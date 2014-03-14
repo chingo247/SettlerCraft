@@ -5,6 +5,7 @@
  */
 package util.schematic.model;
 
+import com.blockhaus2000.materialidlib.MaterialIdLib;
 import org.bukkit.Material;
 
 
@@ -16,13 +17,13 @@ import org.bukkit.Material;
  * @author Chingo
  */
 public class BlockData implements Comparable<BlockData> {
-    public final int data;
+    public final byte data;
     public final int x;
     public final int z;
     public final int layer;
     public final int material;
 
-    public BlockData(int x, int z, int layer, int material, int data) {
+    public BlockData(int x, int z, int layer, int material, byte data) {
         this.x = x;
         this.z = z;
         this.layer = layer;
@@ -52,57 +53,31 @@ public class BlockData implements Comparable<BlockData> {
         }
     }
     
-    /**
-     * Attempts to get the material of this block otherwise returns null
-     * @return 
-     */
+
+    
     public Material getMaterial() {
-        return Material.getMaterial(material);
+        return MaterialIdLib.getMaterialById(material);
     }
-    
-    /**
-     * Returns wheter the material is woodplanks or woodplanks slab or double slab
-     * @param material
-     * @return 
-     */
-    public boolean isWoodPlanks(int material) {
-        return material == 5 || material == 125;
+
+    public byte getData() {
+        return data;
     }
-    
-    public enum SAPPLING {
-        OAK(0),
-        SPRUCE(1),
-        BIRCH(2),
-        JUNGLE(3),
-        ACACIA(4),
-        DARK_OAK(5);
-        
-        private int value;
-        
-        SAPPLING(int value) {
-            this.value = value;
-        }
-        
-        public SAPPLING getSappling(int value) {
-            for(SAPPLING s : SAPPLING.values()) {
-                if(s.value == value) return s;
-            }
-            return null;
-        }
+
+    public int getX() {
+        return x;
     }
-    
-    
-    
-    public boolean isSappling(int material) {
-        return material == 6;
+
+    public int getZ() {
+        return z;
     }
-    
-    public boolean isLOG(int material) {
-        return material == 17;
+
+    public int getLayer() {
+        return layer;
     }
+
+
     
-    public boolean isLeaves(int material) {
-        return material == 18;
-    }
     
+    
+   
 }

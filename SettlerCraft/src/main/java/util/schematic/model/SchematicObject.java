@@ -5,9 +5,11 @@
  */
 package util.schematic.model;
 
+import com.blockhaus2000.materialidlib.MaterialIdLib;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
+import org.bukkit.Material;
 
 /**
  *
@@ -84,6 +86,7 @@ public class SchematicObject {
     public List getTileEntities() {
         return tileEntities;
     }
+    
     
     
     
