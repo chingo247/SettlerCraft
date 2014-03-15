@@ -24,15 +24,17 @@ public class SettlerCraft extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        
-        // Register commands
-        CommandManager manager = new CommandManager(this);
-        manager.registerCommands(BuildCommands.class);
-        manager.registerHelp();
+
         // Register Event Listeners!
     }
 
-
-    
+    @Override
+    public void onLoad() {
+        // Register commands
+        CommandManager manager = new CommandManager(this);
+        manager.registerCommands(new BuildCommands());
+        manager.registerHelp();
+        System.out.println("[" + this.getName() + "]" + " registered commands!");
+    }
 
 }
