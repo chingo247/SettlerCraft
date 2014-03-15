@@ -26,11 +26,11 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.4</version>
                 <configuration>
-                <descriptorRefs>
-                    <descriptorRef>jar-with-dependencies</descriptorRef>
-                </descriptorRefs>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
 
-            </configuration>
+                </configuration>
                 <executions>
                     <execution>
                         <id>assemble-all</id>
@@ -58,7 +58,7 @@
             <id>everything</id>
             <url>http://repo.citizensnpcs.co</url>
         </repository>
-<!--        <repository>
+        <!--        <repository>
             <id>blockhaus2000-repo</id>
             <url>http://repo.blockhaus2000.com/</url>
         </repository>-->
@@ -98,7 +98,7 @@
             <version>2.0.10-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-<!--        <dependency>
+        <!--        <dependency>
             <groupId>com.blockhaus2000</groupId>
             <artifactId>materialidlib</artifactId>
             <version>1.7.2</version>
@@ -110,5 +110,12 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+        </dependency>
+            
+            
     </dependencies>
 </project>

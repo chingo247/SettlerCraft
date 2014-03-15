@@ -6,7 +6,10 @@
 package com.settlercraft.main;
 
 import com.not2excel.api.command.CommandManager;
+import com.settlercraft.build.BuildingRegister;
+import com.settlercraft.build.recipes.RoadToolRecipes;
 import com.settlercraft.commands.BuildCommands;
+import java.io.File;
 import java.util.logging.Level;
 
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,6 +19,8 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author Chingo
  */
 public class SettlerCraft extends JavaPlugin {
+    
+    private BuildingRegister buildingRegister;
 
     @Override
     public void onEnable() {
@@ -25,7 +30,14 @@ public class SettlerCraft extends JavaPlugin {
             return;
         }
 
-        // Register Event Listeners!
+        RoadToolRecipes recipes = new RoadToolRecipes(this);
+        
+        this.getDataFolder().mkdir();
+        File buildingFolder = new File(getDataFolder().getAbsolutePath() + "/Buildings");
+        if(!buildingFolder.exists()) buildingFolder.mkdir();
+        else buildingRegister.registerBuildings(buildingFolder);
+        
+        
     }
 
     @Override

@@ -5,9 +5,7 @@
  */
 package com.settlercraft.commands;
 
-import com.not2excel.api.command.CommandHandler;
 import com.not2excel.api.command.CommandListener;
-import com.not2excel.api.command.objects.CommandInfo;
 
 /**
  *
@@ -15,8 +13,6 @@ import com.not2excel.api.command.objects.CommandInfo;
  */
 public class BuildCommands implements CommandListener {
 
-    @CommandHandler(command = "test")
-    public static void testingCommand(CommandInfo info) {
-        info.getSender().sendMessage("Test worked");
-    }
+    
+
 }
