@@ -6,53 +6,52 @@
 package com.settlercraft.build;
 
 import com.settlercraft.model.structure.Structure;
+import com.settlercraft.util.Structures;
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
+import org.apache.commons.io.FileUtils;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 /**
  *
  * @author Chingo
  */
 public class BuildingRegister {
-    public static final String BUILDING_FILE_NAME = "Building.schematic";
-    public static final String BUILDING_FOUNDATION_FILE_NAME = "BuildingFoundation.schematic";
-    public static final String BUILDING_FILE_INFO = "Building.yml";
+
     
     private Set<Structure> structures = new HashSet<>();
+    
 
-    public void registerBuildings(File buildingFolder) {
-        for (File folder : buildingFolder.listFiles()) {
-            if (folder.isDirectory()) {
-                processBuilding(folder);
+    public void registerCustomBuildings(File buildingFolder) {
+        String[] extensions = {"yml"};
+        Iterator<File> it = FileUtils.iterateFiles(buildingFolder, extensions, true);
+        
+        while(it.hasNext()) {
+            File yamlBuildingFile = it.next();
+            System.out.println(yamlBuildingFile.getName());
+            YamlConfiguration yaml = YamlConfiguration.loadConfiguration(yamlBuildingFile);
+            if(yaml.getString("schematic") == null) {
+                System.out.println("[SettlerCraft]: " + yamlBuildingFile.getAbsolutePath() + " contains no schematic information, skipping...");
+                continue;
+            } 
+//            File f = new File(file.getParentFile().get + "\\"+ yaml.getString("schematic"));
+            File schematicBuildingFile = FileUtils.getFile(yamlBuildingFile.getParent(), yaml.getString("schematic"));
+            if(!schematicBuildingFile.exists()) {
+                System.out.println("[SettlerCraft]: " + yamlBuildingFile.getParentFile().getAbsolutePath() + " contains no schematic, skipping...");
+                continue;
+            }
+            
+            Structure structure = Structures.read(schematicBuildingFile, yamlBuildingFile);
+            if(structure == null) {
+               System.out.println("[SettlerCraft]: failed to create building for "  + schematicBuildingFile.getAbsolutePath() + ", skipping..."); 
+            } else {
+                structures.add(structure);
             }
         }
     }
 
-    private void processBuilding(File folder) {
-       
-    }
-    
-    private boolean validFolder(File folder) {
-        boolean hasBuildingFile = false;
-        boolean hasBuildingInfoFile = false;
-        for(File file : folder.listFiles()) {
-            if(file.getName().equals(BUILDING_FILE_INFO)) hasBuildingInfoFile = true;
-            if(file.getName().equals(BUILDING_FILE_NAME)) hasBuildingFile = true;
-        }
-        return hasBuildingFile && hasBuildingInfoFile;
-    }
-    
-    private boolean hasFoundationFile(File folder) {
-        boolean hasFoundationFile = false;
-        for(File file : folder.listFiles()) {
-            if(file.getName().equals(BUILDING_FOUNDATION_FILE_NAME)) hasFoundationFile = true;
-        }
-        return hasFoundationFile;
-    }
-
-
-
- 
 
 }

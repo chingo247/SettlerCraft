@@ -19,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author Chingo
  */
 public class SettlerCraft extends JavaPlugin {
+
     
     private BuildingRegister buildingRegister;
 
@@ -31,13 +32,15 @@ public class SettlerCraft extends JavaPlugin {
         }
 
         RoadToolRecipes recipes = new RoadToolRecipes(this);
-        
+
         this.getDataFolder().mkdir();
         File buildingFolder = new File(getDataFolder().getAbsolutePath() + "/Buildings");
-        if(!buildingFolder.exists()) buildingFolder.mkdir();
-        else buildingRegister.registerBuildings(buildingFolder);
-        
-        
+        if (!buildingFolder.exists()) {
+            buildingFolder.mkdir();
+        }
+        buildingRegister = new BuildingRegister();
+        buildingRegister.registerCustomBuildings(buildingFolder);
+
     }
 
     @Override

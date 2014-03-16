@@ -9,6 +9,7 @@
 
     <name>SettlerCraft</name>
     <url>http://maven.apache.org</url>
+
     <build>
         <plugins>
             <plugin>
@@ -48,7 +49,10 @@
     </properties>
 
     <repositories>
-
+        <repository>
+            <id>royal-dev repo</id>
+            <url>http://minor.royaldev.org:8081/nexus/content/repositories/public/</url>
+        </repository>
         <!-- Bukkit can be found at the following repository -->
         <repository>
             <id>bukkit-repo</id>
@@ -80,11 +84,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>jnbt</groupId>
+            <groupId>org.jnbt</groupId>
             <artifactId>jnbt</artifactId>
-            <version>{version}</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/lib/jnbt-1.1.jar</systemPath>
+            <version>1.1</version>
         </dependency>
         <dependency>
             <groupId>org.bukkit</groupId>
