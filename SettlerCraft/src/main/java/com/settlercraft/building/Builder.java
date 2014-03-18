@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.settlercraft.build;
+package com.settlercraft.building;
 
 import org.bukkit.entity.Player;
 
@@ -14,10 +14,6 @@ import org.bukkit.entity.Player;
  */
 public class Builder {
     
-    public final Player player;
     
-    public Builder(Player player) {
-        this.player = player;
-    }
     
 }

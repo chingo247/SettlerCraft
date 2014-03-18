@@ -6,11 +6,15 @@
 package com.settlercraft.main;
 
 import com.not2excel.api.command.CommandManager;
-import com.settlercraft.build.BuildingRegister;
-import com.settlercraft.build.recipes.RoadToolRecipes;
+import com.settlercraft.building.BuildingRegister;
 import com.settlercraft.commands.BuildCommands;
+import com.settlercraft.listener.BuildPlanListener;
+import com.settlercraft.recipe.DefaultBuildingRecipes;
 import java.io.File;
 import java.util.logging.Level;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -20,7 +24,6 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class SettlerCraft extends JavaPlugin {
 
-    
     private BuildingRegister buildingRegister;
 
     @Override
@@ -31,16 +34,11 @@ public class SettlerCraft extends JavaPlugin {
             return;
         }
 
-        RoadToolRecipes recipes = new RoadToolRecipes(this);
-
-        this.getDataFolder().mkdir();
-        File buildingFolder = new File(getDataFolder().getAbsolutePath() + "/Buildings");
-        if (!buildingFolder.exists()) {
-            buildingFolder.mkdir();
-        }
         buildingRegister = new BuildingRegister();
-        buildingRegister.registerCustomBuildings(buildingFolder);
-
+//        registerDefaultBuildings(buildingRegister);
+        registerCustomBuildings(buildingRegister);
+        registerRecipes();
+        Bukkit.getPluginManager().registerEvents(new BuildPlanListener(), this);
     }
 
     @Override
@@ -52,4 +50,29 @@ public class SettlerCraft extends JavaPlugin {
         System.out.println("[" + this.getName() + "]" + " registered commands!");
     }
 
+    private void registerCustomBuildings(BuildingRegister buildingRegister) {
+        File buildingFolder = new File(getDataFolder().getAbsolutePath() + "\\Buildings");
+        if (!buildingFolder.exists()) {
+            buildingFolder.mkdir();
+        }
+        buildingRegister.registerCustomBuildings(buildingFolder);
+    }
+
+//    private void registerDefaultBuildings(BuildingRegister buildingRegister) {
+//        File buildingFolder = new File("src\\main\\resources");
+//        System.out.println(buildingFolder.getAbsolutePath());
+//        buildingRegister.registerCustomBuildings(buildingFolder);
+//    }
+//    
+    private void registerRecipes() {
+        DefaultBuildingRecipes.load(this);
+    }
+
+    public static void main(String... args) {
+        
+                
+    }
+    
+    
+    
 }

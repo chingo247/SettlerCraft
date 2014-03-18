@@ -14,6 +14,7 @@ import java.util.EnumMap;
  * @author Chingo
  */
 public class Structure {
+    private boolean isFinished = false;
     
     public enum RESERVED_SIDES {
         NORTH,
@@ -46,7 +47,7 @@ public class Structure {
         return reserved;
     }
 
-    public SchematicObject getStructure() {
+    public SchematicObject getSchematic() {
         return structure;
     }
 

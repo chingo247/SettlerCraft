@@ -11,7 +11,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.MaterialData;
 
 /**
- *
+ * A recipe class make new recipes with display
  * @author Chingo
  */
 public class CShapedRecipe implements Comparable<CShapedRecipe> {

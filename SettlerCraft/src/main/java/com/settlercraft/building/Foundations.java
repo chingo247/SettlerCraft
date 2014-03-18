@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.settlercraft.build;
+package com.settlercraft.building;
 
 import com.settlercraft.util.schematic.model.SchematicObject;
 import com.settlercraft.util.schematic.util.SchematicUtil;
@@ -17,6 +17,8 @@ import org.bukkit.Material;
  */
 public class Foundations {
 
+    private Foundations(){}
+    
     /**
      * Creates a foundation that covers an entire square
      * @param start The startLocation

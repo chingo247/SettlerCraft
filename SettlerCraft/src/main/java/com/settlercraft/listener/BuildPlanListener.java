@@ -4,8 +4,9 @@
  * and open the template in the editor.
  */
 
-package com.settlercraft.build.recipes;
+package com.settlercraft.listener;
 
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -13,14 +14,12 @@ import org.bukkit.event.player.PlayerInteractEvent;
  *
  * @author Chingo
  */
-public class RoadToolListener implements Listener {
+public class BuildPlanListener implements Listener {
     
-    public RoadToolListener(RoadToolRecipes rcps) {
-        
-    }
     
-    public void onPlayerUseRoadTool(PlayerInteractEvent pie) {
-//        if(player.)
+    @EventHandler
+    public void onPlayerBuildTownCenter(PlayerInteractEvent pie) {
+
     }
     
 }
