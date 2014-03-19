@@ -1,0 +1,24 @@
+name: DefaultTownCenter
+displayName: Town Center
+description: First building of a town.
+#The schematic file associated with this yml
+#You can have multiple YAML pointing at the same schematic!
+schematic: DefaultTownCenter.schematic
+
+#By default a building belongs to the default culture, even when this node is missing
+#Culture is a name to group buildings 
+culture: default 
+#Which sides need to be free?
+reserved:
+  north: false
+  east: true
+  south: true
+  west: true
+  
+#This discribes the amount of layers underground, each layer has a height of exactly 1 block
+#In this template the schematic contains a stone floor, which needs to be underground
+#Must be positive or 0
+layers-beneath-ground: 1
+
+#PRO-TIP: Make sure your schematics have ENOUGH LIGHT/(TORCHES!), that way NO UNWANTED MONSTERS will spawn inside your building
+
