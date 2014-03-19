@@ -1,8 +1,10 @@
 package com.settlercraft.util;
 
 import com.settlercraft.model.structure.Structure;
+import com.settlercraft.util.yaml.YAMLStructure;
 import com.settlercraft.util.schematic.model.SchematicObject;
 import com.settlercraft.util.schematic.util.SchematicUtil;
+import com.settlercraft.util.yaml.StructureYAMLUtil;
 import java.io.File;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -26,14 +28,9 @@ public class Structures {
         if(!validate(structureInfo)) {
             return null;
         }
+        YAMLStructure yaml = StructureYAMLUtil.read(structureYAML);
         
-        Structure structure = new Structure(structureInfo.getString("name"), obj, structureInfo.getInt("layers-beneath-ground"));
-        structure.setReserved(Structure.RESERVED_SIDES.NORTH, structureInfo.getBoolean("reserved.north"));
-        structure.setReserved(Structure.RESERVED_SIDES.EAST, structureInfo.getBoolean("reserved.east"));
-        structure.setReserved(Structure.RESERVED_SIDES.SOUTH, structureInfo.getBoolean("reserved.south"));
-        structure.setReserved(Structure.RESERVED_SIDES.WEST, structureInfo.getBoolean("reserved.west"));
-        
-        
+        Structure structure = new Structure(obj,yaml);
         
         return structure;
         
