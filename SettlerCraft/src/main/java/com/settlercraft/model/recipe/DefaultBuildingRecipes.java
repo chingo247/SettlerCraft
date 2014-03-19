@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.settlercraft.recipe;
+package com.settlercraft.model.recipe;
 
 import com.settlercraft.main.SettlerCraft;
 import org.bukkit.Material;

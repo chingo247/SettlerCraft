@@ -17,20 +17,26 @@ import org.bukkit.configuration.file.YamlConfiguration;
  */
 public class StructureYAMLUtil {
   
+  private StructureYAMLUtil(){}
+  
   public static YAMLStructure read(File yaml) {
     YamlConfiguration config = YamlConfiguration.loadConfiguration(yaml);
     
     EnumMap<YAMLStructure.RESERVED_SIDE, Boolean> reserved = new EnumMap<>(YAMLStructure.RESERVED_SIDE.class);
+    reserved.put(YAMLStructure.RESERVED_SIDE.NORTH, config.getBoolean("reserved.north"));
     reserved.put(YAMLStructure.RESERVED_SIDE.EAST, config.getBoolean("reserved.east"));
+    reserved.put(YAMLStructure.RESERVED_SIDE.SOUTH, config.getBoolean("reserved.south"));
+    reserved.put(YAMLStructure.RESERVED_SIDE.WEST, config.getBoolean("reserved.west"));
     
     YAMLStructure ys = new YAMLStructure(
             config.getString("name"),
             config.getString("displayName"),
             config.getString("description"),
-            reserved
+            reserved,
+            config.getInt("layers-beneath-ground"),
+            config.getString("culture"),
+            config.getString("type")
     );
-    
-    
     
     return ys;
   }

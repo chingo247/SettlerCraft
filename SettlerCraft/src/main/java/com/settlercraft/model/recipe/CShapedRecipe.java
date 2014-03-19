@@ -1,4 +1,4 @@
-package com.settlercraft.recipe;
+package com.settlercraft.model.recipe;
 
 
 import java.util.List;

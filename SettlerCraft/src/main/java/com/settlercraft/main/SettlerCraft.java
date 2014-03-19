@@ -6,10 +6,10 @@
 package com.settlercraft.main;
 
 import com.not2excel.api.command.CommandManager;
-import com.settlercraft.building.BuildingRegister;
+import com.settlercraft.actions.build.BuildingRegister;
 import com.settlercraft.commands.BuildCommands;
 import com.settlercraft.listener.BuildPlanListener;
-import com.settlercraft.recipe.DefaultBuildingRecipes;
+import com.settlercraft.model.recipe.DefaultBuildingRecipes;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
 
