@@ -8,6 +8,7 @@ schematic: DefaultTownCenter.schematic
 #By default a building belongs to the default culture, even when this node is missing
 #Culture is a name to group buildings 
 culture: default 
+#The type of buildings this building belongs to
 type: default
 #Which sides need to be free?
 reserved:

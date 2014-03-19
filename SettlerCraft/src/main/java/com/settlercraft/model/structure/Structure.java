@@ -7,9 +7,6 @@ package com.settlercraft.model.structure;
 
 import com.settlercraft.util.yaml.YAMLStructure;
 import com.settlercraft.util.schematic.model.SchematicObject;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -18,21 +15,27 @@ import java.util.Map;
 public class Structure {
   
   private final SchematicObject structure;
+  private final YAMLStructure config;
 //  private final Map<Integer, StructureLayer> layers; // Layer Height , Layer
 
 
 
   public Structure(SchematicObject structure, YAMLStructure buildingConfig) {
     this.structure = structure;
+    this.config = buildingConfig;
     
 //    this.layers = new HashMap<>(structure.getHeight());
   }
 
-
-
   public SchematicObject getSchematic() {
     return structure;
   }
+
+  public YAMLStructure getConfig() {
+    return config;
+  }
+  
+  
 
 
 
