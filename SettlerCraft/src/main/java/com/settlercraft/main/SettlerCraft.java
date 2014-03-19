@@ -10,7 +10,6 @@ import com.settlercraft.building.BuildingRegister;
 import com.settlercraft.commands.BuildCommands;
 import com.settlercraft.listener.BuildPlanListener;
 import com.settlercraft.recipe.DefaultBuildingRecipes;
-import java.io.File;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
 
@@ -66,10 +65,10 @@ public class SettlerCraft extends JavaPlugin {
         DefaultBuildingRecipes.load(this);
     }
 
-    public static void main(String... args) {
-        
-                
-    }
+//    public static void main(String... args) {
+//        
+//                
+//    }
     
     
     

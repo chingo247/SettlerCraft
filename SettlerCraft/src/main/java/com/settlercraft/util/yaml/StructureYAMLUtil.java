@@ -21,6 +21,7 @@ public class StructureYAMLUtil {
     YamlConfiguration config = YamlConfiguration.loadConfiguration(yaml);
     
     EnumMap<YAMLStructure.RESERVED_SIDE, Boolean> reserved = new EnumMap<>(YAMLStructure.RESERVED_SIDE.class);
+    reserved.put(YAMLStructure.RESERVED_SIDE.EAST, config.getBoolean("reserved.east"));
     
     YAMLStructure ys = new YAMLStructure(
             config.getString("name"),

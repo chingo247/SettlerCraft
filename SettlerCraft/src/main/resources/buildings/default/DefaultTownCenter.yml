@@ -11,9 +11,9 @@ culture: default
 #Which sides need to be free?
 reserved:
   north: false
-  east: true
-  south: true
-  west: true
+  east: false
+  south: false
+  west: false
   
 #This discribes the amount of layers underground, each layer has a height of exactly 1 block
 #In this template the schematic contains a stone floor, which needs to be underground
