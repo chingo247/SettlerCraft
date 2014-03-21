@@ -8,7 +8,6 @@ package com.settlercraft.main;
 import com.settlercraft.model.structure.StructurePlan;
 import com.settlercraft.util.Structures;
 import java.io.File;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -19,7 +18,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
  *
  * @author Chingo
  */
-public class BuildingRegister {
+public class StructurePlanRegister {
 
     
     private Set<StructurePlan> structures = new HashSet<>();

@@ -5,10 +5,11 @@
  */
 package com.settlercraft.main;
 
-import com.not2excel.api.command.CommandManager;
+
 
 import com.settlercraft.listener.StructurePlanListener;
 import com.settlercraft.model.recipe.DefaultBuildingRecipes;
+
 import java.io.File;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
@@ -20,7 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class SettlerCraft extends JavaPlugin {
 
-    private BuildingRegister buildingRegister;
+    private StructurePlanRegister buildingRegister;
 
     @Override
     public void onEnable() {
@@ -30,8 +31,10 @@ public class SettlerCraft extends JavaPlugin {
             return;
         }
 
-        buildingRegister = new BuildingRegister();
+
+        buildingRegister = new StructurePlanRegister();
         registerBuildings(buildingRegister);
+
 //        registerCustomBuildings(buildingRegister);
         registerRecipes();
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(), this);
@@ -46,13 +49,15 @@ public class SettlerCraft extends JavaPlugin {
 //        System.out.println("[" + this.getName() + "]" + " registered commands!");
     }
 
-    private void registerBuildings(BuildingRegister buildingRegister) {
+
+    private void registerBuildings(StructurePlanRegister buildingRegister) {
         File buildingFolder = new File(getDataFolder().getAbsolutePath());
         if (!buildingFolder.exists()) {
             buildingFolder.mkdir();
         }
         buildingRegister.registerBuildings(buildingFolder);
     }
+
 
 
     private void registerRecipes() {

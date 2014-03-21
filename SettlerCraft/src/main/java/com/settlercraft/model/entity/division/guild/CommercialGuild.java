@@ -10,16 +10,21 @@ import java.util.List;
 import org.bukkit.inventory.ItemStack;
 
 /**
- * Commercial guild is a guild that only sell goods, like markets
+ * Commercial guild is a guild that sells good, the goods could either be brought to this guild or
+ * produced by the guild itself
  * @author Chingo
  */
 public interface CommercialGuild {
     
-    public List<ItemStack> getGoods();
     /**
-     * The goods this guild will accept to sell
-     * @return 
+     * The goods this guild will sell
+     * @return List of goods this guild will sell
      */
-    public List<ItemStack> acceptsGoods();
+    public List<ItemStack> getOutput();
+    /**
+     * The goods this guild will accept
+     * @return List of goods this guild will accept
+     */
+    public List<ItemStack> getInput();
     
 }
