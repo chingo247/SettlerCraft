@@ -37,6 +37,8 @@ public class Structures {
     
     public static void build(Player owner, StructurePlan plan, Location location) {
         Structure structure = new Structure(owner, location, plan);
+        // Build Foundation
+        // Setup Chest!
     }
     
     private static boolean validate(YamlConfiguration yaml) {
