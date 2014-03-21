@@ -3,40 +3,27 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package com.settlercraft.model.structure;
 
-import com.settlercraft.util.yaml.YAMLStructure;
-import com.settlercraft.util.schematic.model.SchematicObject;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 /**
  *
  * @author Chingo
  */
 public class Structure {
-  
-  private final SchematicObject structure;
-  private final YAMLStructure config;
-//  private final Map<Integer, StructureLayer> layers; // Layer Height , Layer
+    private Player owner;
+    private Location location;
+    private final StructurePlan plan;
 
-
-
-  public Structure(SchematicObject structure, YAMLStructure buildingConfig) {
-    this.structure = structure;
-    this.config = buildingConfig;
+    public Structure(Player owner, Location location, StructurePlan plan) {
+        this.owner = owner;
+        this.location = location;
+        this.plan = plan;
+    }
     
-//    this.layers = new HashMap<>(structure.getHeight());
-  }
-
-  public SchematicObject getSchematic() {
-    return structure;
-  }
-
-  public YAMLStructure getConfig() {
-    return config;
-  }
-  
-  
-
-
-
+    
+    
 }

@@ -14,7 +14,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
  *
  * @author Chingo
  */
-public class BuildPlanListener implements Listener {
+public class StructurePlanListener implements Listener {
     
     
     @EventHandler

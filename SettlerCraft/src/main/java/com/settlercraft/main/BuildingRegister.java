@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.settlercraft.actions.build;
+package com.settlercraft.main;
 
-import com.settlercraft.model.structure.Structure;
+import com.settlercraft.model.structure.StructurePlan;
 import com.settlercraft.util.Structures;
 import java.io.File;
 import java.util.Arrays;
@@ -22,10 +22,11 @@ import org.bukkit.configuration.file.YamlConfiguration;
 public class BuildingRegister {
 
     
-    private Set<Structure> structures = new HashSet<>();
-    
+    private Set<StructurePlan> structures = new HashSet<>();
+   
 
     public void registerCustomBuildings(File buildingFolder) {
+        
         String[] extensions = {"yml"};
         Iterator<File> it = FileUtils.iterateFiles(buildingFolder, extensions, true);
         
@@ -44,7 +45,7 @@ public class BuildingRegister {
                 continue;
             }
             
-            Structure structure = Structures.read(schematicBuildingFile, yamlBuildingFile);
+            StructurePlan structure = Structures.read(schematicBuildingFile, yamlBuildingFile);
             if(structure == null) {
                System.out.println("[SettlerCraft]: failed to create building for "  + schematicBuildingFile.getAbsolutePath() + ", skipping..."); 
             } else {

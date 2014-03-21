@@ -6,9 +6,8 @@
 package com.settlercraft.main;
 
 import com.not2excel.api.command.CommandManager;
-import com.settlercraft.actions.build.BuildingRegister;
 import com.settlercraft.commands.BuildCommands;
-import com.settlercraft.listener.BuildPlanListener;
+import com.settlercraft.listener.StructurePlanListener;
 import com.settlercraft.model.recipe.DefaultBuildingRecipes;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
@@ -35,7 +34,7 @@ public class SettlerCraft extends JavaPlugin {
 //        registerDefaultBuildings(buildingRegister);
 //        registerCustomBuildings(buildingRegister);
         registerRecipes();
-        Bukkit.getPluginManager().registerEvents(new BuildPlanListener(), this);
+        Bukkit.getPluginManager().registerEvents(new StructurePlanListener(), this);
     }
 
     @Override
