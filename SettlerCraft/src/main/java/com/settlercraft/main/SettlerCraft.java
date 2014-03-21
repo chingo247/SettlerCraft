@@ -10,7 +10,9 @@ package com.settlercraft.main;
 import com.settlercraft.listener.StructurePlanListener;
 import com.settlercraft.model.recipe.DefaultBuildingRecipes;
 
+
 import java.io.File;
+
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -50,6 +52,7 @@ public class SettlerCraft extends JavaPlugin {
     }
 
 
+
     private void registerBuildings(StructurePlanRegister buildingRegister) {
         File buildingFolder = new File(getDataFolder().getAbsolutePath());
         if (!buildingFolder.exists()) {
@@ -57,7 +60,6 @@ public class SettlerCraft extends JavaPlugin {
         }
         buildingRegister.registerBuildings(buildingFolder);
     }
-
 
 
     private void registerRecipes() {
