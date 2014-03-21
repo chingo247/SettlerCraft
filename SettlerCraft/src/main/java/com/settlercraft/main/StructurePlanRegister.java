@@ -19,7 +19,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
  *
  * @author Chingo
  */
-public class BuildingRegister {
+public class StructurePlanRegister {
 
     
     private Set<StructurePlan> structures = new HashSet<>();

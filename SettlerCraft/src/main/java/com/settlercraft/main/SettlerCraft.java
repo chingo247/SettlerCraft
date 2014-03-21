@@ -9,6 +9,8 @@ import com.not2excel.api.command.CommandManager;
 import com.settlercraft.commands.BuildCommands;
 import com.settlercraft.listener.StructurePlanListener;
 import com.settlercraft.model.recipe.DefaultBuildingRecipes;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
 
@@ -20,7 +22,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class SettlerCraft extends JavaPlugin {
 
-    private BuildingRegister buildingRegister;
+    private StructurePlanRegister buildingRegister;
 
     @Override
     public void onEnable() {
@@ -30,8 +32,8 @@ public class SettlerCraft extends JavaPlugin {
             return;
         }
 
-        buildingRegister = new BuildingRegister();
-//        registerDefaultBuildings(buildingRegister);
+        buildingRegister = new StructurePlanRegister();
+        registerDefaultStructurePlan(buildingRegister);
 //        registerCustomBuildings(buildingRegister);
         registerRecipes();
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(), this);
@@ -46,7 +48,7 @@ public class SettlerCraft extends JavaPlugin {
         System.out.println("[" + this.getName() + "]" + " registered commands!");
     }
 
-//    private void registerCustomBuildings(BuildingRegister buildingRegister) {
+//    private void registerCustomStructurePlanRegisterngRegister buildingRegister) {
 //        File buildingFolder = new File(getDataFolder().getAbsolutePath() + "\\Buildings");
 //        if (!buildingFolder.exists()) {
 //            buildingFolder.mkdir();
@@ -54,12 +56,10 @@ public class SettlerCraft extends JavaPlugin {
 //        buildingRegister.registerCustomBuildings(buildingFolder);
 //    }
 
-//    private void registerDefaultBuildings(BuildingRegister buildingRegister) {
-//        File buildingFolder = new File("src\\main\\resources");
-//        System.out.println(buildingFolder.getAbsolutePath());
-//        buildingRegister.registerCustomBuildings(buildingFolder);
-//    }
-//    
+    private void registerDefaultStructurePlan(StructurePlanRegister structureRegister) {
+      SettlerCraft.class.getResource("buildings\\default").getPath();
+    }
+    
     private void registerRecipes() {
         DefaultBuildingRecipes.load(this);
     }
