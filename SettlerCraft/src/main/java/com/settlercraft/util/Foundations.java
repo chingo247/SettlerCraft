@@ -16,44 +16,46 @@ import org.bukkit.Material;
  * @author Chingo
  */
 public class Foundations {
+  
+    
 
     private Foundations(){}
     
     /**
      * Creates a foundation that covers an entire square
+     * @param playerLocation The location of the player
      * @param start The startLocation
      * @param width The width of the foundation
      * @param length The length of the foundation
      * @param material The material which will be used to build the foundation
      */
-    public static void createDefaultFoundation(Location start, int width, int length, Material material) {
-        for (int x = 0; x < width; x++) {
-            for (int z = 0; z < length; z++) {
+    public static void createDefaultFoundation(Location playerLocation, Location start, int width, int length, Material material) {
+      Location direction = playerLocation.subtract(start);
+      int zMod;
+      if(direction.getZ() < 0) { 
+        zMod = -1;
+      } else {
+        zMod = 1;
+      }
+      
+      int xMod;
+      if(direction.getZ() < 0) { 
+        xMod = -1;
+      } else {
+        xMod = 1;
+      }
+        for (int x = 0; x < width; x+=xMod) {
+            for (int z = 0; z < length; z+= zMod) {
                 start.clone().add(x, start.getBlockX(), z).getBlock().setType(material);
             }
         }
     }
-
-    /**
-     * Creates a foundation that covers an entire square
-     * @param start The startLocation
-     * @param obj The schematic object associated with this foundation
-     * @param material The material which will be used to build the foundation
-     */
-    public static void createDefaultFoundation(Location start, SchematicObject obj, Material material) {
-        createDefaultFoundation(start, obj.width, obj.length, material);
-    }
     
-     /**
-     * Creates a foundation that covers an entire square
-     * @param start The startLocation
-     * @param schematic The schematic file associated with this foundation
-     * @param material The material which will be used to build the foundation
-     */
-    public static void createDefaultFoundation(Location start, File schematic, Material material) {
-        SchematicObject obj = SchematicUtil.readFile(schematic);
-        createDefaultFoundation(start, obj.width, obj.length, material);
+    public static void createDefaultFoundation(Location playerLocation, Location start, SchematicObject schematic, Material material) {
+      createDefaultFoundation(playerLocation, start, schematic.width, schematic.length, material);
     }
+
+
     
     
 

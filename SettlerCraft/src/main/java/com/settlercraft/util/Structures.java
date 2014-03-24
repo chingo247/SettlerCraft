@@ -8,6 +8,7 @@ import com.settlercraft.util.yaml.StructureYAMLUtil;
 import com.settlercraft.util.yaml.YAMLStructure;
 import java.io.File;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
@@ -35,9 +36,17 @@ public class Structures {
         return structure;
     }
     
-    public static void build(Player owner, StructurePlan plan, Location location) {
+    public static void placeStructure(Player owner, StructurePlan plan, Location location) {
         Structure structure = new Structure(owner, location, plan);
+        //VALIDATE LOCATION
+        //REGISTER BUILDING
+        //PLACE FOUNDATION
+        //PLACE BUILDBOX
+        Foundations.createDefaultFoundation(owner.getLocation(), location, plan.getSchematic(), Material.COBBLESTONE);
+        
     }
+    
+    
     
     private static boolean validate(YamlConfiguration yaml) {
         return yaml.getString("name") != null 
