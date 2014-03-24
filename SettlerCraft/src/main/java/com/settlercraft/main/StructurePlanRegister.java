@@ -8,7 +8,6 @@ package com.settlercraft.main;
 import com.settlercraft.model.structure.StructurePlan;
 import com.settlercraft.util.Structures;
 import java.io.File;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -25,14 +24,14 @@ public class StructurePlanRegister {
     private Set<StructurePlan> structures = new HashSet<>();
    
 
-    public void registerCustomBuildings(File buildingFolder) {
+    public void registerBuildings(File buildingFolder) {
         
         String[] extensions = {"yml"};
         Iterator<File> it = FileUtils.iterateFiles(buildingFolder, extensions, true);
-        
+        int count = 0;
         while(it.hasNext()) {
             File yamlBuildingFile = it.next();
-            System.out.println(yamlBuildingFile.getName());
+            
             YamlConfiguration yaml = YamlConfiguration.loadConfiguration(yamlBuildingFile);
             if(yaml.getString("schematic") == null) {
                 System.out.println("[SettlerCraft]: " + yamlBuildingFile.getAbsolutePath() + " contains no schematic information, skipping...");
@@ -49,9 +48,19 @@ public class StructurePlanRegister {
             if(structure == null) {
                System.out.println("[SettlerCraft]: failed to create building for "  + schematicBuildingFile.getAbsolutePath() + ", skipping..."); 
             } else {
-                structures.add(structure);
+                if(structures.add(structure)) {
+                    System.out.println("[SettlerCraft]: loaded " + structure.getConfig().getName());
+                    count++;
+                } else {
+                    System.out.println("[SettlerCraft]: unable to load building for " 
+                            + yamlBuildingFile.getAbsolutePath() + ", name: "
+                            + structure.getConfig().getName() + " already in use...");
+                }
+                
             }
         }
+        
+        System.out.println("[SettlerCraft]: " + count + " structures were loaded ");
     }
 
 

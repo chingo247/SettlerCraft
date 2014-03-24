@@ -5,7 +5,9 @@
  */
 package com.settlercraft.util.yaml;
 
+import com.google.common.base.Preconditions;
 import java.util.EnumMap;
+import net.citizensnpcs.api.ai.tree.Precondition;
 
 /**
  * Defines all extra information of a structure, create YAML structure with the
@@ -24,12 +26,14 @@ public class YAMLStructure {
   private final EnumMap<RESERVED_SIDE, Boolean> reserved;
 
   public enum RESERVED_SIDE {
-
     NORTH,
     EAST,
     SOUTH,
     WEST
   }
+  
+
+
 
   YAMLStructure(String name,
           String displayName,
@@ -47,6 +51,7 @@ public class YAMLStructure {
     this.type = type;
     this.culture = culture;
   }
+  
 
   public EnumMap<RESERVED_SIDE, Boolean> getReserved() {
     return new EnumMap<>(reserved);
@@ -67,11 +72,5 @@ public class YAMLStructure {
   public String getCulture() {
     return culture;
   }
-
-  public String getType() {
-    return type;
-  }
-  
-  
 
 }

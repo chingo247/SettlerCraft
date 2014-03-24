@@ -5,15 +5,16 @@
  */
 package com.settlercraft.main;
 
-import com.not2excel.api.command.CommandManager;
-import com.settlercraft.commands.BuildCommands;
+
+
 import com.settlercraft.listener.StructurePlanListener;
 import com.settlercraft.model.recipe.DefaultBuildingRecipes;
-import java.io.FileInputStream;
-import java.io.InputStream;
+
+
+import java.io.File;
+
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
-
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -32,8 +33,10 @@ public class SettlerCraft extends JavaPlugin {
             return;
         }
 
+
         buildingRegister = new StructurePlanRegister();
-        registerDefaultStructurePlan(buildingRegister);
+        registerBuildings(buildingRegister);
+
 //        registerCustomBuildings(buildingRegister);
         registerRecipes();
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(), this);
@@ -41,34 +44,26 @@ public class SettlerCraft extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        // Register commands
-        CommandManager manager = new CommandManager(this);
-        manager.registerCommands(new BuildCommands());
-        manager.registerHelp();
-        System.out.println("[" + this.getName() + "]" + " registered commands!");
+//        // Register commands
+//        CommandManager manager = new CommandManager(this);
+//        manager.registerCommands(new BuildCommands());
+//        manager.registerHelp();
+//        System.out.println("[" + this.getName() + "]" + " registered commands!");
     }
 
-//    private void registerCustomStructurePlanRegisterngRegister buildingRegister) {
-//        File buildingFolder = new File(getDataFolder().getAbsolutePath() + "\\Buildings");
-//        if (!buildingFolder.exists()) {
-//            buildingFolder.mkdir();
-//        }
-//        buildingRegister.registerCustomBuildings(buildingFolder);
-//    }
 
-    private void registerDefaultStructurePlan(StructurePlanRegister structureRegister) {
-      SettlerCraft.class.getResource("buildings\\default").getPath();
+
+    private void registerBuildings(StructurePlanRegister buildingRegister) {
+        File buildingFolder = new File(getDataFolder().getAbsolutePath());
+        if (!buildingFolder.exists()) {
+            buildingFolder.mkdir();
+        }
+        buildingRegister.registerBuildings(buildingFolder);
     }
-    
+
+
     private void registerRecipes() {
         DefaultBuildingRecipes.load(this);
     }
 
-//    public static void main(String... args) {
-//        
-//                
-//    }
-    
-    
-    
 }
