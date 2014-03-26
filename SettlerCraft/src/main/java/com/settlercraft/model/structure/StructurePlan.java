@@ -27,4 +27,14 @@ public class StructurePlan {
     public YAMLStructure getConfig() {
         return config;
     }
+
+  @Override
+  public boolean equals(Object o) {
+    if(!(o instanceof StructurePlan)) return false;
+    
+    StructurePlan sp = (StructurePlan) o;
+    return sp.getConfig().getName().equals(this.getConfig().getName());
+  }
+    
+    
 }

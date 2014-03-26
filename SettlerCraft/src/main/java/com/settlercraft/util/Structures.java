@@ -38,7 +38,6 @@ public class Structures {
     
     public static void placeStructure(Player owner, StructurePlan plan, Location location) {
         Structure structure = new Structure(owner, location, plan);
-
         //VALIDATE LOCATION
         //REGISTER BUILDING
         //PLACE FOUNDATION

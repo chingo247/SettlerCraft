@@ -30,7 +30,6 @@ public class StructureYAMLUtil {
     
     YAMLStructure ys = new YAMLStructure(
             config.getString("name"),
-            config.getString("displayName"),
             config.getString("description"),
             reserved,
             config.getInt("layers-beneath-ground"),

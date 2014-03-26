@@ -30,25 +30,18 @@ public class Foundations {
      * @param material The material which will be used to build the foundation
      */
     public static void createDefaultFoundation(Location playerLocation, Location start, int width, int length, Material material) {
-      Location direction = playerLocation.subtract(start);
-      int zMod;
-      if(direction.getZ() < 0) { 
-        zMod = -1;
-      } else {
-        zMod = 1;
-      }
+    float yaw = playerLocation.getYaw();
+      System.out.println(yaw);
       
-      int xMod;
-      if(direction.getZ() < 0) { 
-        xMod = -1;
-      } else {
-        xMod = 1;
-      }
-        for (int x = 0; x < width; x+=xMod) {
-            for (int z = 0; z < length; z+= zMod) {
-                start.clone().add(x, start.getBlockX(), z).getBlock().setType(material);
-            }
-        }
+      
+      
+//        for (int x = 0; x < width; x++) {
+//            for (int z = 0; z < length; z++) {
+//                Location loc = start.clone().add(x*xMod, 0, z*zMod);
+//                System.out.println("X: " + loc.getBlockX() + " Y:"+ loc.getBlockY() +  " Z:" + loc.getBlockZ());
+//                loc.getBlock().setType(material);
+//            }
+//        }
     }
     
     public static void createDefaultFoundation(Location playerLocation, Location start, SchematicObject schematic, Material material) {

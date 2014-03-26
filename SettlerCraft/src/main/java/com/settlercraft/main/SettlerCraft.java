@@ -23,7 +23,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class SettlerCraft extends JavaPlugin {
 
-    private StructurePlanRegister buildingRegister;
+    private StructurePlanRegister structurePlanRegister;
 
     @Override
     public void onEnable() {
@@ -34,12 +34,14 @@ public class SettlerCraft extends JavaPlugin {
         }
 
 
-        buildingRegister = new StructurePlanRegister();
-        registerBuildings(buildingRegister);
-
+        structurePlanRegister = new StructurePlanRegister();
+        registerBuildings(structurePlanRegister);
+        
 //        registerCustomBuildings(buildingRegister);
+        
+        structurePlanRegister.printStructures(new File(this.getDataFolder() + "/buildings.txt"));
         registerRecipes();
-        Bukkit.getPluginManager().registerEvents(new StructurePlanListener(), this);
+        Bukkit.getPluginManager().registerEvents(new StructurePlanListener(this), this);
     }
 
     @Override
@@ -53,12 +55,16 @@ public class SettlerCraft extends JavaPlugin {
 
 
 
-    private void registerBuildings(StructurePlanRegister buildingRegister) {
+    private void registerBuildings(StructurePlanRegister structurePlanRegister) {
         File buildingFolder = new File(getDataFolder().getAbsolutePath());
         if (!buildingFolder.exists()) {
             buildingFolder.mkdir();
         }
-        buildingRegister.registerBuildings(buildingFolder);
+        structurePlanRegister.registerStructures(buildingFolder);
+    }
+    
+    public StructurePlanRegister getDefaultStructurePlanRegister() {
+      return this.structurePlanRegister;
     }
 
 

@@ -20,11 +20,11 @@ public class DefaultBuildingRecipes {
     private DefaultBuildingRecipes(){}
     
     public static void load(SettlerCraft slc) {
-        ShapedRecipe claimTownGroundRecipe = new CShapedRecipe(new ItemStack(Material.PAPER), "Town Center Buildplan")
-                .shape("B", "W")
-                .setIngredient('W', Material.WORKBENCH)
-                .setIngredient('B', Material.BOOK_AND_QUILL)
+        ShapedRecipe claimTownGroundRecipe = new CShapedRecipe(new ItemStack(Material.PAPER), "Town Center")
+                .shape("D", "D")
+                .setIngredient('D', Material.DIRT)
                 .getRecipe();
+        
         slc.getServer().addRecipe(claimTownGroundRecipe);
     }
     

@@ -7,16 +7,24 @@
 package com.settlercraft.building;
 
 import com.settlercraft.model.structure.StructurePlan;
+import com.settlercraft.util.Foundations;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 /**
  *
  * @author Chingo
  */
-public class BuildAction {
+public class Builder {
   
-  public void BuildSettlementCenter(Player owner, StructurePlan plan) {
+  private Builder(){}
+  
+  
+  public static void buildStructure(Player builder, StructurePlan plan, Location location) {
+    // Place foundation
+    Foundations.createDefaultFoundation(builder.getLocation(), location, plan.getSchematic(), Material.COBBLESTONE);
+    // Place Chest
     
   }
-  
 }
