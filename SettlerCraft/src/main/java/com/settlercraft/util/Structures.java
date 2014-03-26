@@ -43,7 +43,6 @@ public class Structures {
         //REGISTER BUILDING
         //PLACE FOUNDATION
         //PLACE BUILDBOX
-        Foundations.createDefaultFoundation(owner.getLocation(), location, plan.getSchematic(), Material.COBBLESTONE);
     }
     
     
