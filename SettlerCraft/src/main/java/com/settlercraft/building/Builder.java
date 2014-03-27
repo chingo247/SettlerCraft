@@ -23,7 +23,7 @@ public class Builder {
   
   public static void buildStructure(Player builder, StructurePlan plan, Location location) {
     // Place foundation
-    Foundations.createDefaultFoundation(builder.getLocation(), location, plan.getSchematic(), Material.COBBLESTONE);
+    Foundations.createDefaultFoundation(builder.getLocation(),location, plan.getSchematic(), Material.COBBLESTONE);
     // Place Chest
     
   }

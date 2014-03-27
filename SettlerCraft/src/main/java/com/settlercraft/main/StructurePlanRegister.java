@@ -73,7 +73,7 @@ public class StructurePlanRegister {
     try (PrintWriter pw = new PrintWriter(new FileOutputStream(f))) {
       int count = 0;
       for (StructurePlan plan : structures.values()) {
-        pw.println("#" + count + ": " + plan.getConfig().getName() + " " + plan.getConfig().getType());
+        pw.println("#" + count + ": " + plan.getConfig().getName() + " \t TYPE: " + plan.getConfig().getType());
       }
 
       pw.close();
