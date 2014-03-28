@@ -5,15 +5,12 @@
  */
 package com.settlercraft.main;
 
-
-
 import com.settlercraft.listener.StructurePlanListener;
 import com.settlercraft.model.recipe.DefaultBuildingRecipes;
-
-
+import com.settlercraft.model.structure.Structure;
 import java.io.File;
-
 import java.util.logging.Level;
+import javax.persistence.PersistenceException;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -23,7 +20,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class SettlerCraft extends JavaPlugin {
 
-    private StructurePlanRegister structurePlanRegister;
+    private StructureChestRegister structureChestRegister;
 
     @Override
     public void onEnable() {
@@ -33,15 +30,14 @@ public class SettlerCraft extends JavaPlugin {
             return;
         }
 
+        structureChestRegister = new StructureChestRegister(this);
+        registerBuildings();
 
-        structurePlanRegister = new StructurePlanRegister();
-        registerBuildings(structurePlanRegister);
-        
 //        registerCustomBuildings(buildingRegister);
-        
-        structurePlanRegister.printStructures(new File(this.getDataFolder() + "/buildings.txt"));
+        StructurePlanRegister.printStructures(new File(this.getDataFolder() + "/buildings.txt"));
         registerRecipes();
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(this), this);
+        setupDatabase();
     }
 
     @Override
@@ -53,23 +49,33 @@ public class SettlerCraft extends JavaPlugin {
 //        System.out.println("[" + this.getName() + "]" + " registered commands!");
     }
 
-
-
-    private void registerBuildings(StructurePlanRegister structurePlanRegister) {
+    private void registerBuildings() {
         File buildingFolder = new File(getDataFolder().getAbsolutePath());
         if (!buildingFolder.exists()) {
             buildingFolder.mkdir();
         }
-        structurePlanRegister.registerStructures(buildingFolder);
-    }
-    
-    public StructurePlanRegister getDefaultStructurePlanRegister() {
-      return this.structurePlanRegister;
+        StructurePlanRegister.registerStructures(buildingFolder);
     }
 
+//    public StructurePlanRegister getStructurePlanRegister() {
+//        return this.structurePlanRegister;
+//    }
+
+    public StructureChestRegister getStructureChestRegister() {
+        return this.structureChestRegister;
+    }
 
     private void registerRecipes() {
         DefaultBuildingRecipes.load(this);
+    }
+
+    private void setupDatabase() {
+        try {
+            getDatabase().find(Structure.class).findRowCount();
+        } catch (PersistenceException pe) {
+            System.out.println("Installing database for " + getDescription().getName() + " due to first time usage");
+            installDDL();
+        }
     }
 
 }

@@ -5,7 +5,7 @@ import com.settlercraft.model.structure.StructurePlan;
 import com.settlercraft.util.schematic.model.SchematicObject;
 import com.settlercraft.util.schematic.util.SchematicUtil;
 import com.settlercraft.util.yaml.StructureYAMLUtil;
-import com.settlercraft.util.yaml.YAMLStructure;
+import com.settlercraft.util.yaml.StructureConfig;
 import java.io.File;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -31,20 +31,10 @@ public class Structures {
         if(!validate(structureInfo)) {
             return null;
         }
-        YAMLStructure yaml = StructureYAMLUtil.read(structureYAML);
+        StructureConfig yaml = StructureYAMLUtil.read(structureYAML);
         StructurePlan structure = new StructurePlan(obj,yaml);
         return structure;
     }
-    
-    public static void placeStructure(Player owner, StructurePlan plan, Location location) {
-        Structure structure = new Structure(owner, location, plan);
-        //VALIDATE LOCATION
-        //REGISTER BUILDING
-        //PLACE FOUNDATION
-        //PLACE BUILDBOX
-    }
-    
-    
     
     private static boolean validate(YamlConfiguration yaml) {
         return yaml.getString("name") != null 

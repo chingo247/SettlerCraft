@@ -24,9 +24,9 @@ import org.bukkit.configuration.file.YamlConfiguration;
  */
 public class StructurePlanRegister {
 
-  private TreeMap<String, StructurePlan> structures = new TreeMap<>();
+  private static final TreeMap<String, StructurePlan> structures = new TreeMap<>();
 
-  public void registerStructures(File buildingFolder) {
+  public static void registerStructures(File buildingFolder) {
 
     String[] extensions = {"yml"};
     Iterator<File> it = FileUtils.iterateFiles(buildingFolder, extensions, true);
@@ -35,12 +35,12 @@ public class StructurePlanRegister {
       File yamlBuildingFile = it.next();
 
       YamlConfiguration yaml = YamlConfiguration.loadConfiguration(yamlBuildingFile);
-      if (yaml.getString("schematic") == null) {
+      if (yaml.getString("schematic.building") == null) {
         System.out.println("[SettlerCraft]: " + yamlBuildingFile.getAbsolutePath() + " contains no schematic information, skipping...");
         continue;
       }
 //            File f = new File(file.getParentFile().get + "\\"+ yaml.getString("schematic"));
-      File schematicBuildingFile = FileUtils.getFile(yamlBuildingFile.getParent(), yaml.getString("schematic"));
+      File schematicBuildingFile = FileUtils.getFile(yamlBuildingFile.getParent(), yaml.getString("schematic.building"));
       if (!schematicBuildingFile.exists()) {
         System.out.println("[SettlerCraft]: " + yamlBuildingFile.getParentFile().getAbsolutePath() + " contains no schematic, skipping...");
         continue;
@@ -67,9 +67,7 @@ public class StructurePlanRegister {
     
   }
 
-  public void printStructures(File f) {
-    
-
+  static void printStructures(File f) {
     try (PrintWriter pw = new PrintWriter(new FileOutputStream(f))) {
       int count = 0;
       for (StructurePlan plan : structures.values()) {
@@ -84,7 +82,7 @@ public class StructurePlanRegister {
     }
   }
 
-  public StructurePlan getPlan(String key ) {
+  public static StructurePlan getPlan(String key ) {
     return structures.get(key);
   }
   

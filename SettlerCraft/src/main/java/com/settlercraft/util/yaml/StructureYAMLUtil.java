@@ -19,16 +19,16 @@ public class StructureYAMLUtil {
   
   private StructureYAMLUtil(){}
   
-  public static YAMLStructure read(File yaml) {
+  public static StructureConfig read(File yaml) {
     YamlConfiguration config = YamlConfiguration.loadConfiguration(yaml);
     
-    EnumMap<YAMLStructure.RESERVED_SIDE, Boolean> reserved = new EnumMap<>(YAMLStructure.RESERVED_SIDE.class);
-    reserved.put(YAMLStructure.RESERVED_SIDE.NORTH, config.getBoolean("reserved.north"));
-    reserved.put(YAMLStructure.RESERVED_SIDE.EAST, config.getBoolean("reserved.east"));
-    reserved.put(YAMLStructure.RESERVED_SIDE.SOUTH, config.getBoolean("reserved.south"));
-    reserved.put(YAMLStructure.RESERVED_SIDE.WEST, config.getBoolean("reserved.west"));
+    EnumMap<StructureConfig.RESERVED_SIDE, Boolean> reserved = new EnumMap<>(StructureConfig.RESERVED_SIDE.class);
+    reserved.put(StructureConfig.RESERVED_SIDE.NORTH, config.getBoolean("reserved.north"));
+    reserved.put(StructureConfig.RESERVED_SIDE.EAST, config.getBoolean("reserved.east"));
+    reserved.put(StructureConfig.RESERVED_SIDE.SOUTH, config.getBoolean("reserved.south"));
+    reserved.put(StructureConfig.RESERVED_SIDE.WEST, config.getBoolean("reserved.west"));
     
-    YAMLStructure ys = new YAMLStructure(
+    StructureConfig ys = new StructureConfig(
             config.getString("name"),
             config.getString("description"),
             reserved,

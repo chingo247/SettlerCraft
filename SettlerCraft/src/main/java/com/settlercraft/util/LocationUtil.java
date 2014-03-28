@@ -25,4 +25,29 @@ public class LocationUtil {
     else if(yaw >= 225 && yaw < 315 || yaw >= -135 && yaw< -45) return DIRECTION.EAST;
     else /*(yaw >= 315 && yaw < 360 || yaw >= 0 && < 45) */ return DIRECTION.SOUTH;
   }
+  
+      public static float getYaw(DIRECTION direction) {
+        switch(direction) {
+            case SOUTH : return 0f;
+            case EAST: return -90f;
+            case NORTH: return -180f;
+            case WEST: return -270f;
+            default: throw new AssertionError("Unreachable");
+        }
+    }
+
+    public static int[] getModifiers(DIRECTION direction) {
+        switch (direction) {
+            case NORTH:
+                return new int[]{1, -1};
+            case EAST:
+                return new int[]{1, 1};
+            case SOUTH:
+                return new int[]{-1, 1};
+            case WEST:
+                return new int[]{-1, -1};
+            default:
+                throw new AssertionError("Unreachable");
+        }
+    }
 }

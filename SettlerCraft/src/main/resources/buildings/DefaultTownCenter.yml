@@ -3,7 +3,8 @@ name: Town Center
 description: First building of a town.
 #The schematic file associated with this yml
 #You can have multiple YAML pointing at the same schematic!
-schematic: DefaultTownCenter.schematic
+schematic: 
+  building: DefaultTownCenter.schematic
 
 #By default a building belongs to the default culture
 #Culture is a name to group buildings 

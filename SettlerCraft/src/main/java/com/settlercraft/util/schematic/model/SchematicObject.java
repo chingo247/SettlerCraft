@@ -40,6 +40,16 @@ public class SchematicObject {
     public TreeSet<BlockData> getBlocksSorted() {
         return new TreeSet<>(this.blocks);
     }
+    
+    public TreeSet<BlockData> getBlocksFromLayer(int layer) {
+        TreeSet<BlockData> data = new TreeSet<>();
+        for(BlockData b : blocks) {
+            if(b.layer == layer) {
+                data.add(b);
+            }
+        }
+        return data;
+    }
 
     /**
      * Returns a HashMap of blocks with the layer as key, a schematic doesnt know anything about the
@@ -51,12 +61,11 @@ public class SchematicObject {
     public HashMap<Integer, TreeSet<BlockData>> getBlocksLayered() {
         HashMap<Integer, TreeSet<BlockData>> blks = new HashMap<>();
 
-        for (BlockData b : blocks) {
+        for (BlockData b : getBlocksSorted()) {
             if (blks.get(b.layer) == null) {
                 blks.put(b.layer, new TreeSet<BlockData>());
             }
             blks.get(b.layer).add(b);
-
         }
         return blks;
     }
