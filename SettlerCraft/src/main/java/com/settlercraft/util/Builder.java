@@ -46,9 +46,9 @@ public class Builder {
         Structure structure = new Structure(player, target, direction, plan.getConfig().getName());
         structure.buildLayer(0, direction);
         structure.buildLayer(1, direction);
-        structure.buildLayer(2, direction);
-        structure.buildLayer(3, direction);
-        structure.buildLayer(4, direction);
+//        structure.buildLayer(2, direction);
+//        structure.buildLayer(3, direction);
+//        structure.buildLayer(4, direction);
     }
 
 

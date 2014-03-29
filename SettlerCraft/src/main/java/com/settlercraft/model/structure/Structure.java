@@ -98,6 +98,8 @@ public class Structure implements Serializable {
     public void buildLayer(int layer, DIRECTION direction) {
         StructurePlan sp = StructurePlanRegister.getPlan(plan);
         Iterator<BlockData> it = sp.getSchematic().getBlocksFromLayer(layer).iterator();
+//        System.out.println(sp.getSchematic().getBlocksSorted().size());
+//        System.out.println(sp.getSchematic().getBlocksFromLayer(layer).size());
         SchematicObject schematic = sp.getSchematic();
         
         int[] mods = LocationUtil.getModifiers(direction);
@@ -107,13 +109,13 @@ public class Structure implements Serializable {
         if (direction == LocationUtil.DIRECTION.NORTH || direction == LocationUtil.DIRECTION.SOUTH) {
             for (int z = schematic.length - 1; z >= 0; z--) {
                 for (int x = 0; x < schematic.width; x++) {
-                    location.clone().add(x * xMod, 0, z * zMod).getBlock().setType(it.next().getMaterial());
+                    location.clone().add(x * xMod, layer, z * zMod).getBlock().setType(it.next().getMaterial());
                 }
             }
         } else {
             for (int z = schematic.length - 1; z >= 0; z--) {
                 for (int x = 0; x < schematic.width; x++) {
-                    location.clone().add(z * zMod, 0, x * xMod).getBlock().setType(it.next().getMaterial());
+                    location.clone().add(z * zMod, layer, x * xMod).getBlock().setType(it.next().getMaterial());
                 }
             }
         }
