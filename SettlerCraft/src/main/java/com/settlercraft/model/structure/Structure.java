@@ -22,6 +22,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -39,9 +40,6 @@ public class Structure implements Serializable {
     private long id;
     @NotNull
     private String owner;
-    @NotNull
-    private Location location;
-
     @Embedded
     @NotNull
     private StructureChest structureChest;
@@ -53,6 +51,19 @@ public class Structure implements Serializable {
     @NotNull
     @NotEmpty
     private String plan;
+    
+    @NotNull
+    private DIRECTION direction;
+    
+    @NotNull
+    private int xLoc;
+    @NotNull
+    private int yLoc;
+    @NotNull
+    private int zLoc;
+    @NotNull
+    @NotEmpty
+    private String world;
 
     protected Structure() {
     }
@@ -62,7 +73,10 @@ public class Structure implements Serializable {
     public Structure(Player owner, Location target, DIRECTION direction, String plan) {
         Preconditions.checkNotNull(StructurePlanRegister.getPlan(plan));
         this.owner = owner.getName();
-        this.location = target;
+        this.xLoc = target.getBlockX();
+        this.yLoc = target.getBlockY();
+        this.zLoc = target.getBlockZ();
+        this.world = target.getWorld().getName();
         this.plan = plan;
         
         
@@ -75,6 +89,9 @@ public class Structure implements Serializable {
         structureSign = new StructureSign(signLocation);
     }
 
+    public Location getLocation() {
+        return new Location(Bukkit.getWorld(world), xLoc, yLoc, zLoc);
+    }
 
     private void createDefaultFoundation(Location target, DIRECTION direction, SchematicObject schematic) {
         int[] mods = LocationUtil.getModifiers(direction);
@@ -95,7 +112,11 @@ public class Structure implements Serializable {
         }
     }
     
-    public void buildLayer(int layer, DIRECTION direction) {
+    /**
+     * Builds the corresponding layer of this building, whether the precoditions are met or not
+     * @param layer The layer to build
+     */
+    public void buildLayer(int layer) {
         StructurePlan sp = StructurePlanRegister.getPlan(plan);
         Iterator<BlockData> it = sp.getSchematic().getBlocksFromLayer(layer).iterator();
         SchematicObject schematic = sp.getSchematic();
@@ -104,16 +125,16 @@ public class Structure implements Serializable {
         int xMod = mods[0];
         int zMod = mods[1];
         
-        if (direction == LocationUtil.DIRECTION.NORTH || direction == LocationUtil.DIRECTION.SOUTH) {
+        if (this.direction == LocationUtil.DIRECTION.NORTH || this.direction == LocationUtil.DIRECTION.SOUTH) {
             for (int z = schematic.length - 1; z >= 0; z--) {
                 for (int x = 0; x < schematic.width; x++) {
-                    location.clone().add(x * xMod, 0, z * zMod).getBlock().setType(it.next().getMaterial());
+                    getLocation().clone().add(x * xMod, 0, z * zMod).getBlock().setType(it.next().getMaterial());
                 }
             }
-        } else {
+        } else { // SWAP X AND Z
             for (int z = schematic.length - 1; z >= 0; z--) {
                 for (int x = 0; x < schematic.width; x++) {
-                    location.clone().add(z * zMod, 0, x * xMod).getBlock().setType(it.next().getMaterial());
+                    getLocation().clone().add(z * zMod, 0, x * xMod).getBlock().setType(it.next().getMaterial());
                 }
             }
         }

@@ -44,11 +44,11 @@ public class Builder {
      */
     public static void placeStructure(Player player, Location target, StructurePlan plan, DIRECTION direction) {
         Structure structure = new Structure(player, target, direction, plan.getConfig().getName());
-        structure.buildLayer(0, direction);
-        structure.buildLayer(1, direction);
-        structure.buildLayer(2, direction);
-        structure.buildLayer(3, direction);
-        structure.buildLayer(4, direction);
+        structure.buildLayer(0);
+        structure.buildLayer(1);
+        structure.buildLayer(2);
+        structure.buildLayer(3);
+        structure.buildLayer(4);
     }
 
 
