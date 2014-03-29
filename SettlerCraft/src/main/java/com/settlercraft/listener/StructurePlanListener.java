@@ -9,7 +9,7 @@ package com.settlercraft.listener;
 import com.settlercraft.main.SettlerCraft;
 import com.settlercraft.main.StructurePlanRegister;
 import com.settlercraft.model.structure.StructurePlan;
-import com.settlercraft.util.Builder;
+import com.settlercraft.action.BuildAction;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,26 +20,24 @@ import org.bukkit.event.player.PlayerInteractEvent;
  * @author Chingo
  */
 public class StructurePlanListener implements Listener {
-    private SettlerCraft settlerCraft;
+    private final SettlerCraft settlerCraft;
     
     public StructurePlanListener(SettlerCraft settlerCraft) {
       this.settlerCraft = settlerCraft;
-   
     }
   
     @EventHandler
     public void onPlayerBuild(PlayerInteractEvent pie) {
       System.out.println("PlayerInteractEvent!");
-      if(pie.getItem().getType() != Material.PAPER) return;
+      if(pie.getItem() == null || pie.getItem().getType() != Material.PAPER) return;
       StructurePlan plan = StructurePlanRegister.getPlan(pie.getItem().getItemMeta().getDisplayName());
       if(plan != null 
               && pie.getClickedBlock() != null 
               && pie.getClickedBlock().getType() != Material.AIR) {
         System.out.println("Building");
-        Builder.placeStructure(pie.getPlayer(), pie.getClickedBlock().getLocation(),plan);
+        BuildAction ba = new BuildAction(settlerCraft);
+        ba.placeStructure(pie.getPlayer(), pie.getClickedBlock().getLocation(),plan);
       }
-      
-      
     }
     
 }

@@ -5,6 +5,8 @@
  */
 package com.settlercraft.main;
 
+import com.avaje.ebean.EbeanServer;
+import com.settlercraft.listener.StructureChestListener;
 import com.settlercraft.listener.StructurePlanListener;
 import com.settlercraft.model.recipe.DefaultBuildingRecipes;
 import com.settlercraft.model.structure.Structure;
@@ -20,7 +22,6 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class SettlerCraft extends JavaPlugin {
 
-    private StructureChestRegister structureChestRegister;
 
     @Override
     public void onEnable() {
@@ -30,13 +31,14 @@ public class SettlerCraft extends JavaPlugin {
             return;
         }
 
-        structureChestRegister = new StructureChestRegister(this);
+
         registerBuildings();
 
 //        registerCustomBuildings(buildingRegister);
         StructurePlanRegister.printStructures(new File(this.getDataFolder() + "/buildings.txt"));
         registerRecipes();
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new StructureChestListener(this), this);
         setupDatabase();
     }
 
@@ -57,13 +59,7 @@ public class SettlerCraft extends JavaPlugin {
         StructurePlanRegister.registerStructures(buildingFolder);
     }
 
-//    public StructurePlanRegister getStructurePlanRegister() {
-//        return this.structurePlanRegister;
-//    }
-
-    public StructureChestRegister getStructureChestRegister() {
-        return this.structureChestRegister;
-    }
+    
 
     private void registerRecipes() {
         DefaultBuildingRecipes.load(this);
@@ -77,5 +73,8 @@ public class SettlerCraft extends JavaPlugin {
             installDDL();
         }
     }
+    
+    
+           
 
 }

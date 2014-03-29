@@ -37,7 +37,6 @@ public class StructurePlan {
         if (!(o instanceof StructurePlan)) {
             return false;
         }
-
         StructurePlan sp = (StructurePlan) o;
         return sp.getConfig().getName().equals(this.getConfig().getName());
     }

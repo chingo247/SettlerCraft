@@ -10,8 +10,9 @@ import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
 import javax.persistence.Embeddable;
-import javax.persistence.GeneratedValue;
+import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -20,8 +21,11 @@ import org.bukkit.Material;
  *
  * @author Chingo
  */
-@Embeddable
+@Entity
 public class StructureChest {
+    
+    @Id
+    private long id;
     
     @NotNull
     private final int x;
@@ -32,23 +36,19 @@ public class StructureChest {
     @NotNull
     private final int z;
     
-    @NotNull
-    private final float pitch;
-    
-    @NotNull
-    private final float yaw;
-    
     @NotEmpty
     private final String world;
     
-    public StructureChest(Location chestLocation) {
+    StructureChest(Location chestLocation) {
         Preconditions.checkArgument(chestLocation.getBlock().getType() == Material.CHEST);
         this.x = chestLocation.getBlockX();
         this.y = chestLocation.getBlockY();
         this.z = chestLocation.getBlockZ();
-        this.pitch = chestLocation.getPitch();
-        this.yaw = chestLocation.getYaw();
         this.world = chestLocation.getWorld().getName();
+    }
+
+    public long getId() {
+        return id;
     }
 
     public int getX() {
@@ -63,24 +63,22 @@ public class StructureChest {
         return z;
     }
 
-    public float getPitch() {
-        return pitch;
-    }
-
-    public float getYaw() {
-        return yaw;
-    }
-
     public String getWorld() {
         return world;
     }
     
     public Location getLocation() {
         Location location = new Location(Bukkit.getServer().getWorld(world), x, y, z);
-        location.setPitch(pitch);
-        location.setYaw(yaw);
         return location;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof StructureChest)) return false;
+        StructureChest sc = (StructureChest) obj;
+        return sc.id == this.id;
+    }
+    
     
     
     

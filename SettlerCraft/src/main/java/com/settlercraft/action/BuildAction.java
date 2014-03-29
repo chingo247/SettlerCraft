@@ -3,11 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.settlercraft.util;
+package com.settlercraft.action;
 
 import com.google.common.base.Preconditions;
+import com.settlercraft.main.SettlerCraft;
 import com.settlercraft.model.structure.Structure;
 import com.settlercraft.model.structure.StructurePlan;
+import com.settlercraft.util.LocationUtil;
 import static com.settlercraft.util.LocationUtil.DIRECTION;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -16,9 +18,11 @@ import org.bukkit.entity.Player;
  *
  * @author Chingo
  */
-public class Builder {
+public class BuildAction {
+    private final SettlerCraft sc;
 
-    private Builder() {
+    public BuildAction(SettlerCraft sc) {
+        this.sc = sc;
     }
 
     /**
@@ -29,7 +33,7 @@ public class Builder {
      * @param target The target location
      * @param plan The structure plan of the structure
      */
-    public static void placeStructure(Player player, Location target, StructurePlan plan) {
+    public void placeStructure(Player player, Location target, StructurePlan plan) {
         Preconditions.checkArgument(player.isOnline());
         placeStructure(player, target, plan, LocationUtil.getDirection(player.getLocation().getYaw()));
     }
@@ -42,15 +46,10 @@ public class Builder {
      * @param plan
      * @param direction
      */
-    public static void placeStructure(Player player, Location target, StructurePlan plan, DIRECTION direction) {
+    public void placeStructure(Player player, Location target, StructurePlan plan, DIRECTION direction) {
         Structure structure = new Structure(player, target, direction, plan.getConfig().getName());
-
-        structure.buildLayer(0);
-        structure.buildLayer(1);
-        structure.buildLayer(2);
-        structure.buildLayer(3);
-        structure.buildLayer(4);
-
+        sc.getDatabase().save(structure);
+        
     }
 
 
