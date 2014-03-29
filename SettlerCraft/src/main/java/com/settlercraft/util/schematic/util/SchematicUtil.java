@@ -33,15 +33,17 @@ public class SchematicUtil {
     }
 
     private static List<BlockData> readBlocksMaterials(final int height, final int width, final int length, final byte[] materialData, byte[] data) {
+        int rLayer = 0;
         final List<BlockData> blks = new ArrayList<>(height * length * width);
         for (int layer = 0; layer < height * length * width; layer += width * length) {
             for (int z = 0; z < length * width; z += width) {
                 for (int x = 0; x < width; x++) {
-                    BlockData block = new BlockData(x, z, layer, materialData[z+x+layer], data[z+x+layer]);
+                    BlockData block = new BlockData(x, z, rLayer, materialData[z+x+layer], data[z+x+layer]);
                     blks.add(block);
                     
                 }
             }
+            rLayer++;
         }
         return blks;
     }

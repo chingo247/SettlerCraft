@@ -30,6 +30,20 @@ public class BlockData implements Comparable<BlockData> {
         this.data = data;
     }
 
+  @Override
+  public boolean equals(Object o) {
+    if(!(o instanceof BlockData)) {
+      return false;
+    } 
+    
+    BlockData b = (BlockData) o;
+    return this.x == b.x 
+            && this.z == b.z 
+            && this.layer == b.layer;
+  }
+    
+    
+
     @Override
     public int compareTo(BlockData o) {
         if (layer > o.layer) {
