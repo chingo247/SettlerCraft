@@ -15,7 +15,6 @@ import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import org.bukkit.Bukkit;
@@ -31,8 +30,8 @@ import org.bukkit.entity.Player;
 public class Structure implements Serializable  {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+    @GeneratedValue
+    private int id;
     @NotNull
     private String owner;
     @NotNull
@@ -76,7 +75,7 @@ public class Structure implements Serializable  {
         this.currentLayer = 0;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
@@ -124,7 +123,7 @@ public class Structure implements Serializable  {
         return world;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -167,6 +166,13 @@ public class Structure implements Serializable  {
     public void setCurrentLayer(int currentLayer) {
         this.currentLayer = currentLayer;
     }
+
+    @Override
+    public String toString() {
+        return "id:" + getId() + " owner:" + getOwner() + " plan:" + getPlan() + " x:" + getX() + " y:" + getY() + " z:" + getZ();
+    }
+    
+    
 
     
     

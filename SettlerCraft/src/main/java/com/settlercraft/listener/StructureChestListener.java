@@ -31,23 +31,15 @@ public class StructureChestListener implements Listener {
         System.out.println("Inventory Close event");
         if(ice.getInventory().getHolder() instanceof Chest){
             Chest chest = (Chest) ice.getInventory().getHolder();
-
             Structure s = sc.getDatabase().find(Structure.class).where()
                     .eq("structureChest.x", chest.getX())
                     .eq("structureChest.y", chest.getY())
                     .eq("structureChest.z", chest.getZ())
                     .ieq("structureChest.world", chest.getWorld().getName())
                     .findUnique();
-                    
-            System.out.println(s);
             if(s != null) {
                 
-                System.out.println(s.getId() + ":" + s.getOwner() + ":" + s.getPlan());
-                
-                
             }
-            
-           
         }
     }
     
@@ -55,5 +47,7 @@ public class StructureChestListener implements Listener {
     public void onBuildChestInventoryChanged(InventoryMoveItemEvent ime) {
         System.out.println("Inventory move item Event");
     }
+    
+    
     
 }
