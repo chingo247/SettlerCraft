@@ -6,11 +6,11 @@
 package com.settlercraft.action;
 
 import com.google.common.base.Preconditions;
-import com.settlercraft.main.SettlerCraft;
+import com.settlercraft.model.structure.Builder;
 import com.settlercraft.model.structure.Structure;
 import com.settlercraft.model.structure.StructurePlan;
 import com.settlercraft.util.LocationUtil;
-import static com.settlercraft.util.LocationUtil.DIRECTION;
+import com.settlercraft.util.LocationUtil.DIRECTION;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -18,11 +18,11 @@ import org.bukkit.entity.Player;
  *
  * @author Chingo
  */
-public class BuildAction {
-    private final SettlerCraft sc;
+public class BuildAction extends SettlerCraftAction{
+ 
 
-    public BuildAction(SettlerCraft sc) {
-        this.sc = sc;
+    public BuildAction() {
+  
     }
 
     /**
@@ -48,6 +48,10 @@ public class BuildAction {
      */
     public void placeStructure(Player player, Location target, StructurePlan plan, DIRECTION direction) {
         Structure structure = new Structure(player, target, direction, plan.getConfig().getName());
+        Builder.clearBuildSite(structure);
+        Builder.createDefaultFoundation(structure);
+        Builder.placeStructureChest(structure);
+        Builder.placeStructureSign(structure);
         sc.getDatabase().save(structure);
         
     }

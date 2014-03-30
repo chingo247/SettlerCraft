@@ -6,7 +6,7 @@
 package com.settlercraft.main;
 
 import com.settlercraft.model.structure.StructurePlan;
-import com.settlercraft.util.Structures;
+import com.settlercraft.util.StructureReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -46,7 +46,7 @@ public class StructurePlanRegister {
         continue;
       }
 
-      StructurePlan structure = Structures.read(schematicBuildingFile, yamlBuildingFile);
+      StructurePlan structure = StructureReader.read(schematicBuildingFile, yamlBuildingFile);
       if (structure == null) {
         System.out.println("[SettlerCraft]: failed to create building for " + schematicBuildingFile.getAbsolutePath() + ", skipping...");
       } else {

@@ -3,12 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.settlercraft.model.structure;
 
 import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
+import java.io.Serializable;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -19,33 +20,33 @@ import org.bukkit.Material;
  * @author Chingo
  */
 @Embeddable
-public class StructureSign {
+public class StructureSign implements Serializable {
     
     @NotNull
-    private final int x;
-    
+    @Column(name = "stsign_x")
+    private int x;
+
     @NotNull
-    private final int y;
-    
+    @Column(name = "stsign_y")
+    private int y;
+
     @NotNull
-    private final int z;
-    
-    @NotNull
-    private final float pitch;
-    
-    @NotNull
-    private final float yaw;
-    
+    @Column(name = "stsign_z")
+    private int z;
+
     @NotEmpty
-    private final String world;
-    
-    public StructureSign(Location signLocation) {
+    @NotNull
+    @Column(name = "stsign_world")
+    private String world;
+
+    public StructureSign() {
+    }
+
+    public StructureSign(Location signLocation, Structure structure) {
         Preconditions.checkArgument(signLocation.getBlock().getType() == Material.SIGN_POST);
         this.x = signLocation.getBlockX();
         this.y = signLocation.getBlockY();
         this.z = signLocation.getBlockZ();
-        this.pitch = signLocation.getPitch();
-        this.yaw = signLocation.getYaw();
         this.world = signLocation.getWorld().getName();
     }
 
@@ -61,29 +62,29 @@ public class StructureSign {
         return z;
     }
 
-    public float getPitch() {
-        return pitch;
-    }
-
-    public float getYaw() {
-        return yaw;
-    }
-
     public String getWorld() {
         return world;
     }
-    
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public void setZ(int z) {
+        this.z = z;
+    }
+
+    public void setWorld(String world) {
+        this.world = world;
+    }
+
     public Location getLocation() {
         Location location = new Location(Bukkit.getServer().getWorld(world), x, y, z);
-        location.setPitch(pitch);
-        location.setYaw(yaw);
         return location;
     }
-    
-    
-    
-    
-    
-    
-    
+
 }

@@ -9,17 +9,17 @@ import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
 import com.settlercraft.main.StructurePlanRegister;
-import static com.settlercraft.util.LocationUtil.DIRECTION;
+import com.settlercraft.util.LocationUtil.DIRECTION;
 import java.io.Serializable;
+import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 /**
@@ -28,58 +28,52 @@ import org.bukkit.entity.Player;
  */
 @Entity
 @Table(name = "sc_structure")
-public class Structure implements Serializable {
+public class Structure implements Serializable  {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
     @NotNull
     private String owner;
-
-    @OneToOne
-    @NotNull
-    private Builder builder;
-
     @NotNull
     @NotEmpty
     private String plan;
-
     @NotNull
     private DIRECTION direction;
-
     @NotNull
-    private int xLoc;
+    private int x;
     @NotNull
-    private int yLoc;
+    private int y;
     @NotNull
-    private int zLoc;
+    private int z;
     @NotNull
     @NotEmpty
     private String world;
-
     @NotNull
-    @OneToOne
-    private final StructureChest structureChest;
-
+    private int currentLayer;
+    
     @Embedded
-    @NotNull
-    private final StructureSign structureSign;
+    @Column(name = "structureChest")
+    private StructureChest structureChest;
+    
+    @Embedded
+    @Column(name = "structureSign")
+    private StructureSign structureSign;
+
+    public Structure() {
+    }
 
     public Structure(Player owner, Location target, DIRECTION direction, String plan) {
         Preconditions.checkNotNull(StructurePlanRegister.getPlan(plan));
+        Preconditions.checkNotNull(target);
         this.owner = owner.getName();
-        this.xLoc = target.getBlockX();
-        this.yLoc = target.getBlockY();
-        this.zLoc = target.getBlockZ();
+        this.x = target.getBlockX();
+        this.y = target.getBlockY();
+        this.z = target.getBlockZ();
         this.world = target.getWorld().getName();
         this.plan = plan;
         this.direction = direction;
-        this.builder = new Builder(plan, this);
-        
-        Location chestLocation = builder.placeProgressEntity(this.getLocation(), direction, 1, Material.CHEST); 
-        Location signLocation = builder.placeProgressEntity(this.getLocation(), direction, 2, Material.SIGN_POST);
-        structureChest = new StructureChest(chestLocation);
-        structureSign = new StructureSign(signLocation);
+        this.currentLayer = 0;
     }
 
     public long getId() {
@@ -90,16 +84,90 @@ public class Structure implements Serializable {
         return owner;
     }
 
-    public StructurePlan getPlan() {
-        return StructurePlanRegister.getPlan(plan);
+    public String getPlan() {
+        return plan;
     }
 
     public final Location getLocation() {
-        return new Location(Bukkit.getWorld(world), xLoc, yLoc, zLoc);
+        return new Location(Bukkit.getWorld(world), x, y, z);
     }
 
     public DIRECTION getDirection() {
         return direction;
     }
 
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public int getZ() {
+        return z;
+    }
+
+    public void setZ(int z) {
+        this.z = z;
+    }
+    
+    public String getWorld() {
+        return world;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public void setDirection(DIRECTION direction) {
+        this.direction = direction;
+    }
+
+    public void setWorld(String world) {
+        this.world = world;
+    }
+
+    public StructureChest getStructureChest() {
+        return structureChest;
+    }
+
+    public StructureSign getStructureSign() {
+        return structureSign;
+    }
+
+    public void setPlan(String plan) {
+        this.plan = plan;
+    }
+
+    public void setStructureChest(StructureChest structureChest) {
+        this.structureChest = structureChest;
+    }
+
+    public void setStructureSign(StructureSign structureSign) {
+        this.structureSign = structureSign;
+    }
+
+    public int getCurrentLayer() {
+        return currentLayer;
+    }
+
+    public void setCurrentLayer(int currentLayer) {
+        this.currentLayer = currentLayer;
+    }
+
+    
+    
 }

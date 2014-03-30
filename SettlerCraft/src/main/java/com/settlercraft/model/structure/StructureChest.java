@@ -3,16 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.settlercraft.model.structure;
 
 import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
+import java.io.Serializable;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -21,34 +19,35 @@ import org.bukkit.Material;
  *
  * @author Chingo
  */
-@Entity
-public class StructureChest {
-    
-    @Id
-    private long id;
+@Embeddable
+public class StructureChest implements Serializable {
     
     @NotNull
-    private final int x;
-    
+    @Column(name = "stchest_x")
+    private int x;
+
     @NotNull
-    private final int y;
-    
+    @Column(name = "stchest_y")
+    private int y;
+
     @NotNull
-    private final int z;
-    
+    @Column(name = "stchest_z")
+    private int z;
+
     @NotEmpty
-    private final String world;
-    
-    StructureChest(Location chestLocation) {
+    @NotNull
+    @Column(name = "stchest_world")
+    private String world;
+
+    public StructureChest() {
+    }
+
+    StructureChest(Location chestLocation, Structure structure) {
         Preconditions.checkArgument(chestLocation.getBlock().getType() == Material.CHEST);
         this.x = chestLocation.getBlockX();
         this.y = chestLocation.getBlockY();
         this.z = chestLocation.getBlockZ();
         this.world = chestLocation.getWorld().getName();
-    }
-
-    public long getId() {
-        return id;
     }
 
     public int getX() {
@@ -66,24 +65,26 @@ public class StructureChest {
     public String getWorld() {
         return world;
     }
-    
+
     public Location getLocation() {
         Location location = new Location(Bukkit.getServer().getWorld(world), x, y, z);
         return location;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if(!(obj instanceof StructureChest)) return false;
-        StructureChest sc = (StructureChest) obj;
-        return sc.id == this.id;
+    public void setX(int x) {
+        this.x = x;
     }
-    
-    
-    
-    
-    
-    
-    
-    
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public void setZ(int z) {
+        this.z = z;
+    }
+
+    public void setWorld(String world) {
+        this.world = world;
+    }
+
 }

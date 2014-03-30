@@ -5,12 +5,15 @@
  */
 package com.settlercraft.main;
 
-import com.avaje.ebean.EbeanServer;
 import com.settlercraft.listener.StructureChestListener;
 import com.settlercraft.listener.StructurePlanListener;
 import com.settlercraft.model.recipe.DefaultBuildingRecipes;
 import com.settlercraft.model.structure.Structure;
+import com.settlercraft.model.structure.StructureChest;
+import com.settlercraft.model.structure.StructureSign;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import javax.persistence.PersistenceException;
 import org.bukkit.Bukkit;
@@ -22,6 +25,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class SettlerCraft extends JavaPlugin {
 
+    public static final String name = "SettlerCraft";
 
     @Override
     public void onEnable() {
@@ -30,7 +34,6 @@ public class SettlerCraft extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-
 
         registerBuildings();
 
@@ -59,8 +62,6 @@ public class SettlerCraft extends JavaPlugin {
         StructurePlanRegister.registerStructures(buildingFolder);
     }
 
-    
-
     private void registerRecipes() {
         DefaultBuildingRecipes.load(this);
     }
@@ -73,8 +74,14 @@ public class SettlerCraft extends JavaPlugin {
             installDDL();
         }
     }
-    
-    
-           
+
+    @Override
+    public List<Class<?>> getDatabaseClasses() {
+        List<Class<?>> list = new ArrayList<>();
+        list.add(Structure.class);
+        list.add(StructureChest.class);
+        list.add(StructureSign.class);
+        return list;
+    }
 
 }

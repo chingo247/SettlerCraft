@@ -1,16 +1,12 @@
 package com.settlercraft.util;
 
-import com.settlercraft.model.structure.Structure;
 import com.settlercraft.model.structure.StructurePlan;
 import com.settlercraft.util.schematic.model.SchematicObject;
 import com.settlercraft.util.schematic.util.SchematicUtil;
 import com.settlercraft.util.yaml.StructureYAMLUtil;
 import com.settlercraft.util.yaml.StructureConfig;
 import java.io.File;
-import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -22,7 +18,7 @@ import org.bukkit.entity.Player;
  *
  * @author Chingo
  */
-public class Structures {
+public class StructureReader {
     
     
     public static StructurePlan read(File schematic, File structureYAML) {
