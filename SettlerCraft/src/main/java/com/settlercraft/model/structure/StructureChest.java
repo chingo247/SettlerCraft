@@ -10,7 +10,13 @@ import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
 import java.io.Serializable;
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -19,8 +25,13 @@ import org.bukkit.Material;
  *
  * @author Chingo
  */
-@Embeddable
+@Entity
 public class StructureChest implements Serializable {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(unique = true, nullable = false)
+    private int id;
     
     @NotNull
     @Column(name = "stchest_x")
@@ -38,8 +49,13 @@ public class StructureChest implements Serializable {
     @NotNull
     @Column(name = "stchest_world")
     private String world;
+    
+    @OneToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    private Structure mainStructure;
 
     public StructureChest() {
+        
     }
 
     StructureChest(Location chestLocation, Structure structure) {
@@ -48,8 +64,17 @@ public class StructureChest implements Serializable {
         this.y = chestLocation.getBlockY();
         this.z = chestLocation.getBlockZ();
         this.world = chestLocation.getWorld().getName();
+        this.mainStructure = structure;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+    
     public int getX() {
         return x;
     }
@@ -87,4 +112,14 @@ public class StructureChest implements Serializable {
         this.world = world;
     }
 
+    public Structure getStructure() {
+        return mainStructure;
+    }
+
+    public void setStructure(Structure structure) {
+        this.mainStructure = structure;
+    }
+
+    
+    
 }

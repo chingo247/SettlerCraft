@@ -10,7 +10,12 @@ import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
 import java.io.Serializable;
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -19,8 +24,13 @@ import org.bukkit.Material;
  *
  * @author Chingo
  */
-@Embeddable
+@Entity
 public class StructureSign implements Serializable {
+    
+    @Id
+    @GeneratedValue
+    @Column(unique = true, nullable = false)
+    private int id;
     
     @NotNull
     @Column(name = "stsign_x")
@@ -38,6 +48,10 @@ public class StructureSign implements Serializable {
     @NotNull
     @Column(name = "stsign_world")
     private String world;
+    
+    @OneToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    private Structure mainStructure;
 
     public StructureSign() {
     }
@@ -48,8 +62,13 @@ public class StructureSign implements Serializable {
         this.y = signLocation.getBlockY();
         this.z = signLocation.getBlockZ();
         this.world = signLocation.getWorld().getName();
+        this.mainStructure = structure;
     }
 
+    public int getId() {
+        return id;
+    }
+    
     public int getX() {
         return x;
     }
@@ -87,4 +106,13 @@ public class StructureSign implements Serializable {
         return location;
     }
 
+    public Structure getStructure() {
+        return mainStructure;
+    }
+
+    public void setStructure(Structure structure) {
+        this.mainStructure = structure;
+    }
+
+    
 }

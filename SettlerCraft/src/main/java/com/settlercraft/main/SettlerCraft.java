@@ -43,6 +43,7 @@ public class SettlerCraft extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(this), this);
         Bukkit.getPluginManager().registerEvents(new StructureChestListener(this), this);
         setupDatabase();
+        
     }
 
     @Override

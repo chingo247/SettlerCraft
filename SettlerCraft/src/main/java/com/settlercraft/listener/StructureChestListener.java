@@ -37,6 +37,7 @@ public class StructureChestListener implements Listener {
                     .eq("structureChest.z", chest.getZ())
                     .ieq("structureChest.world", chest.getWorld().getName())
                     .findUnique();
+            System.out.println(s);
             if(s != null) {
                 
             }

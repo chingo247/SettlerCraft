@@ -11,11 +11,13 @@ import com.google.common.base.Preconditions;
 import com.settlercraft.main.StructurePlanRegister;
 import com.settlercraft.util.LocationUtil.DIRECTION;
 import java.io.Serializable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -27,6 +29,7 @@ import org.bukkit.entity.Player;
  */
 @Entity
 @Table(name = "sc_structure")
+
 public class Structure implements Serializable  {
 
     @Id
@@ -51,11 +54,11 @@ public class Structure implements Serializable  {
     @NotNull
     private int currentLayer;
     
-    @Embedded
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "mainStructure", cascade = CascadeType.ALL)
     @Column(name = "structureChest")
     private StructureChest structureChest;
     
-    @Embedded
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "mainStructure", cascade = CascadeType.ALL)
     @Column(name = "structureSign")
     private StructureSign structureSign;
 

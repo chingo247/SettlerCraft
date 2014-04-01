@@ -5,10 +5,10 @@
  */
 package com.settlercraft.action;
 
-import com.google.common.base.Preconditions;
 import com.settlercraft.model.structure.Builder;
 import com.settlercraft.model.structure.Structure;
 import com.settlercraft.model.structure.StructurePlan;
+import com.google.common.base.Preconditions;
 import com.settlercraft.util.LocationUtil;
 import com.settlercraft.util.LocationUtil.DIRECTION;
 import org.bukkit.Location;
