@@ -6,7 +6,7 @@
 
 package com.settlercraft.listener;
 
-import com.settlercraft.main.SettlerCraft;
+import com.settlercraft.SettlerCraft;
 import com.settlercraft.model.structure.Structure;
 import org.bukkit.block.Chest;
 import org.bukkit.event.EventHandler;

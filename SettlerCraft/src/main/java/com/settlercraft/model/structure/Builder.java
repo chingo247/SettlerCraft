@@ -5,7 +5,7 @@
  */
 package com.settlercraft.model.structure;
 
-import com.settlercraft.main.StructurePlanRegister;
+import com.settlercraft.StructurePlanRegister;
 import com.settlercraft.util.LocationUtil;
 import com.settlercraft.util.LocationUtil.DIRECTION;
 import com.settlercraft.util.schematic.model.BlockData;

@@ -8,7 +8,7 @@ package com.settlercraft.model.structure;
 import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
-import com.settlercraft.main.StructurePlanRegister;
+import com.settlercraft.StructurePlanRegister;
 import com.settlercraft.util.LocationUtil.DIRECTION;
 import java.io.Serializable;
 import javax.persistence.CascadeType;

@@ -35,6 +35,18 @@ public abstract class AbstractService {
         return sessionFactory.openSession();
     }
     
+    public void save(Object o) {
+        Session session = getSession();
+        session.save(o);
+        session.close();
+    }
+    
+    
+    public void delete(Object o) {
+        Session session = getSession();
+        session.delete(o);
+        session.close();
+    }
 
     
     

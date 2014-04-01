@@ -7,8 +7,8 @@
 package com.settlercraft.listener;
 
 import com.settlercraft.action.BuildAction;
-import com.settlercraft.main.SettlerCraft;
-import com.settlercraft.main.StructurePlanRegister;
+import com.settlercraft.SettlerCraft;
+import com.settlercraft.StructurePlanRegister;
 import com.settlercraft.model.structure.StructurePlan;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
