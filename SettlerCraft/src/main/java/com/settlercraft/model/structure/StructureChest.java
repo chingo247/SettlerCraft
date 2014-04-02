@@ -11,12 +11,9 @@ import com.google.common.base.Preconditions;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -50,8 +47,8 @@ public class StructureChest implements Serializable {
     @Column(name = "stchest_world")
     private String world;
     
-    @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+//    @OneToOne(fetch = FetchType.LAZY)
+//    @PrimaryKeyJoinColumn
     private Structure mainStructure;
 
     public StructureChest() {

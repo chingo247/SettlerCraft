@@ -109,16 +109,18 @@ public class Builder {
         }
     }
 
-    public static void placeStructureChest(Structure structure) {
+    public static StructureChest placeStructureChest(Structure structure) {
         Location chestLocation = placeProgressEntity(structure.getLocation(), structure.getDirection(), 1, Material.CHEST);
         StructureChest chest = new StructureChest(chestLocation, structure);
         structure.setStructureChest(chest);
+        return chest;
     }
 
-    public static void placeStructureSign(Structure structure) {
+    public static StructureSign placeStructureSign(Structure structure) {
         Location signLocation = placeProgressEntity(structure.getLocation(), structure.getDirection(), 2, Material.SIGN_POST);
         StructureSign sign = new StructureSign(signLocation, structure);
         structure.setStructureSign(sign);
+        return sign;
     }
 
     static Location placeProgressEntity(Location target, LocationUtil.DIRECTION direction, int yOffset, Material m) {

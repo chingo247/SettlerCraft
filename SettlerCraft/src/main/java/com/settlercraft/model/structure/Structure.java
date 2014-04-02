@@ -11,13 +11,9 @@ import com.google.common.base.Preconditions;
 import com.settlercraft.StructurePlanRegister;
 import com.settlercraft.util.LocationUtil.DIRECTION;
 import java.io.Serializable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -54,12 +50,10 @@ public class Structure implements Serializable  {
     @NotNull
     private int currentLayer;
     
-    @OneToOne(fetch = FetchType.EAGER, mappedBy = "mainStructure", cascade = CascadeType.ALL)
-    @Column(name = "structureChest")
+//    @OneToOne(fetch = FetchType.EAGER, mappedBy = "mainStructure", cascade = CascadeType.ALL)
     private StructureChest structureChest;
     
-    @OneToOne(fetch = FetchType.EAGER, mappedBy = "mainStructure", cascade = CascadeType.ALL)
-    @Column(name = "structureSign")
+//    @OneToOne(fetch = FetchType.EAGER, mappedBy = "mainStructure", cascade = CascadeType.ALL)
     private StructureSign structureSign;
 
     public Structure() {
