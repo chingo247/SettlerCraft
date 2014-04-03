@@ -7,10 +7,11 @@ package com.settlercraft;
 
 import com.settlercraft.listener.StructureChestListener;
 import com.settlercraft.listener.StructurePlanListener;
+import com.settlercraft.model.entity.structure.Structure;
+import com.settlercraft.model.entity.structure.StructureChest;
+import com.settlercraft.model.entity.structure.StructureProgress;
+import com.settlercraft.model.entity.structure.StructureSign;
 import com.settlercraft.model.recipe.DefaultBuildingRecipes;
-import com.settlercraft.model.structure.Structure;
-import com.settlercraft.model.structure.StructureChest;
-import com.settlercraft.model.structure.StructureSign;
 import com.settlercraft.util.HibernateUtil;
 import java.io.File;
 import java.util.logging.Level;
@@ -46,11 +47,7 @@ public class SettlerCraft extends JavaPlugin {
 
     @Override
     public void onLoad() {
-//        // Register commands
-//        CommandManager manager = new CommandManager(this);
-//        manager.registerCommands(new BuildCommands());
-//        manager.registerHelp();
-//        System.out.println("[" + this.getName() + "]" + " registered commands!");
+
     }
 
     private void registerBuildings() {
@@ -69,7 +66,8 @@ public class SettlerCraft extends JavaPlugin {
         HibernateUtil.addAnnotatedClasses(
                 Structure.class,
                 StructureChest.class,
-                StructureSign.class
+                StructureSign.class,
+                StructureProgress.class
         );
     }
 

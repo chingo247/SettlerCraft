@@ -5,7 +5,7 @@
  */
 package com.settlercraft;
 
-import com.settlercraft.model.structure.StructurePlan;
+import com.settlercraft.model.entity.structure.StructurePlan;
 import com.settlercraft.util.StructureReader;
 import java.io.File;
 import java.io.FileNotFoundException;

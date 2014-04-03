@@ -3,17 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.settlercraft.model.structure;
+package com.settlercraft.model.entity.structure;
 
 import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
 import com.settlercraft.StructurePlanRegister;
+import com.settlercraft.model.entity.WorldLocation;
 import com.settlercraft.util.LocationUtil.DIRECTION;
 import java.io.Serializable;
 import javax.persistence.CascadeType;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -29,7 +30,7 @@ import org.bukkit.entity.Player;
  */
 @Entity
 @Table(name = "sc_structure")
-public class Structure implements Serializable  {
+public class Structure implements Serializable {
 
     @Id
     @GeneratedValue
@@ -42,40 +43,31 @@ public class Structure implements Serializable  {
     @NotNull
     private DIRECTION direction;
     @NotNull
-    private int x;
-    @NotNull
-    private int y;
-    @NotNull
-    private int z;
-    @NotNull
-    @NotEmpty
-    private String world;
-    @NotNull
     private int currentLayer;
-    
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "chest_id")
     private StructureChest structureChest;
-    
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "sign_id")
     private StructureSign structureSign;
+    
+    @Embedded
+    private WorldLocation wlocation;
 
-    public Structure() {
+    public Structure() {      
     }
+    
 
     public Structure(Player owner, Location target, DIRECTION direction, String plan) {
         Preconditions.checkNotNull(StructurePlanRegister.getPlan(plan));
         Preconditions.checkNotNull(target);
         this.owner = owner.getName();
-        this.x = target.getBlockX();
-        this.y = target.getBlockY();
-        this.z = target.getBlockZ();
-        this.world = target.getWorld().getName();
         this.plan = plan;
         this.direction = direction;
         this.currentLayer = 0;
+        this.wlocation = new WorldLocation(target);
     }
 
     public Long getId() {
@@ -90,44 +82,8 @@ public class Structure implements Serializable  {
         return plan;
     }
 
-    public final Location getLocation() {
-        return new Location(Bukkit.getWorld(world), x, y, z);
-    }
-
     public DIRECTION getDirection() {
         return direction;
-    }
-
-    public int getX() {
-        return x;
-    }
-
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    public int getZ() {
-        return z;
-    }
-
-    public void setZ(int z) {
-        this.z = z;
-    }
-    
-    public String getWorld() {
-        return world;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public void setOwner(String owner) {
@@ -136,10 +92,6 @@ public class Structure implements Serializable  {
 
     public void setDirection(DIRECTION direction) {
         this.direction = direction;
-    }
-
-    public void setWorld(String world) {
-        this.world = world;
     }
 
     public StructureChest getStructureChest() {
@@ -169,14 +121,14 @@ public class Structure implements Serializable  {
     public void setCurrentLayer(int currentLayer) {
         this.currentLayer = currentLayer;
     }
+    
+    public Location getLocation() {
+        return new Location(Bukkit.getWorld(wlocation.getWorld()), wlocation.getX(), wlocation.getY(), wlocation.getZ());
+    }
 
     @Override
     public String toString() {
-        return "id:" + getId() + " owner:" + getOwner() + " plan:" + getPlan() + " x:" + getX() + " y:" + getY() + " z:" + getZ();
+        return "id:" + getId() + " owner:" + getOwner() + " plan:" + getPlan() + " x:" + wlocation.getX()+ " y:" + wlocation.getY() + " z:" + wlocation.getZ();
     }
-    
-    
 
-    
-    
 }

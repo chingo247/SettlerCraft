@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.settlercraft.model.structure;
+package com.settlercraft.model.entity.structure;
 
 import com.settlercraft.StructurePlanRegister;
 import com.settlercraft.util.LocationUtil;
@@ -94,7 +94,7 @@ public class Builder {
             for (int y = 0; y < schematic.height; y++) {
                 for (int z = schematic.length - 1; z >= 0; z--) {
                     for (int x = 0; x < schematic.width; x++) {
-                        target.clone().add(x * xMod, y, z * zMod).getBlock().setType(Material.AIR);
+                        target.clone().add(x * xMod, y, z * zMod).getBlock().breakNaturally();
                     }
                 }
             }
@@ -102,7 +102,7 @@ public class Builder {
             for (int y = 0; y < schematic.height; y++) {
                 for (int z = schematic.length - 1; z >= 0; z--) {
                     for (int x = 0; x < schematic.width; x++) {
-                        target.clone().add(z * zMod, y, x * xMod).getBlock().setType(Material.AIR);
+                        target.clone().add(z * zMod, y, x * xMod).getBlock().breakNaturally();
                     }
                 }
             }

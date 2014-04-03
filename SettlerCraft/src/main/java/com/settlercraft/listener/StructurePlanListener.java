@@ -9,7 +9,7 @@ package com.settlercraft.listener;
 import com.settlercraft.action.BuildAction;
 import com.settlercraft.SettlerCraft;
 import com.settlercraft.StructurePlanRegister;
-import com.settlercraft.model.structure.StructurePlan;
+import com.settlercraft.model.entity.structure.StructurePlan;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

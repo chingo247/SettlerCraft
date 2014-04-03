@@ -3,17 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.settlercraft.persistence;
 
+package com.settlercraft.util.material;
 
 /**
  *
  * @author Chingo
- * @param <T> The object for this service
  */
-public interface SettlerCraftService <T extends Object> {
-
-    public T save(T object);
-    public void delete(T object);
-
+public class Materials {
+    
+    private static final Woods WOODS = new Woods();
+    
+    public static Woods getWoods() { return WOODS; }
+            
+    
+    
 }

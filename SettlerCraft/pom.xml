@@ -272,6 +272,11 @@
             <artifactId>querydsl-codegen</artifactId>
             <version>3.3.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.mysema.querydsl</groupId>
+            <artifactId>querydsl-hql</artifactId>
+            <version>0.5.4</version>
+        </dependency>
         
         <!-- Spring framework -->
         <dependency>

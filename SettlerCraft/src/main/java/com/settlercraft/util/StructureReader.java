@@ -1,6 +1,6 @@
 package com.settlercraft.util;
 
-import com.settlercraft.model.structure.StructurePlan;
+import com.settlercraft.model.entity.structure.StructurePlan;
 import com.settlercraft.util.schematic.model.SchematicObject;
 import com.settlercraft.util.schematic.util.SchematicUtil;
 import com.settlercraft.util.yaml.StructureYAMLUtil;

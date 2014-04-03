@@ -38,6 +38,7 @@ public class HibernateUtil {
         annotatedClasses.add(clazz);
         config = getInitializedConfiguration();
         factory = config.buildSessionFactory();
+        System.out.println("[SettlerCraft]: registered " + clazz);
     }
     
     public static void addAnnotatedClasses(Class... clazzes) {

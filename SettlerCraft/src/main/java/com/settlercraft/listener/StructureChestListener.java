@@ -7,7 +7,8 @@
 package com.settlercraft.listener;
 
 import com.settlercraft.SettlerCraft;
-import com.settlercraft.model.structure.Structure;
+import com.settlercraft.model.entity.structure.StructureChest;
+import com.settlercraft.persistence.StructureChestService;
 import org.bukkit.block.Chest;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,25 +22,21 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent;
 public class StructureChestListener implements Listener {
     
     private final SettlerCraft sc;
+    private final StructureChestService scs;
     
     public StructureChestListener(SettlerCraft sc) {
         this.sc = sc;
+        this.scs = new StructureChestService();
     }
     
     @EventHandler
     public void onBuildChestEvent(InventoryCloseEvent ice) {
         System.out.println("Inventory Close event");
-        if(ice.getInventory().getHolder() instanceof Chest){
+        if(ice.getInventory().getHolder() instanceof Chest && ice.getInventory().getContents().length > 0){
             Chest chest = (Chest) ice.getInventory().getHolder();
-            Structure s = sc.getDatabase().find(Structure.class).where()
-                    .eq("structureChest.x", chest.getX())
-                    .eq("structureChest.y", chest.getY())
-                    .eq("structureChest.z", chest.getZ())
-                    .ieq("structureChest.world", chest.getWorld().getName())
-                    .findUnique();
-            System.out.println(s);
-            if(s != null) {
-                
+            StructureChest stc = scs.getStructureChest(chest.getWorld().getName(), chest.getX(), chest.getY(), chest.getZ());
+            if(stc != null) {
+                System.out.println(stc);
             }
         }
     }
