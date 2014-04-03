@@ -36,6 +36,8 @@ public class StructureService extends AbstractService<Structure> {
         session.close();
         return structures;
     }
+    
+    
 
 
 }

@@ -17,8 +17,8 @@ import org.hibernate.Transaction;
 
 
 /**
- *
  * @author Chingo
+ * @param <T> The persistent Object
  */
 public abstract class AbstractService <T extends Object> {
 
