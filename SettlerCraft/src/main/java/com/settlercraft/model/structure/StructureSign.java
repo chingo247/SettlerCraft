@@ -9,10 +9,14 @@ import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
 import java.io.Serializable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -26,8 +30,7 @@ public class StructureSign implements Serializable {
     
     @Id
     @GeneratedValue
-    @Column(unique = true, nullable = false)
-    private int id;
+    private Long id;
     
     @NotNull
     @Column(name = "stsign_x")
@@ -46,8 +49,8 @@ public class StructureSign implements Serializable {
     @Column(name = "stsign_world")
     private String world;
     
-//    @OneToOne(fetch = FetchType.LAZY)
-//    @PrimaryKeyJoinColumn
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "structure")
     private Structure mainStructure;
 
     public StructureSign() {
@@ -62,7 +65,11 @@ public class StructureSign implements Serializable {
         this.mainStructure = structure;
     }
 
-    public int getId() {
+    public void setId(Long id) {
+        this.id = id;
+    }
+    
+    public Long getId() {
         return id;
     }
     

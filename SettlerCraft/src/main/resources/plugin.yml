@@ -1,4 +1,4 @@
 name: SettlerCraft
-main: com.settlercraft.main.SettlerCraft
+main: com.settlercraft.SettlerCraft
 version: 1.0
-database: true
+

@@ -11,9 +11,13 @@ import com.google.common.base.Preconditions;
 import com.settlercraft.StructurePlanRegister;
 import com.settlercraft.util.LocationUtil.DIRECTION;
 import java.io.Serializable;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -25,12 +29,11 @@ import org.bukkit.entity.Player;
  */
 @Entity
 @Table(name = "sc_structure")
-
 public class Structure implements Serializable  {
 
     @Id
     @GeneratedValue
-    private int id;
+    private Long id;
     @NotNull
     private String owner;
     @NotNull
@@ -50,10 +53,13 @@ public class Structure implements Serializable  {
     @NotNull
     private int currentLayer;
     
-//    @OneToOne(fetch = FetchType.EAGER, mappedBy = "mainStructure", cascade = CascadeType.ALL)
+
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "chest_id")
     private StructureChest structureChest;
     
-//    @OneToOne(fetch = FetchType.EAGER, mappedBy = "mainStructure", cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "sign_id")
     private StructureSign structureSign;
 
     public Structure() {
@@ -72,7 +78,7 @@ public class Structure implements Serializable  {
         this.currentLayer = 0;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
@@ -120,7 +126,7 @@ public class Structure implements Serializable  {
         return world;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

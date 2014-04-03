@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.settlercraft.model.structure.Builder;
 import com.settlercraft.model.structure.Structure;
 import com.settlercraft.model.structure.StructurePlan;
+import com.settlercraft.persistence.StructureService;
 import com.settlercraft.util.LocationUtil;
 import com.settlercraft.util.LocationUtil.DIRECTION;
 import org.bukkit.Location;
@@ -48,13 +49,13 @@ public class BuildAction extends SettlerCraftAction{
      * @param direction
      */
     public void placeStructure(Player player, Location target, StructurePlan plan, DIRECTION direction) {
+        StructureService ss = new StructureService();
         Structure structure = new Structure(player, target, direction, plan.getConfig().getName());
         Builder.clearBuildSite(structure);
         Builder.createDefaultFoundation(structure);
         Builder.placeStructureChest(structure);
         Builder.placeStructureSign(structure);
-        
-        
+        ss.save(structure);
     }
 
 
