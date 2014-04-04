@@ -93,6 +93,13 @@ public class SchematicObject {
     public List getTileEntities() {
         return tileEntities;
     }
+
+    @Override
+    public String toString() {
+        return "width: " + width + " length: " + length + " height: " + height;
+    }
+    
+    
     
     
     

@@ -39,17 +39,30 @@ public class StructureService extends AbstractService<Structure> {
     
     public boolean overlaps(Structure structure) {
       QStructure qStructure = QStructure.structure;
-      
-
       Session session = HibernateUtil.getSession();
       JPQLQuery query = new HibernateQuery(session);
       
-      //FIXME Doesnt include the build box and reserved sides!
-      boolean overlaps = query.from(qStructure).where(qStructure.dimension().world.eq(structure.getDimension().getWorld())
-              .and(qStructure.dimension().startX.between(structure.getDimension().getStartX(), structure.getDimension().getEndX()))
-              .and(qStructure.dimension().startY.between(structure.getDimension().getStartY(), structure.getDimension().getEndY()))
-              .and(qStructure.dimension().startZ.between(structure.getDimension().getStartZ(), structure.getDimension().getEndZ()))
+      // MOTHER OF ALL QUERIES, because 4 isnt between 5 and 3 but between 3 and 5
+      boolean overlaps = query.from(qStructure)
+              .where(qStructure.worldLocation().world.eq(structure.getStructureLocation().getWorld().getName())
+                      // Y between?
+                      .and((qStructure.dimension().startY.between(structure.getDimension().getStartY(), structure.getDimension().getEndY())
+                      .or(qStructure.dimension().endY.between(structure.getDimension().getEndY(), structure.getDimension().getStartY())))
+                      .or(qStructure.dimension().startY.between(structure.getDimension().getEndY(), structure.getDimension().getStartY())
+                      .or(qStructure.dimension().endY.between(structure.getDimension().getStartY(), structure.getDimension().getEndY())))
+                      // X between?       
+                      .and((qStructure.dimension().startX.between(structure.getDimension().getStartX(), structure.getDimension().getEndX())
+                      .or(qStructure.dimension().endX.between(structure.getDimension().getEndX(), structure.getDimension().getStartX())))
+                      .or(qStructure.dimension().startX.between(structure.getDimension().getEndX(), structure.getDimension().getStartX())
+                      .or(qStructure.dimension().endX.between(structure.getDimension().getStartX(), structure.getDimension().getEndX()))))
+                      // Z between?
+                      .and((qStructure.dimension().startZ.between(structure.getDimension().getStartZ(), structure.getDimension().getEndZ())
+                      .or(qStructure.dimension().endZ.between(structure.getDimension().getEndZ(), structure.getDimension().getStartZ())))
+                      .or(qStructure.dimension().startZ.between(structure.getDimension().getEndZ(), structure.getDimension().getStartZ())
+                      .or(qStructure.dimension().endZ.between(structure.getDimension().getStartZ(), structure.getDimension().getEndZ()))))
+                      )
       ).exists();
+      session.close();
               
       return overlaps;
       

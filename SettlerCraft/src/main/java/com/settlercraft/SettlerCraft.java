@@ -34,7 +34,11 @@ public class SettlerCraft extends JavaPlugin {
             return;
         }
 
-        registerBuildings();
+        if(!registerBuildings()) {
+            getLogger().log(Level.SEVERE, "Some buildings were registered unsuccesfully!");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 
 //        registerCustomBuildings(buildingRegister);
         StructurePlanRegister.printStructures(new File(this.getDataFolder() + "/buildings.txt"));
@@ -50,12 +54,12 @@ public class SettlerCraft extends JavaPlugin {
 
     }
 
-    private void registerBuildings() {
+    private boolean registerBuildings() {
         File buildingFolder = new File(getDataFolder().getAbsolutePath());
         if (!buildingFolder.exists()) {
             buildingFolder.mkdir();
         }
-        StructurePlanRegister.registerStructures(buildingFolder);
+        return StructurePlanRegister.registerStructures(buildingFolder);
     }
 
     private void registerRecipes() {

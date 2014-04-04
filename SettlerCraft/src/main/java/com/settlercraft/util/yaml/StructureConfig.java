@@ -20,7 +20,7 @@ public class StructureConfig {
     private final String culture;
     private final String type;
 
-    private final EnumMap<RESERVED_SIDE, Boolean> reserved;
+    private final EnumMap<RESERVED_SIDE, Integer> reserved;
 
     public enum RESERVED_SIDE {
 
@@ -32,7 +32,7 @@ public class StructureConfig {
 
     StructureConfig(String name,
             String description,
-            EnumMap<RESERVED_SIDE, Boolean> reserved,
+            EnumMap<RESERVED_SIDE, Integer> reserved,
             int layersBeneathGround,
             String culture,
             String type
@@ -45,7 +45,7 @@ public class StructureConfig {
         this.culture = culture;
     }
 
-    public EnumMap<RESERVED_SIDE, Boolean> getReserved() {
+    public EnumMap<RESERVED_SIDE, Integer> getReserved() {
         return new EnumMap<>(reserved);
     }
 

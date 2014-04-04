@@ -3,8 +3,8 @@ package com.settlercraft.util;
 import com.settlercraft.model.entity.structure.StructurePlan;
 import com.settlercraft.util.schematic.model.SchematicObject;
 import com.settlercraft.util.schematic.util.SchematicUtil;
-import com.settlercraft.util.yaml.StructureYAMLUtil;
 import com.settlercraft.util.yaml.StructureConfig;
+import com.settlercraft.util.yaml.StructureYAMLUtil;
 import java.io.File;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -34,10 +34,15 @@ public class StructureReader {
     
     private static boolean validate(YamlConfiguration yaml) {
         return yaml.getString("name") != null 
-                && yaml.isBoolean("reserved.north")
-                && yaml.isBoolean("reserved.east")
-                && yaml.isBoolean("reserved.south")
-                && yaml.isBoolean("reserved.west");
+                && yaml.isInt("reserved.north")
+                && yaml.isInt("reserved.east")
+                && yaml.isInt("reserved.south")
+                && yaml.isInt("reserved.west")
+                && yaml.getInt("reserved.south") >= 1 // Min room for structureChest
+                && yaml.getInt("reserved.east")  >= 0
+                && yaml.getInt("reserved.north") >= 0
+                && yaml.getInt("reserved.west")  >= 0;
+                    
     }
 
 

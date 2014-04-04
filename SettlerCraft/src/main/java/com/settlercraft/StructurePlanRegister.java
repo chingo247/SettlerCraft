@@ -26,8 +26,8 @@ public class StructurePlanRegister {
 
   private static final TreeMap<String, StructurePlan> structures = new TreeMap<>();
 
-  public static void registerStructures(File buildingFolder) {
-
+  public static boolean registerStructures(File buildingFolder) {
+    boolean succes = true;
     String[] extensions = {"yml"};
     Iterator<File> it = FileUtils.iterateFiles(buildingFolder, extensions, true);
     int count = 0;
@@ -48,7 +48,8 @@ public class StructurePlanRegister {
 
       StructurePlan structure = StructureReader.read(schematicBuildingFile, yamlBuildingFile);
       if (structure == null) {
-        System.out.println("[SettlerCraft]: failed to create building for " + schematicBuildingFile.getAbsolutePath() + ", skipping...");
+        succes = false;
+        System.out.println("[SettlerCraft]: failed to create building for " + schematicBuildingFile.getAbsolutePath() + ", skipping... will disable plugin");
       } else {
         if (!structures.containsKey(structure.getConfig().getName())) {
           System.out.println("[SettlerCraft]: loaded " + structure.getConfig().getName());
@@ -64,7 +65,7 @@ public class StructurePlanRegister {
     }
 
     System.out.println("[SettlerCraft]: " + count + " structures were loaded ");
-    
+    return succes;
   }
 
   static void printStructures(File f) {

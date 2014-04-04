@@ -9,7 +9,7 @@ import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
 import com.settlercraft.StructurePlanRegister;
-import com.settlercraft.model.entity.WorldDimension;
+import com.settlercraft.model.entity.StructureDimension;
 import com.settlercraft.model.entity.WorldLocation;
 import com.settlercraft.util.location.LocationUtil;
 import com.settlercraft.util.location.LocationUtil.DIRECTION;
@@ -64,7 +64,7 @@ public class Structure implements Serializable {
     private WorldLocation worldLocation;
 
     @Embedded
-    private WorldDimension dimension;
+    private StructureDimension dimension;
 
     
     /**
@@ -89,7 +89,7 @@ public class Structure implements Serializable {
         this.xMod = modifiers[0];
         this.zMod = modifiers[1];
         this.worldLocation = new WorldLocation(target);
-        this.dimension = new WorldDimension(target, this);
+        this.dimension = new StructureDimension(this);
     }
 
     /**
@@ -198,10 +198,9 @@ public class Structure implements Serializable {
 
     /**
      * Gets the dimension of this building
-     * @return The dimension of this building
-     * see @link{WorldDimension.class}
+     * @return The dimension of this building.
      */
-    public WorldDimension getDimension() {
+    public StructureDimension getDimension() {
         return dimension;
     }
 
@@ -218,7 +217,7 @@ public class Structure implements Serializable {
      * @return The startlocation of this structure
      */
     public Location getStartLocation() {
-        return new Location(Bukkit.getWorld(dimension.getWorld()), dimension.getStartX(), dimension.getStartY(), dimension.getStartZ());
+        return new Location(Bukkit.getWorld(worldLocation.getWorld()), dimension.getStartX(), dimension.getStartY(), dimension.getStartZ());
     }
 
     @Override

@@ -1,0 +1,28 @@
+#Name of a Building MUST BE UNIQUE
+#Changing this name in a later period of the server may causes the plugin to crash
+name: Town Center
+description: First building of a town.
+#The schematic file associated with this yml
+#You can have multiple YAML pointing at the same schematic!
+schematic: 
+  building: DefaultTownCenter.schematic
+
+#By default a building belongs to the default culture
+#Culture is a name to group buildings 
+culture: default 
+#The type of buildings this building belongs to
+type: default
+#Which sides need to be free? The south side is also the side where a Construction Chest will be placed
+#Therefore this side always needs to be at least 1 block free
+reserved:
+  north: 0
+  east: 0
+  south: 1
+  west: 0
+  
+#This describes where at which height the building must start
+#Where 0 means equal to the ground
+layers-start: 0
+
+#PRO-TIP: Make sure your schematics have ENOUGH LIGHT/(TORCHES!), that way NO UNWANTED MONSTERS will spawn inside your building
+
