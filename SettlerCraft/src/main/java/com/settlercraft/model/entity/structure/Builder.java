@@ -5,7 +5,6 @@
  */
 package com.settlercraft.model.entity.structure;
 
-import com.settlercraft.StructurePlanRegister;
 import com.settlercraft.util.location.LocationUtil;
 import com.settlercraft.util.location.LocationUtil.DIRECTION;
 import com.settlercraft.util.schematic.model.BlockData;
@@ -13,6 +12,7 @@ import com.settlercraft.util.schematic.model.SchematicObject;
 import java.util.Iterator;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 
 /**
  *
@@ -25,10 +25,10 @@ public class Builder {
    * @param structure The structure
    */
   public static void createDefaultFoundation(Structure structure) {
-    SchematicObject schematic = StructurePlanRegister.getPlan(structure.getPlan())
+    SchematicObject schematic = structure.getPlan()
             .getSchematic();
     DIRECTION direction = structure.getDirection();
-    Location target = structure.getLocation();
+    Location target = structure.getStartLocation();
 
     int[] mods = LocationUtil.getModifiers(direction);
     int xMod = mods[0];
@@ -55,7 +55,7 @@ public class Builder {
    * @param layer The layer to build
    */
   public static void buildLayer(Structure structure, int layer) {
-    StructurePlan sp = StructurePlanRegister.getPlan(structure.getPlan());
+    StructurePlan sp = structure.getPlan();
     if (layer > sp.getSchematic().height) {
       throw new IndexOutOfBoundsException("layer out of bounds");
     }
@@ -63,7 +63,7 @@ public class Builder {
     Iterator<BlockData> it = sp.getSchematic().getBlocksFromLayer(layer).iterator();
     SchematicObject schematic = sp.getSchematic();
     DIRECTION direction = structure.getDirection();
-    Location target = structure.getLocation();
+    Location target = structure.getStartLocation();
 
     int[] mods = LocationUtil.getModifiers(direction);
     int xMod = mods[0];
@@ -86,8 +86,8 @@ public class Builder {
 
   public static void clearBuildSite(Structure structure) {
     DIRECTION direction = structure.getDirection();
-    Location target = structure.getLocation();
-    StructurePlan sp = StructurePlanRegister.getPlan(structure.getPlan());
+    Location target = structure.getStartLocation();
+    StructurePlan sp = structure.getPlan();
     SchematicObject schematic = sp.getSchematic();
 
     int[] mods = LocationUtil.getModifiers(direction);
@@ -112,16 +112,18 @@ public class Builder {
       }
     }
   }
+  
+  
 
   public static StructureChest placeStructureChest(Structure structure) {
-    Location chestLocation = placeProgressEntity(structure.getLocation(), structure.getDirection(), 1, Material.CHEST);
+    Location chestLocation = placeProgressEntity(structure.getStartLocation(), structure.getDirection(), 1, Material.CHEST);
     StructureChest chest = new StructureChest(chestLocation, structure);
     structure.setStructureChest(chest);
     return chest;
   }
 
   public static StructureSign placeStructureSign(Structure structure) {
-    Location signLocation = placeProgressEntity(structure.getLocation(), structure.getDirection(), 2, Material.SIGN_POST);
+    Location signLocation = placeProgressEntity(structure.getStartLocation(), structure.getDirection(), 2, Material.SIGN_POST);
     StructureSign sign = new StructureSign(signLocation, structure);
     structure.setStructureSign(sign);
     return sign;
@@ -140,4 +142,32 @@ public class Builder {
     loc.getBlock().setType(m);
     return loc;
   }
+  
+      public static void instantBuildStructure(Location playerLocation, Location target, SchematicObject schematic) {
+        DIRECTION direction = LocationUtil.getDirection(playerLocation.getYaw());
+        int[] mods = LocationUtil.getModifiers(direction);
+        int xMod = mods[0];
+        int zMod = mods[1];
+        Iterator<BlockData> it = schematic.getBlocksSorted().iterator();
+        if (direction == DIRECTION.NORTH || direction == DIRECTION.SOUTH) {
+            for (int y = 0; y < schematic.height; y++) {
+                for (int z = schematic.length; z > 0; z--) {
+                    for (int x = 0; x < schematic.width; x++) {
+                        Block b = target.clone().add(x * xMod, y, z * zMod).getBlock();
+                        BlockData d = it.next();
+                        b.setType(d.getMaterial());
+                        b.setData(d.getData());
+                    }
+                }
+            }
+        } else {
+            for (int y = 0; y < schematic.height; y++) {
+                for (int z = schematic.length; z > 0; z--) {
+                    for (int x = 0; x < schematic.width; x++) {
+                        target.clone().add(z * zMod, y, x * xMod).getBlock().setType(it.next().getMaterial());
+                    }
+                }
+            }
+        }
+    }
 }

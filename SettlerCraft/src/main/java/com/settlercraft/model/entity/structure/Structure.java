@@ -9,6 +9,7 @@ import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
 import com.settlercraft.StructurePlanRegister;
+import com.settlercraft.model.entity.WorldDimension;
 import com.settlercraft.model.entity.WorldLocation;
 import com.settlercraft.util.location.LocationUtil;
 import com.settlercraft.util.location.LocationUtil.DIRECTION;
@@ -33,109 +34,196 @@ import org.bukkit.entity.Player;
 @Table(name = "sc_structure")
 public class Structure implements Serializable {
 
-  @Id
-  @GeneratedValue
-  private Long id;
-  @NotNull
-  private String owner;
-  @NotNull
-  @NotEmpty
-  private String plan;
+    @Id
+    @GeneratedValue
+    private Long id;
+    @NotNull
+    private String owner;
+    @NotNull
+    @NotEmpty
+    private String plan;
 
-  @NotNull
-  private int xMod;
+    @NotNull
+    private int xMod;
 
-  @NotNull
-  private int zMod;
+    @NotNull
+    private int zMod;
 
-  @NotNull
-  private int currentLayer;
+    @NotNull
+    private int currentLayer;
 
-  @OneToOne(cascade = CascadeType.ALL)
-  @JoinColumn(name = "chest_id")
-  private StructureChest structureChest;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "chest_id")
+    private StructureChest structureChest;
 
-  @OneToOne(cascade = CascadeType.ALL)
-  @JoinColumn(name = "sign_id")
-  private StructureSign structureSign;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "sign_id")
+    private StructureSign structureSign;
 
-  @Embedded
-  private WorldLocation wlocation;
+    @Embedded
+    private WorldLocation worldLocation;
 
-  public Structure() {
-  }
+    @Embedded
+    private WorldDimension dimension;
 
-  public Structure(Player owner, Location target, DIRECTION direction, String plan) {
-    Preconditions.checkNotNull(StructurePlanRegister.getPlan(plan));
-    Preconditions.checkNotNull(target);
-    this.owner = owner.getName();
-    this.plan = plan;
-    this.currentLayer = 0;
-    this.wlocation = new WorldLocation(target);
-    int[] modifiers = LocationUtil.getModifiers(direction);
-    this.xMod = modifiers[0];
-    this.zMod = modifiers[1];
-  }
+    
+    /**
+     * JPA Constructor
+     */
+    protected Structure() {}
 
-  public Long getId() {
-    return id;
-  }
+    /**
+     * Constructor.
+     * @param owner The owner of this structure
+     * @param target The start location of this structure
+     * @param direction The direction of this structure
+     * @param plan 
+     */
+    public Structure(Player owner, Location target, DIRECTION direction, StructurePlan plan) {
+        Preconditions.checkNotNull(plan);
+        Preconditions.checkNotNull(target);
+        this.owner = owner.getName();
+        this.plan = plan.getConfig().getName();
+        this.currentLayer = 0;
+        int[] modifiers = LocationUtil.getModifiers(direction);
+        this.xMod = modifiers[0];
+        this.zMod = modifiers[1];
+        this.worldLocation = new WorldLocation(target);
+        this.dimension = new WorldDimension(target, this);
+    }
 
-  public String getOwner() {
-    return owner;
-  }
+    /**
+     * Gets the id of this structure
+     * @return The id
+     */
+    public Long getId() {
+        return id;
+    }
 
-  public String getPlan() {
-    return plan;
-  }
+    /**
+     * Gets the name of the owner of this structure Owner may be a Player or NPC
+     * @return The owner of this structure
+     */
+    public String getOwner() {
+        return owner;
+    }
 
-  public void setOwner(String owner) {
-    this.owner = owner;
-  }
+    /**
+     * Retrieves the plan of this structure
+     * @return The structure plan
+     */
+    public StructurePlan getPlan() {
+        return StructurePlanRegister.getPlan(plan);
+    }
 
-  public StructureChest getStructureChest() {
-    return structureChest;
-  }
+    /**
+     * Sets the owner of this structure Use a Structure to handle this as a transaction!
+     * @param owner The new owner of this structure
+     */
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
 
-  public StructureSign getStructureSign() {
-    return structureSign;
-  }
+    /**
+     * Gets the structureChest that handles the build progress of this structure
+     * @return The structureChest
+     */
+    public StructureChest getStructureChest() {
+        return structureChest;
+    }
 
-  public void setStructureChest(StructureChest structureChest) {
-    this.structureChest = structureChest;
-  }
+    /**
+     * Gets the structureSign of this structure
+     * @return The structureSign
+     */
+    public StructureSign getStructureSign() {
+        return structureSign;
+    }
 
-  public void setStructureSign(StructureSign structureSign) {
-    this.structureSign = structureSign;
-  }
+    /**
+     * Gets the currentLayer this structure is building
+     * @return the currentLayer
+     */
+    public int getCurrentLayer() {
+        return currentLayer;
+    }
 
-  public int getCurrentLayer() {
-    return currentLayer;
-  }
+    /**
+     * Sets the currentLayer this structure is building
+     * @param currentLayer The currentLayer
+     */
+    public void setCurrentLayer(int currentLayer) {
+        this.currentLayer = currentLayer;
+    }
 
-  public void setCurrentLayer(int currentLayer) {
-    this.currentLayer = currentLayer;
-  }
+    /**
+     * Gets the xMod of this building to determine the direction
+     * @return The xMod
+     */
+    public int getxMod() {
+        return xMod;
+    }
 
-  public int getxMod() {
-    return xMod;
-  }
+    /**
+     * Gets the zMod of this building to determine the direction
+     * @return The zMod of this building
+     */
+    public int getzMod() {
+        return zMod;
+    }
 
-  public int getzMod() {
-    return zMod;
-  }
+    /**
+     * Gets the direction (NORTH|EAST|SOUTH|WEST) of this building
+     * @return The direction
+     */
+    public DIRECTION getDirection() {
+        return LocationUtil.getDirection(xMod, zMod);
+    }
 
-  public DIRECTION getDirection() {
-    return LocationUtil.getDirection(xMod, zMod);
-  }
+    /**
+     * Sets the structureChest of this structure
+     * @param structureChest The structureChest
+     */
+    public void setStructureChest(StructureChest structureChest) {
+        this.structureChest = structureChest;
+    }
 
-  public Location getLocation() {
-    return new Location(Bukkit.getWorld(wlocation.getWorld()), wlocation.getX(), wlocation.getY(), wlocation.getZ());
-  }
+    /**
+     * Sets the structureSign of this structure
+     * @param structureSign The structureSign
+     */
+    public void setStructureSign(StructureSign structureSign) {
+        this.structureSign = structureSign;
+    }
 
-  @Override
-  public String toString() {
-    return "id:" + getId() + " owner:" + getOwner() + " plan:" + getPlan() + " x:" + wlocation.getX() + " y:" + wlocation.getY() + " z:" + wlocation.getZ();
-  }
+    /**
+     * Gets the dimension of this building
+     * @return The dimension of this building
+     * see @link{WorldDimension.class}
+     */
+    public WorldDimension getDimension() {
+        return dimension;
+    }
+
+    /**
+     * Gets the actual location of the start of this building
+     * @return The building location
+     */
+    public Location getStructureLocation() {
+        return new Location(Bukkit.getWorld(worldLocation.getWorld()), worldLocation.getX(), worldLocation.getY(), worldLocation.getZ());
+    }
+
+    /**
+     * Gets the start location of this stucture, this includes any reserved sides
+     * @return The startlocation of this structure
+     */
+    public Location getStartLocation() {
+        return new Location(Bukkit.getWorld(dimension.getWorld()), dimension.getStartX(), dimension.getStartY(), dimension.getStartZ());
+    }
+
+    @Override
+    public String toString() {
+        return "id:" + getId() + " owner:" + getOwner() + " plan:" + getPlan() + " x:" + dimension.getStartX() + " y:" + dimension.getStartY() + " z:" + dimension.getStartZ();
+    }
 
 }
