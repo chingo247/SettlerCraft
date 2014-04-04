@@ -10,7 +10,8 @@ import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
 import com.settlercraft.StructurePlanRegister;
 import com.settlercraft.model.entity.WorldLocation;
-import com.settlercraft.util.LocationUtil.DIRECTION;
+import com.settlercraft.util.location.LocationUtil;
+import com.settlercraft.util.location.LocationUtil.DIRECTION;
 import java.io.Serializable;
 import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
@@ -32,103 +33,109 @@ import org.bukkit.entity.Player;
 @Table(name = "sc_structure")
 public class Structure implements Serializable {
 
-    @Id
-    @GeneratedValue
-    private Long id;
-    @NotNull
-    private String owner;
-    @NotNull
-    @NotEmpty
-    private String plan;
-    @NotNull
-    private DIRECTION direction;
-    @NotNull
-    private int currentLayer;
+  @Id
+  @GeneratedValue
+  private Long id;
+  @NotNull
+  private String owner;
+  @NotNull
+  @NotEmpty
+  private String plan;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "chest_id")
-    private StructureChest structureChest;
+  @NotNull
+  private int xMod;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "sign_id")
-    private StructureSign structureSign;
-    
-    @Embedded
-    private WorldLocation wlocation;
+  @NotNull
+  private int zMod;
 
-    public Structure() {      
-    }
-    
+  @NotNull
+  private int currentLayer;
 
-    public Structure(Player owner, Location target, DIRECTION direction, String plan) {
-        Preconditions.checkNotNull(StructurePlanRegister.getPlan(plan));
-        Preconditions.checkNotNull(target);
-        this.owner = owner.getName();
-        this.plan = plan;
-        this.direction = direction;
-        this.currentLayer = 0;
-        this.wlocation = new WorldLocation(target);
-    }
+  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "chest_id")
+  private StructureChest structureChest;
 
-    public Long getId() {
-        return id;
-    }
+  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "sign_id")
+  private StructureSign structureSign;
 
-    public String getOwner() {
-        return owner;
-    }
+  @Embedded
+  private WorldLocation wlocation;
 
-    public String getPlan() {
-        return plan;
-    }
+  public Structure() {
+  }
 
-    public DIRECTION getDirection() {
-        return direction;
-    }
+  public Structure(Player owner, Location target, DIRECTION direction, String plan) {
+    Preconditions.checkNotNull(StructurePlanRegister.getPlan(plan));
+    Preconditions.checkNotNull(target);
+    this.owner = owner.getName();
+    this.plan = plan;
+    this.currentLayer = 0;
+    this.wlocation = new WorldLocation(target);
+    int[] modifiers = LocationUtil.getModifiers(direction);
+    this.xMod = modifiers[0];
+    this.zMod = modifiers[1];
+  }
 
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public void setDirection(DIRECTION direction) {
-        this.direction = direction;
-    }
+  public String getOwner() {
+    return owner;
+  }
 
-    public StructureChest getStructureChest() {
-        return structureChest;
-    }
+  public String getPlan() {
+    return plan;
+  }
 
-    public StructureSign getStructureSign() {
-        return structureSign;
-    }
+  public void setOwner(String owner) {
+    this.owner = owner;
+  }
 
-    public void setPlan(String plan) {
-        this.plan = plan;
-    }
+  public StructureChest getStructureChest() {
+    return structureChest;
+  }
 
-    public void setStructureChest(StructureChest structureChest) {
-        this.structureChest = structureChest;
-    }
+  public StructureSign getStructureSign() {
+    return structureSign;
+  }
 
-    public void setStructureSign(StructureSign structureSign) {
-        this.structureSign = structureSign;
-    }
+  public void setStructureChest(StructureChest structureChest) {
+    this.structureChest = structureChest;
+  }
 
-    public int getCurrentLayer() {
-        return currentLayer;
-    }
+  public void setStructureSign(StructureSign structureSign) {
+    this.structureSign = structureSign;
+  }
 
-    public void setCurrentLayer(int currentLayer) {
-        this.currentLayer = currentLayer;
-    }
-    
-    public Location getLocation() {
-        return new Location(Bukkit.getWorld(wlocation.getWorld()), wlocation.getX(), wlocation.getY(), wlocation.getZ());
-    }
+  public int getCurrentLayer() {
+    return currentLayer;
+  }
 
-    @Override
-    public String toString() {
-        return "id:" + getId() + " owner:" + getOwner() + " plan:" + getPlan() + " x:" + wlocation.getX()+ " y:" + wlocation.getY() + " z:" + wlocation.getZ();
-    }
+  public void setCurrentLayer(int currentLayer) {
+    this.currentLayer = currentLayer;
+  }
+
+  public int getxMod() {
+    return xMod;
+  }
+
+  public int getzMod() {
+    return zMod;
+  }
+
+  public DIRECTION getDirection() {
+    return LocationUtil.getDirection(xMod, zMod);
+  }
+
+  public Location getLocation() {
+    return new Location(Bukkit.getWorld(wlocation.getWorld()), wlocation.getX(), wlocation.getY(), wlocation.getZ());
+  }
+
+  @Override
+  public String toString() {
+    return "id:" + getId() + " owner:" + getOwner() + " plan:" + getPlan() + " x:" + wlocation.getX() + " y:" + wlocation.getY() + " z:" + wlocation.getZ();
+  }
 
 }

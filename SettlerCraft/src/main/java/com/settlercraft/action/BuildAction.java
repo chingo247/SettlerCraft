@@ -10,8 +10,8 @@ import com.settlercraft.model.entity.structure.Builder;
 import com.settlercraft.model.entity.structure.Structure;
 import com.settlercraft.model.entity.structure.StructurePlan;
 import com.settlercraft.persistence.StructureService;
-import com.settlercraft.util.LocationUtil;
-import com.settlercraft.util.LocationUtil.DIRECTION;
+import com.settlercraft.util.location.LocationUtil;
+import com.settlercraft.util.location.LocationUtil.DIRECTION;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 

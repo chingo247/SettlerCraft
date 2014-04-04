@@ -37,6 +37,12 @@ public class StructureService extends AbstractService<Structure> {
         return structures;
     }
     
+//    public boolean overlaps(Structure structure) {
+//      QStructure qStructure = QStructure.structure;
+//      Session session = HibernateUtil.getSession();
+//      JPQLQuery query = new HibernateQuery(session);
+//    }
+    
     
 
 
