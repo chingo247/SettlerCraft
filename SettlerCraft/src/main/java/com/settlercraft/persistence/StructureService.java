@@ -44,6 +44,9 @@ public class StructureService extends AbstractService<Structure> {
       
       boolean overlaps = query.from(qStructure)
               .where(qStructure.worldLocation().world.eq(structure.getStructureLocation().getWorld().getName())
+                      // Y between?
+                      .and(qStructure.dimension().startY.between(structure.getDimension().getStartY(), structure.getDimension().getEndY())
+                      .or(qStructure.dimension().endY.between(structure.getDimension().getStartY(), structure.getDimension().getEndY())))
                       // X between?
                       .and((qStructure.dimension().startX.between(structure.getDimension().getStartX(), structure.getDimension().getEndX())
                       .or(qStructure.dimension().endX.between(structure.getDimension().getEndX(), structure.getDimension().getStartX())))
