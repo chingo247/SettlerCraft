@@ -105,9 +105,9 @@ public class Builder {
         int zMod = mods[1];
         Location loc;
         if (direction == LocationUtil.DIRECTION.NORTH || direction == LocationUtil.DIRECTION.SOUTH) {
-            loc = target.clone().add(0 * xMod, yOffset, 1 * zMod);
+            loc = target.clone().add(0 * xMod, yOffset, -1 * zMod);
         } else {
-            loc = target.clone().add(1 * zMod, yOffset, 0 * xMod);
+            loc = target.clone().add(-1 * zMod, yOffset, 0 * xMod);
         }
         loc.getBlock().setType(m);
         return loc;

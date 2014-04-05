@@ -42,20 +42,14 @@ public class StructureService extends AbstractService<Structure> {
       Session session = HibernateUtil.getSession();
       JPQLQuery query = new HibernateQuery(session);
       
-      // MOTHER OF ALL QUERIES, because 4 isnt between 5 and 3 but between 3 and 5
       boolean overlaps = query.from(qStructure)
               .where(qStructure.worldLocation().world.eq(structure.getStructureLocation().getWorld().getName())
-                      // Y between?
-                      .and((qStructure.dimension().startY.between(structure.getDimension().getStartY(), structure.getDimension().getEndY())
-                      .or(qStructure.dimension().endY.between(structure.getDimension().getEndY(), structure.getDimension().getStartY())))
-                      .or(qStructure.dimension().startY.between(structure.getDimension().getEndY(), structure.getDimension().getStartY())
-                      .or(qStructure.dimension().endY.between(structure.getDimension().getStartY(), structure.getDimension().getEndY())))
-                      // X between?       
+                      // X between?
                       .and((qStructure.dimension().startX.between(structure.getDimension().getStartX(), structure.getDimension().getEndX())
                       .or(qStructure.dimension().endX.between(structure.getDimension().getEndX(), structure.getDimension().getStartX())))
                       .or(qStructure.dimension().startX.between(structure.getDimension().getEndX(), structure.getDimension().getStartX())
-                      .or(qStructure.dimension().endX.between(structure.getDimension().getStartX(), structure.getDimension().getEndX()))))
-                      // Z between?
+                      .or(qStructure.dimension().endX.between(structure.getDimension().getStartX(), structure.getDimension().getEndX())))
+                      // Z between? 
                       .and((qStructure.dimension().startZ.between(structure.getDimension().getStartZ(), structure.getDimension().getEndZ())
                       .or(qStructure.dimension().endZ.between(structure.getDimension().getEndZ(), structure.getDimension().getStartZ())))
                       .or(qStructure.dimension().startZ.between(structure.getDimension().getEndZ(), structure.getDimension().getStartZ())
