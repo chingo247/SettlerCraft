@@ -287,9 +287,8 @@ public class MaterialUtil {
 
     /**
      * Returns the wood value for given material
-     *
      * @param block The block
-     * @return The wood value of the material, throws AssertionError if material wasnt of type wood
+     * @return the value of the block in its base resource, returns 1.0 by default if not supported
      */
     public static float getValue(BlockData block) {
         Material mat = block.getMaterial();
@@ -315,8 +314,7 @@ public class MaterialUtil {
     }
 
     public static boolean isSupported(BlockData block) {
-        return isBrick(block) || isCobbleStone(block) || isDirt(block) || isNetherBrick(block)
-                || isQuartz(block) || isSandStone(block) || isStoneBrick(block) || isWood(block) ;
+        return getSupported(block) != null ;
     }
 
     public static Material getSupported(BlockData block) {

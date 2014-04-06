@@ -52,6 +52,7 @@ public final class StructureRequirement {
     
     private void setRequirement(Material material, byte data, float value, HashMap<BlockData, Float> approxReq) {
         BlockData block = new BlockData(material.getId(), data);
+        
         if(approxReq.get(block) == null) {
             approxReq.put(block, value);
         } else {
