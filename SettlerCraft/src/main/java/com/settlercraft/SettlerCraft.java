@@ -5,6 +5,7 @@
  */
 package com.settlercraft;
 
+import com.settlercraft.listener.PlayerListener;
 import com.settlercraft.listener.StructureChestListener;
 import com.settlercraft.listener.StructurePlanListener;
 import com.settlercraft.model.entity.structure.Structure;
@@ -45,6 +46,7 @@ public class SettlerCraft extends JavaPlugin {
         registerRecipes();
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(this), this);
         Bukkit.getPluginManager().registerEvents(new StructureChestListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
 
         initDB();
     }

@@ -5,7 +5,7 @@
  */
 package com.settlercraft.model.entity.structure;
 
-import com.settlercraft.util.schematic.model.SchematicObject;
+import com.settlercraft.util.schematic.SchematicObject;
 import com.settlercraft.util.yaml.StructureConfig;
 
 /**
@@ -18,10 +18,17 @@ public class StructurePlan {
     private final SchematicObject structure;
 
     private final StructureConfig config;
+    
+    private final StructureRequirement requirement;
 
     public StructurePlan(SchematicObject structure, StructureConfig structureConfig) {
         this.structure = structure;
         this.config = structureConfig;
+        this.requirement = new StructureRequirement(this);
+    }
+
+    public StructureRequirement getRequirement() {
+        return requirement;
     }
 
     public SchematicObject getSchematic() {
@@ -48,5 +55,7 @@ public class StructurePlan {
     public void setId(Long id) {
         this.id = id;
     }
+    
+    
 
 }

@@ -7,8 +7,8 @@ package com.settlercraft.model.entity.structure;
 
 import com.settlercraft.util.location.LocationUtil;
 import com.settlercraft.util.location.LocationUtil.DIRECTION;
-import com.settlercraft.util.schematic.model.BlockData;
-import com.settlercraft.util.schematic.model.SchematicObject;
+import com.settlercraft.util.schematic.SchematicBlockData;
+import com.settlercraft.util.schematic.SchematicObject;
 import java.util.Iterator;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -32,7 +32,7 @@ public class Builder {
             throw new IndexOutOfBoundsException("layer out of bounds");
         }
 
-        Iterator<BlockData> it = sp.getSchematic().getBlocksFromLayer(layer).iterator();
+        Iterator<SchematicBlockData> it = sp.getSchematic().getBlocksFromLayer(layer).iterator();
         SchematicObject schematic = sp.getSchematic();
         DIRECTION direction = structure.getDirection();
         Location target = structure.getStartLocation();
@@ -118,13 +118,13 @@ public class Builder {
         int[] mods = LocationUtil.getModifiers(direction);
         int xMod = mods[0];
         int zMod = mods[1];
-        Iterator<BlockData> it = schematic.getBlocksSorted().iterator();
+        Iterator<SchematicBlockData> it = schematic.getBlocksSorted().iterator();
         if (direction == DIRECTION.NORTH || direction == DIRECTION.SOUTH) {
             for (int y = 0; y < schematic.height; y++) {
                 for (int z = schematic.length - 1; z >= 0; z--) {
                     for (int x = 0; x < schematic.width; x++) {
                         Block b = target.clone().add(x * xMod, y, z * zMod).getBlock();
-                        BlockData d = it.next();
+                        SchematicBlockData d = it.next();
                         b.setType(d.getMaterial());
                         b.setData(d.getData());
                     }

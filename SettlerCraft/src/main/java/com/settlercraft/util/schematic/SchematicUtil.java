@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.settlercraft.util.schematic.util;
+package com.settlercraft.util.schematic;
 
-import com.settlercraft.util.schematic.model.BlockData;
-import com.settlercraft.util.schematic.model.SchematicObject;
+import com.settlercraft.util.schematic.SchematicBlockData;
+import com.settlercraft.util.schematic.SchematicObject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -32,13 +32,13 @@ public class SchematicUtil {
         return tag;
     }
 
-    private static List<BlockData> readBlocksMaterials(final int height, final int width, final int length, final byte[] materialData, byte[] data) {
+    private static List<SchematicBlockData> readBlocksMaterials(final int height, final int width, final int length, final byte[] materialData, byte[] data) {
         int rLayer = 0;
-        final List<BlockData> blks = new ArrayList<>(height * length * width);
+        final List<SchematicBlockData> blks = new ArrayList<>(height * length * width);
         for (int layer = 0; layer < height * length * width; layer += width * length) {
             for (int z = 0; z < length * width; z += width) {
                 for (int x = 0; x < width; x++) {
-                    BlockData block = new BlockData(x, z, rLayer, materialData[z+x+layer], data[z+x+layer]);
+                    SchematicBlockData block = new SchematicBlockData(x, z, rLayer, materialData[z+x+layer], data[z+x+layer]);
                     blks.add(block);
                     
                 }
@@ -63,7 +63,7 @@ public class SchematicUtil {
 
                 byte[] blocks = (byte[]) getChildTag(tagCollection, "Blocks", ByteArrayTag.class).getValue();
                 byte[] data = (byte[]) getChildTag(tagCollection, "Data", ByteArrayTag.class).getValue();
-                List<BlockData> blks = new ArrayList<>(readBlocksMaterials(height, width, length, blocks, data));
+                List<SchematicBlockData> blks = new ArrayList<>(readBlocksMaterials(height, width, length, blocks, data));
                 
 
                 List entities = (List) getChildTag(tagCollection, "Entities", ListTag.class).getValue();

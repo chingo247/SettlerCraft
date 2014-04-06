@@ -8,7 +8,7 @@ package com.settlercraft.model.entity;
 import com.avaje.ebean.validation.NotNull;
 import com.settlercraft.model.entity.structure.Structure;
 import com.settlercraft.util.location.LocationUtil;
-import com.settlercraft.util.schematic.model.SchematicObject;
+import com.settlercraft.util.schematic.SchematicObject;
 import com.settlercraft.util.yaml.StructureConfig.RESERVED_SIDE;
 import java.io.Serializable;
 import java.util.EnumMap;
@@ -49,8 +49,7 @@ public class StructureDimension implements Serializable {
     @Column(name = "endZ")
     protected int endZ;
 
-    public StructureDimension() {
-    }
+    public StructureDimension() {}
 
     public StructureDimension(Structure structure) {
         Location start = getStart(structure.getStructureLocation(), structure);
@@ -99,9 +98,9 @@ public class StructureDimension implements Serializable {
         int zMod = mods[1];
         Location loc;
         if (direction == LocationUtil.DIRECTION.NORTH || direction == LocationUtil.DIRECTION.SOUTH) {
-            loc = target.clone().add((schem.width-1) * xMod, schem.height, (schem.length-1) * zMod);
+            loc = target.clone().add((schem.width-1) * xMod, (schem.height -1) , (schem.length-1) * zMod);
         } else {
-            loc = target.clone().add((schem.length-1) * zMod, schem.height, (schem.width-1) * xMod);
+            loc = target.clone().add((schem.length-1) * zMod, (schem.height -1) , (schem.width-1) * xMod);
         }
         System.out.println("\ngetEnd():" + loc + "\n");
 

@@ -34,12 +34,18 @@ public class StructurePlanRegister {
     while (it.hasNext()) {
       File yamlBuildingFile = it.next();
 
+      /**
+       * Check if the yaml file contains a schematic node
+       */
       YamlConfiguration yaml = YamlConfiguration.loadConfiguration(yamlBuildingFile);
       if (yaml.getString("schematic.building") == null) {
-        System.out.println("[SettlerCraft]: " + yamlBuildingFile.getAbsolutePath() + " contains no schematic information, skipping...");
+        System.out.println("[SettlerCraft]: " + yamlBuildingFile.getAbsolutePath() + " contains no schematic node, skipping...");
         continue;
       }
-//            File f = new File(file.getParentFile().get + "\\"+ yaml.getString("schematic"));
+      
+      /**
+       * Check if structure has schematic file
+       */
       File schematicBuildingFile = FileUtils.getFile(yamlBuildingFile.getParent(), yaml.getString("schematic.building"));
       if (!schematicBuildingFile.exists()) {
         System.out.println("[SettlerCraft]: " + yamlBuildingFile.getParentFile().getAbsolutePath() + " contains no schematic, skipping...");

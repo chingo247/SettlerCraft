@@ -49,9 +49,6 @@ public class Structure implements Serializable {
     @NotNull
     private int zMod;
 
-    @NotNull
-    private int currentLayer;
-
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "chest_id")
     private StructureChest structureChest;
@@ -59,6 +56,10 @@ public class Structure implements Serializable {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "sign_id")
     private StructureSign structureSign;
+    
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "progress")
+    private StructureProgress progress;
 
     @Embedded
     private WorldLocation worldLocation;
@@ -84,7 +85,6 @@ public class Structure implements Serializable {
         Preconditions.checkNotNull(target);
         this.owner = owner.getName();
         this.plan = plan.getConfig().getName();
-        this.currentLayer = 0;
         int[] modifiers = LocationUtil.getModifiers(direction);
         this.xMod = modifiers[0];
         this.zMod = modifiers[1];
@@ -140,21 +140,7 @@ public class Structure implements Serializable {
         return structureSign;
     }
 
-    /**
-     * Gets the currentLayer this structure is building
-     * @return the currentLayer
-     */
-    public int getCurrentLayer() {
-        return currentLayer;
-    }
 
-    /**
-     * Sets the currentLayer this structure is building
-     * @param currentLayer The currentLayer
-     */
-    public void setCurrentLayer(int currentLayer) {
-        this.currentLayer = currentLayer;
-    }
 
     /**
      * Gets the xMod of this building to determine the direction

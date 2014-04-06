@@ -3,40 +3,35 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.settlercraft.util.schematic.model;
-
-import org.bukkit.Material;
+package com.settlercraft.util.schematic;
 
 
 
 
 
 /**
- *
+ * Schematic blockdata knows the place and the exact material the block is made of using the byte value
  * @author Chingo
  */
-public class BlockData implements Comparable<BlockData> {
-    public final byte data;
+public class SchematicBlockData extends BlockData implements Comparable<SchematicBlockData> {
     public final int x;
     public final int z;
     public final int layer;
-    public final int material;
 
-    public BlockData(int x, int z, int layer, int material, byte data) {
+    public SchematicBlockData(int x, int z, int layer, int material, byte data) {
+        super(material, data);
         this.x = x;
         this.z = z;
         this.layer = layer;
-        this.material = material;
-        this.data = data;
     }
 
   @Override
   public boolean equals(Object o) {
-    if(!(o instanceof BlockData)) {
+    if(!(o instanceof SchematicBlockData)) {
       return false;
     } 
     
-    BlockData b = (BlockData) o;
+    SchematicBlockData b = (SchematicBlockData) o;
     return this.x == b.x 
             && this.z == b.z 
             && this.layer == b.layer;
@@ -45,7 +40,7 @@ public class BlockData implements Comparable<BlockData> {
     
 
     @Override
-    public int compareTo(BlockData o) {
+    public int compareTo(SchematicBlockData o) {
         if (layer > o.layer) {
             return 1;
         } else if (layer == o.layer) {
@@ -64,16 +59,6 @@ public class BlockData implements Comparable<BlockData> {
         } else {
             return -1;
         }
-    }
-    
-
-    
-    public Material getMaterial() {
-        return Material.getMaterial(material);
-    }
-
-    public byte getData() {
-        return data;
     }
 
     public int getX() {
