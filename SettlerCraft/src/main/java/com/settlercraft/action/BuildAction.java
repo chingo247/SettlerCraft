@@ -12,6 +12,7 @@ import com.settlercraft.model.entity.structure.StructurePlan;
 import com.settlercraft.persistence.StructureService;
 import com.settlercraft.util.location.LocationUtil;
 import com.settlercraft.util.location.LocationUtil.DIRECTION;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -48,7 +49,7 @@ public class BuildAction extends SettlerCraftAction {
         Structure structure = new Structure(player, target, direction, plan);
         
         if(ss.overlaps(structure)) {
-            System.out.println("[SettlerCraft]: Structure OVERLAPS");
+            player.sendMessage(ChatColor.RED + "[SC]: Structure OVERLAPS");
             return;
         }
         

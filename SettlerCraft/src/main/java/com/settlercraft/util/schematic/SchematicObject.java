@@ -45,14 +45,16 @@ public class SchematicObject {
      * Gets all materials of this building
      *
      * @return Map where the key is a blockdata and the value the frequency of the blockdata
+     * FIXME DOESNT WORK
      */
     public HashMap<BlockData, Integer> getBlockData() {
         HashMap<BlockData, Integer> m = new HashMap<>();
-        for (SchematicBlockData b : blocks) {
-            if (m.get(b) == null) {
-                m.put(b, 1);
+        for (BlockData b : blocks) {
+          BlockData data = b;
+            if (m.get(data) == null) {
+                m.put(data, 1);
             } else {
-                m.put(b, m.get(b) + 1);
+                m.put(data, m.get(data) + 1);
             }
         }
         return m;

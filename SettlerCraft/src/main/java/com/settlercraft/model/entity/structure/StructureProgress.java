@@ -15,6 +15,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import org.hibernate.annotations.CollectionOfElements;
 
 /**
  *
@@ -23,44 +24,47 @@ import javax.persistence.OneToOne;
 @Entity
 public class StructureProgress implements Serializable {
 
-    @Id
-    @GeneratedValue
-    private Long id;
+  @Id
+  @GeneratedValue
+  private Long id;
 
-    @Basic
-    private Set<StructureResource> resourceRequirements;
+  @CollectionOfElements
+  private Set<StructureResource> resourceRequirements;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "structure")
-    private Structure structure;
+  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "structure")
+  private Structure structure;
 
-    @Column(name = "layer")
-    private int currentLayer;
+  @Column(name = "layer")
+  private int currentLayer;
 
-    public StructureProgress(StructurePlan plan) {
-        this.currentLayer = 0;
-        this.resourceRequirements = plan.getRequirement().getResources();
-    }
+  public StructureProgress(Structure structure) {
+    this.currentLayer = 0;
+    this.resourceRequirements = structure.getPlan().getRequirement().getResources();
+    this.structure = structure;
+  }
 
-    /**
-     * Gets the currentLayer this structure is building
-     * @return the currentLayer
-     */
-    public int getCurrentLayer() {
-        return currentLayer;
-    }
 
-    /**
-     * Sets the currentLayer this structure is building
-     * @param currentLayer The currentLayer
-     */
-    public void setCurrentLayer(int currentLayer) {
-        this.currentLayer = currentLayer;
-    }
-    
+  /**
+   * Gets the currentLayer this structure is building
+   *
+   * @return the currentLayer
+   */
+  public int getCurrentLayer() {
+    return currentLayer;
+  }
 
-    public Long getId() {
-        return id;
-    }
+  /**
+   * Sets the currentLayer this structure is building
+   *
+   * @param currentLayer The currentLayer
+   */
+  public void setCurrentLayer(int currentLayer) {
+    this.currentLayer = currentLayer;
+  }
+
+  public Long getId() {
+    return id;
+  }
 
 }

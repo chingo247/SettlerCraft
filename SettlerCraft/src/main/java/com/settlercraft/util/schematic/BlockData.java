@@ -30,7 +30,7 @@ public class BlockData {
         return Material.getMaterial(material);
     }
     
-        @Override
+    @Override
     public boolean equals(Object obj) {
         if(! (obj instanceof BlockData)) {
             return false;

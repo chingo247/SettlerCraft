@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import javax.persistence.Basic;
 import org.bukkit.Material;
 
 /**
@@ -20,11 +21,13 @@ import org.bukkit.Material;
  */
 public final class StructureRequirement {
 
+    
     private final Set<StructureResource> resources;
 
     StructureRequirement(StructurePlan plan) {
         this.resources = new HashSet<>();
         setRequirements(plan);
+//        System.out.println(resources.size());
     }
 
     /**
@@ -35,6 +38,7 @@ public final class StructureRequirement {
      */
     private void setRequirements(StructurePlan plan) {
         HashMap<BlockData, Integer> m = plan.getSchematic().getBlockData();
+        System.out.println(m.size());
         HashMap<BlockData, Float> approxReq = new HashMap<>();
 
         for (Map.Entry<BlockData, Integer> e : m.entrySet()) {

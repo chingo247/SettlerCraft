@@ -6,13 +6,16 @@
 
 package com.settlercraft.model.entity.structure;
 
+import java.io.Serializable;
 import org.bukkit.Material;
 
 /**
  *
  * @author Chingo
  */
-public class StructureResource {
+
+
+public class StructureResource implements Serializable{
     private final byte data;
     private final boolean checkByteValue;
     private final Material material;
