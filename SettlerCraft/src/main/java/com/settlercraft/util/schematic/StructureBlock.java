@@ -12,11 +12,11 @@ import org.bukkit.Material;
  * Blockdata contains the material and also the byte to recognize the true identity of a block
  * @author Chingo
  */
-public class BlockData {
+public class StructureBlock {
     public final int material;
     public final byte data;
 
-    public BlockData(int material, byte data) {
+    public StructureBlock(int material, byte data) {
         this.material = material;
         this.data = data;
     }
@@ -32,11 +32,20 @@ public class BlockData {
     
     @Override
     public boolean equals(Object obj) {
-        if(! (obj instanceof BlockData)) {
+        if(! (obj instanceof StructureBlock)) {
             return false;
         }
-        BlockData res = (BlockData) obj;
-        return res.getData() == this.getData() && res.getMaterial() == this.getMaterial();
+        StructureBlock res = (StructureBlock) obj;
+        
+        return this.data == res.data && this.material == res.material;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 73 * hash + this.material;
+        hash = 73 * hash + this.data;
+        return hash;
     }
     
 }

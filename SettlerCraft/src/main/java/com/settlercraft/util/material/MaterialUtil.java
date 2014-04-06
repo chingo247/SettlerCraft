@@ -6,8 +6,7 @@
 package com.settlercraft.util.material;
 
 import com.google.common.collect.Maps;
-import com.settlercraft.util.schematic.BlockData;
-import com.settlercraft.util.schematic.SchematicBlockData;
+import com.settlercraft.util.schematic.StructureBlock;
 import java.util.HashMap;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -109,7 +108,7 @@ public class MaterialUtil {
         SANDSTONE.put(Material.STEP, 0.5f); // DATA == 1
     }
 
-    public static boolean isBrick(BlockData block) {
+    public static boolean isBrick(StructureBlock block) {
         if (block.getMaterial() == Material.STEP) {
             return block.getData() == 4;
         }
@@ -124,7 +123,7 @@ public class MaterialUtil {
      * @deprecated makes use of deprecated methods block.getData and block.getId
      */
     public static boolean isBrick(Block block) {
-        return isBrick(new SchematicBlockData(0, 0, 0, block.getType().getId(), block.getData()));
+        return isBrick(new StructureBlock(block.getType().getId(), block.getData()));
     }
 
     /**
@@ -133,7 +132,7 @@ public class MaterialUtil {
      * @param block The block
      * @return true if block is recognized as brick
      */
-    public static boolean isNetherBrick(BlockData block) {
+    public static boolean isNetherBrick(StructureBlock block) {
         if (block.getMaterial() == Material.STEP) {
             return block.getData() == 6;
         }
@@ -148,7 +147,7 @@ public class MaterialUtil {
      * @deprecated makes use of deprecated methods block.getData and block.getId
      */
     public static boolean isNetherBrick(Block block) {
-        return isNetherBrick(new BlockData(block.getType().getId(), block.getData()));
+        return isNetherBrick(new StructureBlock(block.getType().getId(), block.getData()));
     }
 
     /**
@@ -157,7 +156,7 @@ public class MaterialUtil {
      * @param block The block
      * @return true if block is recognized as dirt
      */
-    public static boolean isDirt(BlockData block) {
+    public static boolean isDirt(StructureBlock block) {
         return DIRT.containsKey(block.getMaterial());
     }
 
@@ -177,7 +176,7 @@ public class MaterialUtil {
      * @param block The block
      * @return true if block is recognized as quartz
      */
-    public static boolean isQuartz(BlockData block) {
+    public static boolean isQuartz(StructureBlock block) {
         if (block.getMaterial() == Material.STEP) {
             return block.getData() == 7;
         }
@@ -192,7 +191,7 @@ public class MaterialUtil {
      * @deprecated makes use of deprecated methods block.getData and block.getId
      */
     public static boolean isQuartz(Block block) {
-        return isQuartz(new BlockData(block.getType().getId(), block.getData()));
+        return isQuartz(new StructureBlock(block.getType().getId(), block.getData()));
     }
 
     /**
@@ -201,7 +200,7 @@ public class MaterialUtil {
      * @param block The block
      * @return true if block is recognized as quartz
      */
-    public static boolean isSandStone(BlockData block) {
+    public static boolean isSandStone(StructureBlock block) {
         if (block.getMaterial() == Material.STEP) {
             return block.getData() == 1;
         }
@@ -216,7 +215,7 @@ public class MaterialUtil {
      * @deprecated Makes use of deprecated methods getId and getData
      */
     public static boolean isSandStone(Block block) {
-        return isSandStone(new BlockData(block.getType().getId(), block.getData()));
+        return isSandStone(new StructureBlock(block.getType().getId(), block.getData()));
     }
 
     /**
@@ -229,7 +228,7 @@ public class MaterialUtil {
         return WOOD.containsKey(material);
     }
 
-    public static boolean isWood(BlockData block) {
+    public static boolean isWood(StructureBlock block) {
         return isWood(block.getMaterial());
     }
 
@@ -243,7 +242,7 @@ public class MaterialUtil {
      * @param block The block
      * @return if the material is a cobblestone type
      */
-    public static boolean isCobbleStone(BlockData block) {
+    public static boolean isCobbleStone(StructureBlock block) {
         if (block.getMaterial() == Material.STEP) {
             return block.getData() == 3;
         }
@@ -258,7 +257,7 @@ public class MaterialUtil {
      * @deprecated Makes use of deprecated methods getId and getData
      */
     public static boolean isCobbleStone(Block block) {
-        return isCobbleStone(new BlockData(block.getType().getId(), block.getData()));
+        return isCobbleStone(new StructureBlock(block.getType().getId(), block.getData()));
     }
 
     /**
@@ -267,7 +266,7 @@ public class MaterialUtil {
      * @param block The block
      * @return if the material is a stone brick type
      */
-    public static boolean isStoneBrick(BlockData block) {
+    public static boolean isStoneBrick(StructureBlock block) {
         if (block.getMaterial() == Material.STEP) {
             return block.getData() == 5;
         }
@@ -282,7 +281,7 @@ public class MaterialUtil {
      * @deprecated Makes use of deprecated methods getId and getData
      */
     public static boolean isStoneBrick(Block block) {
-        return isStoneBrick(new BlockData(block.getType().getId(), block.getData()));
+        return isStoneBrick(new StructureBlock(block.getType().getId(), block.getData()));
     }
 
     /**
@@ -290,7 +289,7 @@ public class MaterialUtil {
      * @param block The block
      * @return the value of the block in its base resource, returns 1.0 by default if not supported
      */
-    public static float getValue(BlockData block) {
+    public static float getValue(StructureBlock block) {
         Material mat = block.getMaterial();
         if (isWood(mat)) {
             return WOOD.get(mat);
@@ -313,11 +312,11 @@ public class MaterialUtil {
         }
     }
 
-    public static boolean isSupported(BlockData block) {
+    public static boolean isSupported(StructureBlock block) {
         return getSupported(block) != null ;
     }
 
-    public static Material getSupported(BlockData block) {
+    public static Material getSupported(StructureBlock block) {
         if (isWood(block)) {
             return Material.WOOD;
         } else if (isStoneBrick(block)) {

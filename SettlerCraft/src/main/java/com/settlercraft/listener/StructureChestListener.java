@@ -9,6 +9,7 @@ package com.settlercraft.listener;
 import com.settlercraft.SettlerCraft;
 import com.settlercraft.model.entity.structure.StructureChest;
 import com.settlercraft.persistence.StructureChestService;
+import org.bukkit.Bukkit;
 import org.bukkit.block.Chest;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -34,12 +35,43 @@ public class StructureChestListener implements Listener {
         System.out.println("Inventory Close event");
         if(ice.getInventory().getHolder() instanceof Chest && ice.getInventory().getContents().length > 0){
             Chest chest = (Chest) ice.getInventory().getHolder();
-            StructureChest stc = scs.getStructureChest(chest.getWorld().getName(), chest.getX(), chest.getY(), chest.getZ());
+            final StructureChest stc = scs.getStructureChest(chest.getWorld().getName(), chest.getX(), chest.getY(), chest.getZ());
             if(stc != null) {
-                System.out.println(stc);
+                
+                if(stc.getStructure().getProgress().processChest(stc)) {
+                    
+                    Bukkit.getScheduler().runTaskLater(sc, new Runnable() {
+
+                        @Override
+                        public void run() {
+                            processChest(stc);
+                        }
+                    }, 10);
+                }
             }
         }
     }
+    
+    private void processChest(final StructureChest stc) {
+        if(stc.getStructure().getProgress().processChest(stc)) {
+               stc.getChest().update();
+               Bukkit.getScheduler().runTaskLater(sc, new Runnable() {
+
+                   @Override
+                   public void run() {
+                       processChest(stc);
+                      
+                   }
+               }, 10);
+        } else {
+            scs.merge(stc);
+            
+            stc.getChest().update();
+        }
+        
+    }
+    
+    
     
     @EventHandler
     public void onBuildChestInventoryChanged(InventoryMoveItemEvent ime) {

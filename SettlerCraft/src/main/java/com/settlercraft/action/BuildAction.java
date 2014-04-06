@@ -57,7 +57,7 @@ public class BuildAction extends SettlerCraftAction {
         Builder.createDefaultFoundation(structure);
         Builder.placeStructureChest(structure);
         Builder.placeStructureSign(structure);
-        Builder.instantBuildStructure(player.getLocation(), target, plan.getSchematic());
+//        Builder.instantBuildStructure(player.getLocation(), target, plan.getSchematic());
         ss.save(structure);
     }
 

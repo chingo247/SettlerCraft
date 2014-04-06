@@ -15,12 +15,11 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-
 /**
  * @author Chingo
  * @param <T> The persistent Object
  */
-public abstract class AbstractService <T extends Object> {
+public abstract class AbstractService<T extends Object> {
 
     protected EntityManager entityManager;
 
@@ -32,7 +31,6 @@ public abstract class AbstractService <T extends Object> {
         this.entityManager = entityManager;
     }
 
-
     public T save(T t) {
         Session session = null;
         Transaction tx = null;
@@ -40,6 +38,29 @@ public abstract class AbstractService <T extends Object> {
             session = HibernateUtil.getSession();
             tx = session.beginTransaction();
             session.save(t);
+            tx.commit();
+        } catch (HibernateException e) {
+            try {
+                tx.rollback();
+            } catch (HibernateException rbe) {
+                Logger.getLogger(AbstractService.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
+            }
+            throw e;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return t;
+    }
+
+    public T merge(T t) {
+        Session session = null;
+        Transaction tx = null;
+        try {
+            session = HibernateUtil.getSession();
+            tx = session.beginTransaction();
+            session.merge(t);
             tx.commit();
         } catch (HibernateException e) {
             try {
@@ -77,5 +98,5 @@ public abstract class AbstractService <T extends Object> {
             }
         }
     }
-    
+
 }

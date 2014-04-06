@@ -44,13 +44,19 @@ public class Builder {
         if (direction == LocationUtil.DIRECTION.NORTH || direction == LocationUtil.DIRECTION.SOUTH) {
             for (int z = schematic.length - 1; z >= 0; z--) {
                 for (int x = 0; x < schematic.width; x++) {
-                    target.clone().add(x * xMod, 0, z * zMod).getBlock().setType(it.next().getMaterial());
+                    Block b = target.clone().add(x * xMod, layer, z * zMod).getBlock();
+                    SchematicBlockData d = it.next();
+                    b.setType(d.getMaterial());
+                    b.setData(d.getData());
                 }
             }
         } else { // SWAP X AND Z
             for (int z = schematic.length - 1; z >= 0; z--) {
                 for (int x = 0; x < schematic.width; x++) {
-                    target.clone().add(z * zMod, 0, x * xMod).getBlock().setType(it.next().getMaterial());
+                    Block b = target.clone().add(z * zMod, layer, x * xMod).getBlock();
+                    SchematicBlockData d = it.next();
+                    b.setType(d.getMaterial());
+                    b.setData(d.getData());
                 }
             }
         }
@@ -134,7 +140,10 @@ public class Builder {
             for (int y = 0; y < schematic.height; y++) {
                 for (int z = schematic.length - 1; z >= 0; z--) {
                     for (int x = 0; x < schematic.width; x++) {
-                        target.clone().add(z * zMod, y, x * xMod).getBlock().setType(it.next().getMaterial());
+                        Block b = target.clone().add(z * zMod, y, x * xMod).getBlock();
+                        SchematicBlockData d = it.next();
+                        b.setType(d.getMaterial());
+                        b.setData(d.getData());
                     }
                 }
             }
@@ -161,9 +170,6 @@ public class Builder {
             for (int z = schematic.length - 1; z >= 0; z--) {
                 for (int x = 0; x < schematic.width; x++) {
                     Location l = target.clone().add(x * xMod, 0, z * zMod);
-                    if (z == schematic.length - 1 && x == schematic.width - 1) {
-                        System.out.println("\nlol " + l);
-                    }
                     l.getBlock().setType(Material.COBBLESTONE);
                 }
             }
@@ -171,9 +177,6 @@ public class Builder {
             for (int z = schematic.length - 1; z >= 0; z--) {
                 for (int x = 0; x < schematic.width; x++) {
                     Location l = target.clone().add(z * zMod, 0, x * xMod);
-                    if (z == schematic.length - 1 && x == schematic.width - 1) {
-                        System.out.println("\nlol " + l);
-                    }
                     l.getBlock().setType(Material.COBBLESTONE);
                 }
             }

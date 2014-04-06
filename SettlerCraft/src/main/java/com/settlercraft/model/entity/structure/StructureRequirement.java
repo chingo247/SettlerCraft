@@ -5,14 +5,15 @@
  */
 package com.settlercraft.model.entity.structure;
 
+import com.google.common.collect.Maps;
 import com.settlercraft.util.material.MaterialUtil;
-import com.settlercraft.util.schematic.BlockData;
+import com.settlercraft.util.schematic.StructureBlock;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import javax.persistence.Basic;
 import org.bukkit.Material;
 
 /**
@@ -22,12 +23,10 @@ import org.bukkit.Material;
 public final class StructureRequirement {
 
     
-    private final Set<StructureResource> resources;
+    private final HashMap<Integer,Set<StructureResource>> resources = Maps.newHashMap();
 
     StructureRequirement(StructurePlan plan) {
-        this.resources = new HashSet<>();
         setRequirements(plan);
-//        System.out.println(resources.size());
     }
 
     /**
@@ -37,12 +36,13 @@ public final class StructureRequirement {
      * @param plan The StructurePlan
      */
     private void setRequirements(StructurePlan plan) {
-        HashMap<BlockData, Integer> m = plan.getSchematic().getBlockData();
-        System.out.println(m.size());
-        HashMap<BlockData, Float> approxReq = new HashMap<>();
+        for(int layer = 0; layer < plan.getSchematic().height; layer++) {
+        resources.put(layer, new HashSet<StructureResource>());
+        HashMap<StructureBlock, Integer> m = plan.getSchematic().getStructureBlocks(layer);
+        HashMap<StructureBlock, Float> approxReq = new HashMap<>();
 
-        for (Map.Entry<BlockData, Integer> e : m.entrySet()) {
-            BlockData b = e.getKey();
+        for (Map.Entry<StructureBlock, Integer> e : m.entrySet()) {
+            StructureBlock b = e.getKey();
             Material supported = MaterialUtil.getSupported(b);
             
             if(supported != null) {
@@ -51,12 +51,13 @@ public final class StructureRequirement {
                 setRequirement(b.getMaterial(), b.getData(), e.getValue() * 1.0f, approxReq); // if not supported default value = 1.0
             }
         }
-        setResources(approxReq);
+
+        setResources(approxReq,layer);
+        }
     }
     
-    private void setRequirement(Material material, byte data, float value, HashMap<BlockData, Float> approxReq) {
-        BlockData block = new BlockData(material.getId(), data);
-        
+    private void setRequirement(Material material, byte data, float value, HashMap<StructureBlock, Float> approxReq) {
+        StructureBlock block = new StructureBlock(material.getId(), data);
         if(approxReq.get(block) == null) {
             approxReq.put(block, value);
         } else {
@@ -64,19 +65,39 @@ public final class StructureRequirement {
         }
     }
 
-    private void setResources(HashMap<BlockData, Float> approxReq) {
-        for (Entry<BlockData, Float> e : approxReq.entrySet()) {
-            BlockData b = e.getKey();
-            if(MaterialUtil.isSupported(b)) {
-            resources.add(new StructureResource(b.getData(), b.getMaterial(),Math.round(e.getValue()), false));
+    private void setResources(HashMap<StructureBlock, Float> approxReq, int layer) {
+        for (Entry<StructureBlock, Float> e : approxReq.entrySet()) {
+            StructureBlock b = e.getKey();
+            StructureResource res = new StructureResource(b.getData(), b.getMaterial(), Math.round(e.getValue()));  
+    
+            if(resources.get(layer).contains(res)) {
+                Iterator<StructureResource> it = resources.get(layer).iterator();
+                
+                while(it.hasNext()) {
+                    StructureResource i = it.next();
+                    if(i.equals(res)) {
+                        int amount = i.getAmount();
+                        res.setAmount(res.getAmount() + amount);
+                        resources.get(layer).remove(res);
+                        resources.get(layer).add(res);
+                        break;
+                    }
+                }
+                
+            } else if (!resources.get(layer).contains(res)) {
+                resources.get(layer).add(res);
             } else {
-            resources.add(new StructureResource(b.getData(), b.getMaterial(),Math.round(e.getValue()), true));    
+               
             }
+           
         }
+        
     }
 
-    public final Set<StructureResource> getResources() {
-        return new HashSet<>(resources);
+    public final HashMap<Integer,Set<StructureResource>> getResources() {
+        return new HashMap<>(resources);
     }
+
+
 
 }

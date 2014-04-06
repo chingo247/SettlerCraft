@@ -10,10 +10,10 @@ package com.settlercraft.util.schematic;
 
 
 /**
- * Schematic blockdata knows the place and the exact material the block is made of using the byte value
+ * Schematic blockdata knows the place and the exact material the block is made of using the byte 
  * @author Chingo
  */
-public class SchematicBlockData extends BlockData implements Comparable<SchematicBlockData> {
+public class SchematicBlockData extends StructureBlock implements Comparable<SchematicBlockData> {
     public final int x;
     public final int z;
     public final int layer;

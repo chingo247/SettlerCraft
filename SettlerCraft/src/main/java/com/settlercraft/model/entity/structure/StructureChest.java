@@ -18,6 +18,7 @@ import javax.persistence.OneToOne;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Chest;
 
 /**
  *
@@ -65,6 +66,10 @@ public class StructureChest implements Serializable {
         this.mainStructure = structure;
     }
     
+    public Chest getChest() {
+        return (Chest) getLocation().getBlock().getState();
+    }
+     
     public Location getLocation() {
         return new Location(Bukkit.getWorld(wlocation.getWorld()), wlocation.getX(), wlocation.getY(), wlocation.getZ());
     }
