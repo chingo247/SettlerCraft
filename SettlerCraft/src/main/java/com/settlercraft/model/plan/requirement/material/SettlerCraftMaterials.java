@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.settlercraft.util.material;
+package com.settlercraft.model.plan.requirement.material;
 
 import com.google.common.collect.Maps;
-import com.settlercraft.model.plan.schematic.StructureBlock;
+import com.settlercraft.model.plan.requirement.material.SettlerCraftResource;
+import com.settlercraft.model.plan.schematic.BlockMaterial;
 import java.util.HashMap;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -108,7 +109,7 @@ public class SettlerCraftMaterials {
         SANDSTONE.put(Material.STEP, 0.5f); // DATA == 1
     }
 
-    public static boolean isBrick(StructureBlock block) {
+    public static boolean isBrick(BlockMaterial block) {
         if (block.getMaterial() == Material.STEP) {
             return block.getData() == 4;
         }
@@ -123,7 +124,7 @@ public class SettlerCraftMaterials {
      * @deprecated makes use of deprecated methods block.getData and block.getId
      */
     public static boolean isBrick(Block block) {
-        return isBrick(new StructureBlock(block.getType().getId(), block.getData()));
+        return isBrick(new BlockMaterial(block.getType().getId(), block.getData()));
     }
 
     /**
@@ -132,7 +133,7 @@ public class SettlerCraftMaterials {
      * @param block The block
      * @return true if block is recognized as brick
      */
-    public static boolean isNetherBrick(StructureBlock block) {
+    public static boolean isNetherBrick(BlockMaterial block) {
         if (block.getMaterial() == Material.STEP) {
             return block.getData() == 6;
         }
@@ -147,7 +148,7 @@ public class SettlerCraftMaterials {
      * @deprecated makes use of deprecated methods block.getData and block.getId
      */
     public static boolean isNetherBrick(Block block) {
-        return isNetherBrick(new StructureBlock(block.getType().getId(), block.getData()));
+        return isNetherBrick(new BlockMaterial(block.getType().getId(), block.getData()));
     }
 
     /**
@@ -156,7 +157,7 @@ public class SettlerCraftMaterials {
      * @param block The block
      * @return true if block is recognized as dirt
      */
-    public static boolean isDirt(StructureBlock block) {
+    public static boolean isDirt(BlockMaterial block) {
         return DIRT.containsKey(block.getMaterial());
     }
 
@@ -176,7 +177,7 @@ public class SettlerCraftMaterials {
      * @param block The block
      * @return true if block is recognized as quartz
      */
-    public static boolean isQuartz(StructureBlock block) {
+    public static boolean isQuartz(BlockMaterial block) {
         if (block.getMaterial() == Material.STEP) {
             return block.getData() == 7;
         }
@@ -191,7 +192,7 @@ public class SettlerCraftMaterials {
      * @deprecated makes use of deprecated methods block.getData and block.getId
      */
     public static boolean isQuartz(Block block) {
-        return isQuartz(new StructureBlock(block.getType().getId(), block.getData()));
+        return isQuartz(new BlockMaterial(block.getType().getId(), block.getData()));
     }
 
     /**
@@ -200,7 +201,7 @@ public class SettlerCraftMaterials {
      * @param block The block
      * @return true if block is recognized as quartz
      */
-    public static boolean isSandStone(StructureBlock block) {
+    public static boolean isSandStone(BlockMaterial block) {
         if (block.getMaterial() == Material.STEP) {
             return block.getData() == 1;
         }
@@ -215,7 +216,7 @@ public class SettlerCraftMaterials {
      * @deprecated Makes use of deprecated methods getId and getData
      */
     public static boolean isSandStone(Block block) {
-        return isSandStone(new StructureBlock(block.getType().getId(), block.getData()));
+        return isSandStone(new BlockMaterial(block.getType().getId(), block.getData()));
     }
 
     /**
@@ -228,7 +229,7 @@ public class SettlerCraftMaterials {
         return WOOD.containsKey(material);
     }
 
-    public static boolean isWood(StructureBlock block) {
+    public static boolean isWood(BlockMaterial block) {
         return isWood(block.getMaterial());
     }
 
@@ -242,7 +243,7 @@ public class SettlerCraftMaterials {
      * @param block The block
      * @return if the material is a cobblestone type
      */
-    public static boolean isCobbleStone(StructureBlock block) {
+    public static boolean isCobbleStone(BlockMaterial block) {
         if (block.getMaterial() == Material.STEP) {
             return block.getData() == 3;
         }
@@ -257,7 +258,7 @@ public class SettlerCraftMaterials {
      * @deprecated Makes use of deprecated methods getId and getData
      */
     public static boolean isCobbleStone(Block block) {
-        return isCobbleStone(new StructureBlock(block.getType().getId(), block.getData()));
+        return isCobbleStone(new BlockMaterial(block.getType().getId(), block.getData()));
     }
 
     /**
@@ -266,7 +267,7 @@ public class SettlerCraftMaterials {
      * @param block The block
      * @return if the material is a stone brick type
      */
-    public static boolean isStoneBrick(StructureBlock block) {
+    public static boolean isStoneBrick(BlockMaterial block) {
         if (block.getMaterial() == Material.STEP) {
             return block.getData() == 5;
         }
@@ -281,7 +282,7 @@ public class SettlerCraftMaterials {
      * @deprecated Makes use of deprecated methods getId and getData
      */
     public static boolean isStoneBrick(Block block) {
-        return isStoneBrick(new StructureBlock(block.getType().getId(), block.getData()));
+        return isStoneBrick(new BlockMaterial(block.getType().getId(), block.getData()));
     }
 
     /**
@@ -289,7 +290,7 @@ public class SettlerCraftMaterials {
      * @param block The block
      * @return the value of the block in its base resource, returns 1.0 by default if not supported
      */
-    public static float getValue(StructureBlock block) {
+    public static float getValue(BlockMaterial block) {
         Material mat = block.getMaterial();
         if (isWood(mat)) {
             return WOOD.get(mat);
@@ -312,11 +313,11 @@ public class SettlerCraftMaterials {
         }
     }
 
-    public static boolean isSupported(StructureBlock block) {
-        return getSupported(block) != null ;
+    public static boolean canSimplify(BlockMaterial block) {
+        return getSimplifiedMaterial(block) != null ;
     }
 
-    public static Material getSupported(StructureBlock block) {
+    public static Material getSimplifiedMaterial(BlockMaterial block) {
         if (isWood(block)) {
             return Material.WOOD;
         } else if (isStoneBrick(block)) {
@@ -334,6 +335,16 @@ public class SettlerCraftMaterials {
         } else if (isNetherBrick(block)){
             return Material.NETHER_BRICK;
         } else return null;
+    }
+
+    /**
+     * FIXME Check if this method is needed
+     * Should check if byte values do matter
+     * @param scr The resource
+     * @return true if does 
+     */
+    static boolean isSpecial(SettlerCraftResource scr) {
+        return false;
     }
 
 }

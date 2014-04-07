@@ -6,10 +6,9 @@
 
 package com.settlercraft.listener;
 
-import com.settlercraft.main.SettlerCraft;
+import com.settlercraft.plugin.SettlerCraft;
 import com.settlercraft.model.entity.structure.StructureChest;
 import com.settlercraft.persistence.StructureChestService;
-import org.bukkit.Bukkit;
 import org.bukkit.block.Chest;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -37,39 +36,12 @@ public class StructureChestListener implements Listener {
             Chest chest = (Chest) ice.getInventory().getHolder();
             final StructureChest stc = scs.getStructureChest(chest.getWorld().getName(), chest.getX(), chest.getY(), chest.getZ());
             if(stc != null) {
-                
-                if(stc.getStructure().getProgress().processChest(stc)) {
-                    
-                    Bukkit.getScheduler().runTaskLater(sc, new Runnable() {
-
-                        @Override
-                        public void run() {
-                            processChest(stc);
-                        }
-                    }, 10);
-                }
+                // DO SOMETHING
             }
         }
     }
     
-    private void processChest(final StructureChest stc) {
-        if(stc.getStructure().getProgress().processChest(stc)) {
-               stc.getChest().update();
-               Bukkit.getScheduler().runTaskLater(sc, new Runnable() {
-
-                   @Override
-                   public void run() {
-                       processChest(stc);
-                      
-                   }
-               }, 10);
-        } else {
-            scs.merge(stc);
-            
-            stc.getChest().update();
-        }
-        
-    }
+   
     
     
     

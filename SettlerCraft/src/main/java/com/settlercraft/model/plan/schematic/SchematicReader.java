@@ -6,6 +6,7 @@
 
 package com.settlercraft.model.plan.schematic;
 
+import com.settlercraft.exception.UnsupportedStructureException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -29,13 +30,14 @@ public class SchematicReader {
         return tag;
     }
 
-    private List<SchematicBlockData> readBlocksMaterials(final int height, final int width, final int length, final byte[] materialData, byte[] data) {
+    private List<SchematicBlockData> readBlocksMaterials(final int height, final int width, final int length, final byte[] materialData, byte[] data) throws UnsupportedStructureException {
         int rLayer = 0;
         final List<SchematicBlockData> blks = new ArrayList<>(height * length * width);
         for (int layer = 0; layer < height * length * width; layer += width * length) {
             for (int z = 0; z < length * width; z += width) {
                 for (int x = 0; x < width; x++) {
                     SchematicBlockData block = new SchematicBlockData(x, z, rLayer, materialData[z+x+layer], data[z+x+layer]);
+                    isSupported(block);
                     blks.add(block);
                     
                 }
@@ -47,7 +49,7 @@ public class SchematicReader {
     
     
 
-    public SchematicObject readFile(File schematicFile) {
+    public SchematicObject readFile(File schematicFile) throws UnsupportedStructureException {
         SchematicObject obj = null;
         try {
             try (FileInputStream fis = new FileInputStream(schematicFile); NBTInputStream nbt = new NBTInputStream(fis)) {
@@ -72,5 +74,11 @@ public class SchematicReader {
             ex.printStackTrace();
         }
         return obj;
+    }
+    
+    private void isSupported(SchematicBlockData block) throws UnsupportedStructureException {
+        if(block.getMaterial() == null) {
+            throw new UnsupportedStructureException("Material with id: " + block.material + " is not supported by this plugin");
+        }
     }
 }

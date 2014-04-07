@@ -6,9 +6,10 @@
 package com.settlercraft.action;
 
 import com.google.common.base.Preconditions;
+import com.settlercraft.action.SettlerCraftAction;
 import com.settlercraft.model.entity.structure.Builder;
 import com.settlercraft.model.entity.structure.Structure;
-import com.settlercraft.model.entity.structure.StructurePlan;
+import com.settlercraft.model.plan.StructurePlan;
 import com.settlercraft.persistence.StructureService;
 import com.settlercraft.util.location.LocationUtil;
 import com.settlercraft.util.location.LocationUtil.DIRECTION;

@@ -6,7 +6,7 @@
 
 package com.settlercraft.model.recipe;
 
-import com.settlercraft.main.SettlerCraft;
+import com.settlercraft.plugin.SettlerCraft;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;

@@ -5,10 +5,11 @@
  */
 package com.settlercraft.model.entity.structure;
 
+import com.settlercraft.model.plan.StructurePlan;
 import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
-import com.settlercraft.main.SettlerCraft;
+import com.settlercraft.plugin.SettlerCraft;
 import com.settlercraft.model.entity.StructureDimension;
 import com.settlercraft.model.entity.WorldLocation;
 import com.settlercraft.util.location.LocationUtil;

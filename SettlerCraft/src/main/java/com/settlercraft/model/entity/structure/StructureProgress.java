@@ -5,20 +5,17 @@
  */
 package com.settlercraft.model.entity.structure;
 
+import com.settlercraft.model.plan.requirement.material.MaterialRequirement;
 import java.io.Serializable;
-import java.util.ArrayList;
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import org.bukkit.block.Chest;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -32,9 +29,9 @@ public class StructureProgress implements Serializable {
     @GeneratedValue
     private Long id;
 
-    @Basic
-    @Column(name = "resources")
-    private ArrayList<StructureResource> resources;
+    
+    @Embedded
+    private MaterialRequirement resources;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "structure")
@@ -48,39 +45,12 @@ public class StructureProgress implements Serializable {
 
     public StructureProgress(Structure structure) {
         this.currentLayer = 0;
-//        this.resources = new ArrayList<>(structure.getPlan().getRequirement().getResources().get(currentLayer));
+        this.resources = structure.getPlan().getRequirement().getMaterialRQ().copy();
         this.structure = structure;
     }
 
-    public boolean processChest(StructureChest sc) {
-        if (!sc.getStructure().getStructureChest().getId().equals(sc.getId())) {
-            throw new IllegalArgumentException("invalid chest, doesnt belong to building");
-        }
-        Chest chest = sc.getChest();
-        Inventory invent = chest.getBlockInventory();
-        for (int i = 0; i < resources.size(); i++) {
-            for (int j = 0; j < chest.getBlockInventory().getSize(); j++) {
-                StructureResource sr = resources.get(i);
-                ItemStack is = invent.getItem(j);
-                if (is != null && is.getType() == sr.getMaterial()) {
-                    int amount = Math.min(sr.getAmount(), is.getAmount());
-                    chest.getBlockInventory().setItem(j, new ItemStack(is.getType(), is.getAmount() - amount));
-                    sr.setAmount(sr.getAmount() - amount);
-                    resources.set(i, sr);
-                    print();
-                    return true;
-                }
-            }
-        }
-        print();
-        return false;
-    }
 
-    private void print() {
-        for (StructureResource sr : resources) {
-            System.out.println(sr);
-        }
-    }
+
 
     /**
      * Gets the currentLayer this structure is building

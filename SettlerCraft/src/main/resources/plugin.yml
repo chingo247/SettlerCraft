@@ -1,4 +1,4 @@
 name: SettlerCraft
-main: com.settlercraft.SettlerCraft
+main: com.settlercraft.plugin.SettlerCraft
 version: 1.0
 

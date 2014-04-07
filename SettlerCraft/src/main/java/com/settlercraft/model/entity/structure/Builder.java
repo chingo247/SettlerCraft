@@ -5,6 +5,7 @@
  */
 package com.settlercraft.model.entity.structure;
 
+import com.settlercraft.model.plan.StructurePlan;
 import com.settlercraft.model.plan.schematic.SchematicBlockData;
 import com.settlercraft.model.plan.schematic.SchematicObject;
 import com.settlercraft.util.location.LocationUtil;

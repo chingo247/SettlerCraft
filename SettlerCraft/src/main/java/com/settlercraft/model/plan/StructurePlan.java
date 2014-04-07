@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.settlercraft.model.entity.structure;
+package com.settlercraft.model.plan;
 
+import com.settlercraft.model.plan.requirement.StructureRequirement;
 import com.settlercraft.model.plan.schematic.SchematicObject;
 import com.settlercraft.model.plan.yaml.StructureConfig;
 

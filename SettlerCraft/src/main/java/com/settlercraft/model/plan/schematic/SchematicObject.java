@@ -41,24 +41,6 @@ public class SchematicObject {
         return new TreeSet<>(this.blocks);
     }
 
-    /**
-     * Gets all materials of this building
-     * @return Map where the key is a blockdata and the value the frequency of the blockdata
-     */
-    public HashMap<StructureBlock, Integer> getStructureBlocks(int layer) {
-        HashMap<StructureBlock, Integer> m = new HashMap<>();
-        for (SchematicBlockData sbd : getBlocksFromLayer(layer)) {
-            StructureBlock bd = new StructureBlock(sbd.material, sbd.data);             
-            if (m.get(bd) == null) {
-                m.put(bd, 1);
-            } else {
-                m.put(bd, m.get(bd) + 1);
-            }
-        }
-        return m;
-    }
-    
-    
 
     /**
      * Gets all blocks of corresponding layer

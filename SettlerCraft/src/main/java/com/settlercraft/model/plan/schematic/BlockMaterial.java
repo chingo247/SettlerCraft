@@ -9,20 +9,25 @@ package com.settlercraft.model.plan.schematic;
 import org.bukkit.Material;
 
 /**
- * Structure Block describes what a Block is made of
+ * BlockMaterial describes what a Block is made of
  * @author Chingo
  */
-public class StructureBlock {
+public class BlockMaterial {
     /**
      * The Material id
      */
-    public final int material;
+    public final Material material;
     /**
      * The Byte value
      */
-    public final byte data;
+    public final Byte data;
 
-    public StructureBlock(int material, byte data) {
+    public BlockMaterial(int material, byte data) {
+        this.material = Material.getMaterial(material);
+        this.data = data;
+    }
+    
+    public BlockMaterial(Material material, byte data) {
         this.material = material;
         this.data = data;
     }
@@ -33,22 +38,22 @@ public class StructureBlock {
     }
     
     public Material getMaterial() {
-        return Material.getMaterial(material);
+        return material;
     }
     
     @Override
     public boolean equals(Object obj) {
-        if(! (obj instanceof StructureBlock)) {
+        if(! (obj instanceof BlockMaterial)) {
             return false;
         }
-        StructureBlock res = (StructureBlock) obj;
+        BlockMaterial res = (BlockMaterial) obj;
         return this.data == res.data && this.material == res.material;
     }
 
     @Override
     public int hashCode() {
         int hash = 5;
-        hash = 73 * hash + this.material;
+        hash = 73 * hash + this.material.getId();
         hash = 73 * hash + this.data;
         return hash;
     }

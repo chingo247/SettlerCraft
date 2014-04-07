@@ -1,7 +1,8 @@
 package com.settlercraft.model.plan;
 
 
-import com.settlercraft.model.entity.structure.StructurePlan;
+import com.settlercraft.exception.InvalidStructurePlanException;
+import com.settlercraft.exception.UnsupportedStructureException;
 import com.settlercraft.model.plan.schematic.SchematicObject;
 import com.settlercraft.model.plan.schematic.SchematicReader;
 import com.settlercraft.model.plan.yaml.StructureConfig;
@@ -22,12 +23,14 @@ import org.bukkit.configuration.file.YamlConfiguration;
 public class StructureReader {
     
     
-    public StructurePlan read(File schematic, File structureYAML) {
+    public StructurePlan read(File schematic, File structureYAML) throws UnsupportedStructureException, InvalidStructurePlanException {
         SchematicReader sr = new SchematicReader();
         SchematicObject obj = sr.readFile(schematic);
         YamlConfiguration structureInfo = YamlConfiguration.loadConfiguration(structureYAML);
-        if(!validate(structureInfo)) {
-            return null;
+        if(!hasChestSpace(structureInfo)) {
+            throw new InvalidStructurePlanException("[SettlerCraft]: no chest space defined in "+ structureYAML.getAbsolutePath() +", the sum of all reserved sides should be bigger than 0");
+        } else if(!checKvalues(structureInfo)) {
+            throw new InvalidStructurePlanException("[SettlerCraft]: failed to create structure plan for " + structureYAML.getAbsolutePath() + ", invalid values");
         }
         StructureConfigReader scr = new StructureConfigReader();
         StructureConfig config = scr.read(structureYAML);
@@ -35,17 +38,23 @@ public class StructureReader {
         return structure;
     }
     
-    private boolean validate(YamlConfiguration yaml) {
+    private boolean checKvalues(YamlConfiguration yaml) {
         return yaml.getString("name") != null 
                 && yaml.isInt("reserved.north")
                 && yaml.isInt("reserved.east")
                 && yaml.isInt("reserved.south")
-                && yaml.isInt("reserved.west")
-                && yaml.getInt("reserved.south") >= 1 // Min room for structureChest
-                && yaml.getInt("reserved.east")  >= 0
-                && yaml.getInt("reserved.north") >= 0
-                && yaml.getInt("reserved.west")  >= 0;
+                && yaml.isInt("reserved.west");
                     
+    }
+    
+    
+    
+    private boolean hasChestSpace(YamlConfiguration yaml) {
+        if(yaml.getInt("reserved.south") + yaml.getInt("reserved.east")
+                + yaml.getInt("reserved.north") + yaml.getInt("reserved.west") == 0) {
+            return false;
+        }
+        return true;
     }
 
 
