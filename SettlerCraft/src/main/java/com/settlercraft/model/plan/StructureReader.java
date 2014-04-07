@@ -1,10 +1,11 @@
-package com.settlercraft.util;
+package com.settlercraft.model.plan;
+
 
 import com.settlercraft.model.entity.structure.StructurePlan;
-import com.settlercraft.util.schematic.SchematicObject;
-import com.settlercraft.util.schematic.SchematicUtil;
-import com.settlercraft.util.yaml.StructureConfig;
-import com.settlercraft.util.yaml.StructureYAMLUtil;
+import com.settlercraft.model.plan.schematic.SchematicObject;
+import com.settlercraft.model.plan.schematic.SchematicReader;
+import com.settlercraft.model.plan.yaml.StructureConfig;
+import com.settlercraft.model.plan.yaml.StructureConfigReader;
 import java.io.File;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -21,18 +22,20 @@ import org.bukkit.configuration.file.YamlConfiguration;
 public class StructureReader {
     
     
-    public static StructurePlan read(File schematic, File structureYAML) {
-        SchematicObject obj = SchematicUtil.readFile(schematic);
+    public StructurePlan read(File schematic, File structureYAML) {
+        SchematicReader sr = new SchematicReader();
+        SchematicObject obj = sr.readFile(schematic);
         YamlConfiguration structureInfo = YamlConfiguration.loadConfiguration(structureYAML);
         if(!validate(structureInfo)) {
             return null;
         }
-        StructureConfig yaml = StructureYAMLUtil.read(structureYAML);
-        StructurePlan structure = new StructurePlan(obj,yaml);
+        StructureConfigReader scr = new StructureConfigReader();
+        StructureConfig config = scr.read(structureYAML);
+        StructurePlan structure = new StructurePlan(obj,config);
         return structure;
     }
     
-    private static boolean validate(YamlConfiguration yaml) {
+    private boolean validate(YamlConfiguration yaml) {
         return yaml.getString("name") != null 
                 && yaml.isInt("reserved.north")
                 && yaml.isInt("reserved.east")

@@ -6,7 +6,7 @@
 package com.settlercraft.util.material;
 
 import com.google.common.collect.Maps;
-import com.settlercraft.util.schematic.StructureBlock;
+import com.settlercraft.model.plan.schematic.StructureBlock;
 import java.util.HashMap;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -15,10 +15,10 @@ import org.bukkit.block.Block;
  *
  * @author Chingo
  */
-public class MaterialUtil {
+public class SettlerCraftMaterials {
 
     /**
-     * MaterialUtil recognized as wood
+     * SettlerCraftMaterials recognized as wood
      */
     private final static HashMap<Material, Float> WOOD = Maps.newHashMap();
 
@@ -41,7 +41,7 @@ public class MaterialUtil {
     }
 
     /**
-     * MaterialUtil recognized as Cobblestone
+     * SettlerCraftMaterials recognized as Cobblestone
      */
     private final static HashMap<Material, Float> COBBLESTONE = Maps.newHashMap();
 
@@ -53,7 +53,7 @@ public class MaterialUtil {
     }
 
     /**
-     * MaterialUtil recognized as Stone Brick AKA Smooth Brick
+     * SettlerCraftMaterials recognized as Stone Brick AKA Smooth Brick
      */
     private final static HashMap<Material, Float> STONE_BRICK = Maps.newHashMap();
 
@@ -64,7 +64,7 @@ public class MaterialUtil {
     }
 
     /**
-     * MaterialUtil recognized as Brick
+     * SettlerCraftMaterials recognized as Brick
      */
     private final static HashMap<Material, Float> BRICK = Maps.newHashMap();
 

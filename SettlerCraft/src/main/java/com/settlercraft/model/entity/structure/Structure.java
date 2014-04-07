@@ -8,7 +8,7 @@ package com.settlercraft.model.entity.structure;
 import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
-import com.settlercraft.StructurePlanRegister;
+import com.settlercraft.main.SettlerCraft;
 import com.settlercraft.model.entity.StructureDimension;
 import com.settlercraft.model.entity.WorldLocation;
 import com.settlercraft.util.location.LocationUtil;
@@ -122,7 +122,7 @@ public class Structure implements Serializable {
    * @return The structure plan
    */
   public StructurePlan getPlan() {
-    return StructurePlanRegister.getPlan(plan);
+    return SettlerCraft.getStructurePlanRegister().getPlan(plan);
   }
 
   /**

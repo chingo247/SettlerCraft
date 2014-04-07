@@ -6,7 +6,7 @@
 
 package com.settlercraft.listener;
 
-import com.settlercraft.SettlerCraft;
+import com.settlercraft.main.SettlerCraft;
 import com.settlercraft.model.entity.structure.StructureChest;
 import com.settlercraft.persistence.StructureChestService;
 import org.bukkit.Bukkit;

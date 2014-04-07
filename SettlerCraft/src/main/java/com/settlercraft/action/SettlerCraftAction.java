@@ -6,7 +6,7 @@
 
 package com.settlercraft.action;
 
-import com.settlercraft.SettlerCraft;
+import com.settlercraft.main.SettlerCraft;
 import org.bukkit.Bukkit;
 
 /**

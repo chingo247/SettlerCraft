@@ -5,8 +5,9 @@
  */
 package com.settlercraft.model.entity.structure;
 
-import com.settlercraft.util.schematic.SchematicObject;
-import com.settlercraft.util.yaml.StructureConfig;
+import com.settlercraft.model.plan.schematic.SchematicObject;
+import com.settlercraft.model.plan.yaml.StructureConfig;
+
 
 /**
  * @author Chingo

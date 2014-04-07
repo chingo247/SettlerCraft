@@ -5,10 +5,10 @@
  */
 package com.settlercraft.model.entity.structure;
 
+import com.settlercraft.model.plan.schematic.SchematicBlockData;
+import com.settlercraft.model.plan.schematic.SchematicObject;
 import com.settlercraft.util.location.LocationUtil;
 import com.settlercraft.util.location.LocationUtil.DIRECTION;
-import com.settlercraft.util.schematic.SchematicBlockData;
-import com.settlercraft.util.schematic.SchematicObject;
 import java.util.Iterator;
 import org.bukkit.Location;
 import org.bukkit.Material;

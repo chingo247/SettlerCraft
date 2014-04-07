@@ -4,16 +4,22 @@
  * and open the template in the editor.
  */
 
-package com.settlercraft.util.schematic;
+package com.settlercraft.model.plan.schematic;
 
 import org.bukkit.Material;
 
 /**
- * Blockdata contains the material and also the byte to recognize the true identity of a block
+ * Structure Block describes what a Block is made of
  * @author Chingo
  */
 public class StructureBlock {
+    /**
+     * The Material id
+     */
     public final int material;
+    /**
+     * The Byte value
+     */
     public final byte data;
 
     public StructureBlock(int material, byte data) {
@@ -36,7 +42,6 @@ public class StructureBlock {
             return false;
         }
         StructureBlock res = (StructureBlock) obj;
-        
         return this.data == res.data && this.material == res.material;
     }
 

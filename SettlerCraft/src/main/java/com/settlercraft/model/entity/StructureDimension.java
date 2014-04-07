@@ -7,9 +7,9 @@ package com.settlercraft.model.entity;
 
 import com.avaje.ebean.validation.NotNull;
 import com.settlercraft.model.entity.structure.Structure;
+import com.settlercraft.model.plan.schematic.SchematicObject;
+import com.settlercraft.model.plan.yaml.StructureConfig.RESERVED_SIDE;
 import com.settlercraft.util.location.LocationUtil;
-import com.settlercraft.util.schematic.SchematicObject;
-import com.settlercraft.util.yaml.StructureConfig.RESERVED_SIDE;
 import java.io.Serializable;
 import java.util.EnumMap;
 import javax.persistence.Column;

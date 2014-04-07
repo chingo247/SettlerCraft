@@ -48,7 +48,7 @@ public class StructureProgress implements Serializable {
 
     public StructureProgress(Structure structure) {
         this.currentLayer = 0;
-        this.resources = new ArrayList<>(structure.getPlan().getRequirement().getResources().get(currentLayer));
+//        this.resources = new ArrayList<>(structure.getPlan().getRequirement().getResources().get(currentLayer));
         this.structure = structure;
     }
 
@@ -98,7 +98,6 @@ public class StructureProgress implements Serializable {
      */
     public void setCurrentLayer(int currentLayer) {
         this.currentLayer = currentLayer;
-        this.resources = new ArrayList<>(structure.getPlan().getRequirement().getResources().get(currentLayer));
     }
 
     public Long getId() {

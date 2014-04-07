@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.settlercraft.util.yaml;
+package com.settlercraft.model.plan.yaml;
 
 import java.io.File;
 import java.util.EnumMap;
@@ -15,11 +15,11 @@ import org.bukkit.configuration.file.YamlConfiguration;
  *
  * @author Christian
  */
-public class StructureYAMLUtil {
+public class StructureConfigReader {
   
-  private StructureYAMLUtil(){}
+  public StructureConfigReader(){}
   
-  public static StructureConfig read(File yaml) {
+  public StructureConfig read(File yaml) {
     YamlConfiguration config = YamlConfiguration.loadConfiguration(yaml);
     
     EnumMap<StructureConfig.RESERVED_SIDE, Integer> reserved = new EnumMap<>(StructureConfig.RESERVED_SIDE.class);

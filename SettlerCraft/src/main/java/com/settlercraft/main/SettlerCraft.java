@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.settlercraft;
+package com.settlercraft.main;
 
+
+import com.settlercraft.exception.InvalidStructurePlanException;
 import com.settlercraft.listener.PlayerListener;
 import com.settlercraft.listener.StructureChestListener;
 import com.settlercraft.listener.StructurePlanListener;
@@ -16,6 +18,7 @@ import com.settlercraft.model.recipe.DefaultBuildingRecipes;
 import com.settlercraft.util.HibernateUtil;
 import java.io.File;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -26,6 +29,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class SettlerCraft extends JavaPlugin {
 
     public static final String name = "SettlerCraft";
+    private static StructurePlanRegister structurePlanRegister;
 
     @Override
     public void onEnable() {
@@ -34,20 +38,11 @@ public class SettlerCraft extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-
-        if(!registerBuildings()) {
-            getLogger().log(Level.SEVERE, "Some buildings were registered unsuccesfully!");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
-
-//        registerCustomBuildings(buildingRegister);
-        StructurePlanRegister.printStructures(new File(this.getDataFolder() + "/buildings.txt"));
+        registerBuildings();
         registerRecipes();
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(this), this);
         Bukkit.getPluginManager().registerEvents(new StructureChestListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
-
         initDB();
     }
 
@@ -56,12 +51,21 @@ public class SettlerCraft extends JavaPlugin {
 
     }
 
-    private boolean registerBuildings() {
+    private void registerBuildings() {
         File buildingFolder = new File(getDataFolder().getAbsolutePath());
         if (!buildingFolder.exists()) {
             buildingFolder.mkdir();
         }
-        return StructurePlanRegister.registerStructures(buildingFolder);
+        try {
+            structurePlanRegister = new StructurePlanRegister(buildingFolder);
+        } catch (InvalidStructurePlanException ex) {
+            Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
+            getServer().getPluginManager().disablePlugin(this);
+        }
+    }
+    
+    public static StructurePlanRegister getStructurePlanRegister() {
+        return structurePlanRegister;
     }
 
     private void registerRecipes() {

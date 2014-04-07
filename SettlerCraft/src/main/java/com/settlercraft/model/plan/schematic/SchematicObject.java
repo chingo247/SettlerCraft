@@ -3,14 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.settlercraft.util.schematic;
+package com.settlercraft.model.plan.schematic;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 
 /**
- *
+ * SchematicObject contains all the information that was read from a .schematic file
  * @author Chingo
  */
 public class SchematicObject {
@@ -33,8 +34,7 @@ public class SchematicObject {
     }
 
     /**
-     * Returns the blocks in the same order they came also the correct order to write to a file
-     *
+     * Gets all the schematic blocks whitin this schematic sorted in the way they will be build
      * @return all blocks of this schematic
      */
     public TreeSet<SchematicBlockData> getBlocksSorted() {
@@ -107,15 +107,15 @@ public class SchematicObject {
         return length;
     }
 
-    public List<SchematicBlockData> getBlocks() {
+    public Collection<SchematicBlockData> getBlocks() {
         return blocks;
     }
 
-    public List getEntities() {
+    public Collection getEntities() {
         return entities;
     }
 
-    public List getTileEntities() {
+    public Collection getTileEntities() {
         return tileEntities;
     }
 
