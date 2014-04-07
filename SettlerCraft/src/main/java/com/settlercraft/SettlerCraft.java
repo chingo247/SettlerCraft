@@ -29,6 +29,7 @@ public class SettlerCraft extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        System.out.println("I KNOW, I KNOW");
         if (getServer().getPluginManager().getPlugin("Citizens") == null || getServer().getPluginManager().getPlugin("Citizens").isEnabled() == false) {
             getLogger().log(Level.SEVERE, "Citizens 2.0 not found or not enabled");
             getServer().getPluginManager().disablePlugin(this);
