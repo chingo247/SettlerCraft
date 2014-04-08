@@ -98,9 +98,9 @@ public class StructureDimension implements Serializable {
         int zMod = mods[1];
         Location loc;
         if (direction == LocationUtil.DIRECTION.NORTH || direction == LocationUtil.DIRECTION.SOUTH) {
-            loc = target.clone().add((schem.width-1) * xMod, (schem.height -1) , (schem.length-1) * zMod);
+            loc = target.clone().add((schem.width-1) * xMod, (schem.layers -1) , (schem.length-1) * zMod);
         } else {
-            loc = target.clone().add((schem.length-1) * zMod, (schem.height -1) , (schem.width-1) * xMod);
+            loc = target.clone().add((schem.length-1) * zMod, (schem.layers -1) , (schem.width-1) * xMod);
         }
         System.out.println("\ngetEnd():" + loc + "\n");
 

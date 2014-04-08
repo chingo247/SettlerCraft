@@ -9,14 +9,9 @@ package com.settlercraft.model.plan.requirement.material;
 import com.google.common.base.Preconditions;
 import com.settlercraft.model.plan.schematic.SchematicBlockData;
 import com.settlercraft.model.plan.schematic.SchematicObject;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeSet;
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.FetchType;
 
 /**
  *
@@ -52,7 +47,7 @@ public class MaterialRequirement {
         }
     }
     
-    public LayerRequirement getLayerRequirement(int layer) {
+    public LayerRequirement getLayer(int layer) {
         for(LayerRequirement l : layers) {
             if(l.getLayer() == layer) return l;
         }

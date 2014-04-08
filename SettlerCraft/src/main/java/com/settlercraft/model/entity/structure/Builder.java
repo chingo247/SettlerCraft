@@ -29,7 +29,7 @@ public class Builder {
      */
     public static void buildLayer(Structure structure, int layer) {
         StructurePlan sp = structure.getPlan();
-        if (layer > sp.getSchematic().height) {
+        if (layer > sp.getSchematic().layers) {
             throw new IndexOutOfBoundsException("layer out of bounds");
         }
 
@@ -74,7 +74,7 @@ public class Builder {
         int zMod = mods[1];
 
         if (direction == LocationUtil.DIRECTION.NORTH || direction == LocationUtil.DIRECTION.SOUTH) {
-            for (int y = 0; y < schematic.height; y++) {
+            for (int y = 0; y < schematic.layers; y++) {
                 for (int z = schematic.length - 1; z > 0; z--) {
                     for (int x = 0; x < schematic.width; x++) {
                         target.clone().add(x * xMod, y, z * zMod).getBlock().breakNaturally();
@@ -82,7 +82,7 @@ public class Builder {
                 }
             }
         } else { // SWAP X AND Z
-            for (int y = 0; y < schematic.height; y++) {
+            for (int y = 0; y < schematic.layers; y++) {
                 for (int z = schematic.length - 1; z > 0; z--) {
                     for (int x = 0; x < schematic.width; x++) {
                         target.clone().add(z * zMod, y, x * xMod).getBlock().breakNaturally();
@@ -127,7 +127,7 @@ public class Builder {
         int zMod = mods[1];
         Iterator<SchematicBlockData> it = schematic.getBlocksSorted().iterator();
         if (direction == DIRECTION.NORTH || direction == DIRECTION.SOUTH) {
-            for (int y = 0; y < schematic.height; y++) {
+            for (int y = 0; y < schematic.layers; y++) {
                 for (int z = schematic.length - 1; z >= 0; z--) {
                     for (int x = 0; x < schematic.width; x++) {
                         Block b = target.clone().add(x * xMod, y, z * zMod).getBlock();
@@ -138,7 +138,7 @@ public class Builder {
                 }
             }
         } else {
-            for (int y = 0; y < schematic.height; y++) {
+            for (int y = 0; y < schematic.layers; y++) {
                 for (int z = schematic.length - 1; z >= 0; z--) {
                     for (int x = 0; x < schematic.width; x++) {
                         Block b = target.clone().add(z * zMod, y, x * xMod).getBlock();

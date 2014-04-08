@@ -17,16 +17,16 @@ import java.util.TreeSet;
 public class SchematicObject {
 
     public final int width;
-    public final int height;
+    public final int layers;
     public final int length;
 
     private final List<SchematicBlockData> blocks;
     private final List entities;
     private final List tileEntities;
 
-    public SchematicObject(int width, int height, int length, List<SchematicBlockData> blocks, List entities, List tileEntities) {
+    SchematicObject(int width, int height, int length, List<SchematicBlockData> blocks, List entities, List tileEntities) {
         this.width = width;
-        this.height = height;
+        this.layers = height;
         this.length = length;
         this.blocks = blocks;
         this.entities = entities;
@@ -45,7 +45,7 @@ public class SchematicObject {
     /**
      * Gets all blocks of corresponding layer
      *
-     * @param layer The layer between 0 and the height of this building
+     * @param layer The layer between 0 and the layers of this building
      * @return TreeSet of blockdata ordered by it place priority
      */
     public TreeSet<SchematicBlockData> getBlocksFromLayer(int layer) {
@@ -60,7 +60,7 @@ public class SchematicObject {
 
     /**
      * Returns a HashMap of blocks with the layer as key, a schematic doesnt know anything about the
-     * height of the blocks. The lowest blocks are at layer 0 (WHICH HAS NOTHING TO DO WITH THE REAL
+ layers of the blocks. The lowest blocks are at layer 0 (WHICH HAS NOTHING TO DO WITH THE REAL
      * HEIGHT)
      *
      * @return
@@ -82,7 +82,7 @@ public class SchematicObject {
     }
 
     public int getHeight() {
-        return height;
+        return layers;
     }
 
     public int getLength() {
@@ -103,7 +103,7 @@ public class SchematicObject {
 
     @Override
     public String toString() {
-        return "width: " + width + " length: " + length + " height: " + height;
+        return "width: " + width + " length: " + length + " height: " + layers;
     }
 
 }

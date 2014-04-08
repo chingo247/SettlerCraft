@@ -5,13 +5,13 @@
  */
 package com.settlercraft.model.entity.structure;
 
-import com.settlercraft.model.plan.StructurePlan;
 import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
-import com.settlercraft.plugin.SettlerCraft;
 import com.settlercraft.model.entity.StructureDimension;
 import com.settlercraft.model.entity.WorldLocation;
+import com.settlercraft.model.plan.StructurePlan;
+import com.settlercraft.plugin.SettlerCraft;
 import com.settlercraft.util.location.LocationUtil;
 import com.settlercraft.util.location.LocationUtil.DIRECTION;
 import java.io.Serializable;
@@ -107,7 +107,7 @@ public class Structure implements Serializable {
   public StructureProgress getProgress() {
     return progress;
   }
-
+  
   /**
    * Gets the name of the owner of this structure Owner may be a Player or NPC
    *

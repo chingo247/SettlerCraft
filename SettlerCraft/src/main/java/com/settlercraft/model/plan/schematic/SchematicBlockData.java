@@ -10,7 +10,7 @@ package com.settlercraft.model.plan.schematic;
  *
  * @author Chingo
  */
-public class SchematicBlockData extends BlockMaterial implements Comparable<SchematicBlockData> {
+public class SchematicBlockData extends ResourceMaterial implements Comparable<SchematicBlockData> {
 
     /**
      * The x position within the schematic
