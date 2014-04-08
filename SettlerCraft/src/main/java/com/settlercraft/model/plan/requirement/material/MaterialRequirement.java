@@ -22,12 +22,12 @@ import javax.persistence.FetchType;
  *
  * @author Chingo
  */
-@Embeddable
-public class MaterialRequirement implements Serializable {
+
+public class MaterialRequirement {
     
     
-    @Basic(fetch = FetchType.EAGER)
-    @Column(name = "resource_req")
+//    @Basic(fetch = FetchType.EAGER)
+//    @Column(name = "resource_req")
     private ArrayList<LayerRequirement> layers; 
 
     /**

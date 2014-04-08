@@ -40,9 +40,9 @@ public class StructurePlanRegister {
             File schematicBuildingFile = FileUtils.getFile(yamlBuildingFile.getParent(), yaml.getString("schematic.building"));
 
             if (yaml.getString("schematic.building") == null) {
-                throw new InvalidStructurePlanException("[SC~BuildApi]: " + yamlBuildingFile.getAbsolutePath() + " contains no schematic node");
+                throw new InvalidStructurePlanException("[SettlerCraft]: " + yamlBuildingFile.getAbsolutePath() + " contains no schematic node");
             } else if (!schematicBuildingFile.exists()) {
-                throw new InvalidStructurePlanException("[SC~BuildApi]: " + yamlBuildingFile.getParentFile().getAbsolutePath() + ", schematic file doesnt exist");
+                throw new InvalidStructurePlanException("[SettlerCraft]: " + yamlBuildingFile.getParentFile().getAbsolutePath() + ", schematic file doesnt exist");
             }
 
             StructureReader sr = new StructureReader();
@@ -57,10 +57,10 @@ public class StructurePlanRegister {
                 
             } else {
                 if (!structures.containsKey(structure.getConfig().getName())) {
-                    System.out.println("[SC~BuildApi]: loaded " + structure.getConfig().getName());
+                    System.out.println("[SettlerCraft]: loaded " + structure.getConfig().getName());
                     structures.put(structure.getConfig().getName(), structure);
                 } else {
-                    throw new InvalidStructurePlanException("[SC~BuildApi]: unable to load building for "
+                    throw new InvalidStructurePlanException("[SettlerCraft]: unable to load building for "
                             + yamlBuildingFile.getAbsolutePath() + ", name: "
                             + structure.getConfig().getName() + " already in use...");
                 }

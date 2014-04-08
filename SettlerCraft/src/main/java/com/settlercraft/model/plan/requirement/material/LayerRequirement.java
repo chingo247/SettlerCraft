@@ -13,19 +13,27 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
+import javax.persistence.ElementCollection;
+import javax.persistence.Embeddable;
+import javax.persistence.FetchType;
 import org.bukkit.Material;
+import org.hibernate.annotations.CollectionOfElements;
 
 /**
  *
  * @author Chingo
  */
+@Embeddable
 public class LayerRequirement implements Serializable {
 
     private int layer;
     
-    private ArrayList<StructureResource> resources;
+    @CollectionOfElements(fetch = FetchType.EAGER)
+    private Set<StructureResource> resources;
 
     /**
      * JPA Constructor.
@@ -36,7 +44,7 @@ public class LayerRequirement implements Serializable {
     
     LayerRequirement(int layer, Collection<SchematicBlockData> blocks) {
         this.layer = layer;
-        this.resources = new ArrayList<>();
+        this.resources = new HashSet<>();
         setRequirements(blocks);
     }
     
@@ -75,9 +83,6 @@ public class LayerRequirement implements Serializable {
         }
     }
 
-    public List<StructureResource> getResources() {
-        return resources;
-    }
     
     
 

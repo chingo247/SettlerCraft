@@ -5,6 +5,7 @@
  */
 package com.settlercraft.model.entity.structure;
 
+import com.settlercraft.model.plan.requirement.material.LayerRequirement;
 import com.settlercraft.model.plan.requirement.material.MaterialRequirement;
 import java.io.Serializable;
 import javax.persistence.CascadeType;
@@ -31,44 +32,44 @@ public class StructureProgress implements Serializable {
 
     
     @Embedded
-    private MaterialRequirement resources;
+    private LayerRequirement resources;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "structure")
     private Structure structure;
 
-    @Column(name = "layer")
-    private int currentLayer;
+//    @Column(name = "layer")
+//    private int currentLayer;
 
     public StructureProgress() {
     }
 
     public StructureProgress(Structure structure) {
-        this.currentLayer = 0;
-        this.resources = structure.getPlan().getRequirement().getMaterialRQ().copy();
+//        this.currentLayer = 0;
+        this.resources = structure.getPlan().getRequirement().getMaterialRQ().getLayerRequirement(0);
         this.structure = structure;
     }
 
 
 
 
-    /**
-     * Gets the currentLayer this structure is building
-     *
-     * @return the currentLayer
-     */
-    public int getCurrentLayer() {
-        return currentLayer;
-    }
-
-    /**
-     * Sets the currentLayer this structure is building
-     *
-     * @param currentLayer The currentLayer
-     */
-    public void setCurrentLayer(int currentLayer) {
-        this.currentLayer = currentLayer;
-    }
+//    /**
+//     * Gets the currentLayer this structure is building
+//     *
+//     * @return the currentLayer
+//     */
+//    public int getCurrentLayer() {
+//        return currentLayer;
+//    }
+//
+//    /**
+//     * Sets the currentLayer this structure is building
+//     *
+//     * @param currentLayer The currentLayer
+//     */
+//    public void setCurrentLayer(int currentLayer) {
+//        this.currentLayer = currentLayer;
+//    }
 
     public Long getId() {
         return id;

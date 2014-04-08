@@ -7,13 +7,14 @@
 package com.settlercraft.model.plan.requirement.material;
 
 import java.io.Serializable;
+import javax.persistence.Embeddable;
 import org.bukkit.Material;
 
 /**
  *
  * @author Chingo
  */
-
+@Embeddable
 public class StructureResource implements Serializable{
     private Byte data;
     private Material material;
