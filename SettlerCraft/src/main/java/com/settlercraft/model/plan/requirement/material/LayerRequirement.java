@@ -10,11 +10,14 @@ import com.google.common.collect.Maps;
 import com.settlercraft.model.plan.schematic.ResourceMaterial;
 import com.settlercraft.model.plan.schematic.SchematicBlockData;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Embeddable;
+import javax.persistence.OneToMany;
 import org.bukkit.Material;
 
 /**
@@ -26,8 +29,10 @@ public class LayerRequirement implements Serializable {
 
     private int layer;
     
-    @Basic
-    private HashMap<Material,Integer> basicResources;
+    @OneToMany(cascade = CascadeType.ALL)
+    private ArrayList<ResourceRequirement> basicResources;
+    
+    
     
     
     /**

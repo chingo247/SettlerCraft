@@ -19,6 +19,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Chest;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -27,56 +28,58 @@ import org.bukkit.block.Chest;
 @Entity
 public class StructureChest implements Serializable {
 
-    @Id
-    @GeneratedValue
-    private Long id;
+  @Id
+  @GeneratedValue
+  private Long id;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "structure")
-    private Structure mainStructure;
+  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "structure")
+  private Structure mainStructure;
 
-    @Embedded
-    private WorldLocation wlocation;
-    
-    /**
-     * Default JPA Constructor
-     */
-    protected StructureChest() {}
+  @Embedded
+  private WorldLocation wlocation;
 
-    /**
-     * Constructor
-     * @param chestLocation The location of the chest
-     * @param structure The structure this chest belongs to
-     */
-    StructureChest(Location chestLocation, Structure structure) {
-        this.wlocation = new WorldLocation(chestLocation);
-        Preconditions.checkArgument(chestLocation.getBlock().getType() == Material.CHEST);
-        this.mainStructure = structure;
-    }
+  /**
+   * Default JPA Constructor
+   */
+  protected StructureChest() {
+  }
 
-    public Long getId() {
-        return id;
-    }
+  /**
+   * Constructor
+   *
+   * @param chestLocation The location of the chest
+   * @param structure The structure this chest belongs to
+   */
+  StructureChest(Location chestLocation, Structure structure) {
+    this.wlocation = new WorldLocation(chestLocation);
+    Preconditions.checkArgument(chestLocation.getBlock().getType() == Material.CHEST);
+    this.mainStructure = structure;
+  }
 
-    public Structure getStructure() {
-        return mainStructure;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public void setStructure(Structure structure) {
-        this.mainStructure = structure;
-    }
-    
-    public Chest getChest() {
-        return (Chest) getLocation().getBlock().getState();
-    }
-     
-    public Location getLocation() {
-        return new Location(Bukkit.getWorld(wlocation.getWorld()), wlocation.getX(), wlocation.getY(), wlocation.getZ());
-    }
+  public Structure getStructure() {
+    return mainStructure;
+  }
 
-    @Override
-    public String toString() {
-        return id + " : " + mainStructure.getPlan() + ": TYPE=CHEST";
-    }
+  public void setStructure(Structure structure) {
+    this.mainStructure = structure;
+  }
+
+  public Chest getChest() {
+    return (Chest) getLocation().getBlock().getState();
+  }
+
+  public Location getLocation() {
+    return new Location(Bukkit.getWorld(wlocation.getWorld()), wlocation.getX(), wlocation.getY(), wlocation.getZ());
+  }
+
+  @Override
+  public String toString() {
+    return id + " : " + mainStructure.getPlan() + ": TYPE=CHEST";
+  }
 
 }
