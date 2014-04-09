@@ -8,44 +8,32 @@ package com.settlercraft.model.entity.structure;
 import com.google.common.base.Preconditions;
 import com.settlercraft.model.entity.WorldLocation;
 import java.io.Serializable;
-import javax.persistence.CascadeType;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
 /**
- *
+ * Displays info about the structure it's construction progress
  * @author Chingo
  */
 @Entity
-public class StructureSign implements Serializable {
+public class StructureProgressSign extends StructureEntity implements Serializable {
 
     @Id
     @GeneratedValue
     private Long id;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "structure")
-    private Structure mainStructure;
-
-    @Embedded
-    private WorldLocation wlocation;
-
     /**
      * Default JPA Constructor
      */
-    protected StructureSign() {
+    protected StructureProgressSign() {
     }
 
-    public StructureSign(Location signLocation, Structure structure) {
+    public StructureProgressSign(Location signLocation, Structure structure) {
+        super(new WorldLocation(signLocation), structure);
         Preconditions.checkArgument(signLocation.getBlock().getType() == Material.SIGN_POST);
-        this.mainStructure = structure;
         this.wlocation = new WorldLocation(signLocation);
     }
 
@@ -53,22 +41,9 @@ public class StructureSign implements Serializable {
         return id;
     }
 
-    public Structure getStructure() {
-        return mainStructure;
-    }
-
-    public void setStructure(Structure structure) {
-        this.mainStructure = structure;
-    }
-
-        public Location getLocation() {
+    public Location getLocation() {
         return new Location(Bukkit.getWorld(wlocation.getWorld()), wlocation.getX(), wlocation.getY(), wlocation.getZ());
     }
 
-    @Override
-    public String toString() {
-        return id + " : " + mainStructure.getPlan() + ": TYPE=SIGN";
-    }
-    
-        
+
 }

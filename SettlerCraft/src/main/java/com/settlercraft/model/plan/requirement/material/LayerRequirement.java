@@ -6,7 +6,7 @@
 package com.settlercraft.model.plan.requirement.material;
 
 import com.google.common.collect.Maps;
-import com.settlercraft.model.plan.SettlerCraftMaterials;
+import com.settlercraft.util.SettlerCraftMaterials;
 import com.settlercraft.model.plan.schematic.ResourceMaterial;
 import com.settlercraft.model.plan.schematic.SchematicBlockData;
 import java.io.Serializable;

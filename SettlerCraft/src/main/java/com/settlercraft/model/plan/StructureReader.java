@@ -17,7 +17,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
  */
 
 /**
- *
+ * 
  * @author Chingo
  */
 public class StructureReader {

@@ -35,8 +35,6 @@ public class StructureProgress implements Serializable {
     @JoinColumn(name = "structure")
     private Structure structure;
 
-    private boolean inProgress;
-
     /**
      * JPA Constructor.
      */
@@ -55,7 +53,6 @@ public class StructureProgress implements Serializable {
     public StructureProgress(Structure structure) {
         this.layerRequirement = structure.getPlan().getRequirement().getMaterialRequirement().getLayer(0);
         this.structure = structure;
-        this.inProgress = false;
     }
 
     public LayerRequirement getResources() {
@@ -84,14 +81,6 @@ public class StructureProgress implements Serializable {
 
     public Structure getStructure() {
         return structure;
-    }
-
-    public void setInProgress(boolean inProgress) {
-        this.inProgress = inProgress;
-    }
-
-    public boolean isInProgress() {
-        return inProgress;
     }
 
 }

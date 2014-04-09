@@ -6,24 +6,14 @@
 package com.settlercraft.model.entity;
 
 import com.avaje.ebean.validation.NotNull;
-import com.settlercraft.model.entity.structure.Structure;
-import com.settlercraft.model.plan.schematic.SchematicObject;
-import com.settlercraft.model.plan.yaml.StructureConfig.RESERVED_SIDE;
-import com.settlercraft.util.location.LocationUtil;
-import java.io.Serializable;
-import java.util.EnumMap;
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
 import org.bukkit.Location;
 
 /**
- * Dimension is the total space a building requires the start location may not be the actual start
- * of the building the Start location and end location include the reserved spots of the building.
  *
  * @author Chingo
  */
-@Embeddable
-public class WorldDimension implements Serializable {
+public class WorldDimension {
 
     @NotNull
     @Column(name = "startX")
@@ -49,62 +39,19 @@ public class WorldDimension implements Serializable {
     @Column(name = "endZ")
     protected int endZ;
 
-    public WorldDimension() {}
+    
+    /**
+     * JPA Constructor.
+     */
+    protected WorldDimension() {}
 
-    public WorldDimension(Structure structure) {
-        Location start = getStart(structure.getStructureLocation(), structure);
+    public WorldDimension(Location start, Location end) {
         this.startX = start.getBlockX();
         this.startY = start.getBlockY();
         this.startZ = start.getBlockZ();
-
-        Location end = getEnd(structure.getStructureLocation(), structure);
         this.endX = end.getBlockX();
         this.endY = end.getBlockY();
         this.endZ = end.getBlockZ();
-    }
-
-    private Location getStart(Location location, Structure structure) {
-        EnumMap<RESERVED_SIDE, Integer> reserved = structure.getPlan().getConfig().getReserved();
-        LocationUtil.DIRECTION direction = structure.getDirection();
-        Location target = new Location(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
-
-        // Calculate Building Start + reserved Spots
-        int[] mods = LocationUtil.getModifiers(direction);
-        int xMod = mods[0];
-        int zMod = mods[1];
-        Location loc;
-        if (direction == LocationUtil.DIRECTION.NORTH || direction == LocationUtil.DIRECTION.SOUTH) {
-            loc = target.clone().add(-reserved.get(RESERVED_SIDE.WEST) * xMod, 0, -reserved.get(RESERVED_SIDE.SOUTH) * zMod);
-        } else {
-            loc = target.clone().add(-reserved.get(RESERVED_SIDE.SOUTH) * zMod, 0, -reserved.get(RESERVED_SIDE.WEST) * xMod);
-        }
-        return loc;
-    }
-
-    private Location getEnd(Location location, Structure structure) {
-        EnumMap<RESERVED_SIDE, Integer> reserved = structure.getPlan().getConfig().getReserved();
-        LocationUtil.DIRECTION direction = structure.getDirection();
-        SchematicObject schem = structure.getPlan().getSchematic();
-
-        // Calculate Building end
-        Location target = new Location(location.getWorld(),
-                location.getBlockX(), // x Structure End
-                location.getBlockY(),
-                location.getBlockZ());   // z Structure End
-
-        // Calculate Building end + Reserved Spots
-        int[] mods = LocationUtil.getModifiers(direction);
-        int xMod = mods[0];
-        int zMod = mods[1];
-        Location loc;
-        if (direction == LocationUtil.DIRECTION.NORTH || direction == LocationUtil.DIRECTION.SOUTH) {
-            loc = target.clone().add((schem.width-1) * xMod, (schem.layers -1) , (schem.length-1) * zMod);
-        } else {
-            loc = target.clone().add((schem.length-1) * zMod, (schem.layers -1) , (schem.width-1) * xMod);
-        }
-        System.out.println("\ngetEnd():" + loc + "\n");
-
-        return loc;
     }
 
     public int getStartX() {
@@ -155,4 +102,7 @@ public class WorldDimension implements Serializable {
         this.endZ = endZ;
     }
 
+
+
+    
 }
