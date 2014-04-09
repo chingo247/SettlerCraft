@@ -20,16 +20,8 @@ import java.util.TreeSet;
 
 public class MaterialRequirement {
     
-    
-//    @Basic(fetch = FetchType.EAGER)
-//    @Column(name = "resource_req")
     private ArrayList<LayerRequirement> layers; 
-
-    /**
-     * JPA Constructor.
-     */
-    protected MaterialRequirement() {}
-    
+ 
     private MaterialRequirement(ArrayList<LayerRequirement> layers) {
         this.layers = layers;
     }
@@ -43,7 +35,7 @@ public class MaterialRequirement {
     private void setLayers(SchematicObject obj) {
         HashMap<Integer, TreeSet<SchematicBlockData>> m = obj.getBlocksLayered();
         for(int i : m.keySet()) {
-            layers.add(new LayerRequirement(i, m.get(i)));
+            layers.add(new LayerRequirement(i,m.get(i)));
         }
     }
     

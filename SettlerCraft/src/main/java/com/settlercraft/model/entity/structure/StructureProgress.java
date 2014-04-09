@@ -8,7 +8,6 @@ package com.settlercraft.model.entity.structure;
 import com.settlercraft.model.plan.requirement.material.LayerRequirement;
 import java.io.Serializable;
 import javax.persistence.CascadeType;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -28,11 +27,11 @@ public class StructureProgress implements Serializable {
     @Id
     @GeneratedValue
     private Long id;
-
-    @Embedded
+    
+    @OneToOne(cascade = CascadeType.ALL)
     private LayerRequirement layerRequirement;
 
-    @OneToOne(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "structure")
     private Structure structure;
 

@@ -14,6 +14,9 @@ import com.settlercraft.model.entity.structure.Structure;
 import com.settlercraft.model.entity.structure.StructureChest;
 import com.settlercraft.model.entity.structure.StructureProgress;
 import com.settlercraft.model.entity.structure.StructureSign;
+import com.settlercraft.model.plan.requirement.material.LayerRequirement;
+import com.settlercraft.model.plan.requirement.material.ResourceRequirement;
+import com.settlercraft.model.plan.requirement.material.SpecialResourceRequirement;
 import com.settlercraft.model.recipe.DefaultBuildingRecipes;
 import com.settlercraft.util.HibernateUtil;
 import java.io.File;
@@ -77,7 +80,10 @@ public class SettlerCraft extends JavaPlugin {
                 Structure.class,
                 StructureChest.class,
                 StructureSign.class,
-                StructureProgress.class
+                StructureProgress.class,
+                ResourceRequirement.class,
+                SpecialResourceRequirement.class,
+                LayerRequirement.class
         );
     }
 

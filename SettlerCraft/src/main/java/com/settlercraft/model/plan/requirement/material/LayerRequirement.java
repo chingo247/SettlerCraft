@@ -6,15 +6,19 @@
 package com.settlercraft.model.plan.requirement.material;
 
 import com.google.common.collect.Maps;
+import com.settlercraft.model.plan.SettlerCraftMaterials;
 import com.settlercraft.model.plan.schematic.ResourceMaterial;
 import com.settlercraft.model.plan.schematic.SchematicBlockData;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 import javax.persistence.CascadeType;
-import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import org.bukkit.Material;
 
@@ -22,16 +26,21 @@ import org.bukkit.Material;
  *
  * @author Chingo
  */
-@Embeddable
+@Entity
 public class LayerRequirement implements Serializable {
 
+    @Id
+    @GeneratedValue
+    private Long id;
+    
     private int layer;
 
     @OneToMany(cascade = CascadeType.ALL)
-    private ArrayList<ResourceRequirement> basicResources;
+    private List<ResourceRequirement> basicResources;
 
     @OneToMany(cascade = CascadeType.ALL)
-    private ArrayList<SpecialResourceRequirement> specialResources;
+    private List<SpecialResourceRequirement> specialResources;
+    
 
     /**
      * JPA Constructor.
@@ -78,11 +87,11 @@ public class LayerRequirement implements Serializable {
         return layer;
     }
 
-    public ArrayList<ResourceRequirement> getBasicResources() {
+    public List<ResourceRequirement> getBasicResources() {
         return basicResources;
     }
 
-    public ArrayList<SpecialResourceRequirement> getSpecialResources() {
+    public List<SpecialResourceRequirement> getSpecialResources() {
         return specialResources;
     }
     
@@ -108,6 +117,14 @@ public class LayerRequirement implements Serializable {
             sb.append(r).append("\n");
         }
         return sb.toString();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
 }

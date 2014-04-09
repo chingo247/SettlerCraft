@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.settlercraft.model.plan.requirement.material;
+package com.settlercraft.model.plan;
 
 import com.google.common.collect.Maps;
 import com.settlercraft.model.plan.schematic.ResourceMaterial;
