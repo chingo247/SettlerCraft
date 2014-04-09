@@ -6,20 +6,14 @@
 package com.settlercraft.listener;
 
 import com.settlercraft.model.entity.structure.StructureChest;
-import com.settlercraft.model.entity.structure.StructureProgress;
 import com.settlercraft.persistence.StructureChestService;
 import com.settlercraft.plugin.SettlerCraft;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Chest;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -51,54 +45,8 @@ public class StructureChestListener implements Listener {
     public void onInventoryChangeEvent(InventoryClickEvent ice) {
         System.out.println("Inventory Click Event: " + ice.getAction());
 
-        if (ice.getInventory().getType() == InventoryType.CHEST && (ice.getAction() == InventoryAction.PLACE_ALL
-                    || ice.getAction() == InventoryAction.PLACE_ONE
-                    || ice.getAction() == InventoryAction.PLACE_SOME
-                    || ice.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY
-                    || ice.getAction() == InventoryAction.SWAP_WITH_CURSOR)) {
-                final Chest chest = (Chest) ice.getInventory().getHolder();
-                final StructureChest stc = scs.getStructureChest(chest.getWorld().getName(), chest.getX(), chest.getY(), chest.getZ());
-                if (stc != null) {
-                    System.out.println("StructureChest: " + stc);
-                    Bukkit.getScheduler().runTaskLater(sc, new Runnable() {
-                        @Override
-                        public void run() {
-                            processChest(stc); // Needs to be executed a bit later because at this very moment chest doesnt contain the itemstack yet
-                        }
-                    }, 20);
-                }
-            }
+
     }
 
-    private void processChest(final StructureChest stc) {
-        final StructureProgress progress = stc.getStructure().getProgress();
-        if (!progress.isInProgress()) {
-            progress.setInProgress(true);
-            for (final ItemStack is : stc.getChest().getBlockInventory().getContents()) {
-                if (is != null && is.getAmount() > 0 && progress.isNeeded(is)) {
-                    Bukkit.getScheduler().runTaskLater(sc, new Runnable() {
-
-                        @Override
-                        public void run() {
-                            processStack(progress, is, stc, 5);
-                        }
-                    }, 50);
-                    break;
-                }
-            }
-            progress.setInProgress(false);
-        }
-    }
-
-    private void processStack(final StructureProgress progress, ItemStack stack, final StructureChest chest, final int amount) {
-        ItemStack copy = new ItemStack(stack);
-        copy.setAmount(Math.min(progress.getNeed(copy), Math.min(amount, stack.getAmount())));
-        chest.getChest().getInventory().removeItem(copy);
-        chest.getChest().update(true);
-        
-        if (progress.commit(copy, copy.getAmount())) {
-            processChest(chest);
-        }
-    }
 
 }

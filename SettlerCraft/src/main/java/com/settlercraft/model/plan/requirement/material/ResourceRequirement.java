@@ -23,16 +23,16 @@ import org.bukkit.Material;
 public class ResourceRequirement implements Serializable {
   @Id
   @GeneratedValue
-  private Long id;
+  protected Long id;
   
   @NotNull
-  private final Material material;
+  protected final Material material;
   
   @NotNull
   @ManyToOne(cascade = CascadeType.ALL)
-  private LayerRequirement layerRequirement;
+  protected LayerRequirement layerRequirement;
   
-  private int amount;
+  protected int amount;
 
   protected ResourceRequirement() {
     this.material = null;

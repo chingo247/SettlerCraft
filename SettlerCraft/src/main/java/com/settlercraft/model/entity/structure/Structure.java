@@ -8,7 +8,7 @@ package com.settlercraft.model.entity.structure;
 import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
-import com.settlercraft.model.entity.StructureDimension;
+import com.settlercraft.model.entity.WorldDimension;
 import com.settlercraft.model.entity.WorldLocation;
 import com.settlercraft.model.plan.StructurePlan;
 import com.settlercraft.plugin.SettlerCraft;
@@ -66,7 +66,7 @@ public class Structure implements Serializable {
   private WorldLocation worldLocation;
 
   @Embedded
-  private StructureDimension dimension;
+  private WorldDimension dimension;
 
   /**
    * JPA Constructor
@@ -91,7 +91,7 @@ public class Structure implements Serializable {
     this.xMod = modifiers[0];
     this.zMod = modifiers[1];
     this.worldLocation = new WorldLocation(target);
-    this.dimension = new StructureDimension(this);
+    this.dimension = new WorldDimension(this);
     this.progress = new StructureProgress(this);
   }
 
@@ -203,7 +203,7 @@ public class Structure implements Serializable {
    *
    * @return The dimension of this building.
    */
-  public StructureDimension getDimension() {
+  public WorldDimension getDimension() {
     return dimension;
   }
 

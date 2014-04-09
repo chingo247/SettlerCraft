@@ -23,7 +23,7 @@ import org.bukkit.Location;
  * @author Chingo
  */
 @Embeddable
-public class StructureDimension implements Serializable {
+public class WorldDimension implements Serializable {
 
     @NotNull
     @Column(name = "startX")
@@ -49,9 +49,9 @@ public class StructureDimension implements Serializable {
     @Column(name = "endZ")
     protected int endZ;
 
-    public StructureDimension() {}
+    public WorldDimension() {}
 
-    public StructureDimension(Structure structure) {
+    public WorldDimension(Structure structure) {
         Location start = getStart(structure.getStructureLocation(), structure);
         this.startX = start.getBlockX();
         this.startY = start.getBlockY();
