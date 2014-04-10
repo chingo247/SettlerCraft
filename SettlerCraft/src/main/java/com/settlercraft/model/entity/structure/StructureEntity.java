@@ -11,8 +11,8 @@ import com.settlercraft.model.entity.WorldLocation;
 import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToOne;
 
 /**
  * A structure entity is a small object that could be placed around the building in a reserved area
@@ -28,7 +28,7 @@ public abstract class StructureEntity {
     @Embedded
     protected WorldLocation wlocation;
     
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     protected Structure structure;
 
     /**

@@ -17,16 +17,13 @@ import com.settlercraft.plugin.SettlerCraft;
 import com.settlercraft.util.location.LocationUtil;
 import com.settlercraft.util.location.LocationUtil.DIRECTION;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.bukkit.Bukkit;
@@ -57,11 +54,17 @@ public class Structure implements Serializable {
     private int zMod;
 
     @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "chest_id")
+    private StructureChest structureChest;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "sign_id")
+    private StructureProgressSign structureSign;
+
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "progress")
     private StructureProgress progress;
     
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<StructureEntity> entities;
 
     @Embedded
     private WorldLocation worldLocation;
@@ -86,7 +89,6 @@ public class Structure implements Serializable {
     public Structure(Player owner, Location target, DIRECTION direction, StructurePlan plan) {
         Preconditions.checkNotNull(plan);
         Preconditions.checkNotNull(target);
-        this.entities = new ArrayList<>();
         this.owner = owner.getName();
         this.plan = plan.getConfig().getName();
         int[] modifiers = LocationUtil.getModifiers(direction);
@@ -138,6 +140,24 @@ public class Structure implements Serializable {
     }
 
     /**
+     * Gets the structureChest that handles the build progress of this structure
+     *
+     * @return The structureChest
+     */
+    public StructureChest getStructureChest() {
+        return structureChest;
+    }
+
+    /**
+     * Gets the structureSign of this structure
+     *
+     * @return The structureSign
+     */
+    public StructureProgressSign getStructureSign() {
+        return structureSign;
+    }
+
+    /**
      * Gets the xMod of this building to determine the direction
      *
      * @return The xMod
@@ -164,10 +184,23 @@ public class Structure implements Serializable {
         return LocationUtil.getDirection(xMod, zMod);
     }
 
-    public void addEntity(StructureEntity entity) {
-        this.entities.add(entity);
+    /**
+     * Sets the structureChest of this structure
+     *
+     * @param structureChest The structureChest
+     */
+    public void setStructureChest(StructureChest structureChest) {
+        this.structureChest = structureChest;
     }
-    
+
+    /**
+     * Sets the structureSign of this structure
+     *
+     * @param structureSign The structureSign
+     */
+    public void setStructureSign(StructureProgressSign structureSign) {
+        this.structureSign = structureSign;
+    }
 
     /**
      * Gets the actual location of the start of this building

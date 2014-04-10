@@ -241,7 +241,7 @@
             <artifactId>querydsl-collections</artifactId>
             <version>3.3.2</version>
         </dependency>
-        <dependency>
+<!--        <dependency>
             <groupId>com.mysema.querydsl</groupId>
             <artifactId>querydsl-hibernate-search</artifactId>
             <version>3.3.2</version>
@@ -251,12 +251,12 @@
                     <groupId>org.hibernate.javax.persistence</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
+        </dependency>-->
+<!--        <dependency>
             <groupId>com.mysema.querydsl</groupId>
             <artifactId>querydsl-jdo</artifactId>
             <version>3.3.2</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.mysema.querydsl</groupId>
             <artifactId>querydsl-jpa</artifactId>
@@ -267,23 +267,17 @@
             <artifactId>querydsl-sql</artifactId>
             <version>3.3.2</version>
         </dependency>
-        <dependency>
+<!--        <dependency>
             <groupId>com.mysema.querydsl</groupId>
             <artifactId>querydsl-codegen</artifactId>
             <version>3.3.2</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.mysema.querydsl</groupId>
             <artifactId>querydsl-hql</artifactId>
             <version>0.5.4</version>
         </dependency>
         
-        <!-- Spring framework -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring</artifactId>
-            <version>2.5.6</version>
-        </dependency>
 
     </dependencies>
 </project>

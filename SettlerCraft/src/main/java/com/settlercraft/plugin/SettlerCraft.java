@@ -12,6 +12,7 @@ import com.settlercraft.listener.StructureChestListener;
 import com.settlercraft.listener.StructurePlanListener;
 import com.settlercraft.model.entity.structure.Structure;
 import com.settlercraft.model.entity.structure.StructureChest;
+import com.settlercraft.model.entity.structure.StructureEntity;
 import com.settlercraft.model.entity.structure.StructureProgress;
 import com.settlercraft.model.entity.structure.StructureProgressSign;
 import com.settlercraft.model.plan.requirement.material.LayerRequirement;
@@ -79,6 +80,7 @@ public class SettlerCraft extends JavaPlugin {
         HibernateUtil.addAnnotatedClasses(
                 Structure.class,
                 StructureChest.class,
+                StructureEntity.class,
                 StructureProgressSign.class,
                 StructureProgress.class,
                 ResourceRequirement.class,

@@ -38,9 +38,9 @@ public class StructureService extends AbstractService<Structure> {
     }
     
     public boolean overlaps(Structure structure) {
-      QStructure qStructure = QStructure.structure;
-      Session session = HibernateUtil.getSession();
-      JPQLQuery query = new HibernateQuery(session);
+     QStructure qStructure = QStructure.structure;
+     Session session = HibernateUtil.getSession();
+     JPQLQuery query = new HibernateQuery(session);
       
       boolean overlaps = query.from(qStructure)
               .where(qStructure.worldLocation().world.eq(structure.getStructureLocation().getWorld().getName())
