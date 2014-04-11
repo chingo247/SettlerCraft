@@ -6,7 +6,6 @@
 package com.settlercraft.action;
 
 import com.google.common.base.Preconditions;
-import com.settlercraft.action.SettlerCraftAction;
 import com.settlercraft.model.entity.structure.Builder;
 import com.settlercraft.model.entity.structure.Structure;
 import com.settlercraft.model.plan.StructurePlan;
@@ -56,7 +55,7 @@ public class BuildAction extends SettlerCraftAction {
         
         Builder.clearBuildSite(structure);
         Builder.createDefaultFoundation(structure);
-        Builder.placeStructureChest(structure);
+//        Builder.placeStructureChest(structure);
         Builder.placeStructureSign(structure);
 //        Builder.instantBuildStructure(player.getLocation(), target, plan.getSchematic());
         ss.save(structure);

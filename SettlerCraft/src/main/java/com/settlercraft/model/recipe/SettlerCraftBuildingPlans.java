@@ -14,10 +14,11 @@ import org.bukkit.inventory.ShapedRecipe;
 /**
  *
  * @author Chingo
+ * @deprecated No one can craft them
  */
-public class DefaultBuildingRecipes {
+public class SettlerCraftBuildingPlans {
     
-    private DefaultBuildingRecipes(){}
+    private SettlerCraftBuildingPlans(){}
     
     public static void load(SettlerCraft slc) {
         ShapedRecipe claimTownGroundRecipe = new CShapedRecipe(new ItemStack(Material.PAPER), "Town Center")

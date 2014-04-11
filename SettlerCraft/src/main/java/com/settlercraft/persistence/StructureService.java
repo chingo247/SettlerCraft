@@ -11,6 +11,7 @@ import com.settlercraft.model.entity.structure.QStructure;
 import com.settlercraft.model.entity.structure.Structure;
 import com.settlercraft.util.HibernateUtil;
 import java.util.List;
+import org.bukkit.Location;
 import org.hibernate.Session;
 
 /**
@@ -35,6 +36,25 @@ public class StructureService extends AbstractService<Structure> {
         List<Structure> structures = query.from(structure).where(structure.owner.eq(owner)).list(structure);
         session.close();
         return structures;
+    }
+    
+    public boolean isOnStructure(Location location) {
+     QStructure qStructure = QStructure.structure;
+     Session session = HibernateUtil.getSession();
+     JPQLQuery query = new HibernateQuery(session);
+      
+      boolean onStructure = query.from(qStructure)
+              .where(qStructure.worldLocation().world.eq(location.getWorld().getName())
+                .and(qStructure.dimension().startX.loe(location.getBlockX()))
+                .and(qStructure.dimension().endX.goe(location.getBlockX()))
+                .and(qStructure.dimension().startZ.loe(location.getBlockZ()))
+                .and(qStructure.dimension().endZ.goe(location.getBlockZ()))
+                .and(qStructure.dimension().startY.loe(location.getBlockY()))
+                .and(qStructure.dimension().endY.goe(location.getBlockY()))
+              ).exists();
+
+      session.close();
+      return onStructure;
     }
     
     public boolean overlaps(Structure structure) {

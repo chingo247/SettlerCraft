@@ -99,8 +99,14 @@ public class Builder {
         return chest;
     }
 
+    //FIXME PLACE SIGN ON GROUND
+    /**
+     * 
+     * @param structure
+     * @return 
+     */
     public static StructureProgressSign placeStructureSign(Structure structure) {
-        Location signLocation = placeProgressEntity(structure.getStartLocation(), structure.getDirection(), 2, Material.SIGN_POST);
+        Location signLocation = placeProgressEntity(structure.getStartLocation(), structure.getDirection(), 1, Material.SIGN_POST);
         StructureProgressSign sign = new StructureProgressSign(signLocation, structure);
         structure.setStructureSign(sign);
         return sign;
