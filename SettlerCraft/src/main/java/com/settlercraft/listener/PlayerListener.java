@@ -7,6 +7,7 @@ package com.settlercraft.listener;
 
 import com.settlercraft.model.recipe.SettlerCraftTools;
 import com.settlercraft.persistence.StructureService;
+import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -42,6 +43,9 @@ public class PlayerListener implements Listener {
             if (pie.getAction() != Action.LEFT_CLICK_BLOCK) {
                 return;
             }
+            
+            
+            
 
             StructureService service = new StructureService();
             boolean onStructure = service.isOnStructure(pie.getClickedBlock().getLocation());
@@ -49,8 +53,7 @@ public class PlayerListener implements Listener {
             if (onStructure) {
 
             }
-
         }
-
+        
     }
 }

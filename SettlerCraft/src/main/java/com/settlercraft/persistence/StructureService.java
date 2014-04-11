@@ -38,12 +38,22 @@ public class StructureService extends AbstractService<Structure> {
         return structures;
     }
     
+    
+    /**
+     * Determines if given location is on a structure. 
+     * @param location The location
+     * @return  getStructure() != null
+     */
     public boolean isOnStructure(Location location) {
+      return getStructure(location) != null;
+    } 
+    
+    public Structure getStructure(Location location) {
      QStructure qStructure = QStructure.structure;
      Session session = HibernateUtil.getSession();
      JPQLQuery query = new HibernateQuery(session);
       
-      boolean onStructure = query.from(qStructure)
+      Structure structure = query.from(qStructure)
               .where(qStructure.worldLocation().world.eq(location.getWorld().getName())
                 .and(qStructure.dimension().startX.loe(location.getBlockX()))
                 .and(qStructure.dimension().endX.goe(location.getBlockX()))
@@ -51,10 +61,10 @@ public class StructureService extends AbstractService<Structure> {
                 .and(qStructure.dimension().endZ.goe(location.getBlockZ()))
                 .and(qStructure.dimension().startY.loe(location.getBlockY()))
                 .and(qStructure.dimension().endY.goe(location.getBlockY()))
-              ).exists();
+              ).uniqueResult(qStructure);
 
       session.close();
-      return onStructure;
+      return structure;
     }
     
     public boolean overlaps(Structure structure) {
