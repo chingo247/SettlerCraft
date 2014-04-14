@@ -18,10 +18,23 @@ import org.bukkit.inventory.ItemStack;
 public class NPCBuildEvent extends BuildEvent{
     private NPC npc;
 
-    public NPCBuildEvent(Structure structure, NPC npc, ItemStack stack) {
+    /**
+     * Constructor.
+     * @param structure The structure involved in this event
+     * @param npc The NPC involved in this event
+     * @param stack The itemstack involved in this event
+     */
+    public NPCBuildEvent(final Structure structure, final NPC npc, final ItemStack stack) {
         super(structure, npc.getEntity(), stack);
         this.npc = npc;
     }
-    
+
+    /**
+     * Gets the NPC involved in this event.
+     * @return The NPC involved in this event
+     */
+    public NPC getNpc() {
+        return npc;
+    }
     
 }

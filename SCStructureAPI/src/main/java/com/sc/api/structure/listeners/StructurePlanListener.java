@@ -29,6 +29,10 @@ public class StructurePlanListener implements Listener {
         this.settlerCraft = settlerCraft;
     }
   
+    /**
+     * Places a structure on player's target location
+     * @param pie The playerInteractEvent 
+     */
     @EventHandler
     public void onPlayerBuild(PlayerInteractEvent pie) {
       System.out.println("PlayerInteractEvent!");

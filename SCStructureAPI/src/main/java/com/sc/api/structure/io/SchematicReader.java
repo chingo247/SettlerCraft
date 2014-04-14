@@ -24,7 +24,7 @@ import org.jnbt.Tag;
 
 
 /**
- *
+ * SchematicReader class for reading .schematic files
  * @author Chingo
  */
 public class SchematicReader {
@@ -49,9 +49,13 @@ public class SchematicReader {
         }
         return blks;
     }
-    
-    
 
+    /**
+     * Reads a schematic file.
+     * @param schematicFile The schematic file
+     * @return SchematicObject which contains all the info of the .schematic file
+     * @throws UnsupportedStructureException when file contains unsupported material or entity
+     */
     public SchematicObject readFile(File schematicFile) throws UnsupportedStructureException {
         SchematicObject obj = null;
         try {

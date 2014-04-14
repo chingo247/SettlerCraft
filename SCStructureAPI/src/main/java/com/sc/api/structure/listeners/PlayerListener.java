@@ -18,6 +18,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 public class PlayerListener implements Listener {
 
     @EventHandler
+    /**
+     * DEBUG
+     */
     public void onPlayerPlacedBlock(BlockPlaceEvent bpe) {
         System.out.println(
                 "Player placed: " + bpe.getBlock().getType()

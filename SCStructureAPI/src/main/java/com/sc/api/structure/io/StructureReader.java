@@ -21,8 +21,14 @@ import org.bukkit.configuration.file.YamlConfiguration;
  * @author Chingo
  */
 public class StructureReader {
-    
-    
+    /**
+     * Assembles a config file and its schematic into a structure plan.
+     * @param schematic The schematic file
+     * @param structureYAML The structure config file
+     * @return Structure plan containing both the schematic and the config
+     * @throws UnsupportedStructureException When the schematic contains an unsupported entity or material
+     * @throws InvalidStructurePlanException When the config file has missing or invalid nodes.
+     */
     public StructurePlan assemble(File schematic, File structureYAML) throws UnsupportedStructureException, InvalidStructurePlanException {
         System.out.println(schematic.getAbsolutePath());
         SchematicReader sr = new SchematicReader();
@@ -45,9 +51,7 @@ public class StructureReader {
                 && yaml.isInt("reserved.east")
                 && yaml.isInt("reserved.south")
                 && yaml.isInt("reserved.west");
-                    
     }
-    
     
     
     private boolean hasChestSpace(YamlConfiguration yaml) {

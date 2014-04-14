@@ -15,22 +15,21 @@ import com.settlercraft.core.model.entity.structure.Structure;
  */
 public class StructureStateChangedEvent extends SettlerCraftEvent {
     
-    private final Structure.STATE state;
     private final Structure structure;
 
-    public StructureStateChangedEvent(Structure.STATE state, Structure structure) {
-        this.state = state;
+    /**
+     * Constructor.
+     * @param structure The structure involved in this event
+     */
+    public StructureStateChangedEvent(final Structure structure) {
         this.structure = structure;
     }
 
-    public Structure.STATE getState() {
-        return state;
-    }
-
+    /**
+     * Gets the structure involved in this event.
+     * @return The structure involved in this event
+     */
     public Structure getStructure() {
         return structure;
     }
-    
-    
-    
 }

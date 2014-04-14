@@ -7,11 +7,12 @@
 package com.sc.api.structure.exception;
 
 /**
- *
+ * Thrown when the config file of a plan has invalid or missing nodes.
  * @author Chingo
  */
 public final class InvalidStructurePlanException extends Throwable {
 
+    
     public InvalidStructurePlanException(String message) {
         super(message);
     }

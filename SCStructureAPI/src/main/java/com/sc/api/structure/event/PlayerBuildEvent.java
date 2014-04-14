@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.sc.api.structure.event;
 
 import com.settlercraft.core.model.entity.structure.Structure;
@@ -15,18 +14,27 @@ import org.bukkit.inventory.ItemStack;
  * @author Chingo
  */
 public class PlayerBuildEvent extends BuildEvent {
-    private final Player player;
-    
 
+    private final Player player;
+
+    /**
+     * Constructor.
+     *
+     * @param structure The structure involved in this event
+     * @param player The player involved in this event
+     * @param stack The itemstack involved in this event
+     */
     public PlayerBuildEvent(Structure structure, Player player, ItemStack stack) {
-        super(structure,player, stack);
+        super(structure, player, stack);
         this.player = player;
     }
 
+    /**
+     * Gets the player who is involved in this event.
+     *
+     * @return The player who is involved in this event
+     */
     public Player getPlayer() {
         return player;
     }
-    
-    
-    
 }
