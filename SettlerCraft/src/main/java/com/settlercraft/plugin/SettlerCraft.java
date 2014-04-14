@@ -5,24 +5,14 @@
  */
 package com.settlercraft.plugin;
 
-import com.settlercraft.exception.InvalidStructurePlanException;
-import com.settlercraft.listener.PlayerListener;
-import com.settlercraft.listener.StructurePlanListener;
-import com.settlercraft.model.entity.structure.Structure;
-import com.settlercraft.model.entity.structure.StructureChest;
-import com.settlercraft.model.entity.structure.StructureEntity;
-import com.settlercraft.model.entity.structure.StructureProgress;
-import com.settlercraft.model.entity.structure.StructureProgressSign;
-import com.settlercraft.model.plan.requirement.material.LayerRequirement;
-import com.settlercraft.model.plan.requirement.material.ResourceRequirement;
-import com.settlercraft.model.plan.requirement.material.SpecialResourceRequirement;
-import com.settlercraft.model.recipe.SettlerCraftBuildingPlans;
-import com.settlercraft.model.recipe.SettlerCraftTools;
-import com.settlercraft.util.HibernateUtil;
-import java.io.File;
+import com.sc.api.structure.SCStructureAPI;
+import com.settlercraft.core.SCCore;
+import com.settlercraft.core.SettlerCraftAPI;
+import com.settlercraft.plugin.exception.DuplicateAPIException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -30,9 +20,10 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author Chingo
  */
 public class SettlerCraft extends JavaPlugin {
-
+    
+    private SCStructureAPI structureAPI;
+    private Set<SettlerCraftAPI> apis;
     public static final String name = "SettlerCraft";
-    private static StructurePlanRegister structurePlanRegister;
 
     @Override
     public void onEnable() {
@@ -41,57 +32,29 @@ public class SettlerCraft extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        registerBuildings();
-        registerRecipes();
-        registerListeners();
-
-        initDB();
+        
+        SCCore.initDB();
+        apis = new HashSet<>();
+        
+        structureAPI = new SCStructureAPI();
+        try {
+            addAPI(structureAPI);
+        } catch (DuplicateAPIException ex) {
+            Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
     public void onLoad() {
 
     }
-
-    private void registerBuildings() {
-        File buildingFolder = new File(getDataFolder().getAbsolutePath());
-        if (!buildingFolder.exists()) {
-            buildingFolder.mkdir();
+    
+    public void addAPI(SettlerCraftAPI api) throws DuplicateAPIException {
+        if(apis.add(api)) {
+           api.init(this);
+        } else {
+            throw new DuplicateAPIException(api);
         }
-        try {
-            structurePlanRegister = new StructurePlanRegister(buildingFolder);
-        } catch (InvalidStructurePlanException ex) {
-            Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
-            getServer().getPluginManager().disablePlugin(this);
-        }
-    }
-
-    public static StructurePlanRegister getStructurePlanRegister() {
-        return structurePlanRegister;
-    }
-
-    private void registerRecipes() {
-        SettlerCraftBuildingPlans.load(this);
-        SettlerCraftTools.load(this);
-    }
-
-    private void initDB() {
-        HibernateUtil.addAnnotatedClasses(
-                Structure.class,
-                StructureChest.class,
-                StructureEntity.class,
-                StructureProgressSign.class,
-                StructureProgress.class,
-                ResourceRequirement.class,
-                SpecialResourceRequirement.class,
-                LayerRequirement.class
-        );
-    }
-
-    private void registerListeners() {
-        Bukkit.getPluginManager().registerEvents(new StructurePlanListener(this), this);
-//        Bukkit.getPluginManager().registerEvents(new StructureChestListener(this), this);
-        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
     }
 
 }
