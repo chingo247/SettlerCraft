@@ -34,8 +34,8 @@ public class StructurePlanLoader {
             YamlConfiguration yaml = YamlConfiguration.loadConfiguration(yamlBuildingFile);
             File schematicBuildingFile = FileUtils.getFile(yamlBuildingFile.getParent(), yaml.getString("schematic.building"));
             
-            System.out.println("Schematic: " + schematicBuildingFile.getAbsolutePath());
-            System.out.println("yaml: " + yamlBuildingFile);
+//            System.out.println("Schematic: " + schematicBuildingFile.getAbsolutePath());
+//            System.out.println("yaml: " + yamlBuildingFile);
 
             if (yaml.getString("schematic.building") == null) {
                 throw new InvalidStructurePlanException("[SettlerCraft]: " + yamlBuildingFile.getAbsolutePath() + " contains no schematic node");
