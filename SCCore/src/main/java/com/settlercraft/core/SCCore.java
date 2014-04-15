@@ -9,7 +9,6 @@ import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.entity.structure.StructureChest;
 import com.settlercraft.core.model.entity.structure.StructureEntity;
 import com.settlercraft.core.model.entity.structure.StructureProgressSign;
-import com.settlercraft.core.model.entity.structure.construction.ConstructionSite;
 import com.settlercraft.core.model.plan.requirement.material.LayerRequirement;
 import com.settlercraft.core.model.plan.requirement.material.ResourceRequirement;
 import com.settlercraft.core.model.plan.requirement.material.SpecialResourceRequirement;
@@ -27,7 +26,6 @@ public class SCCore {
                 StructureChest.class,
                 StructureEntity.class,
                 StructureProgressSign.class,
-                ConstructionSite.class,
                 ResourceRequirement.class,
                 SpecialResourceRequirement.class,
                 LayerRequirement.class

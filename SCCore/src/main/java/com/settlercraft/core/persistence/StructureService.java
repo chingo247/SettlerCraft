@@ -9,10 +9,15 @@ import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.settlercraft.core.model.entity.structure.QStructure;
 import com.settlercraft.core.model.entity.structure.Structure;
+import com.settlercraft.core.model.entity.structure.Structure.STATE;
 import com.settlercraft.core.util.HibernateUtil;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.Location;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
  *
@@ -38,6 +43,28 @@ public class StructureService extends AbstractService<Structure> {
         return structures;
     }
     
+    public void setStatus(Structure structure, STATE newStatus) {
+        Session session = null;
+        Transaction tx = null;
+        try {
+            session = HibernateUtil.getSession();
+            tx = session.beginTransaction();
+            structure.setStatus(newStatus);
+            session.merge(structure);
+            tx.commit();
+        } catch (HibernateException e) {
+            try {
+                tx.rollback();
+            } catch (HibernateException rbe) {
+                Logger.getLogger(AbstractService.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
+            }
+            throw e;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
     
     /**
      * Determines if given location is on a structure. 

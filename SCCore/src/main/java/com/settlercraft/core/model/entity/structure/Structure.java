@@ -11,20 +11,16 @@ import com.google.common.base.Preconditions;
 import com.settlercraft.core.manager.StructurePlanManager;
 import com.settlercraft.core.model.entity.WorldDimension;
 import com.settlercraft.core.model.entity.WorldLocation;
-import com.settlercraft.core.model.entity.structure.construction.ConstructionSite;
 import com.settlercraft.core.model.plan.StructurePlan;
 import com.settlercraft.core.model.plan.schematic.SchematicObject;
 import com.settlercraft.core.util.LocationUtil;
 import com.settlercraft.core.util.LocationUtil.DIRECTION;
 import java.io.Serializable;
 import java.util.Date;
-import javax.annotation.Nullable;
-import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -63,16 +59,17 @@ public class Structure implements Serializable {
     @Embedded
     private WorldDimension dimension;
 
-    @Nullable
-    @OneToOne(cascade = CascadeType.ALL)
-    private ConstructionSite constructionSite;
 
     public enum STATE {
 
         /**
-         * ConstructionSite will be cleaterd of entities
+         * All blocks on structure location will be removed.
          */
-        CLEARING_SITE,
+        CLEARING_SITE_OF_BLOCKS,
+        /**
+         * All blocks on structure location will be removed.
+         */
+        CLEARING_SITE_OF_ENTITIES,
         /**
          * Placeing Foundation
          */
@@ -118,11 +115,10 @@ public class Structure implements Serializable {
         int[] modifiers = LocationUtil.getModifiers(direction);
         this.xMod = modifiers[0];
         this.zMod = modifiers[1];
-        setStatus(STATE.CLEARING_SITE);
+        setStatus(STATE.CLEARING_SITE_OF_BLOCKS);
         this.created = new Date();
         this.worldLocation = new WorldLocation(target);
         this.dimension = new WorldDimension(this);
-        this.constructionSite = new ConstructionSite(this);
     }
 
     /**
@@ -244,11 +240,6 @@ public class Structure implements Serializable {
         System.out.println(this + " changed state: " + status);
         this.status = status;
     }
-
-    public ConstructionSite getConstructionSite() {
-        return constructionSite;
-    }
-
 
     public Date getCreated() {
         return created;

@@ -159,6 +159,8 @@ public class LocationUtil {
      * @return All entities within this box
      */
     public static Set<Entity> getEntitiesWithin(Location start, Location end) {
+        System.out.println(start.getX() + " : " + start.getY() + " : " + start.getZ());
+        System.out.println(end.getX() + " : " + end.getY() + " : " + end.getZ());
         Set<Entity> entities = new HashSet<>();
         Location s = start.getChunk().getBlock(0, 0, 0).getLocation();
         int xMod = (start.getBlockX() < end.getBlockX()) ? 1 : -1;
@@ -166,8 +168,8 @@ public class LocationUtil {
         int deltaX = (int) Math.ceil(start.distance(new Location(start.getWorld(), end.getBlockX(), start.getBlockY(), start.getBlockZ()))); // Horizontal distance
         int deltaZ = (int) Math.ceil(start.distance(new Location(start.getWorld(), start.getBlockX(), start.getBlockY(), end.getBlockZ()))); // Vertical distance
 
-        for (int x = 0; x <= deltaX; x += 16) {
-            for (int z = 0; z <= deltaZ; z += 16) {
+        for (int x = 0; x <= Math.max(deltaX, 16); x += 16) {
+            for (int z = 0; z <= Math.max(deltaZ, 16); z += 16) {
                 Location l = s.clone().add(x * xMod, 0, z * zMod);
                     for (Entity e : l.getChunk().getEntities()) {
                         if (       e.getLocation().getBlockY() >= Math.min(start.getBlockY(), end.getBlockY()) 

@@ -23,13 +23,17 @@ public abstract class SettlerCraftAPI {
         this.name = name;
     }
 
+    /**
+     * Gets the name of the API
+     * @return The name of the API
+     */
     public final String getName() {
         return name;
     }
     
     /**
      * Setup all recipes for this api
-     * @param plugin 
+     * @param plugin The plugin
      */
     public abstract void setupRecipes(JavaPlugin plugin);
     /**
@@ -39,8 +43,8 @@ public abstract class SettlerCraftAPI {
     public abstract void setupListeners(JavaPlugin plugin);
 
     /**
-     * Completely initializes this plugin
-     * @param plugin
+     * Completely initializes this api
+     * @param plugin The plugin
      */
     public abstract void init(JavaPlugin plugin);
 
