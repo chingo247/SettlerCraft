@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.sc.api.structure.exception.InvalidStructurePlanException;
 import com.sc.api.structure.listeners.PlayerListener;
 import com.sc.api.structure.listeners.StructurePlanListener;
+import com.sc.api.structure.recipe.tools.Recipes;
 import com.settlercraft.core.SettlerCraftAPI;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.entity.structure.Structure.STATE;
@@ -17,6 +18,7 @@ import com.settlercraft.core.model.plan.schematic.SchematicBlockData;
 import com.settlercraft.core.model.plan.schematic.SchematicObject;
 import com.settlercraft.core.persistence.StructureService;
 import com.settlercraft.core.util.LocationUtil;
+import com.settlercraft.recipe.CShapedRecipe;
 import java.io.File;
 import java.util.Iterator;
 import java.util.Set;
@@ -50,15 +52,16 @@ public class SCStructureAPI extends SettlerCraftAPI {
 
     @Override
     public void setupRecipes(JavaPlugin plugin) {
-        // Add recipes to plugin here
+        for(CShapedRecipe r : Recipes.getRecipes()) {
+            plugin.getServer().addRecipe(r.getRecipe());
+        }
     }
 
     /**
      * Read and loads all structures in the datafolder of the plugin
-     *
      * @param baseFolder The datafolder of the plugin
      */
-    public void loadStructures(File baseFolder) {
+    private void loadStructures(File baseFolder) {
         if (!baseFolder.exists()) {
             baseFolder.mkdir();
         }
@@ -106,8 +109,6 @@ public class SCStructureAPI extends SettlerCraftAPI {
                 }
             }
         }
-//        StructureService structureService = new StructureService();
-//        structureService.setStatus(structure, STATE.CLEARING_SITE_OF_ENTITIES);
         structure.setStatus(STATE.CLEARING_SITE_OF_ENTITIES);
     }
 
@@ -137,8 +138,6 @@ public class SCStructureAPI extends SettlerCraftAPI {
                 l.getBlock().setType(Material.COBBLESTONE);
             }
         }
-//        StructureService structureService = new StructureService();
-//        structureService.setStatus(structure, STATE.PLACING_FRAME);
         structure.setStatus(STATE.PLACING_FRAME);
     }
 
@@ -152,16 +151,12 @@ public class SCStructureAPI extends SettlerCraftAPI {
         Set<Entity> entities = LocationUtil.getEntitiesWithin(structure.getStructureStartLocation(), structure.getStructureEndLocation());
         System.out.println(entities.size());
         for (Entity e : entities) {
-//            if (structure.onLot(e.getLocation())) { // already selected within
             System.out.println("on lot!");
             if (e instanceof LivingEntity) {
                 System.out.println("moving: " + e);
                 moveEntityFromLot(structure, (LivingEntity) e);
             }
-//            }
         }
-//        StructureService structureService = new StructureService();
-//        structureService.setStatus(structure, STATE.PLACING_FOUNDATION);
         structure.setStatus(STATE.PLACING_FOUNDATION);
     }
 
@@ -191,8 +186,6 @@ public class SCStructureAPI extends SettlerCraftAPI {
             }
         }
         
-
-//        Location l = LocationUtil.getClosest(entity.getLocation(), locations);
         StructureService ss = new StructureService();
         Structure s = ss.getStructure(l);
         if (s != null && !s.getId().equals(structure.getId())) {
@@ -201,7 +194,7 @@ public class SCStructureAPI extends SettlerCraftAPI {
             Location target = l.getWorld().getHighestBlockAt(l.getBlockX(), l.getBlockY()).getLocation();
             if (target.getBlock().getType() == Material.LAVA) {
                 //TODO moveToAlternative location
-                System.out.println("TARGET BLOCK WAS LAVA");
+                System.out.println("TARGET BLOCK WAS LAVA!!!");
             } else {
                 entity.teleport(target.clone().add(0, 1, 0));
                 System.out.println("target: " + l);

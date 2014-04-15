@@ -5,8 +5,11 @@
  */
 package com.sc.api.structure.listeners;
 
+import com.sc.api.structure.recipe.tools.Recipes;
+import com.settlercraft.core.persistence.StructureService;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -32,23 +35,23 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerBuildEvent(PlayerInteractEvent pie) {
-//        if (pie.getItem() != null
-//                && pie.getClickedBlock() != null
-//                && pie.getItem().getItemMeta() != null
-//                && pie.getItem().getItemMeta().getDisplayName() != null
-//                && pie.getItem().getItemMeta().getDisplayName().equals(SettlerCraftTools.CONSTRUCTION_TOOL)) {
-//            System.out.println("CONSTRUCTION TOOL!");
-//            pie.setCancelled(true);                             // Cancel default action which will destroy blocks
-//            if (pie.getAction() != Action.LEFT_CLICK_BLOCK) {
-//                return;
-//            }
-//            StructureService service = new StructureService();
-//            boolean onStructure = service.isOnStructure(pie.getClickedBlock().getLocation());
-//            System.out.println("ON STRUCTURE: " + onStructure);
-//            if (onStructure) {
-//                // BUILD!
-//            }
-//        }
+        if (pie.getItem() != null
+                && pie.getClickedBlock() != null
+                && pie.getItem().getItemMeta() != null
+                && pie.getItem().getItemMeta().getDisplayName() != null
+                && pie.getItem().getItemMeta().getDisplayName().equals(Recipes.CONSTRUCTION_TOOL)) {
+            System.out.println("CONSTRUCTION TOOL!");
+            pie.setCancelled(true);                             // Cancel default action which will destroy blocks
+            if (pie.getAction() != Action.LEFT_CLICK_BLOCK) {
+                return;
+            }
+            StructureService service = new StructureService();
+            boolean onStructure = service.isOnStructure(pie.getClickedBlock().getLocation());
+            System.out.println("ON STRUCTURE: " + onStructure);
+            if (onStructure) {
+                // BUILD!
+            }
+        }
         
     }
 }
