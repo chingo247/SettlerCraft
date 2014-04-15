@@ -9,7 +9,7 @@ package com.settlercraft.plugin.exception;
 import com.settlercraft.core.SettlerCraftAPI;
 
 /**
- *
+ * Thrown when there already was an API with the same name / unique identifier
  * @author Chingo
  */
 public class DuplicateAPIException extends Throwable {
