@@ -27,30 +27,29 @@ import org.bukkit.Material;
  * @author Chingo
  */
 @Entity
-public class LayerRequirement implements Serializable {
+public class StructureLayer implements Serializable {
 
     @Id
     @GeneratedValue
     private Long id;
-    
+
     private int layer;
 
     @OneToMany(cascade = CascadeType.ALL)
-    private List<ResourceRequirement> basicResources;
+    private List<MaterialResource> resources;
 
     @OneToMany(cascade = CascadeType.ALL)
-    private List<SpecialResourceRequirement> specialResources;
-    
+    private List<SpecialResource> specialResources;
 
     /**
      * JPA Constructor.
      */
-    protected LayerRequirement() {
+    protected StructureLayer() {
     }
 
-    LayerRequirement(int layer, Collection<SchematicBlockData> blocks) {
+    StructureLayer(int layer, Collection<SchematicBlockData> blocks) {
         this.layer = layer;
-        this.basicResources = new ArrayList<>();
+        this.resources = new ArrayList<>();
         this.specialResources = new ArrayList<>();
         setRequirements(blocks);
     }
@@ -58,28 +57,37 @@ public class LayerRequirement implements Serializable {
     private void setRequirements(Collection<SchematicBlockData> blocks) {
         HashMap<Material, Float> mts = Maps.newHashMap();
         for (SchematicBlockData sbd : blocks) {
-            Material m = SettlerCraftMaterials.getSimplifiedMaterial(sbd);
-
-            // Check canSimplify?
-            if (m == null) { // This material
-                m = sbd.getMaterial();
+            Material m;
+            if (SettlerCraftMaterials.canSimplify(sbd)) { 
+                m = SettlerCraftMaterials.getSimplifiedMaterial(sbd);
+            } else {
+                 m = sbd.getMaterial();
             }
-            // exists?
+            
             if (mts.get(m) == null) {
                 mts.put(m, SettlerCraftMaterials.getValue(new ResourceMaterial(m, sbd.getData())));
             } else {
                 mts.put(m, mts.get(m) + SettlerCraftMaterials.getValue(new ResourceMaterial(m, sbd.getData())));
             }
         }
-        // Set Special Resources here?
-
-        // Set Basice Resources
         setResources(mts);
     }
 
     private void setResources(HashMap<Material, Float> mts) {
         for (Entry<Material, Float> e : mts.entrySet()) {
-            basicResources.add(new ResourceRequirement(this, e.getKey(), Math.round(e.getValue())));
+            resources.add(new MaterialResource(this, e.getKey(), Math.round(e.getValue())));
+        }
+    }
+    
+    
+    
+    public int getNeed(Material material, Byte data) {
+        if(!contains(material, data)) {
+            return 0; // NO NEED
+        } else if(getSpecialResource(material, data) != null) {
+            return getSpecialResource(material, data).getValue();
+        } else {
+            return getResource(material).getValue();
         }
     }
 
@@ -87,33 +95,49 @@ public class LayerRequirement implements Serializable {
         return layer;
     }
 
-    public List<ResourceRequirement> getBasicResources() {
-        return basicResources;
+    public List<MaterialResource> getResources() {
+        return resources;
     }
 
-    public List<SpecialResourceRequirement> getSpecialResources() {
+    public List<SpecialResource> getSpecialResources() {
         return specialResources;
     }
-    
+
     public boolean contains(Material material, Byte data) {
-        if(specialResources.contains(new SpecialResourceRequirement(this, material, data, 0))) {
+        if (specialResources.contains(new SpecialResource(this, material, data, 0))) {
             return true;
         } else {
-            return basicResources.contains(new ResourceRequirement(this, material, 0));
+            return resources.contains(new MaterialResource(this, material, 0));
         }
     }
-    
- 
-    
+
+    public MaterialResource getResource(Material material) {
+        for (MaterialResource r : resources) {
+            if (r.getMaterial() == material) {
+                return r;
+            }
+        }
+        return null;
+    }
+
+    public SpecialResource getSpecialResource(Material material, Byte data) {
+        for (SpecialResource s : specialResources) {
+            if (s.getData().equals(data) && s.getMaterial() == material) {
+                return s;
+            }
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Basic Resources:\n");
-        for (ResourceRequirement r : basicResources) {
+        for (MaterialResource r : resources) {
             sb.append(r).append("\n");
         }
         sb.append("Special Resources:\n");
-        for (SpecialResourceRequirement r : specialResources) {
+        for (SpecialResource r : specialResources) {
             sb.append(r).append("\n");
         }
         return sb.toString();
@@ -121,10 +145,6 @@ public class LayerRequirement implements Serializable {
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
 }

@@ -1,13 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.settlercraft.core.model.entity.structure;
 
 import com.google.common.base.Preconditions;
-import com.settlercraft.core.model.entity.WorldLocation;
-import com.settlercraft.core.model.entity.structure.Structure;
+import com.settlercraft.core.model.world.WorldLocation;
 import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

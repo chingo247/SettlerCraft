@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.settlercraft.core.model.entity.living;
+package com.settlercraft.core.model.entity.settler;
 
 import com.google.common.base.Preconditions;
 import java.util.Objects;

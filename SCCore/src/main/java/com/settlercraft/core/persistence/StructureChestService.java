@@ -8,7 +8,7 @@ package com.settlercraft.core.persistence;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.settlercraft.core.model.entity.WorldLocation;
+import com.settlercraft.core.model.world.WorldLocation;
 import com.settlercraft.core.model.entity.structure.QStructureChest;
 import com.settlercraft.core.model.entity.structure.StructureChest;
 import com.settlercraft.core.util.HibernateUtil;

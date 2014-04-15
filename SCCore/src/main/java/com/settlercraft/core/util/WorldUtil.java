@@ -6,6 +6,11 @@
 package com.settlercraft.core.util;
 
 import com.google.common.base.Preconditions;
+import com.settlercraft.core.model.world.Direction;
+import static com.settlercraft.core.model.world.Direction.EAST;
+import static com.settlercraft.core.model.world.Direction.NORTH;
+import static com.settlercraft.core.model.world.Direction.SOUTH;
+import static com.settlercraft.core.model.world.Direction.WEST;
 import java.util.HashSet;
 import java.util.Set;
 import org.bukkit.Location;
@@ -15,15 +20,9 @@ import org.bukkit.entity.Entity;
  *
  * @author Chingo
  */
-public class LocationUtil {
+public class WorldUtil {
 
-    public enum DIRECTION {
 
-        NORTH,
-        EAST,
-        SOUTH,
-        WEST
-    }
 
     /**
      * Translates a yaw to direction
@@ -31,15 +30,15 @@ public class LocationUtil {
      * @param yaw The yaw
      * @return The direction
      */
-    public static DIRECTION getDirection(float yaw) {
+    public static Direction getDirection(float yaw) {
         if (yaw >= 45 && yaw < 135 || yaw >= -315 && yaw < -225) {
-            return DIRECTION.WEST;
+            return Direction.WEST;
         } else if (yaw >= 135 && yaw < 225 || yaw >= -225 && yaw < -135) {
-            return DIRECTION.NORTH;
+            return Direction.NORTH;
         } else if (yaw >= 225 && yaw < 315 || yaw >= -135 && yaw < -45) {
-            return DIRECTION.EAST;
-        } else /*(yaw >= 315 && yaw < 360 || yaw >= 0 && < 45) */ {
-            return DIRECTION.SOUTH;
+            return Direction.EAST;
+        } else /*(yaw >= 315 && yaw < 360 || yaw >= 0 && < 45) */  {
+            return Direction.SOUTH;
         }
     }
 
@@ -49,7 +48,7 @@ public class LocationUtil {
      * @param direction The direction
      * @return float, yaw value
      */
-    public static float getYaw(DIRECTION direction) {
+    public static float getYaw(Direction direction) {
         switch (direction) {
             case SOUTH:
                 return 0f;
@@ -71,7 +70,7 @@ public class LocationUtil {
      * @param direction The direction
      * @return int[2] where first element is x modifier and second the z modifier
      */
-    public static int[] getModifiers(DIRECTION direction) {
+    public static int[] getModifiers(Direction direction) {
         switch (direction) {
             case NORTH:
                 return new int[]{1, -1};
@@ -86,7 +85,7 @@ public class LocationUtil {
         }
     }
 
-    public static DIRECTION getDirection(int xMod, int zMod) {
+    public static Direction getDirection(int xMod, int zMod) {
         if (xMod != 1 && xMod != -1) {
             throw new IllegalArgumentException("x modifier: " + xMod + " not allowed, must be 1 or -1");
         }
@@ -95,20 +94,21 @@ public class LocationUtil {
         }
 
         if (xMod == 1 && zMod == -1) {
-            return DIRECTION.NORTH;
+            return Direction.NORTH;
         } else if (xMod == 1 && zMod == 1) {
-            return DIRECTION.EAST;
+            return Direction.EAST;
         } else if (xMod == -1 && zMod == 1) {
-            return DIRECTION.SOUTH;
+            return Direction.SOUTH;
         } else /**
          * if(xMod == -1 && zMod == -1 *
          */
+        
         {
-            return DIRECTION.WEST;
+            return Direction.WEST;
         }
     }
 
-    public static DIRECTION getDirection(Entity entity) {
+    public static Direction getDirection(Entity entity) {
         return getDirection(entity.getLocation().getYaw());
     }
 

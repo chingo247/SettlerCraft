@@ -7,7 +7,7 @@
 package com.settlercraft.core.model.entity.structure;
 
 import com.avaje.ebean.validation.NotNull;
-import com.settlercraft.core.model.entity.WorldLocation;
+import com.settlercraft.core.model.world.WorldLocation;
 import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.FetchType;

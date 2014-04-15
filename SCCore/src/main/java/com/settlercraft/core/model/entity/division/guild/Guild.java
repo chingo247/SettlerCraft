@@ -7,7 +7,7 @@
 package com.settlercraft.core.model.entity.division.guild;
 
 import com.settlercraft.core.model.entity.division.Division;
-import com.settlercraft.core.model.entity.living.GuildMaster;
+import com.settlercraft.core.model.entity.settler.GuildMaster;
 
 
 /**

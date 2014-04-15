@@ -20,7 +20,7 @@ import org.bukkit.Material;
  * @author Chingo
  */
 @Entity
-public class SpecialResourceRequirement implements Serializable  {
+public class SpecialResource implements Serializable {
 
     @Id
     @GeneratedValue
@@ -31,21 +31,21 @@ public class SpecialResourceRequirement implements Serializable  {
 
     @NotNull
     @ManyToOne(cascade = CascadeType.ALL)
-    protected LayerRequirement layerRequirement;
+    protected StructureLayer layerRequirement;
 
-    protected int amount;
+    protected int value;
 
     protected final Byte byteValue;
 
-    protected SpecialResourceRequirement() {
+    protected SpecialResource() {
         this.material = null;
         this.byteValue = null;
     }
 
-    public SpecialResourceRequirement(LayerRequirement layerRequirement, Material material, Byte byteValue, int amount) {
+    public SpecialResource(StructureLayer layerRequirement, Material material, Byte byteValue, int amount) {
         this.material = material;
         this.layerRequirement = layerRequirement;
-        this.amount = amount;
+        this.value = amount;
         this.byteValue = byteValue;
     }
 
@@ -53,25 +53,38 @@ public class SpecialResourceRequirement implements Serializable  {
         return id;
     }
 
-    public LayerRequirement getLayerRequirement() {
+    public StructureLayer getLayerRequirement() {
         return layerRequirement;
     }
 
-    public void setLayerRequirement(LayerRequirement layerRequirement) {
+    public void setLayerRequirement(StructureLayer layerRequirement) {
         this.layerRequirement = layerRequirement;
     }
 
-    public int getAmount() {
-        return amount;
+    public int getValue() {
+        return value;
     }
 
     public void setAmount(int amount) {
-        this.amount = amount;
+        this.value = amount;
     }
 
+    /**
+     * Removes an value of this resource, if the value is higher than the value of this resource
+ the resource will be set to 0
+     *
+     * @param amount The value to substract from this resource
+     */
+    public void removeAmount(int amount) {
+        this.value = value - Math.min(amount, value);
+    }
 
     public Byte getData() {
         return byteValue;
+    }
+
+    public Material getMaterial() {
+        return material;
     }
 
     @Override
@@ -90,15 +103,11 @@ public class SpecialResourceRequirement implements Serializable  {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final SpecialResourceRequirement other = (SpecialResourceRequirement) obj;
+        final SpecialResource other = (SpecialResource) obj;
         if (this.material != other.material) {
             return false;
         }
         return Objects.equals(this.byteValue, other.byteValue);
     }
-
-
-    
-    
 
 }

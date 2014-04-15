@@ -1,26 +1,24 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.settlercraft.core.model.entity.structure;
 
 import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
 import com.settlercraft.core.manager.StructurePlanManager;
-import com.settlercraft.core.model.entity.WorldDimension;
-import com.settlercraft.core.model.entity.WorldLocation;
 import com.settlercraft.core.model.plan.StructurePlan;
 import com.settlercraft.core.model.plan.schematic.SchematicObject;
-import com.settlercraft.core.util.LocationUtil;
-import com.settlercraft.core.util.LocationUtil.DIRECTION;
+import com.settlercraft.core.model.world.Direction;
+import com.settlercraft.core.model.world.WorldDimension;
+import com.settlercraft.core.model.world.WorldLocation;
+import com.settlercraft.core.util.WorldUtil;
 import java.io.Serializable;
 import java.util.Date;
+import javax.annotation.Nullable;
+import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -58,6 +56,10 @@ public class Structure implements Serializable {
 
     @Embedded
     private WorldDimension dimension;
+    
+    @Nullable
+    @OneToOne(cascade = CascadeType.ALL)
+    private StructureResource progress;
 
 
     public enum STATE {
@@ -107,18 +109,19 @@ public class Structure implements Serializable {
      * @param direction The direction of this structure
      * @param plan
      */
-    public Structure(Player owner, Location target, DIRECTION direction, StructurePlan plan) {
+    public Structure(Player owner, Location target, Direction direction, StructurePlan plan) {
         Preconditions.checkNotNull(plan);
         Preconditions.checkNotNull(target);
         this.owner = owner.getName();
         this.plan = plan.getConfig().getName();
-        int[] modifiers = LocationUtil.getModifiers(direction);
+        int[] modifiers = WorldUtil.getModifiers(direction);
         this.xMod = modifiers[0];
         this.zMod = modifiers[1];
         setStatus(STATE.CLEARING_SITE_OF_BLOCKS);
         this.created = new Date();
         this.worldLocation = new WorldLocation(target);
         this.dimension = new WorldDimension(this);
+        this.progress = new StructureResource(this);
     }
 
     /**
@@ -180,8 +183,8 @@ public class Structure implements Serializable {
      *
      * @return The direction
      */
-    public DIRECTION getDirection() {
-        return LocationUtil.getDirection(xMod, zMod);
+    public Direction getDirection() {
+        return WorldUtil.getDirection(xMod, zMod);
     }
 
     /**
@@ -196,13 +199,13 @@ public class Structure implements Serializable {
     public Location getStructureEndLocation() {
         SchematicObject schem = getPlan().getSchematic();
         Location target = getStructureStartLocation();
-        DIRECTION direction = LocationUtil.getDirection(xMod, zMod);
+        Direction direction = WorldUtil.getDirection(xMod, zMod);
 
-        int[] mods = LocationUtil.getModifiers(direction);
+        int[] mods = WorldUtil.getModifiers(direction);
         int xMd = mods[0];
         int zMd = mods[1];
         Location loc;
-        if (direction == LocationUtil.DIRECTION.NORTH || direction == LocationUtil.DIRECTION.SOUTH) {
+        if (direction == Direction.NORTH || direction == Direction.SOUTH) {
             loc = target.clone().add((schem.width - 1) * xMd, (schem.layers - 1), (schem.length - 1) * zMd);
         } else {
             loc = target.clone().add((schem.length - 1) * zMd, (schem.layers - 1), (schem.width - 1) * xMd);
@@ -244,6 +247,11 @@ public class Structure implements Serializable {
     public Date getCreated() {
         return created;
     }
+
+    public StructureResource getProgress() {
+        return progress;
+    }
+    
 
     @Override
     public String toString() {

@@ -7,7 +7,7 @@
 package com.settlercraft.core.model.entity.division;
 
 import com.settlercraft.core.model.entity.division.guild.Guild;
-import com.settlercraft.core.model.entity.living.SettlementLeader;
+import com.settlercraft.core.model.entity.settler.SettlementLeader;
 import java.util.HashSet;
 import java.util.Set;
 import org.bukkit.Location;

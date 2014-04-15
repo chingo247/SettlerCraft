@@ -20,9 +20,9 @@ import java.util.TreeSet;
 
 public class MaterialRequirement {
     
-    private ArrayList<LayerRequirement> layers; 
+    private ArrayList<StructureLayer> layers; 
  
-    private MaterialRequirement(ArrayList<LayerRequirement> layers) {
+    private MaterialRequirement(ArrayList<StructureLayer> layers) {
         this.layers = layers;
     }
     
@@ -35,12 +35,12 @@ public class MaterialRequirement {
     private void setLayers(SchematicObject obj) {
         HashMap<Integer, TreeSet<SchematicBlockData>> m = obj.getBlocksLayered();
         for(int i : m.keySet()) {
-            layers.add(new LayerRequirement(i,m.get(i)));
+            layers.add(new StructureLayer(i,m.get(i)));
         }
     }
     
-    public LayerRequirement getLayer(int layer) {
-        for(LayerRequirement l : layers) {
+    public StructureLayer getLayer(int layer) {
+        for(StructureLayer l : layers) {
             if(l.getLayer() == layer) return l;
         }
         return null;

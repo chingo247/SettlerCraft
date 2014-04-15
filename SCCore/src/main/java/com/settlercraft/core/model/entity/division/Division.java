@@ -6,8 +6,8 @@
 
 package com.settlercraft.core.model.entity.division;
 
-import com.settlercraft.core.model.entity.living.Labourer;
-import com.settlercraft.core.model.entity.living.Representative;
+import com.settlercraft.core.model.entity.settler.Labourer;
+import com.settlercraft.core.model.entity.settler.Representative;
 import java.util.HashSet;
 import java.util.Set;
 

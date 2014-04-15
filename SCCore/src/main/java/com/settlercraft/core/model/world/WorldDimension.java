@@ -3,15 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.settlercraft.core.model.entity;
+package com.settlercraft.core.model.world;
 
 import com.avaje.ebean.validation.NotNull;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.plan.StructurePlan;
 import com.settlercraft.core.model.plan.schematic.SchematicObject;
 import com.settlercraft.core.model.plan.yaml.StructureConfig;
-import com.settlercraft.core.util.LocationUtil;
-import com.settlercraft.core.util.LocationUtil.DIRECTION;
+import com.settlercraft.core.util.WorldUtil;
 import java.util.EnumMap;
 import javax.persistence.Column;
 import org.bukkit.Location;
@@ -57,7 +56,7 @@ public class WorldDimension {
      * @param structure The structure
      */
     public WorldDimension(Structure structure) {
-        DIRECTION direction = structure.getDirection();
+        Direction direction = structure.getDirection();
         Location start = structure.getStructureStartLocation();
         StructurePlan plan = structure.getPlan();
         
@@ -131,16 +130,16 @@ public class WorldDimension {
         this.endZ = endZ;
     }
 
-    private Location getStart(Location start, StructurePlan plan, LocationUtil.DIRECTION direction) {
+    private Location getStart(Location start, StructurePlan plan, Direction direction) {
         EnumMap<StructureConfig.RESERVED_SIDE, Integer> reserved = plan.getConfig().getReserved();
         Location target = new Location(start.getWorld(), start.getBlockX(), start.getBlockY(), start.getBlockZ());
 
         // Calculate Building Start + reserved Spots
-        int[] mods = LocationUtil.getModifiers(direction);
+        int[] mods = WorldUtil.getModifiers(direction);
         int xMd = mods[0];
         int zMd = mods[1];
         Location loc;
-        if (direction == LocationUtil.DIRECTION.NORTH || direction == LocationUtil.DIRECTION.SOUTH) {
+        if (direction == Direction.NORTH || direction == Direction.SOUTH) {
             loc = target.clone().add(-reserved.get(StructureConfig.RESERVED_SIDE.WEST) * xMd, 0, -reserved.get(StructureConfig.RESERVED_SIDE.SOUTH) * zMd);
         } else {
             loc = target.clone().add(-reserved.get(StructureConfig.RESERVED_SIDE.SOUTH) * zMd, 0, -reserved.get(StructureConfig.RESERVED_SIDE.WEST) * xMd);
@@ -148,7 +147,7 @@ public class WorldDimension {
         return loc;
     }
 
-    private Location getEnd(Location start, StructurePlan plan, LocationUtil.DIRECTION direction) {
+    private Location getEnd(Location start, StructurePlan plan, Direction direction) {
         EnumMap<StructureConfig.RESERVED_SIDE, Integer> reserved = plan.getConfig().getReserved();
         SchematicObject schem = plan.getSchematic();
 
@@ -159,11 +158,11 @@ public class WorldDimension {
                 start.getBlockZ());   // z Structure End
 
         // Calculate Building end + Reserved Spots
-        int[] mods = LocationUtil.getModifiers(direction);
+        int[] mods = WorldUtil.getModifiers(direction);
         int xMd = mods[0];
         int zMd = mods[1];
         Location loc;
-        if (direction == LocationUtil.DIRECTION.NORTH || direction == LocationUtil.DIRECTION.SOUTH) {
+        if (direction == Direction.NORTH || direction == Direction.SOUTH) {
             loc = target.clone().add((schem.width - 1) * xMd, (schem.layers - 1), (schem.length - 1) * zMd);
         } else {
             loc = target.clone().add((schem.length - 1) * zMd, (schem.layers - 1), (schem.width - 1) * xMd);

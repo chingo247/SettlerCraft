@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.settlercraft.core.persistence;
 
 import com.mysema.query.jpa.JPQLQuery;
@@ -79,15 +74,17 @@ public class StructureService extends AbstractService<Structure> {
      QStructure qStructure = QStructure.structure;
      Session session = HibernateUtil.getSession();
      JPQLQuery query = new HibernateQuery(session);
+     
       
       Structure structure = query.from(qStructure)
               .where(qStructure.worldLocation().world.eq(location.getWorld().getName())
-                .and(qStructure.dimension().startX.loe(location.getBlockX()))
-                .and(qStructure.dimension().endX.goe(location.getBlockX()))
-                .and(qStructure.dimension().startZ.loe(location.getBlockZ()))
-                .and(qStructure.dimension().endZ.goe(location.getBlockZ()))
-                .and(qStructure.dimension().startY.loe(location.getBlockY()))
-                .and(qStructure.dimension().endY.goe(location.getBlockY()))
+                .and(qStructure.dimension().startX.goe(location.getBlockX()))
+                .and(qStructure.dimension().endX.loe(location.getBlockX()))
+                .and(qStructure.dimension().startZ.goe(location.getBlockZ()))
+                .and(qStructure.dimension().endZ.loe(location.getBlockZ()))
+                .and(qStructure.dimension().startY.goe(location.getBlockY()))
+                .and(qStructure.dimension().endY.loe(location.getBlockY()))
+                      
               ).uniqueResult(qStructure);
 
       session.close();
@@ -117,12 +114,9 @@ public class StructureService extends AbstractService<Structure> {
                       )
       ).exists();
       session.close();
-              
       return overlaps;
-      
     }
-    
-    
+
 
 
 }

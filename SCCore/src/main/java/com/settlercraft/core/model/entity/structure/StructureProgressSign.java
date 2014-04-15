@@ -6,7 +6,7 @@
 package com.settlercraft.core.model.entity.structure;
 
 import com.google.common.base.Preconditions;
-import com.settlercraft.core.model.entity.WorldLocation;
+import com.settlercraft.core.model.world.WorldLocation;
 import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

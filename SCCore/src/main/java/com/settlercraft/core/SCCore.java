@@ -8,10 +8,11 @@ package com.settlercraft.core;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.entity.structure.StructureChest;
 import com.settlercraft.core.model.entity.structure.StructureEntity;
+import com.settlercraft.core.model.entity.structure.StructureResource;
 import com.settlercraft.core.model.entity.structure.StructureProgressSign;
-import com.settlercraft.core.model.plan.requirement.material.LayerRequirement;
-import com.settlercraft.core.model.plan.requirement.material.ResourceRequirement;
-import com.settlercraft.core.model.plan.requirement.material.SpecialResourceRequirement;
+import com.settlercraft.core.model.plan.requirement.material.StructureLayer;
+import com.settlercraft.core.model.plan.requirement.material.MaterialResource;
+import com.settlercraft.core.model.plan.requirement.material.SpecialResource;
 import com.settlercraft.core.util.HibernateUtil;
 
 /**
@@ -26,9 +27,10 @@ public class SCCore {
                 StructureChest.class,
                 StructureEntity.class,
                 StructureProgressSign.class,
-                ResourceRequirement.class,
-                SpecialResourceRequirement.class,
-                LayerRequirement.class
+                StructureResource.class,
+                StructureResource.class,
+                SpecialResource.class,
+                StructureLayer.class
         );
     }
 
