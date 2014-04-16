@@ -7,7 +7,10 @@ package com.settlercraft.core.util;
 
 import com.google.common.collect.Maps;
 import com.settlercraft.core.model.plan.schematic.ResourceMaterial;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 
@@ -17,6 +20,14 @@ import org.bukkit.block.Block;
  */
 public class SettlerCraftMaterials {
 
+    
+    private final static Set<Material> UNCRAFTABLE = new HashSet<>(Arrays.asList(
+       Material.AIR,
+       Material.LONG_GRASS,
+       Material.COMMAND,
+       Material.BEDROCK
+    ));
+    
     /**
      * SettlerCraftMaterials recognized as wood
      */
@@ -31,6 +42,7 @@ public class SettlerCraftMaterials {
         WOOD.put(Material.WOODEN_DOOR, 6.0f);
         WOOD.put(Material.STICK, 0.5f);
         WOOD.put(Material.FENCE, 3.0f);
+        WOOD.put(Material.FENCE_GATE, 4.0f);
         WOOD.put(Material.LADDER, 3.0f);
         WOOD.put(Material.SIGN, 2.5f);
         WOOD.put(Material.SIGN_POST, 2.5f);
@@ -106,6 +118,10 @@ public class SettlerCraftMaterials {
         SANDSTONE.put(Material.SANDSTONE, 1.0f);
         SANDSTONE.put(Material.SANDSTONE_STAIRS, 1.5f);
         SANDSTONE.put(Material.STEP, 0.5f); // DATA == 1
+    }
+    
+    public static boolean isUncraftable(Material material) {
+        return UNCRAFTABLE.contains(material);
     }
 
     public static boolean isBrick(ResourceMaterial block) {

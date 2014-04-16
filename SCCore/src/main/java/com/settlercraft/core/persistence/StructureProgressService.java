@@ -57,7 +57,7 @@ public class StructureProgressService extends AbstractService<StructureProgress>
             session = HibernateUtil.getSession();
             tx = session.beginTransaction();
             StructureProgress progress = structure.getProgress();
-            if(!progress.getResources().isEmpty() || progress.getLayer() == progress.getMaxHeight()) {
+            if(!progress.getResources().isEmpty() || progress.getLayer() == progress.getMaxHeight() - 1) {
                 return false;
             } else {
                 progress.setLayer(progress.getLayer() + 1);

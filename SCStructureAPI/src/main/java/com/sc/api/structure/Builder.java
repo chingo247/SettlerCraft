@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.sc.api.structure;
 
 import com.google.common.base.Preconditions;
@@ -16,8 +15,6 @@ import com.settlercraft.core.persistence.StructureService;
 import com.settlercraft.core.util.WorldUtil;
 import java.util.Iterator;
 import java.util.Set;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -30,18 +27,49 @@ import org.bukkit.entity.Player;
  * @author Chingo
  */
 public class Builder {
-    
-    Builder(){}
-        /**
-     * Removes all blocks (replace with air) that stand in the way of this
+
+    Builder() {
+    }
+
+    /**
+     * Places an unfinished building at target location. The orientation must be
+     * given
+     *
+     * @param player The player
+     * @param direction The direction
+     * @param target The target location of the structure
+     * @param plan The StructurePlan of the structure that will be placed
+     * @return True if the building was succesfully placed and stored in the
+     * database
+     */
+    public boolean placeStructure(Player player, Location target, Direction direction, StructurePlan plan) {
+        StructureService ss = new StructureService();
+        Structure structure = new Structure(player, target, direction, plan);
+        System.out.println("target: " + target);
+        if (ss.overlaps(structure)) {
+            if (player != null && player.isOnline()) {
+                player.sendMessage(Messages.STRUCTURE_OVERLAPS_ANOTHER); // TODO BETTER FEEDBACK
+            }
+            return false;
+        }
+//        ss.save(structure); // CLAIMS Ground (Dimension)!
+//        progress(structure);
+        clearSiteFromBlocks(structure);
+        System.out.println(structure);
+        return true;
+    }
+
+    /**
+     * Removes all blocks (replace them with air) that stand in the way of this
      * building.
      *
-     * @param structure THe structure
+     * @param structure The structure
      */
     public void clearSiteFromBlocks(Structure structure) {
-        Preconditions.checkArgument(structure.getStatus() == Structure.STATE.CLEARING_SITE_OF_BLOCKS);
+//        Preconditions.checkArgument(structure.getStatus() == Structure.STATE.CLEARING_SITE_OF_BLOCKS);
         Direction direction = structure.getDirection();
-        Location target = structure.getDimensionStartLocation();
+        Location start = structure.getDimensionStartLocation();
+        System.out.println(start);
         StructurePlan sp = structure.getPlan();
         SchematicObject schematic = sp.getSchematic();
 
@@ -50,19 +78,19 @@ public class Builder {
         int zMod = mods[1];
 
         for (int y = 0; y < schematic.layers; y++) {
-            for (int z = schematic.length - 1; z > 0; z--) {
+            for (int z = 0; z < schematic.length; z++) {
                 for (int x = 0; x < schematic.width; x++) {
                     Block b;
                     if (direction == Direction.NORTH || direction == Direction.SOUTH) {
-                        b = target.clone().add(x * xMod, y, z * zMod).getBlock();
+                        b = start.clone().add(x * xMod, y, z * zMod).getBlock();
                     } else {
-                        b = target.clone().add(z * zMod, y, x * xMod).getBlock();
+                        b = start.clone().add(z * zMod, y, x * xMod).getBlock();
                     }
-                    b.setType(Material.AIR);
+                    b.setType(Material.REDSTONE_BLOCK);
                 }
             }
         }
-        structure.setStatus(Structure.STATE.CLEARING_SITE_OF_ENTITIES);
+//        structure.setStatus(Structure.STATE.CLEARING_SITE_OF_ENTITIES);
     }
 
     /**
@@ -186,25 +214,6 @@ public class Builder {
     }
 
     /**
-     * Places an unfinished building at target location. The orientation must be
-     * given
-     *
-     * @param structure
-     */
-    public void placeStructure(Structure structure) {
-        StructureService ss = new StructureService();
-        if (ss.overlaps(structure)) {
-            Player player = Bukkit.getServer().getPlayer(structure.getOwner());
-            if (player != null && player.isOnline()) {
-                player.sendMessage(ChatColor.RED + "[SC]: Structure overlaps"); // TODO BETTER FEEDBACK
-            }
-            return;
-        }
-        ss.save(structure); // CLAIMS Ground (Dimension)!
-        progress(structure);
-    }
-
-    /**
      * Instantly constructs a structure
      *
      * @param structure The structure
@@ -238,7 +247,7 @@ public class Builder {
         StructureService structureService = new StructureService();
         structureService.setStatus(structure, Structure.STATE.COMPLETE);
     }
-    
+
     public void progress(Structure structure) {
         switch (structure.getStatus()) {
             case BUILDING_IN_PROGRESS:
@@ -258,46 +267,46 @@ public class Builder {
                 throw new AssertionError("Unreachable");
         }
     }
-    
+
     /**
-      * Builds the corresponding layer of this structure, whether the precoditions are met or not
-      *
-      * @param structure The structure
-      * @param layer The layer to build
-      */
-     public static void buildLayer(Structure structure, int layer) {
-         StructurePlan sp = structure.getPlan();
-         if (layer > sp.getSchematic().layers) {
-             throw new IndexOutOfBoundsException("layer out of bounds");
-         }
- 
-         Iterator<SchematicBlockData> it = sp.getSchematic().getBlocksFromLayer(layer).iterator();
-         SchematicObject schematic = sp.getSchematic();
-         Direction direction = structure.getDirection();
-         Location target = structure.getStructureStartLocation();
- 
-         int[] mods = WorldUtil.getModifiers(direction);
-         int xMod = mods[0];
-         int zMod = mods[1];
- 
-         if (direction == Direction.NORTH || direction == Direction.SOUTH) {
-             for (int z = schematic.length - 1; z >= 0; z--) {
-                 for (int x = 0; x < schematic.width; x++) {
-                     Block b = target.clone().add(x * xMod, layer, z * zMod).getBlock();
-                     SchematicBlockData d = it.next();
-                     b.setType(d.getMaterial());
-                     b.setData(d.getData());
-                 }
-             }
-         } else { // SWAP X AND Z
-             for (int z = schematic.length - 1; z >= 0; z--) {
-                 for (int x = 0; x < schematic.width; x++) {
-                     Block b = target.clone().add(z * zMod, layer, x * xMod).getBlock();
-                     SchematicBlockData d = it.next();
-                     b.setType(d.getMaterial());
-                     b.setData(d.getData());
-                 }
-             }
-         }
-     }
+     * Builds the corresponding layer of this structure, whether the
+     * precoditions are met or not
+     *
+     * @param structure The structure
+     * @param layer The layer to build
+     * @param keepFrame Determines if this should keep the fence at the borders
+     */
+    public static void buildLayer(Structure structure, int layer, boolean keepFrame) {
+        StructurePlan sp = structure.getPlan();
+        if (layer > sp.getSchematic().layers || layer < 0) {
+            throw new IndexOutOfBoundsException("layer doesnt exist");
+        }
+
+        Iterator<SchematicBlockData> it = sp.getSchematic().getBlocksFromLayer(layer).iterator();
+        SchematicObject schematic = sp.getSchematic();
+        Direction direction = structure.getDirection();
+        Location target = structure.getStructureStartLocation();
+
+        int[] mods = WorldUtil.getModifiers(direction);
+        int xMod = mods[0];
+        int zMod = mods[1];
+
+        for (int z = schematic.length - 1; z >= 0; z--) {
+            for (int x = 0; x < schematic.width; x++) {
+                Block b;
+                SchematicBlockData d = it.next();
+                if (keepFrame && d.getMaterial() == Material.AIR
+                        && (z == 0 || z == schematic.length - 1 || x == 0 || x == schematic.width - 1)) {
+                    continue;
+                }
+                if (direction == Direction.NORTH || direction == Direction.SOUTH) {
+                    b = target.clone().add(x * xMod, layer, z * zMod).getBlock();
+                } else {
+                    b = target.clone().add(z * zMod, layer, x * xMod).getBlock();
+                }
+                b.setType(d.getMaterial());
+                b.setData(d.getData());
+            }
+        }
+    }
 }

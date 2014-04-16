@@ -22,8 +22,6 @@ import org.bukkit.entity.Entity;
  */
 public class WorldUtil {
 
-
-
     /**
      * Translates a yaw to direction
      *
@@ -37,7 +35,7 @@ public class WorldUtil {
             return Direction.NORTH;
         } else if (yaw >= 225 && yaw < 315 || yaw >= -135 && yaw < -45) {
             return Direction.EAST;
-        } else /*(yaw >= 315 && yaw < 360 || yaw >= 0 && < 45) */  {
+        } else /*(yaw >= 315 && yaw < 360 || yaw >= 0 && < 45) */ {
             return Direction.SOUTH;
         }
     }
@@ -102,7 +100,6 @@ public class WorldUtil {
         } else /**
          * if(xMod == -1 && zMod == -1 *
          */
-        
         {
             return Direction.WEST;
         }
@@ -154,6 +151,7 @@ public class WorldUtil {
 
     /**
      * Gets all entities within bounding box of the two given locations, where start is the origin
+     *
      * @param start The start location
      * @param end The end location
      * @return All entities within this box
@@ -171,24 +169,25 @@ public class WorldUtil {
         for (int x = 0; x <= Math.max(deltaX, 16); x += 16) {
             for (int z = 0; z <= Math.max(deltaZ, 16); z += 16) {
                 Location l = s.clone().add(x * xMod, 0, z * zMod);
-                    for (Entity e : l.getChunk().getEntities()) {
-                        if (       e.getLocation().getBlockY() >= Math.min(start.getBlockY(), end.getBlockY()) 
-                                && e.getLocation().getBlockY() <= Math.max(start.getBlockY(), end.getBlockY())              
-                                && e.getLocation().getBlockX() >= Math.min(start.getBlockX(), end.getBlockX()) 
-                                && e.getLocation().getBlockX() <= Math.max(start.getBlockX(), end.getBlockX())
-                                && e.getLocation().getBlockZ() >= Math.min(start.getBlockZ(), end.getBlockZ()) 
-                                && e.getLocation().getBlockZ() <= Math.max(start.getBlockZ(), end.getBlockZ()) 
-                                ) {
-                            entities.add(e);
-                        }
+                for (Entity e : l.getChunk().getEntities()) {
+                    if (e.getLocation().getBlockY() >= Math.min(start.getBlockY(), end.getBlockY())
+                            && e.getLocation().getBlockY() <= Math.max(start.getBlockY(), end.getBlockY())
+                            && e.getLocation().getBlockX() >= Math.min(start.getBlockX(), end.getBlockX())
+                            && e.getLocation().getBlockX() <= Math.max(start.getBlockX(), end.getBlockX())
+                            && e.getLocation().getBlockZ() >= Math.min(start.getBlockZ(), end.getBlockZ())
+                            && e.getLocation().getBlockZ() <= Math.max(start.getBlockZ(), end.getBlockZ())) {
+                        entities.add(e);
                     }
+                }
             }
         }
         return entities;
     }
-    
-        /**
-     * Gets all entities between bounding square of the two given locations, where start is the origin
+
+    /**
+     * Gets all entities between bounding square of the two given locations, where start is the
+     * origin
+     *
      * @param start The start location
      * @param end The end location
      * @return All entities within this box
@@ -204,18 +203,18 @@ public class WorldUtil {
         for (int x = 0; x <= deltaX; x += 16) {
             for (int z = 0; z <= deltaZ; z += 16) {
                 Location l = s.clone().add(x * xMod, 0, z * zMod);
-                    for (Entity e : l.getChunk().getEntities()) {
-                        if (       e.getLocation().getBlockX() >= Math.min(start.getBlockX(), end.getBlockX()) 
-                                && e.getLocation().getBlockX() <= Math.max(start.getBlockX(), end.getBlockX())
-                                && e.getLocation().getBlockZ() >= Math.min(start.getBlockZ(), end.getBlockZ()) 
-                                && e.getLocation().getBlockZ() <= Math.max(start.getBlockZ(), end.getBlockZ()) 
-                                ) {
-                            entities.add(e);
-                        }
+                for (Entity e : l.getChunk().getEntities()) {
+                    if (e.getLocation().getBlockX() >= Math.min(start.getBlockX(), end.getBlockX())
+                            && e.getLocation().getBlockX() <= Math.max(start.getBlockX(), end.getBlockX())
+                            && e.getLocation().getBlockZ() >= Math.min(start.getBlockZ(), end.getBlockZ())
+                            && e.getLocation().getBlockZ() <= Math.max(start.getBlockZ(), end.getBlockZ())) {
+                        entities.add(e);
                     }
+                }
             }
         }
         return entities;
     }
-    
+
+
 }

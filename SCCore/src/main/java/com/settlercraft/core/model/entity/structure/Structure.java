@@ -255,7 +255,7 @@ public class Structure implements Serializable {
 
     @Override
     public String toString() {
-        return "id:" + getId() + " owner:" + getOwner() + " plan:" + getPlan();
+        return "id:" + getId() + " owner:" + getOwner() + " plan:" + getPlan() + "direction: " + getDirection();
     }
 
 }

@@ -45,6 +45,10 @@ public class StructureLayerRequirement implements Serializable {
         HashMap<Material, Float> mts = Maps.newHashMap();
         for (SchematicBlockData sbd : blocks) {
             Material m;
+            if(SettlerCraftMaterials.isUncraftable(sbd.getMaterial())) {
+                continue;
+            }
+            
             if (SettlerCraftMaterials.canSimplify(sbd)) { 
                 m = SettlerCraftMaterials.getSimplifiedMaterial(sbd);
             } else {

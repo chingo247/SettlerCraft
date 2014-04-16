@@ -97,7 +97,7 @@ public class SCStructureAPI extends SettlerCraftAPI {
                             if(structureProgressService.nextLayer(structure)) {
                                 System.out.println("NEXT LAYER!");
                                 Bukkit.getPluginManager().callEvent(new LayerCompleteEvent(structure, structure.getProgress().getLayer()));
-                                Builder.buildLayer(structure, completedLayer);
+                                Builder.buildLayer(structure, completedLayer, true);
                             }
                         }
                         Bukkit.getPluginManager().callEvent(new PlayerBuildEvent(structure, player, removedIS));
