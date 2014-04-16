@@ -1,11 +1,8 @@
 package com.settlercraft.core.model.plan.requirement.material;
 
 import java.io.Serializable;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import java.util.Objects;
+import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 import org.bukkit.Material;
 
@@ -14,21 +11,14 @@ import org.bukkit.Material;
  * this material.
  * @author Chingo
  */
-@Entity
+@Embeddable
 public class MaterialResource implements Serializable {
-  @Id
-  @GeneratedValue
-  protected Long id;
   
   /**
    * The material.
    */
   @NotNull
   protected final Material material;
-  
-  @NotNull
-  @ManyToOne(cascade = CascadeType.ALL)
-  protected StructureLayer requirement;
   
   /**
    * The value of this resource
@@ -44,29 +34,20 @@ public class MaterialResource implements Serializable {
 
   /**
    * Constructor.
-   * @param requirement The StructureLayer this StructureResource belongs to
    * @param material The material of this StructureResource
    * @param value The amount that is needed of this resource
    */
-  public MaterialResource(StructureLayer requirement, Material material, int value) {
+  public MaterialResource(Material material, int value) {
     this.material = material;
     this.value = value;
-    this.requirement = requirement;
   }
   
-  /**
-   * Gets the id of this MaterialResource
-   * @return 
-   */
-  public Long getId() {
-    return id;
-  }
 
   /** 
    * Gets the value
    * @return 
    */
-  public int getValue() {
+  public int getAmount() {
     return value;
   }
 
@@ -74,7 +55,7 @@ public class MaterialResource implements Serializable {
    * Sets the value of this resource
    * @param amount The value
    */
-  public void setValue(int amount) {
+  public void setAmount(int amount) {
     this.value = amount;
   }
 
@@ -95,14 +76,30 @@ public class MaterialResource implements Serializable {
     return material;
   }
 
-  /**
-   * Get the material resources of the currentLayer in progress
-   * @return The material resources of the current layer in progress
-   */
-  public StructureLayer getStructureLayer() {
-    return requirement;
-  }
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final MaterialResource other = (MaterialResource) obj;
+        if (this.material != other.material) {
+            return false;
+        }
+        return true;
+    }
 
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 11 * hash + Objects.hashCode(this.material);
+        return hash;
+    }
+
+  
+  
   @Override
    public String toString() {
     return "[Material: " + material + "] : " + value + "]";

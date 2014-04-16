@@ -5,7 +5,9 @@
  */
 package com.sc.api.structure.listeners;
 
-import com.sc.api.structure.recipe.tools.Recipes;
+import com.sc.api.structure.SCStructureAPI;
+import com.sc.api.structure.recipe.Recipes;
+import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.persistence.StructureService;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,8 +16,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 /**
- * DEBUG. Check byte and material values
- *
  * @author Chingo
  */
 public class PlayerListener implements Listener {
@@ -41,15 +41,16 @@ public class PlayerListener implements Listener {
                 && pie.getItem().getItemMeta().getDisplayName() != null
                 && pie.getItem().getItemMeta().getDisplayName().equals(Recipes.CONSTRUCTION_TOOL)) {
             System.out.println("CONSTRUCTION TOOL!");
-            pie.setCancelled(true);                             // Cancel default action which will destroy blocks
+            // Cancel default action which would destroy blocks
+            pie.setCancelled(true);
             if (pie.getAction() != Action.LEFT_CLICK_BLOCK) {
                 return;
             }
             StructureService service = new StructureService();
-            boolean onStructure = service.isOnStructure(pie.getClickedBlock().getLocation());
-            System.out.println("ON STRUCTURE: " + onStructure);
-            if (onStructure) {
-                // BUILD!
+            Structure structure = service.getStructure(pie.getClickedBlock().getLocation());
+            System.out.println("ON STRUCTURE: " + structure);
+            if (structure != null && structure.getStatus() != Structure.STATE.COMPLETE) {
+                SCStructureAPI.build(pie.getPlayer(), structure);
             }
         }
         

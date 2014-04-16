@@ -21,6 +21,10 @@ public class HibernateUtil {
         }
         return factory.openSession();
     }
+    
+    public static Session getCurrentSession() {
+        return factory.getCurrentSession();
+    }
 
     public static AnnotationConfiguration getInitializedConfiguration() {
         if(config == null) {

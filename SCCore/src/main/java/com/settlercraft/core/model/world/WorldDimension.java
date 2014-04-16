@@ -45,42 +45,41 @@ public class WorldDimension {
     @Column(name = "endZ")
     protected int endZ;
 
-    
     /**
      * JPA Constructor.
      */
-    protected WorldDimension() {}
+    protected WorldDimension() {
+    }
 
     /**
      * Constructor when using a structure
+     *
      * @param structure The structure
      */
     public WorldDimension(Structure structure) {
         Direction direction = structure.getDirection();
         Location start = structure.getStructureStartLocation();
         StructurePlan plan = structure.getPlan();
-        
+
         Location s = getStart(start, plan, direction);
         Location e = getEnd(start, plan, direction);
-        this.startX = s.getBlockX();
-        this.startY = s.getBlockY();
-        this.startZ = s.getBlockZ();
-        this.endX = e.getBlockX();
-        this.endY = e.getBlockY();
-        this.endZ = e.getBlockZ();
-        
+        this.startX = Math.min(s.getBlockX(), e.getBlockX());
+        this.startY = Math.min(s.getBlockY(), e.getBlockY());
+        this.startZ = Math.min(s.getBlockZ(), e.getBlockZ());
+        this.endX = Math.max(s.getBlockX(), e.getBlockX());
+        this.endY = Math.max(s.getBlockY(), e.getBlockY());
+        this.endZ = Math.max(s.getBlockZ(), s.getBlockZ());
+
     }
-    
+
     public WorldDimension(Location start, Location end) {
-        this.startX = start.getBlockX();
-        this.startY = start.getBlockY();
-        this.startZ = start.getBlockZ();
-        this.endX = end.getBlockX();
-        this.endY = end.getBlockY();
-        this.endZ = end.getBlockZ();
+        this.startX = Math.min(start.getBlockX(), end.getBlockX());
+        this.startY = Math.min(start.getBlockY(), end.getBlockY());
+        this.startZ = Math.min(start.getBlockZ(), end.getBlockZ());
+        this.endX = Math.max(start.getBlockX(), end.getBlockX());
+        this.endY = Math.max(start.getBlockY(), end.getBlockY());
+        this.endZ = Math.max(start.getBlockZ(), end.getBlockZ());
     }
-    
-    
 
     public int getStartX() {
         return startX;
@@ -130,6 +129,13 @@ public class WorldDimension {
         this.endZ = endZ;
     }
 
+    /**
+     * FIXME
+     * @param start
+     * @param plan
+     * @param direction
+     * @return 
+     */
     private Location getStart(Location start, StructurePlan plan, Direction direction) {
         EnumMap<StructureConfig.RESERVED_SIDE, Integer> reserved = plan.getConfig().getReserved();
         Location target = new Location(start.getWorld(), start.getBlockX(), start.getBlockY(), start.getBlockZ());
@@ -139,12 +145,12 @@ public class WorldDimension {
         int xMd = mods[0];
         int zMd = mods[1];
         Location loc;
-        if (direction == Direction.NORTH || direction == Direction.SOUTH) {
-            loc = target.clone().add(-reserved.get(StructureConfig.RESERVED_SIDE.WEST) * xMd, 0, -reserved.get(StructureConfig.RESERVED_SIDE.SOUTH) * zMd);
-        } else {
-            loc = target.clone().add(-reserved.get(StructureConfig.RESERVED_SIDE.SOUTH) * zMd, 0, -reserved.get(StructureConfig.RESERVED_SIDE.WEST) * xMd);
-        }
-        return loc;
+//        if (direction == Direction.NORTH || direction == Direction.SOUTH) {
+//            loc = target.clone().add(-reserved.get(StructureConfig.RESERVED_SIDE.WEST) * xMd, 0, -reserved.get(StructureConfig.RESERVED_SIDE.SOUTH) * zMd);
+//        } else {
+//            loc = target.clone().add(reserved.get(StructureConfig.RESERVED_SIDE.SOUTH) * zMd, 0, reserved.get(StructureConfig.RESERVED_SIDE.WEST) * xMd);
+//        }
+        return target;
     }
 
     private Location getEnd(Location start, StructurePlan plan, Direction direction) {
@@ -170,5 +176,4 @@ public class WorldDimension {
         return loc;
     }
 
-    
 }

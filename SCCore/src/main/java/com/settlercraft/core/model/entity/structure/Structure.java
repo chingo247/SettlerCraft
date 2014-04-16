@@ -59,7 +59,7 @@ public class Structure implements Serializable {
     
     @Nullable
     @OneToOne(cascade = CascadeType.ALL)
-    private StructureResource progress;
+    private StructureProgress progress;
 
 
     public enum STATE {
@@ -121,7 +121,7 @@ public class Structure implements Serializable {
         this.created = new Date();
         this.worldLocation = new WorldLocation(target);
         this.dimension = new WorldDimension(this);
-        this.progress = new StructureResource(this);
+        this.progress = new StructureProgress(this);
     }
 
     /**
@@ -248,7 +248,7 @@ public class Structure implements Serializable {
         return created;
     }
 
-    public StructureResource getProgress() {
+    public StructureProgress getProgress() {
         return progress;
     }
     

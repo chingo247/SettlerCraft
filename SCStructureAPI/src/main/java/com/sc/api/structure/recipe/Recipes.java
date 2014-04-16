@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.sc.api.structure.recipe.tools;
+package com.sc.api.structure.recipe;
 
 import com.settlercraft.recipe.CShapedRecipe;
 import java.util.Arrays;

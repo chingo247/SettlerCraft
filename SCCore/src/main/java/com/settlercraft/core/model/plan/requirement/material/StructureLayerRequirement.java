@@ -13,44 +13,31 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import org.bukkit.Material;
 
 /**
  *
  * @author Chingo
  */
-@Entity
-public class StructureLayer implements Serializable {
+public class StructureLayerRequirement implements Serializable {
 
-    @Id
-    @GeneratedValue
     private Long id;
 
+    private ArrayList<MaterialResource> resources;
+
     private int layer;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<MaterialResource> resources;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<SpecialResource> specialResources;
-
     /**
      * JPA Constructor.
      */
-    protected StructureLayer() {
+    protected StructureLayerRequirement() {
     }
 
-    StructureLayer(int layer, Collection<SchematicBlockData> blocks) {
+    StructureLayerRequirement(int layer, Collection<SchematicBlockData> blocks) {
         this.layer = layer;
         this.resources = new ArrayList<>();
-        this.specialResources = new ArrayList<>();
         setRequirements(blocks);
     }
 
@@ -75,22 +62,10 @@ public class StructureLayer implements Serializable {
 
     private void setResources(HashMap<Material, Float> mts) {
         for (Entry<Material, Float> e : mts.entrySet()) {
-            resources.add(new MaterialResource(this, e.getKey(), Math.round(e.getValue())));
+            resources.add(new MaterialResource(e.getKey(), Math.round(e.getValue())));
         }
     }
     
-    
-    
-    public int getNeed(Material material, Byte data) {
-        if(!contains(material, data)) {
-            return 0; // NO NEED
-        } else if(getSpecialResource(material, data) != null) {
-            return getSpecialResource(material, data).getValue();
-        } else {
-            return getResource(material).getValue();
-        }
-    }
-
     public int getLayer() {
         return layer;
     }
@@ -98,17 +73,16 @@ public class StructureLayer implements Serializable {
     public List<MaterialResource> getResources() {
         return resources;
     }
-
-    public List<SpecialResource> getSpecialResources() {
-        return specialResources;
-    }
-
-    public boolean contains(Material material, Byte data) {
-        if (specialResources.contains(new SpecialResource(this, material, data, 0))) {
-            return true;
-        } else {
-            return resources.contains(new MaterialResource(this, material, 0));
+    
+    public boolean removeResource(MaterialResource resource) {
+        Iterator<MaterialResource> it = resources.iterator();
+        while (it.hasNext()) {
+            if(it.next().material.equals(resource.material)) {
+                it.remove();
+                return true;
+            }
         }
+        return false;
     }
 
     public MaterialResource getResource(Material material) {
@@ -120,14 +94,6 @@ public class StructureLayer implements Serializable {
         return null;
     }
 
-    public SpecialResource getSpecialResource(Material material, Byte data) {
-        for (SpecialResource s : specialResources) {
-            if (s.getData().equals(data) && s.getMaterial() == material) {
-                return s;
-            }
-        }
-        return null;
-    }
 
     @Override
     public String toString() {
@@ -136,15 +102,14 @@ public class StructureLayer implements Serializable {
         for (MaterialResource r : resources) {
             sb.append(r).append("\n");
         }
-        sb.append("Special Resources:\n");
-        for (SpecialResource r : specialResources) {
-            sb.append(r).append("\n");
-        }
         return sb.toString();
     }
 
     public Long getId() {
         return id;
     }
+
+    
+    
 
 }

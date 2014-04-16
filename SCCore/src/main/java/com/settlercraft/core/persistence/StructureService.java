@@ -75,15 +75,15 @@ public class StructureService extends AbstractService<Structure> {
      Session session = HibernateUtil.getSession();
      JPQLQuery query = new HibernateQuery(session);
      
-      
+    
       Structure structure = query.from(qStructure)
               .where(qStructure.worldLocation().world.eq(location.getWorld().getName())
-                .and(qStructure.dimension().startX.goe(location.getBlockX()))
-                .and(qStructure.dimension().endX.loe(location.getBlockX()))
-                .and(qStructure.dimension().startZ.goe(location.getBlockZ()))
-                .and(qStructure.dimension().endZ.loe(location.getBlockZ()))
-                .and(qStructure.dimension().startY.goe(location.getBlockY()))
-                .and(qStructure.dimension().endY.loe(location.getBlockY()))
+                .and(qStructure.dimension().startX.loe(location.getBlockX()))
+                .and(qStructure.dimension().endX.goe(location.getBlockX()))
+                .and(qStructure.dimension().startZ.loe(location.getBlockZ()))
+                .and(qStructure.dimension().endZ.goe(location.getBlockZ()))
+                .and(qStructure.dimension().startY.loe(location.getBlockY()))
+                .and(qStructure.dimension().endY.goe(location.getBlockY()))
                       
               ).uniqueResult(qStructure);
 
