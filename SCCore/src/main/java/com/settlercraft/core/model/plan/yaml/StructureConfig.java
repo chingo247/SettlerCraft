@@ -23,11 +23,12 @@ public class StructureConfig {
     private final EnumMap<RESERVED_SIDE, Integer> reserved;
 
     public enum RESERVED_SIDE {
-
         NORTH,
         EAST,
         SOUTH,
-        WEST
+        WEST,
+        UP,
+        DOWN
     }
 
     StructureConfig(String name,

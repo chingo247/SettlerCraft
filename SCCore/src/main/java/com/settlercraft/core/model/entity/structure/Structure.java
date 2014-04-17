@@ -40,7 +40,7 @@ public class Structure implements Serializable {
     private Long id;
 
     @NotNull
-    private String owner; //FIXME Create Owner class
+    private String owner; //TODO Create Owner class
 
     @NotNull
     @NotEmpty
@@ -64,6 +64,8 @@ public class Structure implements Serializable {
     @OneToOne(cascade = CascadeType.ALL)
     private StructureProgress progress;
 
+    @Embedded
+    private ReservedArea reserved;
 
     public enum STATE {
 
@@ -124,6 +126,7 @@ public class Structure implements Serializable {
         this.created = new Date();
         this.worldLocation = new WorldLocation(target);
         this.dimension = new WorldDimension(this);
+        this.reserved = new ReservedArea(this);
         this.progress = new StructureProgress(this);
     }
 
@@ -218,6 +221,12 @@ public class Structure implements Serializable {
     public StructureProgress getProgress() {
         return progress;
     }
+
+    public ReservedArea getReserved() {
+        return reserved;
+    }
+    
+    
     
 
     @Override
