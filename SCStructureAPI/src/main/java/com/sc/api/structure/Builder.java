@@ -45,17 +45,14 @@ public class Builder {
     public boolean placeStructure(Player player, Location target, Direction direction, StructurePlan plan) {
         StructureService ss = new StructureService();
         Structure structure = new Structure(player, target, direction, plan);
-        System.out.println("target: " + target);
         if (ss.overlaps(structure)) {
             if (player != null && player.isOnline()) {
                 player.sendMessage(Messages.STRUCTURE_OVERLAPS_ANOTHER); // TODO BETTER FEEDBACK
             }
             return false;
         }
-//        ss.save(structure); // CLAIMS Ground (Dimension)!
-//        progress(structure);
-        clearSiteFromBlocks(structure);
-        System.out.println(structure);
+        ss.save(structure); // CLAIMS Ground (Dimension)!
+        progress(structure);
         return true;
     }
 
@@ -66,10 +63,8 @@ public class Builder {
      * @param structure The structure
      */
     public void clearSiteFromBlocks(Structure structure) {
-//        Preconditions.checkArgument(structure.getStatus() == Structure.STATE.CLEARING_SITE_OF_BLOCKS);
         Direction direction = structure.getDirection();
-        Location start = structure.getDimensionStartLocation();
-        System.out.println(start);
+        Location location = structure.getLocation();
         StructurePlan sp = structure.getPlan();
         SchematicObject schematic = sp.getSchematic();
 
@@ -78,19 +73,18 @@ public class Builder {
         int zMod = mods[1];
 
         for (int y = 0; y < schematic.layers; y++) {
-            for (int z = 0; z < schematic.length; z++) {
+            for (int z = schematic.length - 1; z >= 0; z--) {
                 for (int x = 0; x < schematic.width; x++) {
                     Block b;
                     if (direction == Direction.NORTH || direction == Direction.SOUTH) {
-                        b = start.clone().add(x * xMod, y, z * zMod).getBlock();
+                        b = location.clone().add(x * xMod, y, z * zMod).getBlock();
                     } else {
-                        b = start.clone().add(z * zMod, y, x * xMod).getBlock();
+                        b = location.clone().add(z * zMod, y, x * xMod).getBlock();
                     }
-                    b.setType(Material.REDSTONE_BLOCK);
+                    b.setType(Material.AIR);
                 }
             }
         }
-//        structure.setStatus(Structure.STATE.CLEARING_SITE_OF_ENTITIES);
     }
 
     /**
@@ -103,7 +97,7 @@ public class Builder {
         Preconditions.checkArgument(structure.getStatus() == Structure.STATE.PLACING_FOUNDATION);
         SchematicObject schematic = structure.getPlan().getSchematic();
         Direction direction = structure.getDirection();
-        Location target = structure.getStructureStartLocation();
+        Location target = structure.getLocation();
 
         int[] mods = WorldUtil.getModifiers(direction);
         int xMod = mods[0];
@@ -129,7 +123,7 @@ public class Builder {
      */
     public void clearSiteFromEntities(Structure structure) {
         Preconditions.checkArgument(structure.getStatus() == Structure.STATE.CLEARING_SITE_OF_ENTITIES);
-        Set<Entity> entities = WorldUtil.getEntitiesWithin(structure.getStructureStartLocation(), structure.getStructureEndLocation());
+        Set<Entity> entities = WorldUtil.getEntitiesWithin(structure.getDimension().getStart(), structure.getDimension().getEnd());
         System.out.println(entities.size());
         for (Entity e : entities) {
             System.out.println("on lot!");
@@ -148,48 +142,14 @@ public class Builder {
         int xMod = mods[0];
         int zMod = mods[1];
 
-        System.out.println("xMod: " + xMod + " zMod: " + zMod);
-        System.out.println(structure.getDimensionStartLocation() + " : " + structure.getDimensionEndLocation());
-
-        // TODO Improve target location
-        Location l;
-        if (structure.getDirection() == Direction.NORTH || structure.getDirection() == Direction.SOUTH) {
-            if (entLoc.distance(structure.getDimensionStartLocation()) < entLoc.distance(structure.getDimensionEndLocation())) {
-                l = structure.getDimensionStartLocation().clone().add(xMod * -threshold, 0, zMod * -threshold);
-            } else {
-                l = structure.getDimensionEndLocation().clone().add(xMod * threshold, 0, zMod * threshold);
-            }
-        } else {
-            if (entLoc.distance(structure.getDimensionStartLocation()) < entLoc.distance(structure.getDimensionEndLocation())) {
-                l = structure.getDimensionStartLocation().clone().add(zMod * -threshold, 0, xMod * -threshold);
-            } else {
-                l = structure.getDimensionEndLocation().clone().add(zMod * threshold, 0, xMod * threshold);
-            }
-        }
-
-        StructureService ss = new StructureService();
-        Structure s = ss.getStructure(l);
-        if (s != null && !s.getId().equals(structure.getId())) {
-            moveEntityFromLot(s, entity);
-        } else {
-            Location target = l.getWorld().getHighestBlockAt(l.getBlockX(), l.getBlockY()).getLocation();
-            if (target.getBlock().getType() == Material.LAVA) {
-                //TODO moveToAlternative location
-                System.out.println("TARGET BLOCK WAS LAVA!!!");
-            } else {
-                entity.teleport(target.clone().add(0, 1, 0));
-                System.out.println("target: " + l);
-                l.getBlock().setType(Material.STONE);
-            }
-        }
+        
     }
 
     public void placeFrame(Structure structure) {
         Preconditions.checkArgument(structure.getStatus() == Structure.STATE.PLACING_FRAME);
         SchematicObject schematic = structure.getPlan().getSchematic();
-        Preconditions.checkArgument(schematic.layers >= 2);
         Direction direction = structure.getDirection();
-        Location target = structure.getStructureStartLocation();
+        Location target = structure.getLocation();
         int[] mods = WorldUtil.getModifiers(direction);
         int xMod = mods[0];
         int zMod = mods[1];
@@ -221,10 +181,9 @@ public class Builder {
     public void instantBuildStructure(Structure structure) {
         Preconditions.checkArgument(structure.getStatus() != Structure.STATE.COMPLETE);
         SchematicObject schematic = structure.getPlan().getSchematic();
-        Preconditions.checkArgument(schematic.layers >= 2);
         Iterator<SchematicBlockData> it = schematic.getBlocksSorted().iterator();
         Direction direction = structure.getDirection();
-        Location target = structure.getStructureStartLocation();
+        Location target = structure.getLocation();
         int[] mods = WorldUtil.getModifiers(direction);
         int xMod = mods[0];
         int zMod = mods[1];
@@ -256,6 +215,7 @@ public class Builder {
                 return; // Structure Complete Event!
             case CLEARING_SITE_OF_BLOCKS:
                 clearSiteFromBlocks(structure);
+                structure.setStatus(Structure.STATE.CLEARING_SITE_OF_ENTITIES);
             case CLEARING_SITE_OF_ENTITIES:
                 clearSiteFromEntities(structure);
             case PLACING_FOUNDATION:
@@ -285,7 +245,7 @@ public class Builder {
         Iterator<SchematicBlockData> it = sp.getSchematic().getBlocksFromLayer(layer).iterator();
         SchematicObject schematic = sp.getSchematic();
         Direction direction = structure.getDirection();
-        Location target = structure.getStructureStartLocation();
+        Location target = structure.getLocation();
 
         int[] mods = WorldUtil.getModifiers(direction);
         int xMod = mods[0];

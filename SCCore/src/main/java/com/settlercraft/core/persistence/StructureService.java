@@ -97,7 +97,7 @@ public class StructureService extends AbstractService<Structure> {
      JPQLQuery query = new HibernateQuery(session);
       
       boolean overlaps = query.from(qStructure)
-              .where(qStructure.worldLocation().world.eq(structure.getStructureStartLocation().getWorld().getName())
+              .where(qStructure.worldLocation().world.eq(structure.getLocation().getWorld().getName())
                       // Y between?
                       .and(qStructure.dimension().startY.between(structure.getDimension().getStartY(), structure.getDimension().getEndY())
                       .or(qStructure.dimension().endY.between(structure.getDimension().getStartY(), structure.getDimension().getEndY())))

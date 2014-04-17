@@ -5,7 +5,6 @@ import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
 import com.settlercraft.core.manager.StructurePlanManager;
 import com.settlercraft.core.model.plan.StructurePlan;
-import com.settlercraft.core.model.plan.schematic.SchematicObject;
 import com.settlercraft.core.model.world.Direction;
 import com.settlercraft.core.model.world.WorldDimension;
 import com.settlercraft.core.model.world.WorldLocation;
@@ -13,7 +12,9 @@ import com.settlercraft.core.util.WorldUtil;
 import java.io.Serializable;
 import java.util.Date;
 import javax.annotation.Nullable;
+import javax.persistence.AttributeOverride;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -52,9 +53,11 @@ public class Structure implements Serializable {
     private int zMod;
 
     @Embedded
+    @AttributeOverride(name = "world", column = @Column(name = "loc_world"))
     private WorldLocation worldLocation;
 
     @Embedded
+    @AttributeOverride(name = "world", column = @Column(name = "dim_world"))
     private WorldDimension dimension;
     
     @Nullable
@@ -192,43 +195,8 @@ public class Structure implements Serializable {
      *
      * @return The building location
      */
-    public Location getStructureStartLocation() {
+    public Location getLocation() {
         return new Location(Bukkit.getWorld(worldLocation.getWorld()), worldLocation.getX(), worldLocation.getY(), worldLocation.getZ());
-    }
-
-    public Location getStructureEndLocation() {
-        SchematicObject schem = getPlan().getSchematic();
-        Location target = getStructureStartLocation();
-        Direction direction = WorldUtil.getDirection(xMod, zMod);
-
-        int[] mods = WorldUtil.getModifiers(direction);
-        int xMd = mods[0];
-        int zMd = mods[1];
-        Location loc;
-        if (direction == Direction.NORTH || direction == Direction.SOUTH) {
-            loc = target.clone().add((schem.width - 1) * xMd, (schem.layers - 1), (schem.length - 1) * zMd);
-        } else {
-            loc = target.clone().add((schem.length - 1) * zMd, (schem.layers - 1), (schem.width - 1) * xMd);
-        }
-        return loc;
-    }
-
-    /**
-     * Gets the start location the structure dimension
-     *
-     * @return The startlocation of this structure
-     */
-    public Location getDimensionStartLocation() {
-        return new Location(Bukkit.getWorld(worldLocation.getWorld()), dimension.getStartX(), dimension.getStartY(), dimension.getStartZ());
-    }
-
-    /**
-     * Gets the end location of the structure dimension
-     *
-     * @return
-     */
-    public Location getDimensionEndLocation() {
-        return new Location(Bukkit.getWorld(worldLocation.getWorld()), dimension.getEndX(), dimension.getEndY(), dimension.getEndZ());
     }
 
     public WorldDimension getDimension() {
@@ -240,7 +208,6 @@ public class Structure implements Serializable {
     }
 
     public final void setStatus(STATE status) {
-        System.out.println(this + " changed state: " + status);
         this.status = status;
     }
 

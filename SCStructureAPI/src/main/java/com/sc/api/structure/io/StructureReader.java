@@ -30,7 +30,6 @@ public class StructureReader {
      * @throws InvalidStructurePlanException When the config file has missing or invalid nodes.
      */
     public StructurePlan assemble(File schematic, File structureYAML) throws UnsupportedStructureException, InvalidStructurePlanException {
-        System.out.println(schematic.getAbsolutePath());
         SchematicReader sr = new SchematicReader();
         SchematicObject obj = sr.readFile(schematic);
         YamlConfiguration structureInfo = YamlConfiguration.loadConfiguration(structureYAML);

@@ -204,7 +204,7 @@ public class WorldUtil {
             for (int z = 0; z <= deltaZ; z += 16) {
                 Location l = s.clone().add(x * xMod, 0, z * zMod);
                 for (Entity e : l.getChunk().getEntities()) {
-                    if (e.getLocation().getBlockX() >= Math.min(start.getBlockX(), end.getBlockX())
+                    if (       e.getLocation().getBlockX() >= Math.min(start.getBlockX(), end.getBlockX())
                             && e.getLocation().getBlockX() <= Math.max(start.getBlockX(), end.getBlockX())
                             && e.getLocation().getBlockZ() >= Math.min(start.getBlockZ(), end.getBlockZ())
                             && e.getLocation().getBlockZ() <= Math.max(start.getBlockZ(), end.getBlockZ())) {

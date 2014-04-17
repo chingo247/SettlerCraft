@@ -25,7 +25,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 public class StructurePlanLoader {
 
     public void load(File buildingFolder) throws InvalidStructurePlanException {
-        System.out.println(buildingFolder.getAbsolutePath());
         String[] extensions = {"yml"};
         Iterator<File> it = FileUtils.iterateFiles(buildingFolder, extensions, true);
         

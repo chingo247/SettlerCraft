@@ -1,18 +1,14 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.settlercraft.core.model.world;
 
 import com.avaje.ebean.validation.NotNull;
+import com.google.common.base.Preconditions;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.plan.StructurePlan;
 import com.settlercraft.core.model.plan.schematic.SchematicObject;
-import com.settlercraft.core.model.plan.yaml.StructureConfig;
 import com.settlercraft.core.util.WorldUtil;
-import java.util.EnumMap;
 import javax.persistence.Column;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 /**
@@ -20,30 +16,34 @@ import org.bukkit.Location;
  * @author Chingo
  */
 public class WorldDimension {
+    
+    @NotNull
+    @Column(name = "world")
+    protected String world;
 
     @NotNull
     @Column(name = "startX")
-    protected int startX;
+    private int startX;
 
     @NotNull
     @Column(name = "startY")
-    protected int startY;
+    private int startY;
 
     @NotNull
     @Column(name = "startZ")
-    protected int startZ;
+    private int startZ;
 
     @NotNull
     @Column(name = "endX")
-    protected int endX;
+    private int endX;
 
     @NotNull
     @Column(name = "endY")
-    protected int endY;
+    private int endY;
 
     @NotNull
     @Column(name = "endZ")
-    protected int endZ;
+    private int endZ;
 
     
     /**
@@ -52,32 +52,34 @@ public class WorldDimension {
     protected WorldDimension() {}
 
     /**
-     * Constructor when using a structure
+     * Constructor.
      * @param structure The structure
      */
     public WorldDimension(Structure structure) {
         Direction direction = structure.getDirection();
-        Location start = structure.getStructureStartLocation();
         StructurePlan plan = structure.getPlan();
+        Location s = structure.getLocation();
+        Location e = getEnd(s, plan, direction);
         
-        Location s = getStart(start, plan, direction);
-        Location e = getEnd(start, plan, direction);
-        this.startX = s.getBlockX();
-        this.startY = s.getBlockY();
-        this.startZ = s.getBlockZ();
-        this.endX = e.getBlockX();
-        this.endY = e.getBlockY();
-        this.endZ = e.getBlockZ();
+        this.startX = Math.min(s.getBlockX(), e.getBlockX());
+        this.startY = Math.min(s.getBlockY(), e.getBlockY());
+        this.startZ = Math.min(s.getBlockZ(), e.getBlockZ());
+        this.endX = Math.max(s.getBlockX(), e.getBlockX());
+        this.endY = Math.max(s.getBlockY(), e.getBlockY());
+        this.endZ = Math.max(s.getBlockZ(), e.getBlockZ());
+        this.world = structure.getLocation().getWorld().getName();
         
     }
     
     public WorldDimension(Location start, Location end) {
-        this.startX = start.getBlockX();
-        this.startY = start.getBlockY();
-        this.startZ = start.getBlockZ();
-        this.endX = end.getBlockX();
-        this.endY = end.getBlockY();
-        this.endZ = end.getBlockZ();
+        Preconditions.checkArgument(start.getWorld().getName().equals(end.getWorld().getName()));
+        this.startX = Math.min(start.getBlockX(), end.getBlockX());
+        this.startY = Math.min(start.getBlockY(), end.getBlockY());
+        this.startZ = Math.min(start.getBlockZ(), end.getBlockZ());
+        this.endX = Math.max(start.getBlockX(), end.getBlockX());
+        this.endY = Math.max(start.getBlockY(), end.getBlockY());
+        this.endZ = Math.max(start.getBlockZ(), end.getBlockZ());
+        this.world = start.getWorld().getName();
     }
     
     
@@ -130,25 +132,7 @@ public class WorldDimension {
         this.endZ = endZ;
     }
 
-    private Location getStart(Location start, StructurePlan plan, Direction direction) {
-        EnumMap<StructureConfig.RESERVED_SIDE, Integer> reserved = plan.getConfig().getReserved();
-        Location target = new Location(start.getWorld(), start.getBlockX(), start.getBlockY(), start.getBlockZ());
-
-        // Calculate Building Start + reserved Spots
-        int[] mods = WorldUtil.getModifiers(direction);
-        int xMd = mods[0];
-        int zMd = mods[1];
-        Location loc;
-        if (direction == Direction.NORTH || direction == Direction.SOUTH) {
-            loc = target.clone().add(-reserved.get(StructureConfig.RESERVED_SIDE.WEST) * xMd, 0, -reserved.get(StructureConfig.RESERVED_SIDE.SOUTH) * zMd);
-        } else {
-            loc = target.clone().add(-reserved.get(StructureConfig.RESERVED_SIDE.SOUTH) * zMd, 0, -reserved.get(StructureConfig.RESERVED_SIDE.WEST) * xMd);
-        }
-        return loc;
-    }
-
     private Location getEnd(Location start, StructurePlan plan, Direction direction) {
-        EnumMap<StructureConfig.RESERVED_SIDE, Integer> reserved = plan.getConfig().getReserved();
         SchematicObject schem = plan.getSchematic();
 
         // Calculate Building end
@@ -157,7 +141,6 @@ public class WorldDimension {
                 start.getBlockY(),
                 start.getBlockZ());   // z Structure End
 
-        // Calculate Building end + Reserved Spots
         int[] mods = WorldUtil.getModifiers(direction);
         int xMd = mods[0];
         int zMd = mods[1];
@@ -169,6 +152,13 @@ public class WorldDimension {
         }
         return loc;
     }
+    
+    public Location getStart() {
+        return new Location(Bukkit.getWorld(world), startX, startY, startZ);
+    }
 
+    public Location getEnd() {
+        return new Location(Bukkit.getWorld(world), endX, endY, endZ);
+    }
     
 }
