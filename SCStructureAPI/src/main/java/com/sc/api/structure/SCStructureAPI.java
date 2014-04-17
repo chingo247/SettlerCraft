@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -71,11 +72,13 @@ public class SCStructureAPI extends SettlerCraftAPI {
     @Override
     public void init(JavaPlugin plugin) {
         loadStructures(plugin.getDataFolder().getAbsoluteFile());
+        StructureValidator.validateStructures();
         setupListeners(plugin);
         setupRecipes(plugin);
     }
 
     public static void build(Player player, Structure structure) {
+        
         StructureProgressService structureProgressService = new StructureProgressService();
         List<MaterialResource> resources = structure.getProgress().getResources();
         Iterator<MaterialResource> lit = resources.iterator();
@@ -97,7 +100,7 @@ public class SCStructureAPI extends SettlerCraftAPI {
                             if(structureProgressService.nextLayer(structure)) {
                                 System.out.println("NEXT LAYER!");
                                 Bukkit.getPluginManager().callEvent(new LayerCompleteEvent(structure, structure.getProgress().getLayer()));
-                                Builder.buildLayer(structure, completedLayer, true);
+                                SCStructureAPI.getBuilder().buildLayer(structure, completedLayer, true);
                             }
                         }
                         Bukkit.getPluginManager().callEvent(new PlayerBuildEvent(structure, player, removedIS));
@@ -110,6 +113,9 @@ public class SCStructureAPI extends SettlerCraftAPI {
     }
 
     public static Builder getBuilder() {
+        for(World world : Bukkit.getServer().getWorlds()){
+            world.getWorldFolder().lastModified();
+        }
         return new Builder();
     }
 

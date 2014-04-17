@@ -2,6 +2,7 @@ package com.settlercraft.core.model.entity.structure;
 
 import com.settlercraft.core.model.plan.requirement.material.MaterialResource;
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -9,6 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+import javax.persistence.Version;
 import org.hibernate.annotations.CollectionOfElements;
 
 /**
@@ -31,6 +33,9 @@ public class StructureProgress implements Serializable {
     
     @CollectionOfElements(fetch = FetchType.EAGER)
     private List<MaterialResource> resources;
+    
+    @Version
+    private Timestamp lastModified;
 
     /**
      * JPA Constructor.
@@ -71,6 +76,12 @@ public class StructureProgress implements Serializable {
     public Long getId() {
         return id;
     }
+
+    public Timestamp getLastModified() {
+        return lastModified;
+    }
+    
+    
 
     @Override
     public String toString() {

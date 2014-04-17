@@ -236,7 +236,7 @@ public class Builder {
      * @param layer The layer to build
      * @param keepFrame Determines if this should keep the fence at the borders
      */
-    public static void buildLayer(Structure structure, int layer, boolean keepFrame) {
+    public void buildLayer(Structure structure, int layer, boolean keepFrame) {
         StructurePlan sp = structure.getPlan();
         if (layer > sp.getSchematic().layers || layer < 0) {
             throw new IndexOutOfBoundsException("layer doesnt exist");
@@ -246,7 +246,6 @@ public class Builder {
         SchematicObject schematic = sp.getSchematic();
         Direction direction = structure.getDirection();
         Location target = structure.getLocation();
-
         int[] mods = WorldUtil.getModifiers(direction);
         int xMod = mods[0];
         int zMod = mods[1];
@@ -267,6 +266,12 @@ public class Builder {
                 b.setType(d.getMaterial());
                 b.setData(d.getData());
             }
+        }
+    }
+    
+    public void buildToLayer(Structure structure, int layer, boolean keepFrame) {
+        for(int i = 0; i < layer; i++) {
+            buildLayer(structure, layer, keepFrame);
         }
     }
 }

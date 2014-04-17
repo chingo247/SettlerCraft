@@ -10,6 +10,7 @@ import com.settlercraft.core.model.world.WorldDimension;
 import com.settlercraft.core.model.world.WorldLocation;
 import com.settlercraft.core.util.WorldUtil;
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Date;
 import javax.annotation.Nullable;
 import javax.persistence.AttributeOverride;
@@ -21,8 +22,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.Version;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -97,14 +97,18 @@ public class Structure implements Serializable {
 
     private STATE status;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date created;
+    private Timestamp created;
+    
+    @Version
+    private Timestamp lastModified;
 
     /**
      * JPA Constructor
      */
     protected Structure() {
     }
+    
+    
 
     /**
      * Constructor.
@@ -123,7 +127,7 @@ public class Structure implements Serializable {
         this.xMod = modifiers[0];
         this.zMod = modifiers[1];
         setStatus(STATE.CLEARING_SITE_OF_BLOCKS);
-        this.created = new Date();
+        this.created = new Timestamp(new Date().getTime());
         this.worldLocation = new WorldLocation(target);
         this.dimension = new WorldDimension(this);
         this.reserved = new ReservedArea(this);
@@ -138,6 +142,8 @@ public class Structure implements Serializable {
     public Long getId() {
         return id;
     }
+    
+
 
     /**
      * Gets the name of the owner of this structure Owner may be a Player or NPC
@@ -217,6 +223,12 @@ public class Structure implements Serializable {
     public Date getCreated() {
         return created;
     }
+
+    public Timestamp getLastModified() {
+        return lastModified;
+    }
+    
+    
 
     public StructureProgress getProgress() {
         return progress;
