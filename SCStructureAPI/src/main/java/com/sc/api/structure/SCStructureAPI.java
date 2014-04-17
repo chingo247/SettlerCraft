@@ -9,6 +9,7 @@ import com.sc.api.structure.event.LayerCompleteEvent;
 import com.sc.api.structure.event.PlayerBuildEvent;
 import com.sc.api.structure.exception.InvalidStructurePlanException;
 import com.sc.api.structure.listeners.PlayerListener;
+import com.sc.api.structure.listeners.StructureListener;
 import com.sc.api.structure.listeners.StructurePlanListener;
 import com.sc.api.structure.recipe.Recipes;
 import com.settlercraft.core.SettlerCraftAPI;
@@ -42,6 +43,7 @@ public class SCStructureAPI extends SettlerCraftAPI {
     public void setupListeners(JavaPlugin plugin) {
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(plugin), plugin);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), plugin);
+        Bukkit.getPluginManager().registerEvents(new StructureListener(), plugin);
     }
 
     @Override
@@ -72,7 +74,6 @@ public class SCStructureAPI extends SettlerCraftAPI {
     @Override
     public void init(JavaPlugin plugin) {
         loadStructures(plugin.getDataFolder().getAbsoluteFile());
-        StructureValidator.validateStructures();
         setupListeners(plugin);
         setupRecipes(plugin);
     }

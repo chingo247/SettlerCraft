@@ -7,6 +7,7 @@ package com.sc.api.structure.event;
 
 import com.settlercraft.core.model.entity.structure.Structure;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -36,5 +37,16 @@ public class PlayerBuildEvent extends BuildEvent {
      */
     public Player getPlayer() {
         return player;
+    }
+    
+    private static final HandlerList handlers = new HandlerList();
+
+    @Override
+    public HandlerList getHandlers() {
+        return handlers;
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 }

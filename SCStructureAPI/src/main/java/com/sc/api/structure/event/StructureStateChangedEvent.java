@@ -8,6 +8,7 @@ package com.sc.api.structure.event;
 
 import com.settlercraft.core.event.SettlerCraftEvent;
 import com.settlercraft.core.model.entity.structure.Structure;
+import org.bukkit.event.HandlerList;
 
 /**
  *
@@ -31,5 +32,12 @@ public class StructureStateChangedEvent extends SettlerCraftEvent {
      */
     public Structure getStructure() {
         return structure;
+    }
+    
+    private static final HandlerList handlers = new HandlerList();
+    
+    @Override
+    public HandlerList getHandlers() {
+        return handlers;
     }
 }

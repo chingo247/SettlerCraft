@@ -8,6 +8,7 @@ package com.sc.api.structure.event;
 
 import com.settlercraft.core.model.entity.structure.Structure;
 import net.citizensnpcs.api.npc.NPC;
+import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 
 
@@ -37,4 +38,14 @@ public class NPCBuildEvent extends BuildEvent{
         return npc;
     }
     
+    private static final HandlerList handlers = new HandlerList();
+
+    @Override
+    public HandlerList getHandlers() {
+        return handlers;
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
 }

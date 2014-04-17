@@ -270,7 +270,7 @@ public class Builder {
     }
     
     public void buildToLayer(Structure structure, int layer, boolean keepFrame) {
-        for(int i = 0; i < layer; i++) {
+        for(int i = 0; i < layer+1; i++) {
             buildLayer(structure, layer, keepFrame);
         }
     }
