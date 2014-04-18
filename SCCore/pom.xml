@@ -35,11 +35,11 @@
         </plugins>
     </build>
     <repositories>
-        <!--SQLITE DIALECT-->
+        <!--        SQLITE DIALECT
         <repository>
             <id>hibernatesqlite-maven</id>
             <url>https://hibernate-sqlite.googlecode.com/svn/trunk/mavenrepo</url>
-        </repository>
+        </repository>-->
         <!--Bukkit Repo-->
         <repository>
             <id>bukkit-repo</id>
@@ -95,14 +95,14 @@
             <version>2.4</version>
         </dependency>
         
-        <!-- SQLite database JDBC -->
+<!--         SQLite database JDBC 
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.6.0</version>
-        </dependency>
+        </dependency>-->
         
-        <!-- hibernate sqlite dialect -->
+        <!--         hibernate sqlite dialect 
         <dependency>
             <groupId>com.applerao</groupId>
             <artifactId>hibernatesqlite</artifactId>
@@ -113,7 +113,7 @@
                     <artifactId>hibernate</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
+        </dependency>-->
         
         <!-- hibernate jars -->
         <dependency>
@@ -180,6 +180,12 @@
             <groupId>javax.transaction</groupId>
             <artifactId>jta</artifactId>
             <version>1.1</version>
+        </dependency>
+        <!-- jar that contains the HSQLDB driver class  -->
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>2.3.2</version>
         </dependency>
    
         <!-- QueryDSL Start -->

@@ -5,12 +5,14 @@
 <hibernate-configuration>
     <session-factory>
         <property name="hibernate.bytecode.use_reflection_optimizer">false</property>
-        <property name="hibernate.connection.driver_class">org.sqlite.JDBC</property>
+        <property name="hibernate.connection.driver_class">org.hsqldb.jdbcDriver</property>
         <property name="hibernate.connection.password">root</property>
-        <property name="hibernate.connection.url">jdbc:sqlite:plugins/SettlerCraft/settlercraft.db</property>
+        <!--<property name="hibernate.connection.url">jdbc:hsqldb:mem:plugins/SettlerCraft/settlercraft</property>--> 
+        <property name="connection.url">jdbc:hsqldb:file:plugins/SettlerCraft/settlerdb;shutdown=true;hsqldb.write_delay=false;</property>
         <property name="hibernate.connection.username">root</property>
-        <property name="dialect">com.applerao.hibernatesqlite.dialect.SQLiteDialect</property>
-        <property name="show_sql">false</property>
+        <!-- SQL dialect -->
+        <property name="dialect">org.hibernate.dialect.HSQLDialect</property>
+        <property name="show_sql">true</property>
         <property name="hibernate.hbm2ddl.auto">update</property>
 
     </session-factory>
