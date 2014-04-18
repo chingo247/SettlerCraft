@@ -35,12 +35,12 @@ public abstract class SettlerCraftAPI {
      * Setup all recipes for this api
      * @param plugin The plugin
      */
-    public abstract void setupRecipes(JavaPlugin plugin);
+    protected abstract void setupRecipes(JavaPlugin plugin);
     /**
      * Setup all listeners for this api
      * @param plugin The plugin
      */
-    public abstract void setupListeners(JavaPlugin plugin);
+    protected abstract void setupListeners(JavaPlugin plugin);
 
     /**
      * Completely initializes this api

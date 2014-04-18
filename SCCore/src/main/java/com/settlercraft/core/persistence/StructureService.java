@@ -6,7 +6,7 @@ import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.settlercraft.core.model.entity.structure.QStructure;
 import com.settlercraft.core.model.entity.structure.ReservedArea;
 import com.settlercraft.core.model.entity.structure.Structure;
-import com.settlercraft.core.model.entity.structure.Structure.STATE;
+import com.settlercraft.core.model.entity.structure.Structure.StructureState;
 import com.settlercraft.core.util.HibernateUtil;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -42,7 +42,7 @@ public class StructureService extends AbstractService<Structure> {
         return structures;
     }
     
-    public void setStatus(Structure structure, STATE newStatus) {
+    public void setStatus(Structure structure, StructureState newStatus) {
         Session session = null;
         Transaction tx = null;
         try {

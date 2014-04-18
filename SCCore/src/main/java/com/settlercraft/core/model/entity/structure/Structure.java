@@ -67,7 +67,7 @@ public class Structure implements Serializable {
     @Embedded
     private ReservedArea reserved;
 
-    public enum STATE {
+    public enum StructureState {
 
         /**
          * All blocks on structure location will be removed.
@@ -95,7 +95,7 @@ public class Structure implements Serializable {
         COMPLETE
     }
 
-    private STATE status;
+    private StructureState status;
 
     private Timestamp created;
     
@@ -126,7 +126,7 @@ public class Structure implements Serializable {
         int[] modifiers = WorldUtil.getModifiers(direction);
         this.xMod = modifiers[0];
         this.zMod = modifiers[1];
-        setStatus(STATE.CLEARING_SITE_OF_BLOCKS);
+        setStatus(StructureState.CLEARING_SITE_OF_BLOCKS);
         this.created = new Timestamp(new Date().getTime());
         this.worldLocation = new WorldLocation(target);
         this.dimension = new WorldDimension(this);
@@ -212,11 +212,11 @@ public class Structure implements Serializable {
         return dimension;
     }
 
-    public STATE getStatus() {
+    public StructureState getStatus() {
         return status;
     }
 
-    public final void setStatus(STATE status) {
+    public final void setStatus(StructureState status) {
         this.status = status;
     }
 
