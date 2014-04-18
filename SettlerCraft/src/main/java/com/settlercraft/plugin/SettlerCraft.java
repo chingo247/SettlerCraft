@@ -32,13 +32,13 @@ public class SettlerCraft extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        
         SCCore.initDB();
         apis = new HashSet<>();
-        
         structureAPI = new SCStructureAPI();
+        
         try {
-            addAPI(structureAPI);
+
+            addModule(structureAPI);
         } catch (DuplicateAPIException ex) {
             Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -49,12 +49,14 @@ public class SettlerCraft extends JavaPlugin {
 
     }
     
-    public void addAPI(SettlerCraftAPI api) throws DuplicateAPIException {
+    public void addModule(SettlerCraftAPI api) throws DuplicateAPIException {
         if(apis.add(api)) {
            api.init(this);
         } else {
-            throw new DuplicateAPIException(api);
+            throw new DuplicateAPIException(api); // Self check
         }
     }
+    
+    
 
 }

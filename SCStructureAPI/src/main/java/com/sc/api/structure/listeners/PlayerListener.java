@@ -8,6 +8,7 @@ package com.sc.api.structure.listeners;
 import com.sc.api.structure.SCStructureAPI;
 import com.sc.api.structure.recipe.Recipes;
 import com.settlercraft.core.model.entity.structure.Structure;
+import com.settlercraft.core.model.entity.structure.Structure.StructureState;
 import com.settlercraft.core.persistence.StructureService;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -49,7 +50,7 @@ public class PlayerListener implements Listener {
             StructureService service = new StructureService();
             Structure structure = service.getStructure(pie.getClickedBlock().getLocation());
             System.out.println("ON STRUCTURE: " + structure);
-            if (structure != null && structure.getStatus() != Structure.STATE.COMPLETE) {
+            if (structure != null && structure.getStatus() != StructureState.COMPLETE) {
                 SCStructureAPI.build(pie.getPlayer(), structure);
             }
         }

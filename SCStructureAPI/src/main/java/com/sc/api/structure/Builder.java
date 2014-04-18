@@ -7,6 +7,7 @@ package com.sc.api.structure;
 
 import com.google.common.base.Preconditions;
 import com.settlercraft.core.model.entity.structure.Structure;
+import com.settlercraft.core.model.entity.structure.Structure.StructureState;
 import com.settlercraft.core.model.plan.StructurePlan;
 import com.settlercraft.core.model.plan.schematic.SchematicBlockData;
 import com.settlercraft.core.model.plan.schematic.SchematicObject;
@@ -94,7 +95,7 @@ public class Builder {
      * @param structure The structure
      */
     public void placeDefaultFoundation(Structure structure) {
-        Preconditions.checkArgument(structure.getStatus() == Structure.STATE.PLACING_FOUNDATION);
+        Preconditions.checkArgument(structure.getStatus() == StructureState.PLACING_FOUNDATION);
         SchematicObject schematic = structure.getPlan().getSchematic();
         Direction direction = structure.getDirection();
         Location target = structure.getLocation();
@@ -113,7 +114,7 @@ public class Builder {
                 l.getBlock().setType(Material.COBBLESTONE);
             }
         }
-        structure.setStatus(Structure.STATE.PLACING_FRAME);
+        structure.setStatus(StructureState.PLACING_FRAME);
     }
 
     /**
@@ -122,7 +123,7 @@ public class Builder {
      * @param structure
      */
     public void clearSiteFromEntities(Structure structure) {
-        Preconditions.checkArgument(structure.getStatus() == Structure.STATE.CLEARING_SITE_OF_ENTITIES);
+        Preconditions.checkArgument(structure.getStatus() == StructureState.CLEARING_SITE_OF_ENTITIES);
         Set<Entity> entities = WorldUtil.getEntitiesWithin(structure.getDimension().getStart(), structure.getDimension().getEnd());
         System.out.println(entities.size());
         for (Entity e : entities) {
@@ -132,7 +133,7 @@ public class Builder {
                 moveEntityFromLot(structure, (LivingEntity) e);
             }
         }
-        structure.setStatus(Structure.STATE.PLACING_FOUNDATION);
+        structure.setStatus(StructureState.PLACING_FOUNDATION);
     }
 
     private void moveEntityFromLot(Structure structure, LivingEntity entity) {
@@ -146,7 +147,7 @@ public class Builder {
     }
 
     public void placeFrame(Structure structure) {
-        Preconditions.checkArgument(structure.getStatus() == Structure.STATE.PLACING_FRAME);
+        Preconditions.checkArgument(structure.getStatus() == StructureState.PLACING_FRAME);
         SchematicObject schematic = structure.getPlan().getSchematic();
         Direction direction = structure.getDirection();
         Location target = structure.getLocation();
@@ -170,7 +171,7 @@ public class Builder {
             }
         }
         StructureService structureService = new StructureService();
-        structureService.setStatus(structure, Structure.STATE.BUILDING_IN_PROGRESS);
+        structureService.setStatus(structure, StructureState.BUILDING_IN_PROGRESS);
     }
 
     /**
@@ -179,7 +180,7 @@ public class Builder {
      * @param structure The structure
      */
     public void instantBuildStructure(Structure structure) {
-        Preconditions.checkArgument(structure.getStatus() != Structure.STATE.COMPLETE);
+        Preconditions.checkArgument(structure.getStatus() != StructureState.COMPLETE);
         SchematicObject schematic = structure.getPlan().getSchematic();
         Iterator<SchematicBlockData> it = schematic.getBlocksSorted().iterator();
         Direction direction = structure.getDirection();
@@ -204,7 +205,7 @@ public class Builder {
             }
         }
         StructureService structureService = new StructureService();
-        structureService.setStatus(structure, Structure.STATE.COMPLETE);
+        structureService.setStatus(structure, StructureState.COMPLETE);
     }
 
     public void progress(Structure structure) {
@@ -215,7 +216,7 @@ public class Builder {
                 return; // Structure Complete Event!
             case CLEARING_SITE_OF_BLOCKS:
                 clearSiteFromBlocks(structure);
-                structure.setStatus(Structure.STATE.CLEARING_SITE_OF_ENTITIES);
+                structure.setStatus(StructureState.CLEARING_SITE_OF_ENTITIES);
             case CLEARING_SITE_OF_ENTITIES:
                 clearSiteFromEntities(structure);
             case PLACING_FOUNDATION:

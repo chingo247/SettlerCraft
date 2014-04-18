@@ -40,14 +40,14 @@ public class SCStructureAPI extends SettlerCraftAPI {
     }
 
     @Override
-    public void setupListeners(JavaPlugin plugin) {
+    protected void setupListeners(JavaPlugin plugin) {
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(plugin), plugin);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), plugin);
         Bukkit.getPluginManager().registerEvents(new StructureListener(), plugin);
     }
 
     @Override
-    public void setupRecipes(JavaPlugin plugin) {
+    protected void setupRecipes(JavaPlugin plugin) {
         for (CShapedRecipe r : Recipes.getRecipes()) {
             plugin.getServer().addRecipe(r.getRecipe());
         }
