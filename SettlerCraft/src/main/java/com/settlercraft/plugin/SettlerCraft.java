@@ -5,7 +5,7 @@
  */
 package com.settlercraft.plugin;
 
-import com.sc.api.structure.SCStructureModule;
+import com.sc.api.structure.SCStructureAPI;
 import com.settlercraft.core.SCCore;
 import com.settlercraft.core.SettlerCraftModule;
 import com.settlercraft.plugin.exception.DuplicateAPIException;
@@ -21,7 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class SettlerCraft extends JavaPlugin {
     
-    private SCStructureModule structureModule;
+    private SCStructureAPI structureModule;
     private Set<SettlerCraftModule> modules;
     public static final String name = "SettlerCraft";
 
@@ -34,7 +34,7 @@ public class SettlerCraft extends JavaPlugin {
         }
         SCCore.initDB();
         modules = new HashSet<>();
-        structureModule = new SCStructureModule();
+        structureModule = new SCStructureAPI();
         
         try {
 

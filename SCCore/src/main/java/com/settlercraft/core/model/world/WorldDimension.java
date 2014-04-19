@@ -133,7 +133,7 @@ public class WorldDimension {
     }
 
     private Location getEnd(Location start, StructurePlan plan, Direction direction) {
-        SchematicObject schem = plan.getSchematic();
+        SchematicObject schem = plan.getStructureSchematic();
 
         // Calculate Building end
         Location target = new Location(start.getWorld(),

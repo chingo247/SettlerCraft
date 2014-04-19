@@ -5,9 +5,12 @@
  */
 package com.sc.api.structure;
 
+import com.sc.api.structure.io.StructurePlanLoader;
 import com.sc.api.structure.event.LayerCompleteEvent;
 import com.sc.api.structure.event.PlayerBuildEvent;
 import com.sc.api.structure.exception.InvalidStructurePlanException;
+import com.sc.api.structure.exception.NoStructureSchematicNodeException;
+import com.sc.api.structure.exception.SchematicFileNotFoundException;
 import com.sc.api.structure.listeners.PlayerListener;
 import com.sc.api.structure.listeners.StructureListener;
 import com.sc.api.structure.listeners.StructurePlanListener;
@@ -33,9 +36,9 @@ import org.bukkit.plugin.java.JavaPlugin;
  *
  * @author Chingo
  */
-public class SCStructureModule extends SettlerCraftModule {
+public class SCStructureAPI extends SettlerCraftModule {
 
-    public SCStructureModule() {
+    public SCStructureAPI() {
         super("SCStructureAPI");
     }
 
@@ -66,8 +69,8 @@ public class SCStructureModule extends SettlerCraftModule {
             StructurePlanLoader spLoader = new StructurePlanLoader();
             spLoader.load(baseFolder);
         }
-        catch (InvalidStructurePlanException ex) {
-            Logger.getLogger(SCStructureModule.class.getName()).log(Level.SEVERE, null, ex);
+        catch (InvalidStructurePlanException | SchematicFileNotFoundException | NoStructureSchematicNodeException ex) {
+            Logger.getLogger(SCStructureAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -112,11 +115,8 @@ public class SCStructureModule extends SettlerCraftModule {
         }
     }
 
-    public static Builder getBuilder() {
-        for (World world : Bukkit.getServer().getWorlds()) {
-            world.getWorldFolder().lastModified();
-        }
-        return new Builder();
+    public static Builder build(Structure structure) {
+        return new Builder(structure);
     }
 
 }

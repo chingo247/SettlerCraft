@@ -3,9 +3,10 @@
 name: Town Center
 description: First building of a town.
 #The schematic file associated with this yml
-#You can have multiple YAML pointing at the same schematic!
+#Multiple configs maybe be associated with a single schematic
 schematic: 
-  building: DefaultTownCenter.schematic
+  building: TownCenterStructure.schematic
+  foundation: TownCenterFoundation.schematic
 
 #By default a building belongs to the default culture
 #Culture is a name to group buildings 
@@ -21,8 +22,7 @@ reserved:
   west: 0
   
 #This describes where at which height the building must start
-#Where 0 means equal to the ground
+#Where 0 means equal to the ground / clicked block
 layers-start: 0
 
-#PRO-TIP: Make sure your schematics have ENOUGH LIGHT/(TORCHES!), that way NO UNWANTED MONSTERS will spawn inside your building
 

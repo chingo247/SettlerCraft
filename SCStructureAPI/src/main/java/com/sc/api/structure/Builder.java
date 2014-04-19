@@ -16,6 +16,7 @@ import com.settlercraft.core.persistence.StructureService;
 import com.settlercraft.core.util.WorldUtil;
 import java.util.Iterator;
 import java.util.Set;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -28,46 +29,44 @@ import org.bukkit.entity.Player;
  * @author Chingo
  */
 public class Builder {
-
-    Builder() {
+    
+    private final Structure structure;
+    
+    public enum FOUNDATION_STRATEGY {
+        DEFAULT,
+        PROVIDED,
     }
 
+    Builder(Structure structure) {
+        this.structure = structure;
+    }
+    
     /**
-     * Places an unfinished building at target location. The orientation must be
-     * given
-     *
-     * @param player The player
-     * @param direction The direction
-     * @param target The target location of the structure
-     * @param plan The StructurePlan of the structure that will be placed
-     * @return True if the building was succesfully placed and stored in the
-     * database
+     * Will try to place the structure, the operation is succesful if the structure
+     * doesn't "overlap" any other structure
+     * @return True if operation was succesful, otherwise false
      */
-    public boolean placeStructure(Player player, Location target, Direction direction, StructurePlan plan) {
-        StructureService ss = new StructureService();
-        Structure structure = new Structure(player, target, direction, plan);
+    public boolean place() {
+       StructureService ss = new StructureService();
         if (ss.overlaps(structure)) {
+            Player player = Bukkit.getServer().getPlayer(structure.getOwner());
             if (player != null && player.isOnline()) {
-                player.sendMessage(Messages.STRUCTURE_OVERLAPS_ANOTHER); // TODO BETTER FEEDBACK
+                player.sendMessage(Messages.STRUCTURE_OVERLAPS_ANOTHER);
             }
             return false;
         }
-        ss.save(structure); // CLAIMS Ground (Dimension)!
-        progress(structure);
-        return true;
+        ss.save(structure); 
+        return true; 
     }
 
     /**
-     * Removes all blocks (replace them with air) that stand in the way of this
-     * building.
-     *
-     * @param structure The structure
+     * Clears all blocks at the location of the structure
      */
-    public void clearSiteFromBlocks(Structure structure) {
+    public void clear() {
         Direction direction = structure.getDirection();
         Location location = structure.getLocation();
         StructurePlan sp = structure.getPlan();
-        SchematicObject schematic = sp.getSchematic();
+        SchematicObject schematic = sp.getStructureSchematic();
 
         int[] mods = WorldUtil.getModifiers(direction);
         int xMod = mods[0];
@@ -88,15 +87,16 @@ public class Builder {
         }
     }
 
-    /**
-     * Creates a default foundation for given structure, this foundation will be
-     * immediately generated at the buildings target location
-     *
-     * @param structure The structure
-     */
-    public void placeDefaultFoundation(Structure structure) {
+    public void foundation(FOUNDATION_STRATEGY strategy) {
+        switch(strategy) {
+            case DEFAULT: placeDefaultFoundation();break;
+            case PROVIDED: placeProvidedFoundation(); break;
+        }
+    }
+    
+    private void placeDefaultFoundation() {
         Preconditions.checkArgument(structure.getStatus() == StructureState.PLACING_FOUNDATION);
-        SchematicObject schematic = structure.getPlan().getSchematic();
+        SchematicObject schematic = structure.getPlan().getStructureSchematic();
         Direction direction = structure.getDirection();
         Location target = structure.getLocation();
 
@@ -114,9 +114,19 @@ public class Builder {
                 l.getBlock().setType(Material.COBBLESTONE);
             }
         }
-        structure.setStatus(StructureState.PLACING_FRAME);
+    }
+    
+    private void placeProvidedFoundation() {
+        
     }
 
+    public void foundation() {
+        foundation(FOUNDATION_STRATEGY.DEFAULT);
+    }
+
+    
+    
+    
     /**
      * Clears the lot from entities
      *
@@ -148,7 +158,7 @@ public class Builder {
 
     public void placeFrame(Structure structure) {
         Preconditions.checkArgument(structure.getStatus() == StructureState.PLACING_FRAME);
-        SchematicObject schematic = structure.getPlan().getSchematic();
+        SchematicObject schematic = structure.getPlan().getStructureSchematic();
         Direction direction = structure.getDirection();
         Location target = structure.getLocation();
         int[] mods = WorldUtil.getModifiers(direction);
@@ -181,7 +191,7 @@ public class Builder {
      */
     public void instantBuildStructure(Structure structure) {
         Preconditions.checkArgument(structure.getStatus() != StructureState.COMPLETE);
-        SchematicObject schematic = structure.getPlan().getSchematic();
+        SchematicObject schematic = structure.getPlan().getStructureSchematic();
         Iterator<SchematicBlockData> it = schematic.getBlocksSorted().iterator();
         Direction direction = structure.getDirection();
         Location target = structure.getLocation();
@@ -208,26 +218,26 @@ public class Builder {
         structureService.setStatus(structure, StructureState.COMPLETE);
     }
 
-    public void progress(Structure structure) {
-        switch (structure.getStatus()) {
-            case BUILDING_IN_PROGRESS:
-                return; // Nothing to do here
-            case COMPLETE:
-                return; // Structure Complete Event!
-            case CLEARING_SITE_OF_BLOCKS:
-                clearSiteFromBlocks(structure);
-                structure.setStatus(StructureState.CLEARING_SITE_OF_ENTITIES);
-            case CLEARING_SITE_OF_ENTITIES:
-                clearSiteFromEntities(structure);
-            case PLACING_FOUNDATION:
-                placeDefaultFoundation(structure);
-            case PLACING_FRAME:
-                placeFrame(structure);
-                break;
-            default:
-                throw new AssertionError("Unreachable");
-        }
-    }
+//    public void progress(Structure structure) {
+//        switch (structure.getStatus()) {
+//            case BUILDING_IN_PROGRESS:
+//                return; // Nothing to do here
+//            case COMPLETE:
+//                return; // Structure Complete Event!
+//            case CLEARING_SITE_OF_BLOCKS:
+//                clearSiteFromBlocks(structure);
+//                structure.setStatus(StructureState.CLEARING_SITE_OF_ENTITIES);
+//            case CLEARING_SITE_OF_ENTITIES:
+//                clearSiteFromEntities(structure);
+//            case PLACING_FOUNDATION:
+//                placeDefaultFoundation(structure);
+//            case PLACING_FRAME:
+//                placeFrame(structure);
+//                break;
+//            default:
+//                throw new AssertionError("Unreachable");
+//        }
+//    }
 
     /**
      * Builds the corresponding layer of this structure, whether the
@@ -239,12 +249,12 @@ public class Builder {
      */
     public void buildLayer(Structure structure, int layer, boolean keepFrame) {
         StructurePlan sp = structure.getPlan();
-        if (layer > sp.getSchematic().layers || layer < 0) {
+        if (layer > sp.getStructureSchematic().layers || layer < 0) {
             throw new IndexOutOfBoundsException("layer doesnt exist");
         }
 
-        Iterator<SchematicBlockData> it = sp.getSchematic().getBlocksFromLayer(layer).iterator();
-        SchematicObject schematic = sp.getSchematic();
+        Iterator<SchematicBlockData> it = sp.getStructureSchematic().getBlocksFromLayer(layer).iterator();
+        SchematicObject schematic = sp.getStructureSchematic();
         Direction direction = structure.getDirection();
         Location target = structure.getLocation();
         int[] mods = WorldUtil.getModifiers(direction);

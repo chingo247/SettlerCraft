@@ -52,7 +52,7 @@ public class StructureProgress extends SettlerCraftEntity implements Serializabl
     }
     
     public int getMaxHeight() {
-        return structure.getPlan().getSchematic().getHeight();
+        return structure.getPlan().getStructureSchematic().getHeight();
     }
 
     public void setLayer(int layer) {

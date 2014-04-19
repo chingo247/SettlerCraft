@@ -9,55 +9,68 @@ import com.settlercraft.core.model.plan.requirement.StructureRequirement;
 import com.settlercraft.core.model.plan.schematic.SchematicObject;
 import com.settlercraft.core.model.plan.yaml.StructureConfig;
 
-
 /**
  * @author Chingo
  */
 public class StructurePlan {
 
-    private Long id;
+  private Long id;
 
-    private final SchematicObject structure;
+  private final SchematicObject structure;
+  
+  private final SchematicObject foundation;
 
-    private final StructureConfig config;
-    
-    private final StructureRequirement requirement;
+  private final StructureConfig config;
 
-    public StructurePlan(SchematicObject structure, StructureConfig structureConfig) {
-        this.structure = structure;
-        this.config = structureConfig;
-        this.requirement = new StructureRequirement(this);
+  private final StructureRequirement requirement;
+  
+  
+
+  public StructurePlan(SchematicObject structure, StructureConfig structureConfig) {
+    this.structure = structure;
+    this.config = structureConfig;
+    this.requirement = new StructureRequirement(this);
+    this.foundation = null;
+  }
+
+  public StructurePlan(SchematicObject structure, SchematicObject foundation, StructureConfig structureConfig) {
+    this.structure = structure;
+    this.config = structureConfig;
+    this.requirement = new StructureRequirement(this);
+    this.foundation = foundation;
+  }
+
+  public StructureRequirement getRequirement() {
+    return requirement;
+  }
+
+  public SchematicObject getFoundationSchematic() {
+    return foundation;
+  }
+  
+  public SchematicObject getStructureSchematic() {
+    return structure;
+  }
+
+  public StructureConfig getConfig() {
+    return config;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof StructurePlan)) {
+      return false;
     }
+    StructurePlan sp = (StructurePlan) o;
+    return sp.getConfig().getName().equals(this.getConfig().getName());
+  }
 
-    public StructureRequirement getRequirement() {
-        return requirement;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public SchematicObject getSchematic() {
-        return structure;
-    }
-
-    public StructureConfig getConfig() {
-        return config;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof StructurePlan)) {
-            return false;
-        }
-        StructurePlan sp = (StructurePlan) o;
-        return sp.getConfig().getName().equals(this.getConfig().getName());
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-    
-    
+  public void setId(Long id) {
+    this.id = id;
+  }
 
 }

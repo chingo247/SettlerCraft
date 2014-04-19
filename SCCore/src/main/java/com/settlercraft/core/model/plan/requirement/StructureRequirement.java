@@ -18,7 +18,7 @@ public final class StructureRequirement {
     private MaterialRequirement materialRQ;
     
     public StructureRequirement(StructurePlan sp) {
-        this.materialRQ = new MaterialRequirement(sp.getSchematic());
+        this.materialRQ = new MaterialRequirement(sp.getStructureSchematic());
     }
 
     public MaterialRequirement getMaterialRequirement() {
