@@ -12,7 +12,7 @@ import java.io.File;
  *
  * @author Christian
  */
-public class SchematicFileNotFoundException extends Throwable {
+public class SchematicFileNotFoundException extends Exception {
 
     public SchematicFileNotFoundException(File filePath) {
         super("no such file: " + filePath.getAbsolutePath());

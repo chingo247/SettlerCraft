@@ -7,6 +7,7 @@ package com.sc.api.structure.listeners;
 
 import com.sc.api.structure.construction.SCStructureAPI;
 import com.settlercraft.core.manager.StructurePlanManager;
+import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.plan.StructurePlan;
 import com.settlercraft.core.util.WorldUtil;
 import org.bukkit.Material;
@@ -41,13 +42,13 @@ public class StructurePlanListener implements Listener {
         if (plan != null
                 && pie.getClickedBlock() != null
                 && pie.getClickedBlock().getType() != Material.AIR) {
-            System.out.println("Building");
-//            SCStructureAPI.build().placeStructure(
-//                    pie.getPlayer(), 
-//                    pie.getClickedBlock().getLocation(), 
-//                    WorldUtil.getDirection(pie.getPlayer()), 
-//                    plan
-//            );
+            Structure structure = new Structure(
+                    pie.getPlayer(), 
+                    pie.getClickedBlock().getLocation(), 
+                    WorldUtil.getDirection(pie.getPlayer()),
+                    plan
+            );
+            SCStructureAPI.place(structure);
         }
     }
 

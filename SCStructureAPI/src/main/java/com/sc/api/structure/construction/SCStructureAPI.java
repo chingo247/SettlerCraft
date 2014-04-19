@@ -5,12 +5,14 @@
  */
 package com.sc.api.structure.construction;
 
-import com.sc.api.structure.io.StructurePlanLoader;
+import com.google.common.base.Preconditions;
+import com.sc.api.structure.Messages;
 import com.sc.api.structure.event.LayerCompleteEvent;
 import com.sc.api.structure.event.PlayerBuildEvent;
 import com.sc.api.structure.exception.InvalidStructurePlanException;
 import com.sc.api.structure.exception.NoStructureSchematicNodeException;
 import com.sc.api.structure.exception.SchematicFileNotFoundException;
+import com.sc.api.structure.io.StructurePlanLoader;
 import com.sc.api.structure.listeners.PlayerListener;
 import com.sc.api.structure.listeners.StructureListener;
 import com.sc.api.structure.listeners.StructurePlanListener;
@@ -18,16 +20,23 @@ import com.sc.api.structure.recipe.Recipes;
 import com.settlercraft.core.SettlerCraftModule;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.plan.requirement.material.MaterialResource;
+import com.settlercraft.core.model.world.WorldDimension;
 import com.settlercraft.core.persistence.StructureProgressService;
+import com.settlercraft.core.persistence.StructureService;
+import com.settlercraft.core.util.WorldUtil;
 import com.settlercraft.recipe.CShapedRecipe;
 import java.io.File;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.World;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -80,15 +89,17 @@ public class SCStructureAPI extends SettlerCraftModule {
         setupListeners(plugin);
         setupRecipes(plugin);
     }
+    
+    
 
     public static void build(Player player, Structure structure) {
         StructureProgressService structureProgressService = new StructureProgressService();
         List<MaterialResource> resources = structure.getProgress().getResources();
         Iterator<MaterialResource> lit = resources.iterator();
-        
+
         while (lit.hasNext()) {
             MaterialResource materialResource = lit.next();
-            
+
             for (ItemStack stack : player.getInventory()) {
                 if (materialResource != null && stack != null && materialResource.getMaterial() == stack.getType()) {
                     int removed = structureProgressService.resourceTransaction(materialResource, Math.min(stack.getAmount(), 5));
@@ -99,7 +110,7 @@ public class SCStructureAPI extends SettlerCraftModule {
                         player.getInventory().removeItem(removedIS);
                         player.updateInventory();
                         player.sendMessage(ChatColor.YELLOW + "[SC]: " + removed + " " + removedIS.getType() + " has been removed from your inventory");
-                        
+
                         System.out.println(structure.getProgress());
                         // Layer Complete?
                         if (structure.getProgress().getResources().isEmpty()) {
@@ -119,4 +130,102 @@ public class SCStructureAPI extends SettlerCraftModule {
         return new Builder(structure);
     }
 
+    /**
+     * Moves all entities from structure within the structure to the borders of
+     * this structure if the new location is on another structure, the entity
+     * will be moved again
+     *
+     * @param structure The structure
+     */
+    public static void evacuate(Structure structure) {
+        Set<Entity> entities = WorldUtil.getEntitiesWithin(structure.getDimension().getStart(), structure.getDimension().getEnd());
+        for (Entity e : entities) {
+            if (e instanceof LivingEntity) {
+                moveEntityFromLot((LivingEntity) e, 5, structure);
+            }
+        }
+    }
+
+    /**
+     * Moves the given entity from the given target structure, the entity will be moved beyond the closest border.
+     * If the entity isnt within the structure, no actions will be taken. If the new location of the entity is a location on another structure, then this method will call itself recursively
+     * To prevent a stackoverflow the distance value will be doubled each recursive call
+     * @param entity
+     * @param distance
+     * @param targetStructure 
+     */
+    public static void moveEntityFromLot(LivingEntity entity, int distance, Structure targetStructure) {
+        Preconditions.checkArgument(distance > 0);
+        if(targetStructure.isOnLot(entity.getLocation())) {
+            return;
+        }
+
+        WorldDimension dimension = targetStructure.getDimension();
+        Location start = dimension.getStart();
+        Location end = dimension.getEnd();
+        if (entity.getLocation().distance(start) < entity.getLocation().distance(end)) {
+            Location xMinus = new Location(start.getWorld(),
+                    start.getBlockX() - distance, // X
+                    start.getWorld().getHighestBlockYAt(start.getBlockX() - distance, entity.getLocation().getBlockZ()), // Y
+                    entity.getLocation().getBlockZ() // Z
+            );
+            Location zMinus = new Location(start.getWorld(),
+                    entity.getLocation().getBlockX(),
+                    start.getWorld().getHighestBlockYAt(entity.getLocation().getBlockX() - distance, start.getBlockZ() - distance),
+                    start.getBlockZ() - distance
+            );
+            if (entity.getLocation().distance(xMinus) < entity.getLocation().distance(zMinus)) {
+                moveEntity(entity, distance, xMinus);
+            } else {
+                moveEntity(entity, distance, zMinus);
+            }
+        } else {
+            Location xPlus = new Location(end.getWorld(),
+                    end.getBlockX() + distance, // X
+                    end.getWorld().getHighestBlockYAt(end.getBlockX() + distance, entity.getLocation().getBlockZ()), // Y
+                    entity.getLocation().getBlockZ()
+            );                                                                      // Z
+
+            Location zPlus = new Location(end.getWorld(),
+                    entity.getLocation().getBlockX(),
+                    end.getWorld().getHighestBlockYAt(entity.getLocation().getBlockX() + distance, end.getBlockZ() + distance),
+                    end.getBlockZ() + distance
+            );
+            if (entity.getLocation().distance(xPlus) < entity.getLocation().distance(zPlus)) {
+                moveEntity(entity, distance, xPlus);
+            } else {
+                moveEntity(entity, distance, zPlus);
+            }
+        }
+    }
+
+    private static void moveEntity(LivingEntity entity, int distance, Location target) {
+        StructureService structureService = new StructureService();
+        if (target.getBlock().getType() == Material.LAVA) {
+            // Alternative?
+            // TODO use alternative
+
+        } else if (structureService.isOnStructure(target)) {
+            moveEntityFromLot(entity, distance * 2, structureService.getStructure(target));
+        }
+    }
+
+    /**
+     * Will try to place the structure, the operation is succesful if the
+     * structure doesn't "overlap" any other structure.
+     * @param structure The structure to place
+     * @return True if operation was succesful, otherwise false
+     */
+    public static boolean place(Structure structure) {
+        StructureService ss = new StructureService();
+        if (ss.overlaps(structure)) {
+            Player player = Bukkit.getServer().getPlayer(structure.getOwner());
+            if (player != null && player.isOnline()) {
+                player.sendMessage(Messages.STRUCTURE_OVERLAPS_ANOTHER);
+            }
+            return false;
+        }
+        ss.save(structure);
+        return true;
+    }
 }

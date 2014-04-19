@@ -221,6 +221,11 @@ public class Structure extends SettlerCraftEntity implements Serializable {
         return reserved;
     }
     
+    public boolean isOnLot(Location location) {
+        return (location.getBlockX() >= dimension.getStartX() && location.getBlockX() <= dimension.getEndX()
+                && location.getBlockY() >= dimension.getStartY() && location.getBlockY() <= dimension.getEndY()
+                && location.getBlockZ() >= dimension.getStartZ() && location.getBlockZ() <= dimension.getEndZ());
+    }
     
     
 

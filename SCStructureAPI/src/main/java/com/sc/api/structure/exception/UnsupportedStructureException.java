@@ -10,7 +10,7 @@ package com.sc.api.structure.exception;
  * Thrown when a structure was read with a material that is not supported by this plugin.
  * @author Chingo
  */
-public final class UnsupportedStructureException extends Throwable {
+public final class UnsupportedStructureException extends Exception {
 
     public UnsupportedStructureException(String message) {
         super(message);

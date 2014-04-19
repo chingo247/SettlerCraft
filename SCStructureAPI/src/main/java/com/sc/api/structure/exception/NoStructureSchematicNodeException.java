@@ -12,7 +12,7 @@ import java.io.File;
  *
  * @author Christian
  */
-public class NoStructureSchematicNodeException extends Throwable{
+public class NoStructureSchematicNodeException extends Exception{
 
     public NoStructureSchematicNodeException(File yaml) {
         super(yaml.getAbsolutePath() + ", contains no schematic node");
