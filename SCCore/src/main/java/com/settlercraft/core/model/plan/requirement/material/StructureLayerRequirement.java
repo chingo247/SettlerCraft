@@ -75,7 +75,7 @@ public class StructureLayerRequirement implements Serializable {
     }
 
     public List<MaterialResource> getResources() {
-        return resources;
+        return new ArrayList<>(resources);
     }
     
     public boolean removeResource(MaterialResource resource) {

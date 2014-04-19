@@ -1,24 +1,24 @@
 package com.settlercraft.core.model.entity.structure;
 
+import com.settlercraft.core.model.entity.SettlerCraftEntity;
 import com.settlercraft.core.model.plan.requirement.material.MaterialResource;
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.Version;
-import org.hibernate.annotations.CollectionOfElements;
 
 /**
  *
  * @author Chingo
  */
 @Entity
-public class StructureProgress implements Serializable {
+public class StructureProgress extends SettlerCraftEntity implements Serializable {
     
     @Id
     @GeneratedValue
@@ -31,12 +31,9 @@ public class StructureProgress implements Serializable {
     @OneToOne(cascade = CascadeType.ALL)
     private Structure structure;
     
-    @CollectionOfElements(fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<MaterialResource> resources;
     
-    @Version
-    private Timestamp lastModified;
-
     /**
      * JPA Constructor.
      */
@@ -47,10 +44,11 @@ public class StructureProgress implements Serializable {
      * @param structure The structure
      */
     public StructureProgress(Structure structure) {
+        this.resources = new ArrayList<>();
         this.structure = structure;
         this.plan = structure.getPlan().getConfig().getName();
-        this.resources = structure.getPlan().getRequirement().getMaterialRequirement().getLayer(0).getResources();
         this.layer = 0;
+        setResources(structure.getPlan().getRequirement().getMaterialRequirement().getLayer(layer).getResources());
     }
     
     public int getMaxHeight() {
@@ -61,8 +59,12 @@ public class StructureProgress implements Serializable {
         this.layer = layer;
     }
 
-    public void setResources(List<MaterialResource> resources) {
-        this.resources = resources;
+    public final void setResources(List<MaterialResource> resources) {
+        this.resources.clear();
+        for( MaterialResource mr : resources ) {
+            mr.setProgress(this);
+            this.resources.add(mr);
+        }
     }
 
     public int getLayer() {
@@ -76,12 +78,6 @@ public class StructureProgress implements Serializable {
     public Long getId() {
         return id;
     }
-
-    public Timestamp getLastModified() {
-        return lastModified;
-    }
-    
-    
 
     @Override
     public String toString() {

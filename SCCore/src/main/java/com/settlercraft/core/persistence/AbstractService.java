@@ -7,6 +7,7 @@ package com.settlercraft.core.persistence;
 
 import com.mysema.query.jpa.impl.JPAQuery;
 import com.mysema.query.types.EntityPath;
+import com.settlercraft.core.model.entity.SettlerCraftEntity;
 import com.settlercraft.core.util.HibernateUtil;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,7 +20,7 @@ import org.hibernate.Transaction;
  * @author Chingo
  * @param <T> The persistent Object
  */
-public abstract class AbstractService<T extends Object> {
+public abstract class AbstractService<T extends SettlerCraftEntity> {
 
     protected EntityManager entityManager;
 
@@ -33,25 +34,28 @@ public abstract class AbstractService<T extends Object> {
 
     public T save(T t) {
         Session session = null;
-        Transaction tx = null;
+        Transaction transaction = null;
         try {
             session = HibernateUtil.getSession();
-            tx = session.beginTransaction();
+            transaction = session.beginTransaction();
+            transaction.begin();
             session.save(t);
-            tx.commit();
-        } catch (HibernateException e) {
+            transaction.commit();
+            session.close();
+        } catch (HibernateException exception) {
             try {
-                tx.rollback();
+                transaction.rollback();
             } catch (HibernateException rbe) {
                 Logger.getLogger(AbstractService.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
             }
-            throw e;
+            throw exception;
         } finally {
-            if (session != null) {
+            if (session != null && session.isOpen()) {
                 session.close();
             }
         }
         return t;
+
     }
 
     public T merge(T t) {
@@ -70,7 +74,7 @@ public abstract class AbstractService<T extends Object> {
             }
             throw e;
         } finally {
-            if (session != null) {
+            if (session != null && session.isOpen()) {
                 session.close();
             }
         }

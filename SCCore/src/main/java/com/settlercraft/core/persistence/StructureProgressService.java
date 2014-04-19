@@ -19,21 +19,23 @@ import org.hibernate.Transaction;
  *
  * @author Chingo
  */
-public class StructureProgressService extends AbstractService<StructureProgress> {
+public class StructureProgressService extends AbstractService {
 
-    public final int resourceTransaction(final StructureProgress progress, final MaterialResource resource, final int maxAmount) {
+    public final int resourceTransaction(final MaterialResource resource, final int maxAmount) {
         Session session = null;
         Transaction tx = null;
         int removed = 0;
         try {
             session = HibernateUtil.getSession();
             tx = session.beginTransaction();
+            
             removed = Math.min(resource.getAmount(), maxAmount);
             resource.setAmount(resource.getAmount() - removed);
             if (resource.getAmount() == 0) {
-                progress.getResources().remove(resource);
+                session.delete(resource);
+            } else {
+                merge(resource);
             }
-            session.merge(progress);
             tx.commit();
         } catch (HibernateException e) {
             try {
@@ -57,11 +59,11 @@ public class StructureProgressService extends AbstractService<StructureProgress>
             session = HibernateUtil.getSession();
             tx = session.beginTransaction();
             StructureProgress progress = structure.getProgress();
-            if(!progress.getResources().isEmpty() || progress.getLayer() == progress.getMaxHeight() - 1) {
+            if(!progress.getResources().isEmpty()) {
                 return false;
             } else {
                 progress.setLayer(progress.getLayer() + 1);
-                progress.getResources().addAll(structure.getPlan().getRequirement().getMaterialRequirement().getLayer(progress.getLayer()).getResources());
+                progress.setResources(structure.getPlan().getRequirement().getMaterialRequirement().getLayer(progress.getLayer()).getResources());
                 session.save(progress);
                 tx.commit();
                 return true;

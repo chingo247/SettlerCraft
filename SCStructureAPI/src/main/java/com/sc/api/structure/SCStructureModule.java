@@ -12,7 +12,7 @@ import com.sc.api.structure.listeners.PlayerListener;
 import com.sc.api.structure.listeners.StructureListener;
 import com.sc.api.structure.listeners.StructurePlanListener;
 import com.sc.api.structure.recipe.Recipes;
-import com.settlercraft.core.SettlerCraftAPI;
+import com.settlercraft.core.SettlerCraftModule;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.plan.requirement.material.MaterialResource;
 import com.settlercraft.core.persistence.StructureProgressService;
@@ -33,9 +33,9 @@ import org.bukkit.plugin.java.JavaPlugin;
  *
  * @author Chingo
  */
-public class SCStructureAPI extends SettlerCraftAPI {
+public class SCStructureModule extends SettlerCraftModule {
 
-    public SCStructureAPI() {
+    public SCStructureModule() {
         super("SCStructureAPI");
     }
 
@@ -67,7 +67,7 @@ public class SCStructureAPI extends SettlerCraftAPI {
             spLoader.load(baseFolder);
         }
         catch (InvalidStructurePlanException ex) {
-            Logger.getLogger(SCStructureAPI.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SCStructureModule.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -79,42 +79,41 @@ public class SCStructureAPI extends SettlerCraftAPI {
     }
 
     public static void build(Player player, Structure structure) {
-        
         StructureProgressService structureProgressService = new StructureProgressService();
         List<MaterialResource> resources = structure.getProgress().getResources();
         Iterator<MaterialResource> lit = resources.iterator();
+        
         while (lit.hasNext()) {
-            MaterialResource m = lit.next();
+            MaterialResource materialResource = lit.next();
+            
             for (ItemStack stack : player.getInventory()) {
-                if (m != null && stack != null && m.getMaterial() == stack.getType()) {
-                    int removed = structureProgressService.resourceTransaction(structure.getProgress(), m, Math.min(stack.getAmount(), 5));
-                    if (removed > 0) { 
+                if (materialResource != null && stack != null && materialResource.getMaterial() == stack.getType()) {
+                    int removed = structureProgressService.resourceTransaction(materialResource, Math.min(stack.getAmount(), 5));
+                    if (removed > 0) {
+                        // Remove items from player inventory
                         ItemStack removedIS = new ItemStack(stack);
                         removedIS.setAmount(removed);
                         player.getInventory().removeItem(removedIS);
                         player.updateInventory();
-                        player.sendMessage(ChatColor.YELLOW + " [SC]: " + removed + " " + removedIS.getType() + " has been removed from your inventory");
+                        player.sendMessage(ChatColor.YELLOW + "[SC]: " + removed + " " + removedIS.getType() + " has been removed from your inventory");
+                        
                         System.out.println(structure.getProgress());
-                        if(structure.getProgress().getResources().isEmpty()) {
-                            System.out.println("No more resources!");
+                        // Layer Complete?
+                        if (structure.getProgress().getResources().isEmpty()) {
                             int completedLayer = structure.getProgress().getLayer();
-                            if(structureProgressService.nextLayer(structure)) {
-                                System.out.println("NEXT LAYER!");
-                                Bukkit.getPluginManager().callEvent(new LayerCompleteEvent(structure, structure.getProgress().getLayer()));
-                                SCStructureAPI.getBuilder().buildLayer(structure, completedLayer, true);
-                            }
+                            structureProgressService.nextLayer(structure);
+                            Bukkit.getPluginManager().callEvent(new LayerCompleteEvent(structure, completedLayer));
                         }
                         Bukkit.getPluginManager().callEvent(new PlayerBuildEvent(structure, player, removedIS));
-                        return;
                     }
+                    return;
                 }
             }
         }
-        player.sendMessage(ChatColor.RED + "[SC]: U Don't have any required materials");
     }
 
     public static Builder getBuilder() {
-        for(World world : Bukkit.getServer().getWorlds()){
+        for (World world : Bukkit.getServer().getWorlds()) {
             world.getWorldFolder().lastModified();
         }
         return new Builder();

@@ -6,7 +6,7 @@
 
 package com.settlercraft.plugin.exception;
 
-import com.settlercraft.core.SettlerCraftAPI;
+import com.settlercraft.core.SettlerCraftModule;
 
 /**
  * Thrown when there already was an API with the same name / unique identifier
@@ -14,7 +14,7 @@ import com.settlercraft.core.SettlerCraftAPI;
  */
 public class DuplicateAPIException extends Throwable {
 
-    public DuplicateAPIException(SettlerCraftAPI api) {
+    public DuplicateAPIException(SettlerCraftModule api) {
         super("already have an API called: " + api.getName());
     }
     

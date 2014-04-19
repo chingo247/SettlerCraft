@@ -12,14 +12,14 @@ import org.bukkit.plugin.java.JavaPlugin;
  *
  * @author Chingo
  */
-public abstract class SettlerCraftAPI {
+public abstract class SettlerCraftModule {
 
     /**
      * Unique Identifier for the api
      */
     private final String name;
     
-    public SettlerCraftAPI(String name) {
+    public SettlerCraftModule(String name) {
         this.name = name;
     }
 
@@ -62,10 +62,10 @@ public abstract class SettlerCraftAPI {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof SettlerCraftAPI)) {
+        if (!(obj instanceof SettlerCraftModule)) {
             return false;
         }
-        final SettlerCraftAPI other = (SettlerCraftAPI) obj;
+        final SettlerCraftModule other = (SettlerCraftModule) obj;
         if (!Objects.equals(this.name, other.name)) {
             return false;
         }

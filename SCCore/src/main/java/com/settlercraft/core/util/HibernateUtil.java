@@ -1,47 +1,49 @@
 package com.settlercraft.core.util;
 
 import com.google.common.collect.Sets;
-import java.util.HashSet;
 import java.util.Set;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
+import org.hibernate.cfg.Configuration;
 
 public class HibernateUtil {
 
     private static SessionFactory factory;
+    private static SessionFactory versionFactory;
     private static Set<Class> annotatedClasses = Sets.newHashSet();
-    private static AnnotationConfiguration config;
+    private static AnnotationConfiguration config = new AnnotationConfiguration();
+    private static AnnotationConfiguration versionConfig = new  AnnotationConfiguration();
 
     public static Session getSession() {
         if (factory == null) {
-            config = HibernateUtil.getInitializedConfiguration();
-            factory = config.buildSessionFactory();
-            annotatedClasses = new HashSet<>();
+            
+            initializeConfiguration(config);
+            factory = config.configure("hibernate.cfg.xml").buildSessionFactory();
         }
         return factory.openSession();
     }
     
-    public static Session getCurrentSession() {
-        return factory.getCurrentSession();
+    public static Session getVersionDBSession() {
+        if(versionFactory == null) {
+            initializeConfiguration(versionConfig);
+            versionFactory = versionConfig.configure("version_history.cfg.xml").buildSessionFactory();
+        }
+        return versionFactory.openSession();
     }
+    
 
-    public static AnnotationConfiguration getInitializedConfiguration() {
-        if(config == null) {
-             config = new AnnotationConfiguration();
-        }
-       
+    private static Configuration initializeConfiguration(final AnnotationConfiguration configuration) {
         for (Class clazz : annotatedClasses) {
-            config.addAnnotatedClass(clazz);
+            configuration.addAnnotatedClass(clazz);
         }
-        config.configure();
-        return config;
+        return configuration.configure();
     }
 
     public static void addAnnotatedClass(Class clazz) {
         annotatedClasses.add(clazz);
-        config = getInitializedConfiguration();
         factory = config.buildSessionFactory();
+        versionFactory = versionConfig.buildSessionFactory();
         System.out.println("[SettlerCraft]: registered " + clazz);
     }
     
@@ -50,12 +52,15 @@ public class HibernateUtil {
             System.out.println("[SettlerCraft]: registered " + clazz);
             annotatedClasses.add(clazz);
         }
-        config = getInitializedConfiguration();
-        factory = config.buildSessionFactory();
+        initializeConfiguration(config);
+        initializeConfiguration(versionConfig);
+        factory = config.configure("hibernate.cfg.xml").buildSessionFactory();
+        versionFactory = versionConfig.configure("hibernate.cfg.xml").buildSessionFactory();
     }
 
     public static void shutdown() {
         factory.close();
+        versionFactory.close();
     }
 
 //    private static List<Class> getAnnotatedClasses() {

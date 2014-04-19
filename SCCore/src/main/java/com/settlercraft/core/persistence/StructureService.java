@@ -1,15 +1,12 @@
 package com.settlercraft.core.persistence;
 
 import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.hibernate.HibernateDeleteClause;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.settlercraft.core.model.entity.structure.QStructure;
 import com.settlercraft.core.model.entity.structure.ReservedArea;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.entity.structure.Structure.StructureState;
 import com.settlercraft.core.util.HibernateUtil;
-import java.sql.Timestamp;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,7 +46,7 @@ public class StructureService extends AbstractService<Structure> {
             session = HibernateUtil.getSession();
             tx = session.beginTransaction();
             structure.setStatus(newStatus);
-            session.merge(structure);
+            merge(structure);
             tx.commit();
         } catch (HibernateException e) {
             try {
@@ -129,30 +126,4 @@ public class StructureService extends AbstractService<Structure> {
       return overlaps;
     }
 
-    public void removeAllCreatedBeforeSave(String world, Date lastModified) {
-        QStructure qStructure = QStructure.structure;
-        Session session = HibernateUtil.getSession();
-        new HibernateDeleteClause(session,qStructure)
-                .where(qStructure.created.gt(new Timestamp(lastModified.getTime())).and(qStructure.worldLocation().world.eq(world))).execute();
-        session.close();
-    }
-    
-    public List<Structure> getAllCreatedBeforeLastSave(String world, Date lastModified) {
-        QStructure qStructure = QStructure.structure;
-        Session session = HibernateUtil.getSession();
-        JPQLQuery query = new HibernateQuery(session);
-        List<Structure> structures = query.from(qStructure).where(qStructure.created.gt(new Timestamp(lastModified.getTime()))).list(qStructure);
-        session.close();
-        return structures;
-    }
-    
-    public List<Structure> getAllModifiedAftherLastSave(String world, Date lastModified) {
-        QStructure qStructure = QStructure.structure;
-        Session session = HibernateUtil.getSession();
-        JPQLQuery query = new HibernateQuery(session);
-        List<Structure> structures = query.from(qStructure).where(qStructure.lastModified.gt(new Timestamp(lastModified.getTime()))
-                .or(qStructure.progress().lastModified.gt(new Timestamp(lastModified.getTime())))).list(qStructure);
-        session.close();
-        return structures;
-    }
 }

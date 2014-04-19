@@ -8,7 +8,7 @@
         <property name="hibernate.connection.driver_class">org.hsqldb.jdbcDriver</property>
         <property name="hibernate.connection.password">root</property>
         <!--<property name="hibernate.connection.url">jdbc:hsqldb:mem:plugins/SettlerCraft/settlercraft</property>--> 
-        <property name="connection.url">jdbc:hsqldb:file:plugins/SettlerCraft/settlerdb;shutdown=true;hsqldb.write_delay=false;</property>
+        <property name="connection.url">jdbc:hsqldb:file:plugins/SettlerCraft/version_history/settlerdb_versions;shutdown=true;hsqldb.write_delay=false;</property>
         <property name="hibernate.connection.username">root</property>
         <!-- SQL dialect -->
         <property name="dialect">org.hibernate.dialect.HSQLDialect</property>

@@ -5,7 +5,7 @@
  */
 package com.sc.api.structure.listeners;
 
-import com.sc.api.structure.SCStructureAPI;
+import com.sc.api.structure.SCStructureModule;
 import com.sc.api.structure.recipe.Recipes;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.entity.structure.Structure.StructureState;
@@ -51,7 +51,7 @@ public class PlayerListener implements Listener {
             Structure structure = service.getStructure(pie.getClickedBlock().getLocation());
             System.out.println("ON STRUCTURE: " + structure);
             if (structure != null && structure.getStatus() != StructureState.COMPLETE) {
-                SCStructureAPI.build(pie.getPlayer(), structure);
+                SCStructureModule.build(pie.getPlayer(), structure);
             }
         }
         

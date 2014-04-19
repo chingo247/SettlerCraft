@@ -7,6 +7,7 @@
 package com.settlercraft.core.model.entity.structure;
 
 import com.avaje.ebean.validation.NotNull;
+import com.settlercraft.core.model.entity.SettlerCraftEntity;
 import com.settlercraft.core.model.world.WorldLocation;
 import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
@@ -21,7 +22,7 @@ import javax.persistence.OneToOne;
  * @author Chingo
  */
 @MappedSuperclass
-public abstract class StructureEntity {
+public abstract class StructureEntity extends SettlerCraftEntity  {
 
     
     @NotNull

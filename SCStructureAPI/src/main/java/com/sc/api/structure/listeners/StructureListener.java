@@ -6,6 +6,7 @@
 
 package com.sc.api.structure.listeners;
 
+import com.sc.api.structure.SCStructureModule;
 import com.sc.api.structure.event.LayerCompleteEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,6 +21,6 @@ public class StructureListener implements Listener {
     @EventHandler
     public void onLayerCompleteEvent(LayerCompleteEvent lce) {
         System.out.println("Layer Complete");
-        lce.getStructure().getLocation().getWorld().save();
+        SCStructureModule.getBuilder().buildLayer(lce.getStructure(), lce.getLayer(), true);
     }
 }
