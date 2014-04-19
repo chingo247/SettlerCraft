@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.api.structure;
+package com.sc.api.structure.construction;
 
 import com.sc.api.structure.io.StructurePlanLoader;
 import com.sc.api.structure.event.LayerCompleteEvent;

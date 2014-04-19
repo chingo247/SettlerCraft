@@ -6,7 +6,7 @@
 
 package com.sc.api.structure.listeners;
 
-import com.sc.api.structure.SCStructureAPI;
+import com.sc.api.structure.construction.SCStructureAPI;
 import com.sc.api.structure.event.LayerCompleteEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

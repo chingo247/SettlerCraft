@@ -3,9 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.api.structure;
+package com.sc.api.structure.construction;
 
 import com.google.common.base.Preconditions;
+import com.sc.api.structure.Messages;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.entity.structure.Structure.StructureState;
 import com.settlercraft.core.model.plan.StructurePlan;

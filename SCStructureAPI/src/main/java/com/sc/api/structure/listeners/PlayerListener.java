@@ -5,7 +5,7 @@
  */
 package com.sc.api.structure.listeners;
 
-import com.sc.api.structure.SCStructureAPI;
+import com.sc.api.structure.construction.SCStructureAPI;
 import com.sc.api.structure.recipe.Recipes;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.entity.structure.Structure.StructureState;

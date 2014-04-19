@@ -5,7 +5,7 @@
  */
 package com.settlercraft.plugin;
 
-import com.sc.api.structure.SCStructureAPI;
+import com.sc.api.structure.construction.SCStructureAPI;
 import com.settlercraft.core.SCCore;
 import com.settlercraft.core.SettlerCraftModule;
 import com.settlercraft.plugin.exception.DuplicateAPIException;
