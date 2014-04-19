@@ -60,7 +60,7 @@ public class WorldDimension {
         StructurePlan plan = structure.getPlan();
         Location s = structure.getLocation();
         Location e = getEnd(s, plan, direction);
-        
+        Preconditions.checkArgument(s.getWorld().getName().equals(e.getWorld().getName()));
         this.startX = Math.min(s.getBlockX(), e.getBlockX());
         this.startY = Math.min(s.getBlockY(), e.getBlockY());
         this.startZ = Math.min(s.getBlockZ(), e.getBlockZ());
@@ -68,7 +68,6 @@ public class WorldDimension {
         this.endY = Math.max(s.getBlockY(), e.getBlockY());
         this.endZ = Math.max(s.getBlockZ(), e.getBlockZ());
         this.world = structure.getLocation().getWorld().getName();
-        
     }
     
     public WorldDimension(Location start, Location end) {

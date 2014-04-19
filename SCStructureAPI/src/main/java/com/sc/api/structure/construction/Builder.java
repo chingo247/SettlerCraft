@@ -8,11 +8,11 @@ package com.sc.api.structure.construction;
 import com.google.common.base.Preconditions;
 import com.sc.api.structure.Messages;
 import com.settlercraft.core.model.entity.structure.Structure;
-import com.settlercraft.core.model.entity.structure.Structure.StructureState;
 import com.settlercraft.core.model.plan.StructurePlan;
 import com.settlercraft.core.model.plan.schematic.SchematicBlockData;
 import com.settlercraft.core.model.plan.schematic.SchematicObject;
 import com.settlercraft.core.model.world.Direction;
+import com.settlercraft.core.model.world.WorldDimension;
 import com.settlercraft.core.persistence.StructureService;
 import com.settlercraft.core.util.WorldUtil;
 import java.util.Iterator;
@@ -30,25 +30,37 @@ import org.bukkit.entity.Player;
  * @author Chingo
  */
 public class Builder {
-    
+
+    private final StructureService structureService;
+
     private final Structure structure;
-    
+
     public enum FOUNDATION_STRATEGY {
+
         DEFAULT,
         PROVIDED,
     }
 
+    public enum FRAME_STRATEGY {
+        DEFAULT,
+        FANCY,
+        ANIMATED_DEFAULT,
+        ANIMATED_FANCY
+    }
+
     Builder(Structure structure) {
         this.structure = structure;
+        this.structureService = new StructureService();
     }
-    
+
     /**
-     * Will try to place the structure, the operation is succesful if the structure
-     * doesn't "overlap" any other structure
+     * Will try to place the structure, the operation is succesful if the
+     * structure doesn't "overlap" any other structure
+     *
      * @return True if operation was succesful, otherwise false
      */
     public boolean place() {
-       StructureService ss = new StructureService();
+        StructureService ss = new StructureService();
         if (ss.overlaps(structure)) {
             Player player = Bukkit.getServer().getPlayer(structure.getOwner());
             if (player != null && player.isOnline()) {
@@ -56,8 +68,8 @@ public class Builder {
             }
             return false;
         }
-        ss.save(structure); 
-        return true; 
+        ss.save(structure);
+        return true;
     }
 
     /**
@@ -88,15 +100,37 @@ public class Builder {
         }
     }
 
+    /**
+     * Constructs a foundation with the given strategy,
+     *
+     * @param strategy The foundation strategy
+     */
     public void foundation(FOUNDATION_STRATEGY strategy) {
-        switch(strategy) {
-            case DEFAULT: placeDefaultFoundation();break;
-            case PROVIDED: placeProvidedFoundation(); break;
+        switch (strategy) {
+            case DEFAULT:
+                placeDefaultFoundation();
+                break;
+            case PROVIDED:
+                placeProvidedFoundation();
+                break;
+            default:
+                throw new UnsupportedOperationException("no strategy implemented for: " + strategy);
         }
     }
-    
+
+    /**
+     * Places a foundation for the structure. If the structure doesnt have a
+     * foundation schematic provided, the default strategy will be executed
+     */
+    public void foundation() {
+        if (structure.getPlan().getFoundationSchematic() != null) {
+            foundation(FOUNDATION_STRATEGY.PROVIDED);
+        } else {
+            foundation(FOUNDATION_STRATEGY.DEFAULT);
+        }
+    }
+
     private void placeDefaultFoundation() {
-        Preconditions.checkArgument(structure.getStatus() == StructureState.PLACING_FOUNDATION);
         SchematicObject schematic = structure.getPlan().getStructureSchematic();
         Direction direction = structure.getDirection();
         Location target = structure.getLocation();
@@ -116,49 +150,120 @@ public class Builder {
             }
         }
     }
-    
+
     private void placeProvidedFoundation() {
-        
-    }
+        SchematicObject schematic = structure.getPlan().getFoundationSchematic();
+        Direction direction = structure.getDirection();
+        Location target = structure.getLocation();
+        Iterator<SchematicBlockData> it = structure.getPlan().getFoundationSchematic().getBlocksSorted().iterator();
 
-    public void foundation() {
-        foundation(FOUNDATION_STRATEGY.DEFAULT);
-    }
-
-    
-    
-    
-    /**
-     * Clears the lot from entities
-     *
-     * @param structure
-     */
-    public void clearSiteFromEntities(Structure structure) {
-        Preconditions.checkArgument(structure.getStatus() == StructureState.CLEARING_SITE_OF_ENTITIES);
-        Set<Entity> entities = WorldUtil.getEntitiesWithin(structure.getDimension().getStart(), structure.getDimension().getEnd());
-        System.out.println(entities.size());
-        for (Entity e : entities) {
-            System.out.println("on lot!");
-            if (e instanceof LivingEntity) {
-                System.out.println("moving: " + e);
-                moveEntityFromLot(structure, (LivingEntity) e);
-            }
-        }
-        structure.setStatus(StructureState.PLACING_FOUNDATION);
-    }
-
-    private void moveEntityFromLot(Structure structure, LivingEntity entity) {
-        Location entLoc = entity.getLocation();
-        int threshold = 2;
-        int[] mods = WorldUtil.getModifiers(structure.getDirection());
+        int[] mods = WorldUtil.getModifiers(direction);
         int xMod = mods[0];
         int zMod = mods[1];
-
-        
+        for (int z = schematic.length - 1; z >= 0; z--) {
+            for (int x = 0; x < schematic.width; x++) {
+                SchematicBlockData sbd = it.next();
+                Location l;
+                if (direction == Direction.NORTH || direction == Direction.SOUTH) {
+                    l = target.clone().add(x * xMod, 0, z * zMod);
+                } else {
+                    l = target.clone().add(z * zMod, 0, x * xMod);
+                }
+                l.getBlock().setType(sbd.getMaterial());
+                l.getBlock().setData(sbd.getData());
+            }
+        }
     }
 
-    public void placeFrame(Structure structure) {
-        Preconditions.checkArgument(structure.getStatus() == StructureState.PLACING_FRAME);
+    /**
+     * Moves all entites from structure within the structure
+     */
+    public void evacuate() {
+        Set<Entity> entities = WorldUtil.getEntitiesWithin(structure.getDimension().getStart(), structure.getDimension().getEnd());
+        for (Entity e : entities) {
+            if (e instanceof LivingEntity) {
+                moveEntityFromLot((LivingEntity) e, 5, structure);
+            }
+        }
+    }
+
+    private void moveEntityFromLot(LivingEntity entity, int distance, Structure targetStructure) {
+        Preconditions.checkArgument(distance > 0);
+
+        WorldDimension dimension = targetStructure.getDimension();
+        Location start = dimension.getStart();
+        Location end = dimension.getEnd();
+        if (entity.getLocation().distance(start) < entity.getLocation().distance(end)) {
+            Location xMinus = new Location(start.getWorld(),
+                    start.getBlockX() - distance, // X
+                    start.getWorld().getHighestBlockYAt(start.getBlockX() - distance, entity.getLocation().getBlockZ()), // Y
+                    entity.getLocation().getBlockZ() // Z
+            );
+            Location zMinus = new Location(start.getWorld(),
+                    entity.getLocation().getBlockX(),
+                    start.getWorld().getHighestBlockYAt(entity.getLocation().getBlockX() - distance, start.getBlockZ() - distance),
+                    start.getBlockZ() - distance
+            );
+            if (entity.getLocation().distance(xMinus) < entity.getLocation().distance(zMinus)) {
+                moveEntity(entity, xMinus);
+            } else {
+                moveEntity(entity, zMinus);
+            }
+        } else {
+            Location xPlus = new Location(end.getWorld(),
+                    end.getBlockX() + distance, // X
+                    end.getWorld().getHighestBlockYAt(end.getBlockX() + distance, entity.getLocation().getBlockZ()), // Y
+                    entity.getLocation().getBlockZ()
+            );                                                                      // Z
+
+            Location zPlus = new Location(end.getWorld(),
+                    entity.getLocation().getBlockX(),
+                    end.getWorld().getHighestBlockYAt(entity.getLocation().getBlockX() + distance, end.getBlockZ() + distance),
+                    end.getBlockZ() + distance
+            );
+            if (entity.getLocation().distance(xPlus) < entity.getLocation().distance(zPlus)) {
+                moveEntity(entity, xPlus);
+            } else {
+                moveEntity(entity, zPlus);
+            }
+        }
+    }
+
+    private void moveEntity(LivingEntity entity, Location target) {
+        if (target.getBlock().getType() == Material.LAVA) {
+            // Alternative?
+        } else if (structureService.isOnStructure(target)) {
+            moveEntityFromLot(entity, 5, structureService.getStructure(target));
+        }
+    }
+
+    /**
+     * Build frame for target structure
+     */
+    public void frame() {
+        frame(FRAME_STRATEGY.DEFAULT);
+    }
+
+    /**
+     * Contructs a frame for this structure
+     * @param strategy The strategy to place this frame
+     */
+    public void frame(FRAME_STRATEGY strategy) {
+        switch (strategy) {
+            case DEFAULT:
+                placeDefaultFrame();
+            case FANCY:
+                placeFancyFrame();
+            case ANIMATED_DEFAULT:
+                placeDefaultAnimatedFrame();
+            case ANIMATED_FANCY:
+                placeFancyAnimatedFrame();
+            default:
+                throw new UnsupportedOperationException("no strategy implemented for " + strategy);
+        }
+    }
+
+    private void placeDefaultFrame() {
         SchematicObject schematic = structure.getPlan().getStructureSchematic();
         Direction direction = structure.getDirection();
         Location target = structure.getLocation();
@@ -181,17 +286,24 @@ public class Builder {
                 }
             }
         }
-        StructureService structureService = new StructureService();
-        structureService.setStatus(structure, StructureState.BUILDING_IN_PROGRESS);
+    }
+
+    private void placeFancyFrame() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private void placeDefaultAnimatedFrame() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private void placeFancyAnimatedFrame() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     /**
-     * Instantly constructs a structure
-     *
-     * @param structure The structure
+     * Instantly constructs a the structure
      */
-    public void instantBuildStructure(Structure structure) {
-        Preconditions.checkArgument(structure.getStatus() != StructureState.COMPLETE);
+    public void instant() {
         SchematicObject schematic = structure.getPlan().getStructureSchematic();
         Iterator<SchematicBlockData> it = schematic.getBlocksSorted().iterator();
         Direction direction = structure.getDirection();
@@ -215,40 +327,16 @@ public class Builder {
                 }
             }
         }
-        StructureService structureService = new StructureService();
-        structureService.setStatus(structure, StructureState.COMPLETE);
     }
-
-//    public void progress(Structure structure) {
-//        switch (structure.getStatus()) {
-//            case BUILDING_IN_PROGRESS:
-//                return; // Nothing to do here
-//            case COMPLETE:
-//                return; // Structure Complete Event!
-//            case CLEARING_SITE_OF_BLOCKS:
-//                clearSiteFromBlocks(structure);
-//                structure.setStatus(StructureState.CLEARING_SITE_OF_ENTITIES);
-//            case CLEARING_SITE_OF_ENTITIES:
-//                clearSiteFromEntities(structure);
-//            case PLACING_FOUNDATION:
-//                placeDefaultFoundation(structure);
-//            case PLACING_FRAME:
-//                placeFrame(structure);
-//                break;
-//            default:
-//                throw new AssertionError("Unreachable");
-//        }
-//    }
 
     /**
      * Builds the corresponding layer of this structure, whether the
      * precoditions are met or not
      *
-     * @param structure The structure
      * @param layer The layer to build
-     * @param keepFrame Determines if this should keep the fence at the borders
+     * @param hasFrame Determines if this should keep the fence at the borders
      */
-    public void buildLayer(Structure structure, int layer, boolean keepFrame) {
+    public void layer(int layer, boolean hasFrame) {
         StructurePlan sp = structure.getPlan();
         if (layer > sp.getStructureSchematic().layers || layer < 0) {
             throw new IndexOutOfBoundsException("layer doesnt exist");
@@ -266,7 +354,7 @@ public class Builder {
             for (int x = 0; x < schematic.width; x++) {
                 Block b;
                 SchematicBlockData d = it.next();
-                if (keepFrame && d.getMaterial() == Material.AIR
+                if (hasFrame && d.getMaterial() == Material.AIR
                         && (z == 0 || z == schematic.length - 1 || x == 0 || x == schematic.width - 1)) {
                     continue;
                 }
@@ -280,10 +368,11 @@ public class Builder {
             }
         }
     }
-    
-    public void buildToLayer(Structure structure, int layer, boolean keepFrame) {
-        for(int i = 0; i < layer+1; i++) {
-            buildLayer(structure, layer, keepFrame);
+
+    public void layers(int layer, boolean hasFrame) {
+        for (int i = 0; i < layer + 1; i++) {
+            layer(layer, hasFrame);
         }
     }
+    
 }
