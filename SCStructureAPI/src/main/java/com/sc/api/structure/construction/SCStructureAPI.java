@@ -46,6 +46,8 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author Chingo
  */
 public class SCStructureAPI extends SettlerCraftModule {
+    
+    public static final String MAIN_PLUGIN_NAME = "SettlerCraft";
 
     public SCStructureAPI() {
         super("SCStructureAPI");
@@ -228,4 +230,6 @@ public class SCStructureAPI extends SettlerCraftModule {
         ss.save(structure);
         return true;
     }
+    
+    
 }

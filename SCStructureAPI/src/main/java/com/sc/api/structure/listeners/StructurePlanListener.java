@@ -49,7 +49,7 @@ public class StructurePlanListener implements Listener {
                     WorldUtil.getDirection(pie.getPlayer()),
                     plan
             );
-            SCStructureAPI.build(structure).frame().construct(FrameStrategy.FANCY);
+            SCStructureAPI.build(structure).frame().anim().construct(FrameStrategy.FANCY);
         }
     }
 

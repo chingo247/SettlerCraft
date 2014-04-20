@@ -6,7 +6,14 @@
 package com.sc.api.structure.construction;
 
 import com.settlercraft.core.model.entity.structure.Structure;
+import com.settlercraft.core.model.plan.schematic.SchematicObject;
+import com.settlercraft.core.model.world.Direction;
 import com.settlercraft.core.util.Ticks;
+import com.settlercraft.core.util.WorldUtil;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 
 /**
  *
@@ -16,7 +23,7 @@ public class AnimatedFrameBuilder {
 
     private final Structure structure;
     private final int delay;
-    private static final int defaultDelay = 5 * Ticks.ONE_SECOND;
+    private static final int defaultDelay = Ticks.ONE_SECOND;
 
     AnimatedFrameBuilder(Structure structure, int delay) {
         this.structure = structure;
@@ -43,20 +50,82 @@ public class AnimatedFrameBuilder {
     public void construct(FrameStrategy strategy) {
         switch (strategy) {
             case DEFAULT:
-                placeDefaultAnimatedFrame();
+                placeDefaultAnimatedFrame(1);
+                break;
             case FANCY:
-                placeFancyAnimatedFrame();
+                placeFancyAnimatedFrame(1);
+                break;
             default:
                 throw new UnsupportedOperationException("no strategy implemented for " + strategy);
         }
     }
 
-    private void placeDefaultAnimatedFrame() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private void placeDefaultAnimatedFrame(int start) {
+        SchematicObject schematic = structure.getPlan().getStructureSchematic();
+        if (start < schematic.layers) {
+            Direction direction = structure.getDirection();
+            Location target = structure.getLocation();
+            int[] mods = WorldUtil.getModifiers(direction);
+            int xMod = mods[0];
+            int zMod = mods[1];
+            for (int z = schematic.length - 1; z >= 0; z--) {
+                for (int x = 0; x < schematic.width; x++) {
+                    if (start == schematic.layers - 1 || z == 0 || x == 0 || z == schematic.length - 1 || x == schematic.width - 1) {
+                        Block b;
+                        if (direction == Direction.NORTH || direction == Direction.SOUTH) {
+                            b = target.clone().add(x * xMod, start, z * zMod).getBlock();
+                        } else {
+                            b = target.clone().add(z * zMod, start, x * xMod).getBlock();
+                        }
+                        b.setType(Material.FENCE);
+                    }
+                }
+            }
+            final int next = start + 1;
+            Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
+                @Override
+                public void run() {
+                    placeDefaultAnimatedFrame(next);
+                    System.out.println("NEXT FRAME LAYER!");
+                }
+            }, delay);
+        }
+
     }
 
-    private void placeFancyAnimatedFrame() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private void placeFancyAnimatedFrame(int start) {
+        SchematicObject schematic = structure.getPlan().getStructureSchematic();
+
+        if (start < schematic.layers) {
+            Direction direction = structure.getDirection();
+            Location target = structure.getLocation();
+            int xMod = structure.getxMod();
+            int zMod = structure.getzMod();
+
+            for (int z = schematic.length - 1; z >= 0; z--) {
+                for (int x = 0; x < schematic.width; x++) {
+                    if (start <= schematic.getHighestAt(x, z) && schematic.getHighestAt(x, z) != -1) {
+
+                        Block b;
+                        if (direction == Direction.NORTH || direction == Direction.SOUTH) {
+                            b = target.clone().add(x * xMod, start, z * zMod).getBlock();
+                        } else {
+                            b = target.clone().add(z * zMod, start, x * xMod).getBlock();
+                        }
+
+                        b.setType(Material.FENCE);
+                    }
+                }
+            }
+            final int next = start + 1;
+            Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
+                @Override
+                public void run() {
+                    placeFancyAnimatedFrame(next);
+                    System.out.println("NEXT FRAME LAYER!");
+                }
+            }, delay);
+        }
     }
 
 }
