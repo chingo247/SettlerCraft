@@ -66,10 +66,10 @@ public class FrameBuilder {
         int xMod = mods[0];
         int zMod = mods[1];
 
-        for (int y = 0; y < schematic.layers; y++) {
+        for (int y = 1; y < schematic.layers; y++) {
             for (int z = schematic.length - 1; z >= 0; z--) {
                 for (int x = 0; x < schematic.width; x++) {
-                    if (y != 0 && (y == schematic.layers - 1 || z == 0 || x == 0 || z == schematic.length - 1 || x == schematic.width - 1)) {
+                    if (y == schematic.layers - 1 || z == 0 || x == 0 || z == schematic.length - 1 || x == schematic.width - 1) {
                         Block b;
                         if (direction == Direction.NORTH || direction == Direction.SOUTH) {
                             b = target.clone().add(x * xMod, y, z * zMod).getBlock();
@@ -92,7 +92,7 @@ public class FrameBuilder {
         int xMod = mods[0];
         int zMod = mods[1];
 
-        for (int y = 0; y < schematic.layers; y++) {
+        for (int y = 1; y < schematic.layers; y++) {
             for (int z = schematic.length - 1; z >= 0; z--) {
                 for (int x = 0; x < schematic.width; x++) {
                     SchematicBlockData d = it.next();

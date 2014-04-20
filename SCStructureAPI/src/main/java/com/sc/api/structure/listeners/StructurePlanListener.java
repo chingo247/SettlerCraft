@@ -5,6 +5,7 @@
  */
 package com.sc.api.structure.listeners;
 
+import com.sc.api.structure.construction.FrameStrategy;
 import com.sc.api.structure.construction.SCStructureAPI;
 import com.settlercraft.core.manager.StructurePlanManager;
 import com.settlercraft.core.model.entity.structure.Structure;
@@ -48,7 +49,7 @@ public class StructurePlanListener implements Listener {
                     WorldUtil.getDirection(pie.getPlayer()),
                     plan
             );
-            SCStructureAPI.place(structure);
+            SCStructureAPI.build(structure).frame().construct(FrameStrategy.FANCY);
         }
     }
 
