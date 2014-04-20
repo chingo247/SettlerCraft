@@ -23,7 +23,11 @@ public class Recipes {
     new CShapedRecipe(new ItemStack(Material.STONE_HOE), CONSTRUCTION_TOOL)
             .shape("W","S","S")
             .setIngredient('W', Material.WORKBENCH)
-            .setIngredient('S', Material.STICK)
+            .setIngredient('S', Material.STICK),
+            
+    new CShapedRecipe(new ItemStack(Material.PAPER), "Town Center")
+            .shape("D","D","D")
+            .setIngredient('D', Material.DIRT)
     ));
 
     public static final HashSet<CShapedRecipe> getRecipes() {

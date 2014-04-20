@@ -113,7 +113,7 @@ public class FrameBuilder {
                             b = target.clone().add(z * zMod, y, x * xMod).getBlock();
                         }
                         
-                        b.setType(Material.FENCE);
+                        b.setType(Material.DIRT);
                     }
                 }
             }

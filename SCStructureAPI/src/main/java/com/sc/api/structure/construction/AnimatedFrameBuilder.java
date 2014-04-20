@@ -23,7 +23,7 @@ public class AnimatedFrameBuilder {
 
     private final Structure structure;
     private final int delay;
-    private static final int defaultDelay = Ticks.ONE_SECOND;
+    private static final int defaultDelay = 2 * Ticks.ONE_SECOND;
 
     AnimatedFrameBuilder(Structure structure, int delay) {
         this.structure = structure;
@@ -86,7 +86,6 @@ public class AnimatedFrameBuilder {
                 @Override
                 public void run() {
                     placeDefaultAnimatedFrame(next);
-                    System.out.println("NEXT FRAME LAYER!");
                 }
             }, delay);
         }
@@ -122,7 +121,6 @@ public class AnimatedFrameBuilder {
                 @Override
                 public void run() {
                     placeFancyAnimatedFrame(next);
-                    System.out.println("NEXT FRAME LAYER!");
                 }
             }, delay);
         }
