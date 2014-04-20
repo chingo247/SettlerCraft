@@ -12,18 +12,18 @@ import com.settlercraft.core.util.Ticks;
  *
  * @author Chingo
  */
-public class AnimatedBuilder {
+public class AnimatedFrameBuilder {
 
     private final Structure structure;
     private final int delay;
     private static final int defaultDelay = 5 * Ticks.ONE_SECOND;
 
-    AnimatedBuilder(Structure structure, int delay) {
+    AnimatedFrameBuilder(Structure structure, int delay) {
         this.structure = structure;
         this.delay = delay;
     }
 
-    AnimatedBuilder(Structure structure) {
+    AnimatedFrameBuilder(Structure structure) {
         this.structure = structure;
         this.delay = defaultDelay;
     }
@@ -32,7 +32,7 @@ public class AnimatedBuilder {
      * Build frame for target structure
      */
     public void construct() {
-        construct(FRAME_STRATEGY.DEFAULT);
+        construct(FrameStrategy.DEFAULT);
     }
 
     /**
@@ -40,7 +40,7 @@ public class AnimatedBuilder {
      *
      * @param strategy The strategy to place this frame
      */
-    public void construct(FRAME_STRATEGY strategy) {
+    public void construct(FrameStrategy strategy) {
         switch (strategy) {
             case DEFAULT:
                 placeDefaultAnimatedFrame();

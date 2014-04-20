@@ -9,7 +9,7 @@ package com.sc.api.structure.construction;
  *
  * @author Chingo
  */
-public enum FRAME_STRATEGY {
+public enum FrameStrategy {
 
     /**
      * Just place the frame instantly with using edge of this structure
