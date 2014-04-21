@@ -21,6 +21,7 @@ import org.bukkit.block.Block;
 public class FrameBuilder {
 
     private final Structure structure;
+    private final int DEFAULT_WALL_HEIGHT = 2;
 
     FrameBuilder(final Structure structure) {
         this.structure = structure;
@@ -35,24 +36,26 @@ public class FrameBuilder {
 
     /**
      * Use an animated builder to construct this frame
+     *
      * @param delay The delay in ticks
      * @return AnimatedFrameBuilder for this structure
      */
     public AnimatedFrameBuilder anim(int delay) {
         return new AnimatedFrameBuilder(structure, delay);
     }
-    
+
     /**
      * Use an animated builder to construct this frame
+     *
      * @return AnimatedFrameBuilder for this structure
      */
     public AnimatedFrameBuilder anim() {
         return new AnimatedFrameBuilder(structure);
     }
-    
 
     /**
      * Contructs a construct for this structure.
+     *
      * @param strategy The strategy to place this frame
      */
     public final void construct(FrameStrategy strategy) {
@@ -76,17 +79,24 @@ public class FrameBuilder {
         int xMod = mods[0];
         int zMod = mods[1];
 
+        int mod;
         for (int y = 1; y < schematic.layers; y++) {
-            for (int z = schematic.length - 1; z >= 0; z--) {
-                for (int x = 0; x < schematic.width; x++) {
+            if (y % 2 == 0 || y < DEFAULT_WALL_HEIGHT ) {
+                mod = 1;
+            } else {
+                mod = 2;
+            }
+            for (int z = schematic.length - 1; z >= 0; z-= mod) {
+                for (int x = 0; x < schematic.width; x+= mod) {
                     if (y == schematic.layers - 1 || z == 0 || x == 0 || z == schematic.length - 1 || x == schematic.width - 1) {
+
                         Block b;
                         if (direction == Direction.NORTH || direction == Direction.SOUTH) {
                             b = target.clone().add(x * xMod, y, z * zMod).getBlock();
                         } else {
                             b = target.clone().add(z * zMod, y, x * xMod).getBlock();
                         }
-                        b.setType(Material.FENCE);
+                        b.setType(Material.WOOD);
                     }
                 }
             }
@@ -100,25 +110,27 @@ public class FrameBuilder {
         SchematicBlockData[][][] arr = schematic.getBlocksAsArray();
         int xMod = structure.getxMod();
         int zMod = structure.getzMod();
-
+        int mod;
         for (int y = 1; y < schematic.layers; y++) {
-            for (int z = schematic.length - 1; z >= 0; z--) {
-                for (int x = 0; x < schematic.width; x++) {
-                    if(y <= schematic.getHighestAt(x, z)) {
-                             
+            if (y % 2 == 0 || y < 3) { // To avoid small entities from entering this structure as good as possible therefore 3
+                mod = 1;
+            } else {
+                mod = 2;
+            }
+
+            for (int z = schematic.length - 1; z >= 0; z -= mod) {
+                for (int x = 0; x < schematic.width; x += mod) {
+                    if (y <= schematic.getHighestAt(x, z)) {
                         Block b;
                         if (direction == Direction.NORTH || direction == Direction.SOUTH) {
                             b = target.clone().add(x * xMod, y, z * zMod).getBlock();
                         } else {
                             b = target.clone().add(z * zMod, y, x * xMod).getBlock();
                         }
-                        
-                        b.setType(Material.DIRT);
+                        b.setType(Material.WOOD);
                     }
                 }
             }
         }
     }
-
-    
 }

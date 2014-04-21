@@ -24,6 +24,7 @@ public class AnimatedFrameBuilder {
     private final Structure structure;
     private final int delay;
     private static final int defaultDelay = 2 * Ticks.ONE_SECOND;
+    private final int DEFAULT_WALL_HEIGHT = 2;
 
     AnimatedFrameBuilder(Structure structure, int delay) {
         this.structure = structure;
@@ -68,16 +69,23 @@ public class AnimatedFrameBuilder {
             int[] mods = WorldUtil.getModifiers(direction);
             int xMod = mods[0];
             int zMod = mods[1];
-            for (int z = schematic.length - 1; z >= 0; z--) {
-                for (int x = 0; x < schematic.width; x++) {
+            int mod;
+            if (start % 2 == 0 || start < DEFAULT_WALL_HEIGHT) {
+                mod = 1;
+            } else {
+                mod = 2;
+            }
+            for (int z = schematic.length - 1; z >= 0; z -= mod) {
+                for (int x = 0; x < schematic.width; x += mod) {
                     if (start == schematic.layers - 1 || z == 0 || x == 0 || z == schematic.length - 1 || x == schematic.width - 1) {
+
                         Block b;
                         if (direction == Direction.NORTH || direction == Direction.SOUTH) {
                             b = target.clone().add(x * xMod, start, z * zMod).getBlock();
                         } else {
                             b = target.clone().add(z * zMod, start, x * xMod).getBlock();
                         }
-                        b.setType(Material.FENCE);
+                        b.setType(Material.WOOD);
                     }
                 }
             }
@@ -101,18 +109,23 @@ public class AnimatedFrameBuilder {
             int xMod = structure.getxMod();
             int zMod = structure.getzMod();
 
-            for (int z = schematic.length - 1; z >= 0; z--) {
-                for (int x = 0; x < schematic.width; x++) {
-                    if (start <= schematic.getHighestAt(x, z) && schematic.getHighestAt(x, z) != -1) {
+            int mod;
+            if (start % 2 == 0 || start < DEFAULT_WALL_HEIGHT) {
+                mod = 1;
+            } else {
+                mod = 2;
+            }
 
+            for (int z = schematic.length - 1; z >= 0; z -= mod) {
+                for (int x = 0; x < schematic.width; x += mod) {
+                    if (start <= schematic.getHighestAt(x, z)) {
                         Block b;
                         if (direction == Direction.NORTH || direction == Direction.SOUTH) {
                             b = target.clone().add(x * xMod, start, z * zMod).getBlock();
                         } else {
                             b = target.clone().add(z * zMod, start, x * xMod).getBlock();
                         }
-
-                        b.setType(Material.FENCE);
+                        b.setType(Material.WOOD);
                     }
                 }
             }
