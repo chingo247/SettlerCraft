@@ -3,10 +3,10 @@
 name: Town Center
 description: First building of a town.
 #The schematic file associated with this yml
-#Multiple configs maybe be associated with a single schematic
+#You can have multiple YAML pointing at the same schematic!
 schematic: 
-  building: TownCenterStructure.schematic
-  foundation: TownCenterFoundation.schematic
+  structure: DefaultTownCenter.schematic
+  
 
 #By default a building belongs to the default culture
 #Culture is a name to group buildings 
@@ -14,15 +14,17 @@ culture: default
 #The type of buildings this building belongs to
 type: default
 #Which sides need to be free? The south side is also the side where a Construction Chest will be placed
-#Therefore this side always needs to be at least 1 block free
+#Therefore this side always needs to be at least 1 block free 
 reserved:
-  north: 0
+  north: 1
   east: 0
-  south: 1
+  south: 0
   west: 0
+  up: 0
+  down: 0
   
 #This describes where at which height the building must start
 #Where 0 means equal to the ground / clicked block
 layers-start: 0
 
-
+#PRO-TIP: Make sure your schematics have ENOUGH LIGHT/(TORCHES!), that way NO UNWANTED MONSTERS will spawn inside your building

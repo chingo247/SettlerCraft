@@ -111,9 +111,9 @@ public class AnimatedFrameBuilder {
 
             int mod;
             if (start % 2 == 0 || start < DEFAULT_WALL_HEIGHT) {
-                mod = 1;
+                mod = 1; // DO A COMPLETE LAYER
             } else {
-                mod = 2;
+                mod = 8; // DO SOME IN THIS LAYER
             }
 
             for (int z = schematic.length - 1; z >= 0; z -= mod) {
