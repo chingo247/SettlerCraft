@@ -47,6 +47,8 @@ public class StructurePlanManager {
         return plans.get(plan);
     }
     
-    
+    public void clear() {
+        this.plans.clear();
+    }
     
 }

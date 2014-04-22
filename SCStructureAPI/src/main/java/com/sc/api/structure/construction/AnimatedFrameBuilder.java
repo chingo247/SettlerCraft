@@ -8,6 +8,7 @@ package com.sc.api.structure.construction;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.plan.schematic.SchematicObject;
 import com.settlercraft.core.model.world.Direction;
+import com.settlercraft.core.persistence.StructureService;
 import com.settlercraft.core.util.Ticks;
 import com.settlercraft.core.util.WorldUtil;
 import org.bukkit.Bukkit;
@@ -21,28 +22,33 @@ import org.bukkit.block.Block;
  */
 public class AnimatedFrameBuilder {
 
+    private final StructureService structureService;
     private final Structure structure;
     private final int delay;
     private static final int defaultDelay = 2 * Ticks.ONE_SECOND;
     private final int DEFAULT_WALL_HEIGHT = 2;
-    private final int hGap = 8;
+    private final int hGap = 2;
     private final int vGap = 1;
 
     AnimatedFrameBuilder(Structure structure, int delay) {
         this.structure = structure;
         this.delay = delay;
+        this.structureService = new StructureService();
     }
 
     AnimatedFrameBuilder(Structure structure) {
         this.structure = structure;
         this.delay = defaultDelay;
+        this.structureService = new StructureService();
     }
 
     /**
      * Build frame for target structure
      */
     public void construct() {
+        structureService.setStatus(structure, Structure.StructureState.PLACING_FRAME);
         construct(FrameStrategy.DEFAULT);
+        structureService.setStatus(structure, Structure.StructureState.READY_TO_BE_BUILD);
     }
 
     /**
@@ -51,6 +57,7 @@ public class AnimatedFrameBuilder {
      * @param strategy The strategy to place this frame
      */
     public void construct(FrameStrategy strategy) {
+        structureService.setStatus(structure, Structure.StructureState.PLACING_FRAME);
         switch (strategy) {
             case DEFAULT:
                 placeDefaultAnimatedFrame(1);
@@ -61,6 +68,7 @@ public class AnimatedFrameBuilder {
             default:
                 throw new UnsupportedOperationException("no strategy implemented for " + strategy);
         }
+        
     }
 
     private void placeDefaultAnimatedFrame(int start) {
@@ -98,6 +106,8 @@ public class AnimatedFrameBuilder {
                     placeDefaultAnimatedFrame(next);
                 }
             }, delay);
+        } else {
+            structureService.setStatus(structure, Structure.StructureState.READY_TO_BE_BUILD);
         }
 
     }
@@ -138,6 +148,8 @@ public class AnimatedFrameBuilder {
                     placeFancyAnimatedFrame(next);
                 }
             }, delay);
+        } else {
+            structureService.setStatus(structure, Structure.StructureState.READY_TO_BE_BUILD);
         }
     }
 

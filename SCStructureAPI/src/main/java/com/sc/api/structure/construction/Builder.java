@@ -5,12 +5,19 @@
  */
 package com.sc.api.structure.construction;
 
+import com.google.common.base.Preconditions;
+import com.sc.api.structure.event.structure.StructureLayerCompleteEvent;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.plan.StructurePlan;
 import com.settlercraft.core.model.plan.schematic.Resource;
 import com.settlercraft.core.model.plan.schematic.SchematicBlockData;
 import com.settlercraft.core.model.plan.schematic.SchematicObject;
 import com.settlercraft.core.model.world.Direction;
+import static com.settlercraft.core.model.world.Direction.EAST;
+import static com.settlercraft.core.model.world.Direction.NORTH;
+import static com.settlercraft.core.model.world.Direction.SOUTH;
+import static com.settlercraft.core.model.world.Direction.WEST;
+import com.settlercraft.core.persistence.StructureProgressService;
 import com.settlercraft.core.persistence.StructureService;
 import com.settlercraft.core.util.SettlerCraftMaterials;
 import com.settlercraft.core.util.Ticks;
@@ -50,11 +57,11 @@ import org.bukkit.material.TripwireHook;
 public class Builder {
 
     private final StructureService structureService;
+    private final StructureProgressService structureProgressService;
     private final Structure structure;
     private final int TIME_BETWEEN_LAYERS = Ticks.ONE_SECOND * 2;
 
     public enum FOUNDATION_STRATEGY {
-
         DEFAULT,
         PROVIDED,
     }
@@ -62,6 +69,7 @@ public class Builder {
     Builder(Structure structure) {
         this.structure = structure;
         this.structureService = new StructureService();
+        this.structureProgressService = new StructureProgressService();
     }
 
     /**
@@ -111,15 +119,19 @@ public class Builder {
     }
 
     /**
-     * Places a foundation for the structure. If the structure doesnt have a
-     * foundation schematic provided, the default strategy will be executed.
+     * A foundation will be created beneath the structure. A foundation is
+     * doesnt have any functionality its just there to give the player some
+     * feedback. And also clears the construction site from any blocks
      */
     public void foundation() {
+        structureService.setStatus(structure, Structure.StructureState.CLEARING_SITE_OF_BLOCKS);
+        clear();
         if (structure.getPlan().getFoundationSchematic() != null) {
             foundation(FOUNDATION_STRATEGY.PROVIDED);
         } else {
             foundation(FOUNDATION_STRATEGY.DEFAULT);
         }
+        structureService.setStatus(structure, Structure.StructureState.PLACING_FRAME);
     }
 
     private void placeDefaultFoundation() {
@@ -200,17 +212,17 @@ public class Builder {
                     }
                     SchematicBlockData d = it.next();
                     if (SettlerCraftMaterials.isDirectional(d)) {
-                    placeLater.add(new PlaceLaterBlock(d.getMaterial(), d.getData(), b));
-                    b.setType(Material.AIR);
+                        placeLater.add(new PlaceLaterBlock(d.getMaterial(), d.getData(), b));
+                        b.setType(Material.AIR);
 
-                } else {
-                    b.setType(d.getMaterial());
-                    b.setData(d.getData());
-                }
+                    } else {
+                        b.setType(d.getMaterial());
+                        b.setData(d.getData());
+                    }
                 }
             }
         }
-        
+
         Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
             @Override
             public void run() {
@@ -225,35 +237,39 @@ public class Builder {
         }, TIME_BETWEEN_LAYERS * 2);
     }
 
-    public void complete() {
+    /**
+     * Should be run at the end of a the construction, removes the frame and
+     * loops trough the structure from top to bottom. 
+     */
+    public void finish() {
+        if(structure.getStatus() != Structure.StructureState.FINISHING && structure.getStatus() != Structure.StructureState.COMPLETE) {
+        structureService.setStatus(structure, Structure.StructureState.FINISHING);
         SchematicObject schematic = structure.getPlan().getStructureSchematic();
-        complete(schematic.layers - 1);
+        finish(schematic.layers - 1);
+        }
     }
 
-    private void complete(int y) {
-
-        SCStructureAPI.build(structure).layer(y, false);
+    /**
+     * Recursive finish
+     *
+     * @param y The layer to finish
+     */
+    private void finish(int y) {
+        SCStructureAPI.build(structure).finishLayer(y);
         if (y > 0) {
             final int next = y - 1;
             Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
 
                 @Override
                 public void run() {
-                    complete(next);
+                    finish(next);
                 }
             }, TIME_BETWEEN_LAYERS);
         }
-
+        structureService.setStatus(structure, Structure.StructureState.COMPLETE);
     }
 
-    /**
-     * Builds the corresponding layer of this structure, whether the
-     * precoditions are met or not.
-     *
-     * @param layer The layer to build
-     * @param hasFrame Determines if this should keep the fence at the borders
-     */
-    public void layer(int layer, boolean hasFrame) {
+    private void finishLayer(int layer) {
         final StructurePlan sp = structure.getPlan();
         if (layer > sp.getStructureSchematic().layers || layer < 0) {
             throw new IndexOutOfBoundsException("layer doesnt exist");
@@ -261,38 +277,33 @@ public class Builder {
         final Direction direction = structure.getDirection();
         final SchematicObject schematic = sp.getStructureSchematic();
         final Iterator<SchematicBlockData> it = schematic.getBlocksFromLayer(layer).iterator();
-
         final Location target = structure.getLocation();
         final int[] mods = WorldUtil.getModifiers(direction);
         final int xMod = mods[0];
         final int zMod = mods[1];
-
         final List<PlaceLaterBlock> placeLater = new LinkedList<>();
 
         for (int z = schematic.length - 1; z >= 0; z--) {
             for (int x = 0; x < schematic.width; x++) {
                 Block b;
                 SchematicBlockData d = it.next();
-                if (hasFrame && d.getMaterial() == Material.AIR
-                        && (z == 0 || z == schematic.length - 1 || x == 0 || x == schematic.width - 1)) {
-                    continue;
-                }
+
                 if (direction == Direction.NORTH || direction == Direction.SOUTH) {
                     b = target.clone().add(x * xMod, layer, z * zMod).getBlock();
                 } else {
                     b = target.clone().add(z * zMod, layer, x * xMod).getBlock();
                 }
+
                 if (SettlerCraftMaterials.isDirectional(d)) {
+                    // Some blocks need to be added later, because they are attachable or directional (or both)
                     placeLater.add(new PlaceLaterBlock(d.getMaterial(), d.getData(), b));
                     b.setType(Material.AIR);
-
                 } else {
                     b.setType(d.getMaterial());
                     b.setData(d.getData());
                 }
             }
         }
-
         Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
             @Override
             public void run() {
@@ -309,141 +320,196 @@ public class Builder {
     }
 
     /**
-     * Using the directional class to get the right direction
-     * see: http://jd.bukkit.org/rb/doxygen/dc/d24/interfaceorg_1_1bukkit_1_1material_1_1Directional.html
+     * Constructs the given layer, it will ignore any directionals and will be
+     * placed afther the layer is finish
+     *
+     * @param layer The layer to construct
+     * @param keepFrame
+     */
+    public void layer(int layer, boolean keepFrame) {
+        if (layer == structure.getPlan().getStructureSchematic().layers - 1) {
+            finish();
+        } else if (structure.getStatus() != Structure.StructureState.ADVANCING_TO_NEXT_LAYER
+                && structure.getStatus() != Structure.StructureState.COMPLETE
+                && structure.getStatus() != Structure.StructureState.FINISHING) {
+            structureService.setStatus(structure, Structure.StructureState.ADVANCING_TO_NEXT_LAYER);
+            final StructurePlan sp = structure.getPlan();
+            if (layer > sp.getStructureSchematic().layers || layer < 0) {
+                throw new IndexOutOfBoundsException("layer doesnt exist");
+            }
+            final Direction direction = structure.getDirection();
+            final SchematicObject schematic = sp.getStructureSchematic();
+            final Iterator<SchematicBlockData> it = schematic.getBlocksFromLayer(layer).iterator();
+            final Location target = structure.getLocation();
+            final int[] mods = WorldUtil.getModifiers(direction);
+            final int xMod = mods[0];
+            final int zMod = mods[1];
+
+            for (int z = schematic.length - 1; z >= 0; z--) {
+                for (int x = 0; x < schematic.width; x++) {
+                    Block b;
+                    SchematicBlockData d = it.next();
+
+                    if (direction == Direction.NORTH || direction == Direction.SOUTH) {
+                        b = target.clone().add(x * xMod, layer, z * zMod).getBlock();
+                    } else {
+                        b = target.clone().add(z * zMod, layer, x * xMod).getBlock();
+                    }
+
+                    if (keepFrame && d.getMaterial() == Material.AIR && b.getType() != Material.AIR) {
+                        continue; // Keep the frame!
+                    }
+                    if (!SettlerCraftMaterials.isDirectional(d)) {
+                        b.setType(d.getMaterial());
+                        b.setData(d.getData());
+                    }
+                }
+            }
+
+            structureProgressService.nextLayer(structure.getProgress(), true);
+            Bukkit.getPluginManager().callEvent(new StructureLayerCompleteEvent(structure, layer));
+            structureService.setStatus(structure, Structure.StructureState.READY_TO_BE_BUILD);
+        }
+    }
+
+    /**
+     * Using the directional class to get the right direction see:
+     * http://jd.bukkit.org/rb/doxygen/dc/d24/interfaceorg_1_1bukkit_1_1material_1_1Directional.html
+     *
      * @param plb
-     * @param newDirection 
+     * @param newDirection
      */
     private void placeToDirection(PlaceLaterBlock plb, Direction newDirection) {
         Resource r = new Resource(plb.material, plb.data);
         if (SettlerCraftMaterials.isDirectional(r)) {
-              if(SettlerCraftMaterials.isDirectionalAttachable(r)) {
-                  
-                  Directional d = (Directional) plb.material.getNewData(plb.data);
-                  BlockFace face = getDirection(d,newDirection);
-                  Block b = plb.block;
-                  Byte data;
-                  
-                  switch(plb.material) {
-                      case BED_BLOCK:
-                          Bed bed = new Bed(face);
-                          data = bed.getData();
-                          break;
-                      case DIODE:
-                      case DIODE_BLOCK_OFF:
-                      case DIODE_BLOCK_ON:
-                          Diode diode = new Diode();
-                          diode.setFacingDirection(face);
-                          data = diode.getData();
-                          break;
-                      case TORCH:
-                      case REDSTONE_TORCH_OFF:
-                      case REDSTONE_TORCH_ON:
-                          Torch torch = new Torch();
-                          torch.setFacingDirection(face);
-                          data = torch.getData();
-                          break;
-                      case PISTON_BASE:
-                          PistonBaseMaterial piston = new PistonBaseMaterial(Material.PISTON_BASE);
-                          piston.setFacingDirection(face);
-                          data = piston.getData();
-                          break;
-                      case PISTON_STICKY_BASE:
-                          PistonBaseMaterial piston2 = new PistonBaseMaterial(Material.PISTON_STICKY_BASE);
-                          piston2.setFacingDirection(face);
-                          data = piston2.getData();
-                          break;
-                      case PUMPKIN:
-                          Pumpkin pumpkin = new Pumpkin(face);
-                          data = pumpkin.getData();
-                          break;
-                      case SKULL:
-                          Skull skull = new Skull(b.getType(), b.getData());
-                          skull.setFacingDirection(face);
-                          data = skull.getData();
-                          break;
-                      case SMOOTH_STAIRS:
-                      case NETHER_BRICK_STAIRS:
-                      case QUARTZ_STAIRS:
-                      case JUNGLE_WOOD_STAIRS:
-                      case SPRUCE_WOOD_STAIRS:
-                      case BIRCH_WOOD_STAIRS:
-                      case COBBLESTONE_STAIRS:
-                      case BRICK_STAIRS:
-                      case WOOD_STAIRS:
-                      Stairs stairs = new Stairs(plb.material);
-                      stairs.setInverted(((Stairs) d).isInverted());
-                      stairs.setFacingDirection(face);
-                      data = stairs.getData();
-                      break;
-                      case COCOA:
-                          CocoaPlant cocoaPlant = new CocoaPlant();
-                          cocoaPlant.setFacingDirection(face);
-                          data = cocoaPlant.getData();
-                      break;
-                      case SIGN_POST:
-                          Sign signp = new Sign(Material.SIGN_POST);
-                          signp.setFacingDirection(face);
-                          data = signp.getData();
-                          break;
-                      case WALL_SIGN:
-                          Sign wsign = new Sign(Material.WALL_SIGN);
-                          wsign.setFacingDirection(face);
-                          data = wsign.getData();
-                          break;
-                      case SIGN: 
-                          Sign sign = new Sign(Material.SIGN);
-                          sign.setFacingDirection(face);
-                          data = sign.getData();
-                          break;
-                      case CHEST:
-                          Chest chest = new Chest(face);
-                          data = chest.getData();
-                          break;
-                      case ENDER_CHEST:
-                          EnderChest echest = new EnderChest(face);
-                          data = echest.getData();
-                          break;
-                      case STONE_BUTTON:
-                      case WOOD_BUTTON:
-                          Button button = new Button(plb.material);
-                          button.setFacingDirection(face);
-                          data = button.getData();
-                          break;
-                      case LADDER:
-                          Ladder ladder = new Ladder();
-                          ladder.setFacingDirection(face);
-                          data = ladder.getData();
-                          break;
-                      case LEVER:
-                          Lever lever = new Lever();
-                          lever.setFacingDirection(face);
-                          lever.setPowered(plb.block.isBlockPowered());
-                          data = lever.getData();
-                          break;
-                      case TRAP_DOOR:
-                          TrapDoor trapDoor = new TrapDoor();
-                          trapDoor.setFacingDirection(face);
-                          data = trapDoor.getData();
-                          break;
-                      case TRIPWIRE_HOOK:
-                          TripwireHook twh = new TripwireHook();
-                          twh.setFacingDirection(face);
-                          data = twh.getData();
-                          break;
-                      case DISPENSER:
-                          Dispenser dispenser = new Dispenser(face);
-                          data = dispenser.getData();
-                          break;
-                      case FURNACE:
-                          Furnace furnace = new Furnace(face);
-                          data = furnace.getData();
-                          break;
-                      default:throw new UnsupportedOperationException(plb.material + " : " + plb.data + " not supported");
-                  }
-                  plb.data = data;
-                  plb.place();
-                  
+            if (SettlerCraftMaterials.isDirectionalAttachable(r)) {
+
+                Directional d = (Directional) plb.material.getNewData(plb.data);
+                BlockFace face = getDirection(d, newDirection);
+                Block b = plb.block;
+                Byte data;
+
+                switch (plb.material) {
+                    case BED_BLOCK:
+                        Bed bed = new Bed(face);
+                        data = bed.getData();
+                        break;
+                    case DIODE:
+                    case DIODE_BLOCK_OFF:
+                    case DIODE_BLOCK_ON:
+                        Diode diode = new Diode();
+                        diode.setFacingDirection(face);
+                        data = diode.getData();
+                        break;
+                    case TORCH:
+                    case REDSTONE_TORCH_OFF:
+                    case REDSTONE_TORCH_ON:
+                        Torch torch = new Torch();
+                        torch.setFacingDirection(face);
+                        data = torch.getData();
+                        break;
+                    case PISTON_BASE:
+                        PistonBaseMaterial piston = new PistonBaseMaterial(Material.PISTON_BASE);
+                        piston.setFacingDirection(face);
+                        data = piston.getData();
+                        break;
+                    case PISTON_STICKY_BASE:
+                        PistonBaseMaterial piston2 = new PistonBaseMaterial(Material.PISTON_STICKY_BASE);
+                        piston2.setFacingDirection(face);
+                        data = piston2.getData();
+                        break;
+                    case PUMPKIN:
+                        Pumpkin pumpkin = new Pumpkin(face);
+                        data = pumpkin.getData();
+                        break;
+                    case SKULL:
+                        Skull skull = new Skull(b.getType(), b.getData());
+                        skull.setFacingDirection(face);
+                        data = skull.getData();
+                        break;
+                    case SMOOTH_STAIRS:
+                    case NETHER_BRICK_STAIRS:
+                    case QUARTZ_STAIRS:
+                    case JUNGLE_WOOD_STAIRS:
+                    case SPRUCE_WOOD_STAIRS:
+                    case BIRCH_WOOD_STAIRS:
+                    case COBBLESTONE_STAIRS:
+                    case BRICK_STAIRS:
+                    case WOOD_STAIRS:
+                        Stairs stairs = new Stairs(plb.material);
+                        stairs.setInverted(((Stairs) d).isInverted());
+                        stairs.setFacingDirection(face);
+                        data = stairs.getData();
+                        break;
+                    case COCOA:
+                        CocoaPlant cocoaPlant = new CocoaPlant();
+                        cocoaPlant.setFacingDirection(face);
+                        data = cocoaPlant.getData();
+                        break;
+                    case SIGN_POST:
+                        Sign signp = new Sign(Material.SIGN_POST);
+                        signp.setFacingDirection(face);
+                        data = signp.getData();
+                        break;
+                    case WALL_SIGN:
+                        Sign wsign = new Sign(Material.WALL_SIGN);
+                        wsign.setFacingDirection(face);
+                        data = wsign.getData();
+                        break;
+                    case SIGN:
+                        Sign sign = new Sign(Material.SIGN);
+                        sign.setFacingDirection(face);
+                        data = sign.getData();
+                        break;
+                    case CHEST:
+                        Chest chest = new Chest(face);
+                        data = chest.getData();
+                        break;
+                    case ENDER_CHEST:
+                        EnderChest echest = new EnderChest(face);
+                        data = echest.getData();
+                        break;
+                    case STONE_BUTTON:
+                    case WOOD_BUTTON:
+                        Button button = new Button(plb.material);
+                        button.setFacingDirection(face);
+                        data = button.getData();
+                        break;
+                    case LADDER:
+                        Ladder ladder = new Ladder();
+                        ladder.setFacingDirection(face);
+                        data = ladder.getData();
+                        break;
+                    case LEVER:
+                        Lever lever = new Lever();
+                        lever.setFacingDirection(face);
+                        lever.setPowered(plb.block.isBlockPowered());
+                        data = lever.getData();
+                        break;
+                    case TRAP_DOOR:
+                        TrapDoor trapDoor = new TrapDoor();
+                        trapDoor.setFacingDirection(face);
+                        data = trapDoor.getData();
+                        break;
+                    case TRIPWIRE_HOOK:
+                        TripwireHook twh = new TripwireHook();
+                        twh.setFacingDirection(face);
+                        data = twh.getData();
+                        break;
+                    case DISPENSER:
+                        Dispenser dispenser = new Dispenser(face);
+                        data = dispenser.getData();
+                        break;
+                    case FURNACE:
+                        Furnace furnace = new Furnace(face);
+                        data = furnace.getData();
+                        break;
+                    default:
+                        throw new UnsupportedOperationException(plb.material + " : " + plb.data + " not supported");
+                }
+                plb.data = data;
+                plb.place();
+
 //                  if(d instanceof Chest) {
 //                      Chest chest = new Chest(face);
 //                      data = chest.getData();
@@ -452,87 +518,87 @@ public class Builder {
 //                      torch.setFacingDirection(face);
 //                      data = torch.getData();
 //                  }
-              }
+            }
         }
-        
+
     }
-    
-    
+
     /**
      * TODO ALL BLOCKFACES SHOULD BE SUPPORTED, MOVE THIS TO WORLDUTIL
+     *
      * @param directional
      * @param newDirection
-     * @return 
+     * @return
      */
     private BlockFace getDirection(Directional directional, Direction newDirection) {
-                if (directional.getFacing() != BlockFace.DOWN && directional.getFacing() != BlockFace.UP) {
-                    switch (newDirection) {
-                        case NORTH:
-                           return directional.getFacing();
-                        case EAST:
-                            System.out.println(directional.getFacing());
-                            switch (directional.getFacing()) {
-                                case NORTH:
-                                    return BlockFace.EAST;
-                                case EAST:
-                                    return BlockFace.SOUTH;
-                                case SOUTH:
-                                    return BlockFace.WEST;
-                                case WEST:
-                                    return BlockFace.NORTH;
-                                default:
-                                    throw new AssertionError("Dont know direction for: " + newDirection);
-                            }
-                        case WEST:
-                            switch (directional.getFacing()) {
-                               case NORTH:
-                                    return BlockFace.WEST;
-                                case EAST:
-                                    return BlockFace.NORTH;
-                                case SOUTH:
-                                    return BlockFace.EAST;
-                                case WEST:
-                                    return BlockFace.SOUTH;
-                                default:
-                                    throw new AssertionError("Dont know direction for: " + newDirection);
-                            }
-                        case SOUTH:
-                            switch (directional.getFacing()) {
-                                case NORTH:
-                                    return BlockFace.SOUTH;
-                                case EAST:
-                                    return BlockFace.WEST;
-                                case SOUTH:
-                                    return BlockFace.NORTH;
-                                case WEST:
-                                    return BlockFace.EAST;
-                                default:
-                                    throw new AssertionError("Dont know direction for: " + newDirection);
-                            }
-                        default: throw new AssertionError("Unreachable");
-                    }
-    } else {
+        if (directional.getFacing() != BlockFace.DOWN && directional.getFacing() != BlockFace.UP) {
+            switch (newDirection) {
+                case NORTH:
                     return directional.getFacing();
-                }
-    }
-    
-        /**
-         * Builds the layers 0 to given layer of this structure.
-         *
-         * @param layer The last layer to construct
-         * @param hasFrame Wheter or not to take in account that there is can be
-         * a frame
-         */
-    public void layers(int layer, boolean hasFrame) {
-        for (int i = 0; i < layer + 1; i++) {
-            layer(layer, hasFrame);
+                case EAST:
+                    System.out.println(directional.getFacing());
+                    switch (directional.getFacing()) {
+                        case NORTH:
+                            return BlockFace.EAST;
+                        case EAST:
+                            return BlockFace.SOUTH;
+                        case SOUTH:
+                            return BlockFace.WEST;
+                        case WEST:
+                            return BlockFace.NORTH;
+                        default:
+                            throw new AssertionError("Dont know direction for: " + newDirection);
+                    }
+                case WEST:
+                    switch (directional.getFacing()) {
+                        case NORTH:
+                            return BlockFace.WEST;
+                        case EAST:
+                            return BlockFace.NORTH;
+                        case SOUTH:
+                            return BlockFace.EAST;
+                        case WEST:
+                            return BlockFace.SOUTH;
+                        default:
+                            throw new AssertionError("Dont know direction for: " + newDirection);
+                    }
+                case SOUTH:
+                    switch (directional.getFacing()) {
+                        case NORTH:
+                            return BlockFace.SOUTH;
+                        case EAST:
+                            return BlockFace.WEST;
+                        case SOUTH:
+                            return BlockFace.NORTH;
+                        case WEST:
+                            return BlockFace.EAST;
+                        default:
+                            throw new AssertionError("Dont know direction for: " + newDirection);
+                    }
+                default:
+                    throw new AssertionError("Unreachable");
+            }
+        } else {
+            return directional.getFacing();
         }
-
     }
 
     /**
-     * A block that should be placed later than any other blocks because placing 
-     * them in air might cause the block to break (e.g. Torches, Signsm, etc)
+     * Builds the layers 0 to given layer of this structure.
+     *
+     * @param layer The last layer to construct
+     * @param keepframe The builder will attempt to keep the frame
+     */
+    public void layers(int layer, boolean keepframe) {
+        Preconditions.checkArgument(layer > 0);
+        for (int i = 0; i < layer + 1; i++) {
+            layer(layer, keepframe);
+        }
+    }
+
+    /**
+     * A block that should be placed later than any other blocks because placing
+     * them in air might cause the block to break (e.g. Torches, Signs, etc)
      */
     private class PlaceLaterBlock {
 
@@ -552,6 +618,5 @@ public class Builder {
         }
 
     }
-
 
 }

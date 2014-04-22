@@ -20,11 +20,10 @@ import org.bukkit.event.player.PlayerInteractEvent;
  * @author Chingo
  */
 public class PlayerListener implements Listener {
+    
+    private int possibleSkillAmount = 5;
 
     @EventHandler
-    /**
-     * DEBUG
-     */
     public void onPlayerPlacedBlock(BlockPlaceEvent bpe) {
         System.out.println(
                 "Player placed: " + bpe.getBlock().getType()
@@ -41,7 +40,6 @@ public class PlayerListener implements Listener {
                 && pie.getItem().getItemMeta() != null
                 && pie.getItem().getItemMeta().getDisplayName() != null
                 && pie.getItem().getItemMeta().getDisplayName().equals(Recipes.CONSTRUCTION_TOOL)) {
-            System.out.println("CONSTRUCTION TOOL!");
             // Cancel default action which would destroy blocks
             pie.setCancelled(true);
             if (pie.getAction() != Action.LEFT_CLICK_BLOCK) {
@@ -49,9 +47,8 @@ public class PlayerListener implements Listener {
             }
             StructureService service = new StructureService();
             Structure structure = service.getStructure(pie.getClickedBlock().getLocation());
-            System.out.println("ON STRUCTURE: " + structure);
             if (structure != null && structure.getStatus() != StructureState.COMPLETE) {
-                SCStructureAPI.build(pie.getPlayer(), structure);
+                SCStructureAPI.build(pie.getPlayer(), structure, possibleSkillAmount);
             }
         }
         

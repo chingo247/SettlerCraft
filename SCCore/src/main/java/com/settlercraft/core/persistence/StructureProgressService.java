@@ -5,7 +5,6 @@
  */
 package com.settlercraft.core.persistence;
 
-import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.entity.structure.StructureProgress;
 import com.settlercraft.core.model.plan.requirement.material.MaterialResource;
 import com.settlercraft.core.util.HibernateUtil;
@@ -32,9 +31,11 @@ public class StructureProgressService extends AbstractService {
             removed = Math.min(resource.getAmount(), maxAmount);
             resource.setAmount(resource.getAmount() - removed);
             if (resource.getAmount() == 0) {
-                session.delete(resource);
+                StructureProgress progress = resource.getProgress();
+                progress.getResources().remove(resource);
+                session.merge(progress);
             } else {
-                merge(resource);
+                session.merge(resource);
             }
             tx.commit();
         } catch (HibernateException e) {
@@ -52,25 +53,29 @@ public class StructureProgressService extends AbstractService {
         return removed;
     }
     
-    public boolean nextLayer(final Structure structure) {
+    /**
+     * Sets the current progress to the next layer, but only if there are no more resources left to do
+     * @param progress The structure w
+     * @param force If true it wont check if the resource requirements are met
+     * @return 
+     */
+    public boolean nextLayer(final StructureProgress progress, boolean force) {
         Session session = null;
         Transaction tx = null;
         try {
             session = HibernateUtil.getSession();
             tx = session.beginTransaction();
-            StructureProgress progress = structure.getProgress();
-            if(!progress.getResources().isEmpty()) {
+            if(!progress.getResources().isEmpty() && !force) {
                 return false;
             } else {
+                if(progress.getLayer() < progress.getMaxHeight() - 1) {
                 progress.setLayer(progress.getLayer() + 1);
-                progress.setResources(structure.getPlan().getRequirement().getMaterialRequirement().getLayer(progress.getLayer()).getResources());
-                session.save(progress);
+                progress.setResources(progress.getStructure().getPlan().getRequirement().getMaterialRequirement().getLayer(progress.getLayer()).getResources(progress));
+                } 
+                session.merge(progress);
                 tx.commit();
                 return true;
             }
-            
-           
-            
         } catch (HibernateException e) {
             try {
                 tx.rollback();

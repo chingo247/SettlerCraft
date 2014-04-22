@@ -9,6 +9,7 @@ import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.plan.schematic.SchematicBlockData;
 import com.settlercraft.core.model.plan.schematic.SchematicObject;
 import com.settlercraft.core.model.world.Direction;
+import com.settlercraft.core.persistence.StructureService;
 import com.settlercraft.core.util.WorldUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -19,7 +20,7 @@ import org.bukkit.block.Block;
  * @author Chingo
  */
 public class FrameBuilder {
-
+    private final StructureService structureService;
     private final Structure structure;
     private final int DEFAULT_WALL_HEIGHT = 2;
     private final int hGap = 2;
@@ -27,13 +28,16 @@ public class FrameBuilder {
 
     FrameBuilder(final Structure structure) {
         this.structure = structure;
+        this.structureService = new StructureService();
     }
 
     /**
      * Build construct for target structure
      */
     public void construct() {
+        structureService.setStatus(structure, Structure.StructureState.PLACING_FRAME);
         construct(FrameStrategy.DEFAULT);
+        structureService.setStatus(structure, Structure.StructureState.READY_TO_BE_BUILD);
     }
 
     /**
@@ -61,6 +65,7 @@ public class FrameBuilder {
      * @param strategy The strategy to place this frame
      */
     public final void construct(FrameStrategy strategy) {
+        structureService.setStatus(structure, Structure.StructureState.PLACING_FRAME);
         switch (strategy) {
             case DEFAULT:
                 placeDefaultFrame();
@@ -71,6 +76,7 @@ public class FrameBuilder {
             default:
                 throw new UnsupportedOperationException("no strategy implemented for " + strategy);
         }
+        structureService.setStatus(structure, Structure.StructureState.READY_TO_BE_BUILD);
     }
 
     private void placeDefaultFrame() {

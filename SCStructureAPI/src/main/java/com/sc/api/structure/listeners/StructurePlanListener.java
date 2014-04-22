@@ -5,11 +5,14 @@
  */
 package com.sc.api.structure.listeners;
 
+import com.sc.api.structure.construction.FrameStrategy;
 import com.sc.api.structure.construction.SCStructureAPI;
 import com.settlercraft.core.manager.StructurePlanManager;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.plan.StructurePlan;
+import com.settlercraft.core.util.Ticks;
 import com.settlercraft.core.util.WorldUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -48,7 +51,15 @@ public class StructurePlanListener implements Listener {
                     WorldUtil.getDirection(pie.getPlayer()),
                     plan
             );
-            SCStructureAPI.build(structure).instant();
+            if(SCStructureAPI.place(structure)) {
+                SCStructureAPI.build(structure).foundation();
+                Bukkit.getScheduler().runTaskLater(settlerCraft, new Runnable() {
+                    @Override
+                    public void run() {
+                        SCStructureAPI.build(structure).frame().anim(Ticks.ONE_SECOND * 1).construct(FrameStrategy.FANCY);
+                    }
+                }, 2 * Ticks.ONE_SECOND);
+            }
         }
     }
 

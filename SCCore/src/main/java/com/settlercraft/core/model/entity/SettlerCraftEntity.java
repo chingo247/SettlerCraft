@@ -9,7 +9,6 @@ package com.settlercraft.core.model.entity;
 import java.sql.Timestamp;
 import java.util.Date;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.Version;
 
 /**
  *
@@ -20,8 +19,8 @@ public abstract class SettlerCraftEntity {
     
     
     
-    @Version
-    private Timestamp lastModified;
+//    @Version
+//    private Timestamp lastModified;
     
     private final Timestamp created;
     
@@ -31,9 +30,9 @@ public abstract class SettlerCraftEntity {
         this.created = new Timestamp(new Date().getTime());
     }
 
-    public Date getCreated() {
-        return lastModified;
-    }
+//    public Date getCreated() {
+//        return lastModified;
+//    }
     
     public abstract Long getId();
     

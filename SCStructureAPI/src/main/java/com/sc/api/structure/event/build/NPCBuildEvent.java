@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.sc.api.structure.event;
+package com.sc.api.structure.event.build;
 
 import com.settlercraft.core.model.entity.structure.Structure;
 import net.citizensnpcs.api.npc.NPC;

@@ -26,9 +26,7 @@ public class StructureProgress extends SettlerCraftEntity implements Serializabl
     
     private int layer;
     
-    private String plan;
-    
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Structure structure;
     
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -46,9 +44,20 @@ public class StructureProgress extends SettlerCraftEntity implements Serializabl
     public StructureProgress(Structure structure) {
         this.resources = new ArrayList<>();
         this.structure = structure;
-        this.plan = structure.getPlan().getConfig().getName();
         this.layer = 0;
-        setResources(structure.getPlan().getRequirement().getMaterialRequirement().getLayer(layer).getResources());
+        this.resources = structure.getPlan().getRequirement().getMaterialRequirement().getLayer(layer).getResources(this);
+    }
+
+    public Structure getStructure() {
+        return structure;
+    }
+    
+    public void addAll(List<MaterialResource> resources){
+        this.resources.addAll(resources);
+    }
+    
+    public void setResources(List<MaterialResource> resources) {
+        this.resources = resources;
     }
     
     public int getMaxHeight() {
@@ -59,13 +68,6 @@ public class StructureProgress extends SettlerCraftEntity implements Serializabl
         this.layer = layer;
     }
 
-    public final void setResources(List<MaterialResource> resources) {
-        this.resources.clear();
-        for( MaterialResource mr : resources ) {
-            mr.setProgress(this);
-            this.resources.add(mr);
-        }
-    }
 
     public int getLayer() {
         return layer;
@@ -78,11 +80,14 @@ public class StructureProgress extends SettlerCraftEntity implements Serializabl
     public Long getId() {
         return id;
     }
+    
+
+    
+    
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Resources: \n");
         for(MaterialResource r : resources) {
             sb.append(r).append("\n");
         }

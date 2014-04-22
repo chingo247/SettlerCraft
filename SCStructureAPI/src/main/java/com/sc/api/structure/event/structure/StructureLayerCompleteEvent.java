@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.sc.api.structure.event;
+package com.sc.api.structure.event.structure;
 
 import com.settlercraft.core.event.SettlerCraftEvent;
 import com.settlercraft.core.model.entity.structure.Structure;
@@ -14,30 +14,33 @@ import org.bukkit.event.HandlerList;
  *
  * @author Chingo
  */
-public class StructureStateChangedEvent extends SettlerCraftEvent {
+public class StructureLayerCompleteEvent extends SettlerCraftEvent {
     
     private final Structure structure;
+    private final int layer;
 
-    /**
-     * Constructor.
-     * @param structure The structure involved in this event
-     */
-    public StructureStateChangedEvent(final Structure structure) {
+    public StructureLayerCompleteEvent(Structure structure, int layer) {
         this.structure = structure;
+        this.layer = layer;
     }
 
-    /**
-     * Gets the structure involved in this event.
-     * @return The structure involved in this event
-     */
+    public int getLayer() {
+        return layer;
+    }
+
     public Structure getStructure() {
         return structure;
     }
     
     private static final HandlerList handlers = new HandlerList();
-    
+
     @Override
     public HandlerList getHandlers() {
         return handlers;
     }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+    
 }

@@ -3,8 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
-package com.sc.api.structure.event;
+package com.sc.api.structure.event.structure;
 
 import com.settlercraft.core.event.SettlerCraftEvent;
 import com.settlercraft.core.model.entity.structure.Structure;
@@ -14,24 +13,19 @@ import org.bukkit.event.HandlerList;
  *
  * @author Chingo
  */
-public class LayerCompleteEvent extends SettlerCraftEvent {
-    
+public class StructureCompleteEvent extends SettlerCraftEvent {
+
     private final Structure structure;
-    private final int layer;
 
-    public LayerCompleteEvent(Structure structure, int layer) {
+    public StructureCompleteEvent(Structure structure) {
         this.structure = structure;
-        this.layer = layer;
-    }
-
-    public int getLayer() {
-        return layer;
     }
 
     public Structure getStructure() {
         return structure;
     }
     
+
     private static final HandlerList handlers = new HandlerList();
 
     @Override
@@ -42,5 +36,5 @@ public class LayerCompleteEvent extends SettlerCraftEvent {
     public static HandlerList getHandlerList() {
         return handlers;
     }
-    
+
 }

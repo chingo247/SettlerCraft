@@ -9,7 +9,6 @@ import com.sc.api.structure.exception.InvalidStructurePlanException;
 import com.sc.api.structure.exception.NoStructureSchematicNodeException;
 import com.sc.api.structure.exception.SchematicFileNotFoundException;
 import com.sc.api.structure.exception.UnsupportedStructureException;
-import com.sc.api.structure.io.SchematicReader;
 import com.settlercraft.core.exception.DuplicateStructurePlanException;
 import com.settlercraft.core.manager.StructurePlanManager;
 import com.settlercraft.core.model.plan.StructurePlan;
@@ -30,6 +29,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 public class StructurePlanLoader {
 
     public void load(File buildingFolder) throws InvalidStructurePlanException, SchematicFileNotFoundException, NoStructureSchematicNodeException {
+        StructurePlanManager.getInstance().clear();
         String[] extensions = {"yml"};
         String structureSchematicNode = "schematic.structure";
         String foundationSchematicNode = "schematic.foundation";

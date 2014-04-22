@@ -6,6 +6,7 @@
 package com.settlercraft.core.model.plan.requirement.material;
 
 import com.google.common.collect.Maps;
+import com.settlercraft.core.model.entity.structure.StructureProgress;
 import com.settlercraft.core.model.plan.schematic.Resource;
 import com.settlercraft.core.model.plan.schematic.SchematicBlockData;
 import com.settlercraft.core.util.SettlerCraftMaterials;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import org.bukkit.Material;
@@ -74,9 +76,18 @@ public class StructureLayerRequirement implements Serializable {
         return layer;
     }
 
-    public List<MaterialResource> getResources() {
-        return new ArrayList<>(resources);
+//    public List<MaterialResource> getResources() {
+//        return new ArrayList<>(resources);
+//    }
+    
+    public List<MaterialResource> getResources(StructureProgress progress) {
+        List<MaterialResource> rs = new LinkedList<>();
+        for(MaterialResource mr : resources) {
+            rs.add(new MaterialResource(progress, mr.getMaterial(), mr.getAmount()));
+        }
+        return rs;
     }
+        
     
     public boolean removeResource(MaterialResource resource) {
         Iterator<MaterialResource> it = resources.iterator();

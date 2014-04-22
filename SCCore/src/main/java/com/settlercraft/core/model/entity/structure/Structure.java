@@ -69,6 +69,8 @@ public class Structure extends SettlerCraftEntity implements Serializable {
 
         /**
          * All blocks on structure location will be removed.
+         *//**
+         * All blocks on structure location will be removed.
          */
         CLEARING_SITE_OF_BLOCKS,
         /**
@@ -83,10 +85,19 @@ public class Structure extends SettlerCraftEntity implements Serializable {
          * Frame will be placed, all players will be removed from the foundation
          */
         PLACING_FRAME,
+        
+        /**
+         * When the Complete() was called on this structure
+         */
+        FINISHING,
+        /**
+         * A layer is being constructed
+         */
+        ADVANCING_TO_NEXT_LAYER,
         /**
          * Players/NPC may build now
          */
-        BUILDING_IN_PROGRESS,
+        READY_TO_BE_BUILD,
         /**
          * ConstructionSite is complete
          */
@@ -216,6 +227,8 @@ public class Structure extends SettlerCraftEntity implements Serializable {
     public StructureProgress getProgress() {
         return progress;
     }
+    
+    
 
     public ReservedArea getReserved() {
         return reserved;

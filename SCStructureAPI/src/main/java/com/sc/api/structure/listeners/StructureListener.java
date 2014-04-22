@@ -6,8 +6,9 @@
 
 package com.sc.api.structure.listeners;
 
-import com.sc.api.structure.construction.SCStructureAPI;
-import com.sc.api.structure.event.LayerCompleteEvent;
+import com.sc.api.structure.event.structure.StructureCompleteEvent;
+import com.sc.api.structure.event.structure.StructureLayerCompleteEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -19,8 +20,15 @@ public class StructureListener implements Listener {
     
     
     @EventHandler
-    public void onLayerCompleteEvent(LayerCompleteEvent lce) {
-        System.out.println("Layer Complete");
-        
+    public void onLayerCompleteEvent(StructureLayerCompleteEvent lce) {
+        System.out.println("Layer Complete Event!");
+        if(lce.getLayer() == lce.getStructure().getPlan().getStructureSchematic().layers - 1) {
+            Bukkit.getPluginManager().callEvent(new StructureCompleteEvent(lce.getStructure()));
+        } 
+    }
+    
+    @EventHandler
+    public void onStructureCompleteEvent(StructureCompleteEvent sce) {
+        System.out.println("Structure Complete Event!");
     }
 }

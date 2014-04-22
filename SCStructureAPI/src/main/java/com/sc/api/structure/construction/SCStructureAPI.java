@@ -7,8 +7,9 @@ package com.sc.api.structure.construction;
 
 import com.google.common.base.Preconditions;
 import com.sc.api.structure.Messages;
-import com.sc.api.structure.event.LayerCompleteEvent;
-import com.sc.api.structure.event.PlayerBuildEvent;
+import com.sc.api.structure.commands.StructureCommandExecutor;
+import com.sc.api.structure.event.build.PlayerBuildEvent;
+import com.sc.api.structure.event.structure.StructureLayerCompleteEvent;
 import com.sc.api.structure.exception.InvalidStructurePlanException;
 import com.sc.api.structure.exception.NoStructureSchematicNodeException;
 import com.sc.api.structure.exception.SchematicFileNotFoundException;
@@ -39,6 +40,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -48,7 +50,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class SCStructureAPI extends SettlerCraftModule {
 
     public static final String MAIN_PLUGIN_NAME = "SettlerCraft";
-    private final boolean TEST_MODE = true;
+    
+    public static Plugin getSettlerCraft() {
+        return Bukkit.getPluginManager().getPlugin(MAIN_PLUGIN_NAME);
+    }
 
     public SCStructureAPI() {
         super("SCStructureAPI");
@@ -66,36 +71,30 @@ public class SCStructureAPI extends SettlerCraftModule {
         for (CShapedRecipe r : Recipes.getRecipes()) {
             plugin.getServer().addRecipe(r.getRecipe());
         }
-
     }
-
-    /**
-     * Read and loads all structures in the datafolder of the plugin
-     *
-     * @param baseFolder The datafolder of the plugin
-     */
-    private void loadStructures(File baseFolder) {
-        if (!baseFolder.exists()) {
-            baseFolder.mkdir();
-        }
-        try {
-            StructurePlanLoader spLoader = new StructurePlanLoader();
-            spLoader.load(baseFolder);
-        }
-        catch (InvalidStructurePlanException | SchematicFileNotFoundException | NoStructureSchematicNodeException ex) {
-            Logger.getLogger(SCStructureAPI.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+    
+   
 
     @Override
     public void init(JavaPlugin plugin) {
         loadStructures(plugin.getDataFolder().getAbsoluteFile());
         setupListeners(plugin);
         setupRecipes(plugin);
+        plugin.getCommand("scs").setExecutor(new StructureCommandExecutor());
+    }
+    
+    public static void reloadPlans() {
+        loadStructures(getSettlerCraft().getDataFolder().getAbsoluteFile());
     }
 
-    
-    public static void build(Player player, Structure structure) {
+    /**
+     * A player is manually constructing a structure
+     * @param player
+     * @param structure
+     * @param possibleSkillAmount 
+     */
+    public static void build(Player player, Structure structure, int possibleSkillAmount) {
+        if(structure.getStatus() == Structure.StructureState.READY_TO_BE_BUILD) {
         StructureProgressService structureProgressService = new StructureProgressService();
         List<MaterialResource> resources = structure.getProgress().getResources();
         Iterator<MaterialResource> lit = resources.iterator();
@@ -105,7 +104,7 @@ public class SCStructureAPI extends SettlerCraftModule {
 
             for (ItemStack stack : player.getInventory()) {
                 if (materialResource != null && stack != null && materialResource.getMaterial() == stack.getType()) {
-                    int removed = structureProgressService.resourceTransaction(materialResource, Math.min(stack.getAmount(), 5));
+                    int removed = structureProgressService.resourceTransaction(materialResource, Math.min(stack.getAmount(), possibleSkillAmount));
                     if (removed > 0) {
                         // Remove items from player inventory
                         ItemStack removedIS = new ItemStack(stack);
@@ -114,18 +113,24 @@ public class SCStructureAPI extends SettlerCraftModule {
                         player.updateInventory();
                         player.sendMessage(ChatColor.YELLOW + "[SC]: " + removed + " " + removedIS.getType() + " has been removed from your inventory");
 
-                        System.out.println(structure.getProgress());
                         // Layer Complete?
                         if (structure.getProgress().getResources().isEmpty()) {
                             int completedLayer = structure.getProgress().getLayer();
-                            structureProgressService.nextLayer(structure);
-                            Bukkit.getPluginManager().callEvent(new LayerCompleteEvent(structure, completedLayer));
+                            structureProgressService.nextLayer(structure.getProgress(), false);
+                            SCStructureAPI.build(structure).layer(completedLayer, true);
+                            Bukkit.getPluginManager().callEvent(new StructureLayerCompleteEvent(structure, completedLayer));
                         }
                         Bukkit.getPluginManager().callEvent(new PlayerBuildEvent(structure, player, removedIS));
                     }
                     return;
                 }
             }
+        }
+        player.sendMessage(ChatColor.RED + "[SCS]: Structure currently needs: \n" + structure.getProgress().toString());
+            
+        } else {
+            player.sendMessage(ChatColor.RED + "[SCS]: Structure is not ready to be build yet, please wait till the current process is done" 
+                    + "\nCurrent Status: " + structure.getStatus());
         }
     }
 
@@ -134,9 +139,8 @@ public class SCStructureAPI extends SettlerCraftModule {
     }
 
     /**
-     * Moves all entities from structure within the structure to the borders of
-     * this structure if the new location is on another structure, the entity
-     * will be moved again
+     * Moves all entities from structure within the structure to the borders of this structure if
+     * the new location is on another structure, the entity will be moved again
      *
      * @param structure The structure
      */
@@ -150,12 +154,10 @@ public class SCStructureAPI extends SettlerCraftModule {
     }
 
     /**
-     * Moves the given entity from the given target structure, the entity will
-     * be moved beyond the closest border. If the entity isnt within the
-     * structure, no actions will be taken. If the new location of the entity is
-     * a location on another structure, then this method will call itself
-     * recursively To prevent a stackoverflow the distance value will be doubled
-     * each recursive call
+     * Moves the given entity from the given target structure, the entity will be moved beyond the
+     * closest border. If the entity isnt within the structure, no actions will be taken. If the new
+     * location of the entity is a location on another structure, then this method will call itself
+     * recursively To prevent a stackoverflow the distance value will be doubled each recursive call
      *
      * @param entity
      * @param distance
@@ -206,20 +208,9 @@ public class SCStructureAPI extends SettlerCraftModule {
         }
     }
 
-    private static void moveEntity(LivingEntity entity, int distance, Location target) {
-        StructureService structureService = new StructureService();
-        if (target.getBlock().getType() == Material.LAVA) {
-            // Alternative?
-            // TODO use alternative
-
-        } else if (structureService.isOnStructure(target)) {
-            moveEntityFromLot(entity, distance * 2, structureService.getStructure(target));
-        }
-    }
-
     /**
-     * Will try to place the structure, the operation is succesful if the
-     * structure doesn't "overlap" any other structure.
+     * Will try to place the structure, the operation is succesful if the structure doesn't
+     * "overlap" any other structure.
      *
      * @param structure The structure to place
      * @return True if operation was succesful, otherwise false
@@ -235,6 +226,34 @@ public class SCStructureAPI extends SettlerCraftModule {
         }
         ss.save(structure);
         return true;
+    }
+
+    /**
+     * Read and loads all structures in the datafolder of the plugin
+     *
+     * @param baseFolder The datafolder of the plugin
+     */
+    private static void loadStructures(File baseFolder) {
+        if (!baseFolder.exists()) {
+            baseFolder.mkdir();
+        }
+        try {
+            StructurePlanLoader spLoader = new StructurePlanLoader();
+            spLoader.load(baseFolder);
+        } catch (InvalidStructurePlanException | SchematicFileNotFoundException | NoStructureSchematicNodeException ex) {
+            Logger.getLogger(SCStructureAPI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private static void moveEntity(LivingEntity entity, int distance, Location target) {
+        StructureService structureService = new StructureService();
+        if (target.getBlock().getType() == Material.LAVA) {
+            // Alternative?
+            // TODO use alternative
+
+        } else if (structureService.isOnStructure(target)) {
+            moveEntityFromLot(entity, distance * 2, structureService.getStructure(target));
+        }
     }
 
 }

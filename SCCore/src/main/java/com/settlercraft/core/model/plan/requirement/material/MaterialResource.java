@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -31,7 +32,8 @@ public class MaterialResource extends SettlerCraftEntity implements Serializable
     @GeneratedValue
     private Long id;
     
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @NotNull
     private StructureProgress progress;
     
     /**
@@ -45,17 +47,34 @@ public class MaterialResource extends SettlerCraftEntity implements Serializable
      */
     protected MaterialResource() {
         this.material = null;
+        this.progress = null;
     }
 
+    public int getValue() {
+        return value;
+    }
+    
     /**
      * Constructor.
-     *
      * @param material The material of this StructureResource
      * @param value The amount that is needed of this resource
      */
     public MaterialResource(Material material, int value) {
         this.material = material;
         this.value = value;
+    }
+
+
+/**
+     * Constructor.
+     * @param progress The parent entity
+     * @param material The material of this StructureResource
+     * @param value The amount that is needed of this resource
+     */
+    public MaterialResource(StructureProgress progress, Material material, int value) {
+        this.material = material;
+        this.value = value;
+        this.progress = progress;
     }
 
     /**
@@ -78,6 +97,10 @@ public class MaterialResource extends SettlerCraftEntity implements Serializable
 
     public void setProgress(StructureProgress progress) {
         this.progress = progress;
+    }
+
+    public StructureProgress getProgress() {
+        return progress;
     }
     
     
@@ -125,7 +148,7 @@ public class MaterialResource extends SettlerCraftEntity implements Serializable
 
     @Override
     public String toString() {
-        return "[Material: " + material + "] : " + value + "]";
+        return "[Material: " + material + "] : " + value;
     }
 
     public Long getId() {
@@ -135,5 +158,7 @@ public class MaterialResource extends SettlerCraftEntity implements Serializable
     public void setId(Long id) {
         this.id = id;
     }
+    
+    
 
 }
