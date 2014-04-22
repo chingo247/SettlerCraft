@@ -6,7 +6,7 @@
 package com.settlercraft.core.model.plan.requirement.material;
 
 import com.google.common.collect.Maps;
-import com.settlercraft.core.model.plan.schematic.ResourceMaterial;
+import com.settlercraft.core.model.plan.schematic.Resource;
 import com.settlercraft.core.model.plan.schematic.SchematicBlockData;
 import com.settlercraft.core.util.SettlerCraftMaterials;
 import java.io.Serializable;
@@ -56,9 +56,9 @@ public class StructureLayerRequirement implements Serializable {
             }
             
             if (mts.get(m) == null) {
-                mts.put(m, SettlerCraftMaterials.getValue(new ResourceMaterial(m, sbd.getData())));
+                mts.put(m, SettlerCraftMaterials.getValue(new Resource(m, sbd.getData())));
             } else {
-                mts.put(m, mts.get(m) + SettlerCraftMaterials.getValue(new ResourceMaterial(m, sbd.getData())));
+                mts.put(m, mts.get(m) + SettlerCraftMaterials.getValue(new Resource(m, sbd.getData())));
             }
         }
         setResources(mts);

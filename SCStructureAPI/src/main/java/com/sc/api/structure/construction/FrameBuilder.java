@@ -22,6 +22,8 @@ public class FrameBuilder {
 
     private final Structure structure;
     private final int DEFAULT_WALL_HEIGHT = 2;
+    private final int hGap = 2;
+    private final int vGap = 1;
 
     FrameBuilder(final Structure structure) {
         this.structure = structure;
@@ -81,10 +83,10 @@ public class FrameBuilder {
 
         int mod;
         for (int y = 1; y < schematic.layers; y++) {
-            if (y % 2 == 0 || y < DEFAULT_WALL_HEIGHT ) {
+            if (y % (vGap + 1) == 0 || y < DEFAULT_WALL_HEIGHT ) {
                 mod = 1;
             } else {
-                mod = 2;
+                mod = hGap + 1;
             }
             for (int z = schematic.length - 1; z >= 0; z-= mod) {
                 for (int x = 0; x < schematic.width; x+= mod) {
@@ -112,10 +114,10 @@ public class FrameBuilder {
         int zMod = structure.getzMod();
         int mod;
         for (int y = 1; y < schematic.layers; y++) {
-            if (y % 2 == 0 || y < 3) { // To avoid small entities from entering this structure as good as possible therefore 3
+            if (y % (vGap + 1) == 0 || y < DEFAULT_WALL_HEIGHT) { // To avoid small entities from entering this structure as good as possible therefore 3
                 mod = 1;
             } else {
-                mod = 2;
+                mod = hGap + 1;
             }
 
             for (int z = schematic.length - 1; z >= 0; z -= mod) {

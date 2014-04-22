@@ -20,7 +20,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author Chingo
  */
 public class SettlerCraft extends JavaPlugin {
-    
+
     private SCStructureAPI structureModule;
     private Set<SettlerCraftModule> modules;
     public static final String name = "SettlerCraft";
@@ -35,29 +35,29 @@ public class SettlerCraft extends JavaPlugin {
         SCCore.initDB();
         modules = new HashSet<>();
         structureModule = new SCStructureAPI();
-        
+
         try {
 
             addModule(structureModule);
         } catch (DuplicateAPIException ex) {
             Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }
 
     @Override
     public void onLoad() {
 
     }
-    
+
+
+
     public void addModule(SettlerCraftModule api) throws DuplicateAPIException {
-        if(modules.add(api)) {
-           api.init(this);
+        if (modules.add(api)) {
+            api.init(this);
         } else {
             throw new DuplicateAPIException(api); // Self check
         }
     }
-    
-    
 
 }

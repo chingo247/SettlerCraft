@@ -25,6 +25,8 @@ public class AnimatedFrameBuilder {
     private final int delay;
     private static final int defaultDelay = 2 * Ticks.ONE_SECOND;
     private final int DEFAULT_WALL_HEIGHT = 2;
+    private final int hGap = 8;
+    private final int vGap = 1;
 
     AnimatedFrameBuilder(Structure structure, int delay) {
         this.structure = structure;
@@ -70,10 +72,10 @@ public class AnimatedFrameBuilder {
             int xMod = mods[0];
             int zMod = mods[1];
             int mod;
-            if (start % 2 == 0 || start < DEFAULT_WALL_HEIGHT) {
+            if (start % (vGap + 1) == 0 || start < DEFAULT_WALL_HEIGHT) {
                 mod = 1;
             } else {
-                mod = 2;
+                mod = hGap + 1;
             }
             for (int z = schematic.length - 1; z >= 0; z -= mod) {
                 for (int x = 0; x < schematic.width; x += mod) {
@@ -110,10 +112,10 @@ public class AnimatedFrameBuilder {
             int zMod = structure.getzMod();
 
             int mod;
-            if (start % 2 == 0 || start < DEFAULT_WALL_HEIGHT) {
+            if (start % (vGap + 1) == 0 || start < DEFAULT_WALL_HEIGHT) {
                 mod = 1; // DO A COMPLETE LAYER
             } else {
-                mod = 8; // DO SOME IN THIS LAYER
+                mod = hGap + 1; // DO SOME IN THIS LAYER
             }
 
             for (int z = schematic.length - 1; z >= 0; z -= mod) {

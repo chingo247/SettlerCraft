@@ -10,7 +10,9 @@ import com.sc.api.structure.construction.SCStructureAPI;
 import com.settlercraft.core.manager.StructurePlanManager;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.plan.StructurePlan;
+import com.settlercraft.core.util.Ticks;
 import com.settlercraft.core.util.WorldUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -43,13 +45,20 @@ public class StructurePlanListener implements Listener {
         if (plan != null
                 && pie.getClickedBlock() != null
                 && pie.getClickedBlock().getType() != Material.AIR) {
-            Structure structure = new Structure(
+            final Structure structure = new Structure(
                     pie.getPlayer(), 
                     pie.getClickedBlock().getLocation(), 
                     WorldUtil.getDirection(pie.getPlayer()),
                     plan
             );
-            SCStructureAPI.build(structure).frame().anim().construct(FrameStrategy.FANCY);
+            SCStructureAPI.build(structure).frame().construct(FrameStrategy.FANCY);
+            Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
+
+                @Override
+                public void run() {
+                    SCStructureAPI.build(structure).complete();
+                }
+            }, Ticks.ONE_SECOND * 2);
         }
     }
 

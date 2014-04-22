@@ -9,10 +9,10 @@ package com.settlercraft.core.model.plan.schematic;
 import org.bukkit.Material;
 
 /**
- * ResourceMaterial describes what a Block is made of
+ * Resource describes what a Block is made of
  * @author Chingo
  */
-public class ResourceMaterial {
+public class Resource {
     /**
      * The Material 
      */
@@ -22,14 +22,14 @@ public class ResourceMaterial {
      */
     public Byte data;
     
-    protected ResourceMaterial(){}
+    protected Resource(){}
 
-    public ResourceMaterial(int material, byte data) {
+    public Resource(int material, byte data) {
         this.material = Material.getMaterial(material);
         this.data = data;
     }
     
-    public ResourceMaterial(Material material, byte data) {
+    public Resource(Material material, byte data) {
         this.material = material;
         this.data = data;
     }
@@ -45,10 +45,10 @@ public class ResourceMaterial {
     
     @Override
     public boolean equals(Object obj) {
-        if(! (obj instanceof ResourceMaterial)) {
+        if(! (obj instanceof Resource)) {
             return false;
         }
-        ResourceMaterial res = (ResourceMaterial) obj;
+        Resource res = (Resource) obj;
         return this.data.equals(res.data) && this.material == res.material;
     }
 

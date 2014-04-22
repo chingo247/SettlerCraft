@@ -6,13 +6,16 @@
 package com.settlercraft.core.util;
 
 import com.google.common.collect.Maps;
-import com.settlercraft.core.model.plan.schematic.ResourceMaterial;
+import com.settlercraft.core.model.plan.schematic.Resource;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.material.Attachable;
+import org.bukkit.material.Directional;
+import org.bukkit.material.DirectionalContainer;
 
 /**
  *
@@ -20,14 +23,35 @@ import org.bukkit.block.Block;
  */
 public class SettlerCraftMaterials {
 
-    
+//    private final static Set<Material> TORCH_ORIENTATION = new HashSet<>(Arrays.asList(
+//            Material.TORCH,
+//            Material.REDSTONE_TORCH_OFF,
+//            Material.REDSTONE_TORCH_ON,
+//            Material.LEVER,
+//            Material.WOOD_BUTTON,
+//            Material.STONE_BUTTON
+//    ));
+//
+//    private final static Set<Material> SPECIAL = new HashSet<>(Arrays.asList(
+//            Material.FENCE_GATE,
+//            Material.LADDER,
+//            Material.WALL_SIGN,
+//            Material.SIGN_POST,
+//            Material.WOODEN_DOOR,
+//            Material.IRON_DOOR_BLOCK,
+//            Material.TRIPWIRE_HOOK,
+//            Material.TRAP_DOOR
+//    ));
+//    static {
+//        SPECIAL.addAll(TORCH_ORIENTATION);
+//    }
     private final static Set<Material> UNCRAFTABLE = new HashSet<>(Arrays.asList(
-       Material.AIR,
-       Material.LONG_GRASS,
-       Material.COMMAND,
-       Material.BEDROCK
+            Material.AIR,
+            Material.LONG_GRASS,
+            Material.COMMAND,
+            Material.BEDROCK
     ));
-    
+
     /**
      * SettlerCraftMaterials recognized as wood
      */
@@ -119,12 +143,24 @@ public class SettlerCraftMaterials {
         SANDSTONE.put(Material.SANDSTONE_STAIRS, 1.5f);
         SANDSTONE.put(Material.STEP, 0.5f); // DATA == 1
     }
-    
+
     public static boolean isUncraftable(Material material) {
         return UNCRAFTABLE.contains(material);
     }
 
-    public static boolean isBrick(ResourceMaterial block) {
+    public static boolean isDirectional(Resource material) {
+        return (material.material.getNewData(material.data) instanceof Directional);
+    }
+
+    public static boolean isDirectionalContainer(Resource material) {
+        return (material.material.getNewData(material.data) instanceof DirectionalContainer);
+    }
+
+    public static boolean isDirectionalAttachable(Resource material) {
+        return (material.material.getNewData(material.data) instanceof Attachable);
+    }
+
+    public static boolean isBrick(Resource block) {
         if (block.getMaterial() == Material.STEP) {
             return block.getData() == 4;
         }
@@ -139,7 +175,7 @@ public class SettlerCraftMaterials {
      * @deprecated makes use of deprecated methods block.getData and block.getId
      */
     public static boolean isBrick(Block block) {
-        return isBrick(new ResourceMaterial(block.getType().getId(), block.getData()));
+        return isBrick(new Resource(block.getType().getId(), block.getData()));
     }
 
     /**
@@ -148,7 +184,7 @@ public class SettlerCraftMaterials {
      * @param block The block
      * @return true if block is recognized as brick
      */
-    public static boolean isNetherBrick(ResourceMaterial block) {
+    public static boolean isNetherBrick(Resource block) {
         if (block.getMaterial() == Material.STEP) {
             return block.getData() == 6;
         }
@@ -163,7 +199,7 @@ public class SettlerCraftMaterials {
      * @deprecated makes use of deprecated methods block.getData and block.getId
      */
     public static boolean isNetherBrick(Block block) {
-        return isNetherBrick(new ResourceMaterial(block.getType().getId(), block.getData()));
+        return isNetherBrick(new Resource(block.getType().getId(), block.getData()));
     }
 
     /**
@@ -172,7 +208,7 @@ public class SettlerCraftMaterials {
      * @param block The block
      * @return true if block is recognized as dirt
      */
-    public static boolean isDirt(ResourceMaterial block) {
+    public static boolean isDirt(Resource block) {
         return DIRT.containsKey(block.getMaterial());
     }
 
@@ -192,7 +228,7 @@ public class SettlerCraftMaterials {
      * @param block The block
      * @return true if block is recognized as quartz
      */
-    public static boolean isQuartz(ResourceMaterial block) {
+    public static boolean isQuartz(Resource block) {
         if (block.getMaterial() == Material.STEP) {
             return block.getData() == 7;
         }
@@ -207,7 +243,7 @@ public class SettlerCraftMaterials {
      * @deprecated makes use of deprecated methods block.getData and block.getId
      */
     public static boolean isQuartz(Block block) {
-        return isQuartz(new ResourceMaterial(block.getType().getId(), block.getData()));
+        return isQuartz(new Resource(block.getType().getId(), block.getData()));
     }
 
     /**
@@ -216,7 +252,7 @@ public class SettlerCraftMaterials {
      * @param block The block
      * @return true if block is recognized as quartz
      */
-    public static boolean isSandStone(ResourceMaterial block) {
+    public static boolean isSandStone(Resource block) {
         if (block.getMaterial() == Material.STEP) {
             return block.getData() == 1;
         }
@@ -231,7 +267,7 @@ public class SettlerCraftMaterials {
      * @deprecated Makes use of deprecated methods getId and getData
      */
     public static boolean isSandStone(Block block) {
-        return isSandStone(new ResourceMaterial(block.getType().getId(), block.getData()));
+        return isSandStone(new Resource(block.getType().getId(), block.getData()));
     }
 
     /**
@@ -244,7 +280,7 @@ public class SettlerCraftMaterials {
         return WOOD.containsKey(material);
     }
 
-    public static boolean isWood(ResourceMaterial block) {
+    public static boolean isWood(Resource block) {
         return isWood(block.getMaterial());
     }
 
@@ -258,7 +294,7 @@ public class SettlerCraftMaterials {
      * @param block The block
      * @return if the material is a cobblestone type
      */
-    public static boolean isCobbleStone(ResourceMaterial block) {
+    public static boolean isCobbleStone(Resource block) {
         if (block.getMaterial() == Material.STEP) {
             return block.getData() == 3;
         }
@@ -273,7 +309,7 @@ public class SettlerCraftMaterials {
      * @deprecated Makes use of deprecated methods getId and getData
      */
     public static boolean isCobbleStone(Block block) {
-        return isCobbleStone(new ResourceMaterial(block.getType().getId(), block.getData()));
+        return isCobbleStone(new Resource(block.getType().getId(), block.getData()));
     }
 
     /**
@@ -282,7 +318,7 @@ public class SettlerCraftMaterials {
      * @param block The block
      * @return if the material is a stone brick type
      */
-    public static boolean isStoneBrick(ResourceMaterial block) {
+    public static boolean isStoneBrick(Resource block) {
         if (block.getMaterial() == Material.STEP) {
             return block.getData() == 5;
         }
@@ -297,7 +333,7 @@ public class SettlerCraftMaterials {
      * @deprecated Makes use of deprecated methods getId and getData
      */
     public static boolean isStoneBrick(Block block) {
-        return isStoneBrick(new ResourceMaterial(block.getType().getId(), block.getData()));
+        return isStoneBrick(new Resource(block.getType().getId(), block.getData()));
     }
 
     /**
@@ -306,7 +342,7 @@ public class SettlerCraftMaterials {
      * @param block The block
      * @return the value of the block in its base resource, returns 1.0 by default if not supported
      */
-    public static float getValue(ResourceMaterial block) {
+    public static float getValue(Resource block) {
         Material mat = block.getMaterial();
         if (isWood(mat)) {
             return WOOD.get(mat);
@@ -331,11 +367,11 @@ public class SettlerCraftMaterials {
         }
     }
 
-    public static boolean canSimplify(ResourceMaterial block) {
+    public static boolean canSimplify(Resource block) {
         return getSimplifiedMaterial(block) != null;
     }
 
-    public static Material getSimplifiedMaterial(ResourceMaterial block) {
+    public static Material getSimplifiedMaterial(Resource block) {
         if (isWood(block)) {
             return Material.WOOD;
         } else if (isStoneBrick(block)) {

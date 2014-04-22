@@ -46,8 +46,9 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author Chingo
  */
 public class SCStructureAPI extends SettlerCraftModule {
-    
+
     public static final String MAIN_PLUGIN_NAME = "SettlerCraft";
+    private final boolean TEST_MODE = true;
 
     public SCStructureAPI() {
         super("SCStructureAPI");
@@ -65,6 +66,7 @@ public class SCStructureAPI extends SettlerCraftModule {
         for (CShapedRecipe r : Recipes.getRecipes()) {
             plugin.getServer().addRecipe(r.getRecipe());
         }
+
     }
 
     /**
@@ -91,9 +93,8 @@ public class SCStructureAPI extends SettlerCraftModule {
         setupListeners(plugin);
         setupRecipes(plugin);
     }
-    
-    
 
+    
     public static void build(Player player, Structure structure) {
         StructureProgressService structureProgressService = new StructureProgressService();
         List<MaterialResource> resources = structure.getProgress().getResources();
@@ -149,16 +150,20 @@ public class SCStructureAPI extends SettlerCraftModule {
     }
 
     /**
-     * Moves the given entity from the given target structure, the entity will be moved beyond the closest border.
-     * If the entity isnt within the structure, no actions will be taken. If the new location of the entity is a location on another structure, then this method will call itself recursively
-     * To prevent a stackoverflow the distance value will be doubled each recursive call
+     * Moves the given entity from the given target structure, the entity will
+     * be moved beyond the closest border. If the entity isnt within the
+     * structure, no actions will be taken. If the new location of the entity is
+     * a location on another structure, then this method will call itself
+     * recursively To prevent a stackoverflow the distance value will be doubled
+     * each recursive call
+     *
      * @param entity
      * @param distance
-     * @param targetStructure 
+     * @param targetStructure
      */
     public static void moveEntityFromLot(LivingEntity entity, int distance, Structure targetStructure) {
         Preconditions.checkArgument(distance > 0);
-        if(targetStructure.isOnLot(entity.getLocation())) {
+        if (targetStructure.isOnLot(entity.getLocation())) {
             return;
         }
 
@@ -215,6 +220,7 @@ public class SCStructureAPI extends SettlerCraftModule {
     /**
      * Will try to place the structure, the operation is succesful if the
      * structure doesn't "overlap" any other structure.
+     *
      * @param structure The structure to place
      * @return True if operation was succesful, otherwise false
      */
@@ -230,6 +236,5 @@ public class SCStructureAPI extends SettlerCraftModule {
         ss.save(structure);
         return true;
     }
-    
-    
+
 }

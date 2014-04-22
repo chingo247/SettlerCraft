@@ -16,7 +16,7 @@ public class StructurePlan {
 
   private Long id;
 
-  private final SchematicObject structure;
+  private final SchematicObject schematic;
   
   private final SchematicObject foundation;
 
@@ -27,14 +27,14 @@ public class StructurePlan {
   
 
   public StructurePlan(SchematicObject structure, StructureConfig structureConfig) {
-    this.structure = structure;
+    this.schematic = structure;
     this.config = structureConfig;
     this.requirement = new StructureRequirement(this);
     this.foundation = null;
   }
 
   public StructurePlan(SchematicObject structure, SchematicObject foundation, StructureConfig structureConfig) {
-    this.structure = structure;
+    this.schematic = structure;
     this.config = structureConfig;
     this.requirement = new StructureRequirement(this);
     this.foundation = foundation;
@@ -49,7 +49,7 @@ public class StructurePlan {
   }
   
   public SchematicObject getStructureSchematic() {
-    return structure;
+    return schematic;
   }
 
   public StructureConfig getConfig() {

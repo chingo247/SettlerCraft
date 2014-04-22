@@ -13,6 +13,7 @@ import org.bukkit.Material;
 
 /**
  * SchematicObject contains all the information that was read from a .schematic file
+ *
  * @author Chingo
  */
 public class SchematicObject {
@@ -38,29 +39,29 @@ public class SchematicObject {
 
     /**
      * Gets all the schematic blocks whitin this schematic sorted in the way they will be build
+     *
      * @return all blocks of this schematic
      */
     public TreeSet<SchematicBlockData> getBlocksSorted() {
         return new TreeSet<>(this.blocks);
     }
-    
-    private SchematicBlockData[][][] getBlocksAsArray() {
+
+    public final SchematicBlockData[][][] getBlocksAsArray() {
         SchematicBlockData[][][] blks = new SchematicBlockData[layers][length][width];
         int ay = 0;
-        
+
         for (int layer = 0; layer < layers * length * width; layer += width * length) {
-            int az = 0;
+            int az = length - 1;
             for (int z = 0; z < length * width; z += width) {
                 for (int x = 0; x < width; x++) {
                     blks[ay][az][x] = blocks.get(layer + x + z);
                 }
-                az++; // actual z
+                az--; // actual z
             }
             ay++; // actual y
         }
         return blks;
     }
-
 
     /**
      * Gets all blocks of corresponding layer
@@ -80,7 +81,7 @@ public class SchematicObject {
 
     /**
      * Returns a HashMap of blocks with the layer as key, a schematic doesnt know anything about the
- layers of the blocks. The lowest blocks are at layer 0 (WHICH HAS NOTHING TO DO WITH THE REAL
+     * layers of the blocks. The lowest blocks are at layer 0 (WHICH HAS NOTHING TO DO WITH THE REAL
      * HEIGHT)
      *
      * @return
@@ -120,21 +121,24 @@ public class SchematicObject {
     public Collection getTileEntities() {
         return tileEntities;
     }
-    
+
     public int getHighestAt(int x, int z) {
-        for(int y = layers-1; y > 0; y--) {
-            if(dimensionalArray[y][z][x].getMaterial() != Material.AIR) {
+        if (x > width || z > length) {
+            return -1;
+        }
+        for (int y = layers - 1; y > 0; y--) {
+            if (dimensionalArray[y][z][x].getMaterial() != Material.AIR) {
                 return y;
             }
         }
         return -1;
     }
-    
-    
+
 
     @Override
     public String toString() {
         return "width: " + width + " length: " + length + " height: " + layers;
     }
+
 
 }
