@@ -180,13 +180,14 @@ public class Builder {
      * Instantly constructs a the structure
      */
     public void instant() {
-        SchematicObject schematic = structure.getPlan().getStructureSchematic();
-        Iterator<SchematicBlockData> it = schematic.getBlocksSorted().iterator();
-        Direction direction = structure.getDirection();
-        Location target = structure.getLocation();
-        int[] mods = WorldUtil.getModifiers(direction);
-        int xMod = mods[0];
-        int zMod = mods[1];
+        final SchematicObject schematic = structure.getPlan().getStructureSchematic();
+        final Iterator<SchematicBlockData> it = schematic.getBlocksSorted().iterator();
+        final Direction direction = structure.getDirection();
+        final Location target = structure.getLocation();
+        final int[] mods = WorldUtil.getModifiers(direction);
+        final int xMod = mods[0];
+        final int zMod = mods[1];
+        final List<PlaceLaterBlock> placeLater = new LinkedList<>();
 
         for (int y = 0; y < schematic.layers; y++) {
             for (int z = schematic.length - 1; z >= 0; z--) {
@@ -198,11 +199,30 @@ public class Builder {
                         b = target.clone().add(z * zMod, y, x * xMod).getBlock();
                     }
                     SchematicBlockData d = it.next();
+                    if (SettlerCraftMaterials.isDirectional(d)) {
+                    placeLater.add(new PlaceLaterBlock(d.getMaterial(), d.getData(), b));
+                    b.setType(Material.AIR);
+
+                } else {
                     b.setType(d.getMaterial());
                     b.setData(d.getData());
                 }
+                }
             }
         }
+        
+        Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
+            @Override
+            public void run() {
+                for (PlaceLaterBlock plb : placeLater) {
+                    if (SettlerCraftMaterials.isDirectional(new Resource(plb.material, plb.data))) {
+                        placeToDirection(plb, direction);
+                    } else { // Not only directionals in near future
+                        plb.place();
+                    }
+                }
+            }
+        }, TIME_BETWEEN_LAYERS * 2);
     }
 
     public void complete() {
@@ -510,6 +530,10 @@ public class Builder {
 
     }
 
+    /**
+     * A block that should be placed later than any other blocks because placing 
+     * them in air might cause the block to break (e.g. Torches, Signsm, etc)
+     */
     private class PlaceLaterBlock {
 
         private Material material;
