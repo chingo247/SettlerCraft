@@ -183,17 +183,16 @@ public class StructureBuilder {
      * @param force
      */
     public void complete(boolean force) {
-        if (structure.getStatus() != StructureState.FINISHING && (structure.getStatus() != StructureState.COMPLETE && !force)) {
+        if ((structure.getStatus() != StructureState.FINISHING && structure.getStatus() != StructureState.COMPLETE) || force) {
             structure.setStatus(StructureState.FINISHING);
             final SchematicObject schematic = structure.getPlan().getStructureSchematic();
             final SchematicBlockData[][][] arr = schematic.getBlocksAsArray();
-//            int layer = bd == BuildDirection.DOWN ? schematic.layers - 1 : structure.getProgress().getLayer();
             complete(structure.getProgress().getLayer(), arr, new LinkedList<SpecialBlock>());
         }
     }
 
-    private void complete(int layer, SchematicBlockData[][][] arr, List<SpecialBlock> placeLater) {
-        if (layer == arr.length - 1) {
+    private void complete(int layer, final SchematicBlockData[][][] arr, final List<SpecialBlock> placeLater) {
+        if (layer == arr.length) {
             // Final Condition 
             placeSpecialBlocks(placeLater, new CallBack() {
 
@@ -229,6 +228,15 @@ public class StructureBuilder {
                     }
                 }
             }
+            final int next = layer + 1;
+            Bukkit.getScheduler().runTaskLater(Bukkit.getServer().getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
+
+                @Override
+                public void run() {
+                     complete(next, arr, placeLater);
+                }
+            }, TIME_BETWEEN_LAYERS);
+           
         }
     }
 
