@@ -3,6 +3,7 @@ package com.settlercraft.core.model.entity.structure;
 import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
+import com.settlercraft.core.event.StructureStateChangedEvent;
 import com.settlercraft.core.manager.StructurePlanManager;
 import com.settlercraft.core.model.entity.SettlerCraftEntity;
 import com.settlercraft.core.model.plan.StructurePlan;
@@ -65,44 +66,7 @@ public class Structure extends SettlerCraftEntity implements Serializable {
     @Embedded
     private ReservedArea reserved;
 
-    public enum StructureState {
-
-        /**
-         * All blocks on structure location will be removed.
-         *//**
-         * All blocks on structure location will be removed.
-         */
-        CLEARING_SITE_OF_BLOCKS,
-        /**
-         * All blocks on structure location will be removed.
-         */
-        CLEARING_SITE_OF_ENTITIES,
-        /**
-         * Placeing Foundation
-         */
-        PLACING_FOUNDATION,
-        /**
-         * Frame will be placed, all players will be removed from the foundation
-         */
-        PLACING_FRAME,
-        
-        /**
-         * When the Complete() was called on this structure
-         */
-        FINISHING,
-        /**
-         * A layer is being constructed
-         */
-        ADVANCING_TO_NEXT_LAYER,
-        /**
-         * Players/NPC may build now
-         */
-        READY_TO_BE_BUILD,
-        /**
-         * ConstructionSite is complete
-         */
-        COMPLETE
-    }
+    
 
     private StructureState status;
 
@@ -220,6 +184,7 @@ public class Structure extends SettlerCraftEntity implements Serializable {
     }
 
     public final void setStatus(StructureState status) {
+        Bukkit.getPluginManager().callEvent(new StructureStateChangedEvent(this.status,status));
         this.status = status;
     }
 

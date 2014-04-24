@@ -5,7 +5,7 @@ import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.settlercraft.core.model.entity.structure.QStructure;
 import com.settlercraft.core.model.entity.structure.ReservedArea;
 import com.settlercraft.core.model.entity.structure.Structure;
-import com.settlercraft.core.model.entity.structure.Structure.StructureState;
+import com.settlercraft.core.model.entity.structure.StructureState;
 import com.settlercraft.core.util.HibernateUtil;
 import java.util.List;
 import java.util.logging.Level;

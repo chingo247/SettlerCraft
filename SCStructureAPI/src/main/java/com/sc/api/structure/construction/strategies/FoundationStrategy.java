@@ -4,16 +4,15 @@
  * and open the template in the editor.
  */
 
-package com.settlercraft.core.util;
+package com.sc.api.structure.construction.strategies;
 
 /**
  *
  * @author Chingo
  */
-public class Ticks {
+public enum FoundationStrategy {
     
-    public static final int ONE_SECOND = 20;
-    public static final int ONE_MINUTE = 60 * ONE_SECOND;
-    public static final int ONE_HOUR = 60 * ONE_MINUTE;
+    DEFAULT,
+    FANCY
     
 }

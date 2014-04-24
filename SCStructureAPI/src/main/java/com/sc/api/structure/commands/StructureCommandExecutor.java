@@ -8,6 +8,7 @@ package com.sc.api.structure.commands;
 import com.sc.api.structure.construction.SCStructureAPI;
 import com.settlercraft.core.manager.StructurePlanManager;
 import com.settlercraft.core.model.entity.structure.Structure;
+import com.settlercraft.core.model.entity.structure.StructureState;
 import com.settlercraft.core.model.plan.StructurePlan;
 import com.settlercraft.core.persistence.StructureService;
 import org.bukkit.ChatColor;
@@ -106,7 +107,7 @@ public class StructureCommandExecutor implements CommandExecutor {
         StructureService ss = new StructureService();
         if(ss.isOnStructure(player.getLocation())){
             Structure structure = ss.getStructure(player.getLocation());
-            if(structure.getStatus() != Structure.StructureState.COMPLETE) {
+            if(structure.getStatus() != StructureState.COMPLETE) {
                 SCStructureAPI.build(structure).finish();
                 player.sendMessage(ChatColor.GREEN + "[SCS]: finishing " + structure.getPlan().getConfig().getName());
                 return true;
@@ -125,9 +126,9 @@ public class StructureCommandExecutor implements CommandExecutor {
         StructureService ss = new StructureService();
         if(ss.isOnStructure(player.getLocation())){
             Structure structure = ss.getStructure(player.getLocation());
-            if(structure.getStatus() != Structure.StructureState.COMPLETE) {
+            if(structure.getStatus() != StructureState.COMPLETE) {
                 SCStructureAPI.build(structure).layer(structure.getProgress().getLayer(), true);
-                player.sendMessage(ChatColor.GREEN + "[SCS]: constructing current layer " + structure.getPlan().getConfig().getName());
+                player.sendMessage(ChatColor.GREEN + "[SCS]: constructing current  " + structure.getPlan().getConfig().getName());
                 return true;
             } else {
                 player.sendMessage(ChatColor.BLUE + "[SCS]: structure already complete...");

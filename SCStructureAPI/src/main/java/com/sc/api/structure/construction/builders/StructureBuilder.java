@@ -3,11 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.api.structure.construction;
+package com.sc.api.structure.construction.builders;
 
 import com.google.common.base.Preconditions;
+import com.sc.api.structure.construction.SCStructureAPI;
+import com.sc.api.structure.construction.strategies.FoundationStrategy;
+import com.sc.api.structure.construction.strategies.FrameStrategy;
 import com.sc.api.structure.event.structure.StructureLayerCompleteEvent;
 import com.settlercraft.core.model.entity.structure.Structure;
+import com.settlercraft.core.model.entity.structure.StructureState;
 import com.settlercraft.core.model.plan.StructurePlan;
 import com.settlercraft.core.model.plan.schematic.Resource;
 import com.settlercraft.core.model.plan.schematic.SchematicBlockData;
@@ -54,19 +58,14 @@ import org.bukkit.material.TripwireHook;
  *
  * @author Chingo
  */
-public class Builder {
+public class StructureBuilder {
 
     private final StructureService structureService;
     private final StructureProgressService structureProgressService;
     private final Structure structure;
     private final int TIME_BETWEEN_LAYERS = Ticks.ONE_SECOND * 2;
 
-    public enum FOUNDATION_STRATEGY {
-        DEFAULT,
-        PROVIDED,
-    }
-
-    Builder(Structure structure) {
+    public StructureBuilder(Structure structure) {
         this.structure = structure;
         this.structureService = new StructureService();
         this.structureProgressService = new StructureProgressService();
@@ -100,83 +99,12 @@ public class Builder {
         }
     }
 
-    /**
-     * Constructs a foundation with the given strategy.
-     *
-     * @param strategy The foundation strategy
-     */
-    public void foundation(FOUNDATION_STRATEGY strategy) {
-        switch (strategy) {
-            case DEFAULT:
-                placeDefaultFoundation();
-                break;
-            case PROVIDED:
-                placeProvidedFoundation();
-                break;
-            default:
-                throw new UnsupportedOperationException("no strategy implemented for: " + strategy);
-        }
+    public FoundationBuilder foundation(FoundationStrategy strategy) {
+        return new FoundationBuilder(structure, strategy);
     }
 
-    /**
-     * A foundation will be created beneath the structure. A foundation is
-     * doesnt have any functionality its just there to give the player some
-     * feedback. And also clears the construction site from any blocks
-     */
-    public void foundation() {
-        structureService.setStatus(structure, Structure.StructureState.CLEARING_SITE_OF_BLOCKS);
-        clear();
-        if (structure.getPlan().getFoundationSchematic() != null) {
-            foundation(FOUNDATION_STRATEGY.PROVIDED);
-        } else {
-            foundation(FOUNDATION_STRATEGY.DEFAULT);
-        }
-        structureService.setStatus(structure, Structure.StructureState.PLACING_FRAME);
-    }
-
-    private void placeDefaultFoundation() {
-        SchematicObject schematic = structure.getPlan().getStructureSchematic();
-        Direction direction = structure.getDirection();
-        Location target = structure.getLocation();
-
-        int[] mods = WorldUtil.getModifiers(direction);
-        int xMod = mods[0];
-        int zMod = mods[1];
-        for (int z = schematic.length - 1; z >= 0; z--) {
-            for (int x = 0; x < schematic.width; x++) {
-                Location l;
-                if (direction == Direction.NORTH || direction == Direction.SOUTH) {
-                    l = target.clone().add(x * xMod, 0, z * zMod);
-                } else {
-                    l = target.clone().add(z * zMod, 0, x * xMod);
-                }
-                l.getBlock().setType(Material.COBBLESTONE);
-            }
-        }
-    }
-
-    private void placeProvidedFoundation() {
-        SchematicObject schematic = structure.getPlan().getFoundationSchematic();
-        Direction direction = structure.getDirection();
-        Location target = structure.getLocation();
-        Iterator<SchematicBlockData> it = structure.getPlan().getFoundationSchematic().getBlocksSorted().iterator();
-
-        int[] mods = WorldUtil.getModifiers(direction);
-        int xMod = mods[0];
-        int zMod = mods[1];
-        for (int z = schematic.length - 1; z >= 0; z--) {
-            for (int x = 0; x < schematic.width; x++) {
-                SchematicBlockData sbd = it.next();
-                Location l;
-                if (direction == Direction.NORTH || direction == Direction.SOUTH) {
-                    l = target.clone().add(x * xMod, 0, z * zMod);
-                } else {
-                    l = target.clone().add(z * zMod, 0, x * xMod);
-                }
-                l.getBlock().setType(sbd.getMaterial());
-                l.getBlock().setData(sbd.getData());
-            }
-        }
+    public FoundationBuilder foundation() {
+        return new FoundationBuilder(structure, FoundationStrategy.DEFAULT);
     }
 
     /**
@@ -186,6 +114,10 @@ public class Builder {
      */
     public FrameBuilder frame() {
         return new FrameBuilder(structure);
+    }
+
+    public FrameBuilder frame(FrameStrategy strategy) {
+        return new FrameBuilder(structure, strategy);
     }
 
     /**
@@ -239,13 +171,13 @@ public class Builder {
 
     /**
      * Should be run at the end of a the construction, removes the frame and
-     * loops trough the structure from top to bottom. 
+     * loops trough the structure from top to bottom.
      */
     public void finish() {
-        if(structure.getStatus() != Structure.StructureState.FINISHING && structure.getStatus() != Structure.StructureState.COMPLETE) {
-        structureService.setStatus(structure, Structure.StructureState.FINISHING);
-        SchematicObject schematic = structure.getPlan().getStructureSchematic();
-        finish(schematic.layers - 1);
+        if (structure.getStatus() != StructureState.FINISHING && structure.getStatus() != StructureState.COMPLETE) {
+            structureService.setStatus(structure, StructureState.FINISHING);
+            SchematicObject schematic = structure.getPlan().getStructureSchematic();
+            finish(schematic.layers - 1);
         }
     }
 
@@ -266,7 +198,7 @@ public class Builder {
                 }
             }, TIME_BETWEEN_LAYERS);
         }
-        structureService.setStatus(structure, Structure.StructureState.COMPLETE);
+        structureService.setStatus(structure, StructureState.COMPLETE);
     }
 
     private void finishLayer(int layer) {
@@ -329,10 +261,10 @@ public class Builder {
     public void layer(int layer, boolean keepFrame) {
         if (layer == structure.getPlan().getStructureSchematic().layers - 1) {
             finish();
-        } else if (structure.getStatus() != Structure.StructureState.ADVANCING_TO_NEXT_LAYER
-                && structure.getStatus() != Structure.StructureState.COMPLETE
-                && structure.getStatus() != Structure.StructureState.FINISHING) {
-            structureService.setStatus(structure, Structure.StructureState.ADVANCING_TO_NEXT_LAYER);
+        } else if (structure.getStatus() != StructureState.ADVANCING_TO_NEXT_LAYER
+                && structure.getStatus() != StructureState.COMPLETE
+                && structure.getStatus() != StructureState.FINISHING) {
+            structureService.setStatus(structure, StructureState.ADVANCING_TO_NEXT_LAYER);
             final StructurePlan sp = structure.getPlan();
             if (layer > sp.getStructureSchematic().layers || layer < 0) {
                 throw new IndexOutOfBoundsException("layer doesnt exist");
@@ -368,7 +300,7 @@ public class Builder {
 
             structureProgressService.nextLayer(structure.getProgress(), true);
             Bukkit.getPluginManager().callEvent(new StructureLayerCompleteEvent(structure, layer));
-            structureService.setStatus(structure, Structure.StructureState.READY_TO_BE_BUILD);
+            structureService.setStatus(structure, StructureState.READY_TO_BE_BUILD);
         }
     }
 
