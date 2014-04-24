@@ -5,11 +5,9 @@
  */
 package com.sc.api.structure.construction.builders;
 
-import com.google.common.base.Preconditions;
 import com.sc.api.structure.construction.SCStructureAPI;
 import com.sc.api.structure.construction.strategies.FoundationStrategy;
 import com.sc.api.structure.construction.strategies.FrameStrategy;
-import com.sc.api.structure.event.structure.StructureCompleteEvent;
 import com.sc.api.structure.event.structure.StructureLayerCompleteEvent;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.entity.structure.StructureState;
@@ -66,11 +64,12 @@ public class StructureBuilder {
     private final Structure structure;
     private final int TIME_BETWEEN_LAYERS = Ticks.ONE_SECOND * 2;
 
-//    public enum BuildDirection {
-//
-//        UP,
-//        DOWN
-//    }
+    public enum BuildDirection {
+
+        UP,
+        DOWN
+    }
+
     public StructureBuilder(Structure structure) {
         this.structure = structure;
         this.structureService = new StructureService();
@@ -176,23 +175,25 @@ public class StructureBuilder {
     }
 
     /**
-     * Finish this structure into given direction. If the direction is up, the
-     * structure will be build from current layer to top. Otherwise from top to
-     * bottom
+     * Finish this structure into given direction. If the direction is up, the structure will be
+     * build from current layer to top. Otherwise from top to bottom
      *
-     * @param force
+     * @param bd Complete up or perform a complete down
+     * @param keepFrame determines if there should be an attempt to keep the frame
+     * @param force Will try to complete the structure even though it says that it's in a Complete State, 
+     * however force will be ignored if the structure is in finishing state, which it would have fallen into if this method was called before
      */
-    public void complete(boolean force) {
-        if ((structure.getStatus() != StructureState.FINISHING && structure.getStatus() != StructureState.COMPLETE) || force) {
+    public void complete(BuildDirection bd, boolean keepFrame, boolean force) {
+        if ((structure.getStatus() != StructureState.FINISHING && structure.getStatus() != StructureState.COMPLETE) || (force && structure.getStatus() == StructureState.COMPLETE)) {
             structure.setStatus(StructureState.FINISHING);
             final SchematicObject schematic = structure.getPlan().getStructureSchematic();
             final SchematicBlockData[][][] arr = schematic.getBlocksAsArray();
-            complete(structure.getProgress().getLayer(), arr, new LinkedList<SpecialBlock>());
+            complete(keepFrame,bd, structure.getProgress().getLayer(), arr, new LinkedList<SpecialBlock>());
         }
     }
 
-    private void complete(int layer, final SchematicBlockData[][][] arr, final List<SpecialBlock> placeLater) {
-        if (layer == arr.length) {
+    private void complete(final boolean keepFrame, final BuildDirection bd, int layer, final SchematicBlockData[][][] arr, final List<SpecialBlock> placeLater) {
+        if ((layer == arr.length && bd == BuildDirection.UP) || (layer == -1 && bd == BuildDirection.DOWN)) {
             // Final Condition 
             placeSpecialBlocks(placeLater, new CallBack() {
 
@@ -218,7 +219,9 @@ public class StructureBuilder {
                     } else {
                         b = target.clone().add(z * zMod, layer, x * xMod).getBlock();
                     }
-
+                    if (keepFrame && arr[layer][z][x].getMaterial() == Material.AIR && b.getType() != Material.AIR) {
+                        continue; // Keep the frame!
+                    }
                     SchematicBlockData d = arr[layer][z][x];
                     if (!SettlerCraftMaterials.isDirectional(d)) {
                         b.setType(d.getMaterial());
@@ -228,15 +231,16 @@ public class StructureBuilder {
                     }
                 }
             }
-            final int next = layer + 1;
+
+            final int next = bd == BuildDirection.UP ? (layer + 1) : (layer - 1);
             Bukkit.getScheduler().runTaskLater(Bukkit.getServer().getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
 
                 @Override
                 public void run() {
-                     complete(next, arr, placeLater);
+                    complete(keepFrame, bd, next, arr, placeLater);
                 }
             }, TIME_BETWEEN_LAYERS);
-           
+
         }
     }
 
@@ -252,8 +256,8 @@ public class StructureBuilder {
     }
 
     /**
-     * Constructs the given layer, it will ignore any directionals and will be
-     * placed afther the layer is finish
+     * Constructs the given layer, it will ignore any directionals and will be placed afther the
+     * layer is finish
      *
      * @param layer The layer to construct
      * @param keepFrame
@@ -299,7 +303,7 @@ public class StructureBuilder {
             }
 
             if (layer == schematic.layers - 1) {
-                complete(false);
+                complete(BuildDirection.DOWN, false, false);
             } else {
                 structureProgressService.nextLayer(structure.getProgress(), true);
                 Bukkit.getPluginManager().callEvent(new StructureLayerCompleteEvent(structure, layer));
@@ -508,8 +512,8 @@ public class StructureBuilder {
     }
 
     /**
-     * A block that should be placed later than any other blocks because placing
-     * them in might cause the block to break (e.g. Torches, Signs, etc)
+     * A block that should be placed later than any other blocks because placing them in might cause
+     * the block to break (e.g. Torches, Signs, etc)
      */
     private class SpecialBlock {
 
