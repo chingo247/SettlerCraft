@@ -109,7 +109,7 @@ public class StructureCommandExecutor implements CommandExecutor {
         if(ss.isOnStructure(player.getLocation())){
             Structure structure = ss.getStructure(player.getLocation());
             if(structure.getStatus() != StructureState.COMPLETE) {
-                SCStructureAPI.build(structure).finish(StructureBuilder.BuildDirection.UP);
+                SCStructureAPI.build(structure).complete(true);
                 player.sendMessage(ChatColor.GREEN + "[SCS]: finishing " + structure.getPlan().getConfig().getName());
                 return true;
             } else {

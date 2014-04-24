@@ -16,6 +16,10 @@ public enum StructureState {
          * All blocks on structure location will be removed.
          *//**
          * All blocks on structure location will be removed.
+         *//**
+         * All blocks on structure location will be removed.
+         *//**
+         * All blocks on structure location will be removed.
          */
         CLEARING_SITE_OF_BLOCKS,
         /**
@@ -38,7 +42,7 @@ public enum StructureState {
         /**
          * A layer is being constructed
          */
-        ADVANCING_TO_NEXT_LAYER,
+        CONSTRUCTING_A_LAYER,
         /**
          * Players/NPC may build now
          */

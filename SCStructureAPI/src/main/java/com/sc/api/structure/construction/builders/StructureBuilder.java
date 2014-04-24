@@ -66,14 +66,11 @@ public class StructureBuilder {
     private final Structure structure;
     private final int TIME_BETWEEN_LAYERS = Ticks.ONE_SECOND * 2;
 
-
-
-    public enum BuildDirection {
-
-        UP,
-        DOWN
-    }
-
+//    public enum BuildDirection {
+//
+//        UP,
+//        DOWN
+//    }
     public StructureBuilder(Structure structure) {
         this.structure = structure;
         this.structureService = new StructureService();
@@ -140,7 +137,7 @@ public class StructureBuilder {
         final int[] mods = WorldUtil.getModifiers(direction);
         final int xMod = mods[0];
         final int zMod = mods[1];
-        final List<PlaceLaterBlock> placeLater = new LinkedList<>();
+        final List<SpecialBlock> placeLater = new LinkedList<>();
 
         for (int y = 0; y < schematic.layers; y++) {
             for (int z = schematic.length - 1; z >= 0; z--) {
@@ -153,7 +150,7 @@ public class StructureBuilder {
                     }
                     SchematicBlockData d = it.next();
                     if (SettlerCraftMaterials.isDirectional(d)) {
-                        placeLater.add(new PlaceLaterBlock(d.getMaterial(), d.getData(), b));
+                        placeLater.add(new SpecialBlock(d.getMaterial(), d.getData(), b));
                         b.setType(Material.AIR);
 
                     } else {
@@ -167,7 +164,7 @@ public class StructureBuilder {
         Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
             @Override
             public void run() {
-                for (PlaceLaterBlock plb : placeLater) {
+                for (SpecialBlock plb : placeLater) {
                     if (SettlerCraftMaterials.isDirectional(new Resource(plb.material, plb.data))) {
                         placeToDirection(plb);
                     } else { // Not only directionals in near future
@@ -183,76 +180,32 @@ public class StructureBuilder {
      * structure will be build from current layer to top. Otherwise from top to
      * bottom
      *
-     * @param bd The builddirection
+     * @param force
      */
-    public void finish(final BuildDirection bd) {
-        if (structure.getStatus() != StructureState.FINISHING && structure.getStatus() != StructureState.COMPLETE) {
-            final Direction direction = structure.getDirection();
+    public void complete(boolean force) {
+        if (structure.getStatus() != StructureState.FINISHING && (structure.getStatus() != StructureState.COMPLETE && !force)) {
+            structure.setStatus(StructureState.FINISHING);
             final SchematicObject schematic = structure.getPlan().getStructureSchematic();
             final SchematicBlockData[][][] arr = schematic.getBlocksAsArray();
-            final Location target = structure.getLocation();
-            final List<PlaceLaterBlock> placeLater = new LinkedList<>();
-            int layer;
-            if(bd == BuildDirection.UP) {
-                layer = structure.getProgress().getLayer();
-            } else {
-                layer = schematic.layers - 1;
-            }
+//            int layer = bd == BuildDirection.DOWN ? schematic.layers - 1 : structure.getProgress().getLayer();
+            complete(structure.getProgress().getLayer(), arr, new LinkedList<SpecialBlock>());
+        }
+    }
 
-            CallBack callback = new CallBack() {
+    private void complete(int layer, SchematicBlockData[][][] arr, List<SpecialBlock> placeLater) {
+        if (layer == arr.length - 1) {
+            // Final Condition 
+            placeSpecialBlocks(placeLater, new CallBack() {
+
                 @Override
-                public void onLayerComplete(int completedLayer, final List<PlaceLaterBlock> placeLater) {
-                    Bukkit.getPluginManager().callEvent(new StructureLayerCompleteEvent(structure, completedLayer));
-                    if(bd == BuildDirection.UP) {
-                        if(completedLayer == schematic.layers - 1) {
-                            structureService.setStatus(structure, StructureState.COMPLETE);
-                            Bukkit.getPluginManager().callEvent(new StructureCompleteEvent(structure));
-                        } else {
-                            final int nextlayer = completedLayer + 1;
-                            Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    finishLayer(target, direction, nextlayer, arr, placeLater, this);
-                                }
-                            }, TIME_BETWEEN_LAYERS);
-                            
-                        }
-                        
-                    } else {
-                        if(completedLayer == 0) {
-                            structureService.setStatus(structure, StructureState.COMPLETE);
-                            Bukkit.getPluginManager().callEvent(new StructureCompleteEvent(structure));
-                        } else {
-                            final int nextlayer = completedLayer + 1;
-                            Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    finishLayer(target, direction, nextlayer, arr, placeLater, callback);
-                                }
-                            }, TIME_BETWEEN_LAYERS);
-                            
-                        }
-                    }
+                public void onComplete() {
+                    structureService.setStatus(structure, StructureState.COMPLETE);
                 }
-                
-            };
-            finishLayer(target, direction, layer, arr , placeLater , callback);
-        }
-    }
-    
-    private void finishPlaceLater(List<PlaceLaterBlock> plbs) {
-        for(PlaceLaterBlock plb : plbs) {
-            if(SettlerCraftMaterials.isDirectional(new Resource(plb.material, plb.data))) {
-                placeToDirection(plb);
-            } else {
-                plb.place();
-            }
-        }
-    }
-    
-    private void finishLayer(Location target, Direction direction, int layer, SchematicBlockData[][][] arr, List<PlaceLaterBlock> placeLater, CallBack callback) {
+            });
+
+        } else {
+            final Direction direction = structure.getDirection();
+            final Location target = structure.getLocation();
             final int[] mods = WorldUtil.getModifiers(direction);
             final int xMod = mods[0];
             final int zMod = mods[1];
@@ -272,21 +225,22 @@ public class StructureBuilder {
                         b.setType(d.getMaterial());
                         b.setData(d.getData());
                     } else {
-                        placeLater.add(new PlaceLaterBlock(d.getMaterial(), d.getData(), b));
+                        placeLater.add(new SpecialBlock(d.getMaterial(), d.getData(), b));
                     }
                 }
             }
-            callback.onLayerComplete(layer, placeLater);
-            
+        }
     }
 
-
-
-
-
-    
-    private interface CallBack  {
-        void onLayerComplete(int completedLayer, List<PlaceLaterBlock> placeLater);
+    private void placeSpecialBlocks(List<SpecialBlock> plbs, CallBack callback) {
+        for (SpecialBlock plb : plbs) {
+            if (SettlerCraftMaterials.isDirectional(new Resource(plb.material, plb.data))) {
+                placeToDirection(plb);
+            } else {
+                plb.place();
+            }
+        }
+        callback.onComplete();
     }
 
     /**
@@ -297,12 +251,12 @@ public class StructureBuilder {
      * @param keepFrame
      */
     public void layer(int layer, boolean keepFrame) {
-        if (layer == structure.getPlan().getStructureSchematic().layers - 1) {
-            finish(BuildDirection.DOWN);
-        } else if (structure.getStatus() != StructureState.ADVANCING_TO_NEXT_LAYER
+        if (structure.getStatus() != StructureState.CONSTRUCTING_A_LAYER
                 && structure.getStatus() != StructureState.COMPLETE
                 && structure.getStatus() != StructureState.FINISHING) {
-            structureService.setStatus(structure, StructureState.ADVANCING_TO_NEXT_LAYER);
+
+            structureService.setStatus(structure, StructureState.CONSTRUCTING_A_LAYER);
+
             final StructurePlan sp = structure.getPlan();
             if (layer > sp.getStructureSchematic().layers || layer < 0) {
                 throw new IndexOutOfBoundsException("layer doesnt exist");
@@ -336,9 +290,13 @@ public class StructureBuilder {
                 }
             }
 
-            structureProgressService.nextLayer(structure.getProgress(), true);
-            Bukkit.getPluginManager().callEvent(new StructureLayerCompleteEvent(structure, layer));
-            structureService.setStatus(structure, StructureState.READY_TO_BE_BUILD);
+            if (layer == schematic.layers - 1) {
+                complete(false);
+            } else {
+                structureProgressService.nextLayer(structure.getProgress(), true);
+                Bukkit.getPluginManager().callEvent(new StructureLayerCompleteEvent(structure, layer));
+                structureService.setStatus(structure, StructureState.READY_TO_BE_BUILD);
+            }
         }
     }
 
@@ -346,20 +304,19 @@ public class StructureBuilder {
      * Using the directional class to get the right direction see:
      * http://jd.bukkit.org/rb/doxygen/dc/d24/interfaceorg_1_1bukkit_1_1material_1_1Directional.html
      *
-     * @param plb
-     * @param newDirection
+     * @param spb
      */
-    private void placeToDirection(PlaceLaterBlock plb) {
-        Resource r = new Resource(plb.material, plb.data);
+    private void placeToDirection(SpecialBlock spb) {
+        Resource r = new Resource(spb.material, spb.data);
         if (SettlerCraftMaterials.isDirectional(r)) {
             if (SettlerCraftMaterials.isDirectionalAttachable(r)) {
 
-                Directional d = (Directional) plb.material.getNewData(plb.data);
-                BlockFace face = getDirection(d, structure.getDirection());
-                Block b = plb.block;
+                Directional directional = (Directional) spb.material.getNewData(spb.data);
+                BlockFace face = getDirection(directional);
+                Block b = spb.block;
                 Byte data;
 
-                switch (plb.material) {
+                switch (spb.material) {
                     case BED_BLOCK:
                         Bed bed = new Bed(face);
                         data = bed.getData();
@@ -406,8 +363,8 @@ public class StructureBuilder {
                     case COBBLESTONE_STAIRS:
                     case BRICK_STAIRS:
                     case WOOD_STAIRS:
-                        Stairs stairs = new Stairs(plb.material);
-                        stairs.setInverted(((Stairs) d).isInverted());
+                        Stairs stairs = new Stairs(spb.material);
+                        stairs.setInverted(((Stairs) directional).isInverted());
                         stairs.setFacingDirection(face);
                         data = stairs.getData();
                         break;
@@ -441,7 +398,7 @@ public class StructureBuilder {
                         break;
                     case STONE_BUTTON:
                     case WOOD_BUTTON:
-                        Button button = new Button(plb.material);
+                        Button button = new Button(spb.material);
                         button.setFacingDirection(face);
                         data = button.getData();
                         break;
@@ -453,7 +410,7 @@ public class StructureBuilder {
                     case LEVER:
                         Lever lever = new Lever();
                         lever.setFacingDirection(face);
-                        lever.setPowered(plb.block.isBlockPowered());
+                        lever.setPowered(spb.block.isBlockPowered());
                         data = lever.getData();
                         break;
                     case TRAP_DOOR:
@@ -475,25 +432,23 @@ public class StructureBuilder {
                         data = furnace.getData();
                         break;
                     default:
-                        throw new UnsupportedOperationException(plb.material + " : " + plb.data + " not supported");
+                        throw new UnsupportedOperationException(spb.material + " : " + spb.data + " not supported");
                 }
-                plb.data = data;
-                plb.place();
+                spb.data = data;
+                spb.place();
             }
         }
 
     }
 
     /**
-     * TODO ALL BLOCKFACES SHOULD BE SUPPORTED, MOVE THIS TO WORLDUTIL
-     *
-     * @param directional
-     * @param newDirection
-     * @return
+     * @param directional The directional (block)
+     * @return the blockface
      */
-    private BlockFace getDirection(Directional directional, Direction newDirection) {
+    private BlockFace getDirection(Directional directional) {
         if (directional.getFacing() != BlockFace.DOWN && directional.getFacing() != BlockFace.UP) {
-            switch (newDirection) {
+            Direction direction = structure.getDirection();
+            switch (direction) {
                 case NORTH:
                     return directional.getFacing();
                 case EAST:
@@ -508,7 +463,7 @@ public class StructureBuilder {
                         case WEST:
                             return BlockFace.NORTH;
                         default:
-                            throw new AssertionError("Dont know direction for: " + newDirection);
+                            throw new AssertionError("Dont know direction for: " + direction);
                     }
                 case WEST:
                     switch (directional.getFacing()) {
@@ -521,7 +476,7 @@ public class StructureBuilder {
                         case WEST:
                             return BlockFace.SOUTH;
                         default:
-                            throw new AssertionError("Dont know direction for: " + newDirection);
+                            throw new AssertionError("Dont know direction for: " + direction);
                     }
                 case SOUTH:
                     switch (directional.getFacing()) {
@@ -534,7 +489,7 @@ public class StructureBuilder {
                         case WEST:
                             return BlockFace.EAST;
                         default:
-                            throw new AssertionError("Dont know direction for: " + newDirection);
+                            throw new AssertionError("Dont know direction for: " + direction);
                     }
                 default:
                     throw new AssertionError("Unreachable");
@@ -545,29 +500,16 @@ public class StructureBuilder {
     }
 
     /**
-     * Builds the layers 0 to given layer of this structure.
-     *
-     * @param layer The last layer to construct
-     * @param keepframe The builder will attempt to keep the frame
-     */
-    public void layers(int layer, boolean keepframe) {
-        Preconditions.checkArgument(layer > 0);
-        for (int i = 0; i < layer + 1; i++) {
-            layer(layer, keepframe);
-        }
-    }
-
-    /**
      * A block that should be placed later than any other blocks because placing
-     * them in air might cause the block to break (e.g. Torches, Signs, etc)
+     * them in might cause the block to break (e.g. Torches, Signs, etc)
      */
-    private class PlaceLaterBlock {
+    private class SpecialBlock {
 
         private Material material;
         private Byte data;
         private Block block;
 
-        public PlaceLaterBlock(Material material, Byte data, Block block) {
+        public SpecialBlock(Material material, Byte data, Block block) {
             this.material = material;
             this.data = data;
             this.block = block;
@@ -578,6 +520,11 @@ public class StructureBuilder {
             block.setType(material);
         }
 
+    }
+
+    private interface CallBack {
+
+        void onComplete();
     }
 
 }
