@@ -71,7 +71,6 @@ public class AnimatedFrameBuilder {
         this(structure, defaultDelay, FrameStrategy.SIMPLE);
     }
 
-
     /**
      * Contructs a frame for this structure
      */
@@ -104,10 +103,10 @@ public class AnimatedFrameBuilder {
             } else {
                 mod = hGap + 1;
             }
-            for (int z = schematic.length - 1; z >= 0; z--) {
-                for (int x = 0; x < schematic.width; x++) {
+            for (int z = schematic.length - 1; z >= 0; z -= mod) {
+                for (int x = 0; x < schematic.width; x += mod) {
                     if (start == schematic.layers - 1 || z == 0 || x == 0 || z == schematic.length - 1 || x == schematic.width - 1) {
-                        
+
                         Block b;
                         if (direction == Direction.NORTH || direction == Direction.SOUTH) {
                             b = target.clone().add(x * xMod, start, z * zMod).getBlock();

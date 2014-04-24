@@ -12,7 +12,6 @@ import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.plan.StructurePlan;
 import com.settlercraft.core.util.Ticks;
 import com.settlercraft.core.util.WorldUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -52,14 +51,8 @@ public class StructurePlanListener implements Listener {
                     plan
             );
             if(SCStructureAPI.player(pie.getPlayer()).place(structure)) {
-                SCStructureAPI.build(structure).foundation();
-                Bukkit.getScheduler().runTaskLater(settlerCraft, new Runnable() {
-                    @Override
-                    public void run() {
-                        SCStructureAPI.build(structure).foundation().construct();
-                        SCStructureAPI.build(structure).frame(FrameStrategy.SIMPLE).anim(Ticks.ONE_SECOND * 1).construct();
-                    }
-                }, 2 * Ticks.ONE_SECOND);
+                SCStructureAPI.build(structure).foundation().construct();
+                SCStructureAPI.build(structure).frame(FrameStrategy.SIMPLE).anim(Ticks.ONE_SECOND * 1).construct();
             }
         }
     }

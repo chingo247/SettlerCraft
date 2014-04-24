@@ -6,6 +6,7 @@
 package com.sc.api.structure.commands;
 
 import com.sc.api.structure.construction.SCStructureAPI;
+import com.sc.api.structure.construction.builders.StructureBuilder;
 import com.settlercraft.core.manager.StructurePlanManager;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.entity.structure.StructureState;
@@ -108,7 +109,7 @@ public class StructureCommandExecutor implements CommandExecutor {
         if(ss.isOnStructure(player.getLocation())){
             Structure structure = ss.getStructure(player.getLocation());
             if(structure.getStatus() != StructureState.COMPLETE) {
-                SCStructureAPI.build(structure).finish();
+                SCStructureAPI.build(structure).finish(StructureBuilder.BuildDirection.UP);
                 player.sendMessage(ChatColor.GREEN + "[SCS]: finishing " + structure.getPlan().getConfig().getName());
                 return true;
             } else {
