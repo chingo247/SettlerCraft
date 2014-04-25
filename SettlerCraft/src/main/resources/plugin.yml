@@ -2,6 +2,7 @@ name: SettlerCraft
 main: com.settlercraft.plugin.SettlerCraft
 version: 1.0
 
+
 commands:
     scs:
         description: Structure related commands

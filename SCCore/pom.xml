@@ -35,12 +35,6 @@
         </plugins>
     </build>
     <repositories>
-        <!--        SQLITE DIALECT
-        <repository>
-            <id>hibernatesqlite-maven</id>
-            <url>https://hibernate-sqlite.googlecode.com/svn/trunk/mavenrepo</url>
-        </repository>-->
-        <!--Bukkit Repo-->
         <repository>
             <id>bukkit-repo</id>
             <url>http://repo.bukkit.org/content/groups/public/</url>

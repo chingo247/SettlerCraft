@@ -104,7 +104,7 @@ public class StructureService extends AbstractService<Structure> {
         int zPlus = ra.getR_zPlus();
         int up = ra.getR_up();
         int down = ra.getR_down();
-      // MOTHER OF ALL QUERIES
+
       boolean overlaps = query.from(qStructure)
               .where(qStructure.worldLocation().world.eq(structure.getLocation().getWorld().getName())
                       .and(qStructure.dimension().endX.add(qStructure.reserved().r_xPlus).goe(structure.getDimension().getStartX() - xMinus).and(qStructure.dimension().startX.subtract(qStructure.reserved().r_xMinus).loe(structure.getDimension().getEndX() + xPlus)))
