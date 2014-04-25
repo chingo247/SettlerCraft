@@ -32,6 +32,7 @@ public class SettlerCraft extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        saveConfig();
         SCCore.initDB();
         modules = new HashSet<>();
         structureModule = new SCStructureAPI();

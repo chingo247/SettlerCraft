@@ -104,9 +104,21 @@ public class StructureService extends AbstractService<Structure> {
         int zPlus = ra.getR_zPlus();
         int up = ra.getR_up();
         int down = ra.getR_down();
-      
+
       boolean overlaps = query.from(qStructure)
               .where(qStructure.worldLocation().world.eq(structure.getLocation().getWorld().getName())
+                      .and(qStructure.dimension().endX.add(qStructure.reserved().r_xPlus).goe(structure.getDimension().getStartX() - xMinus).and(qStructure.dimension().startX.subtract(qStructure.reserved().r_xMinus).loe(structure.getDimension().getEndX() + xPlus)))
+                      .and(qStructure.dimension().endY.add(qStructure.reserved().r_up).goe(structure.getDimension().getStartY() - down).and(qStructure.dimension().startY.subtract(qStructure.reserved().r_down).loe(structure.getDimension().getEndY() + up)))
+                      .and(qStructure.dimension().endZ.add(qStructure.reserved().r_zPlus).goe(structure.getDimension().getStartZ() - zMinus).and(qStructure.dimension().startZ.subtract(qStructure.reserved().r_zMinus).loe(structure.getDimension().getEndZ() + zPlus)))
+             
+      ).exists();
+      session.close();
+      return overlaps;
+    }
+
+}
+/**
+ *             IN MEMORY OF THE MY PREVIOUS FAIL QUERY, MAY YOU FIND PEACE IN A COMMENT
                       // Y between?
                       .and(qStructure.dimension().startY.subtract(qStructure.reserved().r_down).between(structure.getDimension().getStartY() - down, structure.getDimension().getEndY() + up)
                       .or(qStructure.dimension().endY.add(qStructure.reserved().r_up).between(structure.getDimension().getStartY() - down, structure.getDimension().getEndY() + up)))
@@ -119,11 +131,20 @@ public class StructureService extends AbstractService<Structure> {
                       .and((qStructure.dimension().startZ.subtract(qStructure.reserved().r_zMinus).between(structure.getDimension().getStartZ() - zMinus, structure.getDimension().getEndZ() + zPlus)
                       .or(qStructure.dimension().endZ.add(qStructure.reserved().r_zPlus).between(structure.getDimension().getEndZ() + zPlus, structure.getDimension().getStartZ() - zMinus)))
                       .or(qStructure.dimension().startZ.subtract(qStructure.reserved().r_zMinus).between(structure.getDimension().getEndZ() + zPlus, structure.getDimension().getStartZ() - zMinus)
-                      .or(qStructure.dimension().endZ.add(qStructure.reserved().r_zPlus).between(structure.getDimension().getStartZ() - zMinus, structure.getDimension().getEndZ() + zPlus))))
+                      .or(qStructure.dimension().endZ.add(qStructure.reserved().r_zPlus).between(structure.getDimension().getStartZ() - zMinus, structure.getDimension().getEndZ() + zPlus)))
+                      ).or(
+                      (qStructure.dimension().startX.subtract(qStructure.reserved().r_xMinus).goe(structure.getDimension().getStartX()).and(qStructure.dimension().endX.add(qStructure.reserved().r_xPlus).loe(structure.getDimension().getEndX())))
+                      .and(qStructure.dimension().startY.subtract(qStructure.reserved().r_down).goe(structure.getDimension().getStartY()).and(qStructure.dimension().endY.add(qStructure.reserved().r_up).loe(structure.getDimension().getEndY())))
+                      .and((qStructure.dimension().startZ.subtract(qStructure.reserved().r_zMinus).between(structure.getDimension().getStartZ() - zMinus, structure.getDimension().getEndZ() + zPlus)
+                      .or(qStructure.dimension().endZ.add(qStructure.reserved().r_zPlus).between(structure.getDimension().getEndZ() + zPlus, structure.getDimension().getStartZ() - zMinus)))
+                      .or(qStructure.dimension().startZ.subtract(qStructure.reserved().r_zMinus).between(structure.getDimension().getEndZ() + zPlus, structure.getDimension().getStartZ() - zMinus)
+                      .or(qStructure.dimension().endZ.add(qStructure.reserved().r_zPlus).between(structure.getDimension().getStartZ() - zMinus, structure.getDimension().getEndZ() + zPlus)))
                       )
-      ).exists();
-      session.close();
-      return overlaps;
-    }
-
-}
+                      ).or(
+                      (qStructure.dimension().startZ.subtract(qStructure.reserved().r_zMinus).goe(structure.getDimension().getStartX()).and(qStructure.dimension().endZ.add(qStructure.reserved().r_zPlus).loe(structure.getDimension().getEndZ())))
+                      .and(qStructure.dimension().startY.subtract(qStructure.reserved().r_down).goe(structure.getDimension().getStartY()).and(qStructure.dimension().endY.add(qStructure.reserved().r_up).loe(structure.getDimension().getEndY())))
+                      .and((qStructure.dimension().startX.subtract(qStructure.reserved().r_xMinus).between(structure.getDimension().getStartX() - xMinus, structure.getDimension().getEndX() + xPlus)
+                      .or(qStructure.dimension().endX.add(xPlus).between(structure.getDimension().getEndX() + xPlus, structure.getDimension().getStartX() + xMinus)))
+                      .or(qStructure.dimension().startX.subtract(qStructure.reserved().r_xMinus).between(structure.getDimension().getEndX() + xPlus, structure.getDimension().getStartX() - xMinus)
+                      .or(qStructure.dimension().endX.add(qStructure.reserved().r_xPlus).between(structure.getDimension().getStartX() - xMinus, structure.getDimension().getEndX() + xPlus)))
+                      * **/

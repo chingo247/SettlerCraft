@@ -28,6 +28,10 @@ public class Recipes {
             .shape("D", "D", "D")
             .setIngredient('D', Material.DIRT),
             new CShapedRecipe(new ItemStack(Material.PAPER), "Colosseum")
+            .shape("S", "D", "S")
+            .setIngredient('D', Material.DIRT)
+            .setIngredient('S', Material.STONE),
+            new CShapedRecipe(new ItemStack(Material.PAPER), "PluginCrashAttempt")
             .shape("S", "D", "D")
             .setIngredient('D', Material.DIRT)
             .setIngredient('S', Material.STONE)
