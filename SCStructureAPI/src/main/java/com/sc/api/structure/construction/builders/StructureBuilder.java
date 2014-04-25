@@ -5,11 +5,9 @@
  */
 package com.sc.api.structure.construction.builders;
 
-import com.google.common.base.Preconditions;
 import com.sc.api.structure.construction.SCStructureAPI;
 import com.sc.api.structure.construction.strategies.FoundationStrategy;
 import com.sc.api.structure.construction.strategies.FrameStrategy;
-import com.sc.api.structure.event.structure.StructureCompleteEvent;
 import com.sc.api.structure.event.structure.StructureLayerCompleteEvent;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.entity.structure.StructureState;

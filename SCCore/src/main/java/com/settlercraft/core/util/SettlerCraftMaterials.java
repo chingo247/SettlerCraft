@@ -23,28 +23,6 @@ import org.bukkit.material.DirectionalContainer;
  */
 public class SettlerCraftMaterials {
 
-//    private final static Set<Material> TORCH_ORIENTATION = new HashSet<>(Arrays.asList(
-//            Material.TORCH,
-//            Material.REDSTONE_TORCH_OFF,
-//            Material.REDSTONE_TORCH_ON,
-//            Material.LEVER,
-//            Material.WOOD_BUTTON,
-//            Material.STONE_BUTTON
-//    ));
-//
-//    private final static Set<Material> SPECIAL = new HashSet<>(Arrays.asList(
-//            Material.FENCE_GATE,
-//            Material.LADDER,
-//            Material.WALL_SIGN,
-//            Material.SIGN_POST,
-//            Material.WOODEN_DOOR,
-//            Material.IRON_DOOR_BLOCK,
-//            Material.TRIPWIRE_HOOK,
-//            Material.TRAP_DOOR
-//    ));
-//    static {
-//        SPECIAL.addAll(TORCH_ORIENTATION);
-//    }
     private final static Set<Material> UNCRAFTABLE = new HashSet<>(Arrays.asList(
             Material.AIR,
             Material.LONG_GRASS,

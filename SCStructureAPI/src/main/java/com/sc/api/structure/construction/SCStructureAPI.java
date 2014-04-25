@@ -42,7 +42,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class SCStructureAPI extends SettlerCraftModule {
 
     public static final String MAIN_PLUGIN_NAME = "SettlerCraft";
-    public static final String ALIAS = "[SCS]";
+    public static final String ALIAS = "[STRUC]";
     
     public static Plugin getSettlerCraft() {
         return Bukkit.getPluginManager().getPlugin(MAIN_PLUGIN_NAME);

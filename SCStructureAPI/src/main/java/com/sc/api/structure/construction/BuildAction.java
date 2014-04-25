@@ -10,6 +10,7 @@ import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.entity.structure.StructureState;
 import com.settlercraft.core.model.plan.requirement.material.MaterialResource;
 import com.settlercraft.core.persistence.StructureProgressService;
+import com.settlercraft.core.util.Maths;
 import java.util.Iterator;
 import java.util.List;
 import org.bukkit.Bukkit;
@@ -22,13 +23,13 @@ import org.bukkit.inventory.ItemStack;
  */
 public class BuildAction {
 
-    private Structure structure;
+    private final Structure structure;
 
     public BuildAction(Structure structure) {
         this.structure = structure;
     }
 
-    public void build(Inventory inventory, int deposit, BuildCallback callback) {
+    public void build(Inventory inventory, int baseValue, BuildCallback callback) {
         if (structure.getStatus() == StructureState.READY_TO_BE_BUILD) {
             StructureProgressService structureProgressService = new StructureProgressService();
             List<MaterialResource> resources = structure.getProgress().getResources();
@@ -39,7 +40,8 @@ public class BuildAction {
 
                 for (ItemStack stack : inventory) {
                     if (materialResource != null && stack != null && materialResource.getMaterial() == stack.getType()) {
-                        int removed = structureProgressService.resourceTransaction(materialResource, Math.min(stack.getAmount(), deposit));
+                        int removed = structureProgressService.resourceTransaction(materialResource, Maths.lowest(stack.getAmount(), baseValue, stack.getMaxStackSize()));
+                        
                         if (removed > 0) {
                             // Remove items from player inventory
                             ItemStack removedIS = new ItemStack(stack);
