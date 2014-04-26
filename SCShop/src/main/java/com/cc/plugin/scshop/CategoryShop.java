@@ -280,7 +280,7 @@ public class CategoryShop extends Shop {
         }
     }
 
-    private static class Visitor {
+    private class Visitor {
 
         private Inventory inventory;
         private final String player;
