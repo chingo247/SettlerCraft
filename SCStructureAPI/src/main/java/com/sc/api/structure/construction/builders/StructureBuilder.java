@@ -160,7 +160,7 @@ public class StructureBuilder {
             }
         }
 
-        Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
+        Bukkit.getScheduler().runTaskLaterAsynchronously(Bukkit.getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
             @Override
             public void run() {
                 for (SpecialBlock plb : placeLater) {
@@ -233,7 +233,7 @@ public class StructureBuilder {
             }
 
             final int next = bd == BuildDirection.UP ? (layer + 1) : (layer - 1);
-            Bukkit.getScheduler().runTaskLater(Bukkit.getServer().getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
+            Bukkit.getScheduler().runTaskLaterAsynchronously(Bukkit.getServer().getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
 
                 @Override
                 public void run() {

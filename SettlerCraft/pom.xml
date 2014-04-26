@@ -9,22 +9,13 @@
     
     <name>SettlerCraft</name>
     <url>http://maven.apache.org</url>
-    <repositories>
-<!--
-         Minecraft CommandApi 
+<!--    <repositories>
+        Bukkit Repo
         <repository>
-            <id>CommandAPI</id>
-            <url>https://github.com/Not2EXceL/CommandAPI_Builds/raw/master</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
+            <id>bukkit-repo</id>
+            <url>http://repo.bukkit.org/content/groups/public/</url>
         </repository>
-        <repository>
-            <id>JBoss repository</id>
-            <url>http://repository.jboss.com/maven2/</url>
-        </repository>-->
-    </repositories>
+    </repositories>-->
     <build>
         <plugins>
             <plugin>
@@ -59,6 +50,13 @@
         </plugins>
     </build>
     <dependencies>
+<!--         Bukkit 
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>1.6.4-R2.0</version>
+            <scope>provided</scope>
+        </dependency>-->
         <dependency>
             <groupId>com.cc.plugin</groupId>
             <artifactId>SCCore</artifactId>

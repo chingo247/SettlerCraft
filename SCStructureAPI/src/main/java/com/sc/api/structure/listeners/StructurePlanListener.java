@@ -52,7 +52,7 @@ public class StructurePlanListener implements Listener {
             );
             if(SCStructureAPI.player(pie.getPlayer()).place(structure)) {
                 SCStructureAPI.build(structure).foundation().construct();
-                SCStructureAPI.build(structure).frame(FrameStrategy.SIMPLE).anim(Ticks.ONE_SECOND * 1).construct();
+                SCStructureAPI.build(structure).frame(FrameStrategy.FANCY).anim(Ticks.ONE_SECOND * 1).construct();
             }
         }
     }

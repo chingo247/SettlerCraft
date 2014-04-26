@@ -5,10 +5,12 @@
  */
 package com.settlercraft.core.model.plan.schematic;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
+import javax.persistence.Embeddable;
 import org.bukkit.Material;
 
 /**
@@ -16,7 +18,8 @@ import org.bukkit.Material;
  *
  * @author Chingo
  */
-public class SchematicObject {
+@Embeddable
+public class SchematicObject implements Serializable{
 
     public final int width;
     public final int layers;
@@ -26,6 +29,19 @@ public class SchematicObject {
     private final List entities;
     private final List tileEntities;
     private final SchematicBlockData[][][] dimensionalArray;
+
+    /**
+     * JPA Constructor
+     */
+    protected SchematicObject() {
+        this.blocks = null;
+        this.entities = null;
+        this.tileEntities = null;
+        this.dimensionalArray = null;
+        this.length = -1;
+        this.width = -1;
+        this.layers = -1;
+    }
 
     public SchematicObject(int width, int height, int length, List<SchematicBlockData> blocks, List entities, List tileEntities) {
         this.width = width;

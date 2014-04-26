@@ -21,37 +21,20 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class SettlerCraft extends JavaPlugin {
 
-    private SCStructureAPI structureModule;
     private Set<SettlerCraftModule> modules;
     public static final String name = "SettlerCraft";
 
     @Override
     public void onEnable() {
-        if (getServer().getPluginManager().getPlugin("Citizens") == null || getServer().getPluginManager().getPlugin("Citizens").isEnabled() == false) {
-            getLogger().log(Level.SEVERE, "Citizens 2.0 not found or not enabled");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
-        saveConfig();
-        SCCore.initDB();
         modules = new HashSet<>();
-        structureModule = new SCStructureAPI();
-
         try {
-
-            addModule(structureModule);
+            addModule(new SCCore());
+            addModule(new SCStructureAPI());
+           
         } catch (DuplicateAPIException ex) {
             Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
         }
-
     }
-
-    @Override
-    public void onLoad() {
-
-    }
-
-
 
     public void addModule(SettlerCraftModule api) throws DuplicateAPIException {
         if (modules.add(api)) {
@@ -60,5 +43,7 @@ public class SettlerCraft extends JavaPlugin {
             throw new DuplicateAPIException(api); // Self check
         }
     }
+
+
 
 }

@@ -5,7 +5,8 @@
  */
 package com.settlercraft.core.model.entity.structure;
 
-import com.settlercraft.core.model.plan.yaml.StructureConfig.RESERVED_SIDE;
+
+import com.settlercraft.core.model.plan.ReservedSide;
 import java.io.Serializable;
 import java.util.EnumMap;
 import javax.persistence.Embeddable;
@@ -37,39 +38,39 @@ public class ReservedArea implements Serializable {
     }
 
     public ReservedArea(Structure structure) {
-        EnumMap<RESERVED_SIDE, Integer> reserved = structure.getPlan().getConfig().getReserved();
+        EnumMap<ReservedSide, Integer> reserved = structure.getPlan().getReserved();
         System.out.println(structure.getDirection());
         switch (structure.getDirection()) {
             
             case NORTH:
-                this.r_zMinus = reserved.get(RESERVED_SIDE.NORTH);
-                this.r_xPlus = reserved.get(RESERVED_SIDE.EAST);
-                this.r_zPlus = reserved.get(RESERVED_SIDE.SOUTH);
-                this.r_xMinus = reserved.get(RESERVED_SIDE.WEST);
+                this.r_zMinus = reserved.get(ReservedSide.NORTH);
+                this.r_xPlus = reserved.get(ReservedSide.EAST);
+                this.r_zPlus = reserved.get(ReservedSide.SOUTH);
+                this.r_xMinus = reserved.get(ReservedSide.WEST);
                 break;
             case EAST:
-                this.r_zPlus = reserved.get(RESERVED_SIDE.EAST);
-                this.r_xPlus = reserved.get(RESERVED_SIDE.NORTH);
-                this.r_zMinus = reserved.get(RESERVED_SIDE.WEST);
-                this.r_xMinus = reserved.get(RESERVED_SIDE.SOUTH);
+                this.r_zPlus = reserved.get(ReservedSide.EAST);
+                this.r_xPlus = reserved.get(ReservedSide.NORTH);
+                this.r_zMinus = reserved.get(ReservedSide.WEST);
+                this.r_xMinus = reserved.get(ReservedSide.SOUTH);
                 break;
             case SOUTH:
-                this.r_zMinus = reserved.get(RESERVED_SIDE.SOUTH);
-                this.r_xPlus = reserved.get(RESERVED_SIDE.WEST);
-                this.r_zPlus = reserved.get(RESERVED_SIDE.NORTH);
-                this.r_xMinus = reserved.get(RESERVED_SIDE.EAST);
+                this.r_zMinus = reserved.get(ReservedSide.SOUTH);
+                this.r_xPlus = reserved.get(ReservedSide.WEST);
+                this.r_zPlus = reserved.get(ReservedSide.NORTH);
+                this.r_xMinus = reserved.get(ReservedSide.EAST);
                 break;
             case WEST:
-                this.r_zPlus = reserved.get(RESERVED_SIDE.WEST);
-                this.r_xPlus = reserved.get(RESERVED_SIDE.SOUTH);
-                this.r_zMinus = reserved.get(RESERVED_SIDE.EAST);
-                this.r_xMinus = reserved.get(RESERVED_SIDE.NORTH);
+                this.r_zPlus = reserved.get(ReservedSide.WEST);
+                this.r_xPlus = reserved.get(ReservedSide.SOUTH);
+                this.r_zMinus = reserved.get(ReservedSide.EAST);
+                this.r_xMinus = reserved.get(ReservedSide.NORTH);
                 break;
             default:
                 throw new AssertionError("Unreachable");
         }
-        this.r_up = reserved.get(RESERVED_SIDE.UP);
-        this.r_down = reserved.get(RESERVED_SIDE.DOWN);
+        this.r_up = reserved.get(ReservedSide.UP);
+        this.r_down = reserved.get(ReservedSide.DOWN);
     }
 
     public int getR_zPlus() {

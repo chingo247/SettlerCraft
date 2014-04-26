@@ -1,6 +1,0 @@
-database:
-  username: SettlerCraft
-  isolation: SERIALIZABLE
-  driver: com.mysql.jdbc.Driver
-  password: lol
-  url: jdbc:mysql://localhost:3306/SettlerCraft.db

@@ -5,13 +5,14 @@
  */
 package com.sc.api.structure.construction;
 
-import com.sc.api.structure.construction.builders.StructureBuilder;
 import com.google.common.base.Preconditions;
 import com.sc.api.structure.commands.StructureCommandExecutor;
+import com.sc.api.structure.construction.builders.StructureBuilder;
 import com.sc.api.structure.exception.InvalidStructurePlanException;
 import com.sc.api.structure.exception.NoStructureSchematicNodeException;
 import com.sc.api.structure.exception.SchematicFileNotFoundException;
 import com.sc.api.structure.io.StructurePlanLoader;
+import com.sc.api.structure.listeners.InventoryListener;
 import com.sc.api.structure.listeners.PlayerListener;
 import com.sc.api.structure.listeners.StructureListener;
 import com.sc.api.structure.listeners.StructurePlanListener;
@@ -57,6 +58,7 @@ public class SCStructureAPI extends SettlerCraftModule {
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(plugin), plugin);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), plugin);
         Bukkit.getPluginManager().registerEvents(new StructureListener(), plugin);
+        Bukkit.getPluginManager().registerEvents(new InventoryListener(), plugin);
     }
 
     @Override

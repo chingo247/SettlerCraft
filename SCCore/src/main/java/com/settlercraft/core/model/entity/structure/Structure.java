@@ -90,7 +90,7 @@ public class Structure extends SettlerCraftEntity implements Serializable {
         Preconditions.checkNotNull(plan);
         Preconditions.checkNotNull(target);
         this.owner = owner.getName();
-        this.plan = plan.getConfig().getName();
+        this.plan = plan.getName();
         int[] modifiers = WorldUtil.getModifiers(direction);
         this.xMod = modifiers[0];
         this.zMod = modifiers[1];

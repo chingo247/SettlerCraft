@@ -6,7 +6,7 @@ import com.settlercraft.core.model.entity.structure.QStructure;
 import com.settlercraft.core.model.entity.structure.ReservedArea;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.entity.structure.StructureState;
-import com.settlercraft.core.util.HibernateUtil;
+import com.settlercraft.core.util.Database.HibernateUtil;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,7 +19,7 @@ import org.hibernate.Transaction;
  *
  * @author Chingo
  */
-public class StructureService extends AbstractService<Structure> {
+public class StructureService extends AbstractService {
 
     public List<Structure> getStructures() {
         QStructure structure = QStructure.structure;
@@ -46,7 +46,29 @@ public class StructureService extends AbstractService<Structure> {
             session = HibernateUtil.getSession();
             tx = session.beginTransaction();
             structure.setStatus(newStatus);
-            merge(structure);
+            session.merge(structure);
+            tx.commit();
+        } catch (HibernateException e) {
+            try {
+                tx.rollback();
+            } catch (HibernateException rbe) {
+                Logger.getLogger(AbstractService.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
+            }
+            throw e;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+    
+    public void save(Structure structure) {
+                Session session = null;
+        Transaction tx = null;
+        try {
+            session = HibernateUtil.getSession();
+            tx = session.beginTransaction();
+            session.merge(structure);
             tx.commit();
         } catch (HibernateException e) {
             try {

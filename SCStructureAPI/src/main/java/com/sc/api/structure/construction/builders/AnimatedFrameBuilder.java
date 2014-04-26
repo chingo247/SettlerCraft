@@ -46,7 +46,7 @@ public class AnimatedFrameBuilder {
         this.structure = structure;
         this.delay = delay;
         this.structureService = new StructureService();
-        this.strategy = FrameStrategy.SIMPLE;
+        this.strategy = strategy;
     }
 
     /**
@@ -118,7 +118,7 @@ public class AnimatedFrameBuilder {
                 }
             }
             final int next = start + 1;
-            Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
+            Bukkit.getScheduler().runTaskLaterAsynchronously(Bukkit.getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
                 @Override
                 public void run() {
                     placeDefaultAnimatedFrame(next);
@@ -160,7 +160,7 @@ public class AnimatedFrameBuilder {
                 }
             }
             final int next = start + 1;
-            Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
+            Bukkit.getScheduler().runTaskLaterAsynchronously(Bukkit.getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
                 @Override
                 public void run() {
                     placeFancyAnimatedFrame(next);

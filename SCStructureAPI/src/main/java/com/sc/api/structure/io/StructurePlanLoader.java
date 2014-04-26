@@ -11,12 +11,13 @@ import com.sc.api.structure.exception.SchematicFileNotFoundException;
 import com.sc.api.structure.exception.UnsupportedStructureException;
 import com.settlercraft.core.exception.DuplicateStructurePlanException;
 import com.settlercraft.core.manager.StructurePlanManager;
+import com.settlercraft.core.model.plan.ReservedSide;
 import com.settlercraft.core.model.plan.StructurePlan;
 import com.settlercraft.core.model.plan.schematic.SchematicObject;
-import com.settlercraft.core.model.plan.yaml.StructureConfig;
-import com.settlercraft.core.model.plan.yaml.StructureConfigReader;
 import java.io.File;
+import java.util.EnumMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
@@ -36,6 +37,7 @@ public class StructurePlanLoader {
         Iterator<File> it = FileUtils.iterateFiles(buildingFolder, extensions, true);
 
         while (it.hasNext()) {
+            
             File yamlStructureFile = it.next();
             YamlConfiguration yaml = YamlConfiguration.loadConfiguration(yamlStructureFile);
             if (yaml.getString(structureSchematicNode) == null) {
@@ -52,11 +54,13 @@ public class StructurePlanLoader {
                     throw new SchematicFileNotFoundException(schematicFoundationFile);
                 }
             }
+            
+            
             StructurePlan plan;
             try {
                 plan = assemble(schematicStructureFile, schematicFoundationFile, yamlStructureFile);
                 StructurePlanManager.getInstance().addPlan(plan);
-                System.out.println("[SettlerCraft]: loaded " + plan.getConfig().getName());
+                System.out.println("[SettlerCraft]: loaded " + plan.getName());
             }
             catch (UnsupportedStructureException | DuplicateStructurePlanException ex) {
                 Logger.getLogger(StructurePlanLoader.class.getName()).log(Level.SEVERE, null, ex);
@@ -78,26 +82,62 @@ public class StructurePlanLoader {
     }
 
     public StructurePlan assemble(File stSchematicFile, File fdSchematicFile, File structureYAML) throws InvalidStructurePlanException, UnsupportedStructureException {
-        YamlConfiguration structureInfo = YamlConfiguration.loadConfiguration(structureYAML);
-        if (!hasChestSpace(structureInfo)) {
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(structureYAML);
+        if (!hasChestSpace(config)) {
             throw new InvalidStructurePlanException("[SettlerCraft]: structure doesnt have any reserved sides " + structureYAML.getAbsolutePath() + ", the sum of all reserved sides should be bigger than 0");
-        } else if (!checKvalues(structureInfo)) {
+        } else if (!valid(config)) {
             throw new InvalidStructurePlanException("[SettlerCraft]: failed to create structure plan for " + structureYAML.getAbsolutePath() + ", invalid values");
         }
-        StructureConfigReader scr = new StructureConfigReader();
-        StructureConfig config = scr.read(structureYAML);
-
+        
+        if(config.get("cost") == null) {
+            throw new InvalidStructurePlanException("Missing node: \"cost\" in " + structureYAML.getAbsolutePath());
+        } else if (!config.isInt("cost")) {
+            throw new InvalidStructurePlanException("No valid number node: \"cost\" in " + structureYAML.getAbsolutePath() + ", needs to be an Integer (round number)");
+        }
+                
+        EnumMap<ReservedSide, Integer> reserved = new EnumMap<>(ReservedSide.class);
+        if (config.get("reserved.north") != null) {
+            reserved.put(ReservedSide.NORTH, config.getInt("reserved.north"));
+        }
+        if (config.get("reserved.east") != null) {
+            reserved.put(ReservedSide.EAST, config.getInt("reserved.east"));
+        }
+        if (config.get("reserved.south") != null) {
+            reserved.put(ReservedSide.SOUTH, config.getInt("reserved.south"));
+        }
+        if (config.get("reserved.west") != null) {
+            reserved.put(ReservedSide.WEST, config.getInt("reserved.west"));
+        }
+        if (config.get("reserved.up") != null) {
+            reserved.put(ReservedSide.UP, config.getInt("reserved.up"));
+        }
+        if (config.get("reserved.north") != null) {
+            reserved.put(ReservedSide.DOWN, config.getInt("reserved.down"));
+        }
+        
+        for(Map.Entry<ReservedSide, Integer> e : reserved.entrySet()) {
+            if(e.getValue() == null) reserved.put(e.getKey(), 0);
+        }
+        
+        
+        int cost = config.getInt("cost");
+        String name = config.getString("name");
+        String description = config.getString("description");
+        String culture = config.getString("culture");
+        String category = config.getString("category");
+        int layers = config.getInt("layers-start");
+        
         SchematicReader sr = new SchematicReader();
         SchematicObject structure = sr.readFile(stSchematicFile);
-
         if (fdSchematicFile != null) {
             SchematicObject foundation = sr.readFile(fdSchematicFile);
-            return new StructurePlan(structure, foundation, config);
+            return new StructurePlan(structure, foundation, name, culture, name, cost, reserved, description);
+        } else {
+            return new StructurePlan(structure, name, culture, name, cost, reserved, description);
         }
-        return new StructurePlan(structure, config);
     }
 
-    private boolean checKvalues(YamlConfiguration yaml) {
+    private boolean valid(YamlConfiguration yaml) {
         return yaml.getString("name") != null
                 && yaml.isInt("reserved.north")
                 && yaml.isInt("reserved.east")
@@ -112,5 +152,6 @@ public class StructurePlanLoader {
         }
         return true;
     }
+   
 
 }

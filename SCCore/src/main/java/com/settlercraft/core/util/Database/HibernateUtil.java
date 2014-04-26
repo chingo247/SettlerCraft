@@ -1,4 +1,4 @@
-package com.settlercraft.core.util;
+package com.settlercraft.core.util.Database;
 
 import com.google.common.collect.Sets;
 import java.util.Set;
@@ -10,10 +10,8 @@ import org.hibernate.cfg.Configuration;
 public class HibernateUtil {
 
     private static SessionFactory factory;
-    private static SessionFactory versionFactory;
     private static Set<Class> annotatedClasses = Sets.newHashSet();
     private static AnnotationConfiguration config = new AnnotationConfiguration();
-    private static AnnotationConfiguration versionConfig = new  AnnotationConfiguration();
 
     public static Session getSession() {
         if (factory == null) {
@@ -24,13 +22,6 @@ public class HibernateUtil {
         return factory.openSession();
     }
     
-    public static Session getVersionDBSession() {
-        if(versionFactory == null) {
-            initializeConfiguration(versionConfig);
-            versionFactory = versionConfig.configure("version_history.cfg.xml").buildSessionFactory();
-        }
-        return versionFactory.openSession();
-    }
     
 
     private static Configuration initializeConfiguration(final AnnotationConfiguration configuration) {
@@ -43,7 +34,6 @@ public class HibernateUtil {
     public static void addAnnotatedClass(Class clazz) {
         annotatedClasses.add(clazz);
         factory = config.buildSessionFactory();
-        versionFactory = versionConfig.buildSessionFactory();
         System.out.println("[SettlerCraft]: registered " + clazz);
     }
     
@@ -53,14 +43,11 @@ public class HibernateUtil {
             annotatedClasses.add(clazz);
         }
         initializeConfiguration(config);
-        initializeConfiguration(versionConfig);
         factory = config.configure("hibernate.cfg.xml").buildSessionFactory();
-        versionFactory = versionConfig.configure("hibernate.cfg.xml").buildSessionFactory();
     }
 
     public static void shutdown() {
         factory.close();
-        versionFactory.close();
     }
 
 //    private static List<Class> getAnnotatedClasses() {

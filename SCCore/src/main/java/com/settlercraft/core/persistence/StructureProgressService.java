@@ -7,7 +7,7 @@ package com.settlercraft.core.persistence;
 
 import com.settlercraft.core.model.entity.structure.StructureProgress;
 import com.settlercraft.core.model.plan.requirement.material.MaterialResource;
-import com.settlercraft.core.util.HibernateUtil;
+import com.settlercraft.core.util.Database.HibernateUtil;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.hibernate.HibernateException;
