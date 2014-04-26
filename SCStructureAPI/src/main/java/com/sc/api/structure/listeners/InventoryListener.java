@@ -6,9 +6,9 @@
 package com.sc.api.structure.listeners;
 
 //import com.sc.api.structure.vendor.PlanShop;
-import com.cc.plugin.scshop.CategoryShop;
-import com.cc.plugin.scshop.Shop;
-import com.cc.plugin.scshop.ShopManager;
+import com.sc.plugin.shop.CategoryShop;
+import com.sc.plugin.shop.Shop;
+import com.sc.plugin.shop.ShopManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,9 +29,10 @@ public class InventoryListener implements Listener {
             Shop shop = ShopManager.getInstance().getShop(shopName);
             ice.setCancelled(shop.isInfinite());
             if(shop instanceof CategoryShop) {
-                
+                System.out.println(ice.getSlot());
                 CategoryShop cs = (CategoryShop) shop;
                 if(cs.isCategorySlot(ice.getSlot())) {
+                    System.out.println(ice.getCurrentItem().getItemMeta().getDisplayName());
                     cs.visit(player, ice.getCurrentItem().getItemMeta().getDisplayName());
                 } else if(!cs.isReserved(ice.getSlot()) && ice.getCurrentItem() != null) {
                     player.getInventory().addItem(ice.getCurrentItem());

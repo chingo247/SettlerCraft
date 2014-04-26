@@ -10,8 +10,6 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 
 /**
- * TODO REMOVE UGLY Singleton
- * TODO HSQLDB SUPPORT for BOTH SHOPS AS VISITORS
  * @author Chingo
  */
 public class ShopManager {

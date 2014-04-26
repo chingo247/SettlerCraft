@@ -17,6 +17,8 @@ import com.sc.api.structure.listeners.PlayerListener;
 import com.sc.api.structure.listeners.StructureListener;
 import com.sc.api.structure.listeners.StructurePlanListener;
 import com.sc.api.structure.recipe.Recipes;
+import com.sc.plugin.shop.CategoryShop;
+import com.sc.plugin.shop.ShopManager;
 import com.settlercraft.core.SettlerCraftModule;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.world.WorldDimension;
@@ -33,6 +35,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -44,6 +47,7 @@ public class SCStructureAPI extends SettlerCraftModule {
 
     public static final String MAIN_PLUGIN_NAME = "SettlerCraft";
     public static final String ALIAS = "[STRUC]";
+    public static final String PLAN_SHOP = "Buy & Build";
     
     public static Plugin getSettlerCraft() {
         return Bukkit.getPluginManager().getPlugin(MAIN_PLUGIN_NAME);
@@ -76,6 +80,7 @@ public class SCStructureAPI extends SettlerCraftModule {
         setupListeners(plugin);
         setupRecipes(plugin);
         plugin.getCommand("scs").setExecutor(new StructureCommandExecutor());
+        initShop();
     }
     
     public static void reloadPlans() {
@@ -187,6 +192,29 @@ public class SCStructureAPI extends SettlerCraftModule {
         } else if (structureService.isOnStructure(target)) {
             moveEntityFromLot(entity, distance * 2, structureService.getStructure(target));
         }
+    }
+    
+    private void initShop() {
+        CategoryShop cs = new CategoryShop(PLAN_SHOP, true);
+        cs.setCategoryRow(0);
+        cs.addCategory("General", new ItemStack(Material.WORKBENCH));
+        cs.addCategory("Houses", new ItemStack(Material.BED));
+        cs.addCategory("Shops", new ItemStack(Material.GOLD_INGOT));
+        cs.addCategory("Temples", new ItemStack(Material.QUARTZ));
+        cs.addCategory("Castles", new ItemStack(Material.SMOOTH_BRICK));
+        cs.addCategory("Tower", new ItemStack(Material.LADDER));
+        cs.addCategory("Dungeons&Arenas", new ItemStack(Material.IRON_SWORD));
+        cs.addCategory("Misc", new ItemStack(Material.RECORD_10));
+        for (int i = 0; i < 10; i++) {
+            cs.addItem(StructureCommandExecutor.setName(new ItemStack(Material.PAPER), "House : " + i), "Houses");
+        }
+        for (int i = 0; i < 30; i++) {
+            cs.addItem(StructureCommandExecutor.setName(new ItemStack(Material.PAPER), "Tower : " + i), "Tower");
+        }
+        for (int i = 0; i < 5; i++) {
+            cs.addItem(StructureCommandExecutor.setName(new ItemStack(Material.PAPER), "Arena : " + i), "Dungeons&Arenas");
+        }
+        ShopManager.getInstance().register(cs);
     }
 
 }
