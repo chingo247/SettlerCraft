@@ -3,18 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.cc.plugin.scshop;
+package com.sc.plugin.shop;
 
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.sc.plugin.AlphabeticalItemStackComperator;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -28,31 +27,86 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public class CategoryShop extends Shop {
 
-    private final ConcurrentHashMap<String, Visitor> visitors;
     private final List<ItemStack> categories;
     private final Map<String, TreeSet<ItemStack>> items;
-    private final String ALL_CATEGORY = "All";
-    private final Set<Integer> categorySlots = Sets.newTreeSet();
+    private final Map<String, Inventory> visitors;
+    private final Set<Integer> categorySlots;
+    private final Inventory templateInventory;
 
+    public static final String ALL_CATEGORY = "All";
+    public static final String CATEGORY_SLOT = "Category_Slot";
+
+    /**
+     * Constructor.
+     *
+     * @param title The title of this shop
+     */
     public CategoryShop(String title) {
         this(title, false);
     }
 
+    /**
+     * Constructor
+     *
+     * @param title The title of this shop
+     * @param infinite If infinite items in this shop will/must never deplete Note: if infinite all
+     * pick actions on this shop's inventory will be cancelled
+     */
     public CategoryShop(String title, boolean infinite) {
         super(title, infinite);
         this.categories = new ArrayList<>();
-        this.visitors = new ConcurrentHashMap<>();
+        this.visitors = Maps.newConcurrentMap();
         this.items = Maps.newHashMap();
-        this.setCategorySlot(0, true);
-        addCategory(ALL_CATEGORY, new ItemStack(Material.NETHER_STAR));
+        this.templateInventory = Bukkit.createInventory(null, SHOPSIZE, title);
+        this.categorySlots = new HashSet<>();
+        this.setCategorySlot(0);
+        this.addCategory(ALL_CATEGORY, new ItemStack(Material.NETHER_STAR));
+    }
+    
+    public final void setCategorySlot(int slot) {
+            categorySlots.add(slot);
+            this.setSlot(slot, true);
     }
 
-    /**
-     * Adds an item to this shop, item will be added to a default category, which is "All".
-     *
-     * @param item The item to add
-     * @return returns true if succesfully added
-     */
+    public final void setCategoryRow(int row) {
+        int rowSize = 9;
+        for (int slot = row * rowSize; slot < row + rowSize; slot++) {
+            setCategorySlot(slot);
+        }
+    }
+
+    public final void setCategoryColumn(int column) {
+        for (int i = column; i < 54; i += 9) {
+            setCategorySlot(i);
+        }
+    }
+
+    @Override
+    public final void setSlot(int slot, boolean reserve) {
+        if (slot != 0) {
+            if (reserve) {
+                reserved.put(slot, CATEGORY_SLOT);
+            } else {
+                reserved.remove(slot);
+            }
+        }
+    }
+
+    @Override
+    public final void setRow(int row, boolean reserved) {
+        int rowSize = 9;
+        for (int slot = row * rowSize; slot < row + rowSize; slot++) {
+            setSlot(slot, reserved);
+        }
+    }
+
+    @Override
+    public final void setColumn(int column, boolean reserved) {
+        for (int i = column; i < 54; i += 9) {
+            setSlot(i, reserved);
+        }
+    }
+
     @Override
     public boolean addItem(ItemStack item) {
         return addItem(item, ALL_CATEGORY);
@@ -67,10 +121,9 @@ public class CategoryShop extends Shop {
      */
     public boolean addItem(ItemStack item, String category) {
         if (items.containsKey(category) && !isFull()) {
-            if (infinite) {
+            if (isInfinite()) {
                 item.setAmount(1);
             }
-            super.addItem(item);
             return items.get(category).add(item);
         } else {
             return false;
@@ -99,50 +152,25 @@ public class CategoryShop extends Shop {
             meta.setDisplayName(name);
             icon.setItemMeta(meta);
             items.put(name, new TreeSet<>(new AlphabeticalItemStackComperator())); // Add a Set for this category
-            addCategory(icon); // Add to inventory/view!
+            addCategory(icon); // Add to templateInventory/view!
             return true;
         }
     }
 
     private boolean addCategory(ItemStack category) {
         if (category.getItemMeta().getDisplayName().equals(ALL_CATEGORY)) {
-            inventory.setItem(0, category);
+            templateInventory.setItem(0, category);
             return true;
         } else {
             Iterator<Integer> it = categorySlots.iterator();
             while (it.hasNext()) {
                 int i = it.next();
-                if (inventory.getItem(i) == null) {
-                    inventory.setItem(i, category);
+                if (templateInventory.getItem(i) == null) {
+                    templateInventory.setItem(i, category);
                     return true;
                 }
             }
             return false;
-        }
-    }
-
-    public final void setCategorySlot(int slot, boolean reserved) {
-        if (slot != 0) {
-            if (reserved) {
-                categorySlots.add(slot);
-            } else {
-                categorySlots.remove(slot);
-            }
-            setSlot(slot, reserved);
-        }
-    }
-
-    public final void setCategoryRow(int row, boolean reserved) {
-        int rowSize = 9;
-        for (int slot = row * rowSize; slot < row + rowSize; slot++) {
-            setCategorySlot(slot, reserved);
-        }
-        invalidate();
-    }
-
-    public final void setCategoryColumn(int column, boolean reserved) {
-        for (int i = column; i < 54; i += 9) {
-            setCategorySlot(i, reserved);
         }
     }
 
@@ -159,7 +187,7 @@ public class CategoryShop extends Shop {
 
     /**
      * Removes a Category from this shop, all items in this category will be move to the all
-     * category
+     * category.
      *
      * @param name The name
      * @return If the name is equal to "All" or Category doesnt exist, this method returns false
@@ -219,7 +247,7 @@ public class CategoryShop extends Shop {
     }
 
     public boolean isCategorySlot(int slot) {
-        return categorySlots.contains(slot);
+       return categorySlots.contains(slot);
     }
 
     @Override
@@ -229,41 +257,24 @@ public class CategoryShop extends Shop {
         return (amountOfItems + categories.size() + emptyReservedSpaces) == SHOPSIZE;
     }
 
-    private Inventory template() {
-        Inventory in = Bukkit.createInventory(null, SHOPSIZE, title);
+    @Override
+    public Inventory getTemplateInventory() {
+        Inventory in = Bukkit.createInventory(null, SHOPSIZE, getTitle());
         for (int i = 0; i < SHOPSIZE; i++) {
-            if (isCategorySlot(i) || isReserved(i) || i == 0) {
-                in.setItem(i, inventory.getItem(i));
+            if (isReserved(i) || isCategorySlot(i)) {
+                in.setItem(i, templateInventory.getItem(i));
             }
         }
         return in;
     }
-
-    public void visit(Player player, String category) {
-        if (!visitors.contains(player.getName())) {
-            System.out.println(Arrays.toString(visitors.keySet().toArray()));
-            System.out.println("Open new inventory!");
-            visitors.put(player.getName(), new Visitor(player, title));
-            visitors.get(player.getName()).inventory = template();
-            for (ItemStack i : getCategory(category)) {
-                visitors.get(player.getName()).inventory.addItem(i);
-            }
-            player.openInventory(visitors.get(player.getName()).inventory);
-        } else {
-            System.out.println("Update inventory!");
-            visitors.put(player.getName(), new Visitor(player, title));
-            visitors.get(player.getName()).inventory = template();
-            for (ItemStack i : getCategory(category)) {
-                visitors.get(player.getName()).inventory.addItem(i);
-            }
-            player.updateInventory();
-        }
-    }
     
-    public void leave(Player player) {
-        if(visitors.contains(player.getName())) {
-            visitors.remove(player.getName());
-            player.sendMessage("[" + title + "]: Have a nice day!");
+    @Override
+    public void setTemplateInventory(final Inventory inventory) {
+        inventory.clear();
+        for (int i = 0; i < SHOPSIZE; i++) {
+            if (isReserved(i) || isCategorySlot(i)) {
+                inventory.setItem(i, templateInventory.getItem(i));
+            }
         }
     }
 
@@ -272,29 +283,36 @@ public class CategoryShop extends Shop {
         visit(player, ALL_CATEGORY);
     }
 
-    private void invalidate() {
-        if (categorySlots.size() < categories.size()) {
-            for (ItemStack i : categories.subList(categorySlots.size(), categories.size())) {
-                removeCategory(i.getItemMeta().getDisplayName());
+    public void visit(Player player, String category) {
+        if (!visitors.containsKey(player.getName())) {
+            System.out.println("Open inventory!");
+            Inventory inv = getTemplateInventory();
+            visitors.put(player.getName(), inv);
+            for (ItemStack i : getCategory(category)) {
+                inv.addItem(i);
             }
-        }
-    }
-
-    private class Visitor {
-
-        private Inventory inventory;
-        private final String player;
-        private String currentCategory;
-
-        public Visitor(Player player, String shop) {
-            this.player = player.getName();
-            this.inventory = Bukkit.createInventory(null, SHOPSIZE, shop);
-        }
-
-        public Inventory getInventory() {
-            return inventory;
+            player.openInventory(inv);
+        } else {
+            System.out.println("Update inventory!");
+            visitors.get(player.getName()).clear();
+            setTemplateInventory(visitors.get(player.getName()));
+            for (ItemStack i : getCategory(category)) {
+                visitors.get(player.getName()).addItem(i);
+            }
+            player.updateInventory();
         }
 
     }
+
+    @Override
+    public void leave(Player player) {
+        if (visitors.containsKey(player.getName())) {
+            visitors.remove(player.getName());
+            player.sendMessage("[" + getTitle() + "]: Have a nice day!");
+        }
+    }
+
+
+
 
 }

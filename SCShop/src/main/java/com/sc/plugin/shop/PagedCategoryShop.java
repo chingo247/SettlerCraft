@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.cc.plugin.scshop;
+package com.sc.plugin.shop;
 
 import java.util.HashMap;
 
