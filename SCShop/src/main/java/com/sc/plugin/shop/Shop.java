@@ -5,10 +5,12 @@
  */
 package com.sc.plugin.shop;
 
-import com.google.common.collect.Maps;
-import java.util.HashMap;
+import com.google.common.collect.Sets;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
+import net.milkbowl.vault.economy.EconomyResponse;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -19,10 +21,11 @@ import org.bukkit.inventory.ItemStack;
  */
 public abstract class Shop {
 
+    private final UUID id;
     private final String title;
     public static final int SHOPSIZE = 54;
     private final boolean infinite;
-    protected final HashMap<Integer, String> reserved = Maps.newHashMap();
+    protected final Set<Integer> reserved = Sets.newHashSet();
 
     /**
      * Constructor.
@@ -40,8 +43,24 @@ public abstract class Shop {
      * @param infinite If infinite items in this shop will never deplete
      */
     public Shop(String title, boolean infinite) {
+        this(UUID.randomUUID(), title, infinite);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param id The id of the shop
+     * @param title The title of this shop, must be unique
+     * @param infinite If infinite items in this shop will never deplete
+     */
+    public Shop(UUID id, String title, boolean infinite) {
         this.infinite = infinite;
         this.title = title;
+        this.id = id;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     /**
@@ -83,18 +102,21 @@ public abstract class Shop {
      * @return the reserved slots
      */
     public Set<Integer> getReserved() {
-        return new HashSet<>(reserved.keySet());
+        return new HashSet<>(reserved);
     }
 
     /**
      * Adds the item to the shop.
+     *
      * @param item The item to add
+     * @param cost The price of this item
      * @return true if item was succesfully added
      */
-    public abstract boolean addItem(ItemStack item);
+    public abstract boolean addItem(ItemStack item, double cost);
 
     /**
      * Determines that no items can be placed in this shop
+     *
      * @return true if this shop is full
      */
     public abstract boolean isFull();
@@ -102,6 +124,7 @@ public abstract class Shop {
     /**
      * Determines if this is an infinite store. Unlike regular stores the items in infinite stores
      * won't deplete. The regular pick action will be cancelled for this stores inventory
+     *
      * @return True if this store's items won't deplete
      */
     public boolean isInfinite() {
@@ -110,23 +133,50 @@ public abstract class Shop {
 
     /**
      * Checks wheter this slot is a reserved slot
+     *
      * @param slot The slot
      * @return True if this slot is marked as reserved
      */
     public boolean isReserved(int slot) {
-        return reserved.containsKey(slot);
+        return reserved.contains(slot);
     }
 
     /**
      * The template inventory of this store
-     * @param inventory Sets the given inventory back to template inventory
+     *
+     * @param player The player to set the inventory for
      */
-    public abstract void setTemplateInventory(Inventory inventory);
+    public abstract void setTemplateInventory(Player player);
 
     public abstract Inventory getTemplateInventory();
-    
+
     public abstract void visit(Player player);
-    
+
     public abstract void leave(Player player);
 
+    public abstract boolean pay(Player player, ShopSlot item);
+    
+    protected boolean sellItem(Player player, ShopSlot item) {
+        if (item.getSlotType() != ShopSlot.ShopSlotType.ITEM) {
+            throw new IllegalArgumentException("slot: " + item + ", is not of type ITEM");
+        }
+
+        if (!SCShopEconomy.getInstance().getEconomy().hasAccount(player.getName())) {
+            leave(player);
+            player.sendMessage(ChatColor.RED + "[" + getTitle() + "]: u dont have a bankaccount");
+            return false;
+        }
+        if (SCShopEconomy.getInstance().getEconomy().has(player.getName(), item.getPrice() * item.getAmount())) {
+            player.sendMessage(ChatColor.GOLD + "Bought " + item.getAmount() + " for " + item.getAmount() * item.getPrice());
+            EconomyResponse ep = SCShopEconomy.getInstance().pay(player, item.getPrice() * item.getAmount());
+            return true;
+        } else {
+            player.sendMessage("[" + title + "]: U can't afford that...");
+            return false;
+        }
+    }
+    
+    
+    
+    
 }

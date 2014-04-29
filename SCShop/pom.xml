@@ -34,117 +34,27 @@
         </plugins>
     </build>
     <repositories>
+        <repository>
+            <id>Nexus</id>
+            <url>http://localhost:8088/nexus/content/repositories/thirdparty/</url>
+        </repository>
         <!--Bukkit Repo-->
         <repository>
             <id>bukkit-repo</id>
             <url>http://repo.bukkit.org/content/groups/public/</url>
         </repository>
     </repositories>
-    <!--Bukkit--> 
     <dependencies>
         <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.6.4-R2.0</version>
-            <!--<scope>provided</scope>-->
-        </dependency>
-           <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate</artifactId>
-            <version>3.2.6.ga</version>
+            <groupId>org.vault</groupId>
+            <artifactId>Vault</artifactId>
+            <scope>provided</scope>
+            <version>1.2.31</version>
         </dependency>
         <dependency>
-            <groupId>org.hibernate.javax.persistence</groupId>
-            <artifactId>hibernate-jpa-2.0-api</artifactId>
-            <version>1.0.1.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-annotations</artifactId>
-            <version>3.2.0.cr3</version>
-        </dependency>
-        <dependency>
-            <groupId>antlr</groupId>
-            <artifactId>antlr</artifactId>
-            <version>2.7.6</version>
-        </dependency>
-        <dependency>
-            <groupId>asm</groupId>
-            <artifactId>asm</artifactId>
-            <version>1.5.3</version>
-        </dependency>
-        <dependency>
-            <groupId>c3p0</groupId>
-            <artifactId>c3p0</artifactId>
-            <version>0.9.1</version>
-        </dependency>
-        <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib</artifactId>
-            <version>2.1_3</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>3.2</version>
-        </dependency>
-        <dependency>
-            <groupId>dom4j</groupId>
-            <artifactId>dom4j</artifactId>
-            <version>1.6.1</version>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.9</version>
-        </dependency>
-        <dependency>
-            <groupId>ehcache</groupId>
-            <artifactId>ehcache</artifactId>
-            <version>1.2.3</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.transaction</groupId>
-            <artifactId>jta</artifactId>
-            <version>1.1</version>
-        </dependency>
-        <!-- jar that contains the HSQLDB driver class  -->
-        <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <version>2.3.2</version>
-        </dependency>
-   
-        <!-- QueryDSL Start -->
-        <dependency>
-            <groupId>com.mysema.querydsl</groupId>
-            <artifactId>querydsl-core</artifactId>
-            <version>3.3.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.mysema.querydsl</groupId>
-            <artifactId>querydsl-collections</artifactId>
-            <version>3.3.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.mysema.querydsl</groupId>
-            <artifactId>querydsl-jpa</artifactId>
-            <version>3.3.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.mysema.querydsl</groupId>
-            <artifactId>querydsl-sql</artifactId>
-            <version>3.3.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.mysema.querydsl</groupId>
-            <artifactId>querydsl-hql</artifactId>
-            <version>0.5.4</version>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>SCCore</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>
