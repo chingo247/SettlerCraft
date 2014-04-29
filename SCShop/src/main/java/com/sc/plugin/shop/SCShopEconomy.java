@@ -47,12 +47,6 @@ public class SCShopEconomy {
         return economy;
     }
     
-    public EconomyResponse pay(Player player, ShopSlot item) {
-        if(item.getSlotType() != ShopSlot.ShopSlotType.ITEM) {
-            throw new IllegalArgumentException("Slot is not of type ITEM!");
-        }
-        return pay(player, item.getAmount() * item.getPrice());
-    }
     
     public EconomyResponse pay(Player player, double amount) {
         EconomyResponse er = economy.withdrawPlayer(player.getName(), amount);

@@ -13,22 +13,22 @@ import java.util.UUID;
 /**
  * @author Chingo
  */
-public class ShopManager {
+public class MenuManager {
     
-    private final Map<UUID,Shop> shops = Maps.newHashMap();
-    private static ShopManager instance;
+    private final Map<UUID,Menu> shops = Maps.newHashMap();
+    private static MenuManager instance;
     
-    private ShopManager() {
+    private MenuManager() {
     }
     
-    public static ShopManager getInstance() {
+    public static MenuManager getInstance() {
         if(instance == null) {
-            instance = new ShopManager();
+            instance = new MenuManager();
         }
         return instance;
     }
     
-    public boolean register(Shop shop) {
+    public boolean register(Menu shop) {
         if(shops.containsKey(shop.getId())) {
             return false;
         } else {
@@ -37,11 +37,11 @@ public class ShopManager {
         }
     }
     
-    public boolean contains(Shop shop) {
+    public boolean contains(Menu shop) {
         return shops.containsKey(shop.getId());
     }
     
-    public Shop getShop(UUID shop) {
+    public Menu getShop(UUID shop) {
         return shops.get(shop);
     }
 }

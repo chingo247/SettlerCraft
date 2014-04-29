@@ -9,40 +9,37 @@ import com.google.common.collect.Sets;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import net.milkbowl.vault.economy.EconomyResponse;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 /**
  *
  * @author Chingo
  */
-public abstract class Shop {
+public abstract class Menu {
 
     private final UUID id;
     private final String title;
-    public static final int SHOPSIZE = 54;
-    private final boolean infinite;
+    public static final int MENUSIZE = 54;
+    private final boolean wontDeplete;
     protected final Set<Integer> reserved = Sets.newHashSet();
 
     /**
      * Constructor.
      *
-     * @param title The title of this shop, must be unique
+     * @param title The title of this menu, must be unique
      */
-    public Shop(String title) {
+    public Menu(String title) {
         this(title, false);
     }
 
     /**
      * Constructor.
      *
-     * @param title The title of this shop, must be unique
-     * @param infinite If infinite items in this shop will never deplete
+     * @param title The title of this menu, must be unique
+     * @param infinite If wontDeplete items in this shop will never deplete
      */
-    public Shop(String title, boolean infinite) {
+    public Menu(String title, boolean infinite) {
         this(UUID.randomUUID(), title, infinite);
     }
 
@@ -51,10 +48,10 @@ public abstract class Shop {
      *
      * @param id The id of the shop
      * @param title The title of this shop, must be unique
-     * @param infinite If infinite items in this shop will never deplete
+     * @param infinite If wontDeplete items in this shop will never deplete
      */
-    public Shop(UUID id, String title, boolean infinite) {
-        this.infinite = infinite;
+    public Menu(UUID id, String title, boolean infinite) {
+        this.wontDeplete = infinite;
         this.title = title;
         this.id = id;
     }
@@ -105,14 +102,6 @@ public abstract class Shop {
         return new HashSet<>(reserved);
     }
 
-    /**
-     * Adds the item to the shop.
-     *
-     * @param item The item to add
-     * @param cost The price of this item
-     * @return true if item was succesfully added
-     */
-    public abstract boolean addItem(ItemStack item, double cost);
 
     /**
      * Determines that no items can be placed in this shop
@@ -122,13 +111,13 @@ public abstract class Shop {
     public abstract boolean isFull();
 
     /**
-     * Determines if this is an infinite store. Unlike regular stores the items in infinite stores
-     * won't deplete. The regular pick action will be cancelled for this stores inventory
+     * Determines if this is an wontDeplete store. Unlike regular stores the items in wontDeplete stores
+ won't deplete. The regular pick action will be cancelled for this stores inventory
      *
      * @return True if this store's items won't deplete
      */
-    public boolean isInfinite() {
-        return infinite;
+    public boolean getWontDeplete() {
+        return wontDeplete;
     }
 
     /**
@@ -148,35 +137,10 @@ public abstract class Shop {
      */
     public abstract void setTemplateInventory(Player player);
 
-    public abstract Inventory getTemplateInventory();
+    public abstract Inventory getTemplate();
 
-    public abstract void visit(Player player);
+    public abstract void onEnter(Player player);
 
-    public abstract void leave(Player player);
+    public abstract void onLeave(Player player);
 
-    public abstract boolean pay(Player player, ShopSlot item);
-    
-    protected boolean sellItem(Player player, ShopSlot item) {
-        if (item.getSlotType() != ShopSlot.ShopSlotType.ITEM) {
-            throw new IllegalArgumentException("slot: " + item + ", is not of type ITEM");
-        }
-
-        if (!SCShopEconomy.getInstance().getEconomy().hasAccount(player.getName())) {
-            leave(player);
-            player.sendMessage(ChatColor.RED + "[" + getTitle() + "]: u dont have a bankaccount");
-            return false;
-        }
-        if (SCShopEconomy.getInstance().getEconomy().has(player.getName(), item.getPrice() * item.getAmount())) {
-            player.sendMessage(ChatColor.GOLD + "Bought " + item.getAmount() + " for " + item.getAmount() * item.getPrice());
-            EconomyResponse ep = SCShopEconomy.getInstance().pay(player, item.getPrice() * item.getAmount());
-            return true;
-        } else {
-            player.sendMessage("[" + title + "]: U can't afford that...");
-            return false;
-        }
-    }
-    
-    
-    
-    
 }
