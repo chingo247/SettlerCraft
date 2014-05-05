@@ -36,8 +36,8 @@
     </build>
     <repositories>
         <repository>
-            <id>vault-repo</id>
-            <url>http://nexus.theyeticave.net/content/repositories/pub_releases</url>
+            <id>Nexus</id>
+            <url>http://localhost:8088/nexus/content/repositories/thirdparty/</url>
         </repository>
         <!--Bukkit Repo-->
         <repository>
@@ -56,13 +56,14 @@
         </repository>
     </repositories>
     <dependencies>
-        <!--maven project standard-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>3.8.1</version>
             <scope>test</scope>
         </dependency>
+        
+        
         <!-- Bukkit Libraries -->
         <dependency>
             <groupId>org.jnbt</groupId>
@@ -76,7 +77,17 @@
             <version>1.6.4-R2.0</version>
             <!--<scope>provided</scope>-->
         </dependency>
-        
+        <!--Vault-->
+        <dependency>
+            <groupId>org.vault</groupId>
+            <artifactId>Vault</artifactId>
+            <scope>provided</scope>
+            <version>1.2.31</version>
+        </dependency>
+
+
+
+
         <dependency>
             <groupId>net.citizensnpcs</groupId>
             <artifactId>citizensapi</artifactId>

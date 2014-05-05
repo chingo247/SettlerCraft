@@ -21,8 +21,8 @@ public class StructurePlan implements Serializable {
 
   private String name;
   private String description;
-  private final String culture;
-  private final String category;
+  private String culture;
+  private String category;
   private int cost;
   
   private final SchematicObject schematic;
@@ -80,6 +80,16 @@ public class StructurePlan implements Serializable {
   public SchematicObject getStructureSchematic() {
     return schematic;
   }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public void setCulture(String culture) {
+        this.culture = culture;
+    }
+  
+  
 
     public String getName() {
         return name;

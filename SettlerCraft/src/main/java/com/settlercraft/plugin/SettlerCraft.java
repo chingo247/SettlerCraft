@@ -5,14 +5,7 @@
  */
 package com.settlercraft.plugin;
 
-import com.sc.api.structure.construction.SCStructureAPI;
 import com.settlercraft.core.SCCore;
-import com.settlercraft.core.SettlerCraftModule;
-import com.settlercraft.plugin.exception.DuplicateAPIException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -21,28 +14,18 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class SettlerCraft extends JavaPlugin {
 
-    private Set<SettlerCraftModule> modules;
     public static final String name = "SettlerCraft";
 
     @Override
     public void onEnable() {
-        modules = new HashSet<>();
-        try {
-            addModule(new SCCore());
-            addModule(new SCStructureAPI());
-           
-        } catch (DuplicateAPIException ex) {
-            Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
+        System.out.println(getServer().getPluginManager().getPlugin("SCStructureAPI"));
+        if(getServer().getPluginManager().getPlugin("SCStructureAPI") == null) {
+            
         }
+        SCCore.getInstance().initDB();
     }
 
-    public void addModule(SettlerCraftModule api) throws DuplicateAPIException {
-        if (modules.add(api)) {
-            api.init(this);
-        } else {
-            throw new DuplicateAPIException(api); // Self check
-        }
-    }
+    
 
 
 

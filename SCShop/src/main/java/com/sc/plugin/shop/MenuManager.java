@@ -41,7 +41,7 @@ public class MenuManager {
         return shops.containsKey(shop.getId());
     }
     
-    public Menu getShop(UUID shop) {
+    public Menu getMenu(UUID shop) {
         return shops.get(shop);
     }
 }

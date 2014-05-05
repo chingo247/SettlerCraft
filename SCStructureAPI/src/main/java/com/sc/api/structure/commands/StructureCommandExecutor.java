@@ -7,7 +7,7 @@ package com.sc.api.structure.commands;
 
 import com.sc.api.structure.construction.SCStructureAPI;
 import com.sc.api.structure.construction.builders.StructureBuilder;
-import com.sc.plugin.shop.ShopManager;
+import com.sc.plugin.shop.MenuManager;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.entity.structure.StructureState;
 import com.settlercraft.core.persistence.StructureService;
@@ -29,9 +29,6 @@ public class StructureCommandExecutor implements CommandExecutor {
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
         if (cs instanceof Player) {
             Player player = (Player) cs;
-            if (!player.isOp()) {
-                player.sendMessage(ChatColor.RED + " YOU ARE NOT OP");
-            }
 
             String arg = args[0];
             switch (arg) {
@@ -39,8 +36,6 @@ public class StructureCommandExecutor implements CommandExecutor {
                     return tellInfo(player);
                 case "construct":
                     return construct(player, args);
-                case "reload":
-                    return reloadPlans();
                 case "menu":
                     return openPlanMenu(player);
                 default:
@@ -56,10 +51,10 @@ public class StructureCommandExecutor implements CommandExecutor {
         StructureService ss = new StructureService();
         Structure structure = ss.getStructure(player.getLocation());
         if (structure == null) {
-            player.sendMessage(ChatColor.RED + "[SCS] U are not above a structure");
+            player.sendMessage(ChatColor.RED + "[SC] U are not above a structure");
             return false;
         } else {
-            player.sendMessage(ChatColor.YELLOW + "[SCS] INFO: \n"
+            player.sendMessage(ChatColor.YELLOW + "[SC] INFO: \n"
                     + "id: " + structure.getId() + "\n"
                     + "owner: " + structure.getOwner() + "\n"
                     + "plan: " + structure.getPlan().getName() + "\n"
@@ -70,6 +65,11 @@ public class StructureCommandExecutor implements CommandExecutor {
     }
 
     private boolean construct(Player player, String[] args) {
+        if (!player.isOp()) {
+            player.sendMessage(ChatColor.RED + " YOU ARE NOT OP");
+            return false;
+        }
+
         switch (args[1]) {
             case "current":
                 return constructCurrent(player);
@@ -106,15 +106,15 @@ public class StructureCommandExecutor implements CommandExecutor {
             Structure structure = ss.getStructure(player.getLocation());
             if (structure.getStatus() != StructureState.FINISHING) {
                 SCStructureAPI.build(structure).complete(bd, false, true);
-                player.sendMessage(ChatColor.GREEN + "[SCS]: finishing " + structure.getPlan().getName());
+                player.sendMessage(ChatColor.GREEN + "[SC]: finishing " + structure.getPlan().getName());
                 return true;
             } else {
-                player.sendMessage(ChatColor.BLUE + "[SCS]: structure already trying to finish, wait for it to complete");
+                player.sendMessage(ChatColor.BLUE + "[SC]: structure already trying to finish, wait for it to complete");
                 return false;
             }
 
         } else {
-            player.sendMessage(ChatColor.RED + "[SCS]: you must stand on a structure");
+            player.sendMessage(ChatColor.RED + "[SC]: you must stand on a structure");
             return false;
         }
     }
@@ -125,26 +125,21 @@ public class StructureCommandExecutor implements CommandExecutor {
             Structure structure = ss.getStructure(player.getLocation());
             if (structure.getStatus() != StructureState.COMPLETE) {
                 SCStructureAPI.build(structure).layer(structure.getProgress().getLayer(), true);
-                player.sendMessage(ChatColor.GREEN + "[SCS]: constructing current  " + structure.getPlan().getName());
+                player.sendMessage(ChatColor.GREEN + "[SC]: constructing current  " + structure.getPlan().getName());
                 return true;
             } else {
-                player.sendMessage(ChatColor.BLUE + "[SCS]: structure already complete...");
+                player.sendMessage(ChatColor.BLUE + "[SC]: structure already complete...");
                 return false;
             }
 
         } else {
-            player.sendMessage(ChatColor.RED + "[SCS]: you must stand on a structure");
+            player.sendMessage(ChatColor.RED + "[SC]: you must stand on a structure");
             return false;
         }
     }
 
-    private boolean reloadPlans() {
-        SCStructureAPI.reloadPlans();
-        return true;
-    }
-
     private boolean openPlanMenu(Player player) {
-        ShopManager.getInstance().getShop(SCStructureAPI.PLAN_SHOP).visit(player);
+        MenuManager.getInstance().getMenu(SCStructureAPI.PLAN_SHOP_ID).onEnter(player);
         return true;
     }
 

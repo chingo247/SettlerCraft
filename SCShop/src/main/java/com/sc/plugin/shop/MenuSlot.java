@@ -8,13 +8,14 @@ package com.sc.plugin.shop;
 
 import com.google.common.base.Preconditions;
 import java.util.UUID;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 /**
  *
  * @author Chingo
  */
-abstract class MenuSlot extends ItemStack {
+public abstract class MenuSlot extends ItemStack {
 
     private final UUID menuId;
 
@@ -37,6 +38,10 @@ abstract class MenuSlot extends ItemStack {
         return menuId;
     }
 
+    public interface SlotCallBack {
+        
+        void doSomething(Player player, MenuSlot slot); 
+    }
     
     
 }

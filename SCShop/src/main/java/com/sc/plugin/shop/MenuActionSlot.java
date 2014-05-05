@@ -13,9 +13,9 @@ import org.bukkit.inventory.ItemStack;
  *
  * @author Chingo
  */
-public class MenuButtonSlot extends MenuSlot {
+public final class MenuActionSlot extends MenuSlot {
 
-    public MenuButtonSlot(UUID menuId, ItemStack stack, String action) {
+    public MenuActionSlot(UUID menuId, ItemStack stack, String action) {
         super(menuId, stack);
         getItemMeta().setDisplayName(action);
     }

@@ -14,7 +14,7 @@ import org.bukkit.inventory.ItemStack;
  * Coming soon... SKILLAPI SUPPORT WILL BE THERE
  * @author Chingo
  */
-public class MenuSkillSlot extends MenuSlot {
+public final class MenuSkillSlot extends MenuSlot {
     private final int maxLevel;
 
     public MenuSkillSlot(UUID menuId, ItemStack stack, String skillName, int maxLevel) {

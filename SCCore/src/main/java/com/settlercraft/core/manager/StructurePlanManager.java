@@ -45,6 +45,7 @@ public class StructurePlanManager {
      * @throws DuplicateStructurePlanException When name already in use
      */
     public void addPlan(StructurePlan plan) throws DuplicateStructurePlanException {
+        plan.setCategory(plan.getCategory().toUpperCase());
         if (plans.containsKey(plan.getName())) {
             throw new DuplicateStructurePlanException("name \"" + plan.getName() + "\" already in use");
         } else {

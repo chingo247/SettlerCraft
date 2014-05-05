@@ -57,5 +57,5 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-    <name>SCSMenu</name>
+    <name>SCMenuAPI</name>
 </project>

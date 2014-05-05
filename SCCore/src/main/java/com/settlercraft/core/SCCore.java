@@ -13,30 +13,25 @@ import com.settlercraft.core.model.entity.structure.StructureProgressSign;
 import com.settlercraft.core.model.plan.requirement.material.MaterialResource;
 import com.settlercraft.core.util.Database.HibernateUtil;
 import com.settlercraft.core.util.Database.MemDBUtil;
-import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  *
  * @author Chingo
  */
-public class SCCore extends SettlerCraftModule {
+public class SCCore {
 
-    public SCCore() {
-        super("SCCore");
+    private static SCCore instance;
+    
+    private SCCore(){}
+    
+    public static SCCore getInstance() {
+        if(instance == null) {
+            instance = new SCCore();
+        }
+        return instance;
     }
 
-    @Override
-    protected void setupRecipes(JavaPlugin plugin) {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    protected void setupListeners(JavaPlugin plugin) {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void init(JavaPlugin plugin) {
+    public void initDB() {
         HibernateUtil.addAnnotatedClasses(
                 Structure.class,
                 StructureChest.class,

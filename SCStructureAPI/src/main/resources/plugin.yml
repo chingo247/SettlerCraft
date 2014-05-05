@@ -1,0 +1,10 @@
+name: SCStructureAPI
+main: com.sc.api.structure.construction.SCStructureAPI
+version: 1.0
+
+commands:
+    struc:
+        description: Structure related commands
+        usage: /struc [arg]
+
+          

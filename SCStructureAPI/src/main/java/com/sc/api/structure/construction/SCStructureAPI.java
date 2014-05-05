@@ -17,8 +17,8 @@ import com.sc.api.structure.listeners.PlayerListener;
 import com.sc.api.structure.listeners.StructureListener;
 import com.sc.api.structure.listeners.StructurePlanListener;
 import com.sc.api.structure.recipe.Recipes;
-import com.sc.plugin.shop.CategoryShop;
-import com.sc.plugin.shop.ShopManager;
+import com.sc.plugin.shop.ItemShopCategoryMenu;
+import com.sc.plugin.shop.MenuManager;
 import com.settlercraft.core.SettlerCraftModule;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.world.WorldDimension;
@@ -27,6 +27,7 @@ import com.settlercraft.core.util.WorldUtil;
 import com.settlercraft.recipe.CShapedRecipe;
 import java.io.File;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
@@ -36,7 +37,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -45,48 +45,43 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class SCStructureAPI extends SettlerCraftModule {
 
-    public static final String MAIN_PLUGIN_NAME = "SettlerCraft";
     public static final String ALIAS = "[STRUC]";
-    public static final String PLAN_SHOP = "Buy & Build";
+    public static final UUID PLAN_SHOP_ID = UUID.randomUUID();
+    private final StructurePlanListener spl = new StructurePlanListener(this);
+    private final PlayerListener pl = new PlayerListener();
+    private final StructureListener sl = new StructureListener();
+    private final InventoryListener il = new InventoryListener();
     
-    public static Plugin getSettlerCraft() {
-        return Bukkit.getPluginManager().getPlugin(MAIN_PLUGIN_NAME);
+    public static SCStructureAPI getStructureAPI() {
+        return (SCStructureAPI) Bukkit.getServer().getPluginManager().getPlugin("SCStructureAPI");
     }
-
-    public SCStructureAPI() {
-        super("SCStructureAPI");
-    }
-
+    
     @Override
-    protected void setupListeners(JavaPlugin plugin) {
-        Bukkit.getPluginManager().registerEvents(new StructurePlanListener(plugin), plugin);
-        Bukkit.getPluginManager().registerEvents(new PlayerListener(), plugin);
-        Bukkit.getPluginManager().registerEvents(new StructureListener(), plugin);
-        Bukkit.getPluginManager().registerEvents(new InventoryListener(), plugin);
+    public void onEnable() {
+        init();
+    }
+    
+    private void setupListeners(JavaPlugin plugin) {
+        Bukkit.getPluginManager().registerEvents(spl, this);
+        Bukkit.getPluginManager().registerEvents(pl, this);
+        Bukkit.getPluginManager().registerEvents(sl, this);
+        Bukkit.getPluginManager().registerEvents(il, this);
     }
 
-    @Override
-    protected void setupRecipes(JavaPlugin plugin) {
+    private void setupRecipes(JavaPlugin plugin) {
         for (CShapedRecipe r : Recipes.getRecipes()) {
-            plugin.getServer().addRecipe(r.getRecipe());
+            this.getServer().addRecipe(r.getRecipe());
         }
     }
-    
-   
 
     @Override
-    public void init(JavaPlugin plugin) {
-        loadStructures(plugin.getDataFolder().getAbsoluteFile());
-        setupListeners(plugin);
-        setupRecipes(plugin);
-        plugin.getCommand("scs").setExecutor(new StructureCommandExecutor());
-        initShop();
+    public void init() {
+        loadStructures(getDataFolder().getAbsoluteFile());
+        setupListeners(this);
+        setupRecipes(this);
+        this.getCommand("struc").setExecutor(new StructureCommandExecutor());
+        initPlanShop();
     }
-    
-    public static void reloadPlans() {
-        loadStructures(getSettlerCraft().getDataFolder().getAbsoluteFile());
-    }
-
    
     public static StructureBuilder build(Structure structure) {
         return new StructureBuilder(structure);
@@ -172,12 +167,13 @@ public class SCStructureAPI extends SettlerCraftModule {
      * @param baseFolder The datafolder of the plugin
      */
     private static void loadStructures(File baseFolder) {
-        if (!baseFolder.exists()) {
-            baseFolder.mkdir();
+        File structureFolder = new File(baseFolder.getAbsolutePath() + "/Structures");
+        if (!structureFolder.exists()) {
+            structureFolder.mkdir();
         }
         try {
             StructurePlanLoader spLoader = new StructurePlanLoader();
-            spLoader.load(baseFolder);
+            spLoader.load(structureFolder);
         } catch (InvalidStructurePlanException | SchematicFileNotFoundException | NoStructureSchematicNodeException ex) {
             Logger.getLogger(SCStructureAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -194,27 +190,20 @@ public class SCStructureAPI extends SettlerCraftModule {
         }
     }
     
-    private void initShop() {
-        CategoryShop cs = new CategoryShop(PLAN_SHOP, true);
-        cs.setCategoryRow(0);
-        cs.addCategory("General", new ItemStack(Material.WORKBENCH));
-        cs.addCategory("Houses", new ItemStack(Material.BED));
-        cs.addCategory("Shops", new ItemStack(Material.GOLD_INGOT));
-        cs.addCategory("Temples", new ItemStack(Material.QUARTZ));
-        cs.addCategory("Castles", new ItemStack(Material.SMOOTH_BRICK));
-        cs.addCategory("Tower", new ItemStack(Material.LADDER));
-        cs.addCategory("Dungeons&Arenas", new ItemStack(Material.IRON_SWORD));
-        cs.addCategory("Misc", new ItemStack(Material.RECORD_10));
-        for (int i = 0; i < 10; i++) {
-            cs.addItem(StructureCommandExecutor.setName(new ItemStack(Material.PAPER), "House : " + i), "Houses");
-        }
-        for (int i = 0; i < 30; i++) {
-            cs.addItem(StructureCommandExecutor.setName(new ItemStack(Material.PAPER), "Tower : " + i), "Tower");
-        }
-        for (int i = 0; i < 5; i++) {
-            cs.addItem(StructureCommandExecutor.setName(new ItemStack(Material.PAPER), "Arena : " + i), "Dungeons&Arenas");
-        }
-        ShopManager.getInstance().register(cs);
+    private void initPlanShop() {
+        ItemShopCategoryMenu iscm = new ItemShopCategoryMenu(PLAN_SHOP_ID, "Buy & Build", true, true);
+        iscm.addCategory(new ItemStack(Material.NETHER_STAR), "All", 0);
+        iscm.addCategory(new ItemStack(Material.WORKBENCH), "General", 1);
+        iscm.addCategory(new ItemStack(Material.BED), "Residence", 2);
+        iscm.addCategory(new ItemStack(Material.GOLD_INGOT), "Shops", 2);
+        iscm.addCategory(new ItemStack(Material.QUARTZ), "Temples", 2);
+        iscm.addCategory(new ItemStack(Material.SMOOTH_BRICK), "Fortication", 2);
+        iscm.addCategory(new ItemStack(Material.LADDER), "Skyscrapers", 2);
+        iscm.addCategory(new ItemStack(Material.IRON_SWORD), "Arena", 2);
+        iscm.addCategory(new ItemStack(Material.RECORD_10), "Misc", 2);
+        iscm.setDefaultCategory("All");
+        iscm.setChooseDefaultCategory(true);
+        MenuManager.getInstance().register(iscm);
     }
 
 }

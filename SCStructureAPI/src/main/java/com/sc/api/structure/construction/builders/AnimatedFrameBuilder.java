@@ -118,7 +118,7 @@ public class AnimatedFrameBuilder {
                 }
             }
             final int next = start + 1;
-            Bukkit.getScheduler().runTaskLaterAsynchronously(Bukkit.getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
+            Bukkit.getScheduler().runTaskLaterAsynchronously(SCStructureAPI.getStructureAPI(), new Runnable() {
                 @Override
                 public void run() {
                     placeDefaultAnimatedFrame(next);
@@ -160,7 +160,7 @@ public class AnimatedFrameBuilder {
                 }
             }
             final int next = start + 1;
-            Bukkit.getScheduler().runTaskLaterAsynchronously(Bukkit.getPluginManager().getPlugin(SCStructureAPI.MAIN_PLUGIN_NAME), new Runnable() {
+            Bukkit.getScheduler().runTaskLaterAsynchronously(SCStructureAPI.getStructureAPI(), new Runnable() {
                 @Override
                 public void run() {
                     placeFancyAnimatedFrame(next);
