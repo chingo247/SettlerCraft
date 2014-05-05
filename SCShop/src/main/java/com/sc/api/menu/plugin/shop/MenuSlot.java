@@ -6,9 +6,8 @@
 
 package com.sc.api.menu.plugin.shop;
 
-import com.google.common.base.Preconditions;
-import java.util.UUID;
-import org.bukkit.Bukkit;
+import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -16,36 +15,65 @@ import org.bukkit.inventory.meta.ItemMeta;
  *
  * @author Chingo
  */
-public abstract class MenuSlot extends ItemStack {
+public class MenuSlot {
 
-    private final UUID menuId;
-    private ItemMeta meta;
-
-    MenuSlot(UUID menuId, ItemStack icon, String displayName) {
-        Preconditions.checkArgument(menuId != null);
-        this.setType(icon.getType());
-        this.meta = Bukkit.getItemFactory().getItemMeta(icon.getType());
-        
-        meta.setDisplayName(displayName);
-        this.setItemMeta(meta);
-        this.menuId = menuId;
-    }
-
-    public String getName() {
-        return meta.getDisplayName();
+    public enum MenuSlotType {
+        ITEM,
+        SKILL,
+        CATEGORY,
+        ACTION,
     }
     
-    public void setName(String name) {
-        meta.setDisplayName(name);
+    private final ItemStack icon;
+    private final MenuSlotType type;
+    private final String[] aliasses;
+    private List<String> lore;
+
+    MenuSlot(ItemStack icon, String displayName, MenuSlotType type, String... aliasses) {
+        this.icon = icon;
+        ItemMeta meta = icon.getItemMeta();
+        meta.setDisplayName(displayName);
+        lore = new ArrayList<>();
+        icon.setItemMeta(meta);
+        this.type = type;
+        this.aliasses = aliasses;
+    }
+    
+    
+    public void setData(String key, Object data) {
+        ItemMeta meta = icon.getItemMeta();
+        for(int i = 0; i < lore.size(); i++) {
+            if(lore.get(i).startsWith("["+key+"]")) {
+                lore.set(i, "["+key+"]" + String.valueOf(data));
+                meta.setLore(lore);
+                icon.setItemMeta(meta);
+                return;
+            }
+        }
+        lore.add("["+key+"]: " + String.valueOf(data));
+        meta.setLore(lore);
+        icon.setItemMeta(meta);
+    }
+    
+    
+
+    public String getName() {
+        return icon.getItemMeta().getDisplayName();
     }
 
-    @Override
-    public ItemMeta getItemMeta() {
-        return meta;
+    public MenuSlotType getType() {
+        return type;
     }
-
-    public UUID getMenuId() {
-        return menuId;
+    
+    public ItemStack getItemStack() {
+        return icon;
+    }
+    
+    public boolean hasAlias(String alias) {
+        for(String s : this.aliasses) {
+            if(s.equalsIgnoreCase(alias)) return true;
+        }
+        return false;
     }
     
 }

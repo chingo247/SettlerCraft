@@ -4,16 +4,18 @@
  * and open the template in the editor.
  */
 
-package com.sc.api.menu.plugin.shop;
+package com.settlercraft.model.entity.living;
 
-import net.citizensnpcs.api.trait.trait.Inventory;
+import net.citizensnpcs.api.npc.NPC;
 
 /**
  *
  * @author Chingo
  */
-public class SCInventory extends Inventory {
-    
-    
+public class GuildMaster extends Representative {
+
+    public GuildMaster(NPC npc) {
+        super(npc);
+    }
     
 }

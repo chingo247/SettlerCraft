@@ -4,19 +4,16 @@
  * and open the template in the editor.
  */
 
-package com.sc.api.menu.plugin.shop;
+package com.settlercraft.model.entity.division.guild;
 
-import java.util.UUID;
+import java.util.List;
 import org.bukkit.inventory.ItemStack;
 
 /**
- *
+ * Productive Guilds only have output e.g. farms (wheats, eggs, etc)
  * @author Chingo
  */
-public final class MenuActionSlot extends MenuSlot {
-
-    public MenuActionSlot(UUID menuId, ItemStack stack, String action) {
-        super(menuId, stack, action);
-    }
+public interface ProductiveGuild {
     
+    public List<ItemStack> getOutput();
 }

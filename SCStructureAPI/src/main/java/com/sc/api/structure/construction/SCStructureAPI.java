@@ -6,6 +6,8 @@
 package com.sc.api.structure.construction;
 
 import com.google.common.base.Preconditions;
+import com.sc.api.menu.plugin.shop.ItemShopCategoryMenu;
+import com.sc.api.menu.plugin.shop.MenuManager;
 import com.sc.api.structure.commands.StructureCommandExecutor;
 import com.sc.api.structure.construction.builders.StructureBuilder;
 import com.sc.api.structure.exception.InvalidStructurePlanException;
@@ -17,8 +19,7 @@ import com.sc.api.structure.listeners.PlayerListener;
 import com.sc.api.structure.listeners.StructureListener;
 import com.sc.api.structure.listeners.StructurePlanListener;
 import com.sc.api.structure.recipe.Recipes;
-import com.sc.plugin.shop.ItemShopCategoryMenu;
-import com.sc.plugin.shop.MenuManager;
+import com.settlercraft.core.SCEconomyUtil;
 import com.settlercraft.core.SettlerCraftModule;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.world.WorldDimension;
@@ -27,7 +28,6 @@ import com.settlercraft.core.util.WorldUtil;
 import com.settlercraft.recipe.CShapedRecipe;
 import java.io.File;
 import java.util.Set;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
@@ -46,7 +46,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class SCStructureAPI extends SettlerCraftModule {
 
     public static final String ALIAS = "[STRUC]";
-    public static final UUID PLAN_SHOP_ID = UUID.randomUUID();
+    public static final String PLAN_SHOP_NAME = "Buy & Build";
     private final StructurePlanListener spl = new StructurePlanListener(this);
     private final PlayerListener pl = new PlayerListener();
     private final StructureListener sl = new StructureListener();
@@ -58,6 +58,13 @@ public class SCStructureAPI extends SettlerCraftModule {
     
     @Override
     public void onEnable() {
+        if(!SCEconomyUtil.getInstance().hasEconomy()) {
+            //TODO CHECK CONFIG FOR VENDOR
+            System.out.println("Disabling SCStructureAPI, NO Economy FOUND");
+            this.setEnabled(false);
+            return;
+        }
+        getCommand("sc").setExecutor(new StructureCommandExecutor());
         init();
     }
     
@@ -79,7 +86,6 @@ public class SCStructureAPI extends SettlerCraftModule {
         loadStructures(getDataFolder().getAbsoluteFile());
         setupListeners(this);
         setupRecipes(this);
-        this.getCommand("struc").setExecutor(new StructureCommandExecutor());
         initPlanShop();
     }
    
@@ -191,16 +197,32 @@ public class SCStructureAPI extends SettlerCraftModule {
     }
     
     private void initPlanShop() {
-        ItemShopCategoryMenu iscm = new ItemShopCategoryMenu(PLAN_SHOP_ID, "Buy & Build", true, true);
-        iscm.addCategory(new ItemStack(Material.NETHER_STAR), "All", 0);
-        iscm.addCategory(new ItemStack(Material.WORKBENCH), "General", 1);
-        iscm.addCategory(new ItemStack(Material.BED), "Residence", 2);
-        iscm.addCategory(new ItemStack(Material.GOLD_INGOT), "Shops", 2);
-        iscm.addCategory(new ItemStack(Material.QUARTZ), "Temples", 2);
-        iscm.addCategory(new ItemStack(Material.SMOOTH_BRICK), "Fortication", 2);
-        iscm.addCategory(new ItemStack(Material.LADDER), "Skyscrapers", 2);
-        iscm.addCategory(new ItemStack(Material.IRON_SWORD), "Arena", 2);
-        iscm.addCategory(new ItemStack(Material.RECORD_10), "Misc", 2);
+        ItemShopCategoryMenu iscm = new ItemShopCategoryMenu("Buy & Build", true, true);
+        // Add Plan Categories
+        iscm.addCategory(0,new ItemStack(Material.NETHER_STAR), "All");
+        iscm.addCategory(1, new ItemStack(Material.WORKBENCH), "Industrial", "Industry", "Industrial", "Industries");
+        iscm.addCategory(2, new ItemStack(Material.BED), "Residence", "Houses", "House");
+        iscm.addCategory(3, new ItemStack(Material.GOLD_INGOT), "Economy", "Shops", "Shop");
+        iscm.addCategory(4, new ItemStack(Material.QUARTZ), "Temples", "Temple", "Church", "Sacred", "Holy");
+        iscm.addCategory(5, new ItemStack(Material.SMOOTH_BRICK), "Castles", "Fort", "Fortification", "Wall", "Fortress", "Fortresses", "Keep");
+        iscm.addCategory(6, new ItemStack(Material.LADDER), "Skyscrapers", "Skyscraper", "Towers", "Tower");
+        iscm.addCategory(7, new ItemStack(Material.IRON_SWORD), "Dungeons&Arenas", "Arena", "Arenas", "Dungeon", "Dungeons");
+        iscm.addCategory(8, new ItemStack(Material.RECORD_10), "Misc");
+        iscm.addActionSlot(9, new ItemStack(Material.BED_BLOCK), "Previous");
+        iscm.addActionSlot(17, new ItemStack(Material.BED_BLOCK), "Next");
+        iscm.setLocked(10,11,12,13,14,15,16);
+        // Add "Plans"
+        for(int i = 0; i < 100; i++) {
+            iscm.addItem(new ItemStack(Material.PAPER), "Colosseum-" + i, 10000 * i, "Arena");
+        }
+//        for(int i = 0; i < 30; i++) {
+//            iscm.addItem(new ItemStack(Material.PAPER), "Castle-" + i, 10000 * i, "Castle");
+//        }
+//        
+//        for(int i = 0; i < 30; i++) {
+//            iscm.addItem(new ItemStack(Material.PAPER), "Temple-" + i, 10000 * i, "Temple");
+//        }
+        
         iscm.setDefaultCategory("All");
         iscm.setChooseDefaultCategory(true);
         MenuManager.getInstance().register(iscm);

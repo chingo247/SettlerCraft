@@ -8,16 +8,13 @@ package com.sc.api.menu.plugin.shop;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
-import java.util.UUID;
-import org.bukkit.entity.Player;
 
 /**
  * @author Chingo
  */
 public class MenuManager {
     
-    private final Map<UUID,Menu> menus = Maps.newHashMap();
-    private final Map<UUID,ItemShopCategoryMenu> shops = Maps.newHashMap();
+    private final Map<String,Menu> menus = Maps.newHashMap(); //NOTE TO MYSELF: NO PLAYER SHOPS WILL BE EVER PLACED HERE
     private static MenuManager instance;
     
     private MenuManager() {
@@ -31,32 +28,22 @@ public class MenuManager {
     }
     
     public boolean register(Menu menu) {
-        if(menus.containsKey(menu.getId())) {
+        if(menus.containsKey(menu.getTitle())) {
             return false;
         } else {
             if(menu instanceof ItemShopCategoryMenu) {
-                shops.put(menu.getId(), (ItemShopCategoryMenu) menu);
+                menus.put(menu.getTitle(), (ItemShopCategoryMenu) menu);
             }
-            menus.put(menu.getId(), menu);
+            menus.put(menu.getTitle(), menu);
             return true;
         }
     }
     
-    public boolean removeVisitorFromShop(Player player) {
-        for(ItemShopCategoryMenu iscm : shops.values()) {
-            if(iscm.hasVisitor(player)) {
-                iscm.onLeave(player);
-                return true;
-            }
-        }
-        return false;
+    public boolean contains(String menuTitle) {
+        return menus.containsKey(menuTitle);
     }
     
-    public boolean contains(Menu shop) {
-        return menus.containsKey(shop.getId());
-    }
-    
-    public Menu getMenu(UUID shop) {
-        return menus.get(shop);
+    public Menu getMenu(String menuTitle) {
+        return menus.get(menuTitle);
     }
 }

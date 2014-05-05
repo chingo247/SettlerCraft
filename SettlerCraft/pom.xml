@@ -9,13 +9,13 @@
     
     <name>SettlerCraft</name>
     <url>http://maven.apache.org</url>
-<!--    <repositories>
-        Bukkit Repo
+    <repositories>
+        <!--Vault Repo-->
         <repository>
-            <id>bukkit-repo</id>
-            <url>http://repo.bukkit.org/content/groups/public/</url>
+            <id>Nexus</id>
+            <url>http://localhost:8088/nexus/content/repositories/thirdparty/</url>
         </repository>
-    </repositories>-->
+    </repositories>
     <build>
         <plugins>
             <plugin>
@@ -50,6 +50,14 @@
         </plugins>
     </build>
     <dependencies>
+                <!--Vault-->
+        <dependency>
+            <groupId>org.vault</groupId>
+            <artifactId>Vault</artifactId>
+            <scope>provided</scope>
+            <version>1.2.31</version>
+        </dependency>
+
         <dependency>
             <groupId>com.cc.plugin</groupId>
             <artifactId>SCCore</artifactId>

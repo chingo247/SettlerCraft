@@ -5,9 +5,9 @@
  */
 package com.sc.api.structure.commands;
 
+import com.sc.api.menu.plugin.shop.MenuManager;
 import com.sc.api.structure.construction.SCStructureAPI;
 import com.sc.api.structure.construction.builders.StructureBuilder;
-import com.sc.plugin.shop.MenuManager;
 import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.entity.structure.StructureState;
 import com.settlercraft.core.persistence.StructureService;
@@ -139,7 +139,7 @@ public class StructureCommandExecutor implements CommandExecutor {
     }
 
     private boolean openPlanMenu(Player player) {
-        MenuManager.getInstance().getMenu(SCStructureAPI.PLAN_SHOP_ID).onEnter(player);
+        MenuManager.getInstance().getMenu(SCStructureAPI.PLAN_SHOP_NAME).onEnter(player);
         return true;
     }
 

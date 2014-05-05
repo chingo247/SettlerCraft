@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import org.bukkit.entity.Player;
 
 /**
@@ -22,30 +21,19 @@ import org.bukkit.entity.Player;
 public abstract class Menu {
     
     public static final int MENUSIZE = 54;
-    protected final UUID id;
-    private Map<Integer,MenuSlot> slots;
+    protected Map<Integer,MenuSlot> slots;
     protected final String title;
     protected final boolean wontDeplete;
-    private final Set<Integer> locked;
+    protected final Set<Integer> locked;
 
-    public Menu(String title) {
-        this(title, false);
-    }
+
 
     public Menu(String title, boolean wontDeplete) {
-        this(UUID.randomUUID(), title, wontDeplete);
-    }
-
-    public Menu(UUID id, String title, boolean wontDeplete) {
-        this.id = id;
+        Preconditions.checkArgument(!title.contains(":"));
         this.title = title;
         this.wontDeplete = wontDeplete;
         this.locked = new HashSet<>();
         this.slots = Maps.newHashMap();
-    }
-
-    public UUID getId() {
-        return id;
     }
     
     public Map<Integer, MenuSlot> getSlots() {
@@ -57,12 +45,12 @@ public abstract class Menu {
     }
     
     protected void put(int slot, MenuSlot ms) {
-        Preconditions.checkArgument(slot >= 0 && slot < 54);
-        Preconditions.checkArgument(!(ms instanceof MenuItemSlot));
         slots.put(slot, ms);
     } 
     
-    
+    public MenuSlot getSlot(int slot) {
+        return slots.get(slot);
+    }
     
 //    /**
 //     * Puts an item in this menu

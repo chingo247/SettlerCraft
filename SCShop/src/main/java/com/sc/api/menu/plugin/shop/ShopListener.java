@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.sc.api.menu.plugin.shop;
 
 import org.bukkit.entity.Player;
@@ -11,48 +10,50 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.ItemStack;
 
 /**
  *
  * @author Chingo
  */
 public class ShopListener implements Listener {
-    
+
     @EventHandler
     public void onPlayerLeavesShop(InventoryCloseEvent ice) {
-        if(ice.getPlayer() instanceof Player) {
-            MenuManager.getInstance().removeVisitorFromShop((Player)ice.getPlayer());
-        }
+//        if (ice.getInventory().getTitle().contains(":")) {
+            String title = ice.getInventory().getTitle();
+            if (MenuManager.getInstance().contains(title)) {
+                Menu menu = MenuManager.getInstance().getMenu(title);
+                if (ice.getPlayer() instanceof Player) {
+                    if (menu instanceof ItemShopCategoryMenu) {
+                        ItemShopCategoryMenu iscm = (ItemShopCategoryMenu) menu;
+                        iscm.playerLeave((Player) ice.getPlayer());
+                    }
+                }
+            }
+//        }
     }
-    
+
     @EventHandler
     public void onMenuSlotClicked(InventoryClickEvent ice) {
         System.out.println("Inventory Click!");
-        ItemStack stack = ice.getInventory().all(ice.getCurrentItem()).get(ice.getSlot());
-        System.out.println(stack + ": " + (stack instanceof MenuSlot));
-        
-        if(stack instanceof MenuSlot && (ice.getWhoClicked() instanceof Player)) {
-            MenuSlot s = (MenuSlot) ice.getCurrentItem();
-            Menu menu = MenuManager.getInstance().getMenu(s.getMenuId());
-            if(menu instanceof ItemShopCategoryMenu) {
-                ItemShopCategoryMenu iscm = (ItemShopCategoryMenu) menu;
-                if(s instanceof MenuItemSlot) {
-                   if(iscm.wontDeplete) {
-                       ice.setCancelled(true);
-                   }
-                   iscm.onItemClicked((MenuItemSlot) s, (Player) ice.getWhoClicked());
-                } else if(s instanceof MenuActionSlot) {
-                   ice.setCancelled(true);
-                   iscm.onActionClicked((MenuActionSlot)s, (Player) ice.getWhoClicked());
-                } else if(s instanceof MenuCategorySlot) {
-                   ice.setCancelled(true);
-                   iscm.onCategoryClicked((MenuCategorySlot) s, (Player) ice.getWhoClicked());
-                } else {
-                    throw new AssertionError("Unreachable");
+//        if (ice.getInventory().getTitle().contains(":")) {
+            String title = ice.getInventory().getTitle().trim();
+            if (MenuManager.getInstance().contains(title)) {
+                ice.setCancelled(true);
+                Menu menu = MenuManager.getInstance().getMenu(title);
+                System.out.println("Menu: " + menu.getTitle());
+                if (ice.getWhoClicked() instanceof Player) {
+                    if (menu instanceof ItemShopCategoryMenu) {
+                        ItemShopCategoryMenu iscm = (ItemShopCategoryMenu) menu;
+                        MenuSlot slot = iscm.getSlot(ice.getSlot());
+                        if (slot != null) {
+                            iscm.onMenuSlotClicked(slot, (Player) ice.getWhoClicked());
+                        }
+                    }
                 }
             }
-        }
+//        }
+
     }
-    
+
 }
