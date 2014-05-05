@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.sc.plugin.shop;
+package com.sc.api.menu.plugin.shop;
 
 import com.google.common.base.Preconditions;
 import java.util.UUID;
@@ -18,7 +18,7 @@ public final class MenuSkillSlot extends MenuSlot {
     private final int maxLevel;
 
     public MenuSkillSlot(UUID menuId, ItemStack stack, String skillName, int maxLevel) {
-        super(menuId, stack);
+        super(menuId,stack, skillName);
         Preconditions.checkArgument(maxLevel > 0);
         this.maxLevel = maxLevel;
     }

@@ -3,9 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.plugin.shop;
+package com.sc.api.menu.plugin.shop;
 
-import com.settlercraft.core.SCShopEconomy;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -13,12 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  *
@@ -27,7 +24,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class ItemShopCategoryMenu extends CategoryMenu {
 
     private final boolean endless;
-    private final Map<String, List<MenuItem>> items;
+    private final Map<String, List<MenuItemSlot>> items;
     private final Map<String, Session> visitors;
     private boolean chooseDefaultCategory = false;
     private String defaultCategory;
@@ -69,6 +66,10 @@ public class ItemShopCategoryMenu extends CategoryMenu {
         this.items = Maps.newHashMap();
         this.visitors = Maps.newHashMap();
     }
+    
+    public boolean hasVisitor(Player player) {
+        return visitors.containsKey(player.getName());
+    }
 
     public void setChooseDefaultCategory(boolean chooseDefaultCategory) {
         this.chooseDefaultCategory = chooseDefaultCategory;
@@ -102,23 +103,17 @@ public class ItemShopCategoryMenu extends CategoryMenu {
     public boolean addItem(ItemStack item, String itemName, double price, String category) {
         if (!hasCategory(category) && hasDefaultCategory()) {
             category = defaultCategory;
+        } else {
+
+            category = getCategoryName(category); // Also checks for aliases
         }
 
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(itemName);
-        List<String> l = meta.getLore();
-        if (price > 0) {
-            l.add("Cost: " + price);
-        }
-        meta.setLore(l);
-        item.setItemMeta(meta);
-
-        MenuItem ss = new MenuItem(id, item, price);
+        MenuItemSlot ss = new MenuItemSlot(id, item, price, itemName);
         if (wontDeplete) {
             item.setAmount(1);
         }
         if (items.get(category) == null) {
-            items.put(category, new ArrayList<MenuItem>());
+            items.put(category, new ArrayList<MenuItemSlot>());
         }
         items.get(category).add(ss);
 
@@ -130,68 +125,110 @@ public class ItemShopCategoryMenu extends CategoryMenu {
         Map<Integer, MenuSlot> slots = getSlots();
         for (int i = 0; i < MENUSIZE; i++) {
             if (slots.get(i) != null) {
-                inv.setItem(i, slots.get(i));
+//                if(slots.get(i) instanceof MenuCategorySlot) {
+                    inv.setItem(i, slots.get(i));
+//                } else if(slots.get(i) instanceof MenuActionSlot) {
+//                    inv.setItem(i, (MenuActionSlot) slots.get(i));
+//                } else if(slots.get(i) instanceof MenuSkillSlot) {
+//                    inv.setItem(i, (MenuSkillSlot) slots.get(i));
+//                } else {
+//                    System.out.println("LOL");
+//                }
             }
         }
         return inv;
     }
 
-    public MenuActionSlot nextButton() {
-        return new MenuActionSlot(id, new ItemStack(Material.BED_BLOCK), "Previous");
-    }
 
-    /**
-     * TODO MULTILANGUAGE
-     *
-     * @return
-     */
-    public MenuActionSlot prevButton() {
-        return new MenuActionSlot(id, new ItemStack(Material.BED_BLOCK), "Next");
-    }
 
-    private void fillInventory(Player player, Inventory inv, List<MenuItem> miss) {
+    private void fillInventory(Player player, Inventory inv, List<MenuItemSlot> miss) {
         Map<Integer, MenuSlot> slots = getSlots();
-        List<MenuItem> ms = miss.subList(visitors.get(player.getName()).lastIndex, miss.size());
-        Iterator<MenuItem> it = ms.iterator();
-        
+        List<MenuItemSlot> ms = miss.subList(visitors.get(player.getName()).lastIndex, miss.size());
+        Iterator<MenuItemSlot> it = ms.iterator();
+
         for (int i = 0; i < MENUSIZE; i++) {
+//            System.out.println("M=" + i);
+            if(i == 0 && visitors.get(player.getName()).lastIndex > 0) {
+                inv.setItem(i, new MenuActionSlot(id, new ItemStack(Material.BED_BLOCK), "Previous"));
+                break;
+            }
+            
+            if (i == (MENUSIZE - 1)) {
+                inv.setItem(i, new MenuActionSlot(id, new ItemStack(Material.BED_BLOCK), "Next"));
+                break;
+            }
             if (!isLocked(i) && it.hasNext() && slots.get(i) == null) {
-                if (i == MENUSIZE - 1) {
-                    inv.setItem(i, new MenuActionSlot(id, nextButton(), title));
-                }
                 inv.setItem(i, it.next());
                 visitors.get(player.getName()).lastIndex++;
             }
         }
 
     }
-    
+
     /**
      * Returns all the items of this shop
+     *
      * @return All the items of this shop
      */
-    public List<MenuItem> getItems() {
-        List<MenuItem> sss = new ArrayList<>();
-        for(List<MenuItem> is : items.values()) {
+    public List<MenuItemSlot> getItems() {
+        List<MenuItemSlot> sss = new ArrayList<>();
+        for (List<MenuItemSlot> is : items.values()) {
             sss.addAll(is);
         }
         return sss;
     }
-    
-    public List<MenuItem> getItems(String category) {
+
+    public List<MenuItemSlot> getItems(String category) {
         return items.get(category);
+    }
+    
+    private void getNextItems(Player player) {
+        visitors.get(player.getName()).currentPage++;
+        visitors.get(player.getName()).inventory.clear();
+        visitors.get(player.getName()).inventory = Bukkit.createInventory(
+                null, 
+                MENUSIZE, 
+                title + ":" + defaultCategory + "[" + visitors.get(player.getName()).currentPage + "]"
+        );
+        List<MenuItemSlot> ims = getItems();
+        if(visitors.get(player.getName()).currentCategory.equals(defaultCategory)) {
+            fillInventory(player, visitors.get(player.getName()).inventory, ims
+                    .subList(
+                            visitors.get(player.getName()).lastIndex, 
+                            Math.min(ims.size(), visitors.get(player.getName()).lastIndex + MENUSIZE)
+                    )
+            );
+        }
+    }
+    
+    private void getPreviousItems(Player player) {
+        visitors.get(player.getName()).currentPage--;
+        visitors.get(player.getName()).inventory.clear();
+        visitors.get(player.getName()).inventory = Bukkit.createInventory(
+                null, 
+                MENUSIZE, 
+                title + ":" + defaultCategory + "[" + visitors.get(player.getName()).currentPage + "]"
+        );
+        List<MenuItemSlot> ims = getItems();
+        if(visitors.get(player.getName()).currentCategory.equals(defaultCategory)) {
+            fillInventory(player, visitors.get(player.getName()).inventory, ims
+                    .subList(
+                            Math.max(0, visitors.get(player.getName()).lastIndex - MENUSIZE), 
+                            Math.min(ims.size(), visitors.get(player.getName()).lastIndex + MENUSIZE)
+                    )
+            );
+        }
     }
 
     @Override
     public void onEnter(Player player) {
-        if (!SCShopEconomy.getInstance().getEconomy().hasAccount(player.getName())) {
-            player.sendMessage(ChatColor.RED + "[" + getTitle() + "]: U don't have a bankaccount!");
-        } else if (!visitors.containsKey(player.getName())) {
+        if (!visitors.containsKey(player.getName())) {
             System.out.println("Open inventory!");
-            Inventory inv = buildTemplate(title + " : " + defaultCategory);
+            Inventory inv = buildTemplate(title + " : " + defaultCategory + "[" + 0 + "]");
             visitors.put(player.getName(), new Session(0, inv, null));
-            if(chooseDefaultCategory) {
-            fillInventory(player, inv, getItems());
+            if (chooseDefaultCategory) {
+                fillInventory(player, inv, getItems());
+                visitors.get(player.getName()).currentCategory = defaultCategory;
             }
             visitors.get(player.getName()).inventory = inv;
             player.openInventory(inv);
@@ -211,12 +248,19 @@ public class ItemShopCategoryMenu extends CategoryMenu {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public void onItemClicked(MenuItem slot, Player whoClicked) {
+    public void onItemClicked(MenuItemSlot slot, Player whoClicked) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public void onActionClicked(MenuActionSlot slot, Player whoClicked) {
-
+        System.out.println("Action!" + slot.getName());
+        switch(slot.getName().toLowerCase()) {
+            case "next" : getNextItems(whoClicked);
+                break;
+            case "previous": getPreviousItems(whoClicked);
+                break;
+            default:break;
+        }
     }
 
     private class Session {

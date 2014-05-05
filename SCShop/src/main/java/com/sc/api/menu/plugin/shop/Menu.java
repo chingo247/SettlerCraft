@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.plugin.shop;
+package com.sc.api.menu.plugin.shop;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
@@ -58,7 +58,7 @@ public abstract class Menu {
     
     protected void put(int slot, MenuSlot ms) {
         Preconditions.checkArgument(slot >= 0 && slot < 54);
-        Preconditions.checkArgument(!(ms instanceof MenuItem));
+        Preconditions.checkArgument(!(ms instanceof MenuItemSlot));
         slots.put(slot, ms);
     } 
     
@@ -78,7 +78,7 @@ public abstract class Menu {
 //        ItemMeta meta = item.getItemMeta();
 //        meta.setDisplayName(itemName);
 //        item.setItemMeta(meta);
-//        slots.put(slot, new MenuItem(id, item, slot));
+//        slots.put(slot, new MenuItemSlot(id, item, slot));
 //    }
 
     public boolean isLocked(int slot) {
@@ -95,6 +95,8 @@ public abstract class Menu {
     }
     
     public abstract void onEnter(Player player);
+    
+    
 
 }
 

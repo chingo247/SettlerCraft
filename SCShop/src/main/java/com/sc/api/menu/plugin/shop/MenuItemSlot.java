@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.plugin.shop;
+package com.sc.api.menu.plugin.shop;
 
 import java.util.UUID;
 import org.bukkit.inventory.ItemStack;
@@ -12,13 +12,14 @@ import org.bukkit.inventory.ItemStack;
  *
  * @author Chingo
  */
-public final class MenuItem extends MenuSlot {
+public final class MenuItemSlot extends MenuSlot {
 
     private double price;
 
-    public MenuItem(UUID menuId, ItemStack stack, double price) {
-        super(menuId, stack);
+    public MenuItemSlot(UUID menuId, ItemStack stack, double price, String itemName) {
+        super(menuId, stack, itemName);
         this.price = price;
+        
     }
 
     public double getPrice() {

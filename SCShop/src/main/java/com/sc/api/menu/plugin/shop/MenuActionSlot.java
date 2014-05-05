@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.sc.plugin.shop;
+package com.sc.api.menu.plugin.shop;
 
 import java.util.UUID;
 import org.bukkit.inventory.ItemStack;
@@ -16,8 +16,7 @@ import org.bukkit.inventory.ItemStack;
 public final class MenuActionSlot extends MenuSlot {
 
     public MenuActionSlot(UUID menuId, ItemStack stack, String action) {
-        super(menuId, stack);
-        getItemMeta().setDisplayName(action);
+        super(menuId, stack, action);
     }
     
 }

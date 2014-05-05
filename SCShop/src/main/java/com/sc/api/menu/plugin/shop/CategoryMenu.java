@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.plugin.shop;
+package com.sc.api.menu.plugin.shop;
 
 import java.util.UUID;
 import org.bukkit.entity.Player;
@@ -30,7 +30,7 @@ public abstract class CategoryMenu extends Menu {
         super(id, title, wontDeplete);
     }
 
-    public boolean addCategory(ItemStack icon, String categoryName, int slot) {
+    public boolean addCategory(int slot, ItemStack icon, String categoryName, String... aliases) {
         if (!isLocked(slot) && !hasCategory(categoryName)) {
             ItemMeta meta = icon.getItemMeta();
             meta.setDisplayName(categoryName);
@@ -45,9 +45,21 @@ public abstract class CategoryMenu extends Menu {
         for(MenuSlot s : getSlots().values()) {
             if(s.getName().equalsIgnoreCase(category) && (s instanceof MenuCategorySlot)) {
                 return true;
+            } 
+            if(s instanceof MenuCategorySlot && ((MenuCategorySlot)s).hasAlias(category)){
+                return true;
             }
         }
         return false;
+    }
+    
+    public String getCategoryName(String alias) {
+        for(MenuSlot s : getSlots().values()) {
+            if(s instanceof MenuCategorySlot && ((s.getName().equalsIgnoreCase(alias) || ((MenuCategorySlot)s).hasAlias(alias)) )){
+                return s.getName();
+            }
+        }
+        return null;
     }
     
     public abstract void onCategoryClicked(MenuCategorySlot slot, Player whoClicked);

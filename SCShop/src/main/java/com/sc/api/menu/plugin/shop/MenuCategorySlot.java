@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.plugin.shop;
+package com.sc.api.menu.plugin.shop;
 
 import java.util.UUID;
 import org.bukkit.inventory.ItemStack;
@@ -14,14 +14,21 @@ import org.bukkit.inventory.ItemStack;
  */
 public final class MenuCategorySlot extends MenuSlot {
 
-    private String name;
+    private final String[] aliases;
 
-    MenuCategorySlot(UUID menuId, ItemStack stack, String title) {
-        super(menuId, stack);
-
+    MenuCategorySlot(UUID menuId, ItemStack stack, String categoryName, String... aliases) {
+        super(menuId, stack, categoryName);
+        this.aliases = aliases;
     }
 
-
+    public boolean hasAlias(String alias) {
+        for(String s : aliases) {
+            if(s.equalsIgnoreCase(alias)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public boolean equals(Object obj) {
