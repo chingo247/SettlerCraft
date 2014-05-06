@@ -35,13 +35,13 @@ public class ShopListener implements Listener {
 
     @EventHandler
     public void onMenuSlotClicked(InventoryClickEvent ice) {
-        System.out.println("Inventory Click!");
+//        System.out.println("Inventory Click!");
 //        if (ice.getInventory().getTitle().contains(":")) {
             String title = ice.getInventory().getTitle().trim();
             if (MenuManager.getInstance().contains(title) && ice.getSlot() < Menu.MENUSIZE && ice.getSlot() >= 0) {
                 ice.setCancelled(true);
                 Menu menu = MenuManager.getInstance().getMenu(title);
-                System.out.println("Menu: " + menu.getTitle());
+//                System.out.println("Menu: " + menu.getTitle());
                 if (ice.getWhoClicked() instanceof Player) {
                     if (menu instanceof ItemShopCategoryMenu) {
                         ItemShopCategoryMenu iscm = (ItemShopCategoryMenu) menu;

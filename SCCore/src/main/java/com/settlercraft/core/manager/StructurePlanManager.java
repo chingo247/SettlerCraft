@@ -42,7 +42,7 @@ public class StructurePlanManager {
      * Adds a plan to the StructurePlanManager
      *
      * @param plan The plan to add
-     * @throws DuplicateStructurePlanException When name already in use
+     * @throws com.settlercraft.core.exception.DuplicateStructurePlanException If there already is a plan with the same name
      */
     public void addPlan(StructurePlan plan) throws DuplicateStructurePlanException {
         plan.setCategory(plan.getCategory().toUpperCase());

@@ -4,8 +4,9 @@
  * and open the template in the editor.
  */
 
-package com.settlercraft.core.event;
+package com.settlercraft.core.event.structure;
 
+import com.settlercraft.core.event.SettlerCraftEvent;
 import com.settlercraft.core.model.entity.structure.StructureState;
 import org.bukkit.event.HandlerList;
 

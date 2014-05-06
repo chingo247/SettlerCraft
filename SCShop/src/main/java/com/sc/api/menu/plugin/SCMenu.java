@@ -7,7 +7,7 @@
 package com.sc.api.menu.plugin;
 
 import com.sc.api.menu.plugin.shop.ShopListener;
-import com.settlercraft.core.SCEconomyUtil;
+import com.settlercraft.core.SCVaultEconomyUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -21,7 +21,7 @@ public class SCMenu extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        if(SCEconomyUtil.getInstance().getEconomy() == null) {
+        if(SCVaultEconomyUtil.getInstance().getEconomy() == null) {
             System.out.println("[" + getName() + "]: WARNING! NO ECONOMY FOUND");
         }
         Bukkit.getServer().getPluginManager().registerEvents(new ShopListener(), this);

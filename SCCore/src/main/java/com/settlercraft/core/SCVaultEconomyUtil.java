@@ -16,19 +16,19 @@ import org.bukkit.plugin.RegisteredServiceProvider;
  *
  * @author Chingo
  */
-public class SCShopEconomy {
+public class SCVaultEconomyUtil {
     
     private Economy economy;
 
-    private SCShopEconomy() {
+    private SCVaultEconomyUtil() {
         setupEconomy();
     }
 
-    private static SCShopEconomy instance;
+    private static SCVaultEconomyUtil instance;
     
-    public static SCShopEconomy getInstance() {
+    public static SCVaultEconomyUtil getInstance() {
         if(instance == null) {
-            instance = new SCShopEconomy();
+            instance = new SCVaultEconomyUtil();
         }
         return instance;
     }
@@ -46,6 +46,11 @@ public class SCShopEconomy {
     public Economy getEconomy() {
         return economy;
     }
+    
+    public boolean hasEconomy(){
+        return economy != null;
+    }
+
     
     
     public EconomyResponse pay(Player player, double amount) {

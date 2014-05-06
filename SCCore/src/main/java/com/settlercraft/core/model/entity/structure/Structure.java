@@ -3,7 +3,7 @@ package com.settlercraft.core.model.entity.structure;
 import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
-import com.settlercraft.core.event.StructureStateChangedEvent;
+import com.settlercraft.core.event.structure.StructureStateChangedEvent;
 import com.settlercraft.core.manager.StructurePlanManager;
 import com.settlercraft.core.model.entity.SettlerCraftEntity;
 import com.settlercraft.core.model.plan.StructurePlan;

@@ -19,9 +19,11 @@ import com.sc.api.structure.listeners.PlayerListener;
 import com.sc.api.structure.listeners.StructureListener;
 import com.sc.api.structure.listeners.StructurePlanListener;
 import com.sc.api.structure.recipe.Recipes;
-import com.settlercraft.core.SCEconomyUtil;
+import com.settlercraft.core.SCVaultEconomyUtil;
 import com.settlercraft.core.SettlerCraftModule;
+import com.settlercraft.core.manager.StructurePlanManager;
 import com.settlercraft.core.model.entity.structure.Structure;
+import com.settlercraft.core.model.plan.StructurePlan;
 import com.settlercraft.core.model.world.WorldDimension;
 import com.settlercraft.core.persistence.StructureService;
 import com.settlercraft.core.util.WorldUtil;
@@ -58,7 +60,7 @@ public class SCStructureAPI extends SettlerCraftModule {
     
     @Override
     public void onEnable() {
-        if(!SCEconomyUtil.getInstance().hasEconomy()) {
+        if(!SCVaultEconomyUtil.getInstance().hasEconomy()) {
             //TODO CHECK CONFIG FOR VENDOR
             System.out.println("Disabling SCStructureAPI, NO Economy FOUND");
             this.setEnabled(false);
@@ -198,33 +200,27 @@ public class SCStructureAPI extends SettlerCraftModule {
     
     private void initPlanShop() {
         ItemShopCategoryMenu iscm = new ItemShopCategoryMenu("Buy & Build", true, true);
+        
         // Add Plan Categories
         iscm.addCategory(0,new ItemStack(Material.NETHER_STAR), "All");
-        iscm.addCategory(1, new ItemStack(Material.WORKBENCH), "Industrial", "Industry", "Industrial", "Industries");
-        iscm.addCategory(2, new ItemStack(Material.BED), "Residence", "Houses", "House");
-        iscm.addCategory(3, new ItemStack(Material.GOLD_INGOT), "Economy", "Shops", "Shop");
-        iscm.addCategory(4, new ItemStack(Material.QUARTZ), "Temples", "Temple", "Church", "Sacred", "Holy");
-        iscm.addCategory(5, new ItemStack(Material.SMOOTH_BRICK), "Castles", "Fort", "Fortification", "Wall", "Fortress", "Fortresses", "Keep");
-        iscm.addCategory(6, new ItemStack(Material.LADDER), "Skyscrapers", "Skyscraper", "Towers", "Tower");
+        iscm.addCategory(1, new ItemStack(Material.WORKBENCH), "General", "Town Center");
+        iscm.addCategory(2, new ItemStack(Material.ANVIL),"Industry", "Industrial", "Industries");
+        iscm.addCategory(3, new ItemStack(Material.BED), "Residency", "Residence", "Residencial" ,"Houses", "House");
+        iscm.addCategory(4, new ItemStack(Material.GOLD_INGOT), "Economy", "Economical",  "Shops", "Shop", "Market", "Markets");
+        iscm.addCategory(5, new ItemStack(Material.QUARTZ), "Temples", "Temple", "Church", "Sacred", "Holy");
+        iscm.addCategory(6, new ItemStack(Material.SMOOTH_BRICK), "Castles", "Fort", "Fortification", "Wall", "Fortress", "Fortresses", "Keep");
         iscm.addCategory(7, new ItemStack(Material.IRON_SWORD), "Dungeons&Arenas", "Arena", "Arenas", "Dungeon", "Dungeons");
-        iscm.addCategory(8, new ItemStack(Material.RECORD_10), "Misc");
+        iscm.addCategory(8, new ItemStack(Material.BUCKET), "Misc");
         iscm.addActionSlot(9, new ItemStack(Material.BED_BLOCK), "Previous");
         iscm.addActionSlot(17, new ItemStack(Material.BED_BLOCK), "Next");
-        iscm.setLocked(10,11,12,13,14,15,16);
-        // Add "Plans"
-        for(int i = 0; i < 100; i++) {
-            iscm.addItem(new ItemStack(Material.PAPER), "Colosseum-" + i, 10000 * i, "Arena");
-        }
-//        for(int i = 0; i < 30; i++) {
-//            iscm.addItem(new ItemStack(Material.PAPER), "Castle-" + i, 10000 * i, "Castle");
-//        }
-//        
-//        for(int i = 0; i < 30; i++) {
-//            iscm.addItem(new ItemStack(Material.PAPER), "Temple-" + i, 10000 * i, "Temple");
-//        }
-        
+        iscm.setLocked(10,11,12, 13,14,15,16);
         iscm.setDefaultCategory("All");
         iscm.setChooseDefaultCategory(true);
+        
+        for(StructurePlan plan : StructurePlanManager.getInstance().getPlans()) {
+            iscm.addItem(new ItemStack(Material.PAPER), plan.getName(), plan.getCost(), plan.getCategory());
+        }
+        
         MenuManager.getInstance().register(iscm);
     }
 

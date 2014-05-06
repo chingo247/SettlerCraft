@@ -1,6 +1,7 @@
 name: SCStructureAPI
 main: com.sc.api.structure.construction.SCStructureAPI
 version: 1.0
+depend: [SCMenu]
 
 commands:
     sc:

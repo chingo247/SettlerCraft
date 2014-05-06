@@ -60,7 +60,7 @@ public class StructurePlanLoader {
             try {
                 plan = assemble(schematicStructureFile, schematicFoundationFile, yamlStructureFile);
                 StructurePlanManager.getInstance().addPlan(plan);
-                System.out.println("[SettlerCraft]: loaded " + plan.getName());
+                System.out.println("[SCStructureAPI]: loaded " + plan.getName());
             }
             catch (UnsupportedStructureException | DuplicateStructurePlanException ex) {
                 Logger.getLogger(StructurePlanLoader.class.getName()).log(Level.SEVERE, null, ex);
@@ -91,9 +91,7 @@ public class StructurePlanLoader {
         
         if(config.get("cost") == null) {
             throw new InvalidStructurePlanException("Missing node: \"cost\" in " + structureYAML.getAbsolutePath());
-        } else if (!config.isInt("cost")) {
-            throw new InvalidStructurePlanException("No valid number node: \"cost\" in " + structureYAML.getAbsolutePath() + ", needs to be an Integer (round number)");
-        }
+        } 
                 
         EnumMap<ReservedSide, Integer> reserved = new EnumMap<>(ReservedSide.class);
         if (config.get("reserved.north") != null) {
@@ -120,7 +118,7 @@ public class StructurePlanLoader {
         }
         
         
-        int cost = config.getInt("cost");
+        double cost = config.getDouble("cost");
         String name = config.getString("name");
         String description = config.getString("description");
         String culture = config.getString("culture");
@@ -131,9 +129,9 @@ public class StructurePlanLoader {
         SchematicObject structure = sr.readFile(stSchematicFile);
         if (fdSchematicFile != null) {
             SchematicObject foundation = sr.readFile(fdSchematicFile);
-            return new StructurePlan(structure, foundation, name, culture, name, cost, reserved, description);
+            return new StructurePlan(structure, foundation, name, culture, category, cost, reserved, description);
         } else {
-            return new StructurePlan(structure, name, culture, name, cost, reserved, description);
+            return new StructurePlan(structure, name, culture, category, cost, reserved, description);
         }
     }
 

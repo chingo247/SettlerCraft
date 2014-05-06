@@ -23,7 +23,7 @@ public class StructurePlan implements Serializable {
   private String description;
   private String culture;
   private String category;
-  private int cost;
+  private double cost;
   
   private final SchematicObject schematic;
   private final SchematicObject foundation;
@@ -31,7 +31,7 @@ public class StructurePlan implements Serializable {
   
   private final EnumMap<ReservedSide, Integer> reserved;
 
-  public StructurePlan(SchematicObject structure, String name, String culture, String type, int cost, EnumMap<ReservedSide, Integer> reserved, String description) {
+  public StructurePlan(SchematicObject structure, String name, String culture, String type, double cost, EnumMap<ReservedSide, Integer> reserved, String description) {
     this.schematic = structure;
     this.requirement = new StructureRequirement(this);
     this.foundation = null;
@@ -42,7 +42,7 @@ public class StructurePlan implements Serializable {
     this.reserved = reserved;
   }
 
-  public StructurePlan(SchematicObject structure, SchematicObject foundation, String name, String culture, String type, int cost, EnumMap<ReservedSide, Integer> reserved, String description) {
+  public StructurePlan(SchematicObject structure, SchematicObject foundation, String name, String culture, String type, double cost, EnumMap<ReservedSide, Integer> reserved, String description) {
     this.schematic = structure;
     this.requirement = new StructureRequirement(this);
     this.foundation = null;
@@ -107,7 +107,7 @@ public class StructurePlan implements Serializable {
         this.description = description;
     }
 
-    public int getCost() {
+    public double getCost() {
         return cost;
     }
 

@@ -77,7 +77,7 @@ public abstract class CategoryMenu extends Menu {
      */
     public boolean hasCategory(String category) {
         for (MenuSlot ms : getMenuSlots()) {
-            if (ms != null) {
+            if (ms != null && ms.getType() == MenuSlotType.CATEGORY) {
                 if (ms.getName().trim().equalsIgnoreCase(category.trim()) || ms.hasAlias(category)) {
                     return true;
                 }
@@ -94,9 +94,12 @@ public abstract class CategoryMenu extends Menu {
      * @return The parent's name for given allias
      */
     public String getCategoryName(String alias) {
-        for (MenuSlot s : getMenuSlots()) {
-            if (s.getType() == MenuSlotType.CATEGORY && ((s.getName().trim().equalsIgnoreCase(alias.trim()) || s.hasAlias(alias.trim())))) {
-                return s.getName();
+        for (MenuSlot ms : getMenuSlots()) {
+            if (ms != null && ms.getType() == MenuSlotType.CATEGORY
+                    && ((ms.getName().trim().equalsIgnoreCase(
+                            alias.trim()) || 
+                            ms.hasAlias(alias.trim())))) {
+                return ms.getName();
             }
         }
         return null;

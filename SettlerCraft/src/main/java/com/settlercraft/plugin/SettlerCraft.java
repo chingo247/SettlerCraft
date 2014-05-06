@@ -6,7 +6,7 @@
 package com.settlercraft.plugin;
 
 import com.settlercraft.core.SCCore;
-import com.settlercraft.core.SCEconomyUtil;
+import com.settlercraft.core.SCVaultEconomyUtil;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -23,7 +23,7 @@ public class SettlerCraft extends JavaPlugin {
         if(getServer().getPluginManager().getPlugin("SCStructureAPI") == null) {
             
         }
-        if(SCEconomyUtil.getInstance().getEconomy() == null) {
+        if(SCVaultEconomyUtil.getInstance().getEconomy() == null) {
             
         }
         SCCore.getInstance().initDB();
