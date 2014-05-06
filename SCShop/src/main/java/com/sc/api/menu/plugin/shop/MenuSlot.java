@@ -8,6 +8,7 @@ package com.sc.api.menu.plugin.shop;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -22,6 +23,7 @@ public class MenuSlot {
         SKILL,
         CATEGORY,
         ACTION,
+        LOCKED
     }
     
     private final ItemStack icon;
@@ -31,10 +33,12 @@ public class MenuSlot {
 
     MenuSlot(ItemStack icon, String displayName, MenuSlotType type, String... aliasses) {
         this.icon = icon;
+        if(icon != null) {
         ItemMeta meta = icon.getItemMeta();
         meta.setDisplayName(displayName);
         lore = new ArrayList<>();
         icon.setItemMeta(meta);
+        }
         this.type = type;
         this.aliasses = aliasses;
     }
@@ -43,14 +47,14 @@ public class MenuSlot {
     public void setData(String key, Object data) {
         ItemMeta meta = icon.getItemMeta();
         for(int i = 0; i < lore.size(); i++) {
-            if(lore.get(i).startsWith("["+key+"]")) {
-                lore.set(i, "["+key+"]" + String.valueOf(data));
+            if(lore.get(i).startsWith("["+key+"]: ")) {
+                lore.set(i, "["+key+"]: " + ChatColor.YELLOW + String.valueOf(data));
                 meta.setLore(lore);
                 icon.setItemMeta(meta);
                 return;
             }
         }
-        lore.add("["+key+"]: " + String.valueOf(data));
+        lore.add("["+key+"]: " + ChatColor.YELLOW + String.valueOf(data));
         meta.setLore(lore);
         icon.setItemMeta(meta);
     }

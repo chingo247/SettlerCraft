@@ -38,7 +38,7 @@ public class ShopListener implements Listener {
         System.out.println("Inventory Click!");
 //        if (ice.getInventory().getTitle().contains(":")) {
             String title = ice.getInventory().getTitle().trim();
-            if (MenuManager.getInstance().contains(title)) {
+            if (MenuManager.getInstance().contains(title) && ice.getSlot() < Menu.MENUSIZE && ice.getSlot() >= 0) {
                 ice.setCancelled(true);
                 Menu menu = MenuManager.getInstance().getMenu(title);
                 System.out.println("Menu: " + menu.getTitle());

@@ -6,12 +6,7 @@
 package com.sc.api.menu.plugin.shop;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import com.sc.api.menu.plugin.shop.MenuSlot.MenuSlotType;
 import org.bukkit.entity.Player;
 
 /**
@@ -21,67 +16,55 @@ import org.bukkit.entity.Player;
 public abstract class Menu {
     
     public static final int MENUSIZE = 54;
-    protected Map<Integer,MenuSlot> slots;
+    private final MenuSlot[] menuSlots;
+//    protected Map<Integer,MenuSlot> slots;
     protected final String title;
     protected final boolean wontDeplete;
-    protected final Set<Integer> locked;
+//    protected final Set<Integer> locked;
 
-
-
+    /**
+     * Constructor.
+     * @param title The title of this menu
+     * @param wontDeplete Wheter or not the items should deplete int this menu
+     */
     public Menu(String title, boolean wontDeplete) {
-        Preconditions.checkArgument(!title.contains(":"));
         this.title = title;
         this.wontDeplete = wontDeplete;
-        this.locked = new HashSet<>();
-        this.slots = Maps.newHashMap();
+        this.menuSlots = new MenuSlot[MENUSIZE];
     }
     
-    public Map<Integer, MenuSlot> getSlots() {
-        return new HashMap<>(slots);
-    }
-
     public String getTitle() {
         return title;
     }
     
-    protected void put(int slot, MenuSlot ms) {
-        slots.put(slot, ms);
+    protected void setSlot(int slot, MenuSlot ms) {
+        menuSlots[slot] = ms;
     } 
     
     public MenuSlot getSlot(int slot) {
-        return slots.get(slot);
+        
+        return menuSlots[slot];
     }
-    
-//    /**
-//     * Puts an item in this menu
-//     * @param slot The item slot
-//     * @param item
-//     * @param itemName 
-//     */
-//    public void putItem(int slot, ItemStack item, String itemName) {
-//        putItem(slot, item, itemName, 0.0d);
-//    }
-//    
-//    public void putItem(int slot, ItemStack item, String itemName, double price) {
-//        ItemMeta meta = item.getItemMeta();
-//        meta.setDisplayName(itemName);
-//        item.setItemMeta(meta);
-//        slots.put(slot, new MenuItemSlot(id, item, slot));
-//    }
 
+    public MenuSlot[] getMenuSlots() {
+        return menuSlots;
+    }
+    
     public boolean isLocked(int slot) {
-        Preconditions.checkArgument(slot >= 0 && slot < 54);
-        return locked.contains(slot);
+        Preconditions.checkArgument(slot >= 0 && slot < menuSlots.length);
+        if(menuSlots[slot] == null) {
+            return false;
+        }
+        return menuSlots[slot].getType() == MenuSlot.MenuSlotType.LOCKED;
     }
-    
+   
     public void setLocked(Integer... slots) {
-        locked.addAll(Arrays.asList(slots));
+        for(int i : slots) {
+            menuSlots[i] = new MenuSlot(null, null, MenuSlotType.LOCKED);
+        }
+        
     }
-    
-    public boolean setLocked(int slot) {
-        return locked.add(slot);
-    }
-    
+
     public abstract void onEnter(Player player);
     
     
