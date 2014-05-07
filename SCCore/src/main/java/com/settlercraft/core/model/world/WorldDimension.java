@@ -10,6 +10,7 @@ import com.settlercraft.core.util.WorldUtil;
 import javax.persistence.Column;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 
 /**
  *
@@ -81,8 +82,9 @@ public class WorldDimension {
         this.world = start.getWorld().getName();
     }
     
-    
-
+    public World getWorld() {
+        return Bukkit.getWorld(world);
+    } 
     public int getStartX() {
         return startX;
     }

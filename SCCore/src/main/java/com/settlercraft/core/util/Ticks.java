@@ -7,7 +7,7 @@
 package com.settlercraft.core.util;
 
 /**
- *
+ * Fair translation for Real time into Ticks
  * @author Chingo
  */
 public class Ticks {

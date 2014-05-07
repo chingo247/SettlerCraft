@@ -6,15 +6,20 @@
 package com.settlercraft.core.util;
 
 import com.google.common.base.Preconditions;
+import com.settlercraft.core.model.entity.structure.Structure;
 import com.settlercraft.core.model.world.Direction;
 import static com.settlercraft.core.model.world.Direction.EAST;
 import static com.settlercraft.core.model.world.Direction.NORTH;
 import static com.settlercraft.core.model.world.Direction.SOUTH;
 import static com.settlercraft.core.model.world.Direction.WEST;
+import com.settlercraft.core.model.world.WorldDimension;
+import com.settlercraft.core.persistence.StructureService;
 import java.util.HashSet;
 import java.util.Set;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 
 /**
  *
@@ -204,7 +209,7 @@ public class WorldUtil {
             for (int z = 0; z <= deltaZ; z += 16) {
                 Location l = s.clone().add(x * xMod, 0, z * zMod);
                 for (Entity e : l.getChunk().getEntities()) {
-                    if (       e.getLocation().getBlockX() >= Math.min(start.getBlockX(), end.getBlockX())
+                    if (e.getLocation().getBlockX() >= Math.min(start.getBlockX(), end.getBlockX())
                             && e.getLocation().getBlockX() <= Math.max(start.getBlockX(), end.getBlockX())
                             && e.getLocation().getBlockZ() >= Math.min(start.getBlockZ(), end.getBlockZ())
                             && e.getLocation().getBlockZ() <= Math.max(start.getBlockZ(), end.getBlockZ())) {
@@ -216,5 +221,85 @@ public class WorldUtil {
         return entities;
     }
 
+    /**
+     * Moves all entities from structure within the structure to the borders of this structure if
+     * the new location is on another structure, the entity will be moved again
+     *
+     * @param structure The structure
+     */
+    public static void evacuate(Structure structure) {
+        Set<Entity> entities = WorldUtil.getEntitiesWithin(structure.getDimension().getStart(), structure.getDimension().getEnd());
+        for (Entity e : entities) {
+            if (e instanceof LivingEntity) {
+                moveEntityFromLot((LivingEntity) e, 5, structure);
+            }
+        }
+    }
+
+    /**
+     * Moves the given entity from the given target structure, the entity will be moved beyond the
+     * closest border. If the entity isnt within the structure, no actions will be taken. If the new
+     * location of the entity is a location on another structure, then this method will call itself
+     * recursively To prevent a stackoverflow the distance value will be doubled each recursive call
+     *
+     * @param entity
+     * @param distance
+     * @param targetStructure
+     */
+    public static void moveEntityFromLot(LivingEntity entity, int distance, Structure targetStructure) {
+        Preconditions.checkArgument(distance > 0);
+        if (targetStructure.isOnLot(entity.getLocation())) {
+            return;
+        }
+
+        WorldDimension dimension = targetStructure.getDimension();
+        Location start = dimension.getStart();
+        Location end = dimension.getEnd();
+        if (entity.getLocation().distance(start) < entity.getLocation().distance(end)) {
+            Location xMinus = new Location(start.getWorld(),
+                    start.getBlockX() - distance, // X
+                    start.getWorld().getHighestBlockYAt(start.getBlockX() - distance, entity.getLocation().getBlockZ()), // Y
+                    entity.getLocation().getBlockZ() // Z
+            );
+            Location zMinus = new Location(start.getWorld(),
+                    entity.getLocation().getBlockX(),
+                    start.getWorld().getHighestBlockYAt(entity.getLocation().getBlockX() - distance, start.getBlockZ() - distance),
+                    start.getBlockZ() - distance
+            );
+            if (entity.getLocation().distance(xMinus) < entity.getLocation().distance(zMinus)) {
+                moveEntity(entity, distance, xMinus);
+            } else {
+                moveEntity(entity, distance, zMinus);
+            }
+        } else {
+            Location xPlus = new Location(end.getWorld(),
+                    end.getBlockX() + distance, // X
+                    end.getWorld().getHighestBlockYAt(end.getBlockX() + distance, entity.getLocation().getBlockZ()), // Y
+                    entity.getLocation().getBlockZ()
+            );                                                                      // Z
+
+            Location zPlus = new Location(end.getWorld(),
+                    entity.getLocation().getBlockX(),
+                    end.getWorld().getHighestBlockYAt(entity.getLocation().getBlockX() + distance, end.getBlockZ() + distance),
+                    end.getBlockZ() + distance
+            );
+            if (entity.getLocation().distance(xPlus) < entity.getLocation().distance(zPlus)) {
+                moveEntity(entity, distance, xPlus);
+            } else {
+                moveEntity(entity, distance, zPlus);
+            }
+        }
+    }
+
+    private static void moveEntity(LivingEntity entity, int distance, Location target) {
+        StructureService structureService = new StructureService();
+        if (target.getBlock().getType() == Material.LAVA) {
+            // Alternative?
+            // TODO use alternative
+
+        } else if (structureService.isOnStructure(target)) {
+            moveEntityFromLot(entity, distance * 2, structureService.getStructure(target));
+        }
+    }
 
 }
