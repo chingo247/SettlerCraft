@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.api.structure.construction.builders;
+package com.sc.api.structure.construction.builder;
 
 import com.sc.api.structure.construction.strategies.FoundationStrategy;
 import com.settlercraft.core.model.entity.structure.Structure;
@@ -21,49 +21,37 @@ import org.bukkit.Material;
  *
  * @author Chingo
  */
-public class FoundationBuilder {
+class FoundationBuilder {
 
-    private final StructureService structureService;
-    private final FoundationStrategy strategy;
 
-    private final Structure structure;
-
-    FoundationBuilder(Structure structure) {
-        this.structure = structure;
-        this.structureService = new StructureService();
-        this.strategy = FoundationStrategy.DEFAULT;
-    }
-
-    FoundationBuilder(Structure structure, FoundationStrategy strategy) {
-        this.structure = structure;
-        this.structureService = new StructureService();
-        this.strategy = strategy;
-    }
 
     /**
      * A foundation will be created beneath the structure. A foundation is
      * doesnt have any functionality its just there to give the player some
      * feedback. And also clears the construction site from any blocks
+     * @param structure The structure
+     * @param strategy The strategy
      */
-    public void construct() {
+    public static void construct(Structure structure, FoundationStrategy strategy) {
+        StructureService structureService = new StructureService();
         structureService.setStatus(structure, StructureState.PLACING_FOUNDATION);
         switch (strategy) {
             case DEFAULT:
                 if (structure.getPlan().getFoundationSchematic() != null) {
-                    placeProvidedFoundation();
+                    placeProvidedFoundation(structure);
                 } else {
-                    placeDefaultFoundation();
+                    placeDefaultFoundation(structure);
                 }
                 break;
             case FANCY:
-                placeFancyFoundation();
+                placeFancyFoundation(structure);
 
         }
 
         structureService.setStatus(structure, StructureState.PLACING_FRAME);
     }
 
-    private void placeDefaultFoundation() {
+    private static void placeDefaultFoundation(Structure structure) {
         SchematicObject schematic = structure.getPlan().getStructureSchematic();
         Direction direction = structure.getDirection();
         Location target = structure.getLocation();
@@ -84,7 +72,7 @@ public class FoundationBuilder {
         }
     }
 
-    private void placeProvidedFoundation() {
+    private static void placeProvidedFoundation(Structure structure) {
         SchematicObject schematic = structure.getPlan().getFoundationSchematic();
         Direction direction = structure.getDirection();
         Location target = structure.getLocation();
@@ -108,7 +96,7 @@ public class FoundationBuilder {
         }
     }
 
-    private void placeFancyFoundation() {
+    private static void placeFancyFoundation(Structure structure) {
         throw new UnsupportedOperationException("This feature is not supported yet");
     }
 

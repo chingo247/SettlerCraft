@@ -3,13 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.api.structure.construction;
+package com.sc.api.structure;
 
 import com.google.common.base.Preconditions;
 import com.sc.api.menu.plugin.shop.ItemShopCategoryMenu;
 import com.sc.api.menu.plugin.shop.MenuManager;
 import com.sc.api.structure.commands.StructureCommandExecutor;
-import com.sc.api.structure.construction.builders.StructureBuilder;
 import com.sc.api.structure.exception.InvalidStructurePlanException;
 import com.sc.api.structure.exception.NoStructureSchematicNodeException;
 import com.sc.api.structure.exception.SchematicFileNotFoundException;
@@ -37,7 +36,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -89,10 +87,6 @@ public class SCStructureAPI extends SettlerCraftModule {
         setupListeners(this);
         setupRecipes(this);
         initPlanShop();
-    }
-   
-    public static StructureBuilder build(Structure structure) {
-        return new StructureBuilder(structure);
     }
 
     /**
@@ -165,9 +159,6 @@ public class SCStructureAPI extends SettlerCraftModule {
         }
     }
 
-    public static PlayerAction player(Player player) {
-        return new PlayerAction(player);
-    }
     
     /**
      * Read and loads all structures in the datafolder of the plugin

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.api.structure.construction.builders;
+package com.sc.api.structure.construction.builder;
 
 import com.sc.api.structure.construction.strategies.FrameStrategy;
 import com.settlercraft.core.model.entity.structure.Structure;
@@ -22,36 +22,30 @@ import org.bukkit.block.Block;
  * @author Chingo
  */
 public class FrameBuilder {
-    private final StructureService structureService;
-    private final Structure structure;
-    private final int DEFAULT_WALL_HEIGHT = 1;
-    private final int hGap = 2;
-    private final int vGap = 1;
-    private final FrameStrategy strategy;
+//    private final StructureService structureService;
+//    private final Structure structure;
+//    private final int DEFAULT_WALL_HEIGHT = 1;
+//    private final int hGap = 2;
+//    private final int vGap = 1;
+//    private final FrameStrategy strategy;
     
-    FrameBuilder(final Structure structure) {
-        this.structure = structure;
-        this.structureService = new StructureService();
-        this.strategy = FrameStrategy.SIMPLE;
-    }
-
-    FrameBuilder(final Structure structure, FrameStrategy strategy) {
-        this.structure = structure;
-        this.structureService = new StructureService();
-        this.strategy = strategy;
-    }
 
     /**
      * Contructs a frame for this structure instantly
+     * @param structure The structure
+     * @param strategy The strategy to use to construct the frame
+     * @param hGap The gap between blocks horizontally
+     * @param vGap The gap between blocks vertically
      */
-    public final void construct() {
+    public static void construct(Structure structure, FrameStrategy strategy, int hGap, int vGap) {
+        StructureService structureService = new StructureService();
         structureService.setStatus(structure, StructureState.PLACING_FRAME);
         switch (strategy) {
             case SIMPLE:
-                placeDefaultFrame();
+                placeDefaultFrame(structure, hGap, hGap);
                 break;
             case FANCY:
-                placeFancyFrame();
+                placeFancyFrame(structure, hGap, hGap);
                 break;
             default:
                 throw new UnsupportedOperationException("no strategy implemented for " + strategy);
@@ -59,36 +53,8 @@ public class FrameBuilder {
         structureService.setStatus(structure, StructureState.READY_TO_BE_BUILD);
     }
 
-    /**
-     * Use an animated builder that will construct the frame layer by layer.
-     * This builder will consume less ticks than the regular builder.
-     * @param delay Delay between layers
-     * @param strategy The strategy to be used
-     * @return The animated builder
-     */
-    public AnimatedFrameBuilder anim(int delay, FrameStrategy strategy) {
-        return new AnimatedFrameBuilder(structure, delay, strategy);
-    }
     
-    /**
-     * Use an animated builder to construct this frame
-     * @param delay The delay in ticks
-     * @return AnimatedFrameBuilder for this structure
-     */
-    public AnimatedFrameBuilder anim(int delay) {
-        return new AnimatedFrameBuilder(structure, delay, strategy);
-    }
-
-    /**
-     * Use an animated builder that will construct a frame layer every 40 ticks (2 seconds).
-     * This builder will consume less ticks than the regular builder.
-     * @return AnimatedFrameBuilder for this structure
-     */
-    public AnimatedFrameBuilder anim() {
-        return new AnimatedFrameBuilder(structure);
-    }
-    
-    private void placeDefaultFrame() {
+    private static void placeDefaultFrame(Structure structure, int vGap, int hGap) {
         SchematicObject schematic = structure.getPlan().getStructureSchematic();
         Direction direction = structure.getDirection();
         Location target = structure.getLocation();
@@ -98,7 +64,7 @@ public class FrameBuilder {
 
         int mod;
         for (int y = 1; y < schematic.layers; y++) {
-            if (y % (vGap + 1) == 0 || y < DEFAULT_WALL_HEIGHT ) {
+            if (y % (vGap + 1) == 0) {
                 mod = 1;
             } else {
                 mod = hGap + 1;
@@ -120,7 +86,7 @@ public class FrameBuilder {
         }
     }
 
-    private void placeFancyFrame() {
+    private static void placeFancyFrame(Structure structure, int vGap, int hGap) {
         SchematicObject schematic = structure.getPlan().getStructureSchematic();
         Direction direction = structure.getDirection();
         Location target = structure.getLocation();
@@ -129,7 +95,7 @@ public class FrameBuilder {
         int zMod = structure.getzMod();
         int mod;
         for (int y = 1; y < schematic.layers; y++) {
-            if (y % (vGap + 1) == 0 || y < DEFAULT_WALL_HEIGHT) { // To avoid small entities from entering this structure as good as possible therefore 3
+            if (y % (vGap + 1) == 0) { 
                 mod = 1;
             } else {
                 mod = hGap + 1;
