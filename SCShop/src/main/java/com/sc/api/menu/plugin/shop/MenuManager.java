@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public class MenuManager {
     
-    private final Map<String,Menu> menus = Maps.newHashMap(); //NOTE TO MYSELF: NO PLAYER SHOPS WILL BE EVER PLACED HERE
+    private final Map<String,Menu> menus = Maps.newHashMap(); 
     private static MenuManager instance;
     
     private MenuManager() {
@@ -39,7 +39,7 @@ public class MenuManager {
         }
     }
     
-    public boolean contains(String menuTitle) {
+    public boolean hasMenu(String menuTitle) {
         return menus.containsKey(menuTitle);
     }
     

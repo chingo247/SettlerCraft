@@ -1,5 +1,10 @@
 name: SettlerCraft
-main: com.settlercraft.plugin.SettlerCraft
+main: com.sc.plugin.SettlerCraft
 version: 1.0
 
+depend: [SCStructureAPI, SCMenu]
+
+commands:
+    sc:
+        
           

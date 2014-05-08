@@ -6,8 +6,8 @@
 package com.sc.api.menu.plugin.shop;
 
 import com.google.common.collect.Maps;
+import com.sc.api.menu.plugin.SCVaultEconomyUtil;
 import com.sc.api.menu.plugin.shop.MenuSlot.MenuSlotType;
-import com.settlercraft.core.SCVaultEconomyUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;

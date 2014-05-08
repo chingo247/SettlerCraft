@@ -5,7 +5,7 @@
  */
 package com.sc.api.structure.event.build;
 
-import com.settlercraft.core.model.entity.structure.Structure;
+import com.sc.api.structure.model.structure.Structure;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;

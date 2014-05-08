@@ -5,7 +5,7 @@
  */
 package com.sc.api.structure.construction.builder;
 
-import com.settlercraft.core.model.entity.structure.Structure;
+import com.sc.api.structure.model.structure.Structure;
 import org.bukkit.inventory.ItemStack;
 
 /**

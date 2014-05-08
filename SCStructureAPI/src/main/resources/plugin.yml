@@ -1,11 +1,11 @@
 name: SCStructureAPI
 main: com.sc.api.structure.SCStructureAPI
 version: 1.0
-depend: [SCMenu]
 
 commands:
     sc:
         description: Structure related commands
         usage: /sc [arg]
+
 
           

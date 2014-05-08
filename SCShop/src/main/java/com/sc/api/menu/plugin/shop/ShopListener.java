@@ -19,9 +19,9 @@ public class ShopListener implements Listener {
 
     @EventHandler
     public void onPlayerLeavesShop(InventoryCloseEvent ice) {
-//        if (ice.getInventory().getTitle().contains(":")) {
+//        if (ice.getInventory().getTitle().hasMenu(":")) {
             String title = ice.getInventory().getTitle();
-            if (MenuManager.getInstance().contains(title)) {
+            if (MenuManager.getInstance().hasMenu(title)) {
                 Menu menu = MenuManager.getInstance().getMenu(title);
                 if (ice.getPlayer() instanceof Player) {
                     if (menu instanceof ItemShopCategoryMenu) {
@@ -36,9 +36,9 @@ public class ShopListener implements Listener {
     @EventHandler
     public void onMenuSlotClicked(InventoryClickEvent ice) {
 //        System.out.println("Inventory Click!");
-//        if (ice.getInventory().getTitle().contains(":")) {
+//        if (ice.getInventory().getTitle().hasMenu(":")) {
             String title = ice.getInventory().getTitle().trim();
-            if (MenuManager.getInstance().contains(title) && ice.getSlot() < Menu.MENUSIZE && ice.getSlot() >= 0) {
+            if (MenuManager.getInstance().hasMenu(title) && ice.getSlot() < Menu.MENUSIZE && ice.getSlot() >= 0) {
                 ice.setCancelled(true);
                 Menu menu = MenuManager.getInstance().getMenu(title);
 //                System.out.println("Menu: " + menu.getTitle());

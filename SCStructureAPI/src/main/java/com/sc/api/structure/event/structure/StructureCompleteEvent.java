@@ -5,26 +5,19 @@
  */
 package com.sc.api.structure.event.structure;
 
-import com.settlercraft.core.event.SettlerCraftEvent;
-import com.settlercraft.core.model.entity.structure.Structure;
+import com.sc.api.structure.model.structure.Structure;
 import org.bukkit.event.HandlerList;
 
 /**
  *
  * @author Chingo
  */
-public class StructureCompleteEvent extends SettlerCraftEvent {
+public class StructureCompleteEvent extends StructureEvent {
 
-    private final Structure structure;
 
     public StructureCompleteEvent(Structure structure) {
-        this.structure = structure;
+        super(structure);
     }
-
-    public Structure getStructure() {
-        return structure;
-    }
-    
 
     private static final HandlerList handlers = new HandlerList();
 

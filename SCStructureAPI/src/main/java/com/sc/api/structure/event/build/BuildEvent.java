@@ -5,8 +5,8 @@
  */
 package com.sc.api.structure.event.build;
 
-import com.settlercraft.core.event.SettlerCraftEvent;
-import com.settlercraft.core.model.entity.structure.Structure;
+import com.sc.api.structure.event.structure.StructureEvent;
+import com.sc.api.structure.model.structure.Structure;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
@@ -14,11 +14,10 @@ import org.bukkit.inventory.ItemStack;
  * Fired when an entity used its resources (an itemstack) to build a structure.
  * @author Chingo
  */
-public abstract class BuildEvent extends SettlerCraftEvent {
+public abstract class BuildEvent extends StructureEvent {
 
     private final Entity entity;
     private final ItemStack stack;
-    private final Structure structure;
 
     /**
      * Constructor.
@@ -28,9 +27,9 @@ public abstract class BuildEvent extends SettlerCraftEvent {
      * @param stack The itemstack that was commited
      */
     public BuildEvent(final Structure structure, final Entity entity, final ItemStack stack) {
+        super(structure);
         this.entity = entity;
         this.stack = new ItemStack(stack);
-        this.structure = structure;
     }
 
     /**
@@ -49,15 +48,6 @@ public abstract class BuildEvent extends SettlerCraftEvent {
      */
     public ItemStack getStack() {
         return new ItemStack(stack);
-    }
-
-    /**
-     * The structure involved int this event.
-     *
-     * @return The structure involved in this event
-     */
-    public Structure getStructure() {
-        return structure;
     }
 
 }

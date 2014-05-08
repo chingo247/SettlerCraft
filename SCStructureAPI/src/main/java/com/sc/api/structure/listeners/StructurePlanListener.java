@@ -5,11 +5,6 @@
  */
 package com.sc.api.structure.listeners;
 
-import com.sc.api.structure.construction.player.PlayerAction;
-import com.settlercraft.core.manager.StructurePlanManager;
-import com.settlercraft.core.model.entity.structure.Structure;
-import com.settlercraft.core.model.plan.StructurePlan;
-import com.settlercraft.core.util.WorldUtil;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -38,21 +33,21 @@ public class StructurePlanListener implements Listener {
         if (pie.getItem() == null || pie.getItem().getType() != Material.PAPER) {
             return;
         }
-        StructurePlan plan = StructurePlanManager.getInstance().getPlan(pie.getItem().getItemMeta().getDisplayName());
-        if (plan != null
-                && pie.getClickedBlock() != null
-                && pie.getClickedBlock().getType() != Material.AIR) {
-            final Structure structure = new Structure(
-                    pie.getPlayer(), 
-                    pie.getClickedBlock().getLocation(), 
-                    WorldUtil.getDirection(pie.getPlayer()),
-                    plan
-            );
-            if(PlayerAction.place(pie.getPlayer(),structure)) {
-//                SCStructureAPI.build(structure).foundation().construct();
-//                SCStructureAPI.build(structure).frame(FrameStrategy.FANCY).anim(Ticks.ONE_SECOND * 1).construct();
-            }
-        }
+//        StructurePlan plan = StructurePlanManager.getInstance().getPlan(pie.getItem().getItemMeta().getDisplayName());
+//        if (plan != null
+//                && pie.getClickedBlock() != null
+//                && pie.getClickedBlock().getType() != Material.AIR) {
+//            final Structure structure = new Structure(
+//                    pie.getPlayer(), 
+//                    pie.getClickedBlock().getLocation(), 
+//                    WorldUtil.getDirection(pie.getPlayer()),
+//                    plan
+//            );
+//            if(PlayerAction.place(pie.getPlayer(),structure)) {
+////                SCStructureAPI.build(structure).foundation().construct();
+////                SCStructureAPI.build(structure).frame(FrameStrategy.FANCY).anim(Ticks.ONE_SECOND * 1).construct();
+//            }
+//        }
     }
 
 }
