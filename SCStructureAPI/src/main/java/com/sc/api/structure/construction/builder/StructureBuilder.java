@@ -12,18 +12,12 @@
 //import com.settlercraft.core.model.entity.structure.Structure;
 //import com.settlercraft.core.model.entity.structure.StructureState;
 //import com.settlercraft.core.model.plan.StructurePlan;
-//import com.settlercraft.core.model.plan.requirement.MaterialResource;
 //import com.settlercraft.core.model.plan.requirement.Resource;
 //import com.settlercraft.core.model.plan.schematic.SchematicBlockData;
 //import com.settlercraft.core.model.plan.schematic.SchematicObject;
 //import com.settlercraft.core.model.world.Direction;
-//import static com.settlercraft.core.model.world.Direction.EAST;
-//import static com.settlercraft.core.model.world.Direction.NORTH;
-//import static com.settlercraft.core.model.world.Direction.SOUTH;
-//import static com.settlercraft.core.model.world.Direction.WEST;
 //import com.settlercraft.core.persistence.StructureProgressService;
 //import com.settlercraft.core.persistence.StructureService;
-//import com.settlercraft.core.util.Maths;
 //import com.settlercraft.core.util.SettlerCraftMaterials;
 //import com.settlercraft.core.util.Ticks;
 //import com.settlercraft.core.util.WorldUtil;
@@ -34,28 +28,6 @@
 //import org.bukkit.Location;
 //import org.bukkit.Material;
 //import org.bukkit.block.Block;
-//import org.bukkit.block.BlockFace;
-//import org.bukkit.inventory.Inventory;
-//import org.bukkit.inventory.ItemStack;
-//import org.bukkit.material.Bed;
-//import org.bukkit.material.Button;
-//import org.bukkit.material.Chest;
-//import org.bukkit.material.CocoaPlant;
-//import org.bukkit.material.Diode;
-//import org.bukkit.material.Directional;
-//import org.bukkit.material.Dispenser;
-//import org.bukkit.material.EnderChest;
-//import org.bukkit.material.Furnace;
-//import org.bukkit.material.Ladder;
-//import org.bukkit.material.Lever;
-//import org.bukkit.material.PistonBaseMaterial;
-//import org.bukkit.material.Pumpkin;
-//import org.bukkit.material.Sign;
-//import org.bukkit.material.Skull;
-//import org.bukkit.material.Stairs;
-//import org.bukkit.material.Torch;
-//import org.bukkit.material.TrapDoor;
-//import org.bukkit.material.TripwireHook;
 //
 ///**
 // *
@@ -379,242 +351,44 @@
 //        }
 //    }
 //
-//    public static void build(Structure structure ,Inventory inventory, int baseValue, BuildCallback callback) {
-//        if (structure.getStatus() == StructureState.READY_TO_BE_BUILD) {
-//            List<MaterialResource> resources = structure.getProgress().getResources();
-//            Iterator<MaterialResource> lit = resources.iterator();
-//            StructureProgressService structureProgressService = new StructureProgressService();
-//
-//            while (lit.hasNext()) {
-//                MaterialResource materialResource = lit.next();
-//
-//                for (ItemStack stack : inventory) {
-//                    if (materialResource != null && stack != null && materialResource.getMaterial() == stack.getType()) {
-//                        int removed = structureProgressService.resourceTransaction(materialResource, Maths.lowest(stack.getAmount(), baseValue, stack.getMaxStackSize()));
-//
-//                        if (removed > 0) {
-//                            // Remove items from player inventory
-//                            ItemStack removedIS = new ItemStack(stack);
-//                            removedIS.setAmount(removed);
-//                            inventory.removeItem(removedIS);
-//
-//                            // Layer Complete?
-//                            if (structure.getProgress().getResources().isEmpty()) {
-//                                int completedLayer = structure.getProgress().getLayer();
-//                                structureProgressService.nextLayer(structure.getProgress(), false);
-//                                complete(structure, BuildDirection.DOWN, false, true);
-//                                Bukkit.getPluginManager().callEvent(new StructureLayerCompleteEvent(structure, completedLayer));
-//                            }
-//                            callback.onSucces(structure, removedIS);
-//                        }
-//                    }
-//                }
-//            }
-//            callback.onResourcesNotRequired(structure);
-//        } else {
-//            callback.onNotInBuildState(structure);
-//        }
-//    }
-//
-//    /**
-//     * TODO FIX THIS SHITCODE
-//     * Using the directional class to get the right direction see:
-//     * http://jd.bukkit.org/rb/doxygen/dc/d24/interfaceorg_1_1bukkit_1_1material_1_1Directional.html
-//     *
-//     * @param spb
-//     */
-//    private static void placeToDirection(Structure structure, SpecialBlock spb) {
-//        Resource r = new Resource(spb.material, spb.data);
-//        if (SettlerCraftMaterials.isDirectional(r)) {
-//            if (SettlerCraftMaterials.isDirectionalAttachable(r)) {
-//
-//                Directional directional = (Directional) spb.material.getNewData(spb.data);
-//                BlockFace face = getDirection(structure, directional);
-//                Block b = spb.block;
-//                Byte data;
-//
-//                switch (spb.material) {
-//                    case BED_BLOCK:
-//                        Bed bed = new Bed(face);
-//                        data = bed.getData();
-//                        break;
-//                    case DIODE:
-//                    case DIODE_BLOCK_OFF:
-//                    case DIODE_BLOCK_ON:
-//                        Diode diode = new Diode();
-//                        diode.setFacingDirection(face);
-//                        data = diode.getData();
-//                        break;
-//                    case TORCH:
-//                    case REDSTONE_TORCH_OFF:
-//                    case REDSTONE_TORCH_ON:
-//                        Torch torch = new Torch();
-//                        torch.setFacingDirection(face);
-//                        data = torch.getData();
-//                        break;
-//                    case PISTON_BASE:
-//                        PistonBaseMaterial piston = new PistonBaseMaterial(Material.PISTON_BASE);
-//                        piston.setFacingDirection(face);
-//                        data = piston.getData();
-//                        break;
-//                    case PISTON_STICKY_BASE:
-//                        PistonBaseMaterial piston2 = new PistonBaseMaterial(Material.PISTON_STICKY_BASE);
-//                        piston2.setFacingDirection(face);
-//                        data = piston2.getData();
-//                        break;
-//                    case PUMPKIN:
-//                        Pumpkin pumpkin = new Pumpkin(face);
-//                        data = pumpkin.getData();
-//                        break;
-//                    case SKULL:
-//                        Skull skull = new Skull(b.getType(), b.getData());
-//                        skull.setFacingDirection(face);
-//                        data = skull.getData();
-//                        break;
-//                    case SMOOTH_STAIRS:
-//                    case NETHER_BRICK_STAIRS:
-//                    case QUARTZ_STAIRS:
-//                    case JUNGLE_WOOD_STAIRS:
-//                    case SPRUCE_WOOD_STAIRS:
-//                    case BIRCH_WOOD_STAIRS:
-//                    case COBBLESTONE_STAIRS:
-//                    case BRICK_STAIRS:
-//                    case WOOD_STAIRS:
-//                        Stairs stairs = new Stairs(spb.material);
-//                        stairs.setInverted(((Stairs) directional).isInverted());
-//                        stairs.setFacingDirection(face);
-//                        data = stairs.getData();
-//                        break;
-//                    case COCOA:
-//                        CocoaPlant cocoaPlant = new CocoaPlant();
-//                        cocoaPlant.setFacingDirection(face);
-//                        data = cocoaPlant.getData();
-//                        break;
-//                    case SIGN_POST:
-//                        Sign signp = new Sign(Material.SIGN_POST);
-//                        signp.setFacingDirection(face);
-//                        data = signp.getData();
-//                        break;
-//                    case WALL_SIGN:
-//                        Sign wsign = new Sign(Material.WALL_SIGN);
-//                        wsign.setFacingDirection(face);
-//                        data = wsign.getData();
-//                        break;
-//                    case SIGN:
-//                        Sign sign = new Sign(Material.SIGN);
-//                        sign.setFacingDirection(face);
-//                        data = sign.getData();
-//                        break;
-//                    case CHEST:
-//                        Chest chest = new Chest(face);
-//                        data = chest.getData();
-//                        break;
-//                    case ENDER_CHEST:
-//                        EnderChest echest = new EnderChest(face);
-//                        data = echest.getData();
-//                        break;
-//                    case STONE_BUTTON:
-//                    case WOOD_BUTTON:
-//                        Button button = new Button(spb.material);
-//                        button.setFacingDirection(face);
-//                        data = button.getData();
-//                        break;
-//                    case LADDER:
-//                        Ladder ladder = new Ladder();
-//                        ladder.setFacingDirection(face);
-//                        data = ladder.getData();
-//                        break;
-//                    case LEVER:
-//                        Lever lever = new Lever();
-//                        lever.setFacingDirection(face);
-//                        lever.setPowered(spb.block.isBlockPowered());
-//                        data = lever.getData();
-//                        break;
-//                    case TRAP_DOOR:
-//                        TrapDoor trapDoor = new TrapDoor();
-//                        trapDoor.setFacingDirection(face);
-//                        data = trapDoor.getData();
-//                        break;
-//                    case TRIPWIRE_HOOK:
-//                        TripwireHook twh = new TripwireHook();
-//                        twh.setFacingDirection(face);
-//                        data = twh.getData();
-//                        break;
-//                    case DISPENSER:
-//                        Dispenser dispenser = new Dispenser(face);
-//                        data = dispenser.getData();
-//                        break;
-//                    case FURNACE:
-//                        Furnace furnace = new Furnace(face);
-//                        data = furnace.getData();
-//                        break;
-//                    default:
-//                        throw new UnsupportedOperationException(spb.material + " : " + spb.data + " not supported");
-//                }
-//                spb.data = data;
-//                spb.place();
-//            }
-//        }
-//
-//    }
-//
-//    /**
-//     * @param directional The directional (block)
-//     * @return the blockface
-//     */
-//    private static BlockFace getDirection(Structure structure, Directional directional) {
-//        if (directional.getFacing() != BlockFace.DOWN && directional.getFacing() != BlockFace.UP) {
-//            Direction direction = structure.getDirection();
-//            switch (direction) {
-//                case NORTH:
-//                    return directional.getFacing();
-//                case EAST:
-//                    System.out.println(directional.getFacing());
-//                    switch (directional.getFacing()) {
-//                        case NORTH:
-//                            return BlockFace.EAST;
-//                        case EAST:
-//                            return BlockFace.SOUTH;
-//                        case SOUTH:
-//                            return BlockFace.WEST;
-//                        case WEST:
-//                            return BlockFace.NORTH;
-//                        default:
-//                            throw new AssertionError("Dont know direction for: " + direction);
-//                    }
-//                case WEST:
-//                    switch (directional.getFacing()) {
-//                        case NORTH:
-//                            return BlockFace.WEST;
-//                        case EAST:
-//                            return BlockFace.NORTH;
-//                        case SOUTH:
-//                            return BlockFace.EAST;
-//                        case WEST:
-//                            return BlockFace.SOUTH;
-//                        default:
-//                            throw new AssertionError("Dont know direction for: " + direction);
-//                    }
-//                case SOUTH:
-//                    switch (directional.getFacing()) {
-//                        case NORTH:
-//                            return BlockFace.SOUTH;
-//                        case EAST:
-//                            return BlockFace.WEST;
-//                        case SOUTH:
-//                            return BlockFace.NORTH;
-//                        case WEST:
-//                            return BlockFace.EAST;
-//                        default:
-//                            throw new AssertionError("Dont know direction for: " + direction);
-//                    }
-//                default:
-//                    throw new AssertionError("Unreachable");
-//            }
-//        } else {
-//            return directional.getFacing();
-//        }
-//    }
+////    public static void build(Structure structure ,Inventory inventory, int baseValue, BuildCallback callback) {
+////        if (structure.getStatus() == StructureState.READY_TO_BE_BUILD) {
+////            List<MaterialResource> resources = structure.getProgress().getResources();
+////            Iterator<MaterialResource> lit = resources.iterator();
+////            StructureProgressService structureProgressService = new StructureProgressService();
+////
+////            while (lit.hasNext()) {
+////                MaterialResource materialResource = lit.next();
+////
+////                for (ItemStack stack : inventory) {
+////                    if (materialResource != null && stack != null && materialResource.getMaterial() == stack.getType()) {
+////                        int removed = structureProgressService.resourceTransaction(materialResource, Maths.lowest(stack.getAmount(), baseValue, stack.getMaxStackSize()));
+////
+////                        if (removed > 0) {
+////                            // Remove items from player inventory
+////                            ItemStack removedIS = new ItemStack(stack);
+////                            removedIS.setAmount(removed);
+////                            inventory.removeItem(removedIS);
+////
+////                            // Layer Complete?
+////                            if (structure.getProgress().getResources().isEmpty()) {
+////                                int completedLayer = structure.getProgress().getLayer();
+////                                structureProgressService.nextLayer(structure.getProgress(), false);
+////                                complete(structure, BuildDirection.DOWN, false, true);
+////                                Bukkit.getPluginManager().callEvent(new StructureLayerCompleteEvent(structure, completedLayer));
+////                            }
+////                            callback.onSucces(structure, removedIS);
+////                        }
+////                    }
+////                }
+////            }
+////            callback.onResourcesNotRequired(structure);
+////        } else {
+////            callback.onNotInBuildState(structure);
+////        }
+////    }
+////
+////  
 //
 //    
 //    private interface CallBack {

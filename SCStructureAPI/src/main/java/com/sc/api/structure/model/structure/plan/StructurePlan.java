@@ -5,10 +5,19 @@
  */
 package com.sc.api.structure.model.structure.plan;
 
+import com.sk89q.worldedit.CuboidClipboard;
+import com.sk89q.worldedit.data.DataException;
+import com.sk89q.worldedit.schematic.SchematicFormat;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.EnumMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Lob;
+
 
 /**
  *
@@ -23,7 +32,8 @@ public class StructurePlan implements Serializable {
     private String displayName; 
     private String description;
     private int startY = 0;
-    private final String structureSchematic;
+    @Lob
+    private final File structureSchematic;
     private double price = 0.0;
     private int reservedNorth = 0;
     private int reservedEast = 0;
@@ -36,14 +46,14 @@ public class StructurePlan implements Serializable {
      * JPA Constructor
      */
     protected StructurePlan() {
-        this.structureSchematic = null;
         this.id = null;
+        this.structureSchematic = null;
     }
 
-    public StructurePlan(String id, File schematic) {
+    public StructurePlan(String id, File schematic) throws IOException, DataException {
         this.id = id;
         this.displayName = id;
-        this.structureSchematic = schematic.getAbsolutePath();
+        this.structureSchematic = schematic;
     }
 
     public void setDescription(String description) {
@@ -54,8 +64,15 @@ public class StructurePlan implements Serializable {
         this.startY = startY;
     }
 
-    public File getSchematic() {
-        return new File(structureSchematic);
+    public CuboidClipboard getSchematic()  {
+        try {
+            CuboidClipboard structure = SchematicFormat.getFormat(structureSchematic).load(structureSchematic);
+            return structure;
+        }
+        catch (IOException | DataException ex) {
+            Logger.getLogger(StructurePlan.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 
 
@@ -146,13 +163,20 @@ public class StructurePlan implements Serializable {
     public String getDescription() {
         return description;
     }
+    
+    public EnumMap<ReservedSide, Integer> getReserved() {
+        EnumMap<ReservedSide, Integer> reserved = new EnumMap<>(ReservedSide.class);
+        reserved.put(ReservedSide.UP, reservedUp);
+        reserved.put(ReservedSide.DOWN, reservedDown);
+        reserved.put(ReservedSide.EAST, reservedEast);
+        reserved.put(ReservedSide.NORTH, reservedNorth);
+        reserved.put(ReservedSide.SOUTH, reservedSouth);
+        reserved.put(ReservedSide.WEST, reservedWest);
+        return reserved;
+    }
 
     public int getStartY() {
         return startY;
     }
 
-    public File getStructureSchematic() {
-        return new File(structureSchematic);
-    }
-    
 }

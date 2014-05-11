@@ -5,7 +5,7 @@
  */
 package com.sc.api.structure.model.structure;
 
-import com.settlercraft.core.model.plan.ReservedSide;
+import com.sc.api.structure.model.structure.plan.ReservedSide;
 import java.io.Serializable;
 import java.util.EnumMap;
 import javax.persistence.Embeddable;
@@ -37,7 +37,7 @@ public class ReservedArea implements Serializable {
     }
 
     public ReservedArea(Structure structure) {
-        EnumMap<ReservedSide, Integer> reserved = new EnumMap<>(ReservedSide.class);
+        EnumMap<ReservedSide, Integer> reserved = structure.getPlan().getReserved();
         switch (structure.getDirection()) {
             
             case NORTH:

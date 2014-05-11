@@ -5,8 +5,8 @@
  */
 package com.sc.api.structure;
 
-import com.sc.api.structure.commands.StructureCommandExecutor;
 import com.sc.api.structure.io.StructurePlanLoader;
+import com.sc.api.structure.listeners.PlayerListener;
 import com.sc.api.structure.listeners.StructurePlanListener;
 import com.sc.api.structure.model.structure.Structure;
 import com.sc.api.structure.model.structure.plan.StructurePlan;
@@ -34,7 +34,7 @@ public class SCStructureAPI extends JavaPlugin {
     public static final String ALIAS = "[STRUC]";
     public static final String PLAN_SHOP_NAME = "Buy & Build";
     private StructurePlanListener spl;
-//    private final PlayerListener pl = new PlayerListener();
+
 //    private final StructureListener sl = new StructureListener();
 
     public static WorldEditAPI getWorldEditAPI() {
@@ -45,7 +45,11 @@ public class SCStructureAPI extends JavaPlugin {
     public void onEnable() {
         initDB();
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(this), this);
-        getCommand("sc").setExecutor(new StructureCommandExecutor());
+        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
+    }
+    
+    public static WorldEditPlugin getWorldEditPlugin() {
+        return (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
     }
 
 // TODO SHADING  
@@ -79,7 +83,6 @@ public class SCStructureAPI extends JavaPlugin {
      * @param structureDirectory The directory to search
      */
     public static void loadStructures(File structureDirectory) {
-        System.out.println(structureDirectory.getAbsolutePath());
         File structureFolder = new File(structureDirectory.getAbsolutePath());
         if (!structureFolder.exists()) {
             structureFolder.mkdir();

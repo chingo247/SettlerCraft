@@ -34,12 +34,10 @@ public class HibernateUtil {
     public static void addAnnotatedClass(Class clazz) {
         annotatedClasses.add(clazz);
         factory = config.buildSessionFactory();
-        System.out.println("[SettlerCraft]: registered " + clazz);
     }
     
     public static void addAnnotatedClasses(Class... clazzes) {
         for(Class clazz : clazzes) {
-            System.out.println("[SettlerCraft]: registered " + clazz);
             annotatedClasses.add(clazz);
         }
         initializeConfiguration(config);

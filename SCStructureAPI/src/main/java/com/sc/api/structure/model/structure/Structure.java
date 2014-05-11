@@ -5,11 +5,11 @@ import com.google.common.base.Preconditions;
 import com.sc.api.structure.event.structure.StructureStateChangedEvent;
 import com.sc.api.structure.model.structure.plan.StructurePlan;
 import com.sc.api.structure.model.structure.progress.StructureProgress;
-import com.sc.api.structure.model.structure.schematic.SchematicBlockReport;
 import com.sc.api.structure.model.structure.world.Direction;
 import com.sc.api.structure.model.structure.world.WorldDimension;
 import com.sc.api.structure.model.structure.world.WorldLocation;
 import com.sc.api.structure.util.WorldUtil;
+import com.sk89q.worldedit.Location;
 import java.io.Serializable;
 import javax.annotation.Nullable;
 import javax.persistence.AttributeOverride;
@@ -19,10 +19,10 @@ import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 /**
@@ -40,13 +40,8 @@ public class Structure implements Serializable {
     @NotNull
     private String owner; //TODO Create Owner class
 
-    private String planId;
-
-    @NotNull
-    private int xMod;
-
-    @NotNull
-    private int zMod;
+    @Lob
+    private StructurePlan plan;
 
     @Embedded
     @AttributeOverride(name = "world", column = @Column(name = "loc_world"))
@@ -55,15 +50,15 @@ public class Structure implements Serializable {
     @Embedded
     @AttributeOverride(name = "world", column = @Column(name = "dim_world"))
     private WorldDimension dimension;
-    
+
+    private Direction direction;
+
     @Nullable
     @OneToOne(cascade = CascadeType.ALL)
     private StructureProgress progress;
 
     @Embedded
     private ReservedArea reserved;
-
-    
 
     private StructureState status;
 
@@ -72,30 +67,29 @@ public class Structure implements Serializable {
      */
     protected Structure() {
     }
-    
-    
 
     /**
      * Constructor.
      *
      * @param owner The owner of this structure
      * @param target The start location of this structure
-     * @param blockReport
-     * @param plan
+     * @param direction The player's direction on placement
+     * @param plan The plan
      */
-    public Structure(Player owner, SchematicBlockReport blockReport, StructurePlan plan, Location target ) {
+    public Structure(Player owner, Location target, Direction direction, StructurePlan plan) {
         Preconditions.checkNotNull(plan);
         Preconditions.checkNotNull(target);
-        this.planId = plan.getId();
-        this.owner = owner.getName();
-//        int[] modifiers = WorldUtil.getModifiers(direction);
-//        this.xMod = modifiers[0];
-//        this.zMod = modifiers[1];
-        setStatus(StructureState.CLEARING_SITE_OF_BLOCKS);
+        Preconditions.checkNotNull(direction);
+        this.plan = plan;
+        if(owner != null) {
+            this.owner = owner.getName();
+        }
+        this.setStatus(StructureState.CLEARING_SITE_OF_BLOCKS);
+        this.direction = direction;
         this.worldLocation = new WorldLocation(target);
-//        this.dimension = new WorldDimension(this);
         this.reserved = new ReservedArea(this);
-        this.progress = new StructureProgress(this, blockReport);
+        this.dimension = WorldUtil.getWorldDimension(target, direction, plan.getSchematic());
+//        this.progress = new StructureProgress(this, blockReport);
     }
 
     /**
@@ -106,8 +100,10 @@ public class Structure implements Serializable {
     public Long getId() {
         return id;
     }
-    
 
+    public StructurePlan getPlan() {
+        return plan;
+    }
 
     /**
      * Gets the name of the owner of this structure Owner may be a Player or NPC
@@ -119,7 +115,8 @@ public class Structure implements Serializable {
     }
 
     /**
-     * Sets the owner of this structure Use a Structure to handle this as a transaction!
+     * Sets the owner of this structure Use a Structure to handle this as a
+     * transaction!
      *
      * @param owner The new owner of this structure
      */
@@ -128,39 +125,21 @@ public class Structure implements Serializable {
     }
 
     /**
-     * Gets the xMod of this building to determine the direction
-     *
-     * @return The xMod
-     */
-    public int getxMod() {
-        return xMod;
-    }
-
-    /**
-     * Gets the zMod of this building to determine the direction
-     *
-     * @return The zMod of this building
-     */
-    public int getzMod() {
-        return zMod;
-    }
-
-    /**
-     * Gets the direction (NORTH|EAST|SOUTH|WEST) of this building
+     * Gets the direction (NORTH|EAST|SOUTH|WEST) of this structure
      *
      * @return The direction
      */
     public Direction getDirection() {
-        return WorldUtil.getDirection(xMod, zMod);
+        return direction;
     }
 
     /**
-     * Gets the actual location of the start of this building
+     * Gets the actual location of the start of this structure
      *
      * @return The building location
      */
     public Location getLocation() {
-        return new Location(Bukkit.getWorld(worldLocation.getWorld()), worldLocation.getX(), worldLocation.getY(), worldLocation.getZ());
+        return worldLocation.getLocation();
     }
 
     public WorldDimension getDimension() {
@@ -172,27 +151,22 @@ public class Structure implements Serializable {
     }
 
     public final void setStatus(StructureState status) {
-        Bukkit.getPluginManager().callEvent(new StructureStateChangedEvent(this,status));
+        Bukkit.getPluginManager().callEvent(new StructureStateChangedEvent(this, status));
         this.status = status;
     }
-
 
     public StructureProgress getProgress() {
         return progress;
     }
-    
-    
 
     public ReservedArea getReserved() {
         return reserved;
     }
-    
+
     public boolean isOnLot(Location location) {
-        return (location.getBlockX() >= dimension.getStartX() && location.getBlockX() <= dimension.getEndX()
-                && location.getBlockY() >= dimension.getStartY() && location.getBlockY() <= dimension.getEndY()
-                && location.getBlockZ() >= dimension.getStartZ() && location.getBlockZ() <= dimension.getEndZ());
+        return (location.getPosition().getBlockX() >= dimension.getStartX() && location.getPosition().getBlockX() <= dimension.getEndX()
+                && location.getPosition().getBlockY() >= dimension.getStartY() && location.getPosition().getBlockY() <= dimension.getEndY()
+                && location.getPosition().getBlockZ() >= dimension.getStartZ() && location.getPosition().getBlockZ() <= dimension.getEndZ());
     }
-    
-   
 
 }

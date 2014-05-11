@@ -77,7 +77,7 @@ public class StructurePlanService {
         QStructurePlan structurePlan = QStructurePlan.structurePlan;
         Session session = MemDBUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
-        StructurePlan plan = query.from(structurePlan).where(structurePlan.id.eq(planId)).uniqueResult(structurePlan);
+        StructurePlan plan = query.from(structurePlan).where(structurePlan.displayName.eq(planId)).uniqueResult(structurePlan);
         session.close();
         return plan;
     }
@@ -87,6 +87,15 @@ public class StructurePlanService {
         Session session = MemDBUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         List<StructurePlan> plan = query.from(structurePlan).list(structurePlan);
+        session.close();
+        return plan;
+    }
+    
+    public List<StructurePlan> getPlans(List<StructurePlan> newPlans) {
+        QStructurePlan structurePlan = QStructurePlan.structurePlan;
+        Session session = MemDBUtil.getSession();
+        JPQLQuery query = new HibernateQuery(session);
+        List<StructurePlan> plan = query.from(structurePlan).where(structurePlan.notIn(newPlans)).list(structurePlan);
         session.close();
         return plan;
     }

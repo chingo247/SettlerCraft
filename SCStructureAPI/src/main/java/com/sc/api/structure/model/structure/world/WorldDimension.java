@@ -3,9 +3,11 @@ package com.sc.api.structure.model.structure.world;
 
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
+import com.sc.api.structure.util.WorldEditUtil;
+import com.sk89q.worldedit.Location;
+import com.sk89q.worldedit.Vector;
 import javax.persistence.Column;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.World;
 
 /**
@@ -50,12 +52,12 @@ public class WorldDimension {
 
     public WorldDimension(Location start, Location end) {
         Preconditions.checkArgument(start.getWorld().getName().equals(end.getWorld().getName()));
-        this.startX = Math.min(start.getBlockX(), end.getBlockX());
-        this.startY = Math.min(start.getBlockY(), end.getBlockY());
-        this.startZ = Math.min(start.getBlockZ(), end.getBlockZ());
-        this.endX = Math.max(start.getBlockX(), end.getBlockX());
-        this.endY = Math.max(start.getBlockY(), end.getBlockY());
-        this.endZ = Math.max(start.getBlockZ(), end.getBlockZ());
+        this.startX = Math.min(start.getPosition().getBlockX(), end.getPosition().getBlockX());
+        this.startY = Math.min(start.getPosition().getBlockY(), end.getPosition().getBlockY());
+        this.startZ = Math.min(start.getPosition().getBlockZ(), end.getPosition().getBlockZ());
+        this.endX = Math.max(start.getPosition().getBlockX(), end.getPosition().getBlockX());
+        this.endY = Math.max(start.getPosition().getBlockY(), end.getPosition().getBlockY());
+        this.endZ = Math.max(start.getPosition().getBlockZ(), end.getPosition().getBlockZ());
         this.world = start.getWorld().getName();
     }
     
@@ -111,11 +113,11 @@ public class WorldDimension {
     }
 
     public Location getStart() {
-        return new Location(Bukkit.getWorld(world), startX, startY, startZ);
+        return new Location(WorldEditUtil.getLocalWorld(world), new Vector(startX, startY, startZ));
     }
 
     public Location getEnd() {
-        return new Location(Bukkit.getWorld(world), endX, endY, endZ);
+        return new Location(WorldEditUtil.getLocalWorld(world), new Vector(endX, endY, endZ));
     }
     
 }

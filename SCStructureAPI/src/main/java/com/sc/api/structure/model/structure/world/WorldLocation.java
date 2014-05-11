@@ -7,11 +7,12 @@ package com.sc.api.structure.model.structure.world;
 
 import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
+import com.sc.api.structure.util.WorldEditUtil;
+import com.sk89q.worldedit.Location;
+import com.sk89q.worldedit.Vector;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
 
 /**
  *
@@ -41,9 +42,9 @@ public class WorldLocation implements Serializable {
     }
 
     public WorldLocation(Location location) {
-        this.x = location.getBlockX();
-        this.y = location.getBlockY();
-        this.z = location.getBlockZ();
+        this.x = location.getPosition().getBlockX();
+        this.y = location.getPosition().getBlockY();
+        this.z = location.getPosition().getBlockZ();
         this.world = location.getWorld().getName();
     }
 
@@ -80,8 +81,7 @@ public class WorldLocation implements Serializable {
     }
 
     public Location getLocation() {
-        Location location = new Location(Bukkit.getServer().getWorld(world), x, y, z);
-        return location;
+        return new Location(WorldEditUtil.getLocalWorld(world), new Vector(x, y, z));
     }
 
 }
