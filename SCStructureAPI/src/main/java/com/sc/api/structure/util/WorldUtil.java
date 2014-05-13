@@ -6,7 +6,7 @@
 package com.sc.api.structure.util;
 
 import com.google.common.base.Preconditions;
-import com.sc.api.structure.model.structure.world.Direction;
+import com.sc.api.structure.model.structure.world.SimpleCardinal;
 import com.sc.api.structure.model.structure.world.WorldDimension;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;
@@ -24,19 +24,19 @@ public class WorldUtil {
      * @param yaw The yaw
      * @return The direction
      */
-    public static Direction getDirection(int yaw) {
+    public static SimpleCardinal getDirection(int yaw) {
         if (yaw >= 45 && yaw < 135 || yaw >= -315 && yaw < -225) {
-            return Direction.WEST;
+            return SimpleCardinal.WEST;
         } else if (yaw >= 135 && yaw < 225 || yaw >= -225 && yaw < -135) {
-            return Direction.NORTH;
+            return SimpleCardinal.NORTH;
         } else if (yaw >= 225 && yaw < 315 || yaw >= -135 && yaw < -45) {
-            return Direction.EAST;
-        } else /*(yaw >= 315 && yaw < 360 || yaw >= 0 && < 45) */ {
-            return Direction.SOUTH;
+            return SimpleCardinal.EAST;
+        } else /*(yaw >= 315 && yaw < 360 || yaw >= 0 && < 45) */  {
+            return SimpleCardinal.SOUTH;
         }
     }
     
-    private static com.sk89q.worldedit.Location calculatePoint2(com.sk89q.worldedit.Location point1, Direction direction, CuboidClipboard clipboard) {
+    private static com.sk89q.worldedit.Location calculatePoint2(com.sk89q.worldedit.Location point1, SimpleCardinal direction, CuboidClipboard clipboard) {
         switch (direction) {
             case EAST: 
                 return point1.add(clipboard.getSize().subtract(1, 1, 1));
@@ -50,7 +50,7 @@ public class WorldUtil {
         }
     }
     
-    public static WorldDimension getWorldDimension(com.sk89q.worldedit.Location location, Direction direction, CuboidClipboard clipboard) {
+    public static WorldDimension getWorldDimension(com.sk89q.worldedit.Location location, SimpleCardinal direction, CuboidClipboard clipboard) {
         return new WorldDimension(location, calculatePoint2(location, direction, clipboard));
     }
 
@@ -60,7 +60,7 @@ public class WorldUtil {
      * @param direction The direction
      * @return float, yaw value
      */
-    public static int getYaw(Direction direction) {
+    public static int getYaw(SimpleCardinal direction) {
         switch (direction) {
             case SOUTH:
                 return 0;
@@ -76,7 +76,7 @@ public class WorldUtil {
     }
 
 
-    public static Direction getDirection(Entity entity) {
+    public static SimpleCardinal getDirection(Entity entity) {
         return getDirection((int)entity.getLocation().getYaw());
     }
 
@@ -120,7 +120,7 @@ public class WorldUtil {
         return l;
     }
 
-    public static Location calculateEndLocation(Location point1, Direction direction, CuboidClipboard clipboard) {
+    public static Location calculateEndLocation(Location point1, SimpleCardinal direction, CuboidClipboard clipboard) {
         switch (direction) {
             case EAST:
                 return point1.add(clipboard.getSize().subtract(1, 1, 1));

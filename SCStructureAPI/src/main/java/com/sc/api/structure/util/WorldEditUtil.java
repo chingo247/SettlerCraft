@@ -5,17 +5,13 @@
  */
 package com.sc.api.structure.util;
 
-import com.sk89q.worldedit.BlockWorldVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Location;
-import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.WorldVector;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.data.DataException;
 import com.sk89q.worldedit.regions.CuboidRegionSelector;
@@ -24,8 +20,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -45,10 +39,8 @@ public class WorldEditUtil {
     public static WorldEditPlugin getWorldEditPlugin() {
         return (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
     }
+    
 
-    public static EditSession createEditSession(Player player) {
-        return getWorldEditPlugin().createEditSession(player);
-    }
     
     public static EditSession getEditSession(LocalWorld world, int maxblocks) {
         return WorldEdit.getInstance().getEditSessionFactory().getEditSession(world, maxblocks);
@@ -76,57 +68,6 @@ public class WorldEditUtil {
         return null;
     }
 
-    public static BlockWorldVector getBlockWorldVector(LocalWorld world, int x, int y, int z) {
-        return new BlockWorldVector(world, x, y, z);
-    }
-
-    public static BlockWorldVector getBlockWorldVector(com.sk89q.worldedit.Location location) {
-        return new BlockWorldVector(
-                location.getWorld(),
-                location.getPosition().getBlockX(),
-                location.getPosition().getBlockY(),
-                location.getPosition().getBlockZ()
-        );
-    }
-
-    public static WorldVector getWorldVector(LocalWorld localWorld, double x, double y, double z) {
-        return new WorldVector(localWorld, x, y, z);
-    }
-
-    public static WorldVector getWorldVector(LocalWorld localWorld, float x, float y, float z) {
-        return new WorldVector(localWorld, x, y, z);
-    }
-
-    public static WorldVector getWorldVector(LocalWorld localWorld, int x, int y, int z) {
-        return new WorldVector(localWorld, x, y, z);
-    }
-
-    public static WorldVector getWorldVector(com.sk89q.worldedit.Location location) {
-        return new WorldVector(
-                location.getWorld(),
-                location.getPosition().getX(),
-                location.getPosition().getY(),
-                location.getPosition().getBlockZ()
-        );
-    }
-
-
-    public static void place(EditSession editSession, CuboidClipboard cuboidClipboard, com.sk89q.worldedit.Location location, boolean autoflush) {
-        try {
-            Vector v = getBlockWorldVector(location);
-            cuboidClipboard.place(editSession, v, true);
-            if(autoflush) {
-                editSession.flushQueue();
-            }
-        }
-        catch (MaxChangedBlocksException ex) {
-            Logger.getLogger(WorldEditUtil.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
-    
-    
-    
     public static void selectClipboardArea(Player player, Location pos1, Location pos2) {
             LocalPlayer localPlayer = getLocalPlayer(player);
             LocalWorld world = localPlayer.getWorld();
@@ -135,7 +76,7 @@ public class WorldEditUtil {
 //            Vector pos = getBlockWorldVector(location);
 //            Vector pos2 = pos.add(clipboard.getSize().subtract(1,1,1));
             
-            session.setRegionSelector(world, new CuboidRegionSelector(world, getBlockWorldVector(pos1), getBlockWorldVector(pos2)));
+            session.setRegionSelector(world, new CuboidRegionSelector(world, pos1.getPosition(), pos2.getPosition()));
             session.getRegionSelector(world).learnChanges();
             session.getRegionSelector(world).explainRegionAdjust(localPlayer, session);
             

@@ -3,16 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
-package com.sc.api.structure.construction.strategies;
+package com.sc.api.structure.model.structure.world;
 
 /**
  *
  * @author Chingo
  */
-public enum FoundationStrategy {
-    
-    DEFAULT,
-    FANCY
-    
+public enum SimpleCardinal {
+    NORTH,
+    EAST,
+    SOUTH,
+    WEST
 }

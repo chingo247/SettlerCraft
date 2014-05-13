@@ -20,6 +20,15 @@ import org.hibernate.Transaction;
  * @author Chingo
  */
 public class StructureService extends AbstractService {
+    
+    public Structure getStructure(Long id) {
+        QStructure qstructure = QStructure.structure;
+        Session session = HibernateUtil.getSession();
+        JPQLQuery query = new HibernateQuery(session);
+        Structure structure = query.from(qstructure).where(qstructure.id.eq(id)).uniqueResult(qstructure);
+        session.close();
+        return structure;
+    }
 
     public List<Structure> getStructures() {
         QStructure structure = QStructure.structure;

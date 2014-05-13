@@ -5,7 +5,7 @@ import com.google.common.base.Preconditions;
 import com.sc.api.structure.event.structure.StructureStateChangedEvent;
 import com.sc.api.structure.model.structure.plan.StructurePlan;
 import com.sc.api.structure.model.structure.progress.StructureProgress;
-import com.sc.api.structure.model.structure.world.Direction;
+import com.sc.api.structure.model.structure.world.SimpleCardinal;
 import com.sc.api.structure.model.structure.world.WorldDimension;
 import com.sc.api.structure.model.structure.world.WorldLocation;
 import com.sc.api.structure.util.WorldUtil;
@@ -51,7 +51,7 @@ public class Structure implements Serializable {
     @AttributeOverride(name = "world", column = @Column(name = "dim_world"))
     private WorldDimension dimension;
 
-    private Direction direction;
+    private SimpleCardinal direction;
 
     @Nullable
     @OneToOne(cascade = CascadeType.ALL)
@@ -76,7 +76,7 @@ public class Structure implements Serializable {
      * @param direction The player's direction on placement
      * @param plan The plan
      */
-    public Structure(Player owner, Location target, Direction direction, StructurePlan plan) {
+    public Structure(Player owner, Location target, SimpleCardinal direction, StructurePlan plan) {
         Preconditions.checkNotNull(plan);
         Preconditions.checkNotNull(target);
         Preconditions.checkNotNull(direction);
@@ -129,7 +129,7 @@ public class Structure implements Serializable {
      *
      * @return The direction
      */
-    public Direction getDirection() {
+    public SimpleCardinal getDirection() {
         return direction;
     }
 

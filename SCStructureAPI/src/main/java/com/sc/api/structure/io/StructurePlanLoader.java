@@ -28,6 +28,8 @@ public class StructurePlanLoader {
 
     public List<StructurePlan> loadStructures(File buildingFolder) throws FileNotFoundException {
         String[] extensions = {"yml"};
+        
+
         Iterator<File> it = FileUtils.iterateFiles(buildingFolder, extensions, true);
         StructurePlanService sps = new StructurePlanService();
 
@@ -39,87 +41,85 @@ public class StructurePlanLoader {
             structurePlans.add(plan);
         }
         sps.save(structurePlans);
-        
+
         return structurePlans;
     }
-    
 
     public StructurePlan load(File structureYAML) throws FileNotFoundException {
         StructurePlan spv = null;
         try {
             YamlConfiguration config = YamlConfiguration.loadConfiguration(structureYAML);
-            
+
             File schematicStructureFile = FileUtils.getFile(structureYAML.getParent(), config.getString("schematic"));
             if (!schematicStructureFile.exists()) {
                 throw new FileNotFoundException("No such file: " + structureYAML.getParent() + "\"" + config.getString("schematic"));
             }
-            
+
             SchematicFormat format = SchematicFormat.getFormat(schematicStructureFile);
             if (!format.isOfFormat(schematicStructureFile)) {
                 System.err.print("[SCStructureAPI]: Unsupported format for " + format.getName() + " in: " + schematicStructureFile.getName());
                 return null;
             }
-            
+
             String id;
             if (config.contains("id")) {
                 id = String.valueOf(config.get("id"));
             } else {
-                
+
                 id = schematicStructureFile.getName();
                 config.addDefault("id", id);
             }
-            
+
             spv = new StructurePlan(id, schematicStructureFile);
-            
+
             if (config.contains("displayname")) {
                 spv.setDisplayName(String.valueOf(config.get("displayname")));
             }
-            
+
             if (config.contains("price")) {
                 spv.setPrice(config.getDouble("price"));
             }
-            
+
             if (config.contains("reserved.north")) {
                 spv.setReservedNorth(config.getInt("reserved.north"));
             }
-            
+
             if (config.contains("reserved.east")) {
                 spv.setReservedEast(config.getInt("reserved.east"));
             }
-            
+
             if (config.contains("reserved.south")) {
                 spv.setReservedSouth(config.getInt("reserved.south"));
             }
-            
+
             if (config.contains("reserved.west")) {
                 spv.setReservedWest(config.getInt("reserved.west"));
             }
-            
+
             if (config.contains("reserved.up")) {
                 spv.setReservedUp(config.getInt("reserved.up"));
             }
-            
+
             if (config.contains("reserved.down")) {
                 spv.setReservedDown(config.getInt("reserved.down"));
             }
-            
+
             if (config.contains("description")) {
                 spv.setDescription(config.getString("description"));
             }
-            
+
             if (config.contains("faction")) {
                 spv.setFaction(config.getString("faction"));
             }
-            
+
             if (config.contains("category")) {
                 spv.setCategory(config.getString("category"));
             }
-            
+
             if (config.contains("start-y")) {
                 spv.setStartY(config.getInt("start-y"));
             }
-            
-            
+
             return spv;
         }
         catch (IOException | DataException ex) {

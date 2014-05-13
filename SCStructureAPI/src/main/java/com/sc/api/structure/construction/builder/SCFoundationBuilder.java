@@ -5,7 +5,7 @@
  */
 package com.sc.api.structure.construction.builder;
 
-import com.sc.api.structure.construction.strategies.FoundationStrategy;
+import com.sc.api.structure.construction.builder.strategies.FoundationStrategy;
 import com.sc.api.structure.model.structure.Structure;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;

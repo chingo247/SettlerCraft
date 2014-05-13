@@ -14,6 +14,7 @@ import com.sc.api.structure.model.structure.progress.StructureProgress;
 import com.sc.api.structure.model.structure.progress.StructureProgressLayer;
 import com.sc.api.structure.model.structure.progress.StructureProgressMaterialResource;
 import com.sc.api.structure.util.HibernateUtil;
+import com.sc.api.structure.util.MaterialUtil;
 import com.sc.api.structure.util.MemDBUtil;
 import com.sk89q.worldedit.bukkit.WorldEditAPI;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
@@ -22,6 +23,7 @@ import java.io.FileNotFoundException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -40,12 +42,20 @@ public class SCStructureAPI extends JavaPlugin {
     public static WorldEditAPI getWorldEditAPI() {
         return new WorldEditAPI((WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit"));
     }
+    
+    public static SCStructureAPI getSCStructureAPI() {
+        return (SCStructureAPI) Bukkit.getPluginManager().getPlugin("SCStructureAPI");
+    }
 
     @Override
     public void onEnable() {
         initDB();
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
+        
+        for(Material m : Material.values()) {
+            MaterialUtil.isAttachable(m, (byte)0);
+        }
     }
     
     public static WorldEditPlugin getWorldEditPlugin() {
