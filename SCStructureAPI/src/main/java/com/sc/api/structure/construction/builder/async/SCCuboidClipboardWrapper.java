@@ -24,103 +24,24 @@
 package com.sc.api.structure.construction.builder.async;
 
 import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.LocalEntity;
-import com.sk89q.worldedit.Vector;
-import java.lang.reflect.Field;
-import org.primesoft.asyncworldedit.PluginMain;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntityEntry;
-import org.primesoft.asyncworldedit.worldedit.ProxyCuboidClipboard;
+import org.primesoft.asyncworldedit.worldedit.CuboidClipboardWrapper;
 
 /**
- * This class is a wrapper to better handle entity paste Note: Do not use any
- * operations from this class, always use th parrent!
+ * CuboidClipBoardWrapper for vertical emplacement
  *
- * @author SBPrime
+ * @author Chingo
  */
-public class SCCuboidClipboardWrapper extends ProxyCuboidClipboard {
-    /**
-     * The job id
-     */
-    private final int m_jobId;
-    
-    /**
-     * The blocks placer
-     */
-    private final BlockPlacer m_blocksPlacer;
-    /**
-     * Player
-     */
-    private final String m_player;
-
-    /**
-     * Inject entities to CuboidClipboard
-     *
-     * @param cc
-     * @param value
-     */
-    public static void setEntities(CuboidClipboard cc, Object value) {
-        try {
-            Field field = cc.getClass().getDeclaredField("entities");
-            field.setAccessible(true);
-            field.set(cc, value);
-        } catch (IllegalArgumentException ex) {
-            PluginMain.log("Unable to set entities: unsupported WorldEdit version.");
-        } catch (IllegalAccessException ex) {
-            PluginMain.log("Unable to set entities: security exception.");
-        } catch (NoSuchFieldException ex) {
-            PluginMain.log("Unable to set entities: unsupported WorldEdit version.");
-        } catch (SecurityException ex) {
-            PluginMain.log("Unable to set entities: security exception.");
-        }
-    }
-
-    /**
-     * Get entities from CuboidClipboard
-     *
-     * @param cc
-     * @param value
-     */
-    public static Object getEntities(CuboidClipboard cc) {
-        try {
-            Field field = cc.getClass().getDeclaredField("entities");
-            field.setAccessible(true);
-            return field.get(cc);
-        } catch (IllegalArgumentException ex) {
-            PluginMain.log("Unable to set entities: unsupported WorldEdit version.");
-        } catch (IllegalAccessException ex) {
-            PluginMain.log("Unable to set entities: security exception.");
-        } catch (NoSuchFieldException ex) {
-            PluginMain.log("Unable to set entities: unsupported WorldEdit version.");
-        } catch (SecurityException ex) {
-            PluginMain.log("Unable to set entities: security exception.");
-        }
-
-        return null;
-    }
+public class SCCuboidClipboardWrapper extends CuboidClipboardWrapper {
+//    
     
     public SCCuboidClipboardWrapper(String player, CuboidClipboard parrent) {
         this(player, new SCLayeredCuboidClipBoard(parrent), -1);
     }
 
     public SCCuboidClipboardWrapper(String player, CuboidClipboard parrent, int jobId) {
-        super(new SCLayeredCuboidClipBoard(parrent));
+        super(player, new SCLayeredCuboidClipBoard(parrent));
 
-        m_jobId = jobId;
-        m_blocksPlacer = PluginMain.getInstance().getBlockPlacer();
-        m_player = player;
+
     }
 
-    @Override
-    public LocalEntity[] pasteEntities(Vector pos) {
-        synchronized (m_parrent) {
-            final Object entities = getEntities(m_parrent);
-            final int jobId = m_jobId < 0 ? m_blocksPlacer.getJobId(m_player) : m_jobId;
-            final BlockPlacerEntityEntry entry =
-                    new BlockPlacerEntityEntry(null, jobId, entities, pos, m_parrent);
-
-            m_blocksPlacer.addTasks(m_player, entry);
-        }
-        return new LocalEntity[0];
-    }
 }

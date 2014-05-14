@@ -7,16 +7,14 @@ package com.sc.api.structure.construction.builder.async;
 
 import com.sc.api.structure.construction.builder.SCCuboidBuilder;
 import com.sc.api.structure.model.structure.world.SimpleCardinal;
-import com.sc.api.structure.util.AsyncWorldEditUtil;
+import com.sc.api.structure.util.plugins.AsyncWorldEditUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
-import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
 /**
  *
@@ -35,9 +33,6 @@ public class SCAsyncCuboidBuilder {
     public static void place(AsyncEditSession editSession, CuboidClipboard cuboidClipboard, Location target, SimpleCardinal cardinal, String jobName) throws MaxChangedBlocksException {
         SCCuboidBuilder.align(cuboidClipboard, target, cardinal);
         cuboidClipboard.place(editSession, target.getPosition(), true);
-        int jobId = AsyncWorldEditUtil.getAsyncWorldEditPlugin().getBlockPlacer().getJobId(editSession.getPlayer());
-        BlockPlacerJobEntry blockPlacerJobEntry = new BlockPlacerJobEntry(editSession, new CancelabeEditSession(editSession, editSession.getAsyncMask(), jobId), jobId, jobName);
-        AsyncWorldEditUtil.getAsyncWorldEditPlugin().getBlockPlacer().addJob(editSession.getPlayer(), blockPlacerJobEntry);
     }
 
     public static void place(Player player, CuboidClipboard cuboidClipboard, Location target, SimpleCardinal cardinal, String jobName) {
@@ -57,11 +52,10 @@ public class SCAsyncCuboidBuilder {
         SCCuboidBuilder.placeLayer(asyncEditSession, clipboard, layer, location, direction);
     }
 
-    public static void placeLayered(AsyncEditSession asyncEditSession, CuboidClipboard whole, Location location, SimpleCardinal cardinal, String jobName) throws MaxChangedBlocksException {
+    public static void placeLayered(AsyncEditSession asyncEditSession, CuboidClipboard whole, Location location, SimpleCardinal cardinal, String jobName, SCJobCallback callback) throws MaxChangedBlocksException {
         Location target = SCCuboidBuilder.align(whole, location, cardinal);
         SCLayeredCuboidClipBoard clipBoard = new SCLayeredCuboidClipBoard(whole);
-//        clipBoard.place(asyncEditSession, target.getPosition(), true);
         SCAsyncCuboidClipboard asyncCuboidClipboard = new SCAsyncCuboidClipboard(asyncEditSession.getPlayer(), clipBoard);
-        asyncCuboidClipboard.place(asyncEditSession, target.getPosition(), true);
+        asyncCuboidClipboard.place(asyncEditSession, target.getPosition(), true, callback);
     }
 }

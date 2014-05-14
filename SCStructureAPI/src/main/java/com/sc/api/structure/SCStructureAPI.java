@@ -9,6 +9,7 @@ import com.sc.api.structure.io.StructurePlanLoader;
 import com.sc.api.structure.listeners.PlayerListener;
 import com.sc.api.structure.listeners.StructurePlanListener;
 import com.sc.api.structure.model.structure.Structure;
+import com.sc.api.structure.model.structure.StructureJob;
 import com.sc.api.structure.model.structure.plan.StructurePlan;
 import com.sc.api.structure.model.structure.progress.StructureProgress;
 import com.sc.api.structure.model.structure.progress.StructureProgressLayer;
@@ -80,7 +81,8 @@ public class SCStructureAPI extends JavaPlugin {
                 StructureProgress.class,
                 StructureProgressLayer.class,
                 StructureProgressMaterialResource.class,
-                StructurePlan.class
+                StructurePlan.class,
+                StructureJob.class
         );
     }
     

@@ -7,7 +7,7 @@ package com.sc.api.structure.model.structure.world;
 
 import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
-import com.sc.api.structure.util.WorldEditUtil;
+import com.sc.api.structure.util.plugins.WorldEditUtil;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.Vector;
 import java.io.Serializable;

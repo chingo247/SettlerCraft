@@ -51,7 +51,9 @@ public class SCFoundationBuilder {
         Location pos2 = new Location(pos1.getWorld(), new BlockVector(structure.getDimension().getEndX(), 1, structure.getDimension().getEndZ()));
         
         try {
-            session.makeCuboidFaces(new CuboidRegion(pos1.getWorld(), pos1.getPosition(), pos2.getPosition()), new BaseBlock(material.getId()));
+            CuboidRegion region = new CuboidRegion(pos1.getWorld(), pos1.getPosition(), pos2.getPosition());
+            System.out.println(region.getCenter());
+            session.makeCuboidFaces(region, new BaseBlock(material.getId()));
             if(autoflush) {
                 session.flushQueue();
             }

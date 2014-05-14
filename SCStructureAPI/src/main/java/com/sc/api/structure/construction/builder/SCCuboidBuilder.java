@@ -7,7 +7,7 @@ package com.sc.api.structure.construction.builder;
 
 import com.sc.api.structure.model.structure.world.SimpleCardinal;
 import com.sc.api.structure.util.CuboidUtil;
-import com.sc.api.structure.util.WorldEditUtil;
+import com.sc.api.structure.util.plugins.WorldEditUtil;
 import com.sc.api.structure.util.WorldUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;

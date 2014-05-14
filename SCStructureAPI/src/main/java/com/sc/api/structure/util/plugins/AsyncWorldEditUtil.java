@@ -4,10 +4,9 @@
  * and open the template in the editor.
  */
 
-package com.sc.api.structure.util;
+package com.sc.api.structure.util.plugins;
 
-import static com.sc.api.structure.util.WorldEditUtil.getLocalWorld;
-import org.bukkit.Bukkit;
+import static com.sc.api.structure.util.plugins.WorldEditUtil.getLocalWorld;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
@@ -21,7 +20,7 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSessionFactory;
 public class AsyncWorldEditUtil {
     
     public static PluginMain getAsyncWorldEditPlugin() {
-        return (PluginMain) Bukkit.getPluginManager().getPlugin("AsyncWorldEdit");
+        return PluginMain.getInstance();
     }
     
     public static BlockPlacer getBlockPlacer() {

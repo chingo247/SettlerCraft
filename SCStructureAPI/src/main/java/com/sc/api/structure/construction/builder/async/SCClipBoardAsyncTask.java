@@ -53,17 +53,19 @@ public abstract class SCClipBoardAsyncTask extends BukkitRunnable{
      */
     private final String m_player;
     private final BlockPlacer m_blockPlacer;
-    private final BlockPlacerJobEntry m_job;
+    private final SCBlockPlacerJobEntry m_job;
     private final AsyncEditSession m_editSession;
+    private final SCJobCallback callback;
 
     public SCClipBoardAsyncTask(final CuboidClipboard clipboard, final EditSession editSession,
             final String player, final String commandName, BlockPlacer blocksPlacer,
-            BlockPlacerJobEntry job) {
+            SCBlockPlacerJobEntry job, SCJobCallback callback) {
         m_clipboard = clipboard;
         m_player = player;
         m_command = commandName;
         m_blockPlacer = blocksPlacer;
         m_job = job;
+        this.callback = callback;
         m_editSession = (editSession instanceof AsyncEditSession) ? (AsyncEditSession) editSession : null;
         if (m_editSession != null) {
             m_editSession.addAsync(job);
@@ -79,6 +81,9 @@ public abstract class SCClipBoardAsyncTask extends BukkitRunnable{
 //                        + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
 //            }
             m_blockPlacer.addTasks(m_player, m_job);
+            if(callback != null) {
+                callback.onJobAdded(m_job);
+            }
             task(m_clipboard);
 
             if (m_editSession != null && m_editSession.isQueueEnabled()) {
@@ -91,11 +96,15 @@ public abstract class SCClipBoardAsyncTask extends BukkitRunnable{
             PluginMain.say(m_player, ChatColor.RED + "Maximum block change limit.");
         } catch (IllegalArgumentException ex) {
             if (ex.getCause() instanceof CancelabeEditSession.SessionCanceled) {
-                PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Job canceled.");
+//                PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Job canceled.");
+                if(callback != null) {
+                    callback.onJobCanceled(m_job);
+                }
             }
         }
 
         m_job.taskDone();
+
         if (m_editSession != null) {
             m_editSession.removeAsync(m_job);
         }
