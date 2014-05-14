@@ -40,7 +40,9 @@ public class WorldEditUtil {
         return (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
     }
     
-
+    public static EditSession createEditSession(Player player, int maxblocks) {
+        return getWorldEditPlugin().createEditSession(player);
+    }
     
     public static EditSession getEditSession(LocalWorld world, int maxblocks) {
         return WorldEdit.getInstance().getEditSessionFactory().getEditSession(world, maxblocks);

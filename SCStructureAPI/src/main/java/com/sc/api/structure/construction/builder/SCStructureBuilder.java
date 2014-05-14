@@ -5,6 +5,7 @@
  */
 package com.sc.api.structure.construction.builder;
 
+import com.sc.api.structure.construction.builder.async.SCAsyncCuboidBuilder;
 import com.sc.api.structure.model.structure.Structure;
 import com.sc.api.structure.model.structure.plan.StructurePlan;
 import com.sc.api.structure.model.structure.world.SimpleCardinal;
@@ -64,7 +65,8 @@ public class SCStructureBuilder {
             final CuboidClipboard cc = structure.getPlan().getSchematic();
 
             try {
-                SCAsyncCuboidBuilder.placeLayered(session, 
+                SCAsyncCuboidBuilder.placeLayered(
+                        session, 
                         cc, 
                         location, 
                         direction, 

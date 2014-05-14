@@ -3,22 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.api.structure.construction.builder;
+package com.sc.api.structure.construction.builder.async;
 
+import com.sc.api.structure.construction.builder.SCCuboidBuilder;
 import com.sc.api.structure.model.structure.world.SimpleCardinal;
 import com.sc.api.structure.util.AsyncWorldEditUtil;
-import com.sc.api.structure.util.CuboidUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
-import org.primesoft.asyncworldedit.blockPlacer.IJobEntryListener;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
@@ -61,48 +57,11 @@ public class SCAsyncCuboidBuilder {
         SCCuboidBuilder.placeLayer(asyncEditSession, clipboard, layer, location, direction);
     }
 
-    public static void placeLayered(AsyncEditSession editSession, CuboidClipboard whole, Location location, SimpleCardinal cardinal, String jobName) throws MaxChangedBlocksException {
+    public static void placeLayered(AsyncEditSession asyncEditSession, CuboidClipboard whole, Location location, SimpleCardinal cardinal, String jobName) throws MaxChangedBlocksException {
         Location target = SCCuboidBuilder.align(whole, location, cardinal);
-        List<CuboidClipboard> layers = CuboidUtil.getLayers(whole);
-        
-        for(int i = 0; i < layers.size(); i++) {
-                layers.get(i).place(editSession, target.getPosition(), true);   
-        }
-        
-        final String ply = editSession.getPlayer();
-        int jobId = AsyncWorldEditUtil.getAsyncWorldEditPlugin().getBlockPlacer().getJobId(ply);
-        BlockPlacerJobEntry blockPlacerJobEntry = new BlockPlacerJobEntry(editSession, new CancelabeEditSession(editSession, editSession.getAsyncMask(), jobId), jobId, jobName);
-        
-        IJobEntryListener entryListener = new IJobEntryListener() {
-
-            @Override
-            public void jobStateChanged(BlockPlacerJobEntry bpje) {
-                System.out.println("ply: " + ply);
-                Player player = Bukkit.getPlayer(ply);
-               
-                if (player != null && player.isOnline()) {
-                    switch (bpje.getStatus()) {
-                        case Done:
-                            player.sendMessage("Construction complete: " + ChatColor.BLUE + bpje.getName());
-                            
-                            break;
-                        case PlacingBlocks:
-                            player.sendMessage(("Building: " + ChatColor.BLUE + bpje.getName()));
-                            break;
-                        case Waiting:
-                            player.sendMessage("Waiting: " + ChatColor.BLUE + bpje.getName());
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-            }
-        };
-        blockPlacerJobEntry.addStateChangedListener(entryListener);
-        
-        
-        AsyncWorldEditUtil.getBlockPlacer().addJob(ply, blockPlacerJobEntry);
-        
+        SCLayeredCuboidClipBoard clipBoard = new SCLayeredCuboidClipBoard(whole);
+//        clipBoard.place(asyncEditSession, target.getPosition(), true);
+        SCAsyncCuboidClipboard asyncCuboidClipboard = new SCAsyncCuboidClipboard(asyncEditSession.getPlayer(), clipBoard);
+        asyncCuboidClipboard.place(asyncEditSession, target.getPosition(), true);
     }
 }

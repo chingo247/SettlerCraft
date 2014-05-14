@@ -56,6 +56,8 @@ public class SCStructureAPI extends JavaPlugin {
         for(Material m : Material.values()) {
             MaterialUtil.isAttachable(m, (byte)0);
         }
+        
+        
     }
     
     public static WorldEditPlugin getWorldEditPlugin() {

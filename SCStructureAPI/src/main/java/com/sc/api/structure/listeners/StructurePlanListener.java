@@ -60,10 +60,8 @@ public class StructurePlanListener implements Listener {
                 && pie.getClickedBlock().getType() != Material.AIR) {
 
             pie.setCancelled(true); // default action would break a block
-            System.out.println("plan! " + plan.getDisplayName());
             LocalSession session = getLocalSession(pie.getPlayer());
 
-            System.out.println(session.hasCUISupport());
             if (session.hasCUISupport()) {
                 try {
                     if (handleCUIPlayerSelect(player, pie.getClickedBlock().getLocation(), plan, pie.getAction())) {
@@ -129,7 +127,7 @@ public class StructurePlanListener implements Listener {
                 CuboidRegion newRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
                 if (oldRegion.getPos1().equals(newRegion.getPos1()) && oldRegion.getPos2().equals(newRegion.getPos2())) {
                     if (SCStructureBuilder.placeStructure(player, location, direction, plan)) {
-                        player.sendMessage(ChatColor.YELLOW + "Placing structure");
+//                        player.sendMessage(ChatColor.YELLOW + "Placing structure"); 
                         session.getRegionSelector(world).clear();
                         session.dispatchCUISelection(WorldEditUtil.getLocalPlayer(player));
                         return true;

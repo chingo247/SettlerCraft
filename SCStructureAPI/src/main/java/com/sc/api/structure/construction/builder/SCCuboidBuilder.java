@@ -78,7 +78,14 @@ public class SCCuboidBuilder {
         editSession.flushQueue();
     }
 
-    static Location align(CuboidClipboard clipboard, Location location, SimpleCardinal direction) {
+    /**
+     * Alignes target clipboard to speficied direction, assuming that the initial state is pointed to EAST
+     * @param clipboard
+     * @param location
+     * @param direction
+     * @return 
+     */
+    public static Location align(CuboidClipboard clipboard, Location location, SimpleCardinal direction) {
         switch (direction) {
             case EAST:
                 return location;

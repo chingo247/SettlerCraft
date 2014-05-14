@@ -5,33 +5,16 @@
  */
 package com.sc.api.structure.listeners;
 
-import static com.sc.api.structure.util.WorldEditUtil.getLocalSession;
-import com.sk89q.worldedit.LocalSession;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 
 /**
  * @author Chingo
  */
 public class PlayerListener implements Listener {
     
-//    private int possibleSkillAmount = 5;
 
-    @EventHandler
-    public void onPlayerJoinEvent(PlayerJoinEvent joinEvent) {
-        Player player = joinEvent.getPlayer();
-        LocalSession session = getLocalSession(player);
-        if(!session.hasCUISupport()) {
-            player.sendMessage("Hey there " + ChatColor.GOLD +player.getName()+ "!");
-            player.sendMessage(ChatColor.RESET+"You are "+ ChatColor.RED +" NOT " + ChatColor.RESET + " using "+ChatColor.GOLD+ "WorldEditCUI!");
-            player.sendMessage("To get an "+ChatColor.GOLD+"AWESOME "+ ChatColor.RESET+ "Client User Interface");
-//            player.sendMessage("Check out: "+ ChatColor.GOLD +" http://www.minecraftforum.net/topic/2171206-172-worldeditcui/");
-        }
-    }
 
     @EventHandler
     public void onPlayerBuildEvent(PlayerInteractEvent pie) {
