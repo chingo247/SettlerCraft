@@ -33,6 +33,26 @@ public class ItemShopCategoryMenu extends CategoryMenu {
     private final Map<String, Session> visitors;
     private boolean chooseDefaultCategory = false;
     private String defaultCategory;
+    private String mark;
+    private ShopCallback callback;
+
+    /**
+     * Constructor
+     *
+     * @param title The title of this shop
+     * @param wontDeplete If infinite items in this shop will/must never deplete Note: if infinite
+     * all pick actions on this shop's inventory will be cancelled
+     * @param endless wheter the shop should be endless(scrollable) or not
+     * @param callback
+     *
+     */
+    public ItemShopCategoryMenu(String title, boolean wontDeplete, boolean endless, ShopCallback callback) {
+        super(title, wontDeplete);
+        this.endless = endless;
+        this.items = Maps.newHashMap();
+        this.visitors = Maps.newHashMap();
+        this.callback = callback;
+    }
 
     /**
      * Constructor
@@ -44,10 +64,7 @@ public class ItemShopCategoryMenu extends CategoryMenu {
      *
      */
     public ItemShopCategoryMenu(String title, boolean wontDeplete, boolean endless) {
-        super(title, wontDeplete);
-        this.endless = endless;
-        this.items = Maps.newHashMap();
-        this.visitors = Maps.newHashMap();
+        this(title, wontDeplete, endless, null);
     }
 
     /**
@@ -255,8 +272,8 @@ public class ItemShopCategoryMenu extends CategoryMenu {
     }
 
     public void onEnter(Player player, boolean getsForFree) {
-        System.out.println("REMOVE THE CREDIT BONUS!!!!!");
-        SCVaultEconomyUtil.getInstance().getEconomy().depositPlayer(player.getName(), 100000);
+//        System.out.println("REMOVE THE CREDIT BONUS!!!!!");
+//        SCVaultEconomyUtil.getInstance().getEconomy().depositPlayer(player.getName(), 100000);
         player.sendMessage(ChatColor.YELLOW + "[" + title + "]: Hello " + player.getName() + "!");
         double balance = SCVaultEconomyUtil.getInstance().getEconomy().getBalance(player.getName());
         if (balance > 0) {
@@ -374,7 +391,7 @@ public class ItemShopCategoryMenu extends CategoryMenu {
             if (!getsForFree) {
                 whoClicked.closeInventory();
                 playerLeave(whoClicked);
-                whoClicked.sendMessage(ChatColor.RED + "[SCMenu]: U don't have a bankaccount");
+                whoClicked.sendMessage(ChatColor.RED + "You don't have a bankaccount");
                 return;
             }
         }
@@ -385,7 +402,7 @@ public class ItemShopCategoryMenu extends CategoryMenu {
             stack.setItemMeta(meta);
 
             whoClicked.getInventory().addItem(stack);
-            whoClicked.sendMessage(ChatColor.YELLOW + "[" + getTitle() + "]"
+            whoClicked.sendMessage(ChatColor.YELLOW + "[" + getTitle() + "]: "
                     + ChatColor.BLUE + slot.getName()
                     + ChatColor.YELLOW + " has been added to your inventory");
         } else { // Pay!
@@ -393,20 +410,20 @@ public class ItemShopCategoryMenu extends CategoryMenu {
 
             EconomyResponse er = SCVaultEconomyUtil.getInstance().getEconomy().withdrawPlayer(whoClicked.getName(), price);
             if (er.transactionSuccess()) {
-                whoClicked.sendMessage(ChatColor.YELLOW + "[" + getTitle() + "]"
+                whoClicked.sendMessage(ChatColor.YELLOW + "[" + getTitle() + "]: "
                         + ChatColor.BLUE + slot.getName()
                         + ChatColor.YELLOW + " has been added to your inventory");
                 double balance = er.balance;
                 if (balance > 0) {
-                    whoClicked.sendMessage(ChatColor.YELLOW + "[SC]: new balance: " + ChatColor.GREEN + balance);
+                    whoClicked.sendMessage(ChatColor.YELLOW + "Your new balance: " + ChatColor.GREEN + balance);
                 } else {
-                    whoClicked.sendMessage(ChatColor.YELLOW + "[SC]: new balance: " + ChatColor.RED + balance);
+                    whoClicked.sendMessage(ChatColor.YELLOW + "Your new balance: " + ChatColor.RED + balance);
                 }
 
                 ItemStack stack = slot.getItemStack().clone();
-                ItemMeta meta = stack.getItemMeta();
-                meta.setLore(null);
-                stack.setItemMeta(meta);
+                if(callback != null) {
+                    callback.onItemSold(whoClicked, stack, price);
+                }
                 whoClicked.getInventory().addItem(stack);
             } else {
                 whoClicked.sendMessage(ChatColor.RED + "[" + title + "]: Transaction failed, " + er.errorMessage);
@@ -481,6 +498,9 @@ public class ItemShopCategoryMenu extends CategoryMenu {
             if (category.equalsIgnoreCase(defaultCategory)) {
                 clearItemSlots();
                 List<MenuSlot> is = getItems();
+                if(is == null) {
+                    return;
+                }
                 Collections.sort(is, ALPHABETICAL_ORDER);
                 final int max = getFreeSlots();
 //                System.out.println("max = " + max);
@@ -500,11 +520,12 @@ public class ItemShopCategoryMenu extends CategoryMenu {
                 clearItemSlots();
 //                System.out.println("Category: " + getCategoryName(category));
                 List<MenuSlot> is = getItems(getCategoryName(category));
-                Collections.sort(is, ALPHABETICAL_ORDER);
+
 
                 if (is == null) {
                     return;
                 }
+                Collections.sort(is, ALPHABETICAL_ORDER);
                 final int max = getFreeSlots();
 //                System.out.println("max = " + max);
                 int current = 0;
@@ -521,6 +542,12 @@ public class ItemShopCategoryMenu extends CategoryMenu {
                 }
             }
         }
+
+    }
+
+    public interface ShopCallback {
+
+        void onItemSold(final Player buyer, final ItemStack stack, final double price);
 
     }
 }

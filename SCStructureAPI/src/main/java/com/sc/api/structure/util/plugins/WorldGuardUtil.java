@@ -4,18 +4,12 @@
  * and open the template in the editor.
  */
 
-package com.settlercraft.model.entity.living;
-
-import net.citizensnpcs.api.npc.NPC;
+package com.sc.api.structure.util.plugins;
 
 /**
  *
  * @author Chingo
  */
-public class GuildMaster extends Representative {
-
-    public GuildMaster(NPC npc) {
-        super(npc);
-    }
+public class WorldGuardUtil {
     
 }

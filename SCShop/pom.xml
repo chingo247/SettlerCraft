@@ -34,7 +34,7 @@
         </plugins>
     </build>
     <repositories>
-        <!--Vault Repo-->
+        <!--Private Repo-->
         <repository>
             <id>Nexus</id>
             <url>http://localhost:8088/nexus/content/repositories/thirdparty/</url>

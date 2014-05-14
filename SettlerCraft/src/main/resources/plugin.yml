@@ -6,5 +6,7 @@ depend: [SCStructureAPI, SCMenu]
 
 commands:
     sc:
+        description: Structure related commands
+        usage: /sc [arg]
         
           
