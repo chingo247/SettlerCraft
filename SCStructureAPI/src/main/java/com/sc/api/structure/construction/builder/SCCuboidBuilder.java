@@ -7,8 +7,8 @@ package com.sc.api.structure.construction.builder;
 
 import com.sc.api.structure.model.structure.world.SimpleCardinal;
 import com.sc.api.structure.util.CuboidUtil;
-import com.sc.api.structure.util.plugins.WorldEditUtil;
 import com.sc.api.structure.util.WorldUtil;
+import com.sc.api.structure.util.plugins.WorldEditUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
@@ -192,5 +192,15 @@ public class SCCuboidBuilder {
             placeLayered(editSession, whole, all,  location, delayBetweenLayers, next);
         }
     }
+    
+//    public static boolean placeIfFree(Player player, CuboidClipboard clip, Location location, SimpleCardinal cardinal) {
+//        Location target = align(clip, location, cardinal);
+//        if(SCStructureAPI.getSCStructureAPI().isRestrictZonesEnabled()) {
+//            WorldGuardUtil.getRegionManager(player.getWorld()).getApplicableRegions(null)
+//            
+//            
+//        }
+//        
+//    }
 
 }

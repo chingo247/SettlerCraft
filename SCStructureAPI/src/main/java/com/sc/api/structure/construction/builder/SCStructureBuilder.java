@@ -13,9 +13,9 @@ import com.sc.api.structure.model.structure.StructureJob;
 import com.sc.api.structure.model.structure.plan.StructurePlan;
 import com.sc.api.structure.model.structure.world.SimpleCardinal;
 import com.sc.api.structure.persistence.StructureService;
+import com.sc.api.structure.util.WorldUtil;
 import com.sc.api.structure.util.plugins.AsyncWorldEditUtil;
 import com.sc.api.structure.util.plugins.WorldEditUtil;
-import com.sc.api.structure.util.WorldUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Location;
@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.IJobEntryListener;
@@ -100,9 +101,12 @@ public class SCStructureBuilder {
                         public void jobStateChanged(BlockPlacerJobEntry bpje) {
                             if(bpje.getStatus() == BlockPlacerJobEntry.JobStatus.PlacingBlocks) {
                                 player.sendMessage(ChatColor.YELLOW + "Building:  " + ChatColor.BLUE + structureName);
+//                                player.playSound(player.getLocation(), Sound.NOTE_SNARE_DRUM, 5, 0);
                             } else if(bpje.getStatus() == BlockPlacerJobEntry.JobStatus.Done) {
                                 player.sendMessage(ChatColor.YELLOW + "Construction complete: " + ChatColor.BLUE + structureName);
                                 remove(playerName, bpje.getJobId());
+                                player.playSound(player.getLocation(), Sound.NOTE_SNARE_DRUM, 2, 0);
+                                
                             }
                         }
                     });
@@ -137,6 +141,8 @@ public class SCStructureBuilder {
 
         }
     }
+    
+
     
     private static void remove(String player, int jobId) {
         Iterator<StructureJob> it = jobs.get(player).iterator();

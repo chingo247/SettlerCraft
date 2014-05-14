@@ -33,12 +33,22 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class SCStructureAPI extends JavaPlugin {
 
-    
+    private boolean restrictZones = false;
     public static final String ALIAS = "[STRUC]";
     public static final String PLAN_SHOP_NAME = "Buy & Build";
     private StructurePlanListener spl;
 
-//    private final StructureListener sl = new StructureListener();
+    public boolean isRestrictZonesEnabled() {
+        return restrictZones;
+    }
+
+    public void setRestrictZonesEnabled(boolean restrictZones) {
+        this.restrictZones = restrictZones;
+    }
+    
+    
+
+    
 
     public static WorldEditAPI getWorldEditAPI() {
         return new WorldEditAPI((WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit"));

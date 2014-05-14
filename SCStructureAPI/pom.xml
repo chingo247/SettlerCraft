@@ -99,6 +99,13 @@
             <version>5.6</version>
             <scope>provided</scope>
         </dependency>
+        <!--WorldGuard-->
+        <dependency>
+            <groupId>com.sk89q</groupId>
+            <artifactId>worldguard</artifactId>  
+            <version>5.9</version>
+            <scope>provided</scope>
+        </dependency>
         <!--AsyncWorldEdit-->
         <dependency>
             <groupId>org.SBPrime</groupId>
