@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.sc.api.structure.construction.builder.async;
+package com.sc.api.structure.construction.builder;
 
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
@@ -107,6 +107,7 @@ public class SCLayeredCuboidClipBoard extends CuboidClipboard {
                     }
                 }
             }
+            
         }
         water.place(editSession, pos, noAir);
         lava.place(editSession, pos, noAir);

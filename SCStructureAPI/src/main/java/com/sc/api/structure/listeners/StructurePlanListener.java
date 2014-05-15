@@ -6,12 +6,13 @@
 package com.sc.api.structure.listeners;
 
 import com.sc.api.structure.construction.builder.SCStructureBuilder;
+import com.sc.api.structure.model.structure.Structure;
 import com.sc.api.structure.model.structure.plan.StructurePlan;
 import com.sc.api.structure.model.structure.world.SimpleCardinal;
 import com.sc.api.structure.persistence.StructurePlanService;
+import com.sc.api.structure.util.WorldUtil;
 import com.sc.api.structure.util.plugins.WorldEditUtil;
 import static com.sc.api.structure.util.plugins.WorldEditUtil.getLocalSession;
-import com.sc.api.structure.util.WorldUtil;
 import com.sk89q.worldedit.BlockWorldVector;
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalSession;
@@ -94,9 +95,10 @@ public class StructurePlanListener implements Listener {
             int y = target.getBlockY();
             int z = target.getBlockZ();
             Location location = new Location(world, new BlockWorldVector(world, x, y, z));
+            
+            Structure structure = new Structure(player.getName(), location, WorldUtil.getDirection(player), plan);
             if (SCStructureBuilder.overlaps(location, WorldUtil.getDirection(player), plan)) {
                 player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
-
             } else {
                 player.sendMessage(ChatColor.YELLOW + "Placing structure");
                 SCStructureBuilder.placeStructure(player, location, WorldUtil.getDirection(player), plan);
@@ -114,20 +116,20 @@ public class StructurePlanListener implements Listener {
         Location location = new Location(world, new BlockWorldVector(world, x, y, z));
         LocalSession session = WorldEditUtil.getLocalSession(player);
         SimpleCardinal direction = WorldUtil.getDirection(player);
-
+        
+        Structure structure = new Structure(player.getName(), location, WorldUtil.getDirection(player), plan);
         if (action == Action.LEFT_CLICK_BLOCK) {
             if (!session.getRegionSelector(world).isDefined()) {
-                SCStructureBuilder.select(player, WorldUtil.getDirection(player), location, plan);
+                SCStructureBuilder.select(player, structure);
                 player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
                 player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
             } else {
 
                 CuboidRegion oldRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
-                SCStructureBuilder.select(player, WorldUtil.getDirection(player), location, plan);
+                SCStructureBuilder.select(player, structure);
                 CuboidRegion newRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
                 if (oldRegion.getPos1().equals(newRegion.getPos1()) && oldRegion.getPos2().equals(newRegion.getPos2())) {
                     if (SCStructureBuilder.placeStructure(player, location, direction, plan)) {
-//                        player.sendMessage(ChatColor.YELLOW + "Placing structure"); 
                         session.getRegionSelector(world).clear();
                         session.dispatchCUISelection(WorldEditUtil.getLocalPlayer(player));
                         return true;
@@ -135,7 +137,7 @@ public class StructurePlanListener implements Listener {
                         player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
                     }
                 } else {
-                    SCStructureBuilder.select(player, WorldUtil.getDirection(player), location, plan);
+                    SCStructureBuilder.select(player, structure);
                     if (SCStructureBuilder.overlaps(location, direction, plan)) {
                         player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
                     } else {

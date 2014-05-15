@@ -31,8 +31,8 @@ public class AsyncWorldEditUtil {
         return new AsyncEditSessionFactory(getAsyncWorldEditPlugin());
     }
 
-    public static AsyncEditSession createAsyncEditSession(Player player, int maxblocks) {
-        return new AsyncEditSession(getAsyncSessionFactory(), getAsyncWorldEditPlugin(), player.getName(), getLocalWorld(player), maxblocks);
+    public static AsyncEditSession createAsyncEditSession(Player issuer, int maxblocks) {
+        return new AsyncEditSession(getAsyncSessionFactory(), getAsyncWorldEditPlugin(), issuer.getName(), getLocalWorld(issuer), maxblocks);
     }
     
  

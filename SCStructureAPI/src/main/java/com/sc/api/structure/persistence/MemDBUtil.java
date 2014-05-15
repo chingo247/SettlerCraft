@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.sc.api.structure.util;
+package com.sc.api.structure.persistence;
 
 import com.google.common.collect.Sets;
 import java.util.Set;
@@ -37,7 +37,7 @@ public class MemDBUtil {
         for (Class clazz : annotatedClasses) {
             configuration.addAnnotatedClass(clazz);
         }
-        return configuration.configure();
+        return configuration.configure("scstructurememdb.cfg.xml");
     }
 
     public static void addAnnotatedClass(Class clazz) {
@@ -49,8 +49,9 @@ public class MemDBUtil {
         for(Class clazz : clazzes) {
             annotatedClasses.add(clazz);
         }
-        initializeConfiguration(config);
+       initializeConfiguration(config);
         factory = config.configure("scstructurememdb.cfg.xml").buildSessionFactory();
+         
     }
 
     public static void shutdown() {

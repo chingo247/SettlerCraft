@@ -272,8 +272,8 @@ public class ItemShopCategoryMenu extends CategoryMenu {
     }
 
     public void onEnter(Player player, boolean getsForFree) {
-//        System.out.println("REMOVE THE CREDIT BONUS!!!!!");
-//        SCVaultEconomyUtil.getInstance().getEconomy().depositPlayer(player.getName(), 100000);
+        System.out.println("REMOVE THE CREDIT BONUS!!!!!");
+        SCVaultEconomyUtil.getInstance().getEconomy().depositPlayer(player.getName(), 100000);
         player.sendMessage(ChatColor.YELLOW + "[" + title + "]: Hello " + player.getName() + "!");
         double balance = SCVaultEconomyUtil.getInstance().getEconomy().getBalance(player.getName());
         if (balance > 0) {

@@ -10,7 +10,6 @@ import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.api.structure.model.structure.plan.QStructurePlan;
 import com.sc.api.structure.model.structure.plan.StructurePlan;
-import com.sc.api.structure.util.MemDBUtil;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;

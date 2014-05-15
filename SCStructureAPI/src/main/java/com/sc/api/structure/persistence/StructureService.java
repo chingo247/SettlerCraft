@@ -6,7 +6,6 @@ import com.sc.api.structure.model.structure.QStructure;
 import com.sc.api.structure.model.structure.ReservedArea;
 import com.sc.api.structure.model.structure.Structure;
 import com.sc.api.structure.model.structure.StructureState;
-import com.sc.api.structure.util.HibernateUtil;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;

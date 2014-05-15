@@ -23,7 +23,6 @@ import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 
 /**
  *
@@ -56,6 +55,13 @@ public class Structure implements Serializable {
     @Nullable
     @OneToOne(cascade = CascadeType.ALL)
     private StructureProgress progress;
+    
+    @Nullable
+    private String parentRegion;
+    
+    @Nullable
+    private String structureRegion;
+    
 
     @Embedded
     private ReservedArea reserved;
@@ -76,14 +82,12 @@ public class Structure implements Serializable {
      * @param direction The player's direction on placement
      * @param plan The plan
      */
-    public Structure(Player owner, Location target, SimpleCardinal direction, StructurePlan plan) {
+    public Structure(String owner, Location target, SimpleCardinal direction, StructurePlan plan) {
         Preconditions.checkNotNull(plan);
         Preconditions.checkNotNull(target);
         Preconditions.checkNotNull(direction);
         this.plan = plan;
-        if(owner != null) {
-            this.owner = owner.getName();
-        }
+        this.owner = owner;
         this.setStatus(StructureState.CLEARING_SITE_OF_BLOCKS);
         this.direction = direction;
         this.worldLocation = new WorldLocation(target);
@@ -91,6 +95,16 @@ public class Structure implements Serializable {
         this.dimension = WorldUtil.getWorldDimension(target, direction, plan.getSchematic());
 //        this.progress = new StructureProgress(this, blockReport);
     }
+
+    public void setStructureRegion(String structureRegion) {
+        this.structureRegion = structureRegion;
+    }
+
+    public void setParentRegion(String parentRegion) {
+        this.parentRegion = parentRegion;
+    }
+    
+    
 
     /**
      * Gets the id of this structure

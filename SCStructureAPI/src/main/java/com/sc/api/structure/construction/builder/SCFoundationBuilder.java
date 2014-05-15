@@ -5,6 +5,7 @@
  */
 package com.sc.api.structure.construction.builder;
 
+import com.google.common.base.Preconditions;
 import com.sc.api.structure.construction.builder.strategies.FoundationStrategy;
 import com.sc.api.structure.model.structure.Structure;
 import com.sk89q.worldedit.BlockVector;
@@ -42,19 +43,20 @@ public class SCFoundationBuilder {
             case FANCY:
                 placeFancyFoundation(structure, material);
                 break;
-            default: throw new AssertionError("No action known for: " + strategy);
+            default:
+                throw new AssertionError("No action known for: " + strategy);
         }
     }
-    
+
     static void placeDefault(EditSession session, Structure structure, Material material, boolean autoflush) {
         Location pos1 = structure.getDimension().getStart();
         Location pos2 = new Location(pos1.getWorld(), new BlockVector(structure.getDimension().getEndX(), 1, structure.getDimension().getEndZ()));
-        
+
         try {
             CuboidRegion region = new CuboidRegion(pos1.getWorld(), pos1.getPosition(), pos2.getPosition());
             System.out.println(region.getCenter());
             session.makeCuboidFaces(region, new BaseBlock(material.getId()));
-            if(autoflush) {
+            if (autoflush) {
                 session.flushQueue();
             }
         }
@@ -62,24 +64,32 @@ public class SCFoundationBuilder {
             Logger.getLogger(SCFoundationBuilder.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
 
-//    static CuboidClipboard generateDefault(Structure structure, Material material) {
-//        CuboidClipboard cl = structure.getPlan().getSchematic();
-//        int width = cl.getWidth();
-//        int length = cl.getLength();
-//        
-//        CuboidClipboard foundation = new CuboidClipboard(new BlockVector(width, 1, length));
-//        for(int x = 0; x < width; x++) {
-//            for(int z = 0; z < length; z++) {
-//                foundation.setBlock(new BlockVector(x, 0, z), new BaseBlock(material.getId()));
-//            }
-//        }
-//        return foundation;
-//    }
+    static void placeEnclosure(EditSession session, Structure structure, int material, int height) {
+        Preconditions.checkArgument(height > 0);
+        CuboidClipboard clipboard = structure.getPlan().getSchematic();
+        CuboidClipboard cc = new CuboidClipboard(new BlockVector(clipboard.getWidth(), height + 1, clipboard.getLength()));
 
-    static CuboidClipboard placeFancyFoundation(Structure structure, Material material) {
-        throw new UnsupportedOperationException("This feature is not supported yet");
+        for (int z = 0; z < cc.getLength(); z++) {
+            for (int x = 0; x < cc.getWidth(); x ++) {
+                for (int y = 1; y < cc.getHeight(); y++) {
+                    if((z % 3 == 0 && x % 3 == 0) && (z == 0 || z == cc.getLength() - 1 || x == 0 || x == cc.getWidth() - 1)) {
+                        cc.setBlock(new BlockVector(x, y, z), new BaseBlock(material));
+                    }
+                }
+            }
+        }
+        try {
+            Location target = SCCuboidBuilder.align(cc, structure.getLocation(), structure.getDirection());
+            cc.place(session, target.getPosition(), true);
+        }
+        catch (MaxChangedBlocksException ex) {
+            Logger.getLogger(SCFoundationBuilder.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    static void placeFancyFoundation(Structure structure, Material material) {
+        //throw new UnsupportedOperationException("This feature is not supported yet");
     }
 
 }

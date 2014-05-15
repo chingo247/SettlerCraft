@@ -14,9 +14,9 @@ import com.sc.api.structure.model.structure.plan.StructurePlan;
 import com.sc.api.structure.model.structure.progress.StructureProgress;
 import com.sc.api.structure.model.structure.progress.StructureProgressLayer;
 import com.sc.api.structure.model.structure.progress.StructureProgressMaterialResource;
-import com.sc.api.structure.util.HibernateUtil;
+import com.sc.api.structure.persistence.HibernateUtil;
+import com.sc.api.structure.persistence.MemDBUtil;
 import com.sc.api.structure.util.MaterialUtil;
-import com.sc.api.structure.util.MemDBUtil;
 import com.sk89q.worldedit.bukkit.WorldEditAPI;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.File;
@@ -60,6 +60,30 @@ public class SCStructureAPI extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        if(Bukkit.getPluginManager().getPlugin("WorldEdit") == null) {
+            System.out.println("WorldEdit NOT FOUND!!! Disabling...");
+            this.setEnabled(false);
+            return;
+        } 
+        if(Bukkit.getPluginManager().getPlugin("AsyncWorldEdit") == null) {
+           System.out.println("AsyncWorldEdit NOT FOUND!!! Disabling...");
+           this.setEnabled(false);
+           return; 
+        }
+        
+                if(Bukkit.getPluginManager().getPlugin("WorldGuard") == null) {
+           System.out.println("WorldGuard NOT FOUND!!! Disabling...");
+           this.setEnabled(false);
+           return; 
+        }
+        
+//        if(Bukkit.getPluginManager().getPlugin("WorldGuard") == null) {
+//           System.out.println("WorldGuard NOT FOUND!!! Disabling...");
+//           this.setEnabled(false);
+//           return; 
+//        }
+        
+        
         initDB();
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);

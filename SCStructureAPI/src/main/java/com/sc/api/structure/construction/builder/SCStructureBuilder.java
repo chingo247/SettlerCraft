@@ -5,29 +5,23 @@
  */
 package com.sc.api.structure.construction.builder;
 
-import com.google.common.collect.Maps;
 import com.sc.api.structure.construction.builder.async.SCAsyncCuboidBuilder;
 import com.sc.api.structure.construction.builder.async.SCJobCallback;
 import com.sc.api.structure.model.structure.Structure;
 import com.sc.api.structure.model.structure.StructureJob;
 import com.sc.api.structure.model.structure.plan.StructurePlan;
 import com.sc.api.structure.model.structure.world.SimpleCardinal;
+import com.sc.api.structure.model.structure.world.WorldDimension;
 import com.sc.api.structure.persistence.StructureService;
-import com.sc.api.structure.util.WorldUtil;
 import com.sc.api.structure.util.plugins.AsyncWorldEditUtil;
-import com.sc.api.structure.util.plugins.WorldEditUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ConcurrentMap;
+import com.sk89q.worldedit.blocks.BlockID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
@@ -40,23 +34,19 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
  */
 public class SCStructureBuilder {
     
-    private static final ConcurrentMap<String, List<StructureJob>> jobs = Maps.newConcurrentMap();
-
     public enum BuildDirection {
-
         UP,
         DOWN
     }
 
-    public static void select(Player player, SimpleCardinal direction, Location location, StructurePlan plan) {
-        CuboidClipboard clipboard = plan.getSchematic();
-        Location pos2 = WorldUtil.calculateEndLocation(location, direction, clipboard);
-        WorldEditUtil.selectClipboardArea(player, location, pos2);
+    public static void select(Player player, Structure structure) {
+        WorldDimension dim = structure.getDimension();
+        SCCuboidBuilder.select(player, dim.getStart(), dim.getEnd());
     }
 
-    public static void placeInstant(EditSession session, SimpleCardinal direction, Location location, StructurePlan plan) {
-        CuboidClipboard clipboard = plan.getSchematic();
-        SCCuboidBuilder.place(clipboard, location, direction);
+    public static void place(EditSession session, Structure structure) {
+        CuboidClipboard clipboard = structure.getPlan().getSchematic();
+        SCCuboidBuilder.place(clipboard, structure.getLocation(), structure.getDirection());
     }
 
     public static boolean overlaps(Location location, SimpleCardinal direction, StructurePlan plan) {
@@ -67,11 +57,12 @@ public class SCStructureBuilder {
 
     public static boolean placeStructure(final Player player, final Location location, final SimpleCardinal direction, StructurePlan plan) {
         final StructureService service = new StructureService();
+        
 
         if (overlaps(location, direction, plan)) {
             return false;
         } else {
-            final Structure structure = new Structure(player, location, direction, plan);
+            final Structure structure = new Structure(player.getName(), location, direction, plan);
 //            service.save(structure);
             
             final AsyncEditSession asyncSession = AsyncWorldEditUtil.createAsyncEditSession(player, -1); // -1 = infinite
@@ -79,22 +70,18 @@ public class SCStructureBuilder {
             final CuboidClipboard cc = structure.getPlan().getSchematic();
             final String playerName = player.getName();
             final String structureName = structure.getPlan().getDisplayName();
-          
+            asyncSession.setFastMode(true);
             
-            if(jobs.get(playerName) == null) {
-                jobs.put(playerName, new ArrayList<StructureJob>());
-            }
+
             
-            if(!jobs.get(playerName).isEmpty()) {
-                SCFoundationBuilder.placeDefault(session, structure, Material.COBBLESTONE, true);
-            }
+            SCFoundationBuilder.placeEnclosure(session, structure, BlockID.FENCE, 2);
 
             SCJobCallback callback = new SCJobCallback() {
 
                 @Override
                 public void onJobAdded(BlockPlacerJobEntry entry) {
                     final StructureJob job = new StructureJob(entry.getJobId(), structure);
-                    jobs.get(playerName).add(job);
+                    SCConstructionManager.getInstance().addJob(playerName, job);
                     entry.addStateChangedListener(new IJobEntryListener() {
 
                         @Override
@@ -104,7 +91,7 @@ public class SCStructureBuilder {
 //                                player.playSound(player.getLocation(), Sound.NOTE_SNARE_DRUM, 5, 0);
                             } else if(bpje.getStatus() == BlockPlacerJobEntry.JobStatus.Done) {
                                 player.sendMessage(ChatColor.YELLOW + "Construction complete: " + ChatColor.BLUE + structureName);
-                                remove(playerName, bpje.getJobId());
+                                SCConstructionManager.getInstance().removeJob(playerName, bpje.getJobId());
                                 player.playSound(player.getLocation(), Sound.NOTE_SNARE_DRUM, 2, 0);
                                 
                             }
@@ -119,7 +106,7 @@ public class SCStructureBuilder {
                     player.sendMessage(ChatColor.RED + "Construction canceled: " + ChatColor.BLUE + structureName);
                     entry.getEditSession().undo(entry.getEditSession());
                     session.undo(session);
-                    remove(playerName, entry.getJobId());
+                    SCConstructionManager.getInstance().removeJob(playerName, entry.getJobId());
                 }
             };
 
@@ -144,16 +131,7 @@ public class SCStructureBuilder {
     
 
     
-    private static void remove(String player, int jobId) {
-        Iterator<StructureJob> it = jobs.get(player).iterator();
-        while(it.hasNext()) {
-            StructureJob j = it.next();
-            if(j.getId() == jobId) {
-                it.remove();
-                break;
-            }
-        }
-    }
+    
 
     
 

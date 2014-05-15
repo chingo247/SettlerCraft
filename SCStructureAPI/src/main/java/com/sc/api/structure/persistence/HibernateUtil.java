@@ -1,4 +1,4 @@
-package com.sc.api.structure.util;
+package com.sc.api.structure.persistence;
 
 import com.google.common.collect.Sets;
 import java.util.Set;
@@ -15,9 +15,9 @@ public class HibernateUtil {
 
     public static Session getSession() {
         if (factory == null) {
-            
             initializeConfiguration(config);
             factory = config.configure("hibernate.cfg.xml").buildSessionFactory();
+            
         }
         return factory.openSession();
     }
@@ -28,7 +28,7 @@ public class HibernateUtil {
         for (Class clazz : annotatedClasses) {
             configuration.addAnnotatedClass(clazz);
         }
-        return configuration.configure();
+        return configuration.configure("hibernate.cfg.xml");
     }
 
     public static void addAnnotatedClass(Class clazz) {
@@ -42,6 +42,7 @@ public class HibernateUtil {
         }
         initializeConfiguration(config);
         factory = config.configure("hibernate.cfg.xml").buildSessionFactory();
+        
     }
 
     public static void shutdown() {
