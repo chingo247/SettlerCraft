@@ -26,6 +26,8 @@ import java.util.EnumMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 
@@ -37,7 +39,8 @@ import javax.persistence.Lob;
 @Entity
 public class StructurePlan implements Serializable {
     @Id
-    private final String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String category = "default";
     private String faction = "default";
     private String displayName; 
@@ -57,13 +60,11 @@ public class StructurePlan implements Serializable {
      * JPA Constructor
      */
     protected StructurePlan() {
-        this.id = null;
         this.structureSchematic = null;
     }
 
-    public StructurePlan(String id, File schematic) throws IOException, DataException {
-        this.id = id;
-        this.displayName = id;
+    public StructurePlan(String displayName, File schematic) throws IOException, DataException {
+        this.displayName = displayName;
         this.structureSchematic = schematic;
     }
 
@@ -159,7 +160,7 @@ public class StructurePlan implements Serializable {
         this.faction = faction;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 

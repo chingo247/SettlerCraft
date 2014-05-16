@@ -50,6 +50,11 @@ public class SCStructureAPI extends JavaPlugin {
     public static final String ALIAS = "[STRUC]";
     public static final String PLAN_SHOP_NAME = "Buy & Build";
     private StructurePlanListener spl;
+    private static ItemShopCategoryMenu planMenu;
+    
+    public SCStructureAPI() {
+        initDB();
+    }
 
     public boolean isRestrictZonesEnabled() {
         return restrictZones;
@@ -92,12 +97,23 @@ public class SCStructureAPI extends JavaPlugin {
             return;
         }
 
-        initDB();
+        System.out.println("Setting up DB");
+        
+        System.out.println("Setting up Listeners");
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
+        new Thread(new Runnable() {
 
-        loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
-        initPlanShop();
+            @Override
+            public void run() {
+                System.out.println("Loading Structures");
+                loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
+                System.out.println("Loading plans into menu");
+                setupPlanShop();
+                System.out.println("Structures loaded");
+            }
+        }).start();
+        
         getCommand("sc").setExecutor(new StructureCommands());
 
     }
@@ -150,8 +166,8 @@ public class SCStructureAPI extends JavaPlugin {
         }
     }
 
-    private static void initPlanShop() {
-        ItemShopCategoryMenu planShop = new ItemShopCategoryMenu(PLAN_SHOP_NAME, true, true, new ItemShopCategoryMenu.ShopCallback() {
+    private static void setupPlanShop() {
+        planMenu = new ItemShopCategoryMenu(PLAN_SHOP_NAME, true, true, new ItemShopCategoryMenu.ShopCallback() {
 
             @Override
             public void onItemSold(final Player buyer, final ItemStack stack, final double price) {
@@ -165,20 +181,20 @@ public class SCStructureAPI extends JavaPlugin {
         });
 
         // Add Plan Categories
-        planShop.addCategory(0, new ItemStack(Material.NETHER_STAR), "All");
-        planShop.addCategory(1, new ItemStack(Material.WORKBENCH), "General", "Town Center");
-        planShop.addCategory(2, new ItemStack(Material.ANVIL), "Industry", "Industrial", "Industries");
-        planShop.addCategory(3, new ItemStack(Material.BED), "Residency", "Residence", "Residencial", "Houses", "House");
-        planShop.addCategory(4, new ItemStack(Material.GOLD_INGOT), "Economy", "Economical", "Shops", "Shop", "Market", "Markets");
-        planShop.addCategory(5, new ItemStack(Material.QUARTZ), "Temples", "Temple", "Church", "Sacred", "Holy");
-        planShop.addCategory(6, new ItemStack(Material.SMOOTH_BRICK), "Fortifications", "Fort", "Fortification", "Wall", "Fortress", "Fortresses", "Keep", "Castle", "Castles", "Military");
-        planShop.addCategory(7, new ItemStack(Material.IRON_SWORD), "Dungeons&Arenas", "Arena", "Arenas", "Dungeon", "Dungeons");
-        planShop.addCategory(8, new ItemStack(Material.BUCKET), "Misc");
-        planShop.addActionSlot(9, new ItemStack(Material.BED_BLOCK), "Previous");
-        planShop.addActionSlot(17, new ItemStack(Material.BED_BLOCK), "Next");
-        planShop.setLocked(10, 11, 12, 13, 14, 15, 16);
-        planShop.setDefaultCategory("All");
-        planShop.setChooseDefaultCategory(true);
+        planMenu.addCategory(0, new ItemStack(Material.NETHER_STAR), "All");
+        planMenu.addCategory(1, new ItemStack(Material.WORKBENCH), "General", "Town Center");
+        planMenu.addCategory(2, new ItemStack(Material.ANVIL), "Industry", "Industrial", "Industries");
+        planMenu.addCategory(3, new ItemStack(Material.BED), "Residency", "Residence", "Residencial", "Houses", "House");
+        planMenu.addCategory(4, new ItemStack(Material.GOLD_INGOT), "Economy", "Economical", "Shops", "Shop", "Market", "Markets");
+        planMenu.addCategory(5, new ItemStack(Material.QUARTZ), "Temples", "Temple", "Church", "Sacred", "Holy");
+        planMenu.addCategory(6, new ItemStack(Material.SMOOTH_BRICK), "Fortifications", "Fort", "Fortification", "Wall", "Fortress", "Fortresses", "Keep", "Castle", "Castles", "Military");
+        planMenu.addCategory(7, new ItemStack(Material.IRON_SWORD), "Dungeons&Arenas", "Arena", "Arenas", "Dungeon", "Dungeons");
+        planMenu.addCategory(8, new ItemStack(Material.BUCKET), "Misc");
+        planMenu.addActionSlot(9, new ItemStack(Material.BED_BLOCK), "Previous");
+        planMenu.addActionSlot(17, new ItemStack(Material.BED_BLOCK), "Next");
+        planMenu.setLocked(10, 11, 12, 13, 14, 15, 16);
+        planMenu.setDefaultCategory("All");
+        planMenu.setChooseDefaultCategory(true);
 
         StructurePlanService planService = new StructurePlanService();
         for (StructurePlan plan : planService.getPlans()) {
@@ -190,11 +206,10 @@ public class SCStructureAPI extends JavaPlugin {
 
             slot.setData("Size", cc.getLength() + "x" + cc.getWidth() + "x" + cc.getHeight(), ChatColor.GOLD);
             slot.setData("Blocks", sizeString, ChatColor.GOLD);
-            planShop.addItem(slot, plan.getCategory(), plan.getPrice());
-
+            planMenu.addItem(slot, plan.getCategory(), plan.getPrice());
         }
 
-        MenuManager.getInstance().register(planShop);
+        MenuManager.getInstance().register(planMenu);
     }
 
 }

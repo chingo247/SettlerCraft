@@ -172,10 +172,11 @@
             <version>1.6.1</version>
         </dependency>
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.9</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.6.1</version>
         </dependency>
+            
         <dependency>
             <groupId>ehcache</groupId>
             <artifactId>ehcache</artifactId>
@@ -234,6 +235,7 @@
                 <configuration>
                     <configLocation>config/sun_checks.xml</configLocation>
                 </configuration>
+                <version>2.12.1</version>
             </plugin>
         </plugins>
     </reporting>

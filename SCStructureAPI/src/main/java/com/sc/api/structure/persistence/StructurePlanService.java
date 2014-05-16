@@ -17,7 +17,9 @@
 
 package com.sc.api.structure.persistence;
 
+
 import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.hibernate.HibernateDeleteClause;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.api.structure.model.structure.plan.QStructurePlan;
 import com.sc.api.structure.model.structure.plan.StructurePlan;
@@ -28,6 +30,7 @@ import java.util.logging.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+
 
 /**
  *
@@ -42,7 +45,7 @@ public class StructurePlanService {
         try {
             session = MemDBUtil.getSession();
             tx = session.beginTransaction();
-                session.persist(plan);
+                session.merge(plan);
             tx.commit();
         } catch (HibernateException e) {
             try {
@@ -65,7 +68,7 @@ public class StructurePlanService {
             session = MemDBUtil.getSession();
             tx = session.beginTransaction();
             for(StructurePlan plan : plans) {
-                session.persist(plan);
+                session.merge(plan);
             }
             tx.commit();
         } catch (HibernateException e) {
@@ -80,6 +83,13 @@ public class StructurePlanService {
                 session.close();
             }
         }
+    }
+    
+    public void clear() {
+        System.out.println("Clearing plans");
+        Session session = MemDBUtil.getSession();
+        QStructurePlan qplan = QStructurePlan.structurePlan;
+        new HibernateDeleteClause(session, qplan).execute();
     }
     
 

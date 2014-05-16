@@ -39,12 +39,13 @@ import org.bukkit.configuration.file.YamlConfiguration;
 public class StructurePlanLoader {
 
     public List<StructurePlan> loadStructures(File buildingFolder) throws FileNotFoundException {
-        String[] extensions = {"yml"};
-        
-
-        Iterator<File> it = FileUtils.iterateFiles(buildingFolder, extensions, true);
         StructurePlanService sps = new StructurePlanService();
-
+        if(sps.getPlans().size() > 0) {
+            sps.clear();
+        }
+         
+        String[] extensions = {"yml"};
+        Iterator<File> it = FileUtils.iterateFiles(buildingFolder, extensions, true);
         List<StructurePlan> structurePlans = new ArrayList<>();
 
         while (it.hasNext()) {

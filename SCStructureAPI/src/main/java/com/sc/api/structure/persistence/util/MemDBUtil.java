@@ -18,9 +18,11 @@ import org.hibernate.cfg.AnnotationConfiguration;
 public class MemDBUtil {
     private static SessionFactory factory;
     private static final AnnotationConfiguration config = new AnnotationConfiguration();
+    private static final String PATH = "plugins/SCStructureAPI/DataBase/memdb.cfg.xml";
     
     static {
-        File file = new File("plugins/SCStructureAPI/DataBase/memdb.cfg.xml");
+        File file = new File(PATH);
+        
         factory = config.configure(file).buildSessionFactory();
     }
 
@@ -33,14 +35,16 @@ public class MemDBUtil {
 
     public static void addAnnotatedClass(Class clazz) {
         config.addAnnotatedClass(clazz);
-        factory = config.buildSessionFactory();
+        File file = new File(PATH);
+        factory = config.configure(file).buildSessionFactory();
     }
     
     public static void addAnnotatedClasses(Class... clazzes) {
         for(Class clazz : clazzes) {
             config.addAnnotatedClass(clazz);
         }
-        factory = config.configure().buildSessionFactory();
+        File file = new File(PATH);
+        factory = config.configure(file).buildSessionFactory();
     }
 
     public static void shutdown() {
