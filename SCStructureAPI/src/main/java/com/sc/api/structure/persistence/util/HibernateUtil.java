@@ -1,5 +1,6 @@
 package com.sc.api.structure.persistence.util;
 
+import java.io.File;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
@@ -8,8 +9,11 @@ public class HibernateUtil {
 
     private static SessionFactory factory;
     
+    private static final  AnnotationConfiguration config = new AnnotationConfiguration();
+    
     static {
-        factory = new AnnotationConfiguration().configure("hibernate.cfg.xml").buildSessionFactory();
+        File file = new File("plugins/SCStructureAPI/DataBase/hibernate.cfg.xml");
+        factory = config.configure(file).buildSessionFactory();
     }
 
     public static Session getSession() {
@@ -19,7 +23,7 @@ public class HibernateUtil {
    
 
     public static void addAnnotatedClass(Class clazz) {
-        annotatedClasses.add(clazz);
+        config.addAnnotatedClass(clazz);
         factory = config.buildSessionFactory();
     }
     

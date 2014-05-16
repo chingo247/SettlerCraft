@@ -6,52 +6,41 @@
 
 package com.sc.api.structure.persistence.util;
 
-import com.google.common.collect.Sets;
-import java.util.Set;
+import java.io.File;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
-import org.hibernate.cfg.Configuration;
 
 /**
  * A database that fully exists in the system memmory. All data will be lost when the server shutsdown.
- * However when u have a lot of data that needs to be queried and may differ at every server start, this offers a fair approach to get it done.
  * @author Chingo
  */
 public class MemDBUtil {
     private static SessionFactory factory;
-    private static Set<Class> annotatedClasses = Sets.newHashSet();
-    private static AnnotationConfiguration config = new AnnotationConfiguration();
+    private static final AnnotationConfiguration config = new AnnotationConfiguration();
+    
+    static {
+        File file = new File("plugins/SCStructureAPI/DataBase/memdb.cfg.xml");
+        factory = config.configure(file).buildSessionFactory();
+    }
+
 
     public static Session getSession() {
-        if (factory == null) {
-            initializeConfiguration(config);
-            factory = config.configure("scstructurememdb.cfg.xml").buildSessionFactory();
-        }
         return factory.openSession();
     }
     
     
 
-    private static Configuration initializeConfiguration(final AnnotationConfiguration configuration) {
-        for (Class clazz : annotatedClasses) {
-            configuration.addAnnotatedClass(clazz);
-        }
-        return configuration.configure("scstructurememdb.cfg.xml");
-    }
-
     public static void addAnnotatedClass(Class clazz) {
-        annotatedClasses.add(clazz);
+        config.addAnnotatedClass(clazz);
         factory = config.buildSessionFactory();
     }
     
     public static void addAnnotatedClasses(Class... clazzes) {
         for(Class clazz : clazzes) {
-            annotatedClasses.add(clazz);
+            config.addAnnotatedClass(clazz);
         }
-       initializeConfiguration(config);
-        factory = config.configure("scstructurememdb.cfg.xml").buildSessionFactory();
-         
+        factory = config.configure().buildSessionFactory();
     }
 
     public static void shutdown() {
