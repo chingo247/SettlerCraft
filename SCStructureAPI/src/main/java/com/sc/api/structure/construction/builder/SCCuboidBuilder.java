@@ -60,7 +60,7 @@ public class SCCuboidBuilder {
      * @param cuboidClipboard The cuboidClipboard
      * @throws MaxChangedBlocksException
      */
-    public static void clear(EditSession editSession,  Location target, SimpleCardinal cardinal, CuboidClipboard cuboidClipboard) throws MaxChangedBlocksException {
+    public static void clear(EditSession editSession, Location target, SimpleCardinal cardinal, CuboidClipboard cuboidClipboard) throws MaxChangedBlocksException {
         Location pos2 = WorldUtil.calculateEndLocation(target, cardinal, cuboidClipboard);
         clear(editSession, pos2, pos2);
     }
@@ -79,11 +79,13 @@ public class SCCuboidBuilder {
     }
 
     /**
-     * Alignes target clipboard to speficied direction, assuming that the initial state is pointed to EAST
+     * Alignes target clipboard to speficied direction, assuming that the
+     * initial state is pointed to EAST
+     *
      * @param clipboard
      * @param location
      * @param direction
-     * @return 
+     * @return
      */
     public static Location align(CuboidClipboard clipboard, Location location, SimpleCardinal direction) {
         switch (direction) {
@@ -135,7 +137,9 @@ public class SCCuboidBuilder {
     }
 
     /**
-     * Creates a session for infinite blocks and places a specified layer of a cuboid at target location, 
+     * Creates a session for infinite blocks and places a specified layer of a
+     * cuboid at target location,
+     *
      * @param whole The whole cuboidClipBoard
      * @param layer The layer, must be between 0 and height
      * @param location The target location
@@ -151,7 +155,9 @@ public class SCCuboidBuilder {
     }
 
     /**
-     * Uses the given session to place a specified layer of a cuboid at target location
+     * Uses the given session to place a specified layer of a cuboid at target
+     * location
+     *
      * @param editSession
      * @param whole The whole cuboidClipBoard
      * @param layer The layer, must be between 0 and height
@@ -166,13 +172,15 @@ public class SCCuboidBuilder {
     }
 
     /**
-     * Places a cuboidClipBoard in layers at target location at a specified interval
+     * Places a cuboidClipBoard in layers at target location at a specified
+     * interval
+     *
      * @param editSession
      * @param whole
      * @param location
      * @param cardinal
-     * @param interval 
-     * 
+     * @param interval
+     *
      */
     public static void placeLayered(EditSession editSession, CuboidClipboard whole, Location location, SimpleCardinal cardinal, int interval) {
         Location target = align(whole, location, cardinal);
@@ -182,17 +190,17 @@ public class SCCuboidBuilder {
     private static void placeLayered(final EditSession editSession, final CuboidClipboard whole, final List<CuboidClipboard> all, final Location location, final int delayBetweenLayers, final int index) {
         try {
             all.get(index).paste(editSession, location.getPosition().add(new BlockVector(0, 1, 0)), true);
-            
+
         }
         catch (MaxChangedBlocksException ex) {
             Logger.getLogger(SCCuboidBuilder.class.getName()).log(Level.SEVERE, null, ex);
         }
         final int next = index + 1;
         if (next < all.size()) {
-            placeLayered(editSession, whole, all,  location, delayBetweenLayers, next);
+            placeLayered(editSession, whole, all, location, delayBetweenLayers, next);
         }
     }
-    
+
 //    public static boolean placeIfFree(Player player, CuboidClipboard clip, Location location, SimpleCardinal cardinal) {
 //        Location target = align(clip, location, cardinal);
 //        if(SCStructureAPI.getSCStructureAPI().isRestrictZonesEnabled()) {
@@ -201,6 +209,97 @@ public class SCCuboidBuilder {
 //            
 //        }
 //        
+//    }
+//    public static void placeBuffered(final EditSession editSession, final CuboidClipboard whole, final int bufferSize, final Location location, final SimpleCardinal direction, final int delayBetweenLayers, final BufferCallback callback) {
+//        final Location target = align(whole, location, direction);
+//        new BukkitRunnable() {
+//
+//            @Override
+//            public void run() {
+//                placeBuffered(editSession, Collections.synchronizedList(getAsList(whole, direction)), whole, bufferSize, target, direction, 0, delayBetweenLayers, callback);
+//            }
+//        }.runTask(SCStructureAPI.getSCStructureAPI());
+//
+//    }
+//
+//    private static void placeBuffered(final EditSession editSession, final List<BlockVector> vectors, final CuboidClipboard whole, final int bufferSize, final Location location, final SimpleCardinal direction, final int index, final int delayBetweenLayers, final BufferCallback callback) {
+//        int indexCounter = index;
+//        int bufferCounter = 0;
+//        System.out.println("size: " + vectors.size());
+//        System.out.println("index: " + index);
+//        if(index == vectors.size() - 1) {
+//            callback.onComplete();
+//            System.out.println("On Complete");
+//            return;
+//        }
+//        
+//        for (int i = index; i < vectors.size(); i++) {
+//            Vector v = vectors.get(i);
+//            BaseBlock b = whole.getBlock(v);
+//            if (b != null && !b.isAir()) {
+//                try {
+//
+//                    editSession.setBlock(location.add(v).getPosition(), b);
+//                    indexCounter++;
+//                    bufferCounter++;
+//                    if (bufferCounter == bufferSize) {
+//                        editSession.flushQueue();
+//                        final int nIndex = indexCounter;
+//
+//                        new BukkitRunnable() {
+//                            @Override
+//                            public void run() {
+//                                placeBuffered(editSession, vectors, whole, bufferSize, location, direction, nIndex, delayBetweenLayers, callback);
+//                            }
+//                        }.runTaskLater(SCStructureAPI.getSCStructureAPI(), delayBetweenLayers);
+//                        
+//                        
+//                    }
+//                }
+//                catch (MaxChangedBlocksException ex) {
+//                    Logger.getLogger(SCCuboidBuilder.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
+//            
+//        }
+//        
+////        callback.onComplete();
+//        editSession.flushQueue();
+//
+//    }
+//
+//    private static List<BlockVector> getAsList(CuboidClipboard whole, SimpleCardinal cardinal) {
+////        Location target = align(whole, location, direction);
+//
+//        List<BlockVector> vectors = new ArrayList<>();
+//
+//        for (int y = 0; y < whole.getHeight(); y++) {
+//            for (int z = 0; z < whole.getLength(); z++) {
+//                for (int x = 0; x < whole.getWidth(); x++) {
+//                    BlockVector vector = new BlockVector(x, y, z);
+//                    BaseBlock b = whole.getBlock(vector);
+//                            vectors.add(new BlockVector(x, y, z));
+//                }
+//            }
+//        }
+//
+//        return vectors;
+//    }
+//
+//    private static final Comparator<Vector> heightComperator = new Comparator<Vector>() {
+//
+//        @Override
+//        public int compare(Vector o1, Vector o2) {
+//            if (o1.getBlockY() > o2.getBlockY()) {
+//                return -1;
+//            } else {
+//                return 1;
+//            }
+//        }
+//    };
+//    
+//    public interface BufferCallback {
+//        void onComplete();
 //    }
 
 }

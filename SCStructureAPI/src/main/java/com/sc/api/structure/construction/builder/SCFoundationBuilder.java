@@ -40,11 +40,11 @@ public class SCFoundationBuilder {
             case DEFAULT:
                 placeDefault(session, structure, material, autoflush);
                 break;
-            case FANCY:
-                placeFancyFoundation(structure, material);
-                break;
+//            case FANCY:
+//                placeFancyFoundation(structure, material);
+//                break;
             default:
-                throw new AssertionError("No action known for: " + strategy);
+                throw new UnsupportedOperationException("No action known for: " + strategy);
         }
     }
 
@@ -65,31 +65,24 @@ public class SCFoundationBuilder {
         }
     }
 
-    static void placeEnclosure(EditSession session, Structure structure, int material, int height) {
+    static CuboidClipboard generateEnclosure(EditSession session, CuboidClipboard structure, int material, int height, int startY) {
         Preconditions.checkArgument(height > 0);
-        CuboidClipboard clipboard = structure.getPlan().getSchematic();
-        CuboidClipboard cc = new CuboidClipboard(new BlockVector(clipboard.getWidth(), height + 1, clipboard.getLength()));
+        Preconditions.checkArgument(startY < height);
+       
+        CuboidClipboard cc = new CuboidClipboard(new BlockVector(structure.getWidth(), height + startY, structure.getLength()));
 
         for (int z = 0; z < cc.getLength(); z++) {
-            for (int x = 0; x < cc.getWidth(); x ++) {
-                for (int y = 1; y < cc.getHeight(); y++) {
-                    if((z % 3 == 0 && x % 3 == 0) && (z == 0 || z == cc.getLength() - 1 || x == 0 || x == cc.getWidth() - 1)) {
+            for (int x = 0; x < cc.getWidth(); x++) {
+                for (int y = startY; y < cc.getHeight(); y++) {
+                    if(z % (structure.getLength() / 5) == 0 && (z == 0 || z == cc.getLength() - 1 || x == 0 || x == cc.getWidth() - 1)) {
                         cc.setBlock(new BlockVector(x, y, z), new BaseBlock(material));
                     }
                 }
             }
         }
-        try {
-            Location target = SCCuboidBuilder.align(cc, structure.getLocation(), structure.getDirection());
-            cc.place(session, target.getPosition(), true);
-        }
-        catch (MaxChangedBlocksException ex) {
-            Logger.getLogger(SCFoundationBuilder.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        return cc;
     }
 
-    static void placeFancyFoundation(Structure structure, Material material) {
-        //throw new UnsupportedOperationException("This feature is not supported yet");
-    }
+
 
 }

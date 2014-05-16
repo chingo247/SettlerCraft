@@ -74,7 +74,11 @@ public class StructurePlan implements Serializable {
         }
         return null;
     }
+    
 
+    
+
+    
 
     public double getPrice() {
         return price;

@@ -11,17 +11,17 @@ import com.sc.api.structure.model.structure.Structure;
 import com.sc.api.structure.model.structure.StructureJob;
 import com.sc.api.structure.model.structure.plan.StructurePlan;
 import com.sc.api.structure.model.structure.world.SimpleCardinal;
-import com.sc.api.structure.model.structure.world.WorldDimension;
 import com.sc.api.structure.persistence.StructureService;
+import com.sc.api.structure.util.WorldUtil;
 import com.sc.api.structure.util.plugins.AsyncWorldEditUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.blocks.BlockID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
@@ -33,15 +33,15 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
  * @author Chingo
  */
 public class SCStructureBuilder {
-    
+
     public enum BuildDirection {
+
         UP,
         DOWN
     }
 
     public static void select(Player player, Structure structure) {
-        WorldDimension dim = structure.getDimension();
-        SCCuboidBuilder.select(player, dim.getStart(), dim.getEnd());
+        SCCuboidBuilder.select(player, structure.getLocation(), WorldUtil.calculateEndLocation(structure.getLocation(), structure.getDirection(), structure.getPlan().getSchematic()));
     }
 
     public static void place(EditSession session, Structure structure) {
@@ -55,28 +55,28 @@ public class SCStructureBuilder {
         return service.overlaps(structure);
     }
 
-    public static boolean placeStructure(final Player player, final Location location, final SimpleCardinal direction, StructurePlan plan) {
+    public static boolean placeStructure(final Player player, final Location location, final SimpleCardinal direction, final StructurePlan plan) {
         final StructureService service = new StructureService();
-        
 
         if (overlaps(location, direction, plan)) {
             return false;
         } else {
             final Structure structure = new Structure(player.getName(), location, direction, plan);
 //            service.save(structure);
-            
+
             final AsyncEditSession asyncSession = AsyncWorldEditUtil.createAsyncEditSession(player, -1); // -1 = infinite
             final EditSession session = new EditSession(location.getWorld(), -1);
             final CuboidClipboard cc = structure.getPlan().getSchematic();
             final String playerName = player.getName();
             final String structureName = structure.getPlan().getDisplayName();
-            asyncSession.setFastMode(true);
+            if(SCConstructionManager.getInstance().hasJob(playerName)) {
+                SCFoundationBuilder.placeDefault(session, structure, Material.COBBLESTONE, true);
+            }
+            
+            SCFrameBuilder.generateFancyFrame(structure, 4, 4);
             
 
-            
-            SCFoundationBuilder.placeEnclosure(session, structure, BlockID.FENCE, 2);
-
-            SCJobCallback callback = new SCJobCallback() {
+            final SCJobCallback callback = new SCJobCallback() {
 
                 @Override
                 public void onJobAdded(BlockPlacerJobEntry entry) {
@@ -86,21 +86,20 @@ public class SCStructureBuilder {
 
                         @Override
                         public void jobStateChanged(BlockPlacerJobEntry bpje) {
-                            if(bpje.getStatus() == BlockPlacerJobEntry.JobStatus.PlacingBlocks) {
+                            if (bpje.getStatus() == BlockPlacerJobEntry.JobStatus.PlacingBlocks) {
+                                
                                 player.sendMessage(ChatColor.YELLOW + "Building:  " + ChatColor.BLUE + structureName);
 //                                player.playSound(player.getLocation(), Sound.NOTE_SNARE_DRUM, 5, 0);
-                            } else if(bpje.getStatus() == BlockPlacerJobEntry.JobStatus.Done) {
+                            } else if (bpje.getStatus() == BlockPlacerJobEntry.JobStatus.Done) {
                                 player.sendMessage(ChatColor.YELLOW + "Construction complete: " + ChatColor.BLUE + structureName);
                                 SCConstructionManager.getInstance().removeJob(playerName, bpje.getJobId());
                                 player.playSound(player.getLocation(), Sound.NOTE_SNARE_DRUM, 2, 0);
-                                
+                                session.undo(session);
                             }
                         }
                     });
                 }
 
-   
-         
                 @Override
                 public void onJobCanceled(BlockPlacerJobEntry entry) {
                     player.sendMessage(ChatColor.RED + "Construction canceled: " + ChatColor.BLUE + structureName);
@@ -110,7 +109,11 @@ public class SCStructureBuilder {
                 }
             };
 
+            
+           
+            
             try {
+                
                 SCAsyncCuboidBuilder.placeLayered(
                         asyncSession,
                         cc,
@@ -122,17 +125,13 @@ public class SCStructureBuilder {
             catch (MaxChangedBlocksException ex) {
                 Logger.getLogger(SCStructureBuilder.class.getName()).log(Level.SEVERE, null, ex);
             }
-
-//            service.save(structure);
-            return true;
-
+            service.save(structure);
         }
+
+            
+        return true;
+
     }
-    
-
-    
-    
-
-    
-
 }
+
+

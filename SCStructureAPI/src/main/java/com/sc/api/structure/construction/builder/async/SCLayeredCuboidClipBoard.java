@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.sc.api.structure.construction.builder;
+package com.sc.api.structure.construction.builder.async;
 
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
@@ -30,7 +30,6 @@ import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockID;
-import com.sk89q.worldedit.blocks.BlockType;
 
 /**
  * Features Vertically pasting / placing a ClipBoard
@@ -48,6 +47,7 @@ public class SCLayeredCuboidClipBoard extends CuboidClipboard {
                         continue;
                     }
                     this.setBlock(getOrigin().add(new BlockVector(x, y, z)), block);
+                    
                 }
             }
         }
@@ -79,40 +79,39 @@ public class SCLayeredCuboidClipBoard extends CuboidClipboard {
         CuboidClipboard placeFinal = new CuboidClipboard(this.getSize());
         CuboidClipboard water = new CuboidClipboard(this.getSize());
         CuboidClipboard lava = new CuboidClipboard(this.getSize());
-        
-        
+       
+       
         for (int y = 0; y < getHeight(); ++y) {
+       
             for (int x = 0; x < getWidth(); ++x) {
                 for (int z = 0; z < getLength(); ++z) {
                     final BlockVector v = new BlockVector(x, y, z);
                     final BaseBlock b = getBlock(v);
-                    if (b == null) {
+                    if (b == null || (noAir && b.isAir())) {
                         continue;
                     }
 
-                    if (noAir && b.isAir()) {
-                        continue;
-                    }
-                    
-                    if (isWater(b)) {
-                        water.setBlock(v, b);
-                    } else if (isLava(b)) {
-                        lava.setBlock(v, b);
-                    } else if (BlockType.shouldPlaceLast(b.getId())) {
-                        placeLater.setBlock(v, b);
-                    } else if (BlockType.shouldPlaceFinal(b.getId())) {
-                        placeFinal.setBlock(v, b);
-                    } else {
-                        editSession.setBlock(new Vector(x, y, z).add(pos), b);
-                    }
+                   
+//                    if (isWater(b)) {
+//                        water.setBlock(v, b);
+//                    } else if (isLava(b)) {
+//                        lava.setBlock(v, b);
+//                    } else if (BlockType.shouldPlaceLast(b.getId())) {
+//                        placeLater.setBlock(v, b);
+//                    } else if (BlockType.shouldPlaceFinal(b.getId())) {
+//                        placeFinal.setBlock(v, b);
+//                    } else {
+                        Vector p = new Vector(x, y, z).add(pos);
+                        editSession.smartSetBlock(new Vector(x, y, z).add(pos), b);
+//                    }
                 }
             }
             
         }
-        water.place(editSession, pos, noAir);
-        lava.place(editSession, pos, noAir);
-        placeLater.place(editSession, pos, noAir);
-        placeFinal.place(editSession, pos, noAir);
+//        water.place(editSession, pos, noAir);
+//        lava.place(editSession, pos, noAir);
+//        placeLater.place(editSession, pos, noAir);
+//        placeFinal.place(editSession, pos, noAir);
     }
     
     private boolean isLava(BaseBlock b) {

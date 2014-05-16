@@ -5,6 +5,7 @@
  */
 package com.sc.api.menu.plugin.shop;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.sc.api.menu.plugin.SCVaultEconomyUtil;
 import com.sc.api.menu.plugin.shop.MenuSlot.MenuSlotType;
@@ -118,6 +119,29 @@ public class ItemShopCategoryMenu extends CategoryMenu {
         return defaultCategory != null;
     }
 
+    public void addItem(MenuSlot slot, String category, double price) {
+        Preconditions.checkArgument(slot.getType() == MenuSlotType.ITEM);
+        category = getCategoryName(category);
+//        System.out.println("Category: " + category);
+
+        if (category == null && hasDefaultCategory()) {
+            category = defaultCategory;
+        } else if (category == null) {
+            throw new AssertionError("Unknown action for category: " + category);
+        }
+
+        if (wontDeplete) {
+            slot.getItemStack().setAmount(1);
+        }
+        if (items.get(category) == null) {
+            items.put(category, new ArrayList<MenuSlot>());
+        }
+        if (price > 0) {
+            slot.setPrice(price);
+        }
+        items.get(category).add(slot);
+    }
+
     /**
      * Adds an item to the given category.
      *
@@ -128,26 +152,10 @@ public class ItemShopCategoryMenu extends CategoryMenu {
      */
     public void addItem(ItemStack item, String itemName, double price, String category) {
 //        System.out.println("Has category: " + category + " " + hasCategory(category));
-        category = getCategoryName(category);
-//        System.out.println("Category: " + category);
-
-        if (category == null && hasDefaultCategory()) {
-            category = defaultCategory;
-        } else if (category == null) {
-            throw new AssertionError("Unknown action for category: " + category);
-        }
 
         MenuSlot ms = new MenuSlot(item, itemName, MenuSlotType.ITEM);
-        if (wontDeplete) {
-            item.setAmount(1);
-        }
-        if (items.get(category) == null) {
-            items.put(category, new ArrayList<MenuSlot>());
-        }
-        if (price > 0) {
-            ms.setPrice(price);
-        }
-        items.get(category).add(ms);
+        ms.setPrice(price);
+        addItem(ms, category, price);
     }
 
     /**
@@ -360,8 +368,9 @@ public class ItemShopCategoryMenu extends CategoryMenu {
             // Build it's session inventory with the needed categories/actions
             Inventory inv = visitors.get(whoClicked.getName()).inventory;
             List<MenuSlot> msItems = visitors.get(whoClicked.getName()).pages.get(visitors.get(whoClicked.getName()).currentPage);
-            Collections.sort(msItems, ALPHABETICAL_ORDER);
+
             if (msItems != null) {
+                Collections.sort(msItems, ALPHABETICAL_ORDER);
                 Iterator<MenuSlot> it = msItems.iterator();
 
                 clearAndBuildTemplate(whoClicked, inv);
@@ -421,7 +430,7 @@ public class ItemShopCategoryMenu extends CategoryMenu {
                 }
 
                 ItemStack stack = slot.getItemStack().clone();
-                if(callback != null) {
+                if (callback != null) {
                     callback.onItemSold(whoClicked, stack, price);
                 }
                 whoClicked.getInventory().addItem(stack);
@@ -498,7 +507,7 @@ public class ItemShopCategoryMenu extends CategoryMenu {
             if (category.equalsIgnoreCase(defaultCategory)) {
                 clearItemSlots();
                 List<MenuSlot> is = getItems();
-                if(is == null) {
+                if (is == null) {
                     return;
                 }
                 Collections.sort(is, ALPHABETICAL_ORDER);
@@ -520,7 +529,6 @@ public class ItemShopCategoryMenu extends CategoryMenu {
                 clearItemSlots();
 //                System.out.println("Category: " + getCategoryName(category));
                 List<MenuSlot> is = getItems(getCategoryName(category));
-
 
                 if (is == null) {
                     return;

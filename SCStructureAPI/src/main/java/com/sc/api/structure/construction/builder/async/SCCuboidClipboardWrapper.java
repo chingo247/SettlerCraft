@@ -23,7 +23,6 @@
  */
 package com.sc.api.structure.construction.builder.async;
 
-import com.sc.api.structure.construction.builder.SCLayeredCuboidClipBoard;
 import com.sk89q.worldedit.CuboidClipboard;
 import org.primesoft.asyncworldedit.worldedit.CuboidClipboardWrapper;
 

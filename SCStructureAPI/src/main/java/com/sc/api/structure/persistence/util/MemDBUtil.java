@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.sc.api.structure.persistence;
+package com.sc.api.structure.persistence.util;
 
 import com.google.common.collect.Sets;
 import java.util.Set;

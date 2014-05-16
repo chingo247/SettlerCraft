@@ -1,35 +1,22 @@
-package com.sc.api.structure.persistence;
+package com.sc.api.structure.persistence.util;
 
-import com.google.common.collect.Sets;
-import java.util.Set;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
-import org.hibernate.cfg.Configuration;
 
 public class HibernateUtil {
 
     private static SessionFactory factory;
-    private static Set<Class> annotatedClasses = Sets.newHashSet();
-    private static AnnotationConfiguration config = new AnnotationConfiguration();
+    
+    static {
+        factory = new AnnotationConfiguration().configure("hibernate.cfg.xml").buildSessionFactory();
+    }
 
     public static Session getSession() {
-        if (factory == null) {
-            initializeConfiguration(config);
-            factory = config.configure("hibernate.cfg.xml").buildSessionFactory();
-            
-        }
         return factory.openSession();
     }
     
-    
-
-    private static Configuration initializeConfiguration(final AnnotationConfiguration configuration) {
-        for (Class clazz : annotatedClasses) {
-            configuration.addAnnotatedClass(clazz);
-        }
-        return configuration.configure("hibernate.cfg.xml");
-    }
+   
 
     public static void addAnnotatedClass(Class clazz) {
         annotatedClasses.add(clazz);
@@ -38,11 +25,9 @@ public class HibernateUtil {
     
     public static void addAnnotatedClasses(Class... clazzes) {
         for(Class clazz : clazzes) {
-            annotatedClasses.add(clazz);
+            config.addAnnotatedClass(clazz);
         }
-        initializeConfiguration(config);
-        factory = config.configure("hibernate.cfg.xml").buildSessionFactory();
-        
+        factory = config.configure().buildSessionFactory();
     }
 
     public static void shutdown() {

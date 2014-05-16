@@ -6,6 +6,7 @@
 
 package com.sc.api.structure.persistence;
 
+import com.sc.api.structure.persistence.util.MemDBUtil;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.api.structure.model.structure.plan.QStructurePlan;

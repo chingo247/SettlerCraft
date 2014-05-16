@@ -7,8 +7,10 @@ package com.sc.api.structure.util;
 
 import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldedit.Countable;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.blocks.BaseBlock;
 import java.util.List;
 
 /**
@@ -86,6 +88,16 @@ public class CuboidUtil {
         return null;
     }
 
+    public static int count(CuboidClipboard c) {
+        int count = 0;
+        for(Countable<BaseBlock> b : c.getBlockDistributionWithData()){
+            if(b.getID().isAir()) continue;
+            count += b.getAmount();
+        }
+        return count;
+    }
+    
+    
 
 
     public static CuboidClipboard getLayer(CuboidClipboard whole, int layer) {

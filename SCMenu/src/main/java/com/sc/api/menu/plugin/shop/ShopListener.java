@@ -40,7 +40,7 @@ public class ShopListener implements Listener {
 //        System.out.println("Inventory Click!");
 //        if (ice.getInventory().getTitle().hasMenu(":")) {
             String title = ice.getInventory().getTitle().trim();
-            if(MenuManager.getInstance().hasMenu(title) && ice.getClick() == ClickType.RIGHT) { 
+            if(MenuManager.getInstance().hasMenu(title) && (ice.getClick() == ClickType.RIGHT || ice.getClick() == ClickType.SHIFT_RIGHT || ice.getClick() == ClickType.SHIFT_LEFT)) { 
                 ice.setCancelled(true);
             }
             if (MenuManager.getInstance().hasMenu(title) && ice.getRawSlot()< Menu.MENUSIZE && ice.getRawSlot()>= 0) {

@@ -7,10 +7,13 @@ package com.sc.plugin;
 
 import com.sc.api.menu.plugin.shop.ItemShopCategoryMenu;
 import com.sc.api.menu.plugin.shop.MenuManager;
+import com.sc.api.menu.plugin.shop.MenuSlot;
 import com.sc.api.structure.SCStructureAPI;
 import com.sc.api.structure.model.structure.plan.StructurePlan;
 import com.sc.api.structure.persistence.StructurePlanService;
+import com.sc.api.structure.util.CuboidUtil;
 import com.sc.plugin.commands.SetterCraftCommands;
+import com.sk89q.worldedit.CuboidClipboard;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
@@ -82,7 +85,16 @@ public class SettlerCraft extends JavaPlugin {
          
         StructurePlanService planService = new StructurePlanService();
         for(StructurePlan plan : planService.getPlans()) {
-            planShop.addItem(new ItemStack(Material.PAPER), plan.getDisplayName(), plan.getPrice(), plan.getCategory());
+            ItemStack is = new ItemStack(Material.PAPER);
+            MenuSlot slot = new MenuSlot(is, plan.getDisplayName(), MenuSlot.MenuSlotType.ITEM);
+            CuboidClipboard cc = plan.getSchematic();
+            int size = CuboidUtil.count(cc);
+            String sizeString = size < 999 ? String.valueOf(size) : ((Math.round(size/1000)) + "K");
+            
+            slot.setData("Size", cc.getLength() + "x" + cc.getWidth() + "x" + cc.getHeight(), ChatColor.GOLD);
+            slot.setData("Blocks", sizeString, ChatColor.GOLD);
+            planShop.addItem(slot, plan.getCategory(), plan.getPrice());
+            
         }
 
         MenuManager.getInstance().register(planShop);

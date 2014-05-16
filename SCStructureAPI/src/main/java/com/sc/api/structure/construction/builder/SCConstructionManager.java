@@ -48,6 +48,13 @@ public class SCConstructionManager {
         jobs.get(player).add(structureJob);
     }
     
+    public boolean hasJob(String player) {
+        if(jobs.containsKey(player) && !jobs.get(player).isEmpty()) {
+            return true;
+        }
+       return false;
+    }
+    
     public void removeJob(String player, int jobId) {
         Iterator<StructureJob> it = jobs.get(player).iterator();
         while(it.hasNext()) {

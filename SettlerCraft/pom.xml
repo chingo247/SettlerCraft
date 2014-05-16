@@ -10,6 +10,11 @@
     <name>SettlerCraft</name>
     <url>http://maven.apache.org</url>
     <repositories>
+        <!--WorldEdit Repo-->
+        <repository>
+            <id>WorldEdit</id>
+            <url>http://maven.sk89q.com/repo</url>
+        </repository>
         <!--Bukkit Repo-->
         <repository>
             <id>bukkit-repo</id>
@@ -33,6 +38,13 @@
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
             <version>1.6.4-R2.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--WorldEdit-->
+        <dependency>
+            <groupId>com.sk89q</groupId>
+            <artifactId>worldedit</artifactId>  
+            <version>5.6</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

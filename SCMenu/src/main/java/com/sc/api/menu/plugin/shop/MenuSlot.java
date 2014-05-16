@@ -33,7 +33,7 @@ public class MenuSlot {
     private List<String> lore;
     private double price;
 
-    MenuSlot(ItemStack icon, String displayName, MenuSlotType type, String... aliasses) {
+    public MenuSlot(ItemStack icon, String displayName, MenuSlotType type, String... aliasses) {
         this.icon = icon;
         if(icon != null) {
         ItemMeta meta = icon.getItemMeta();
