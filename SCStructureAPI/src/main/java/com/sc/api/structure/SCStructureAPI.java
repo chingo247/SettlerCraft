@@ -97,20 +97,20 @@ public class SCStructureAPI extends JavaPlugin {
             return;
         }
 
-        System.out.println("Setting up DB");
+//        System.out.println("Setting up DB");
         
-        System.out.println("Setting up Listeners");
-        Bukkit.getPluginManager().registerEvents(new StructurePlanListener(this), this);
+//        System.out.println("Setting up Listeners");
+        Bukkit.getPluginManager().registerEvents(new StructurePlanListener(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
         new Thread(new Runnable() {
 
             @Override
             public void run() {
-                System.out.println("Loading Structures");
+//                System.out.println("Loading Structures");
                 loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
-                System.out.println("Loading plans into menu");
+//                System.out.println("Loading plans into menu");
                 setupPlanShop();
-                System.out.println("Structures loaded");
+//                System.out.println("Structures loaded");
             }
         }).start();
         

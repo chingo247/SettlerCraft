@@ -17,6 +17,7 @@
 
 package com.sc.api.structure.listeners;
 
+import com.sc.api.structure.SCStructureAPI;
 import com.sc.api.structure.construction.builder.SCStructureBuilder;
 import com.sc.api.structure.model.structure.Structure;
 import com.sc.api.structure.model.structure.plan.StructurePlan;
@@ -41,7 +42,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  *
@@ -49,11 +49,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class StructurePlanListener implements Listener {
 
-    private final JavaPlugin settlerCraft;
 
-    public StructurePlanListener(JavaPlugin settlerCraft) {
-        this.settlerCraft = settlerCraft;
-    }
 
     /**
      * Places a structure on player's target location
@@ -65,6 +61,9 @@ public class StructurePlanListener implements Listener {
         if (pie.getItem() == null || pie.getItem().getType() != Material.PAPER) {
             return;
         }
+        
+        boolean defaultFeedBack = SCStructureAPI.getSCStructureAPI().getConfig().contains("default-feedback") ? SCStructureAPI.getSCStructureAPI().getConfig().getBoolean("default-feedback") : true;
+        
         StructurePlanService service = new StructurePlanService();
         StructurePlan plan = service.getPlan(pie.getItem().getItemMeta().getDisplayName());
         Player player = pie.getPlayer();
@@ -77,7 +76,7 @@ public class StructurePlanListener implements Listener {
 
             if (session.hasCUISupport()) {
                 try {
-                    if (handleCUIPlayerSelect(player, pie.getClickedBlock().getLocation(), plan, pie.getAction())) {
+                    if (handleCUIPlayerSelect(player, pie.getClickedBlock().getLocation(), plan, pie.getAction(), defaultFeedBack)) {
                         ItemStack stack = pie.getItem().clone();
                         stack.setAmount(1);
                         pie.getPlayer().getInventory().removeItem(stack);
@@ -88,7 +87,7 @@ public class StructurePlanListener implements Listener {
                     Logger.getLogger(StructurePlanListener.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } else {
-                if (handleSimplePlayerSelect(player, pie.getClickedBlock().getLocation(), plan, pie.getAction())) {
+                if (handleSimplePlayerSelect(player, pie.getClickedBlock().getLocation(), plan, pie.getAction(), defaultFeedBack)) {
                     ItemStack stack = pie.getItem().clone();
                     stack.setAmount(1);
                     pie.getPlayer().getInventory().removeItem(stack);
@@ -100,7 +99,7 @@ public class StructurePlanListener implements Listener {
         }
     }
 
-    private boolean handleSimplePlayerSelect(Player player, org.bukkit.Location target, StructurePlan plan, Action action) {
+    private boolean handleSimplePlayerSelect(Player player, org.bukkit.Location target, StructurePlan plan, Action action, boolean defaultFeedBack) {
         if (action == Action.LEFT_CLICK_BLOCK) {
             LocalWorld world = WorldEditUtil.getLocalWorld(player);
             int x = target.getBlockX();
@@ -113,14 +112,14 @@ public class StructurePlanListener implements Listener {
                 player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
             } else {
                 player.sendMessage(ChatColor.YELLOW + "Placing structure");
-                SCStructureBuilder.placeStructure(player, location, WorldUtil.getDirection(player), plan);
+                SCStructureBuilder.placeStructure(player, location, WorldUtil.getDirection(player), plan, defaultFeedBack);
                 return true;
             }
         }
         return false;
     }
 
-    private boolean handleCUIPlayerSelect(Player player, org.bukkit.Location target, StructurePlan plan, Action action) throws IncompleteRegionException {
+    private boolean handleCUIPlayerSelect(Player player, org.bukkit.Location target, StructurePlan plan, Action action, boolean defaultFeedBack) throws IncompleteRegionException {
         LocalWorld world = WorldEditUtil.getLocalWorld(player);
         int x = target.getBlockX();
         int y = target.getBlockY();
@@ -141,7 +140,7 @@ public class StructurePlanListener implements Listener {
                 SCStructureBuilder.select(player, structure);
                 CuboidRegion newRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
                 if (oldRegion.getPos1().equals(newRegion.getPos1()) && oldRegion.getPos2().equals(newRegion.getPos2())) {
-                    if (SCStructureBuilder.placeStructure(player, location, direction, plan)) {
+                    if (SCStructureBuilder.placeStructure(player, location, direction, plan, defaultFeedBack)) {
                         session.getRegionSelector(world).clear();
                         session.dispatchCUISelection(WorldEditUtil.getLocalPlayer(player));
                         return true;

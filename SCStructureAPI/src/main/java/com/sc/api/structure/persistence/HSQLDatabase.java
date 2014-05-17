@@ -15,37 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.sc.api.structure.event.structure;
-
-import com.sc.api.structure.model.structure.Structure;
-import org.bukkit.event.HandlerList;
+package com.sc.api.structure.persistence;
 
 /**
  *
  * @author Chingo
  */
-public class StructureLayerCompleteEvent extends StructureEvent {
+public class HSQLDatabase {
     
-    private final int layer;
-
-    public StructureLayerCompleteEvent(Structure structure, int layer) {
-        super(structure);
-        this.layer = layer;
-    }
-
-    public int getLayer() {
-        return layer;
-    }
-
-     private static final HandlerList handlers = new HandlerList();
-
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
+    
+    
+    
     
 }

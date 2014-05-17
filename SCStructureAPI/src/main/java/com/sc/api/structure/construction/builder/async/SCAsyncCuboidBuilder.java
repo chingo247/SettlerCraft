@@ -29,11 +29,12 @@ import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
- *
+ * Performs all CuboidBuilder operations Async
  * @author Chingo
  */
 public class SCAsyncCuboidBuilder {
 
+    
     public static void clear(AsyncEditSession asyncEditSession, Location target, SimpleCardinal cardinal, CuboidClipboard clipboard) throws MaxChangedBlocksException {
         SCCuboidBuilder.clear(asyncEditSession, target, cardinal, clipboard);
     }

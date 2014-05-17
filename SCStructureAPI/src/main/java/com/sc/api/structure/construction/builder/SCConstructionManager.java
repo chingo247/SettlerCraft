@@ -157,7 +157,7 @@ public class SCConstructionManager {
         if (mayPlace(placer, world, region, true)) {
             RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(world);
             structure.setStructureRegion(region.getId());
-            if(SCStructureBuilder.placeStructure(placer, structure.getLocation(), structure.getDirection(), structure.getPlan())) {
+            if(SCStructureBuilder.placeStructure(placer, structure.getLocation(), structure.getDirection(), structure.getPlan(), feedback)) {
                 mgr.addRegion(region);
                 System.out.println("Claimed region");
                 return true;

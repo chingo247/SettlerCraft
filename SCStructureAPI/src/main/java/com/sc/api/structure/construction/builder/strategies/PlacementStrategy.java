@@ -17,11 +17,16 @@
 
 package com.sc.api.structure.construction.builder.strategies;
 
+import com.sk89q.worldedit.CuboidClipboard;
+import com.sk89q.worldedit.Vector;
+import java.util.List;
+
 /**
  *
  * @author Chingo
  */
-public enum FoundationStrategy {
-    DEFAULT,
-    FANCY
+public interface PlacementStrategy {
+    
+    public List<Vector> getList(CuboidClipboard cliboard);
+    
 }

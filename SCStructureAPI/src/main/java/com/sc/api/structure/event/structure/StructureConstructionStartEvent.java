@@ -15,21 +15,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.sc.api.structure.construction.builder;
+package com.sc.api.structure.event.structure;
 
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.LocalWorld;
+import com.sc.api.structure.model.structure.Structure;
+import org.bukkit.event.HandlerList;
 
 /**
- *
+ * Fired when a structure is being build
  * @author Chingo
  */
-public class SCEditSession extends EditSession {
-    
-    private String sessionName;
+public class StructureConstructionStartEvent extends StructureEvent {
 
-    public SCEditSession(LocalWorld world, int maxBlocks, String sessionName) {
-        super(world, maxBlocks);
+    public StructureConstructionStartEvent(Structure structure) {
+        super(structure);
+    }
+    
+    private static final HandlerList handlers = new HandlerList();
+
+    @Override
+    public HandlerList getHandlers() {
+        return handlers;
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
     
 }

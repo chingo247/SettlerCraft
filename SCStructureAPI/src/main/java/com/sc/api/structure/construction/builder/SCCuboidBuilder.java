@@ -47,7 +47,7 @@ public class SCCuboidBuilder {
      * @param target The target location
      * @param cuboidClipboard The cuboidClipboard
      */
-    public static void select(Player player, SimpleCardinal cardinal, Location target, CuboidClipboard cuboidClipboard) {
+    public static void select(Player player, Location target, SimpleCardinal cardinal, CuboidClipboard cuboidClipboard) {
         Location pos2 = WorldUtil.calculateEndLocation(target, cardinal, cuboidClipboard);
         select(player, target, pos2);
     }
@@ -91,13 +91,13 @@ public class SCCuboidBuilder {
     }
 
     /**
-     * Alignes target clipboard to speficied direction, assuming that the
+     * Aligns target clipboard to speficied direction, assuming that the
      * initial state is pointed to EAST
      *
      * @param clipboard
      * @param location
      * @param direction
-     * @return
+     * @return The new target location
      */
     public static Location align(CuboidClipboard clipboard, Location location, SimpleCardinal direction) {
         switch (direction) {
@@ -131,7 +131,7 @@ public class SCCuboidBuilder {
     }
 
     /**
-     * Creates a session for infinite blocks and places a CuboidClipBoard
+     * Aligns the clipboard to given cardinal and creates a session for infinite blocks and places a CuboidClipBoard
      * instantly aligned to direction
      *
      * @param cuboidClipboard The cuboidclipboard
@@ -147,9 +147,9 @@ public class SCCuboidBuilder {
             Logger.getLogger(SCCuboidBuilder.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
     /**
-     * Creates a session for infinite blocks and places a specified layer of a
+     * Aligns the clipboard to given cardinal and creates a session for infinite blocks and places a specified layer of a
      * cuboid at target location,
      *
      * @param whole The whole cuboidClipBoard
@@ -167,7 +167,7 @@ public class SCCuboidBuilder {
     }
 
     /**
-     * Uses the given session to place a specified layer of a cuboid at target
+     * Aligns the Clipboard to given cardinal and uses the specified session to place a layer of a cuboid at target
      * location
      *
      * @param editSession
@@ -184,19 +184,17 @@ public class SCCuboidBuilder {
     }
 
     /**
-     * Places a cuboidClipBoard in layers at target location at a specified
-     * interval
-     *
-     * @param editSession
-     * @param whole
-     * @param location
-     * @param cardinal
-     * @param interval
-     *
+     * Aligns the clipboard to given cardinal and places a cuboidClipBoard in layers. A runnable is used to fire the placement of each
+     * layer at a certain interval
+     * @param editSession The editsession
+     * @param whole The complete clipboard
+     * @param target The target location
+     * @param cardinal The cardinal 
+     * @param interval The interval at which layers will be placed
      */
-    public static void placeLayered(EditSession editSession, CuboidClipboard whole, Location location, SimpleCardinal cardinal, int interval) {
-        Location target = align(whole, location, cardinal);
-        placeLayered(editSession, whole, CuboidUtil.getLayers(whole), target, interval, 0);
+    public static void placeLayered(EditSession editSession, CuboidClipboard whole, Location target, SimpleCardinal cardinal, int interval) {
+        Location t = align(whole, target, cardinal);
+        placeLayered(editSession, whole, CuboidUtil.getLayers(whole), t, interval, 0);
     }
 
     private static void placeLayered(final EditSession editSession, final CuboidClipboard whole, final List<CuboidClipboard> all, final Location location, final int delayBetweenLayers, final int index) {
@@ -213,105 +211,5 @@ public class SCCuboidBuilder {
         }
     }
 
-//    public static boolean placeIfFree(Player player, CuboidClipboard clip, Location location, SimpleCardinal cardinal) {
-//        Location target = align(clip, location, cardinal);
-//        if(SCStructureAPI.getSCStructureAPI().isRestrictZonesEnabled()) {
-//            WorldGuardUtil.getRegionManager(player.getWorld()).getApplicableRegions(null)
-//            
-//            
-//        }
-//        
-//    }
-//    public static void placeBuffered(final EditSession editSession, final CuboidClipboard whole, final int bufferSize, final Location location, final SimpleCardinal direction, final int delayBetweenLayers, final BufferCallback callback) {
-//        final Location target = align(whole, location, direction);
-//        new BukkitRunnable() {
-//
-//            @Override
-//            public void run() {
-//                placeBuffered(editSession, Collections.synchronizedList(getAsList(whole, direction)), whole, bufferSize, target, direction, 0, delayBetweenLayers, callback);
-//            }
-//        }.runTask(SCStructureAPI.getSCStructureAPI());
-//
-//    }
-//
-//    private static void placeBuffered(final EditSession editSession, final List<BlockVector> vectors, final CuboidClipboard whole, final int bufferSize, final Location location, final SimpleCardinal direction, final int index, final int delayBetweenLayers, final BufferCallback callback) {
-//        int indexCounter = index;
-//        int bufferCounter = 0;
-//        System.out.println("size: " + vectors.size());
-//        System.out.println("index: " + index);
-//        if(index == vectors.size() - 1) {
-//            callback.onComplete();
-//            System.out.println("On Complete");
-//            return;
-//        }
-//        
-//        for (int i = index; i < vectors.size(); i++) {
-//            Vector v = vectors.get(i);
-//            BaseBlock b = whole.getBlock(v);
-//            if (b != null && !b.isAir()) {
-//                try {
-//
-//                    editSession.setBlock(location.add(v).getPosition(), b);
-//                    indexCounter++;
-//                    bufferCounter++;
-//                    if (bufferCounter == bufferSize) {
-//                        editSession.flushQueue();
-//                        final int nIndex = indexCounter;
-//
-//                        new BukkitRunnable() {
-//                            @Override
-//                            public void run() {
-//                                placeBuffered(editSession, vectors, whole, bufferSize, location, direction, nIndex, delayBetweenLayers, callback);
-//                            }
-//                        }.runTaskLater(SCStructureAPI.getSCStructureAPI(), delayBetweenLayers);
-//                        
-//                        
-//                    }
-//                }
-//                catch (MaxChangedBlocksException ex) {
-//                    Logger.getLogger(SCCuboidBuilder.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//            }
-//            
-//        }
-//        
-////        callback.onComplete();
-//        editSession.flushQueue();
-//
-//    }
-//
-//    private static List<BlockVector> getAsList(CuboidClipboard whole, SimpleCardinal cardinal) {
-////        Location target = align(whole, location, direction);
-//
-//        List<BlockVector> vectors = new ArrayList<>();
-//
-//        for (int y = 0; y < whole.getHeight(); y++) {
-//            for (int z = 0; z < whole.getLength(); z++) {
-//                for (int x = 0; x < whole.getWidth(); x++) {
-//                    BlockVector vector = new BlockVector(x, y, z);
-//                    BaseBlock b = whole.getBlock(vector);
-//                            vectors.add(new BlockVector(x, y, z));
-//                }
-//            }
-//        }
-//
-//        return vectors;
-//    }
-//
-//    private static final Comparator<Vector> heightComperator = new Comparator<Vector>() {
-//
-//        @Override
-//        public int compare(Vector o1, Vector o2) {
-//            if (o1.getBlockY() > o2.getBlockY()) {
-//                return -1;
-//            } else {
-//                return 1;
-//            }
-//        }
-//    };
-//    
-//    public interface BufferCallback {
-//        void onComplete();
-//    }
 
 }

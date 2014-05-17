@@ -42,12 +42,13 @@ public class SCFoundationBuilder {
      * doesnt have any functionality its just there to give the player some
      * feedback. And also clears the construction site from any blocks
      *
-     * @param player The player
+     * @param session The editsession
      * @param structure The structure
      * @param strategy The strategy
      * @param material The material to be used
+     * @param autoflush Wheter or not the session needs to be flushed
      */
-    static void placeFoundation(EditSession session, Structure structure, FoundationStrategy strategy, Material material, boolean autoflush) {
+    public static void placeFoundation(EditSession session, Structure structure, FoundationStrategy strategy, Material material, boolean autoflush) {
         switch (strategy) {
             case DEFAULT:
                 placeDefault(session, structure, material, autoflush);
@@ -60,13 +61,19 @@ public class SCFoundationBuilder {
         }
     }
 
-    static void placeDefault(EditSession session, Structure structure, Material material, boolean autoflush) {
+    /**
+     * Placed a default foundation, default foundation will cover the entire area of a structure (only one layer)
+     * @param session The editsession
+     * @param structure The structure
+     * @param material The material to use for the foundation
+     * @param autoflush Wheter or not the session needss to be flushed
+     */
+    public static void placeDefault(EditSession session, Structure structure, Material material, boolean autoflush) {
         Location pos1 = structure.getDimension().getStart();
         Location pos2 = new Location(pos1.getWorld(), new BlockVector(structure.getDimension().getEndX(), 1, structure.getDimension().getEndZ()));
 
         try {
             CuboidRegion region = new CuboidRegion(pos1.getWorld(), pos1.getPosition(), pos2.getPosition());
-            System.out.println(region.getCenter());
             session.makeCuboidFaces(region, new BaseBlock(material.getId()));
             if (autoflush) {
                 session.flushQueue();
@@ -77,16 +84,25 @@ public class SCFoundationBuilder {
         }
     }
 
-    static CuboidClipboard generateEnclosure(EditSession session, CuboidClipboard structure, int material, int height, int startY) {
+    /**
+     * Generates an enclosure for a clipboard, enclosures only mark the edge of a clipboard
+     * @param session The session to be used
+     * @param clipboard The clipboard
+     * @param material The material to use for the enclosure
+     * @param height The height
+     * @param startY The startY
+     * @return The generated enclosure as ClipBoard
+     */
+    public static CuboidClipboard generateEnclosure(EditSession session, CuboidClipboard clipboard, int material, int height, int startY) {
         Preconditions.checkArgument(height > 0);
         Preconditions.checkArgument(startY < height);
        
-        CuboidClipboard cc = new CuboidClipboard(new BlockVector(structure.getWidth(), height + startY, structure.getLength()));
+        CuboidClipboard cc = new CuboidClipboard(new BlockVector(clipboard.getWidth(), height + startY, clipboard.getLength()));
 
         for (int z = 0; z < cc.getLength(); z++) {
             for (int x = 0; x < cc.getWidth(); x++) {
                 for (int y = startY; y < cc.getHeight(); y++) {
-                    if(z % (structure.getLength() / 5) == 0 && (z == 0 || z == cc.getLength() - 1 || x == 0 || x == cc.getWidth() - 1)) {
+                    if(z % (clipboard.getLength() / 5) == 0 && (z == 0 || z == cc.getLength() - 1 || x == 0 || x == cc.getWidth() - 1)) {
                         cc.setBlock(new BlockVector(x, y, z), new BaseBlock(material));
                     }
                 }

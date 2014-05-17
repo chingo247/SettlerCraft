@@ -15,7 +15,6 @@ public class HibernateUtil {
     
     static {
         File file = new File(PATH);
-        
         factory = config.configure(file).buildSessionFactory();
     }
 

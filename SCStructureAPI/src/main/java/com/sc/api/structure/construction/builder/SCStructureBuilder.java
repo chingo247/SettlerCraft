@@ -18,9 +18,8 @@
 package com.sc.api.structure.construction.builder;
 
 import com.sc.api.structure.construction.builder.async.SCAsyncCuboidBuilder;
-import com.sc.api.structure.construction.builder.async.SCJobCallback;
+import com.sc.api.structure.construction.builder.strategies.SCDefaultCallbackAction;
 import com.sc.api.structure.model.structure.Structure;
-import com.sc.api.structure.model.structure.StructureJob;
 import com.sc.api.structure.model.structure.plan.StructurePlan;
 import com.sc.api.structure.model.structure.world.SimpleCardinal;
 import com.sc.api.structure.persistence.StructureService;
@@ -32,12 +31,8 @@ import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
-import org.primesoft.asyncworldedit.blockPlacer.IJobEntryListener;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
@@ -47,27 +42,45 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 public class SCStructureBuilder {
 
     public enum BuildDirection {
-
         UP,
         DOWN
     }
 
+    /**
+     * Selects the area where the structure will be placed
+     * @param player
+     * @param structure 
+     */
     public static void select(Player player, Structure structure) {
         SCCuboidBuilder.select(player, structure.getLocation(), WorldUtil.calculateEndLocation(structure.getLocation(), structure.getDirection(), structure.getPlan().getSchematic()));
     }
 
+    /**
+     * Places the structure at target location
+     * @param session
+     * @param structure 
+     */
     public static void place(EditSession session, Structure structure) {
         CuboidClipboard clipboard = structure.getPlan().getSchematic();
         SCCuboidBuilder.place(clipboard, structure.getLocation(), structure.getDirection());
     }
 
-    public static boolean overlaps(Location location, SimpleCardinal direction, StructurePlan plan) {
-        Structure structure = new Structure(null, location, direction, plan);
+    /**
+     * Checks wheter this structure overlaps another structure
+     * @param target The location
+     * @param direction The direction
+     * @param plan The structure plan
+     * @return true if structure doesnt overlap another
+     * @deprecated Doesnt perform check through worldguard
+     */
+    public static boolean overlaps(Location target, SimpleCardinal direction, StructurePlan plan) {
+        Structure structure = new Structure(null, target, direction, plan);
         StructureService service = new StructureService();
         return service.overlaps(structure);
     }
 
-    public static boolean placeStructure(final Player player, final Location location, final SimpleCardinal direction, final StructurePlan plan) {
+    
+    public static boolean placeStructure(final Player player, final Location location, final SimpleCardinal direction, final StructurePlan plan, boolean defaultFeedback) {
         final StructureService service = new StructureService();
 
         if (overlaps(location, direction, plan)) {
@@ -80,49 +93,14 @@ public class SCStructureBuilder {
             final EditSession session = new EditSession(location.getWorld(), -1);
             final CuboidClipboard cc = structure.getPlan().getSchematic();
             final String playerName = player.getName();
-            final String structureName = structure.getPlan().getDisplayName();
+            
+            // Only generate a foundation if there is another job in progress
             if(SCConstructionManager.getInstance().hasJob(playerName)) {
                 SCFoundationBuilder.placeDefault(session, structure, Material.COBBLESTONE, true);
             }
             
-            SCFrameBuilder.generateFancyFrame(structure, 4, 4);
             
-
-            final SCJobCallback callback = new SCJobCallback() {
-
-                @Override
-                public void onJobAdded(BlockPlacerJobEntry entry) {
-                    final StructureJob job = new StructureJob(entry.getJobId(), structure);
-                    SCConstructionManager.getInstance().addJob(playerName, job);
-                    entry.addStateChangedListener(new IJobEntryListener() {
-
-                        @Override
-                        public void jobStateChanged(BlockPlacerJobEntry bpje) {
-                            if (bpje.getStatus() == BlockPlacerJobEntry.JobStatus.PlacingBlocks) {
-                                
-                                player.sendMessage(ChatColor.YELLOW + "Building:  " + ChatColor.BLUE + structureName);
-//                                player.playSound(player.getLocation(), Sound.NOTE_SNARE_DRUM, 5, 0);
-                            } else if (bpje.getStatus() == BlockPlacerJobEntry.JobStatus.Done) {
-                                player.sendMessage(ChatColor.YELLOW + "Construction complete: " + ChatColor.BLUE + structureName);
-                                SCConstructionManager.getInstance().removeJob(playerName, bpje.getJobId());
-                                player.playSound(player.getLocation(), Sound.NOTE_SNARE_DRUM, 2, 0);
-                                session.undo(session);
-                            }
-                        }
-                    });
-                }
-
-                @Override
-                public void onJobCanceled(BlockPlacerJobEntry entry) {
-                    player.sendMessage(ChatColor.RED + "Construction canceled: " + ChatColor.BLUE + structureName);
-                    entry.getEditSession().undo(entry.getEditSession());
-                    session.undo(session);
-                    SCConstructionManager.getInstance().removeJob(playerName, entry.getJobId());
-                }
-            };
-
-            
-           
+            SCDefaultCallbackAction dca = new SCDefaultCallbackAction(player, structure, asyncSession, defaultFeedback);
             
             try {
                 
@@ -132,7 +110,7 @@ public class SCStructureBuilder {
                         location,
                         direction,
                         plan.getDisplayName(),
-                        callback);
+                        dca);
             }
             catch (MaxChangedBlocksException ex) {
                 Logger.getLogger(SCStructureBuilder.class.getName()).log(Level.SEVERE, null, ex);
