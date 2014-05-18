@@ -12,9 +12,12 @@ public class HibernateUtil {
     private static final  AnnotationConfiguration config = new AnnotationConfiguration();
     
     private static final String PATH = "plugins/SCStructureAPI/DataBase/hibernate.cfg.xml";
+//    private static final String PATH = "com/sc/api/structure/persistence/util/hibernate.cfg.xml";
     
     static {
         File file = new File(PATH);
+        File f = new File(".");
+        System.out.println(f.getAbsolutePath());
         factory = config.configure(file).buildSessionFactory();
     }
 

@@ -57,6 +57,7 @@ public class SCStructureAPI extends JavaPlugin {
     }
 
     public boolean isRestrictZonesEnabled() {
+        
         return restrictZones;
     }
 
@@ -111,10 +112,11 @@ public class SCStructureAPI extends JavaPlugin {
 //                System.out.println("Loading plans into menu");
                 setupPlanShop();
 //                System.out.println("Structures loaded");
+                getCommand("sc").setExecutor(new StructureCommands());
             }
         }).start();
         
-        getCommand("sc").setExecutor(new StructureCommands());
+        
 
     }
 

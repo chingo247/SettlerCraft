@@ -104,7 +104,6 @@ public class Structure implements Serializable {
         Preconditions.checkNotNull(direction);
         this.plan = plan;
         this.owner = owner;
-        this.setStatus(StructureState.CLEARING_SITE_OF_BLOCKS);
         this.direction = direction;
         this.worldLocation = new WorldLocation(target);
         this.reserved = new ReservedArea(this);
@@ -112,7 +111,7 @@ public class Structure implements Serializable {
 //        this.progress = new StructureProgress(this, blockReport);
     }
 
-    public void setStructureRegion(String structureRegion) {
+    public void setStructureRegionId(String structureRegion) {
         this.structureRegion = structureRegion;
     }
 
@@ -192,6 +191,12 @@ public class Structure implements Serializable {
     public ReservedArea getReserved() {
         return reserved;
     }
+
+    public String getStructureRegion() {
+        return structureRegion;
+    }
+    
+    
 
     public boolean isOnLot(Location location) {
         return (location.getPosition().getBlockX() >= dimension.getStartX() && location.getPosition().getBlockX() <= dimension.getEndX()

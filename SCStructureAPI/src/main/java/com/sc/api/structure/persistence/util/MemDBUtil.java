@@ -19,10 +19,10 @@ public class MemDBUtil {
     private static SessionFactory factory;
     private static final AnnotationConfiguration config = new AnnotationConfiguration();
     private static final String PATH = "plugins/SCStructureAPI/DataBase/memdb.cfg.xml";
+//    private static final String PATH = MemDBUtil.class.getClassLoader()."memdb.cfg.xml";
     
     static {
         File file = new File(PATH);
-        
         factory = config.configure(file).buildSessionFactory();
     }
 

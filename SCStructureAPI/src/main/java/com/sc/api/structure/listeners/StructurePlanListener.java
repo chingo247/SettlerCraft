@@ -18,6 +18,7 @@
 package com.sc.api.structure.listeners;
 
 import com.sc.api.structure.SCStructureAPI;
+import com.sc.api.structure.construction.builder.SCConstructionManager;
 import com.sc.api.structure.construction.builder.SCStructureBuilder;
 import com.sc.api.structure.model.structure.Structure;
 import com.sc.api.structure.model.structure.plan.StructurePlan;
@@ -81,6 +82,7 @@ public class StructurePlanListener implements Listener {
                         stack.setAmount(1);
                         pie.getPlayer().getInventory().removeItem(stack);
                         pie.getPlayer().updateInventory();
+                        
                     }
                 }
                 catch (IncompleteRegionException ex) {
@@ -111,9 +113,7 @@ public class StructurePlanListener implements Listener {
             if (SCStructureBuilder.overlaps(location, WorldUtil.getDirection(player), plan)) {
                 player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
             } else {
-                player.sendMessage(ChatColor.YELLOW + "Placing structure");
-                SCStructureBuilder.placeStructure(player, location, WorldUtil.getDirection(player), plan, defaultFeedBack);
-                return true;
+                return  SCConstructionManager.getInstance().placeSafe(player, structure, true, defaultFeedBack);
             }
         }
         return false;
@@ -140,7 +140,7 @@ public class StructurePlanListener implements Listener {
                 SCStructureBuilder.select(player, structure);
                 CuboidRegion newRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
                 if (oldRegion.getPos1().equals(newRegion.getPos1()) && oldRegion.getPos2().equals(newRegion.getPos2())) {
-                    if (SCStructureBuilder.placeStructure(player, location, direction, plan, defaultFeedBack)) {
+                    if (SCConstructionManager.getInstance().placeSafe(player, structure, true, true)) {
                         session.getRegionSelector(world).clear();
                         session.dispatchCUISelection(WorldEditUtil.getLocalPlayer(player));
                         return true;
@@ -166,4 +166,6 @@ public class StructurePlanListener implements Listener {
         }
         return false;
     }
+    
+    
 }

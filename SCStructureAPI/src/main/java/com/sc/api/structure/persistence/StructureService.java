@@ -17,6 +17,7 @@
 package com.sc.api.structure.persistence;
 
 import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.hibernate.HibernateDeleteClause;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.api.structure.model.structure.QStructure;
 import com.sc.api.structure.model.structure.ReservedArea;
@@ -62,6 +63,12 @@ public class StructureService extends AbstractService {
         List<Structure> structures = query.from(structure).where(structure.owner.eq(owner)).list(structure);
         session.close();
         return structures;
+    }
+    
+    public void delete(Structure structure) {
+        Session session = HibernateUtil.getSession();
+        QStructure qstructure = QStructure.structure;
+        new HibernateDeleteClause(session, qstructure).where(qstructure.id.eq(structure.getId())).execute();
     }
     
     public void setStatus(Structure structure, StructureState newStatus) {

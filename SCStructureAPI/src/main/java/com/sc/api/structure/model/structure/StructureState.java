@@ -22,42 +22,17 @@ package com.sc.api.structure.model.structure;
  * @author Chingo
  */
 public enum StructureState {
+        PREPARING,
 
-        /**
-         * All blocks on structure location will be removed.
-         *//**
-         * All blocks on structure location will be removed.
-         *//**
-         * All blocks on structure location will be removed.
-         *//**
-         * All blocks on structure location will be removed.
-         */
         CLEARING_SITE_OF_BLOCKS,
         /**
          * All blocks on structure location will be removed.
          */
-        CLEARING_SITE_OF_ENTITIES,
-        /**
-         * Placeing Foundation
-         */
         PLACING_FOUNDATION,
-        /**
-         * Frame will be placed, all players will be removed from the foundation
+        /*
+         * Constructing
          */
-        PLACING_FRAME,
-        
-        /**
-         * When the Complete() was called on this structure
-         */
-        FINISHING,
-        /**
-         * A layer is being constructed
-         */
-        CONSTRUCTING_A_LAYER,
-        /**
-         * Players/NPC may build now
-         */
-        READY_TO_BE_BUILD,
+        CONSTRUCTING,
         /**
          * ConstructionSite is complete
          */

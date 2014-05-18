@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.sc.api.structure.construction.builder;
 
 import com.sc.api.structure.construction.builder.async.SCAsyncCuboidBuilder;
@@ -29,8 +28,6 @@ import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
@@ -42,14 +39,16 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 public class SCStructureBuilder {
 
     public enum BuildDirection {
+
         UP,
         DOWN
     }
 
     /**
      * Selects the area where the structure will be placed
+     *
      * @param player
-     * @param structure 
+     * @param structure
      */
     public static void select(Player player, Structure structure) {
         SCCuboidBuilder.select(player, structure.getLocation(), WorldUtil.calculateEndLocation(structure.getLocation(), structure.getDirection(), structure.getPlan().getSchematic()));
@@ -57,8 +56,9 @@ public class SCStructureBuilder {
 
     /**
      * Places the structure at target location
+     *
      * @param session
-     * @param structure 
+     * @param structure
      */
     public static void place(EditSession session, Structure structure) {
         CuboidClipboard clipboard = structure.getPlan().getSchematic();
@@ -67,6 +67,7 @@ public class SCStructureBuilder {
 
     /**
      * Checks wheter this structure overlaps another structure
+     *
      * @param target The location
      * @param direction The direction
      * @param plan The structure plan
@@ -79,49 +80,31 @@ public class SCStructureBuilder {
         return service.overlaps(structure);
     }
 
-    
-    public static boolean placeStructure(final Player player, final Location location, final SimpleCardinal direction, final StructurePlan plan, boolean defaultFeedback) {
+    public static void placeStructure(final Player player, final Location location, final SimpleCardinal direction, final StructurePlan plan, boolean defaultFeedback) throws MaxChangedBlocksException {
         final StructureService service = new StructureService();
 
-        if (overlaps(location, direction, plan)) {
-            return false;
-        } else {
-            final Structure structure = new Structure(player.getName(), location, direction, plan);
-//            service.save(structure);
+        final Structure structure = new Structure(player.getName(), location, direction, plan);
 
-            final AsyncEditSession asyncSession = AsyncWorldEditUtil.createAsyncEditSession(player, -1); // -1 = infinite
-            final EditSession session = new EditSession(location.getWorld(), -1);
-            final CuboidClipboard cc = structure.getPlan().getSchematic();
-            final String playerName = player.getName();
-            
-            // Only generate a foundation if there is another job in progress
-            if(SCConstructionManager.getInstance().hasJob(playerName)) {
-                SCFoundationBuilder.placeDefault(session, structure, Material.COBBLESTONE, true);
-            }
-            
-            
-            SCDefaultCallbackAction dca = new SCDefaultCallbackAction(player, structure, asyncSession, defaultFeedback);
-            
-            try {
-                
-                SCAsyncCuboidBuilder.placeLayered(
-                        asyncSession,
-                        cc,
-                        location,
-                        direction,
-                        plan.getDisplayName(),
-                        dca);
-            }
-            catch (MaxChangedBlocksException ex) {
-                Logger.getLogger(SCStructureBuilder.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            service.save(structure);
+        final AsyncEditSession asyncSession = AsyncWorldEditUtil.createAsyncEditSession(player, -1); // -1 = infinite
+        final EditSession session = new EditSession(location.getWorld(), -1);
+        final CuboidClipboard cc = structure.getPlan().getSchematic();
+        final String playerName = player.getName();
+
+        // Only generate a foundation if there is another job in progress
+        if (SCConstructionManager.getInstance().hasJob(playerName)) {
+            SCFoundationBuilder.placeDefault(session, structure, Material.COBBLESTONE, true);
         }
 
-            
-        return true;
+        SCDefaultCallbackAction dca = new SCDefaultCallbackAction(player, structure, asyncSession, defaultFeedback);
+
+        SCAsyncCuboidBuilder.placeLayered(
+                asyncSession,
+                cc,
+                location,
+                direction,
+                plan.getDisplayName(),
+                dca);
+
 
     }
 }
-
-
