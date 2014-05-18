@@ -16,7 +16,7 @@
  */
 package com.sc.api.structure.event.structure;
 
-import com.sc.api.structure.model.structure.Structure;
+import com.sc.api.structure.model.Structure;
 import org.bukkit.event.HandlerList;
 
 /**

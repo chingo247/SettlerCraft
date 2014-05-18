@@ -16,7 +16,6 @@
  */
 package com.sc.api.structure.construction.builder.async;
 
-import com.sk89q.worldedit.CuboidClipboard;
 import org.primesoft.asyncworldedit.worldedit.CuboidClipboardWrapper;
 
 /**
@@ -27,14 +26,12 @@ import org.primesoft.asyncworldedit.worldedit.CuboidClipboardWrapper;
 public class SCCuboidClipboardWrapper extends CuboidClipboardWrapper {
 //    
     
-    public SCCuboidClipboardWrapper(String player, CuboidClipboard parrent) {
-        this(player, new SCLayeredCuboidClipBoard(parrent), -1);
+    public SCCuboidClipboardWrapper(String player, SCSmartClipboard smartClipboard) {
+        this(player, smartClipboard, -1);
     }
 
-    public SCCuboidClipboardWrapper(String player, CuboidClipboard parrent, int jobId) {
-        super(player, new SCLayeredCuboidClipBoard(parrent));
-
-
+    public SCCuboidClipboardWrapper(String player, SCSmartClipboard smartClipboard, int jobId) {
+        super(player, smartClipboard, jobId);
     }
 
 }

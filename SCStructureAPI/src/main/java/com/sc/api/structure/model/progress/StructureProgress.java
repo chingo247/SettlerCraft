@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.model.structure.progress;
+package com.sc.api.structure.model.progress;
 
 
 
-import com.sc.api.structure.model.structure.Structure;
-import com.sc.api.structure.model.structure.schematic.SchematicBlockReport;
-import com.sc.api.structure.model.structure.schematic.SchematicMaterialLayer;
-import com.sc.api.structure.model.structure.schematic.SchematicMaterialResource;
+import com.sc.api.structure.model.Structure;
+import com.sc.api.structure.model.schematic.SchematicBlockReport;
+import com.sc.api.structure.model.schematic.SchematicMaterialLayer;
+import com.sc.api.structure.model.schematic.SchematicMaterialResource;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

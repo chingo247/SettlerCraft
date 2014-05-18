@@ -17,6 +17,7 @@
 
 package com.sc.api.structure.commands;
 
+import com.sc.api.menu.plugin.shop.ItemShopCategoryMenu;
 import com.sc.api.menu.plugin.shop.MenuManager;
 import com.sc.api.structure.SCStructureAPI;
 import org.bukkit.command.Command;
@@ -42,13 +43,26 @@ public class StructureCommands implements CommandExecutor {
                     } else {
                         return false;
                     }
+                case "shop":
+                    if(args.length == 1) {
+                        return openShopMenu((Player) cs);
+                    } else {
+                        return false;
+                    }
                 default: return false;
             }
         }
     }
 
     private boolean openPlanMenu(Player player) {
-        MenuManager.getInstance().getMenu(SCStructureAPI.PLAN_SHOP_NAME).onEnter(player);
+        ItemShopCategoryMenu menu = (ItemShopCategoryMenu) MenuManager.getInstance().getMenu(SCStructureAPI.PLAN_MENU_NAME);
+        menu.onEnter(player, true);
+        return true;
+    }
+    
+    private boolean openShopMenu(Player player) {
+        ItemShopCategoryMenu menu = (ItemShopCategoryMenu) MenuManager.getInstance().getMenu(SCStructureAPI.PLAN_MENU_NAME);
+        menu.onEnter(player);
         return true;
     }
     

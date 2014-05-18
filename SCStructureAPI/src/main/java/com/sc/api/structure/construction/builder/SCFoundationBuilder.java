@@ -19,7 +19,7 @@ package com.sc.api.structure.construction.builder;
 
 import com.google.common.base.Preconditions;
 import com.sc.api.structure.construction.builder.strategies.FoundationStrategy;
-import com.sc.api.structure.model.structure.Structure;
+import com.sc.api.structure.model.Structure;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;

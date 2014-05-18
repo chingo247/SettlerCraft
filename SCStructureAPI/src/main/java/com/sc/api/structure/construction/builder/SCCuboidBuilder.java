@@ -17,7 +17,7 @@
 
 package com.sc.api.structure.construction.builder;
 
-import com.sc.api.structure.model.structure.world.SimpleCardinal;
+import com.sc.api.structure.model.world.SimpleCardinal;
 import com.sc.api.structure.util.CuboidUtil;
 import com.sc.api.structure.util.WorldUtil;
 import com.sc.api.structure.util.plugins.WorldEditUtil;

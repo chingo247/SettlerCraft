@@ -10,14 +10,13 @@ import com.sc.api.menu.plugin.shop.MenuManager;
 import com.sc.api.menu.plugin.shop.MenuSlot;
 import com.sc.api.structure.commands.StructureCommands;
 import com.sc.api.structure.io.StructurePlanLoader;
-import com.sc.api.structure.listeners.PlayerListener;
 import com.sc.api.structure.listeners.StructurePlanListener;
-import com.sc.api.structure.model.structure.Structure;
-import com.sc.api.structure.model.structure.StructureJob;
-import com.sc.api.structure.model.structure.plan.StructurePlan;
-import com.sc.api.structure.model.structure.progress.StructureProgress;
-import com.sc.api.structure.model.structure.progress.StructureProgressLayer;
-import com.sc.api.structure.model.structure.progress.StructureProgressMaterialResource;
+import com.sc.api.structure.model.Structure;
+import com.sc.api.structure.model.StructureJob;
+import com.sc.api.structure.model.plan.StructurePlan;
+import com.sc.api.structure.model.progress.StructureProgress;
+import com.sc.api.structure.model.progress.StructureProgressLayer;
+import com.sc.api.structure.model.progress.StructureProgressMaterialResource;
 import com.sc.api.structure.persistence.StructurePlanService;
 import com.sc.api.structure.persistence.util.HibernateUtil;
 import com.sc.api.structure.persistence.util.MemDBUtil;
@@ -48,7 +47,7 @@ public class SCStructureAPI extends JavaPlugin {
 
     private boolean restrictZones = false;
     public static final String ALIAS = "[STRUC]";
-    public static final String PLAN_SHOP_NAME = "Buy & Build";
+    public static final String PLAN_MENU_NAME = "Plan Menu";
     private StructurePlanListener spl;
     private static ItemShopCategoryMenu planMenu;
     
@@ -98,11 +97,7 @@ public class SCStructureAPI extends JavaPlugin {
             return;
         }
 
-//        System.out.println("Setting up DB");
-        
-//        System.out.println("Setting up Listeners");
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(), this);
-        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
         new Thread(new Runnable() {
 
             @Override
@@ -169,7 +164,7 @@ public class SCStructureAPI extends JavaPlugin {
     }
 
     private static void setupPlanShop() {
-        planMenu = new ItemShopCategoryMenu(PLAN_SHOP_NAME, true, true, new ItemShopCategoryMenu.ShopCallback() {
+        planMenu = new ItemShopCategoryMenu(PLAN_MENU_NAME, true, true, new ItemShopCategoryMenu.ShopCallback() {
 
             @Override
             public void onItemSold(final Player buyer, final ItemStack stack, final double price) {
@@ -208,7 +203,7 @@ public class SCStructureAPI extends JavaPlugin {
 
             slot.setData("Size", cc.getLength() + "x" + cc.getWidth() + "x" + cc.getHeight(), ChatColor.GOLD);
             slot.setData("Blocks", sizeString, ChatColor.GOLD);
-            planMenu.addItem(slot, plan.getCategory(), plan.getPrice());
+            planMenu.addItem(slot, plan.getCategory(), 0f); // FOR FREEEE
         }
 
         MenuManager.getInstance().register(planMenu);

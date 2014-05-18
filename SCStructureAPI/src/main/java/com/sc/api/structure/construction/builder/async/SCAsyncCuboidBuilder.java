@@ -18,7 +18,8 @@
 package com.sc.api.structure.construction.builder.async;
 
 import com.sc.api.structure.construction.builder.SCCuboidBuilder;
-import com.sc.api.structure.model.structure.world.SimpleCardinal;
+import com.sc.api.structure.construction.builder.strategies.PlaceLayeredStrategy;
+import com.sc.api.structure.model.world.SimpleCardinal;
 import com.sc.api.structure.util.plugins.AsyncWorldEditUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;
@@ -67,8 +68,8 @@ public class SCAsyncCuboidBuilder {
 
     public static void placeLayered(AsyncEditSession asyncEditSession, CuboidClipboard whole, Location location, SimpleCardinal cardinal, String jobName, SCJobCallback callback) throws MaxChangedBlocksException {
         Location target = SCCuboidBuilder.align(whole, location, cardinal);
-        SCLayeredCuboidClipBoard clipBoard = new SCLayeredCuboidClipBoard(whole);
-        SCAsyncCuboidClipboard asyncCuboidClipboard = new SCAsyncCuboidClipboard(asyncEditSession.getPlayer(), clipBoard);
+        SCSmartClipboard smartClipboard = new SCSmartClipboard(whole, new PlaceLayeredStrategy());
+        SCAsyncCuboidClipboard asyncCuboidClipboard = new SCAsyncCuboidClipboard(asyncEditSession.getPlayer(), smartClipboard);
         asyncCuboidClipboard.place(asyncEditSession, target.getPosition(), true, callback);
     }
 }

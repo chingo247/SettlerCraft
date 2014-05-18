@@ -18,10 +18,10 @@ package com.sc.api.structure.construction.builder;
 
 import com.google.common.collect.Maps;
 import com.sc.api.structure.construction.builder.flag.SCFlags;
-import com.sc.api.structure.model.structure.Structure;
-import com.sc.api.structure.model.structure.StructureJob;
-import com.sc.api.structure.model.structure.StructureState;
-import com.sc.api.structure.model.structure.world.WorldDimension;
+import com.sc.api.structure.model.Structure;
+import com.sc.api.structure.model.StructureJob;
+import com.sc.api.structure.model.StructureState;
+import com.sc.api.structure.model.world.WorldDimension;
 import com.sc.api.structure.persistence.StructureService;
 import com.sc.api.structure.util.plugins.WorldGuardUtil;
 import com.sk89q.worldedit.BlockVector;

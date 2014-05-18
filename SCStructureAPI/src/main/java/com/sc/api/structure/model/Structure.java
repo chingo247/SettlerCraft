@@ -14,16 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.model.structure;
+package com.sc.api.structure.model;
 
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
 import com.sc.api.structure.event.structure.StructureStateChangedEvent;
-import com.sc.api.structure.model.structure.plan.StructurePlan;
-import com.sc.api.structure.model.structure.progress.StructureProgress;
-import com.sc.api.structure.model.structure.world.SimpleCardinal;
-import com.sc.api.structure.model.structure.world.WorldDimension;
-import com.sc.api.structure.model.structure.world.WorldLocation;
+import com.sc.api.structure.model.plan.StructurePlan;
+import com.sc.api.structure.model.progress.StructureProgress;
+import com.sc.api.structure.model.world.SimpleCardinal;
+import com.sc.api.structure.model.world.WorldDimension;
+import com.sc.api.structure.model.world.WorldLocation;
 import com.sc.api.structure.util.WorldUtil;
 import com.sk89q.worldedit.Location;
 import java.io.Serializable;

@@ -17,8 +17,8 @@
 package com.sc.api.structure.util;
 
 import com.google.common.base.Preconditions;
-import com.sc.api.structure.model.structure.world.SimpleCardinal;
-import com.sc.api.structure.model.structure.world.WorldDimension;
+import com.sc.api.structure.model.world.SimpleCardinal;
+import com.sc.api.structure.model.world.WorldDimension;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;
 import org.bukkit.entity.Entity;

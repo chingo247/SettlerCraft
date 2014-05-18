@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.model.structure.progress;
+package com.sc.api.structure.model.progress;
 
-import com.sc.api.structure.model.structure.schematic.SchematicMaterialResourceId;
+import com.sc.api.structure.model.schematic.SchematicMaterialResourceId;
 import java.io.Serializable;
 import javax.persistence.CascadeType;
 import javax.persistence.Embedded;

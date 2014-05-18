@@ -19,14 +19,36 @@ package com.sc.api.structure.construction.builder.strategies;
 
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.blocks.BlockID;
 import java.util.List;
 
 /**
  *
  * @author Chingo
  */
-public interface PlacementStrategy {
+public abstract class PlacementStrategy {
     
-    public List<Vector> getList(CuboidClipboard cliboard);
+    public List<Vector> getList(CuboidClipboard cliboard) {
+        return getList(cliboard, true);
+    }
+    
+    public abstract List<Vector> getList(CuboidClipboard cliboard, boolean noAir);
+    
+    protected boolean isLava(BaseBlock b) {
+        Integer bi = b.getType();
+        if (bi == BlockID.LAVA || bi == BlockID.STATIONARY_LAVA) {
+            return true;
+        }
+        return false;
+    }
+
+    protected boolean isWater(BaseBlock b) {
+        Integer bi = b.getType();
+        if (bi == BlockID.WATER || bi == BlockID.STATIONARY_WATER) {
+            return true;
+        }
+        return false;
+    }
     
 }

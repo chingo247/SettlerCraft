@@ -18,9 +18,9 @@ package com.sc.api.structure.construction.builder;
 
 import com.sc.api.structure.construction.builder.async.SCAsyncCuboidBuilder;
 import com.sc.api.structure.construction.builder.strategies.SCDefaultCallbackAction;
-import com.sc.api.structure.model.structure.Structure;
-import com.sc.api.structure.model.structure.plan.StructurePlan;
-import com.sc.api.structure.model.structure.world.SimpleCardinal;
+import com.sc.api.structure.model.Structure;
+import com.sc.api.structure.model.plan.StructurePlan;
+import com.sc.api.structure.model.world.SimpleCardinal;
 import com.sc.api.structure.persistence.StructureService;
 import com.sc.api.structure.util.WorldUtil;
 import com.sc.api.structure.util.plugins.AsyncWorldEditUtil;

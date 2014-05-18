@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.sc.api.structure.model.structure;
+package com.sc.api.structure.model;
 
 import com.sk89q.worldedit.Countable;
 import com.sk89q.worldedit.Vector;

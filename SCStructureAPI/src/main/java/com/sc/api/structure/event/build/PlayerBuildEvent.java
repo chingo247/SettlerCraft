@@ -16,7 +16,7 @@
  */
 package com.sc.api.structure.event.build;
 
-import com.sc.api.structure.model.structure.Structure;
+import com.sc.api.structure.model.Structure;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;

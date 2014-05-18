@@ -15,30 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.sc.api.structure.event.structure;
-
-import com.sc.api.structure.model.Structure;
-import org.bukkit.event.HandlerList;
+package com.sc.api.structure.construction.builder.async;
 
 /**
- * Fired when a structure is being build
+ *
  * @author Chingo
  */
-public class StructureConstructionStartEvent extends StructureEvent {
+public class InvalidVectorListException extends Exception {
 
-    public StructureConstructionStartEvent(Structure structure) {
-        super(structure);
+    public InvalidVectorListException(String message) {
+        super(message);
     }
     
-    private static final HandlerList handlers = new HandlerList();
-
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
     
 }

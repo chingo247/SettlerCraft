@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.sc.api.structure.model.structure.schematic;
+package com.sc.api.structure.model.schematic;
 
 import java.io.Serializable;
 import java.util.Objects;
