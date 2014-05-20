@@ -18,7 +18,7 @@ package com.sc.api.structure.model;
 
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
-import com.sc.api.structure.event.structure.StructureStateChangedEvent;
+import com.sc.api.structure.construction.progress.ConstructionTask;
 import com.sc.api.structure.model.plan.StructurePlan;
 import com.sc.api.structure.model.progress.StructureProgress;
 import com.sc.api.structure.model.world.SimpleCardinal;
@@ -34,11 +34,11 @@ import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import org.bukkit.Bukkit;
 
 /**
  *
@@ -49,7 +49,7 @@ import org.bukkit.Bukkit;
 public class Structure implements Serializable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
@@ -72,17 +72,15 @@ public class Structure implements Serializable {
     @OneToOne(cascade = CascadeType.ALL)
     private StructureProgress progress;
     
-    @Nullable
-    private String parentRegion;
+    @OneToOne(cascade = CascadeType.ALL)
+    private ConstructionTask task;
     
     @Nullable
     private String structureRegion;
-    
 
     @Embedded
     private ReservedArea reserved;
 
-    private StructureState status;
 
     /**
      * JPA Constructor
@@ -114,12 +112,6 @@ public class Structure implements Serializable {
     public void setStructureRegionId(String structureRegion) {
         this.structureRegion = structureRegion;
     }
-
-    public void setParentRegion(String parentRegion) {
-        this.parentRegion = parentRegion;
-    }
-    
-    
 
     /**
      * Gets the id of this structure
@@ -173,15 +165,6 @@ public class Structure implements Serializable {
 
     public WorldDimension getDimension() {
         return dimension;
-    }
-
-    public StructureState getStatus() {
-        return status;
-    }
-
-    public final void setStatus(StructureState status) {
-        Bukkit.getPluginManager().callEvent(new StructureStateChangedEvent(this, status));
-        this.status = status;
     }
 
     public StructureProgress getProgress() {

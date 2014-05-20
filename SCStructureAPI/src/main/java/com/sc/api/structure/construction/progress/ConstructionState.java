@@ -15,17 +15,37 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.sc.api.structure.construction.builder.async;
+package com.sc.api.structure.construction.progress;
 
 /**
  *
  * @author Chingo
  */
-public class InvalidVectorListException extends Exception {
+public enum ConstructionState {
+        /**
+         * The state direct after the structure has been placed
+         *//**
+         * The state direct after the structure has been placed
+         */
+        PREPARING,
+        /**
+         * Before structure has been added to the Player's Queue
+         */
+        PLACING_FOUNDATION,
 
-    public InvalidVectorListException(String message) {
-        super(message);
+        /**
+         * When 
+         */
+        IN_QUEUE,
+        
+        /*
+         * Constructing
+         */
+        CONSTRUCTION_IN_PROGRESS,
+        
+        CANCELED,
+        /**
+         * ConstructionSite is complete
+         */
+        FINISHED
     }
-    
-    
-}

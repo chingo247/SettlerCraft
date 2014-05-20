@@ -9,6 +9,8 @@ import com.sc.api.menu.plugin.shop.ItemShopCategoryMenu;
 import com.sc.api.menu.plugin.shop.MenuManager;
 import com.sc.api.menu.plugin.shop.MenuSlot;
 import com.sc.api.structure.commands.StructureCommands;
+import com.sc.api.structure.construction.progress.ConstructionEntry;
+import com.sc.api.structure.construction.progress.ConstructionTask;
 import com.sc.api.structure.io.StructurePlanLoader;
 import com.sc.api.structure.listeners.StructurePlanListener;
 import com.sc.api.structure.model.Structure;
@@ -22,6 +24,7 @@ import com.sc.api.structure.persistence.StructurePlanService;
 import com.sc.api.structure.persistence.util.HibernateUtil;
 import com.sc.api.structure.persistence.util.MemDBUtil;
 import com.sc.api.structure.util.CuboidUtil;
+import com.sc.api.structure.util.plugins.AsyncWorldEditUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.bukkit.WorldEditAPI;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
@@ -56,6 +59,15 @@ public class SCStructureAPI extends JavaPlugin {
         
     }
 
+    /**
+     * The amount of blocks placed between each commit to the database, this value will be
+     * the same as the rendering.blocks node in the AsyncWorldEdit config
+     * @return AsyncWorldEdit's config().getInt("rendering.blocks")
+     */
+    public static int getSaveThreshold() {
+        return AsyncWorldEditUtil.getAsyncWorldEditPlugin().getConfig().getInt("rendering.blocks"); 
+    }
+    
     public boolean isRestrictZonesEnabled() {
         
         return restrictZones;
@@ -146,7 +158,9 @@ public class SCStructureAPI extends JavaPlugin {
                 StructureProgressLayer.class,
                 StructureProgressMaterialResource.class,
                 StructurePlan.class,
-                StructureJob.class
+                StructureJob.class,
+                ConstructionEntry.class,
+                ConstructionTask.class
         );
     }
 

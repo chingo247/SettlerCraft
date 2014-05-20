@@ -22,7 +22,6 @@ import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.api.structure.model.QStructure;
 import com.sc.api.structure.model.ReservedArea;
 import com.sc.api.structure.model.Structure;
-import com.sc.api.structure.model.StructureState;
 import com.sc.api.structure.persistence.util.HibernateUtil;
 import java.util.List;
 import java.util.logging.Level;
@@ -71,36 +70,15 @@ public class StructureService extends AbstractService {
         new HibernateDeleteClause(session, qstructure).where(qstructure.id.eq(structure.getId())).execute();
     }
     
-    public void setStatus(Structure structure, StructureState newStatus) {
-        Session session = null;
-        Transaction tx = null;
-        try {
-            session = HibernateUtil.getSession();
-            tx = session.beginTransaction();
-            structure.setStatus(newStatus);
-            session.merge(structure);
-            tx.commit();
-        } catch (HibernateException e) {
-            try {
-                tx.rollback();
-            } catch (HibernateException rbe) {
-                Logger.getLogger(AbstractService.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
-            }
-            throw e;
-        } finally {
-            if (session != null) {
-                session.close();
-            }
-        }
-    }
     
-    public void save(Structure structure) {
+    
+    public Structure save(Structure structure) {
                 Session session = null;
         Transaction tx = null;
         try {
             session = HibernateUtil.getSession();
             tx = session.beginTransaction();
-            session.merge(structure);
+            structure = (Structure) session.merge(structure);
             tx.commit();
         } catch (HibernateException e) {
             try {
@@ -114,6 +92,7 @@ public class StructureService extends AbstractService {
                 session.close();
             }
         }
+        return structure;
     }
     
     /**

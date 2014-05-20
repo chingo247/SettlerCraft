@@ -41,6 +41,7 @@ public class HSQLServer {
         server.setPort(PORT);
         server.setDatabaseName(0, DATABASE);
         server.setDatabasePath(0, PATH);
+       
     }
 
     public static HSQLServer getInstance() {

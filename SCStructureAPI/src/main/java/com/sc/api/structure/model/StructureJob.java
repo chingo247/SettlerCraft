@@ -20,7 +20,6 @@ package com.sc.api.structure.model;
 import com.sk89q.worldedit.Countable;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.blocks.BlockID;
 
 /**
  *
@@ -41,9 +40,7 @@ public class StructureJob {
     public StructureJob(int jobId, Structure structure) {
         int count = 0;
         for(Countable<BaseBlock> b : structure.getPlan().getSchematic().getBlockDistributionWithData()) {
-            if(b.getID().getId() != BlockID.AIR) {
                 count+= b.getAmount();
-            }
         }
         this.jobSize = count;
         Vector pos = structure.getLocation().getPosition();

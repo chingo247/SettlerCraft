@@ -15,40 +15,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.sc.api.structure.construction.builder.strategies;
+package com.sc.api.structure.construction.progress;
 
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.blocks.BlockID;
 import java.util.List;
 
 /**
  *
  * @author Chingo
  */
-public abstract class PlacementStrategy {
+public enum ConstructionStrategyType {
     
-    public List<Vector> getList(CuboidClipboard cliboard) {
-        return getList(cliboard, true);
+    LAYERED(new LayeredConstructionStrategy());
+    
+    private final ConstructionStrategy strategy;
+    
+    private ConstructionStrategyType(ConstructionStrategy strategy) {    
+        this.strategy = strategy;
     }
     
-    public abstract List<Vector> getList(CuboidClipboard cliboard, boolean noAir);
-    
-    protected boolean isLava(BaseBlock b) {
-        Integer bi = b.getType();
-        if (bi == BlockID.LAVA || bi == BlockID.STATIONARY_LAVA) {
-            return true;
-        }
-        return false;
+    public List<Vector> getList(CuboidClipboard clipboard) {
+        return strategy.getList(clipboard);
     }
-
-    protected boolean isWater(BaseBlock b) {
-        Integer bi = b.getType();
-        if (bi == BlockID.WATER || bi == BlockID.STATIONARY_WATER) {
-            return true;
-        }
-        return false;
+    
+    public List<Vector> getList(CuboidClipboard clipboard, boolean noAir) {
+        return strategy.getList(clipboard, noAir);
     }
     
 }

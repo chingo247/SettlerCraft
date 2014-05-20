@@ -15,8 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.sc.api.structure.construction.builder.strategies;
+package com.sc.api.structure.construction.progress;
 
+import com.sc.api.structure.construction.progress.ConstructionStrategy;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
@@ -29,7 +30,7 @@ import java.util.List;
  *
  * @author Chingo
  */
-public class PlaceLayeredStrategy extends PlacementStrategy {
+public class LayeredConstructionStrategy extends ConstructionStrategy {
 
     @Override
     public List<Vector> getList(CuboidClipboard cliboard, boolean noAir) {

@@ -18,8 +18,7 @@
 package com.sc.api.structure.listeners;
 
 import com.sc.api.structure.SCStructureAPI;
-import com.sc.api.structure.construction.builder.SCConstructionManager;
-import com.sc.api.structure.construction.builder.SCStructureBuilder;
+import com.sc.api.structure.construction.progress.SCConstructionManager;
 import com.sc.api.structure.model.Structure;
 import com.sc.api.structure.model.plan.StructurePlan;
 import com.sc.api.structure.model.world.SimpleCardinal;
@@ -32,7 +31,6 @@ import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Location;
-import com.sk89q.worldedit.regions.CuboidRegion;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
@@ -110,11 +108,9 @@ public class StructurePlanListener implements Listener {
             Location location = new Location(world, new BlockWorldVector(world, x, y, z));
             
             Structure structure = new Structure(player.getName(), location, WorldUtil.getDirection(player), plan);
-            if (SCStructureBuilder.overlaps(location, WorldUtil.getDirection(player), plan)) {
+            if (!SCConstructionManager.getInstance().placeSafe(player, structure, defaultFeedBack, defaultFeedBack)) {
                 player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
-            } else {
-                return  SCConstructionManager.getInstance().placeSafe(player, structure, true, defaultFeedBack);
-            }
+            } 
         }
         return false;
     }
@@ -128,42 +124,45 @@ public class StructurePlanListener implements Listener {
         LocalSession session = WorldEditUtil.getLocalSession(player);
         SimpleCardinal direction = WorldUtil.getDirection(player);
         
+       
+        
         Structure structure = new Structure(player.getName(), location, WorldUtil.getDirection(player), plan);
-        if (action == Action.LEFT_CLICK_BLOCK) {
-            if (!session.getRegionSelector(world).isDefined()) {
-                SCStructureBuilder.select(player, structure);
-                player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
-                player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
-            } else {
-
-                CuboidRegion oldRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
-                SCStructureBuilder.select(player, structure);
-                CuboidRegion newRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
-                if (oldRegion.getPos1().equals(newRegion.getPos1()) && oldRegion.getPos2().equals(newRegion.getPos2())) {
-                    if (SCConstructionManager.getInstance().placeSafe(player, structure, true, true)) {
-                        session.getRegionSelector(world).clear();
-                        session.dispatchCUISelection(WorldEditUtil.getLocalPlayer(player));
-                        return true;
-                    } else {
-                        player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
-                    }
-                } else {
-                    SCStructureBuilder.select(player, structure);
-                    if (SCStructureBuilder.overlaps(location, direction, plan)) {
-                        player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
-                    } else {
-                        player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
-                        player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
-                    }
-                }
-            }
-        } else {
-            if (session.getRegionSelector(world).isDefined()) {
-                session.getRegionSelector(world).clear();
-                session.dispatchCUISelection(WorldEditUtil.getLocalPlayer(player));
-                player.sendMessage("Cleared selection");
-            }
-        }
+         SCConstructionManager.getInstance().placeSafe(player, structure, true, true);
+//        if (action == Action.LEFT_CLICK_BLOCK) {
+//            if (!session.getRegionSelector(world).isDefined()) {
+//                SCCuboidBuilder.select(player, location, direction, structure.getPlan().getSchematic());
+//                player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
+//                player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
+//            } else {
+//
+//                CuboidRegion oldRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
+//                SCCuboidBuilder.select(player, location, direction, structure.getPlan().getSchematic());
+//                CuboidRegion newRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
+//                if (oldRegion.getPos1().equals(newRegion.getPos1()) && oldRegion.getPos2().equals(newRegion.getPos2())) {
+//                    if (SCConstructionManager.getInstance().placeSafe(player, structure, true, true)) {
+//                        session.getRegionSelector(world).clear();
+//                        session.dispatchCUISelection(WorldEditUtil.getLocalPlayer(player));
+//                        return true;
+//                    } else {
+//                        player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
+//                    }
+//                } else {
+//                    SCCuboidBuilder.select(player, location, direction, structure.getPlan().getSchematic());
+//                    if (SCConstructionManager.overlaps(location, direction, plan)) {
+//                        player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
+//                    } else {
+//                        player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
+//                        player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
+//                    }
+//                }
+//            }
+//        } else {
+//            if (session.getRegionSelector(world).isDefined()) {
+//                session.getRegionSelector(world).clear();
+//                session.dispatchCUISelection(WorldEditUtil.getLocalPlayer(player));
+//                player.sendMessage("Cleared selection");
+//            }
+//        }
         return false;
     }
     

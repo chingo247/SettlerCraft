@@ -14,14 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.construction.builder;
+package com.sc.api.structure.construction.progress;
 
 import com.google.common.collect.Maps;
+import com.sc.api.structure.construction.builder.async.SCAsyncStructureBuilder;
 import com.sc.api.structure.construction.builder.flag.SCFlags;
+import com.sc.api.structure.construction.builder.strategies.SCDefaultCallbackAction;
 import com.sc.api.structure.model.Structure;
 import com.sc.api.structure.model.StructureJob;
 import com.sc.api.structure.model.world.WorldDimension;
+import com.sc.api.structure.persistence.ConstructionService;
 import com.sc.api.structure.persistence.StructureService;
+import com.sc.api.structure.util.plugins.AsyncWorldEditUtil;
 import com.sc.api.structure.util.plugins.WorldGuardUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.MaxChangedBlocksException;
@@ -33,17 +37,14 @@ import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-
+import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
  * @author Chingo
@@ -52,34 +53,32 @@ public class SCConstructionManager {
 
     private final ConcurrentMap<String, List<StructureJob>> jobs = Maps.newConcurrentMap();
     private static SCConstructionManager instance;
-    private final String prefix = "SC-STAPI";
-    private final String regionPrefix = "CONSITE";
-    private final String structurefix = "STRUC";
 
-    public void addJob(String player, StructureJob structureJob) {
-        if (jobs.get(player) == null) {
-            jobs.put(player, new ArrayList<StructureJob>());
-        }
-        jobs.get(player).add(structureJob);
-    }
 
-    public boolean hasJob(String player) {
-        if (jobs.containsKey(player) && !jobs.get(player).isEmpty()) {
-            return true;
-        }
-        return false;
-    }
+//    public void addJob(String player, StructureJob structureJob) {
+//        if (jobs.get(player) == null) {
+//            jobs.put(player, new ArrayList<StructureJob>());
+//        }
+//        jobs.get(player).add(structureJob);
+//    }
+//
+//    public boolean hasJob(String player) {
+//        if (jobs.containsKey(player) && !jobs.get(player).isEmpty()) {
+//            return true;
+//        }
+//        return false;
+//    }
 
-    public void removeJob(String player, int jobId) {
-        Iterator<StructureJob> it = jobs.get(player).iterator();
-        while (it.hasNext()) {
-            StructureJob j = it.next();
-            if (j.getId() == jobId) {
-                it.remove();
-                break;
-            }
-        }
-    }
+//    public void removeJob(String player, int jobId) {
+//        Iterator<StructureJob> it = jobs.get(player).iterator();
+//        while (it.hasNext()) {
+//            StructureJob j = it.next();
+//            if (j.getId() == jobId) {
+//                it.remove();
+//                break;
+//            }
+//        }
+//    }
 
     public static SCConstructionManager getInstance() {
         if (instance == null) {
@@ -96,13 +95,13 @@ public class SCConstructionManager {
         return WorldGuardUtil.getGlobalRegionManager(world).hasRegion(id);
     }
 
-
     /**
      * Checks wheter the target player is allowed to place, disregarding the
      * emplacement area
      *
      * @param placer The player
-     * @param ignoreRegionCount Wheter or not to check if the player owns to many regions therefore not being able to place stuff
+     * @param ignoreRegionCount Wheter or not to check if the player owns to
+     * many regions therefore not being able to place stuff
      * @param feedback Wheter or not feedback should be send to the player
      * @return false if player doesnt have permission to claim or has claimed to
      * many regions
@@ -114,7 +113,7 @@ public class SCConstructionManager {
 
         // Has permission to claim
         if (!permissionModel.mayClaim()) {
-            
+
             if (feedback) {
                 placer.sendMessage(ChatColor.RED + "U have no permission to place stuff or claim regions");
             }
@@ -139,24 +138,26 @@ public class SCConstructionManager {
 
         return true;
     }
+    
+//    public boolean overlaps(Structure structure) {
+//        
+//    }
 
     public boolean canPlace(Player placer, World world, ProtectedRegion region, boolean ignoreSize, boolean feedback) {
         RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(world);
-        ProtectedRegion existing = mgr.getRegionExact(region.getId());
+//        ProtectedRegion existing = mgr.getRegionExact(region.getId());
         RegionPermissionModel permModel = WorldGuardUtil.getRegionPermissionModel(placer);
         WorldConfiguration wcfg = WorldGuardUtil.getWorldGuard().getGlobalStateManager().get(placer.getWorld());
-        
 
-        // Check for an existing region
-        if (existing != null) {
-            if (!existing.getOwners().contains(WorldGuardUtil.getLocalPlayer(placer))) {
-                if (feedback) {
-                    placer.sendMessage(ChatColor.RED + "There already exists a region with the same id and you don't own it.");
-                }
-                return false;
-            }
-        }
-
+//        // Check for an existing region
+//        if (existing != null) {
+//            if (!existing.getOwners().contains(WorldGuardUtil.getLocalPlayer(placer))) {
+//                if (feedback) {
+//                    placer.sendMessage(ChatColor.RED + "There already exists a region with the same id and you don't own it.");
+//                }
+//                return false;
+//            }
+//        }
         if (!ignoreSize) {
             // Check claim volume
             if (!permModel.mayClaimRegionsUnbounded()) {
@@ -182,16 +183,14 @@ public class SCConstructionManager {
                 }
                 return false;
             }
-            
-            for(ProtectedRegion r : regions) {
-                if(r.getFlag(SCFlags.STRUCTURE) != null) {
+
+            for (ProtectedRegion r : regions) {
+                if (r.getFlag(SCFlags.STRUCTURE) != null) {
                     System.out.println(ChatColor.RED + "Structure overlaps another structure");
                     return false;
                 }
             }
-            
-            
-            
+
         } else {
             if (wcfg.claimOnlyInsideExistingRegions) {
                 if (feedback) {
@@ -204,51 +203,87 @@ public class SCConstructionManager {
 
         return true;
     }
-    
+
+    private String getIdForStructure(Structure structure) {
+        String s = String.valueOf("sc_s_" + (structure.getPlan().getDisplayName().replaceAll("\\s", "") + "_" + structure.getId())).toLowerCase();
+        return s;
+    }
 
     public boolean placeSafe(Player placer, Structure structure, boolean addSelf, boolean feedback) {
-        if(!mayPlace(placer, true, feedback)) {
+
+        // Handles permissions and limits
+        if (!mayPlace(placer, true, feedback)) {
             return false; // Feedback inside mayPlace()
         }
-        System.out.println("StructureID: " + UUID.randomUUID().hashCode());
-        
-        String id = String.valueOf(UUID.randomUUID().hashCode());
-        System.out.println("StructureRegionID: " + id);
-        structure.setStructureRegionId(id);
 
+        // All structure placement related things
         WorldDimension dim = structure.getDimension();
         Vector p1 = dim.getStart().getPosition();
         Vector p2 = dim.getEnd().getPosition();
-        ProtectedCuboidRegion region = new ProtectedCuboidRegion(id, new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
-        region.setFlag(SCFlags.STRUCTURE, structure.getPlan().getDisplayName());
+        ProtectedCuboidRegion dummy = new ProtectedCuboidRegion("", new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
+
+        dummy.setFlag(SCFlags.STRUCTURE, structure.getPlan().getDisplayName());
         RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(placer.getWorld());
         
-        if(!canPlace(placer, placer.getWorld(), region, true, feedback)) { 
+
+        if (!canPlace(placer, placer.getWorld(), dummy, true, feedback)) {
             return false; // Feedback inside canPlace()
         }
+
+        // Save the structure to get an unique identifier
+        StructureService service = new StructureService();
+        structure = service.save(structure);
+
+        String id = getIdForStructure(structure);
+        ProtectedCuboidRegion region = new ProtectedCuboidRegion(id, new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
+        structure.setStructureRegionId(id);
         
-        if(addSelf) {
-//            region.getOwners().addPlayer(WorldGuardUtil.getLocalPlayer(placer));
+        // Set Flag
+        region.setFlag(SCFlags.STRUCTURE, structure.getId().intValue());
+        
+        // Add self as owner if true
+        if (addSelf) {
+            region.getOwners().addPlayer(WorldGuardUtil.getLocalPlayer(placer));
         }
-        
+
+        // Save the region with worldguard
         mgr.addRegion(region);
         try {
             mgr.save();
         }
         catch (ProtectionDatabaseException ex) {
+            service.delete(structure);
             Logger.getLogger(SCConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        // Add and save the task to an Construction entry
+        ConstructionService cs = new ConstructionService();
+        ConstructionEntry entry;
+        String issuer = placer.getName();
         
+        // Create an entry for the issuer
+        if (!cs.hasEntry(issuer)) {
+            entry = cs.createEntry(issuer);
+        } else {
+            entry = cs.getEntry(issuer);
+        }
+        structure = service.save(structure);
+        cs.save(entry);
+        ConstructionTask task = new ConstructionTask(entry, structure, ConstructionTask.ConstructionType.BUILDING_AUTO, ConstructionStrategyType.LAYERED);
+        task = cs.save(task);
+        
+
+        // Actually place the structure or add them to the construction queue
         try {
-            SCStructureBuilder.placeStructure(placer, structure.getLocation(), structure.getDirection(), structure.getPlan(), feedback);
+            placeStructure(placer, task, structure, feedback);
         }
         catch (MaxChangedBlocksException ex) {
+            service.delete(structure);
+            cs.removeConstructionTask(issuer, task);
             mgr.removeRegion(id);
             Logger.getLogger(SCConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
         }
-        StructureService service = new StructureService();
-        service.save(structure);
-        
+
         return true;
     }
 
@@ -274,6 +309,26 @@ public class SCConstructionManager {
             Logger.getLogger(SCConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
         }
         return true;
+
+    }
+
+    private void placeStructure(final Player player, final ConstructionTask task, Structure structure, boolean defaultFeedback) throws MaxChangedBlocksException {
+        final ConstructionService service = new ConstructionService();
+        final AsyncEditSession asyncSession = AsyncWorldEditUtil.createAsyncEditSession(player, -1); // -1 = infinite
+//        final EditSession session = new EditSession(location.getWorld(), -1);
+    
+        
+//        SCFoundationBuilder.placeDefault(session, structure, Material.COBBLESTONE, true);
+
+        SCDefaultCallbackAction dca = new SCDefaultCallbackAction(player, structure, task, asyncSession, defaultFeedback);
+
+        SCAsyncStructureBuilder.place(
+                structure,
+                task,
+                asyncSession,
+                dca);
+        task.setState(ConstructionState.IN_QUEUE);
+        service.save(task);
 
     }
 

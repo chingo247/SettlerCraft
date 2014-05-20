@@ -17,7 +17,7 @@
 package com.sc.api.structure.event.structure;
 
 import com.sc.api.structure.model.Structure;
-import com.sc.api.structure.model.StructureState;
+import com.sc.api.structure.construction.progress.ConstructionState;
 import org.bukkit.event.HandlerList;
 
 /**
@@ -27,14 +27,14 @@ import org.bukkit.event.HandlerList;
  */
 public class StructureStateChangedEvent extends StructureEvent {
 
-    private final StructureState oldState;
+    private final ConstructionState oldState;
 
-    public StructureStateChangedEvent(Structure structure, StructureState oldState) {
+    public StructureStateChangedEvent(Structure structure, ConstructionState oldState) {
         super(structure);
         this.oldState = oldState;
     }
 
-    public StructureState getOldState() {
+    public ConstructionState getOldState() {
         return oldState;
     }
 
