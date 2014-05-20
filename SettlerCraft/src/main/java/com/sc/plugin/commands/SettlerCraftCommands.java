@@ -6,8 +6,9 @@
 
 package com.sc.plugin.commands;
 
+import com.sc.api.menu.plugin.shop.ItemShopCategoryMenu;
 import com.sc.api.menu.plugin.shop.MenuManager;
-import com.sc.api.structure.SCStructureAPI;
+import com.sc.plugin.SettlerCraft;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -17,7 +18,7 @@ import org.bukkit.entity.Player;
  *
  * @author Chingo
  */
-public class SetterCraftCommands implements CommandExecutor {
+public class SettlerCraftCommands implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
@@ -25,9 +26,9 @@ public class SetterCraftCommands implements CommandExecutor {
             return false;
         } else {
             switch(args[0]) {
-                case "menu":
+                case "shop":
                     if(args.length == 1) {
-                        return openPlanMenu((Player) cs);
+                        return openShopMenu((Player) cs);
                     } else {
                         return false;
                     }
@@ -36,9 +37,10 @@ public class SetterCraftCommands implements CommandExecutor {
         }
     }
 
-    private boolean openPlanMenu(Player player) {
-        MenuManager.getInstance().getMenu(SCStructureAPI.PLAN_SHOP_NAME).onEnter(player);
+    
+    private boolean openShopMenu(Player player) {
+        ItemShopCategoryMenu menu = (ItemShopCategoryMenu) MenuManager.getInstance().getMenu(SettlerCraft.PLANSHOP);
+        menu.onEnter(player);
         return true;
     }
-    
 }

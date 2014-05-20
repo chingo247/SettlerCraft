@@ -8,15 +8,13 @@ package com.sc.plugin;
 import com.sc.api.menu.plugin.shop.ItemShopCategoryMenu;
 import com.sc.api.menu.plugin.shop.MenuManager;
 import com.sc.api.menu.plugin.shop.MenuSlot;
-import com.sc.api.structure.SCStructureAPI;
-import com.sc.api.structure.model.structure.plan.StructurePlan;
+import static com.sc.api.structure.SCStructureAPI.PLAN_MENU_NAME;
+import com.sc.api.structure.model.plan.StructurePlan;
 import com.sc.api.structure.persistence.StructurePlanService;
 import com.sc.api.structure.util.CuboidUtil;
-import com.sc.plugin.commands.SetterCraftCommands;
 import com.sk89q.worldedit.CuboidClipboard;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -32,7 +30,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class SettlerCraft extends JavaPlugin {
 
     public static final String PLANSHOP = "Buy & Build"; // Unique Identifier for shop
-    
+    private static ItemShopCategoryMenu planShop;
 
 
     @Override
@@ -48,20 +46,20 @@ public class SettlerCraft extends JavaPlugin {
             return;
         }
         
-        SCStructureAPI.loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
-        initPlanShop();
-        getCommand("sc").setExecutor(new SetterCraftCommands());
+        setupPlanShop();
+        
+       
     }
     
-    private static void initPlanShop() {
-        ItemShopCategoryMenu planShop = new ItemShopCategoryMenu(PLANSHOP, true, true, new ItemShopCategoryMenu.ShopCallback() {
+    private static void setupPlanShop() {
+        planShop = new ItemShopCategoryMenu(PLAN_MENU_NAME, true, true, new ItemShopCategoryMenu.ShopCallback() {
 
             @Override
             public void onItemSold(final Player buyer, final ItemStack stack, final double price) {
                 ItemMeta meta = stack.getItemMeta();
                 List<String> lore = new ArrayList<>();
                 lore.add("[Value]: " + ChatColor.GOLD + " " + price);
-                lore.add("[Type]: "+ ChatColor.GOLD+"PLAN");
+                lore.add("[Type]: " + ChatColor.GOLD + "PLAN");
                 meta.setLore(lore);
                 stack.setItemMeta(meta);
             }
@@ -82,19 +80,18 @@ public class SettlerCraft extends JavaPlugin {
         planShop.setLocked(10, 11, 12, 13, 14, 15, 16);
         planShop.setDefaultCategory("All");
         planShop.setChooseDefaultCategory(true);
-         
+
         StructurePlanService planService = new StructurePlanService();
-        for(StructurePlan plan : planService.getPlans()) {
+        for (StructurePlan plan : planService.getPlans()) {
             ItemStack is = new ItemStack(Material.PAPER);
             MenuSlot slot = new MenuSlot(is, plan.getDisplayName(), MenuSlot.MenuSlotType.ITEM);
             CuboidClipboard cc = plan.getSchematic();
             int size = CuboidUtil.count(cc);
-            String sizeString = size < 999 ? String.valueOf(size) : ((Math.round(size/1000)) + "K");
+            String sizeString = size < 999 ? String.valueOf(size) : ((Math.round(size / 1000)) + "K");
             
             slot.setData("Size", cc.getLength() + "x" + cc.getWidth() + "x" + cc.getHeight(), ChatColor.GOLD);
             slot.setData("Blocks", sizeString, ChatColor.GOLD);
             planShop.addItem(slot, plan.getCategory(), plan.getPrice());
-            
         }
 
         MenuManager.getInstance().register(planShop);
