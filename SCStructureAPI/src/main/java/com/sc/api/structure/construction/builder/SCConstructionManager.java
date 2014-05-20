@@ -20,7 +20,6 @@ import com.google.common.collect.Maps;
 import com.sc.api.structure.construction.builder.flag.SCFlags;
 import com.sc.api.structure.model.Structure;
 import com.sc.api.structure.model.StructureJob;
-import com.sc.api.structure.model.StructureState;
 import com.sc.api.structure.model.world.WorldDimension;
 import com.sc.api.structure.persistence.StructureService;
 import com.sc.api.structure.util.plugins.WorldGuardUtil;
@@ -206,29 +205,25 @@ public class SCConstructionManager {
         return true;
     }
     
-    
 
     public boolean placeSafe(Player placer, Structure structure, boolean addSelf, boolean feedback) {
         if(!mayPlace(placer, true, feedback)) {
             return false; // Feedback inside mayPlace()
         }
-        StructureService service = new StructureService();
-        System.out.println("Preparing");
-        structure.setStatus(StructureState.PREPARING);
-//        StructureService service = new StructureService();
-//        service.save(structure);
-        String id = UUID.randomUUID().toString();
+        System.out.println("StructureID: " + UUID.randomUUID().hashCode());
+        
+        String id = String.valueOf(UUID.randomUUID().hashCode());
+        System.out.println("StructureRegionID: " + id);
         structure.setStructureRegionId(id);
 
         WorldDimension dim = structure.getDimension();
         Vector p1 = dim.getStart().getPosition();
         Vector p2 = dim.getEnd().getPosition();
         ProtectedCuboidRegion region = new ProtectedCuboidRegion(id, new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
-        region.setFlag(SCFlags.STRUCTURE, SCFlags.STRUCTURE.getName());
+        region.setFlag(SCFlags.STRUCTURE, structure.getPlan().getDisplayName());
         RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(placer.getWorld());
         
         if(!canPlace(placer, placer.getWorld(), region, true, feedback)) { 
-//            service.delete(structure);
             return false; // Feedback inside canPlace()
         }
         
@@ -251,6 +246,7 @@ public class SCConstructionManager {
             mgr.removeRegion(id);
             Logger.getLogger(SCConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
         }
+        StructureService service = new StructureService();
         service.save(structure);
         
         return true;

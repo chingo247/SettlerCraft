@@ -1,6 +1,5 @@
 package com.sc.api.structure.persistence.util;
 
-import java.io.File;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
@@ -11,21 +10,19 @@ public class HibernateUtil {
     
     private static final  AnnotationConfiguration config = new AnnotationConfiguration();
     
-    private static final String PATH = "plugins/SCStructureAPI/DataBase/hibernate.cfg.xml";
+//    private static final String PATH = "plugins/SCStructureAPI/DataBase/hibernate.cfg.xml";
 //    private static final String PATH = "com/sc/api/structure/persistence/util/hibernate.cfg.xml";
     
     static {
-        File file = new File(PATH);
-        File f = new File(".");
-        System.out.println(f.getAbsolutePath());
-        factory = config.configure(file).buildSessionFactory();
+//        File file = new File(PATH);
+//        File f = new File(".");
+//        System.out.println(f.getAbsolutePath());
+        factory = config.configure().buildSessionFactory();
     }
 
     public static Session getSession() {
         return factory.openSession();
     }
-    
-   
 
     public static void addAnnotatedClass(Class clazz) {
         config.addAnnotatedClass(clazz);
@@ -36,8 +33,8 @@ public class HibernateUtil {
         for(Class clazz : clazzes) {
             config.addAnnotatedClass(clazz);
         }
-        File file = new File(PATH);
-        factory = config.configure(file).buildSessionFactory();
+//        File file = new File(PATH);
+        factory = config.configure().buildSessionFactory();
     }
 
     public static void shutdown() {

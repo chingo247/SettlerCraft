@@ -6,15 +6,9 @@
     <session-factory>
         <property name="hibernate.bytecode.use_reflection_optimizer">false</property>
         <property name="hibernate.connection.driver_class">org.hsqldb.jdbcDriver</property>
-        
         <!--<property name="hibernate.connection.url">jdbc:hsqldb:mem:plugins/SettlerCraft/settlercraft</property>--> 
         <!--<property name="connection.url">jdbc:hsqldb:file:plugins/SCStructureAPI/DataBase/Data/settlerdb;shutdown=true;hsqldb.write_delay=false;</property>-->
-		<property name="connection.url">jdbc:hsqldb:hsql://localhost:9001/StructureAPI;</property>
-        
-		
-
-		
-		
+	<property name="connection.url">jdbc:hsqldb:hsql://localhost:9001/StructureAPI;</property>
         <!-- SQL dialect -->
         <property name="dialect">org.hibernate.dialect.HSQLDialect</property>
         <property name="show_sql">false</property>

@@ -22,7 +22,7 @@ package com.sc.api.structure.model;
  * @author Chingo
  */
 public enum StructureState {
-        PREPARING,
+        PREPARING_REGION,
 
         CLEARING_SITE_OF_BLOCKS,
         /**

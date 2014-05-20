@@ -17,6 +17,7 @@ import com.sc.api.structure.model.plan.StructurePlan;
 import com.sc.api.structure.model.progress.StructureProgress;
 import com.sc.api.structure.model.progress.StructureProgressLayer;
 import com.sc.api.structure.model.progress.StructureProgressMaterialResource;
+import com.sc.api.structure.persistence.HSQLServer;
 import com.sc.api.structure.persistence.StructurePlanService;
 import com.sc.api.structure.persistence.util.HibernateUtil;
 import com.sc.api.structure.persistence.util.MemDBUtil;
@@ -52,7 +53,7 @@ public class SCStructureAPI extends JavaPlugin {
     private static ItemShopCategoryMenu planMenu;
     
     public SCStructureAPI() {
-        initDB();
+        
     }
 
     public boolean isRestrictZonesEnabled() {
@@ -71,6 +72,10 @@ public class SCStructureAPI extends JavaPlugin {
     public static SCStructureAPI getSCStructureAPI() {
         return (SCStructureAPI) Bukkit.getPluginManager().getPlugin("SCStructureAPI");
     }
+
+
+    
+    
 
     @Override
     public void onEnable() {
@@ -98,6 +103,8 @@ public class SCStructureAPI extends JavaPlugin {
         }
 
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(), this);
+        HSQLServer.getInstance().start();
+        initDB();
         new Thread(new Runnable() {
 
             @Override
@@ -114,6 +121,10 @@ public class SCStructureAPI extends JavaPlugin {
         
 
     }
+    
+    
+    
+    
 
     public static WorldEditPlugin getWorldEditPlugin() {
         return (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
@@ -162,6 +173,7 @@ public class SCStructureAPI extends JavaPlugin {
             Logger.getLogger(SCStructureAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
 
     private static void setupPlanShop() {
         planMenu = new ItemShopCategoryMenu(PLAN_MENU_NAME, true, true, new ItemShopCategoryMenu.ShopCallback() {
