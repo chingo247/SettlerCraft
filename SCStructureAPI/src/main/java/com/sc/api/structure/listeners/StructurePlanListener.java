@@ -18,7 +18,10 @@
 package com.sc.api.structure.listeners;
 
 import com.sc.api.structure.SCStructureAPI;
-import com.sc.api.structure.construction.progress.SCConstructionManager;
+import com.sc.api.structure.construction.ConstructionValidator;
+import com.sc.api.structure.construction.builder.SCCuboidBuilder;
+import com.sc.api.structure.construction.progress.ConstructionException;
+import com.sc.api.structure.construction.progress.StructureBuilder;
 import com.sc.api.structure.model.Structure;
 import com.sc.api.structure.model.plan.StructurePlan;
 import com.sc.api.structure.model.world.SimpleCardinal;
@@ -26,11 +29,15 @@ import com.sc.api.structure.persistence.StructurePlanService;
 import com.sc.api.structure.util.WorldUtil;
 import com.sc.api.structure.util.plugins.WorldEditUtil;
 import static com.sc.api.structure.util.plugins.WorldEditUtil.getLocalSession;
+import com.sc.api.structure.util.plugins.WorldGuardUtil;
 import com.sk89q.worldedit.BlockWorldVector;
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Location;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldguard.bukkit.WorldConfiguration;
+import com.sk89q.worldguard.protection.managers.RegionManager;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
@@ -98,6 +105,35 @@ public class StructurePlanListener implements Listener {
 
         }
     }
+    
+    private boolean canPlace(Player player, Location location, SimpleCardinal cardinal, StructurePlan plan) {
+        if(!ConstructionValidator.mayClaim(player)) {
+            player.sendMessage(ChatColor.RED + " You have no permission to claim regions");
+            player.sendMessage(ChatColor.RED + " Therefore your are not able to place structures");
+            return false;
+        }
+        
+        if(!ConstructionValidator.canClaim(player)) {
+            WorldConfiguration wcfg = WorldGuardUtil.getWorldGuard().getGlobalStateManager().get(player.getWorld());
+            RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(player.getWorld());
+            int plyMaxRegionCount = wcfg.getMaxRegionCount(player);
+            int plyCurRegionCount = mgr.getRegionCountOfPlayer(WorldGuardUtil.getLocalPlayer(player));
+            player.sendMessage(ChatColor.RED + " You have reached your region claim limit (" + plyCurRegionCount + "/" + plyMaxRegionCount + ")");
+            player.sendMessage(ChatColor.RED + " Therefore your are not able to place structures");
+            return false;
+        }
+        
+        if(ConstructionValidator.overlapsStructure(plan, location, cardinal)) {
+            player.sendMessage(ChatColor.RED + " Structure will overlap another structure");
+            return false;
+        }
+        
+        if(ConstructionValidator.overlapsUnowned(player, plan, location, cardinal)) {
+            player.sendMessage(ChatColor.RED + " Structure overlaps a region you don't own");
+            return false;
+        }
+        return true;
+    }
 
     private boolean handleSimplePlayerSelect(Player player, org.bukkit.Location target, StructurePlan plan, Action action, boolean defaultFeedBack) {
         if (action == Action.LEFT_CLICK_BLOCK) {
@@ -106,10 +142,15 @@ public class StructurePlanListener implements Listener {
             int y = target.getBlockY();
             int z = target.getBlockZ();
             Location location = new Location(world, new BlockWorldVector(world, x, y, z));
+            SimpleCardinal cardinal = WorldUtil.getCardinal(player);
             
-            Structure structure = new Structure(player.getName(), location, WorldUtil.getDirection(player), plan);
-            if (!SCConstructionManager.getInstance().placeSafe(player, structure, defaultFeedBack, defaultFeedBack)) {
-                player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
+            if (canPlace(player, location, cardinal, plan)) {
+                try {
+                    StructureBuilder.place(player, plan, location, cardinal);
+                }
+                catch (ConstructionException ex) {
+                    Logger.getLogger(StructurePlanListener.class.getName()).log(Level.SEVERE, null, ex);
+                }
             } 
         }
         return false;
@@ -122,47 +163,47 @@ public class StructurePlanListener implements Listener {
         int z = target.getBlockZ();
         Location location = new Location(world, new BlockWorldVector(world, x, y, z));
         LocalSession session = WorldEditUtil.getLocalSession(player);
-        SimpleCardinal direction = WorldUtil.getDirection(player);
+        SimpleCardinal direction = WorldUtil.getCardinal(player);
         
        
         
-        Structure structure = new Structure(player.getName(), location, WorldUtil.getDirection(player), plan);
-         SCConstructionManager.getInstance().placeSafe(player, structure, true, true);
-//        if (action == Action.LEFT_CLICK_BLOCK) {
-//            if (!session.getRegionSelector(world).isDefined()) {
-//                SCCuboidBuilder.select(player, location, direction, structure.getPlan().getSchematic());
-//                player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
-//                player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
-//            } else {
-//
-//                CuboidRegion oldRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
-//                SCCuboidBuilder.select(player, location, direction, structure.getPlan().getSchematic());
-//                CuboidRegion newRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
-//                if (oldRegion.getPos1().equals(newRegion.getPos1()) && oldRegion.getPos2().equals(newRegion.getPos2())) {
-//                    if (SCConstructionManager.getInstance().placeSafe(player, structure, true, true)) {
-//                        session.getRegionSelector(world).clear();
-//                        session.dispatchCUISelection(WorldEditUtil.getLocalPlayer(player));
-//                        return true;
-//                    } else {
-//                        player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
-//                    }
-//                } else {
-//                    SCCuboidBuilder.select(player, location, direction, structure.getPlan().getSchematic());
-//                    if (SCConstructionManager.overlaps(location, direction, plan)) {
-//                        player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
-//                    } else {
-//                        player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
-//                        player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
-//                    }
-//                }
-//            }
-//        } else {
-//            if (session.getRegionSelector(world).isDefined()) {
-//                session.getRegionSelector(world).clear();
-//                session.dispatchCUISelection(WorldEditUtil.getLocalPlayer(player));
-//                player.sendMessage("Cleared selection");
-//            }
-//        }
+        Structure structure = new Structure(player.getName(), location, WorldUtil.getCardinal(player), plan);
+//         SCConstrucStructureBuilderce().placeSafe(player, structure, true, true);
+        if (action == Action.LEFT_CLICK_BLOCK) {
+            if (!session.getRegionSelector(world).isDefined()) {
+                SCCuboidBuilder.select(player, location, direction, structure.getPlan().getSchematic());
+                player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
+                player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
+            } else {
+
+                CuboidRegion oldRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
+                SCCuboidBuilder.select(player, location, direction, structure.getPlan().getSchematic());
+                CuboidRegion newRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
+                if (oldRegion.getPos1().equals(newRegion.getPos1()) && oldRegion.getPos2().equals(newRegion.getPos2())) {
+                    if (canPlace(player, location, direction, plan)) {
+                        session.getRegionSelector(world).clear();
+                        session.dispatchCUISelection(WorldEditUtil.getLocalPlayer(player));
+                        return true;
+                    } 
+                } else {
+                    SCCuboidBuilder.select(player, location, direction, structure.getPlan().getSchematic());
+                    if (ConstructionValidator.overlapsStructure(structure)) {
+                        player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
+                    }else if (ConstructionValidator.overlapsUnowned(player, structure)) {
+                        player.sendMessage(ChatColor.RED + "Structure overlaps a region u dont own");
+                    } else {
+                        player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
+                        player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
+                    }
+                }
+            }
+        } else {
+            if (session.getRegionSelector(world).isDefined()) {
+                session.getRegionSelector(world).clear();
+                session.dispatchCUISelection(WorldEditUtil.getLocalPlayer(player));
+                player.sendMessage("Cleared selection");
+            }
+        }
         return false;
     }
     

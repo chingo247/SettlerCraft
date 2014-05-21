@@ -67,7 +67,7 @@ public class SCAsyncCuboidClipboard extends ProxyCuboidClipboard {
      */
     private final PluginMain m_plugin;
 
-    public SCAsyncCuboidClipboard(String player, StructureClipboard parrent) {
+    public SCAsyncCuboidClipboard(String player, SmartClipBoard parrent) {
         super(new SCCuboidClipboardWrapper(player, parrent));
 
         m_plugin = PluginMain.getInstance();

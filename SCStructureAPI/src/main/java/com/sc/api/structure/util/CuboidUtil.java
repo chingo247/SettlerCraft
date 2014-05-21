@@ -99,10 +99,10 @@ public class CuboidUtil {
         return null;
     }
 
-    public static int count(CuboidClipboard c) {
+    public static int count(CuboidClipboard c, boolean noAir) {
         int count = 0;
         for(Countable<BaseBlock> b : c.getBlockDistributionWithData()){
-            if(b.getID().isAir()) continue;
+            if(b.getID().isAir() && noAir) continue;
             count += b.getAmount();
         }
         return count;

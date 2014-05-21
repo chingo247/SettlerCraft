@@ -59,11 +59,24 @@ public class ConstructionService extends AbstractService {
         return ce;
     }
     
+    public boolean hasConstructionTask(Structure structure) {
+        return getConstructionTask(structure) != null;
+    }
+    
     public ConstructionTask getConstructionTask(Structure structure) {
+        return getConstructionTask(structure.getId());
+    }
+    
+    public ConstructionTask getConstructionTask(Long id) {
         Session session = HibernateUtil.getSession();
         QConstructionTask qt = QConstructionTask.constructionTask;
         JPQLQuery query = new HibernateQuery(session);
-        ConstructionTask ce = query.from(qt).where(qt.structure().id.eq(structure.getId())).uniqueResult(qt);
+        ConstructionTask cachedTask = (ConstructionTask) session.get(ConstructionTask.class, id);
+        if(cachedTask != null) {
+            logger.info("Used a cached entry! >:D");
+            return cachedTask;
+        }
+        ConstructionTask ce = query.from(qt).where(qt.id.eq(id)).uniqueResult(qt);
         session.close();
         return ce;
     }

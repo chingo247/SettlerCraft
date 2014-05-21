@@ -224,7 +224,7 @@ public class SCStructureAPI extends JavaPlugin {
             ItemStack is = new ItemStack(Material.PAPER);
             MenuSlot slot = new MenuSlot(is, plan.getDisplayName(), MenuSlot.MenuSlotType.ITEM);
             CuboidClipboard cc = plan.getSchematic();
-            int size = CuboidUtil.count(cc);
+            int size = CuboidUtil.count(cc, true);
             String sizeString = size < 999 ? String.valueOf(size) : ((Math.round(size / 1000)) + "K");
 
             slot.setData("Size", cc.getLength() + "x" + cc.getWidth() + "x" + cc.getHeight(), ChatColor.GOLD);

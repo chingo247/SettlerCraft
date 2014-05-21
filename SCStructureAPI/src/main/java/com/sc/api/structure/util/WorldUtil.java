@@ -21,6 +21,8 @@ import com.sc.api.structure.model.world.SimpleCardinal;
 import com.sc.api.structure.model.world.WorldDimension;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
 /**
@@ -35,7 +37,7 @@ public class WorldUtil {
      * @param yaw The yaw
      * @return The direction
      */
-    public static SimpleCardinal getDirection(int yaw) {
+    public static SimpleCardinal getCardinal(int yaw) {
         if (yaw >= 45 && yaw < 135 || yaw >= -315 && yaw < -225) {
             return SimpleCardinal.WEST;
         } else if (yaw >= 135 && yaw < 225 || yaw >= -225 && yaw < -135) {
@@ -87,8 +89,8 @@ public class WorldUtil {
     }
 
 
-    public static SimpleCardinal getDirection(Entity entity) {
-        return getDirection((int)entity.getLocation().getYaw());
+    public static SimpleCardinal getCardinal(Entity entity) {
+        return getCardinal((int)entity.getLocation().getYaw());
     }
 
     /**
@@ -214,5 +216,9 @@ public class WorldUtil {
 //            moveEntityFromLot(entity, distance * 2, structureService.getStructure(target));
 //        }
 //    }
+    
+    public static World getWorld(String world) {
+        return Bukkit.getWorld(world);
+    }
 
 }

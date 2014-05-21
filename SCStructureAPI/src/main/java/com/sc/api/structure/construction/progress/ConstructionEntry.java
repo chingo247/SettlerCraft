@@ -35,23 +35,21 @@ public class ConstructionEntry implements Serializable {
     
     
     @Id
-    private final String entryName; 
+    private final String player; 
     
     @OneToMany(cascade = CascadeType.ALL)
     private List<ConstructionTask> constructionQueue;
 
     protected ConstructionEntry() {
-        this.entryName = null;
+        this.player = null;
     }
 
     /**
      * Constructor
-     * @param entryName The entryName originally was designed to be restricted to playerNames, however
-     * due to future support with factions players might be able to register structures (and their construction progress) under the name of a faction.
-     * This way the bps (blocks-per-second) for structure placement can be increased without overloading the server
+     * @param player The player or issuer
      */
-    public ConstructionEntry(String entryName) {
-        this.entryName = entryName;
+    public ConstructionEntry(String player) {
+        this.player = player;
         this.constructionQueue = new ArrayList<>();
     }
 
@@ -72,7 +70,7 @@ public class ConstructionEntry implements Serializable {
     }
 
     public String getEntryName() {
-        return entryName;
+        return player;
     }
     
     

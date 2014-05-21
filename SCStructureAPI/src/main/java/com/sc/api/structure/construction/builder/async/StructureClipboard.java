@@ -89,7 +89,7 @@ public class StructureClipboard extends CuboidClipboard {
         
         final int THRESHOLD = 50;
         for(Vector v : vertices) {
-            System.out.println("IN THE CLIP");
+//            System.out.println("IN THE CLIP");
             BaseBlock worldBlock = editSession.getWorld().getBlock(pos.add(v));
             BaseBlock b = parrent.getBlock(v);
             if (b == null || (noAir && b.isAir()) || (worldBlock.getId() == b.getId() && worldBlock.getData() == b.getData())) {
@@ -99,7 +99,7 @@ public class StructureClipboard extends CuboidClipboard {
             // Save every ${THRESHOLD}
             if(counter % THRESHOLD == 0) {
                 task.setIndex(counter);
-                System.out.println("Save!");
+//                System.out.println("Save!");
                 service.save(task);
             }
             
@@ -107,7 +107,7 @@ public class StructureClipboard extends CuboidClipboard {
             editSession.setBlock(pos.add(v), b);
         }
         // Perform last save
-        System.out.println("Final Save!");
+//        System.out.println("Final Save!");
         service.save(task);
     }
     

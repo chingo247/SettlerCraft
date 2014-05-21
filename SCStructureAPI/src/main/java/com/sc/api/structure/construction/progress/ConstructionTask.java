@@ -23,7 +23,6 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Version;
@@ -36,7 +35,6 @@ import javax.persistence.Version;
 public class ConstructionTask implements Serializable {
 
     @Id
-    @GeneratedValue
     private Long id;
 
     private int jobSize;
@@ -83,6 +81,7 @@ public class ConstructionTask implements Serializable {
         this.jobSize = count;
         this.state = ConstructionState.PREPARING;
         this.structure = structure;
+        this.id = structure.getId();
     }
 
     public ConstructionEntry getConstructionEntry() {
