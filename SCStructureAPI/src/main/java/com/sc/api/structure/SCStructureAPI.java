@@ -54,6 +54,8 @@ public class SCStructureAPI extends JavaPlugin {
     public static final String PLAN_MENU_NAME = "Plan Menu";
     private StructurePlanListener spl;
     private static ItemShopCategoryMenu planMenu;
+    public static final String PLANSHOP = "Buy & Build"; // Unique Identifier for shop
+    private static ItemShopCategoryMenu planShop;
     
     public SCStructureAPI() {
         
@@ -117,6 +119,10 @@ public class SCStructureAPI extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(), this);
         HSQLServer.getInstance().start();
         initDB();
+        
+        //FIXME WIll also be fired at RELOAD!!! 
+        SCConstructionRestoreService.restoreProgress();
+        
         new Thread(new Runnable() {
 
             @Override
@@ -124,7 +130,10 @@ public class SCStructureAPI extends JavaPlugin {
 //                System.out.println("Loading Structures");
                 loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
 //                System.out.println("Loading plans into menu");
-                setupPlanShop();
+                setupMenu();
+                if(Bukkit.getPluginManager().getPlugin("Vault") != null) {
+                    setupPlanShop();
+                }
 //                System.out.println("Structures loaded");
                 getCommand("sc").setExecutor(new StructureCommands());
             }
@@ -189,7 +198,7 @@ public class SCStructureAPI extends JavaPlugin {
     }
     
 
-    private static void setupPlanShop() {
+    private static void setupMenu() {
         planMenu = new ItemShopCategoryMenu(PLAN_MENU_NAME, true, true, new ItemShopCategoryMenu.ShopCallback() {
 
             @Override
@@ -235,4 +244,49 @@ public class SCStructureAPI extends JavaPlugin {
         MenuManager.getInstance().register(planMenu);
     }
 
+    private static void setupPlanShop() {
+        planShop = new ItemShopCategoryMenu(PLANSHOP, true, true, new ItemShopCategoryMenu.ShopCallback() {
+
+            @Override
+            public void onItemSold(final Player buyer, final ItemStack stack, final double price) {
+                ItemMeta meta = stack.getItemMeta();
+                List<String> lore = new ArrayList<>();
+                lore.add("[Value]: " + ChatColor.GOLD + " " + price);
+                lore.add("[Type]: " + ChatColor.GOLD + "PLAN");
+                meta.setLore(lore);
+                stack.setItemMeta(meta);
+            }
+        });
+
+        // Add Plan Categories
+        planShop.addCategory(0, new ItemStack(Material.NETHER_STAR), "All");
+        planShop.addCategory(1, new ItemStack(Material.WORKBENCH), "General", "Town Center");
+        planShop.addCategory(2, new ItemStack(Material.ANVIL), "Industry", "Industrial", "Industries");
+        planShop.addCategory(3, new ItemStack(Material.BED), "Residency", "Residence", "Residencial", "Houses", "House");
+        planShop.addCategory(4, new ItemStack(Material.GOLD_INGOT), "Economy", "Economical", "Shops", "Shop", "Market", "Markets");
+        planShop.addCategory(5, new ItemStack(Material.QUARTZ), "Temples", "Temple", "Church", "Sacred", "Holy");
+        planShop.addCategory(6, new ItemStack(Material.SMOOTH_BRICK), "Fortifications", "Fort", "Fortification", "Wall", "Fortress", "Fortresses", "Keep", "Castle", "Castles", "Military");
+        planShop.addCategory(7, new ItemStack(Material.IRON_SWORD), "Dungeons&Arenas", "Arena", "Arenas", "Dungeon", "Dungeons");
+        planShop.addCategory(8, new ItemStack(Material.BUCKET), "Misc");
+        planShop.addActionSlot(9, new ItemStack(Material.BED_BLOCK), "Previous");
+        planShop.addActionSlot(17, new ItemStack(Material.BED_BLOCK), "Next");
+        planShop.setLocked(10, 11, 12, 13, 14, 15, 16);
+        planShop.setDefaultCategory("All");
+        planShop.setChooseDefaultCategory(true);
+
+        StructurePlanService planService = new StructurePlanService();
+        for (StructurePlan plan : planService.getPlans()) {
+            ItemStack is = new ItemStack(Material.PAPER);
+            MenuSlot slot = new MenuSlot(is, plan.getDisplayName(), MenuSlot.MenuSlotType.ITEM);
+            CuboidClipboard cc = plan.getSchematic();
+            int size = CuboidUtil.count(cc, true);
+            String sizeString = size < 999 ? String.valueOf(size) : ((Math.round(size / 1000)) + "K");
+            
+            slot.setData("Size", cc.getLength() + "x" + cc.getWidth() + "x" + cc.getHeight(), ChatColor.GOLD);
+            slot.setData("Blocks", sizeString, ChatColor.GOLD);
+            planShop.addItem(slot, plan.getCategory(), plan.getPrice());
+        }
+
+        MenuManager.getInstance().register(planShop);
+    }
 }

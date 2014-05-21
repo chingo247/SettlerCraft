@@ -18,8 +18,8 @@
 package com.sc.api.structure.construction.builder.flag;
 
 import com.sk89q.worldguard.protection.flags.Flag;
-import com.sk89q.worldguard.protection.flags.IntegerFlag;
 import com.sk89q.worldguard.protection.flags.RegionGroup;
+import com.sk89q.worldguard.protection.flags.StringFlag;
 
 /**
  *
@@ -27,7 +27,7 @@ import com.sk89q.worldguard.protection.flags.RegionGroup;
  */
 public class SCFlags {
     
-    public static final Flag STRUCTURE = new IntegerFlag("sc-structure", RegionGroup.MEMBERS);
+    public static final Flag STRUCTURE = new StringFlag("sc-structure", RegionGroup.MEMBERS);
 //    public static final Flag CONSTRUCTION_ZONE = new StringFlag(null, RegionGroup.MEMBERS);
     
 }

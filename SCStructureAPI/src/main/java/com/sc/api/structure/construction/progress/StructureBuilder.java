@@ -26,7 +26,6 @@ import com.sc.api.structure.model.plan.StructurePlan;
 import com.sc.api.structure.model.world.SimpleCardinal;
 import com.sc.api.structure.model.world.WorldDimension;
 import com.sc.api.structure.persistence.ConstructionService;
-import com.sc.api.structure.persistence.StructureService;
 import com.sc.api.structure.util.WorldUtil;
 import com.sc.api.structure.util.plugins.AsyncWorldEditUtil;
 import com.sc.api.structure.util.plugins.WorldGuardUtil;
@@ -52,7 +51,7 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
  */
 public class StructureBuilder {
     
-    public static ProtectedRegion claimGround(Player player, Structure structure) {
+    public static ProtectedRegion claimGround(final Player player, final Structure structure) {
         if(structure.getId() == null) {
             throw new AssertionError("Save the structure instance first! (e.g. structure = structureService.save(structure)");
         }
@@ -73,37 +72,43 @@ public class StructureBuilder {
         
         
         // Set Flag
-        region.setFlag(SCFlags.STRUCTURE, structure.getId().intValue());
+        region.setFlag(SCFlags.STRUCTURE, structure.getPlan().getDisplayName());
         region.getOwners().addPlayer(player.getName());
         try {
+            mgr.addRegion(region);
             mgr.save();
         }
         catch (ProtectionDatabaseException ex) {
             Logger.getLogger(StructureBuilder.class.getName()).log(Level.SEVERE, null, ex);
         }
-        StructureService service = new StructureService();
-        service.save(structure); // saves structure with it's regionid
+
         
         return region;
     }
     
-    public static void place(Player player, Structure structure) throws ConstructionException {
+    public static void place(String placer, Structure structure) throws ConstructionException {
         final ConstructionService service = new ConstructionService();
         if(service.hasConstructionTask(structure)) {
             throw new ConstructionTaskException("Already have a task reserved for structure" + structure.getId());
         }
         final RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
-        if(structure.getStructureRegion() == null || mgr.hasRegion(structure.getStructureRegion())) {
-            throw new ConstructionException("Tried to place a structure without a valid region");
+        System.out.println("Region: " + structure.getStructureRegion());
+        
+        if(structure.getStructureRegion() == null || !mgr.hasRegion(structure.getStructureRegion())) {
+            throw new ConstructionException("Tried to place a structure without a region");
         }
         
-        final ConstructionEntry entry = service.hasEntry(player.getName()) ? service.getEntry(player.getName()) : service.createEntry(player.getName());
-        final AsyncEditSession asyncSession = AsyncWorldEditUtil.createAsyncEditSession(player, -1); // -1 = infinite
-        final ConstructionTask task = new ConstructionTask(entry, structure, ConstructionTask.ConstructionType.BUILDING_AUTO, ConstructionStrategyType.LAYERED);
+        final ConstructionEntry entry = service.hasEntry(placer) ? service.getEntry(placer) : service.createEntry(placer);
+        final AsyncEditSession asyncSession = AsyncWorldEditUtil.createAsyncEditSession(placer, structure.getLocation().getWorld(), -1); // -1 = infinite
+        if(asyncSession == null) {
+            System.out.println("asyncsession");
+        }
+        
+        ConstructionTask task = new ConstructionTask(entry, structure, ConstructionTask.ConstructionType.BUILDING_AUTO, ConstructionStrategyType.LAYERED);
         
         //TODO Place enclosure
-
-        SCDefaultCallbackAction dca = new SCDefaultCallbackAction(player, structure, task, asyncSession);
+        task = service.save(task); // first save retrieve id, etc...
+        SCDefaultCallbackAction dca = new SCDefaultCallbackAction(placer, structure, task, asyncSession);
 
         try {
             SCAsyncCuboidBuilder.placeLayered(
@@ -118,8 +123,11 @@ public class StructureBuilder {
         catch (MaxChangedBlocksException ex) {
             Logger.getLogger(StructureBuilder.class.getName()).log(Level.SEVERE, null, ex);
         }
-        task.setState(ConstructionState.IN_QUEUE);
-        service.save(task);
+        
+    }
+    
+    public static void place(Player player, Structure structure) throws ConstructionException {
+        place(player.getName(), structure);
     }
     
     public static void place(Player player, StructurePlan plan, Location location, SimpleCardinal cardinal) throws ConstructionException {

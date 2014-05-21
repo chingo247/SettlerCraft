@@ -18,12 +18,16 @@ package com.sc.api.structure.persistence;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
+import com.mysema.query.jpa.hibernate.HibernateUpdateClause;
 import com.sc.api.structure.construction.progress.ConstructionEntry;
+import com.sc.api.structure.construction.progress.ConstructionState;
 import com.sc.api.structure.construction.progress.ConstructionTask;
 import com.sc.api.structure.construction.progress.QConstructionEntry;
 import com.sc.api.structure.construction.progress.QConstructionTask;
 import com.sc.api.structure.model.Structure;
 import com.sc.api.structure.persistence.util.HibernateUtil;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
@@ -35,72 +39,104 @@ import org.hibernate.Transaction;
  * @author Chingo
  */
 public class ConstructionService extends AbstractService {
-    
+
     private final Logger logger = Logger.getLogger("ConstructionService");
-    
+
     public ConstructionEntry createEntry(String issuer) {
         ConstructionEntry entry = new ConstructionEntry(issuer);
         return save(entry);
     }
-    
-
 
     public ConstructionTask save(ConstructionTask constructionTask) {
-        Session session = HibernateUtil.getSession();
-        ConstructionTask cp = (ConstructionTask) session.merge(constructionTask);
-        session.close();
-        return cp;
+        Session session = null;
+        Transaction tx = null;
+        try {
+            session = HibernateUtil.getSession();
+            tx = session.beginTransaction();
+            constructionTask = (ConstructionTask) session.merge(constructionTask);
+            tx.commit();
+        }
+        catch (HibernateException e) {
+            try {
+                tx.rollback();
+            }
+            catch (HibernateException rbe) {
+                java.util.logging.Logger.getLogger(AbstractService.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
+            }
+            throw e;
+        }
+        finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return constructionTask;
     }
 
     public ConstructionEntry save(ConstructionEntry constructionEntry) {
-        Session session = HibernateUtil.getSession();
-        ConstructionEntry ce = (ConstructionEntry) session.merge(constructionEntry);
-        session.close();
-        return ce;
+        Session session = null;
+        Transaction tx = null;
+        try {
+            session = HibernateUtil.getSession();
+            tx = session.beginTransaction();
+            constructionEntry = (ConstructionEntry) session.merge(constructionEntry);
+            tx.commit();
+        }
+        catch (HibernateException e) {
+            try {
+                tx.rollback();
+            }
+            catch (HibernateException rbe) {
+                java.util.logging.Logger.getLogger(AbstractService.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
+            }
+            throw e;
+        }
+        finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return constructionEntry;
     }
-    
+
     public boolean hasConstructionTask(Structure structure) {
-        return getConstructionTask(structure) != null;
-    }
-    
-    public ConstructionTask getConstructionTask(Structure structure) {
-        return getConstructionTask(structure.getId());
-    }
-    
-    public ConstructionTask getConstructionTask(Long id) {
         Session session = HibernateUtil.getSession();
         QConstructionTask qt = QConstructionTask.constructionTask;
         JPQLQuery query = new HibernateQuery(session);
-        ConstructionTask cachedTask = (ConstructionTask) session.get(ConstructionTask.class, id);
-        if(cachedTask != null) {
-            logger.info("Used a cached entry! >:D");
-            return cachedTask;
-        }
-        ConstructionTask ce = query.from(qt).where(qt.id.eq(id)).uniqueResult(qt);
+        boolean exists = query.from(qt).where(qt.structure().id.eq(structure.getId())).exists();
         session.close();
-        return ce;
+        return exists;
     }
-    
-    public ConstructionEntry getEntry(String entryName) {
+
+    public void updateStatus(ConstructionTask task, ConstructionState newStatus) {
+        Session session = HibernateUtil.getSession();
+        QConstructionTask qct = QConstructionTask.constructionTask;
+        if (newStatus == ConstructionState.FINISHED) {
+            Timestamp completedAt = new Timestamp(new Date().getTime());
+            new HibernateUpdateClause(session, qct).where(qct.id.eq(task.getId())).set(qct.state, newStatus).set(qct.completeAt, completedAt).execute();
+        } else {
+            new HibernateUpdateClause(session, qct).where(qct.id.eq(task.getId())).set(qct.state, newStatus).execute();
+        }
+    }
+
+    public ConstructionEntry getEntry(String player) {
         Session session = HibernateUtil.getSession();
         QConstructionEntry qce = QConstructionEntry.constructionEntry;
-        ConstructionEntry cachedEntry = (ConstructionEntry) session.get(ConstructionEntry.class, entryName);
-        if(cachedEntry != null) {
+        ConstructionEntry cachedEntry = (ConstructionEntry) session.get(ConstructionEntry.class, player);
+        if (cachedEntry != null) {
             logger.info("Used a cached entry! >:D");
             return cachedEntry;
         }
         JPQLQuery query = new HibernateQuery(session);
-        ConstructionEntry ce = query.from(qce).where(qce.entryName.eq(entryName)).uniqueResult(qce);
+        ConstructionEntry ce = query.from(qce).where(qce.player.eq(player)).uniqueResult(qce);
         session.close();
         return ce;
     }
-    
+
     public boolean hasEntry(String entryName) {
         return getEntry(entryName) != null;
     }
-    
-    
-    
+
     public ConstructionEntry removeConstructionTask(String issuer, ConstructionTask constructionTask) {
         Session session = null;
         Transaction tx = null;
@@ -111,16 +147,19 @@ public class ConstructionService extends AbstractService {
             entry = getEntry(issuer);
             entry.remove(constructionTask);
             entry = (ConstructionEntry) session.merge(entry);
-            
+
             tx.commit();
-        } catch (HibernateException e) {
+        }
+        catch (HibernateException e) {
             try {
                 tx.rollback();
-            } catch (HibernateException rbe) {
+            }
+            catch (HibernateException rbe) {
                 java.util.logging.Logger.getLogger(AbstractService.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
             }
             throw e;
-        } finally {
+        }
+        finally {
             if (session != null) {
                 session.close();
             }

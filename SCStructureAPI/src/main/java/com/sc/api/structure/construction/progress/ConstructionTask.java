@@ -21,11 +21,15 @@ import com.sk89q.worldedit.Countable;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
 
 /**
  *
@@ -35,18 +39,24 @@ import javax.persistence.Version;
 public class ConstructionTask implements Serializable {
 
     @Id
+    @GeneratedValue
     private Long id;
 
     private int jobSize;
 
+    @NotNull
     @OneToOne(cascade = CascadeType.ALL)
     private Structure structure;
+    
+    @NotNull
+    private Timestamp createdAt;
+    
+    private Timestamp completeAt;
 
     @Version
     private Timestamp lastModified;
 
     public enum ConstructionType {
-
         BUILDING_AUTO,
         DEMOLISHING_AUTO,
         MANUAL
@@ -59,10 +69,8 @@ public class ConstructionTask implements Serializable {
     private final ConstructionStrategyType strategyType;
 
     
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL)
     private final ConstructionEntry constructionEntry;
-
-    private int index;
 
     protected ConstructionTask() {
         this.constructionType = null;
@@ -81,16 +89,29 @@ public class ConstructionTask implements Serializable {
         this.jobSize = count;
         this.state = ConstructionState.PREPARING;
         this.structure = structure;
-        this.id = structure.getId();
+        this.createdAt = new Timestamp(new Date().getTime());
     }
 
     public ConstructionEntry getConstructionEntry() {
         return constructionEntry;
     }
 
-    public void setState(ConstructionState state) {
-        this.state = state;
+//    public void setState(ConstructionState state) {
+//        if(state == ConstructionState.FINISHED) {
+//            this.completeAt = new Timestamp(new Date().getTime());
+//        }
+//        this.state = state;
+//    }
+
+    public Timestamp getCompleteAt() {
+        return completeAt;
     }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+    
+    
 
     public ConstructionState getState() {
         return state;
@@ -99,6 +120,8 @@ public class ConstructionTask implements Serializable {
     public Timestamp getLastModified() {
         return lastModified;
     }
+    
+    
 
     public Long getId() {
         return id;
@@ -108,9 +131,6 @@ public class ConstructionTask implements Serializable {
         return structure;
     }
 
-    public int getIndex() {
-        return index;
-    }
 
     public ConstructionType getConstructionType() {
         return constructionType;
@@ -120,8 +140,8 @@ public class ConstructionTask implements Serializable {
         return strategyType;
     }
 
-    public void setIndex(int index) {
-        this.index = index;
-    }
+
+    
+    
 
 }

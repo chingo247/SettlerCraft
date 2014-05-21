@@ -20,6 +20,8 @@ package com.sc.api.structure.commands;
 import com.sc.api.menu.plugin.shop.ItemShopCategoryMenu;
 import com.sc.api.menu.plugin.shop.MenuManager;
 import com.sc.api.structure.SCStructureAPI;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -61,7 +63,11 @@ public class StructureCommands implements CommandExecutor {
     }
     
     private boolean openShopMenu(Player player) {
-        ItemShopCategoryMenu menu = (ItemShopCategoryMenu) MenuManager.getInstance().getMenu(SCStructureAPI.PLAN_MENU_NAME);
+        if(Bukkit.getPluginManager().getPlugin("Vault") == null) {
+            player.sendMessage(ChatColor.RED + " Planshop requires Vault to work");
+            return false;
+        }
+        ItemShopCategoryMenu menu = (ItemShopCategoryMenu) MenuManager.getInstance().getMenu(SCStructureAPI.PLANSHOP);
         menu.onEnter(player);
         return true;
     }

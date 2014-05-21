@@ -18,6 +18,7 @@
 package com.sc.api.structure.util.plugins;
 
 import static com.sc.api.structure.util.plugins.WorldEditUtil.getLocalWorld;
+import com.sk89q.worldedit.LocalWorld;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
@@ -44,6 +45,10 @@ public class AsyncWorldEditUtil {
 
     public static AsyncEditSession createAsyncEditSession(Player issuer, int maxblocks) {
         return new AsyncEditSession(getAsyncSessionFactory(), getAsyncWorldEditPlugin(), issuer.getName(), getLocalWorld(issuer), maxblocks);
+    }
+    
+    public static AsyncEditSession createAsyncEditSession(String issuer, LocalWorld world, int maxblocks) {
+        return new AsyncEditSession(getAsyncSessionFactory(), getAsyncWorldEditPlugin(), issuer, world, maxblocks);
     }
     
  

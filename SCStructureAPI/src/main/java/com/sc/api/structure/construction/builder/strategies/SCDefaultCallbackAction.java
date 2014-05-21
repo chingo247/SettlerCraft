@@ -37,12 +37,12 @@ import org.primesoft.asyncworldedit.blockPlacer.IJobEntryListener;
  */
 public class SCDefaultCallbackAction implements SCJobCallback {
 
-    private final Player placer;
+    private final String placer;
     private final Structure structure;
     private final EditSession session;
     private ConstructionTask task;
 
-    public SCDefaultCallbackAction(Player placer, Structure structure, ConstructionTask task, EditSession session) {
+    public SCDefaultCallbackAction(String placer, Structure structure, ConstructionTask task, EditSession session) {
         this.placer = placer;
         this.structure = structure;
         this.session = session;
@@ -58,15 +58,19 @@ public class SCDefaultCallbackAction implements SCJobCallback {
             @Override
             public void jobStateChanged(BlockPlacerJobEntry bpje) {
                 if (bpje.getStatus() == BlockPlacerJobEntry.JobStatus.PlacingBlocks) {
-                    placer.sendMessage(ChatColor.YELLOW + "Building:  " + ChatColor.BLUE + structure.getPlan().getDisplayName());
-                    task.setState(ConstructionState.CONSTRUCTION_IN_PROGRESS);
-                    task = constructionService.save(task);
+                    Player ply = Bukkit.getPlayer(placer);
+                    if (ply != null && ply.isOnline()) {
+                        ply.sendMessage(ChatColor.YELLOW + "Building:  " + ChatColor.BLUE + structure.getPlan().getDisplayName());
+                    }
+                   constructionService.updateStatus(task, ConstructionState.CONSTRUCTION_IN_PROGRESS);
                 } else if (bpje.getStatus() == BlockPlacerJobEntry.JobStatus.Done) {
+                    Player ply = Bukkit.getPlayer(placer);
+                    if (ply != null && ply.isOnline()) {
+                        ply.sendMessage(ChatColor.YELLOW + "Construction complete: " + ChatColor.BLUE + structure.getPlan().getDisplayName());
+                        ply.playSound(ply.getLocation(), Sound.NOTE_SNARE_DRUM, 2, 0);
+                    }
                     Bukkit.getPluginManager().callEvent(new StructureCompleteEvent(structure));
-                    placer.sendMessage(ChatColor.YELLOW + "Construction complete: " + ChatColor.BLUE + structure.getPlan().getDisplayName());
-                    placer.playSound(placer.getLocation(), Sound.NOTE_SNARE_DRUM, 2, 0);
-                    task.setState(ConstructionState.FINISHED);
-                    task = constructionService.save(task);
+                    constructionService.updateStatus(task, ConstructionState.FINISHED);
                 }
             }
         });
@@ -74,13 +78,16 @@ public class SCDefaultCallbackAction implements SCJobCallback {
 
     @Override
     public void onJobCanceled(BlockPlacerJobEntry entry) {
-        placer.sendMessage(ChatColor.RED + "Construction canceled: " + ChatColor.BLUE + structure.getPlan().getDisplayName());
+        Player ply = Bukkit.getPlayer(placer);
+        if (ply != null && ply.isOnline()) {
+            ply.sendMessage(ChatColor.RED + "Construction canceled: " + ChatColor.BLUE + structure.getPlan().getDisplayName());
+        }
+        
         entry.getEditSession().undo(entry.getEditSession());
         session.undo(session);
 
         final ConstructionService constructionService = new ConstructionService();
-        task.setState(ConstructionState.CANCELED);
-        task = constructionService.save(task);
+        constructionService.updateStatus(task, ConstructionState.CANCELED);
     }
 
 }

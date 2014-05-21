@@ -18,7 +18,6 @@
 package com.sc.api.structure.construction.builder.async;
 
 import com.sc.api.structure.construction.progress.ConstructionStrategyType;
-import com.sc.api.structure.util.plugins.AsyncWorldEditUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
@@ -78,16 +77,14 @@ public class SmartClipBoard extends CuboidClipboard {
 
     @Override
     public void place(EditSession editSession, Vector pos, boolean noAir) throws MaxChangedBlocksException {
-        int counter = 0;
-        final int SAVE_THRESHOLD = AsyncWorldEditUtil.getAsyncWorldEditPlugin().getConfig().getInt("rendering.blocks"); // amount of blocks between save
         for(Vector v : vertices) {
             BaseBlock worldBlock = editSession.getWorld().getBlock(pos.add(v));
             BaseBlock b = parrent.getBlock(v);
+            
+            
             if (b == null || (noAir && b.isAir()) || (worldBlock.getId() == b.getId() && worldBlock.getData() == b.getData())) {
                 continue;
             }
-            
-            counter++;
             
             editSession.setBlock(pos.add(v), b);
         }

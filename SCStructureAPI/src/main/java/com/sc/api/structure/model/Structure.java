@@ -72,6 +72,7 @@ public class Structure implements Serializable {
     @OneToOne(cascade = CascadeType.ALL)
     private StructureProgress progress;
     
+    @Nullable
     @OneToOne(cascade = CascadeType.ALL)
     private ConstructionTask task;
     
