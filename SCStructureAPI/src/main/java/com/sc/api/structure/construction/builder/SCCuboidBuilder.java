@@ -99,19 +99,19 @@ public class SCCuboidBuilder {
      * @param direction
      * @return The new target location
      */
-    public static Location align(CuboidClipboard clipboard, Location location, SimpleCardinal direction) {
+    public static Location align(final CuboidClipboard clipboard, Location location, SimpleCardinal direction) {
         switch (direction) {
             case EAST:
                 return location;
             case SOUTH:
                 clipboard.rotate2D(90);
-                return location.add(-(clipboard.getWidth() - 1), 0, 0);
+                return location.add(new BlockVector(-(clipboard.getWidth() - 1), 0, 0));
             case WEST:
                 clipboard.rotate2D(180);
-                return location.add(-(clipboard.getWidth() - 1), 0, -(clipboard.getLength() - 1));
+                return location.add(new BlockVector(-(clipboard.getWidth() - 1), 0, -(clipboard.getLength() - 1)));
             case NORTH:
                 clipboard.rotate2D(270);
-                return location.add(0, 0, -(clipboard.getLength() - 1));
+                return location.add(new BlockVector(0, 0, -(clipboard.getLength() - 1)));
             default:
                 throw new AssertionError("unreachable");
         }
@@ -126,8 +126,8 @@ public class SCCuboidBuilder {
      * @param cardinal The cardinal
      */
     public static void place(EditSession editSession, CuboidClipboard clipboard, Location target, SimpleCardinal cardinal) throws MaxChangedBlocksException {
-        align(clipboard, target, cardinal);
-        clipboard.paste(editSession, target.getPosition(), true);
+        Location t = align(clipboard, target, cardinal);
+        clipboard.paste(editSession, t.getPosition(), true);
     }
 
     /**
@@ -136,12 +136,12 @@ public class SCCuboidBuilder {
      *
      * @param cuboidClipboard The cuboidclipboard
      * @param target The target location
-     * @param direction The direction
+     * @param cardinal The direction
      */
-    public static void place(CuboidClipboard cuboidClipboard, Location target, SimpleCardinal direction) {
-        Location t = align(cuboidClipboard, target, direction);
+    public static void place(CuboidClipboard cuboidClipboard, Location target, SimpleCardinal cardinal) {
+        Location t = align(cuboidClipboard, target, cardinal);
         try {
-            SCCuboidBuilder.place(WorldEditUtil.getEditSession(t.getWorld(), -1), cuboidClipboard, t, direction);
+            SCCuboidBuilder.place(WorldEditUtil.getEditSession(t.getWorld(), -1), cuboidClipboard, t, cardinal);
         }
         catch (MaxChangedBlocksException ex) {
             Logger.getLogger(SCCuboidBuilder.class.getName()).log(Level.SEVERE, null, ex);

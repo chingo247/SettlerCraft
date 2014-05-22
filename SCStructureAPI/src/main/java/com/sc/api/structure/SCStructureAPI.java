@@ -121,7 +121,7 @@ public class SCStructureAPI extends JavaPlugin {
         initDB();
         
         //FIXME WIll also be fired at RELOAD!!! 
-        SCConstructionRestoreService.restoreProgress();
+//        SCConstructionRestoreService.restoreProgress();
         
         new Thread(new Runnable() {
 

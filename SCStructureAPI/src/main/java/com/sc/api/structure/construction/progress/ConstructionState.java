@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.sc.api.structure.construction.progress;
 
 /**
@@ -22,30 +21,19 @@ package com.sc.api.structure.construction.progress;
  * @author Chingo
  */
 public enum ConstructionState {
-        /**
-         * The state direct after the structure has been placed
-         *//**
-         * The state direct after the structure has been placed
-         */
-        PREPARING,
-        /**
-         * Before structure has been added to the Player's Queue
-         */
-        PLACING_FOUNDATION,
 
-        /**
-         * When 
-         */
-        IN_QUEUE,
-        
-        /*
-         * Constructing
-         */
-        CONSTRUCTION_IN_PROGRESS,
-        
-        CANCELED,
-        /**
-         * ConstructionSite is complete
-         */
-        FINISHED
-    }
+    PREPARING,
+    /**
+     * When
+     */
+    IN_QUEUE,
+    /*
+     * Constructing
+     */
+    IN_PROGRESS,
+    CANCELED,
+    /**
+     * ConstructionSite is complete
+     */
+    FINISHED
+}

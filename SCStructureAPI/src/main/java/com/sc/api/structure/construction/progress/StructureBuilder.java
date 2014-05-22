@@ -16,11 +16,12 @@
  */
 package com.sc.api.structure.construction.progress;
 
-import com.sc.api.structure.construction.ConstructionValidator;
+import com.sc.api.structure.construction.builder.ConstructionValidator;
 import com.sc.api.structure.construction.builder.SCCuboidBuilder;
-import com.sc.api.structure.construction.builder.async.SCAsyncCuboidBuilder;
+import com.sc.api.structure.construction.builder.SCDefaultCallbackAction;
 import com.sc.api.structure.construction.builder.flag.SCFlags;
-import com.sc.api.structure.construction.builder.strategies.SCDefaultCallbackAction;
+import com.sc.api.structure.construction.builder.worldedit.SCAsyncCuboidClipboard;
+import com.sc.api.structure.construction.builder.worldedit.SmartClipBoard;
 import com.sc.api.structure.model.Structure;
 import com.sc.api.structure.model.plan.StructurePlan;
 import com.sc.api.structure.model.world.SimpleCardinal;
@@ -30,6 +31,7 @@ import com.sc.api.structure.util.WorldUtil;
 import com.sc.api.structure.util.plugins.AsyncWorldEditUtil;
 import com.sc.api.structure.util.plugins.WorldGuardUtil;
 import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
@@ -92,7 +94,6 @@ public class StructureBuilder {
             throw new ConstructionTaskException("Already have a task reserved for structure" + structure.getId());
         }
         final RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
-        System.out.println("Region: " + structure.getStructureRegion());
         
         if(structure.getStructureRegion() == null || !mgr.hasRegion(structure.getStructureRegion())) {
             throw new ConstructionException("Tried to place a structure without a region");
@@ -100,29 +101,27 @@ public class StructureBuilder {
         
         final ConstructionEntry entry = service.hasEntry(placer) ? service.getEntry(placer) : service.createEntry(placer);
         final AsyncEditSession asyncSession = AsyncWorldEditUtil.createAsyncEditSession(placer, structure.getLocation().getWorld(), -1); // -1 = infinite
-        if(asyncSession == null) {
-            System.out.println("asyncsession");
-        }
         
         ConstructionTask task = new ConstructionTask(entry, structure, ConstructionTask.ConstructionType.BUILDING_AUTO, ConstructionStrategyType.LAYERED);
         
+        
         //TODO Place enclosure
-        task = service.save(task); // first save retrieve id, etc...
+        task = service.save(task); // first save, retrieve id, etc...
         SCDefaultCallbackAction dca = new SCDefaultCallbackAction(placer, structure, task, asyncSession);
 
+        CuboidClipboard schematic = structure.getPlan().getSchematic();
+        Location t = SCCuboidBuilder.align(schematic, structure.getLocation(), structure.getCardinal());
+        Vector sign = structure.getLocation().getPosition().subtract(t.getPosition()).add(0, 1, 0);
+        SmartClipBoard smartClipboard = new SmartClipBoard(schematic, sign,ConstructionStrategyType.LAYERED, false);
+        SCAsyncCuboidClipboard asyncCuboidClipboard = new SCAsyncCuboidClipboard(asyncSession.getPlayer(), smartClipboard);
         try {
-            SCAsyncCuboidBuilder.placeLayered(
-                    asyncSession, 
-                    structure.getPlan().getSchematic(), 
-                    structure.getLocation(), 
-                    structure.getDirection(), 
-                    structure.getPlan().getDisplayName(), 
-                    dca
-            );
+            asyncCuboidClipboard.place(asyncSession, t.getPosition(), false, dca);
         }
         catch (MaxChangedBlocksException ex) {
-            Logger.getLogger(StructureBuilder.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(StructureBuilder.class.getName()).log(Level.SEVERE, null, ex); // Won't happen
         }
+        
+        
         
     }
     
@@ -135,7 +134,7 @@ public class StructureBuilder {
     }
     
     public static void select(Player player, Structure structure) {
-        Location pos2 = WorldUtil.calculateEndLocation(structure.getLocation(), structure.getDirection(), structure.getPlan().getSchematic());
+        Location pos2 = WorldUtil.calculateEndLocation(structure.getLocation(), structure.getCardinal(), structure.getPlan().getSchematic());
         SCCuboidBuilder.select(player, structure.getLocation(), pos2);
     }
     

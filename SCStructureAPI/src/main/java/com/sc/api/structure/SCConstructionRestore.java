@@ -19,7 +19,7 @@ package com.sc.api.structure;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.api.structure.construction.builder.async.SCAsyncCuboidBuilder;
-import com.sc.api.structure.construction.builder.strategies.SCDefaultCallbackAction;
+import com.sc.api.structure.construction.builder.SCDefaultCallbackAction;
 import com.sc.api.structure.construction.progress.ConstructionState;
 import com.sc.api.structure.construction.progress.ConstructionTask;
 import com.sc.api.structure.construction.progress.QConstructionTask;
@@ -159,7 +159,7 @@ class SCConstructionRestoreService extends AbstractService {
                     asyncSession,
                     structure.getPlan().getSchematic(),
                     structure.getLocation(),
-                    structure.getDirection(),
+                    structure.getCardinal(),
                     structure.getPlan().getDisplayName(),
                     dca
             );

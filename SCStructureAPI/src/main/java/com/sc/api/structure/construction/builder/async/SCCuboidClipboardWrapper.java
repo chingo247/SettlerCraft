@@ -16,6 +16,7 @@
  */
 package com.sc.api.structure.construction.builder.async;
 
+import com.sc.api.structure.construction.builder.worldedit.SmartClipBoard;
 import org.primesoft.asyncworldedit.worldedit.CuboidClipboardWrapper;
 
 /**

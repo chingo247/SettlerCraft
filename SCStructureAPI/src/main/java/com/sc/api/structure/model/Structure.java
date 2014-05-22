@@ -151,7 +151,7 @@ public class Structure implements Serializable {
      *
      * @return The direction
      */
-    public SimpleCardinal getDirection() {
+    public SimpleCardinal getCardinal() {
         return direction;
     }
 

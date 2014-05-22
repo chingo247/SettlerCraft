@@ -29,6 +29,7 @@ import java.util.List;
  */
 abstract class ConstructionStrategy {
     
+    
     public List<Vector> getList(CuboidClipboard cliboard) {
         return getList(cliboard, true);
     }

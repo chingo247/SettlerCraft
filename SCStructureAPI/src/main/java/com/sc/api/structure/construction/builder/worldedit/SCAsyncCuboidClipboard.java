@@ -14,8 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.construction.builder.async;
+package com.sc.api.structure.construction.builder.worldedit;
 
+import com.sc.api.structure.construction.builder.SCJobCallback;
+import com.sc.api.structure.construction.builder.async.SCBlockPlacerJobEntry;
+import com.sc.api.structure.construction.builder.async.SCClipBoardAsyncTask;
+import com.sc.api.structure.construction.builder.async.SCCuboidClipboardWrapper;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalEntity;
@@ -33,7 +37,7 @@ import org.primesoft.asyncworldedit.worldedit.ProxyCuboidClipboard;
 import org.primesoft.asyncworldedit.worldedit.WorldeditOperations;
 
 /**
- * Modfied version of AsyncClipboard, layers are placed vertically
+ * Modfied version of AsyncClipboard
  * @author Chingo
  */
 public class SCAsyncCuboidClipboard extends ProxyCuboidClipboard {

@@ -19,10 +19,16 @@ package com.sc.api.structure.util;
 import com.google.common.base.Preconditions;
 import com.sc.api.structure.model.world.SimpleCardinal;
 import com.sc.api.structure.model.world.WorldDimension;
+import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;
+import com.sk89q.worldedit.Vector;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 
 /**
@@ -221,4 +227,43 @@ public class WorldUtil {
         return Bukkit.getWorld(world);
     }
 
+
+    
+    
+    public static Sign createSign(Location location, SimpleCardinal cardinal) {
+        
+        byte data;
+        
+        switch(cardinal) {
+            case EAST: data = 4; break;
+            case NORTH: data = 0; break;
+            case WEST: data = 12; break;
+            case SOUTH: data = 8; break;
+            default: throw new AssertionError("Unreachable");
+        }
+        
+        
+        Vector pos = location.getPosition().add(new BlockVector(0, 1, 0));
+        Block b = Bukkit.getWorld(location.getWorld().getName()).getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
+        b.setType(Material.SIGN_POST);
+        Sign sign = (Sign) b.getState();
+        sign.getData().setData(data);
+        sign.update();
+        return sign;
+    }
+    
+    public static BlockState getBlockState(Location location) {
+        Vector pos = location.getPosition();
+        Block b = Bukkit.getWorld(location.getWorld().getName()).getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
+        return b.getState();
+    }
+    
+    public static Sign getSign(Location location) {
+        BlockState b = getBlockState(location);
+        if(b instanceof Sign) {
+            return (Sign) b;
+        } else {
+            return null;
+        }
+    }
 }

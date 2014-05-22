@@ -18,6 +18,9 @@
 package com.sc.api.structure.construction.builder.async;
 
 import com.sc.api.structure.construction.builder.SCCuboidBuilder;
+import com.sc.api.structure.construction.builder.SCJobCallback;
+import com.sc.api.structure.construction.builder.worldedit.SCAsyncCuboidClipboard;
+import com.sc.api.structure.construction.builder.worldedit.SmartClipBoard;
 import com.sc.api.structure.construction.progress.ConstructionStrategyType;
 import com.sc.api.structure.model.world.SimpleCardinal;
 import com.sc.api.structure.util.plugins.AsyncWorldEditUtil;
@@ -45,8 +48,8 @@ public class SCAsyncCuboidBuilder {
     }
 
     public static void place(AsyncEditSession editSession, CuboidClipboard cuboidClipboard, Location target, SimpleCardinal cardinal, String jobName) throws MaxChangedBlocksException {
-        SCCuboidBuilder.align(cuboidClipboard, target, cardinal);
-        cuboidClipboard.place(editSession, target.getPosition(), true);
+        Location t = SCCuboidBuilder.align(cuboidClipboard, target, cardinal);
+        cuboidClipboard.place(editSession, t.getPosition(), true);
     }
 
     public static void place(Player player, CuboidClipboard cuboidClipboard, Location target, SimpleCardinal cardinal, String jobName) {
@@ -67,9 +70,10 @@ public class SCAsyncCuboidBuilder {
     }
 
     public static void placeLayered(AsyncEditSession asyncEditSession, CuboidClipboard whole, Location location, SimpleCardinal cardinal, String jobName, SCJobCallback callback) throws MaxChangedBlocksException {
-        Location target = SCCuboidBuilder.align(whole, location, cardinal);
-        SmartClipBoard smartClipboard = new SmartClipBoard(whole, ConstructionStrategyType.LAYERED);
+        Location t = SCCuboidBuilder.align(whole, location, cardinal);
+//        location.getPosition().subtract(t.getPosition()), new BaseBlock(BlockID.REDSTONE_BLOCK));
+        SmartClipBoard smartClipboard = new SmartClipBoard(whole, ConstructionStrategyType.LAYERED, false);
         SCAsyncCuboidClipboard asyncCuboidClipboard = new SCAsyncCuboidClipboard(asyncEditSession.getPlayer(), smartClipboard);
-        asyncCuboidClipboard.place(asyncEditSession, target.getPosition(), true, callback);
+        asyncCuboidClipboard.place(asyncEditSession, t.getPosition(), false, callback);
     }
 }

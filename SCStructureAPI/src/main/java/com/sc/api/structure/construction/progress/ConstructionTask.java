@@ -17,7 +17,11 @@
 package com.sc.api.structure.construction.progress;
 
 import com.sc.api.structure.model.Structure;
+import com.sc.api.structure.util.WorldUtil;
+import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Countable;
+import com.sk89q.worldedit.Location;
+import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -30,6 +34,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
+import org.bukkit.block.Sign;
 
 /**
  *
@@ -67,7 +72,7 @@ public class ConstructionTask implements Serializable {
     private ConstructionType constructionType;
 
     private final ConstructionStrategyType strategyType;
-
+    
     
     @ManyToOne(cascade = CascadeType.ALL)
     private final ConstructionEntry constructionEntry;
@@ -90,6 +95,12 @@ public class ConstructionTask implements Serializable {
         this.state = ConstructionState.PREPARING;
         this.structure = structure;
         this.createdAt = new Timestamp(new Date().getTime());
+        
+        Sign sign = WorldUtil.createSign(structure.getLocation(), structure.getCardinal());
+        sign.setLine(0, String.valueOf(structure.getId()));
+        sign.setLine(1, String.valueOf(structure.getPlan().getDisplayName()));
+        sign.setLine(2, getState().name());
+        sign.update(true);
     }
 
     public ConstructionEntry getConstructionEntry() {
@@ -111,9 +122,16 @@ public class ConstructionTask implements Serializable {
         return createdAt;
     }
     
-    
+    public Location getSignLocation() {
+        Vector pos = structure.getLocation().getPosition().add(new BlockVector(0, 1, 0));
+//        System.out.println("signLoc: " + structure.getLocation());
+        Location l = new Location(structure.getLocation().getWorld(), pos);
+        return l;
+    }
 
-    public ConstructionState getState() {
+    public final ConstructionState getState() {
+//        Sign sign = WorldUtil.getSign(getSignLocation()) == null ? WorldUtil.createSign(structure.getLocation(), structure.getCardinal()) : WorldUtil.getSign(getSignLocation());
+//        sign.setLine(2, getState().name());
         return state;
     }
 

@@ -17,7 +17,7 @@
 package com.sc.api.structure.listeners;
 
 import com.sc.api.structure.SCStructureAPI;
-import com.sc.api.structure.construction.ConstructionValidator;
+import com.sc.api.structure.construction.builder.ConstructionValidator;
 import com.sc.api.structure.construction.builder.SCCuboidBuilder;
 import com.sc.api.structure.construction.progress.ConstructionException;
 import com.sc.api.structure.construction.progress.StructureBuilder;
@@ -156,7 +156,8 @@ public class StructurePlanListener implements Listener {
                 }
                 try {
                     structure.setStructureRegionId(region.getId());
-                    service.save(structure);
+                    structure = service.save(structure);
+                    System.out.println("Clicked: " + location);
                     StructureBuilder.place(player, structure);
                 }
                 catch (ConstructionException ex) {
@@ -196,7 +197,7 @@ public class StructurePlanListener implements Listener {
                         session.dispatchCUISelection(WorldEditUtil.getLocalPlayer(player));
                         StructureService service = new StructureService();
                         structure = service.save(structure);
-
+//                        System.out.println("Claiming ground");
                         ProtectedRegion region = StructureBuilder.claimGround(player, structure);
                         if (region == null) {
                             service.delete(structure);
@@ -207,6 +208,7 @@ public class StructurePlanListener implements Listener {
                         try {
                             structure.setStructureRegionId(region.getId());
                             structure = service.save(structure);
+//                            System.out.println("Clicked: " + location);
                             StructureBuilder.place(player, structure);
                         }
                         catch (ConstructionException ex) {

@@ -26,10 +26,12 @@ import com.sc.api.structure.construction.progress.QConstructionEntry;
 import com.sc.api.structure.construction.progress.QConstructionTask;
 import com.sc.api.structure.model.Structure;
 import com.sc.api.structure.persistence.util.HibernateUtil;
+import com.sc.api.structure.util.WorldUtil;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
+import org.bukkit.block.Sign;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -107,6 +109,8 @@ public class ConstructionService extends AbstractService {
         session.close();
         return exists;
     }
+    
+    
 
     public void updateStatus(ConstructionTask task, ConstructionState newStatus) {
         Session session = HibernateUtil.getSession();
@@ -116,6 +120,12 @@ public class ConstructionService extends AbstractService {
             new HibernateUpdateClause(session, qct).where(qct.id.eq(task.getId())).set(qct.state, newStatus).set(qct.completeAt, completedAt).execute();
         } else {
             new HibernateUpdateClause(session, qct).where(qct.id.eq(task.getId())).set(qct.state, newStatus).execute();
+        }
+        
+        Sign sign = WorldUtil.getSign(task.getSignLocation());
+        if(sign != null) {
+            sign.setLine(2, newStatus.name());
+            sign.update(true);
         }
     }
 

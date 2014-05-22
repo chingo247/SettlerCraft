@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.construction.builder.strategies;
+package com.sc.api.structure.construction.builder;
 
-import com.sc.api.structure.construction.builder.async.SCJobCallback;
+import com.sc.api.structure.construction.builder.SCJobCallback;
 import com.sc.api.structure.construction.progress.ConstructionState;
 import com.sc.api.structure.construction.progress.ConstructionTask;
 import com.sc.api.structure.event.structure.StructureCompleteEvent;
@@ -62,7 +62,7 @@ public class SCDefaultCallbackAction implements SCJobCallback {
                     if (ply != null && ply.isOnline()) {
                         ply.sendMessage(ChatColor.YELLOW + "Building:  " + ChatColor.BLUE + structure.getPlan().getDisplayName());
                     }
-                   constructionService.updateStatus(task, ConstructionState.CONSTRUCTION_IN_PROGRESS);
+                   constructionService.updateStatus(task, ConstructionState.IN_PROGRESS);
                 } else if (bpje.getStatus() == BlockPlacerJobEntry.JobStatus.Done) {
                     Player ply = Bukkit.getPlayer(placer);
                     if (ply != null && ply.isOnline()) {
