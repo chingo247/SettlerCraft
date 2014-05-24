@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.persistence;
+package com.sc.api.structure.persistence.service;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
@@ -25,7 +25,7 @@ import com.sc.api.structure.construction.progress.ConstructionTask;
 import com.sc.api.structure.construction.progress.QConstructionEntry;
 import com.sc.api.structure.construction.progress.QConstructionTask;
 import com.sc.api.structure.model.Structure;
-import com.sc.api.structure.persistence.util.HibernateUtil;
+import com.sc.api.structure.persistence.HibernateUtil;
 import com.sc.api.structure.util.WorldUtil;
 import java.sql.Timestamp;
 import java.util.Date;

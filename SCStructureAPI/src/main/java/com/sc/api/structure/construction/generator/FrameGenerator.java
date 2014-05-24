@@ -15,9 +15,10 @@
 // * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // */
 //
-//package com.sc.api.structure.construction.builder;
+//package com.sc.api.structure.construction.generator;
 //
 //import com.sc.api.structure.construction.builder.strategies.FrameStrategy;
+//import com.sc.api.structure.model.Structure;
 //import com.sc.api.structure.model.structure.Structure;
 //import com.sc.api.structure.util.CuboidUtil;
 //import com.sk89q.worldedit.BlockVector;
@@ -26,13 +27,14 @@
 //import com.sk89q.worldedit.Vector;
 //import com.sk89q.worldedit.blocks.BaseBlock;
 //import org.bukkit.Material;
+//import static org.hsqldb.Tokens.SIMPLE;
 //
 ///**
 // *
 // * @author Chingo
 // * @deprecated Uses to many system resources
 // */
-//public class SCFrameBuilder {
+//public class FrameGenerator {
 //
 //    public static void placeFrame(EditSession session, Structure structure, FrameStrategy strategy, int hGap, int vGap, boolean autoflush) {
 //        CuboidClipboard cuboidClipboard = null;

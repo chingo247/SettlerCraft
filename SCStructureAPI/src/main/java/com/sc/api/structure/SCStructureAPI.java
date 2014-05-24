@@ -20,9 +20,9 @@ import com.sc.api.structure.model.progress.StructureProgress;
 import com.sc.api.structure.model.progress.StructureProgressLayer;
 import com.sc.api.structure.model.progress.StructureProgressMaterialResource;
 import com.sc.api.structure.persistence.HSQLServer;
-import com.sc.api.structure.persistence.StructurePlanService;
-import com.sc.api.structure.persistence.util.HibernateUtil;
-import com.sc.api.structure.persistence.util.MemDBUtil;
+import com.sc.api.structure.persistence.service.StructurePlanService;
+import com.sc.api.structure.persistence.HibernateUtil;
+import com.sc.api.structure.persistence.MemDBUtil;
 import com.sc.api.structure.util.CuboidUtil;
 import com.sc.api.structure.util.plugins.AsyncWorldEditUtil;
 import com.sk89q.worldedit.CuboidClipboard;
@@ -56,22 +56,24 @@ public class SCStructureAPI extends JavaPlugin {
     private static ItemShopCategoryMenu planMenu;
     public static final String PLANSHOP = "Buy & Build"; // Unique Identifier for shop
     private static ItemShopCategoryMenu planShop;
-    
+
     public SCStructureAPI() {
-        
+
     }
 
     /**
-     * The amount of blocks placed between each commit to the database, this value will be
-     * the same as the rendering.blocks node in the AsyncWorldEdit config
+     * The amount of blocks placed between each commit to the database, this
+     * value will be the same as the rendering.blocks node in the AsyncWorldEdit
+     * config
+     *
      * @return AsyncWorldEdit's config().getInt("rendering.blocks")
      */
     public static int getSaveThreshold() {
-        return AsyncWorldEditUtil.getAsyncWorldEditPlugin().getConfig().getInt("rendering.blocks"); 
+        return AsyncWorldEditUtil.getAsyncWorldEditPlugin().getConfig().getInt("rendering.blocks");
     }
-    
+
     public boolean isRestrictZonesEnabled() {
-        
+
         return restrictZones;
     }
 
@@ -86,10 +88,6 @@ public class SCStructureAPI extends JavaPlugin {
     public static SCStructureAPI getSCStructureAPI() {
         return (SCStructureAPI) Bukkit.getPluginManager().getPlugin("SCStructureAPI");
     }
-
-
-    
-    
 
     @Override
     public void onEnable() {
@@ -119,10 +117,10 @@ public class SCStructureAPI extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(), this);
         HSQLServer.getInstance().start();
         initDB();
-        
+
         //FIXME WIll also be fired at RELOAD!!! 
-//        SCConstructionRestoreService.restoreProgress();
-        
+        SCConstructionRestoreService.restoreProgress();
+
         new Thread(new Runnable() {
 
             @Override
@@ -131,7 +129,7 @@ public class SCStructureAPI extends JavaPlugin {
                 loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
 //                System.out.println("Loading plans into menu");
                 setupMenu();
-                if(Bukkit.getPluginManager().getPlugin("Vault") != null) {
+                if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
                     setupPlanShop();
                 }
 //                System.out.println("Structures loaded");
@@ -139,13 +137,7 @@ public class SCStructureAPI extends JavaPlugin {
             }
         }).start();
         
-        
-
     }
-    
-    
-    
-    
 
     public static WorldEditPlugin getWorldEditPlugin() {
         return (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
@@ -196,7 +188,6 @@ public class SCStructureAPI extends JavaPlugin {
             Logger.getLogger(SCStructureAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
 
     private static void setupMenu() {
         planMenu = new ItemShopCategoryMenu(PLAN_MENU_NAME, true, true, new ItemShopCategoryMenu.ShopCallback() {
@@ -281,7 +272,7 @@ public class SCStructureAPI extends JavaPlugin {
             CuboidClipboard cc = plan.getSchematic();
             int size = CuboidUtil.count(cc, true);
             String sizeString = size < 999 ? String.valueOf(size) : ((Math.round(size / 1000)) + "K");
-            
+
             slot.setData("Size", cc.getLength() + "x" + cc.getWidth() + "x" + cc.getHeight(), ChatColor.GOLD);
             slot.setData("Blocks", sizeString, ChatColor.GOLD);
             planShop.addItem(slot, plan.getCategory(), plan.getPrice());
@@ -289,4 +280,6 @@ public class SCStructureAPI extends JavaPlugin {
 
         MenuManager.getInstance().register(planShop);
     }
+
+
 }

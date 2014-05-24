@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package com.sc.api.structure.construction.builder;
+package com.sc.api.structure.construction;
 
 import com.sc.api.structure.model.world.SimpleCardinal;
 import com.sc.api.structure.util.CuboidUtil;
@@ -31,37 +30,14 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.entity.Player;
 
 /**
  *
  * @author Chingo
  */
-public class SCCuboidBuilder {
+public class SyncBuilder {
 
-    /**
-     * Selects a region between two positions
-     *
-     * @param player The player to create an editSession
-     * @param cardinal The cardinal direction
-     * @param target The target location
-     * @param cuboidClipboard The cuboidClipboard
-     */
-    public static void select(Player player, Location target, SimpleCardinal cardinal, CuboidClipboard cuboidClipboard) {
-        Location pos2 = WorldUtil.calculateEndLocation(target, cardinal, cuboidClipboard);
-        select(player, target, pos2);
-    }
 
-    /**
-     * Selects a region between two points
-     *
-     * @param player The player to create an editsession
-     * @param pos1 The first position
-     * @param pos2 The secondary position
-     */
-    public static void select(Player player, Location pos1, Location pos2) {
-        WorldEditUtil.selectClipboardArea(player, pos1, pos2);
-    }
 
     /**
      * Clears an area within the cliboards target area
@@ -91,8 +67,8 @@ public class SCCuboidBuilder {
     }
 
     /**
-     * Aligns target clipboard to speficied direction, assuming that the
-     * initial state is pointed to EAST
+     * Aligns target clipboard to speficied direction, assuming that the initial
+     * state is pointed to EAST
      *
      * @param clipboard
      * @param location
@@ -131,8 +107,8 @@ public class SCCuboidBuilder {
     }
 
     /**
-     * Aligns the clipboard to given cardinal and creates a session for infinite blocks and places a CuboidClipBoard
-     * instantly aligned to direction
+     * Aligns the clipboard to given cardinal and creates a session for infinite
+     * blocks and places a CuboidClipBoard instantly aligned to direction
      *
      * @param cuboidClipboard The cuboidclipboard
      * @param target The target location
@@ -141,16 +117,16 @@ public class SCCuboidBuilder {
     public static void place(CuboidClipboard cuboidClipboard, Location target, SimpleCardinal cardinal) {
         Location t = align(cuboidClipboard, target, cardinal);
         try {
-            SCCuboidBuilder.place(WorldEditUtil.getEditSession(t.getWorld(), -1), cuboidClipboard, t, cardinal);
+            SyncBuilder.place(WorldEditUtil.getEditSession(t.getWorld(), -1), cuboidClipboard, t, cardinal);
         }
         catch (MaxChangedBlocksException ex) {
-            Logger.getLogger(SCCuboidBuilder.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SyncBuilder.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     /**
-     * Aligns the clipboard to given cardinal and creates a session for infinite blocks and places a specified layer of a
-     * cuboid at target location,
+     * Aligns the clipboard to given cardinal and creates a session for infinite
+     * blocks and places a specified layer of a cuboid at target location,
      *
      * @param whole The whole cuboidClipBoard
      * @param layer The layer, must be between 0 and height
@@ -162,13 +138,13 @@ public class SCCuboidBuilder {
             placeLayer(WorldEditUtil.getEditSession(location.getWorld(), -1), whole, layer, location, cardinal);
         }
         catch (MaxChangedBlocksException ex) {
-            Logger.getLogger(SCCuboidBuilder.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SyncBuilder.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     /**
-     * Aligns the Clipboard to given cardinal and uses the specified session to place a layer of a cuboid at target
-     * location
+     * Aligns the Clipboard to given cardinal and uses the specified session to
+     * place a layer of a cuboid at target location
      *
      * @param editSession
      * @param whole The whole cuboidClipBoard
@@ -180,16 +156,20 @@ public class SCCuboidBuilder {
     public static void placeLayer(EditSession editSession, CuboidClipboard whole, int layer, Location target, SimpleCardinal cardinal) throws MaxChangedBlocksException {
         CuboidClipboard layerClip = CuboidUtil.getLayer(whole, layer);
         Location t = align(layerClip, target, cardinal);
-        SCCuboidBuilder.place(editSession, layerClip, t, cardinal);
+        SyncBuilder.place(editSession, layerClip, t, cardinal);
     }
 
+   
+
     /**
-     * Aligns the clipboard to given cardinal and places a cuboidClipBoard in layers. A runnable is used to fire the placement of each
-     * layer at a certain interval
+     * Aligns the clipboard to given cardinal and places a cuboidClipBoard in
+     * layers. A runnable is used to fire the placement of each layer at a
+     * certain interval
+     *
      * @param editSession The editsession
      * @param whole The complete clipboard
      * @param target The target location
-     * @param cardinal The cardinal 
+     * @param cardinal The cardinal
      * @param interval The interval at which layers will be placed
      */
     public static void placeLayered(EditSession editSession, CuboidClipboard whole, Location target, SimpleCardinal cardinal, int interval) {
@@ -203,13 +183,12 @@ public class SCCuboidBuilder {
 
         }
         catch (MaxChangedBlocksException ex) {
-            Logger.getLogger(SCCuboidBuilder.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SyncBuilder.class.getName()).log(Level.SEVERE, null, ex);
         }
         final int next = index + 1;
         if (next < all.size()) {
             placeLayered(editSession, whole, all, location, delayBetweenLayers, next);
         }
     }
-
 
 }

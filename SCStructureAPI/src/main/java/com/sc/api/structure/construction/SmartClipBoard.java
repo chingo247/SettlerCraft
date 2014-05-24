@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.construction.builder.worldedit;
+package com.sc.api.structure.construction;
 
 
 import com.sc.api.structure.construction.progress.ConstructionStrategyType;
@@ -24,12 +24,13 @@ import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import java.util.List;
+import org.bukkit.Material;
 
 /**
  * The SmartClipboard was originally meant to place blocks in a provided order.
  * In the current state it's also able to skip blocks if the target block
  * already is of the same type as the cuboid wants to place. e.g. When a
- * structure was placed and construction was halted (due server shutdown) next
+ * structure was placed and construction was halted (e.g. on server shutdown) next
  * time it will try to rebuild the structure at the same position but will skip
  * all blocks that are already out there, therefore the blockplace will continue
  * to place blocks he left.
@@ -43,12 +44,13 @@ public class SmartClipBoard extends CuboidClipboard {
     private final Vector sign;
 
     
-    
-    /*
-     * Constructor.
-     *
-     * @param clipboard The CuboidClipboard
+    /**
+     * Constructor when using structures
+     * @param clipboard The clipboard
+     * @param sign The location of the sign within this clipboard
      * @param strategy The strategy
+     * @param noAir Wheter or not to use air
+     * @deprecated Assumes the sign workaround is used, may lose support once there is a reliable API for storing NBT data in blocks
      */
     public SmartClipBoard(CuboidClipboard clipboard, Vector sign, ConstructionStrategyType strategy, boolean noAir) {
         super(clipboard.getSize());
@@ -83,21 +85,6 @@ public class SmartClipBoard extends CuboidClipboard {
         this.sign = null;
     }
 
-
-    @Override
-    public void paste(EditSession editSession, Vector newOrigin, boolean noAir) throws MaxChangedBlocksException {
-        this.paste(editSession, newOrigin, noAir, false);
-    }
-
-    @Override
-    public void paste(EditSession editSession, Vector newOrigin, boolean noAir, boolean entities) throws MaxChangedBlocksException {
-        this.place(editSession, newOrigin.add(getOffset()), noAir);
-        if (entities) {
-            pasteEntities(newOrigin);
-        }
-    }
-
-
     /**
      * Place blocks that 
      * @param editSession
@@ -115,10 +102,12 @@ public class SmartClipBoard extends CuboidClipboard {
                 continue;
             }
             
-            BaseBlock worldBlock = editSession.getWorld().getBlock(v.add(pos));
+            BaseBlock worldBlock = editSession.getBlock(v.add(pos));
             BaseBlock b = parent.getBlock(v);
             
-            
+            if( b != null && !b.isAir() && worldBlock.getId() == b.getId() && worldBlock.getData() == b.getData()){
+                System.out.println("SKIP: " + Material.getMaterial(b.getType()));
+            }
 
             if (b == null || (noAir && b.isAir()) || (worldBlock.getId() == b.getId() && worldBlock.getData() == b.getData())) {
                 continue;

@@ -18,26 +18,27 @@ package com.sc.api.structure;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.api.structure.construction.builder.async.SCAsyncCuboidBuilder;
-import com.sc.api.structure.construction.builder.SCDefaultCallbackAction;
+import com.sc.api.structure.construction.AsyncBuilder;
+import com.sc.api.structure.construction.async.SCDefaultCallbackAction;
+import com.sc.api.structure.construction.progress.ConstructionEntry;
+import com.sc.api.structure.construction.progress.ConstructionException;
 import com.sc.api.structure.construction.progress.ConstructionState;
 import com.sc.api.structure.construction.progress.ConstructionTask;
 import com.sc.api.structure.construction.progress.QConstructionTask;
-import com.sc.api.structure.construction.progress.StructureBuilder;
 import com.sc.api.structure.model.Structure;
-import com.sc.api.structure.persistence.AbstractService;
-import com.sc.api.structure.persistence.util.HibernateUtil;
+import com.sc.api.structure.persistence.service.AbstractService;
+import com.sc.api.structure.persistence.HibernateUtil;
+import com.sc.api.structure.util.WorldUtil;
 import com.sc.api.structure.util.plugins.AsyncWorldEditUtil;
 import com.sc.api.structure.util.plugins.WorldGuardUtil;
-import com.sk89q.worldedit.MaxChangedBlocksException;
-import java.sql.Timestamp;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
-import org.bukkit.World;
+import org.bukkit.block.Sign;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -49,54 +50,42 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
  */
 class SCConstructionRestoreService extends AbstractService {
 
+    private static final int STRUCTURE_ID = 0;
+    private static final int STRUCTURE_NAME = 1;
+    private static final int STRUCTURE_PROGRESS = 2;
+
     private static Logger logger = Logger.getLogger(SCStructureAPI.class);
 
     public static void restoreProgress() {
-        HashMap<String, Timestamp> worlds = getWorlds();
-        for (Entry<String, Timestamp> e : worlds.entrySet()) {
-            deleteCreatedBefore(e.getKey(), e.getValue());
-            List<ConstructionTask> highPriority = getCompletedBefore(e.getKey(), e.getValue());
-            System.out.println("High Priority Tasks: " + highPriority.size());
-            restoreConstructionTasks(e.getKey(), e.getValue(), highPriority);
-        }
-        // Set Completed before
+        // PREPARE TRANSACTION
+        Set<ConstructionTask> removed = new HashSet<>();
+        Set<ConstructionTask> completed = new HashSet<>();
+        Set<ConstructionEntry> invalid = new HashSet<>();
+        Set<ConstructionTask> tasks = new HashSet<>(getTasks());
+        validate(tasks, removed, completed, invalid);
+        commitChanges(removed, completed);
     }
 
-    private static List<ConstructionTask> getCompletedBefore(String w, Timestamp t) {
-        Session session = HibernateUtil.getSession();
-        QConstructionTask qct = QConstructionTask.constructionTask;
-        JPQLQuery query = new HibernateQuery(session);
-        List<ConstructionTask> tasks = query.from(qct).orderBy(qct.completeAt.desc()).where(qct.completeAt.after(t).and(qct.structure().worldLocation().world.eq(w))).list(qct);
-        session.close();
-        return tasks;
-    }
-
-    private static void deleteCreatedBefore(String w, Timestamp t) {
+    public static void commitChanges(Set<ConstructionTask> removed, Set<ConstructionTask> completed) {
         Session session = null;
         Transaction tx = null;
-        QConstructionTask qt = QConstructionTask.constructionTask;
 
         try {
             session = HibernateUtil.getSession();
             tx = session.beginTransaction();
-            JPQLQuery query = new HibernateQuery(session);
-            List<ConstructionTask> tasks = query.from(qt).where(qt.createdAt.after(t).and(qt.structure().worldLocation().world.eq(w))).list(qt);
-            if (!tasks.isEmpty()) {
-                logger.warn("SCStructureAPI: removing structures placed after last save for world " + w);
-                World world = Bukkit.getWorld(w);
-                for (ConstructionTask task : tasks) {
-                    String region = task.getStructure().getStructureRegion();
+            Iterator<ConstructionTask> ri = removed.iterator();
+            Iterator<ConstructionTask> ci = completed.iterator();
 
-                    if (world != null) {
-                        WorldGuardUtil.getGlobalRegionManager(world).removeRegion(region);
-                    }
-                    logger.info("StructureRegion removed: " + region);
-                    session.delete(task);
-//                    session.flush();
-                    logger.info("Task: " + task.getId() + " removed");
-                }
-
+            while (ri.hasNext()) {
+                ConstructionTask ct = ri.next();
+                session.merge(ct);
             }
+
+            while (ci.hasNext()) {
+                ConstructionTask ct = ci.next();
+                session.delete(ct);
+            }
+
             tx.commit();
         }
         catch (HibernateException e) {
@@ -115,38 +104,98 @@ class SCConstructionRestoreService extends AbstractService {
         }
     }
 
-    private static HashMap<String, Timestamp> getWorlds() {
-        HashMap<String, Timestamp> worlds = new HashMap<>();
-        for (World w : Bukkit.getWorlds()) {
-            worlds.put(w.getName(), new Timestamp(w.getWorldFolder().lastModified()));
+    public static void validate(Set<ConstructionTask> tasks, final Set<ConstructionTask> removed, Set<ConstructionTask> completed, Set<ConstructionEntry> invalid) {
+        Iterator<ConstructionTask> it = tasks.iterator();
+
+        while (it.hasNext()) {
+            ConstructionTask t = it.next();
+            if (!hasSign(t)) {
+                if (t.getState() == ConstructionState.FINISHED) {
+                    it.remove();
+                    if (t.getStructure() == null) {
+                        removed.add(t);
+                        continue;
+                    }
+
+                    if (validProgress(t)) {
+                        System.out.println("completion confirmed task #" + t.getId());
+                        completed.add(t);
+                    } else {
+                        System.out.println("invalid completed task #: " + t.getId());
+                        System.out.println("storing entry if not present: " + t.getConstructionEntry().getEntryName());
+                        invalid.add(t.getConstructionEntry());
+                    }
+
+                } else {
+                    it.remove();
+
+                    t.setState(ConstructionState.REMOVED);
+                    removed.add(t);
+                    System.out.println("task #" + t.getId() + " has been assigned for removal");
+                    if (t.getStructure() != null) {
+                        WorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(t.getStructure().getLocation().getWorld().getName())).removeRegion(t.getStructure().getStructureRegion());
+                        System.out.println("removed  associated structure region: " + t.getStructure().getStructureRegion());
+                    }
+
+                }
+            } else {
+                if (!validProgress(t)) {
+                    System.out.println("invalid progress task #: " + t.getId());
+                    invalid.add(t.getConstructionEntry());
+                }
+            }
         }
-        return worlds;
     }
 
-    private static void restoreConstructionTasks(String w, Timestamp t, List<ConstructionTask> highPriority) {
+    private static boolean validProgress(ConstructionTask task) {
+
+        Sign sign = WorldUtil.getSign(task.getSignLocation());
+        if (task.getState() == ConstructionState.FINISHED && sign == null) {
+            return true;
+        }
+
+        if (sign.getLine(STRUCTURE_PROGRESS).equals(task.getState().name())) {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean hasSign(ConstructionTask task) {
+        if (task.getStructure() == null) {
+            return false;
+        }
+
+        Sign sign = WorldUtil.getSign(task.getSignLocation());
+        if (sign == null) {
+            return false;
+        }
+        System.out.println("task: " + task.getId());
+        System.out.println("structure: " + task.getStructure());
+        System.out.println("sId: " + task.getStructure().getId());
+
+        if (sign.getLine(STRUCTURE_ID).isEmpty()
+                || !Long.getLong(sign.getLine(STRUCTURE_ID))
+                .equals(task.getStructure().getId())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static List<ConstructionTask> getTasks() {
         Session session = HibernateUtil.getSession();
         QConstructionTask qct = QConstructionTask.constructionTask;
         JPQLQuery query = new HibernateQuery(session);
-        List<ConstructionTask> tasks = query.from(qct).orderBy(qct.createdAt.desc()).where(qct.structure().worldLocation().world.eq(w).and(qct.state.ne(ConstructionState.FINISHED))).list(qct);
-        System.out.println("Tasks: " + tasks.size());
+        List<ConstructionTask> tasks = query.from(qct).orderBy(qct.id.asc()).where(qct.state.ne(ConstructionState.REMOVED)).list(qct);
         session.close();
-        for (ConstructionTask ct : highPriority) {
-            System.out.println("HighPriority Task: " + ct.getStructure().getStructureRegion());
-            startTask(ct);
-        }
-        
-        
-        for (ConstructionTask ct : tasks) {
-            System.out.println("Task: " + ct.getStructure().getStructureRegion());
-            startTask(ct);
-        }
+        return tasks;
     }
 
     private static void startTask(ConstructionTask task) {
         place(task.getConstructionEntry().getEntryName(), task);
     }
 
-    private static void place(String placer,ConstructionTask task) {
+    private static void place(String placer, ConstructionTask task) {
         final Structure structure = task.getStructure();
         final AsyncEditSession asyncSession = AsyncWorldEditUtil.createAsyncEditSession(placer, structure.getLocation().getWorld(), -1); // -1 = infinite
 
@@ -155,19 +204,11 @@ class SCConstructionRestoreService extends AbstractService {
         SCDefaultCallbackAction dca = new SCDefaultCallbackAction(placer, structure, task, asyncSession);
 
         try {
-            SCAsyncCuboidBuilder.placeLayered(
-                    asyncSession,
-                    structure.getPlan().getSchematic(),
-                    structure.getLocation(),
-                    structure.getCardinal(),
-                    structure.getPlan().getDisplayName(),
-                    dca
-            );
+            AsyncBuilder.placeStructure(placer, structure);
         }
-        catch (MaxChangedBlocksException ex) {
-            java.util.logging.Logger.getLogger(StructureBuilder.class.getName()).log(Level.SEVERE, null, ex);
+        catch (ConstructionException ex) {
+            java.util.logging.Logger.getLogger(SCConstructionRestoreService.class.getName()).log(Level.SEVERE, null, ex);
         }
-
     }
 
 }

@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.construction.builder.async;
+package com.sc.api.structure.construction.async;
 
-import com.sc.api.structure.construction.builder.worldedit.SmartClipBoard;
+import com.sc.api.structure.construction.SmartClipBoard;
 import org.primesoft.asyncworldedit.worldedit.CuboidClipboardWrapper;
 
 /**

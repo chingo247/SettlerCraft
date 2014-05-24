@@ -15,16 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.sc.api.structure.construction.builder;
+package com.sc.api.structure.construction.Flags;
 
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
+import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.flags.RegionGroup;
+import com.sk89q.worldguard.protection.flags.StringFlag;
 
 /**
  *
  * @author Chingo
  */
-public interface SCJobCallback {
-    void onJobAdded(BlockPlacerJobEntry entry);
-//    void onJobComplete(BlockPlacerJobEntry entry);
-    void onJobCanceled(BlockPlacerJobEntry entry);
+public class SCFlags {
+    
+    public static final Flag STRUCTURE = new StringFlag("sc-structure", RegionGroup.MEMBERS);
+//    public static final Flag CONSTRUCTION_ZONE = new StringFlag(null, RegionGroup.MEMBERS);
+    
 }

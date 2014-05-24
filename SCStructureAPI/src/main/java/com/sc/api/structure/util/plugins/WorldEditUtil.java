@@ -16,6 +16,7 @@
  */
 package com.sc.api.structure.util.plugins;
 
+import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalPlayer;
@@ -41,6 +42,10 @@ import org.bukkit.entity.Player;
  * @author Chingo
  */
 public class WorldEditUtil {
+    
+    public static Location getLocation(org.bukkit.Location location) {
+        return new Location(getLocalWorld(location.getWorld().getName()),new BlockVector(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+    }
 
     public static CuboidClipboard load(File SchematicFile) throws FileNotFoundException, DataException, IOException {
         SchematicFormat format = SchematicFormat.getFormat(SchematicFile);

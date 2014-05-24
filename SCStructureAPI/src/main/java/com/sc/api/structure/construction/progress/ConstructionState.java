@@ -22,6 +22,8 @@ package com.sc.api.structure.construction.progress;
  */
 public enum ConstructionState {
 
+    REMOVED,
+    
     PREPARING,
     /**
      * When

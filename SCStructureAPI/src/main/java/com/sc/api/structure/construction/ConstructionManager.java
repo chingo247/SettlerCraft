@@ -14,24 +14,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.construction.builder;
+package com.sc.api.structure.construction;
 
-import com.sc.api.structure.construction.builder.flag.SCFlags;
+import com.sc.api.structure.construction.Flags.SCFlags;
 import com.sc.api.structure.model.Structure;
 import com.sc.api.structure.model.plan.StructurePlan;
 import com.sc.api.structure.model.world.SimpleCardinal;
 import com.sc.api.structure.model.world.WorldDimension;
+import com.sc.api.structure.util.WorldUtil;
+import com.sc.api.structure.util.plugins.WorldEditUtil;
 import com.sc.api.structure.util.plugins.WorldGuardUtil;
 import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.bukkit.RegionPermissionModel;
 import com.sk89q.worldguard.bukkit.WorldConfiguration;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -41,16 +47,112 @@ import org.bukkit.entity.Player;
  *
  * @author Chingo
  */
-public class ConstructionValidator {
+public class ConstructionManager {
     
+        /**
+     * Selects a region between two positions
+     *
+     * @param player The player to create an editSession
+     * @param cardinal The cardinal direction
+     * @param target The target location
+     * @param cuboidClipboard The cuboidClipboard
+     */
+    public static void select(Player player, Location target, SimpleCardinal cardinal, CuboidClipboard cuboidClipboard) {
+        Location pos2 = WorldUtil.calculateEndLocation(target, cardinal, cuboidClipboard);
+        select(player, target, pos2);
+    }
+
+    /**
+     * Selects a region between two points
+     *
+     * @param player The player to create an editsession
+     * @param pos1 The first position
+     * @param pos2 The secondary position
+     */
+    public static void select(Player player, Location pos1, Location pos2) {
+        WorldEditUtil.selectClipboardArea(player, pos1, pos2);
+    }
+
+    public static void selectStructure(Player player, Structure structure) {
+        Location pos2 = WorldUtil.calculateEndLocation(structure.getLocation(), structure.getCardinal(), structure.getPlan().getSchematic());
+        select(player, structure.getLocation(), pos2);
+    }
+
+    public static void selectStructure(Player player, StructurePlan plan, Location location, SimpleCardinal cardinal) {
+        Structure structure = new Structure("", location, cardinal, plan);
+        selectStructure(player, structure);
+    }
+
+    private static String getIdForStructure(Structure structure) {
+        String s = String.valueOf("sc_s_" + (structure.getPlan().getDisplayName().replaceAll("\\s", "") + "_" + structure.getId())).toLowerCase();
+        return s;
+    }
+
+    public static ProtectedRegion claimGround(final Player player, final Structure structure) {
+        if (structure.getId() == null) {
+            throw new AssertionError("Save the structure instance first! (e.g. structure = structureService.save(structure)"); // Should only happen if the programmer forgets to save the instance before this
+        }
+        if (!ConstructionManager.canClaim(player)
+                || !ConstructionManager.mayClaim(player)
+                || ConstructionManager.overlapsStructure(structure)
+                || ConstructionManager.overlapsUnowned(player, structure)) {
+            return null;
+        }
+
+        RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
+        WorldDimension dim = structure.getDimension();
+        Vector p1 = dim.getStart().getPosition();
+        Vector p2 = dim.getEnd().getPosition();
+        String id = getIdForStructure(structure);
+        ProtectedCuboidRegion region = new ProtectedCuboidRegion(id, new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
+
+        // Set Flag
+        region.setFlag(SCFlags.STRUCTURE, structure.getPlan().getDisplayName());
+        region.getOwners().addPlayer(player.getName());
+        try {
+            mgr.addRegion(region);
+            mgr.save();
+        }
+        catch (ProtectionDatabaseException ex) {
+            Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return region;
+    }
+    
+    public boolean createConstructionSite(String id, Player placer, World world, BlockVector pos1, BlockVector pos2, boolean feedback, boolean addSelf) {
+        ProtectedCuboidRegion region = new ProtectedCuboidRegion(id, pos1, pos2);
+        RegionPermissionModel permModel = WorldGuardUtil.getRegionPermissionModel(placer);
+        // Can't replace existing regions
+        RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(world);
+        if (mgr.hasRegion(id)) {
+            if (feedback) {
+                placer.sendMessage(ChatColor.RED + "That region already exists. Please choose a different name.");
+            }
+            return false;
+        }
+
+        region.getOwners().addPlayer(placer.getName());
+
+        mgr.addRegion(region);
+        try {
+            mgr.save();
+        }
+        catch (ProtectionDatabaseException ex) {
+            Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return true;
+
+    }
+
     public static boolean overlapsUnowned(Player player, Structure structure) {
         return overlapsUnowned(WorldGuardUtil.getLocalPlayer(player), structure);
     }
-    
+
     public static boolean overlapsUnowned(Player player, StructurePlan plan, Location location, SimpleCardinal cardinal) {
         return overlapsUnowned(WorldGuardUtil.getLocalPlayer(player), plan, location, cardinal);
     }
-    
+
     public static boolean overlapsUnowned(LocalPlayer player, Structure structure) {
         RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
         WorldDimension dim = structure.getDimension();
@@ -72,7 +174,7 @@ public class ConstructionValidator {
         Structure structure = new Structure("", location, cardinal, plan);
         return overlapsUnowned(player, structure);
     }
-    
+
     public static boolean overlapsStructure(Structure structure) {
         RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
         WorldDimension dim = structure.getDimension();
@@ -80,7 +182,7 @@ public class ConstructionValidator {
         Vector p2 = dim.getEnd().getPosition();
         ProtectedCuboidRegion dummy = new ProtectedCuboidRegion("", new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
         ApplicableRegionSet regions = mgr.getApplicableRegions(dummy);
-        
+
         for (ProtectedRegion r : regions) {
             if (r.getFlag(SCFlags.STRUCTURE) != null) {
                 System.out.println(ChatColor.RED + "Structure overlaps another structure");
@@ -120,15 +222,15 @@ public class ConstructionValidator {
         }
         return true;
     }
-    
-    public static boolean exists(World world, String id) { 
+
+    public static boolean exists(World world, String id) {
         return WorldGuardUtil.getGlobalRegionManager(world).hasRegion(id);
     }
-    
+
     public static boolean isWithinConstructionZone(Structure structure) {
         return false;
     }
-    
+
     public static boolean exceedsLimit(Player player, Structure structure) {
         return false;
     }

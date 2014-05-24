@@ -1,4 +1,4 @@
-package com.sc.api.structure.persistence.util;
+package com.sc.api.structure.persistence;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;

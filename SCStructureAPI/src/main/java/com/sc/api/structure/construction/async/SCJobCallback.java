@@ -15,13 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.sc.api.structure.construction.builder.strategies;
+package com.sc.api.structure.construction.async;
+
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
 
 /**
  *
  * @author Chingo
  */
-public enum FoundationStrategy {
-    DEFAULT,
-    FANCY
+public interface SCJobCallback {
+    void onJobAdded(BlockPlacerJobEntry entry);
+//    void onJobComplete(BlockPlacerJobEntry entry);
+    void onJobCanceled(BlockPlacerJobEntry entry);
 }

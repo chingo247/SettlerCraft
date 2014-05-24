@@ -17,7 +17,6 @@
 package com.sc.api.structure.construction.progress;
 
 import com.sc.api.structure.model.Structure;
-import com.sc.api.structure.util.WorldUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Countable;
 import com.sk89q.worldedit.Location;
@@ -26,6 +25,7 @@ import com.sk89q.worldedit.blocks.BaseBlock;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -34,7 +34,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
-import org.bukkit.block.Sign;
 
 /**
  *
@@ -49,7 +48,6 @@ public class ConstructionTask implements Serializable {
 
     private int jobSize;
 
-    @NotNull
     @OneToOne(cascade = CascadeType.ALL)
     private Structure structure;
     
@@ -96,16 +94,18 @@ public class ConstructionTask implements Serializable {
         this.structure = structure;
         this.createdAt = new Timestamp(new Date().getTime());
         
-        Sign sign = WorldUtil.createSign(structure.getLocation(), structure.getCardinal());
-        sign.setLine(0, String.valueOf(structure.getId()));
-        sign.setLine(1, String.valueOf(structure.getPlan().getDisplayName()));
-        sign.setLine(2, getState().name());
-        sign.update(true);
+        
     }
 
     public ConstructionEntry getConstructionEntry() {
         return constructionEntry;
     }
+
+    public void setState(ConstructionState state) {
+        this.state = state;
+    }
+    
+    
 
 //    public void setState(ConstructionState state) {
 //        if(state == ConstructionState.FINISHED) {
@@ -123,6 +123,9 @@ public class ConstructionTask implements Serializable {
     }
     
     public Location getSignLocation() {
+        if(structure == null) {
+            return null;
+        }
         Vector pos = structure.getLocation().getPosition().add(new BlockVector(0, 1, 0));
 //        System.out.println("signLoc: " + structure.getLocation());
         Location l = new Location(structure.getLocation().getWorld(), pos);
@@ -156,6 +159,30 @@ public class ConstructionTask implements Serializable {
 
     public ConstructionStrategyType getStrategyType() {
         return strategyType;
+    }
+
+
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(this.id);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ConstructionTask other = (ConstructionTask) obj;
+        if (!Objects.equals(this.id, other.id)) {
+            return false;
+        }
+        return true;
     }
 
 

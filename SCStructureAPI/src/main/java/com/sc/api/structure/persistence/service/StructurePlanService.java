@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.sc.api.structure.persistence;
+package com.sc.api.structure.persistence.service;
 
 
 import com.mysema.query.jpa.JPQLQuery;
@@ -23,7 +23,7 @@ import com.mysema.query.jpa.hibernate.HibernateDeleteClause;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.api.structure.model.plan.QStructurePlan;
 import com.sc.api.structure.model.plan.StructurePlan;
-import com.sc.api.structure.persistence.util.MemDBUtil;
+import com.sc.api.structure.persistence.MemDBUtil;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;

@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import com.sc.api.structure.util.plugins.WorldEditUtil;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.Vector;
+import java.io.Serializable;
 import javax.persistence.Column;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -29,7 +30,7 @@ import org.bukkit.World;
  *
  * @author Chingo
  */
-public class WorldDimension {
+public class WorldDimension implements Serializable{
     
     @NotNull
     @Column(name = "world")

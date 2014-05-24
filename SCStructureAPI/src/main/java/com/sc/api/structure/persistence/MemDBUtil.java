@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.sc.api.structure.persistence.util;
+package com.sc.api.structure.persistence;
 
 import java.io.File;
 import org.hibernate.Session;

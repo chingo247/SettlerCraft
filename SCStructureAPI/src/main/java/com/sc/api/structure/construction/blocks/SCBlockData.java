@@ -15,29 +15,16 @@
 // * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // */
 //
-//package com.sc.api.structure.construction.builder.strategies;
+//package com.sc.api.structure.construction.blocks;
+//
+//import com.sk89q.jnbt.CompoundTag;
 //
 ///**
 // *
 // * @author Chingo
 // */
-//public enum FrameStrategy {
-//
-//    /**
-//     * Just place the frame instantly with using edge of this structure
-//     * (width,length,height)
-//     * @deprecated Uses far more resources/ticks than fancy strategy in most cases
-//     * which has a huge impact on the performance
-//     *//**
-//     * Just place the frame instantly with using edge of this structure
-//     * (width,length,height)
-//     * @deprecated Uses far more resources/ticks than fancy strategy in most cases
-//     * which has a huge impact on the performance
-//     */
-//    @Deprecated
-//    SIMPLE,
-//    /**
-//     * Will try to build the frame using a more complex algorithm
-//     */
-//    ADVANCED
+//public interface SCBlockData {
+//    
+//    public CompoundTag getCompoundTag();
+//    
 //}

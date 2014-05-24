@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.construction.builder;
+package com.sc.api.structure.construction.async;
 
-import com.sc.api.structure.construction.builder.SCJobCallback;
+import com.sc.api.structure.construction.async.SCJobCallback;
 import com.sc.api.structure.construction.progress.ConstructionState;
 import com.sc.api.structure.construction.progress.ConstructionTask;
 import com.sc.api.structure.event.structure.StructureCompleteEvent;
 import com.sc.api.structure.model.Structure;
-import com.sc.api.structure.persistence.ConstructionService;
+import com.sc.api.structure.persistence.service.ConstructionService;
 import com.sk89q.worldedit.EditSession;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

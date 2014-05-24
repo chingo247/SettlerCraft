@@ -17,15 +17,14 @@
 package com.sc.api.structure.listeners;
 
 import com.sc.api.structure.SCStructureAPI;
-import com.sc.api.structure.construction.builder.ConstructionValidator;
-import com.sc.api.structure.construction.builder.SCCuboidBuilder;
+import com.sc.api.structure.construction.ConstructionManager;
+import com.sc.api.structure.construction.AsyncBuilder;
 import com.sc.api.structure.construction.progress.ConstructionException;
-import com.sc.api.structure.construction.progress.StructureBuilder;
 import com.sc.api.structure.model.Structure;
 import com.sc.api.structure.model.plan.StructurePlan;
 import com.sc.api.structure.model.world.SimpleCardinal;
-import com.sc.api.structure.persistence.StructurePlanService;
-import com.sc.api.structure.persistence.StructureService;
+import com.sc.api.structure.persistence.service.StructurePlanService;
+import com.sc.api.structure.persistence.service.StructureService;
 import com.sc.api.structure.util.WorldUtil;
 import com.sc.api.structure.util.plugins.WorldEditUtil;
 import static com.sc.api.structure.util.plugins.WorldEditUtil.getLocalSession;
@@ -56,6 +55,21 @@ import org.bukkit.inventory.ItemStack;
  */
 public class StructurePlanListener implements Listener {
 
+    
+    @EventHandler
+    public void onPlayerInteractDebug(PlayerInteractEvent pie) {
+        if(pie.getAction() == Action.RIGHT_CLICK_AIR || pie.getAction() == Action.RIGHT_CLICK_BLOCK) {
+//            org.bukkit.Location l = pie.getClickedBlock().getLocation();
+//            DefaultNmsBlock dmBlock = DefaultNmsBlock.get(l.getWorld(), WorldEditUtil.getLocation(l).getPosition(), l.getBlock().getTypeId(), new Byte(l.getBlock().getData()).intValue());
+//            if(dmBlock != null && dmBlock.hasNbtData()) {
+//                System.out.println(dmBlock.getNbtData());
+//            }
+            
+        }
+//        System.out.println(tags.get("sid").getValue());
+//        System.out.println(tags.get("progress").getValue());
+    }
+    
     /**
      * Places a structure on player's target location
      *
@@ -106,13 +120,13 @@ public class StructurePlanListener implements Listener {
     }
 
     private boolean canPlace(Player player, Location location, SimpleCardinal cardinal, StructurePlan plan) {
-        if (!ConstructionValidator.mayClaim(player)) {
+        if (!ConstructionManager.mayClaim(player)) {
             player.sendMessage(ChatColor.RED + " You have no permission to claim regions");
             player.sendMessage(ChatColor.RED + " Therefore your are not able to place structures");
             return false;
         }
 
-        if (!ConstructionValidator.canClaim(player)) {
+        if (!ConstructionManager.canClaim(player)) {
             WorldConfiguration wcfg = WorldGuardUtil.getWorldGuard().getGlobalStateManager().get(player.getWorld());
             RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(player.getWorld());
             int plyMaxRegionCount = wcfg.getMaxRegionCount(player);
@@ -122,12 +136,12 @@ public class StructurePlanListener implements Listener {
             return false;
         }
 
-        if (ConstructionValidator.overlapsStructure(plan, location, cardinal)) {
+        if (ConstructionManager.overlapsStructure(plan, location, cardinal)) {
             player.sendMessage(ChatColor.RED + " Structure will overlap another structure");
             return false;
         }
 
-        if (ConstructionValidator.overlapsUnowned(player, plan, location, cardinal)) {
+        if (ConstructionManager.overlapsUnowned(player, plan, location, cardinal)) {
             player.sendMessage(ChatColor.RED + " Structure overlaps a region you don't own");
             return false;
         }
@@ -148,7 +162,7 @@ public class StructurePlanListener implements Listener {
                 StructureService service = new StructureService();
                 structure = service.save(structure);
 
-                ProtectedRegion region = StructureBuilder.claimGround(player, structure);
+                ProtectedRegion region = ConstructionManager.claimGround(player, structure);
                 if (region == null) {
                     service.delete(structure);
                     player.sendMessage(ChatColor.RED + " Failed to claim ground for structure");
@@ -158,7 +172,7 @@ public class StructurePlanListener implements Listener {
                     structure.setStructureRegionId(region.getId());
                     structure = service.save(structure);
                     System.out.println("Clicked: " + location);
-                    StructureBuilder.place(player, structure);
+                    AsyncBuilder.placeStructure(player, structure);
                 }
                 catch (ConstructionException ex) {
                     service.delete(structure);
@@ -183,13 +197,13 @@ public class StructurePlanListener implements Listener {
 //         SCConstrucStructureBuilderce().placeSafe(player, structure, true, true);
         if (action == Action.LEFT_CLICK_BLOCK) {
             if (!session.getRegionSelector(world).isDefined()) {
-                SCCuboidBuilder.select(player, location, direction, structure.getPlan().getSchematic());
+                ConstructionManager.select(player, location, direction, structure.getPlan().getSchematic());
                 player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
                 player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
             } else {
 
                 CuboidRegion oldRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
-                SCCuboidBuilder.select(player, location, direction, structure.getPlan().getSchematic());
+                ConstructionManager.select(player, location, direction, structure.getPlan().getSchematic());
                 CuboidRegion newRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
                 if (oldRegion.getPos1().equals(newRegion.getPos1()) && oldRegion.getPos2().equals(newRegion.getPos2())) {
                     if (canPlace(player, location, direction, plan)) {
@@ -198,7 +212,7 @@ public class StructurePlanListener implements Listener {
                         StructureService service = new StructureService();
                         structure = service.save(structure);
 //                        System.out.println("Claiming ground");
-                        ProtectedRegion region = StructureBuilder.claimGround(player, structure);
+                        ProtectedRegion region = ConstructionManager.claimGround(player, structure);
                         if (region == null) {
                             service.delete(structure);
                             player.sendMessage(ChatColor.RED + " Failed to claim ground for structure");
@@ -209,7 +223,7 @@ public class StructurePlanListener implements Listener {
                             structure.setStructureRegionId(region.getId());
                             structure = service.save(structure);
 //                            System.out.println("Clicked: " + location);
-                            StructureBuilder.place(player, structure);
+                            AsyncBuilder.placeStructure(player, structure);
                         }
                         catch (ConstructionException ex) {
                             service.delete(structure);
@@ -219,10 +233,10 @@ public class StructurePlanListener implements Listener {
                         return true;
                     }
                 } else {
-                    SCCuboidBuilder.select(player, location, direction, structure.getPlan().getSchematic());
-                    if (ConstructionValidator.overlapsStructure(structure)) {
+                    ConstructionManager.select(player, location, direction, structure.getPlan().getSchematic());
+                    if (ConstructionManager.overlapsStructure(structure)) {
                         player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
-                    } else if (ConstructionValidator.overlapsUnowned(player, structure)) {
+                    } else if (ConstructionManager.overlapsUnowned(player, structure)) {
                         player.sendMessage(ChatColor.RED + "Structure overlaps a region u dont own");
                     } else {
                         player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");

@@ -14,20 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.sc.api.structure.persistence.service;
 
-package com.sc.api.structure.construction.builder.flag;
-
-import com.sk89q.worldguard.protection.flags.Flag;
-import com.sk89q.worldguard.protection.flags.RegionGroup;
-import com.sk89q.worldguard.protection.flags.StringFlag;
+import com.mysema.query.jpa.impl.JPAQuery;
+import com.mysema.query.types.EntityPath;
+import javax.persistence.EntityManager;
 
 /**
- *
  * @author Chingo
  */
-public class SCFlags {
-    
-    public static final Flag STRUCTURE = new StringFlag("sc-structure", RegionGroup.MEMBERS);
-//    public static final Flag CONSTRUCTION_ZONE = new StringFlag(null, RegionGroup.MEMBERS);
-    
+public abstract class AbstractService {
+
+    protected EntityManager entityManager;
+
+    protected JPAQuery from(EntityPath<?>... paths) {
+        return new JPAQuery(entityManager).from(paths);
+    }
+
+    protected void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
 }

@@ -25,7 +25,6 @@ import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.Vector;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
@@ -223,13 +222,13 @@ public class WorldUtil {
 //        }
 //    }
     
-    public static World getWorld(String world) {
-        return Bukkit.getWorld(world);
-    }
-
-
-    
-    
+    /**
+     * Creates a sign on top of target location
+     * @param location The location
+     * @param cardinal The cardinal
+     * @return The created sign
+     * @deprecated Is currently used as workaround 
+     */
     public static Sign createSign(Location location, SimpleCardinal cardinal) {
         
         byte data;
@@ -252,12 +251,20 @@ public class WorldUtil {
         return sign;
     }
     
+    
+    
     public static BlockState getBlockState(Location location) {
         Vector pos = location.getPosition();
         Block b = Bukkit.getWorld(location.getWorld().getName()).getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
         return b.getState();
     }
     
+    /**
+     * Gets the sign at target location
+     * @param location The location that is a sign
+     * @return The sign
+     * @deprecated Currently used for a workaround
+     */
     public static Sign getSign(Location location) {
         BlockState b = getBlockState(location);
         if(b instanceof Sign) {
