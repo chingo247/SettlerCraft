@@ -22,14 +22,14 @@ import org.bukkit.Material;
 
 /**
  * Structure resource contains a material and a amount to describe the amount that is needed of this
- material.
+ * material.
  *
  * @author Chingo
  */
 public class SchematicMaterialResource implements Serializable {
 
     private SchematicMaterialResourceId materialResourceId;
-    
+
     /**
      * The amount of this resource
      */
@@ -38,7 +38,8 @@ public class SchematicMaterialResource implements Serializable {
     /**
      * JPA Constructor.
      */
-    protected SchematicMaterialResource() {}
+    protected SchematicMaterialResource() {
+    }
 
     /**
      * Constructor.
@@ -51,7 +52,7 @@ public class SchematicMaterialResource implements Serializable {
         this.materialResourceId = new SchematicMaterialResourceId(material, data);
         this.amount = amount;
     }
-    
+
     /**
      * Constructor.
      *
@@ -67,10 +68,11 @@ public class SchematicMaterialResource implements Serializable {
     public SchematicMaterialResourceId getMaterialResourceId() {
         return materialResourceId;
     }
-    
+
     /**
      * Gets the data value
-     * @return 
+     *
+     * @return
      */
     public Integer getData() {
         return materialResourceId.getData();
@@ -78,6 +80,7 @@ public class SchematicMaterialResource implements Serializable {
 
     /**
      * Sets the amount
+     *
      * @param value The value to set the that is needed for this resource
      */
     public void setAmount(int value) {
@@ -85,7 +88,8 @@ public class SchematicMaterialResource implements Serializable {
     }
 
     /**
-     * Gets the amount 
+     * Gets the amount
+     *
      * @return The amount
      */
     public int getAmount() {
@@ -100,7 +104,6 @@ public class SchematicMaterialResource implements Serializable {
     public Material getMaterial() {
         return materialResourceId.getMaterial();
     }
-
 
     @Override
     public int hashCode() {
@@ -123,8 +126,6 @@ public class SchematicMaterialResource implements Serializable {
         }
         return true;
     }
-
-    
 
     @Override
     public String toString() {

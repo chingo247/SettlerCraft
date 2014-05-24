@@ -57,17 +57,14 @@ public class ConstructionService extends AbstractService {
             tx = session.beginTransaction();
             constructionTask = (ConstructionTask) session.merge(constructionTask);
             tx.commit();
-        }
-        catch (HibernateException e) {
+        } catch (HibernateException e) {
             try {
                 tx.rollback();
-            }
-            catch (HibernateException rbe) {
+            } catch (HibernateException rbe) {
                 java.util.logging.Logger.getLogger(AbstractService.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
             }
             throw e;
-        }
-        finally {
+        } finally {
             if (session != null) {
                 session.close();
             }
@@ -83,17 +80,14 @@ public class ConstructionService extends AbstractService {
             tx = session.beginTransaction();
             constructionEntry = (ConstructionEntry) session.merge(constructionEntry);
             tx.commit();
-        }
-        catch (HibernateException e) {
+        } catch (HibernateException e) {
             try {
                 tx.rollback();
-            }
-            catch (HibernateException rbe) {
+            } catch (HibernateException rbe) {
                 java.util.logging.Logger.getLogger(AbstractService.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
             }
             throw e;
-        }
-        finally {
+        } finally {
             if (session != null) {
                 session.close();
             }
@@ -109,8 +103,6 @@ public class ConstructionService extends AbstractService {
         session.close();
         return exists;
     }
-    
-    
 
     public void updateStatus(ConstructionTask task, ConstructionState newStatus) {
         Session session = HibernateUtil.getSession();
@@ -121,9 +113,9 @@ public class ConstructionService extends AbstractService {
         } else {
             new HibernateUpdateClause(session, qct).where(qct.id.eq(task.getId())).set(qct.state, newStatus).execute();
         }
-        
+
         Sign sign = WorldUtil.getSign(task.getSignLocation());
-        if(sign != null) {
+        if (sign != null) {
             sign.setLine(2, newStatus.name());
             sign.update(true);
         }
@@ -159,17 +151,14 @@ public class ConstructionService extends AbstractService {
             entry = (ConstructionEntry) session.merge(entry);
 
             tx.commit();
-        }
-        catch (HibernateException e) {
+        } catch (HibernateException e) {
             try {
                 tx.rollback();
-            }
-            catch (HibernateException rbe) {
+            } catch (HibernateException rbe) {
                 java.util.logging.Logger.getLogger(AbstractService.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
             }
             throw e;
-        }
-        finally {
+        } finally {
             if (session != null) {
                 session.close();
             }

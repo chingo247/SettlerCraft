@@ -41,7 +41,7 @@ public class HSQLServer {
         server.setPort(PORT);
         server.setDatabaseName(0, DATABASE);
         server.setDatabasePath(0, PATH);
-       
+
     }
 
     public static HSQLServer getInstance() {
@@ -52,8 +52,8 @@ public class HSQLServer {
     }
 
     public void start() {
-        
-        if(!isRunning()) {
+
+        if (!isRunning()) {
             System.out.println("Starting HSQL server on port " + server.getPort());
             server.start();
         }
@@ -68,8 +68,7 @@ public class HSQLServer {
         try {
             Connection c = DriverManager.getConnection("jdbc:hsqldb:hsql://" + HOST + "/" + DATABASE);
             return true;
-        }
-        catch (SQLException ex) {
+        } catch (SQLException ex) {
         }
         return false;
     }

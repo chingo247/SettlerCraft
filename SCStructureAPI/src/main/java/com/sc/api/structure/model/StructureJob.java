@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.sc.api.structure.model;
 
 import com.sk89q.worldedit.Countable;
@@ -26,6 +25,7 @@ import com.sk89q.worldedit.blocks.BaseBlock;
  * @author Chingo
  */
 public class StructureJob {
+
     private int id;
     private final String world;
     private int x;
@@ -39,8 +39,8 @@ public class StructureJob {
 
     public StructureJob(int jobId, Structure structure) {
         int count = 0;
-        for(Countable<BaseBlock> b : structure.getPlan().getSchematic().getBlockDistributionWithData()) {
-                count+= b.getAmount();
+        for (Countable<BaseBlock> b : structure.getPlan().getSchematic().getBlockDistributionWithData()) {
+            count += b.getAmount();
         }
         this.jobSize = count;
         Vector pos = structure.getLocation().getPosition();
@@ -74,5 +74,5 @@ public class StructureJob {
     public int getJobSize() {
         return jobSize;
     }
-    
+
 }

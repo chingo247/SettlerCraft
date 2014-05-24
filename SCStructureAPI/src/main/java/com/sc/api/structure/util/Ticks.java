@@ -14,17 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.sc.api.structure.util;
 
 /**
  * Fair translation for Real time into Ticks
+ *
  * @author Chingo
  */
 public class Ticks {
-    
+
     public static final int ONE_SECOND = 20;
     public static final int ONE_MINUTE = 60 * ONE_SECOND;
     public static final int ONE_HOUR = 60 * ONE_MINUTE;
-    
+
 }

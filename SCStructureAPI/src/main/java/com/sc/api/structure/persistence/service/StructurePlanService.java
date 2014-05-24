@@ -14,9 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.sc.api.structure.persistence.service;
-
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateDeleteClause;
@@ -31,21 +29,19 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-
 /**
  *
  * @author Chingo
  */
 public class StructurePlanService {
-    
-    
+
     public void save(StructurePlan plan) {
         Session session = null;
         Transaction tx = null;
         try {
             session = MemDBUtil.getSession();
             tx = session.beginTransaction();
-                session.merge(plan);
+            session.merge(plan);
             tx.commit();
         } catch (HibernateException e) {
             try {
@@ -60,14 +56,14 @@ public class StructurePlanService {
             }
         }
     }
-    
+
     public void save(List<StructurePlan> plans) {
         Session session = null;
         Transaction tx = null;
         try {
             session = MemDBUtil.getSession();
             tx = session.beginTransaction();
-            for(StructurePlan plan : plans) {
+            for (StructurePlan plan : plans) {
                 session.merge(plan);
             }
             tx.commit();
@@ -84,16 +80,14 @@ public class StructurePlanService {
             }
         }
     }
-    
+
     public void clear() {
         System.out.println("Clearing plans");
         Session session = MemDBUtil.getSession();
         QStructurePlan qplan = QStructurePlan.structurePlan;
         new HibernateDeleteClause(session, qplan).execute();
     }
-    
 
-    
     public StructurePlan getPlan(String planId) {
         QStructurePlan structurePlan = QStructurePlan.structurePlan;
         Session session = MemDBUtil.getSession();
@@ -102,7 +96,7 @@ public class StructurePlanService {
         session.close();
         return plan;
     }
-    
+
     public List<StructurePlan> getPlans() {
         QStructurePlan structurePlan = QStructurePlan.structurePlan;
         Session session = MemDBUtil.getSession();
@@ -111,7 +105,7 @@ public class StructurePlanService {
         session.close();
         return plan;
     }
-    
+
     public List<StructurePlan> getPlans(List<StructurePlan> newPlans) {
         QStructurePlan structurePlan = QStructurePlan.structurePlan;
         Session session = MemDBUtil.getSession();
@@ -120,8 +114,5 @@ public class StructurePlanService {
         session.close();
         return plan;
     }
-    
-    
-    
 
 }

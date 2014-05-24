@@ -50,16 +50,17 @@ public class ConstructionTask implements Serializable {
 
     @OneToOne(cascade = CascadeType.ALL)
     private Structure structure;
-    
+
     @NotNull
     private Timestamp createdAt;
-    
+
     private Timestamp completeAt;
 
     @Version
     private Timestamp lastModified;
 
     public enum ConstructionType {
+
         BUILDING_AUTO,
         DEMOLISHING_AUTO,
         MANUAL
@@ -70,8 +71,7 @@ public class ConstructionTask implements Serializable {
     private ConstructionType constructionType;
 
     private final ConstructionStrategyType strategyType;
-    
-    
+
     @ManyToOne(cascade = CascadeType.ALL)
     private final ConstructionEntry constructionEntry;
 
@@ -93,8 +93,7 @@ public class ConstructionTask implements Serializable {
         this.state = ConstructionState.PREPARING;
         this.structure = structure;
         this.createdAt = new Timestamp(new Date().getTime());
-        
-        
+
     }
 
     public ConstructionEntry getConstructionEntry() {
@@ -104,8 +103,6 @@ public class ConstructionTask implements Serializable {
     public void setState(ConstructionState state) {
         this.state = state;
     }
-    
-    
 
 //    public void setState(ConstructionState state) {
 //        if(state == ConstructionState.FINISHED) {
@@ -113,7 +110,6 @@ public class ConstructionTask implements Serializable {
 //        }
 //        this.state = state;
 //    }
-
     public Timestamp getCompleteAt() {
         return completeAt;
     }
@@ -121,9 +117,9 @@ public class ConstructionTask implements Serializable {
     public Timestamp getCreatedAt() {
         return createdAt;
     }
-    
+
     public Location getSignLocation() {
-        if(structure == null) {
+        if (structure == null) {
             return null;
         }
         Vector pos = structure.getLocation().getPosition().add(new BlockVector(0, 1, 0));
@@ -141,8 +137,6 @@ public class ConstructionTask implements Serializable {
     public Timestamp getLastModified() {
         return lastModified;
     }
-    
-    
 
     public Long getId() {
         return id;
@@ -152,7 +146,6 @@ public class ConstructionTask implements Serializable {
         return structure;
     }
 
-
     public ConstructionType getConstructionType() {
         return constructionType;
     }
@@ -160,8 +153,6 @@ public class ConstructionTask implements Serializable {
     public ConstructionStrategyType getStrategyType() {
         return strategyType;
     }
-
-
 
     @Override
     public int hashCode() {
@@ -184,9 +175,5 @@ public class ConstructionTask implements Serializable {
         }
         return true;
     }
-
-
-    
-    
 
 }

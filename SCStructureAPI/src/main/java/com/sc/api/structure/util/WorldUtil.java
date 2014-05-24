@@ -49,25 +49,29 @@ public class WorldUtil {
             return SimpleCardinal.NORTH;
         } else if (yaw >= 225 && yaw < 315 || yaw >= -135 && yaw < -45) {
             return SimpleCardinal.EAST;
-        } else /*(yaw >= 315 && yaw < 360 || yaw >= 0 && < 45) */  {
+        } else /*(yaw >= 315 && yaw < 360 || yaw >= 0 && < 45) */ {
             return SimpleCardinal.SOUTH;
         }
     }
-    
+
     private static com.sk89q.worldedit.Location calculatePoint2(com.sk89q.worldedit.Location point1, SimpleCardinal direction, CuboidClipboard clipboard) {
         switch (direction) {
-            case EAST: 
+            case EAST:
                 return point1.add(clipboard.getSize().subtract(1, 1, 1));
-            case SOUTH: clipboard.rotate2D(90); 
-                return point1.add(-(clipboard.getWidth()-1),clipboard.getHeight()-1, (clipboard.getLength()-1));
-            case WEST: clipboard.rotate2D(180); 
-                        return point1.add(-(clipboard.getWidth()-1), clipboard.getHeight(), -(clipboard.getLength()-1));
-            case NORTH: clipboard.rotate2D(270); 
-                        return point1.add((clipboard.getWidth()-1),clipboard.getHeight()-1, -(clipboard.getLength()-1));
-            default: throw new AssertionError("unreachable");
+            case SOUTH:
+                clipboard.rotate2D(90);
+                return point1.add(-(clipboard.getWidth() - 1), clipboard.getHeight() - 1, (clipboard.getLength() - 1));
+            case WEST:
+                clipboard.rotate2D(180);
+                return point1.add(-(clipboard.getWidth() - 1), clipboard.getHeight(), -(clipboard.getLength() - 1));
+            case NORTH:
+                clipboard.rotate2D(270);
+                return point1.add((clipboard.getWidth() - 1), clipboard.getHeight() - 1, -(clipboard.getLength() - 1));
+            default:
+                throw new AssertionError("unreachable");
         }
     }
-    
+
     public static WorldDimension getWorldDimension(com.sk89q.worldedit.Location location, SimpleCardinal direction, CuboidClipboard clipboard) {
         return new WorldDimension(location, calculatePoint2(location, direction, clipboard));
     }
@@ -93,9 +97,8 @@ public class WorldUtil {
         }
     }
 
-
     public static SimpleCardinal getCardinal(Entity entity) {
-        return getCardinal((int)entity.getLocation().getYaw());
+        return getCardinal((int) entity.getLocation().getYaw());
     }
 
     /**
@@ -221,27 +224,35 @@ public class WorldUtil {
 //            moveEntityFromLot(entity, distance * 2, structureService.getStructure(target));
 //        }
 //    }
-    
     /**
      * Creates a sign on top of target location
+     *
      * @param location The location
      * @param cardinal The cardinal
      * @return The created sign
-     * @deprecated Is currently used as workaround 
+     * @deprecated Is currently used as workaround
      */
     public static Sign createSign(Location location, SimpleCardinal cardinal) {
-        
+
         byte data;
-        
-        switch(cardinal) {
-            case EAST: data = 4; break;
-            case NORTH: data = 0; break;
-            case WEST: data = 12; break;
-            case SOUTH: data = 8; break;
-            default: throw new AssertionError("Unreachable");
+
+        switch (cardinal) {
+            case EAST:
+                data = 4;
+                break;
+            case NORTH:
+                data = 0;
+                break;
+            case WEST:
+                data = 12;
+                break;
+            case SOUTH:
+                data = 8;
+                break;
+            default:
+                throw new AssertionError("Unreachable");
         }
-        
-        
+
         Vector pos = location.getPosition().add(new BlockVector(0, 1, 0));
         Block b = Bukkit.getWorld(location.getWorld().getName()).getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
         b.setType(Material.SIGN_POST);
@@ -250,24 +261,23 @@ public class WorldUtil {
         sign.update();
         return sign;
     }
-    
-    
-    
+
     public static BlockState getBlockState(Location location) {
         Vector pos = location.getPosition();
         Block b = Bukkit.getWorld(location.getWorld().getName()).getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
         return b.getState();
     }
-    
+
     /**
      * Gets the sign at target location
+     *
      * @param location The location that is a sign
      * @return The sign
      * @deprecated Currently used for a workaround
      */
     public static Sign getSign(Location location) {
         BlockState b = getBlockState(location);
-        if(b instanceof Sign) {
+        if (b instanceof Sign) {
             return (Sign) b;
         } else {
             return null;

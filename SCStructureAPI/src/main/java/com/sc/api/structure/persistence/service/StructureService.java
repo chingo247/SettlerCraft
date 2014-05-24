@@ -36,7 +36,7 @@ import org.hibernate.Transaction;
  * @author Chingo
  */
 public class StructureService extends AbstractService {
-    
+
     public Structure getStructure(Long id) {
         QStructure qstructure = QStructure.structure;
         Session session = HibernateUtil.getSession();
@@ -63,17 +63,15 @@ public class StructureService extends AbstractService {
         session.close();
         return structures;
     }
-    
+
     public void delete(Structure structure) {
         Session session = HibernateUtil.getSession();
         QStructure qstructure = QStructure.structure;
         new HibernateDeleteClause(session, qstructure).where(qstructure.id.eq(structure.getId())).execute();
     }
-    
-    
-    
+
     public Structure save(Structure structure) {
-                Session session = null;
+        Session session = null;
         Transaction tx = null;
         try {
             session = HibernateUtil.getSession();
@@ -94,42 +92,41 @@ public class StructureService extends AbstractService {
         }
         return structure;
     }
-    
+
     /**
-     * Determines if given location is on a structure. 
+     * Determines if given location is on a structure.
+     *
      * @param location The location
-     * @return  getStructure() != null
+     * @return getStructure() != null
      */
     public boolean isOnStructure(Location location) {
-      return getStructure(location) != null;
-    } 
-    
-    public Structure getStructure(Location location) {
-     QStructure qStructure = QStructure.structure;
-     Session session = HibernateUtil.getSession();
-     JPQLQuery query = new HibernateQuery(session);
-     
-    
-      Structure structure = query.from(qStructure)
-              .where(qStructure.worldLocation().world.eq(location.getWorld().getName())
-                .and(qStructure.dimension().startX.loe(location.getBlockX()))
-                .and(qStructure.dimension().endX.goe(location.getBlockX()))
-                .and(qStructure.dimension().startZ.loe(location.getBlockZ()))
-                .and(qStructure.dimension().endZ.goe(location.getBlockZ()))
-                .and(qStructure.dimension().startY.loe(location.getBlockY()))
-                .and(qStructure.dimension().endY.goe(location.getBlockY()))
-                      
-              ).uniqueResult(qStructure);
-
-      session.close();
-      return structure;
+        return getStructure(location) != null;
     }
-    
+
+    public Structure getStructure(Location location) {
+        QStructure qStructure = QStructure.structure;
+        Session session = HibernateUtil.getSession();
+        JPQLQuery query = new HibernateQuery(session);
+
+        Structure structure = query.from(qStructure)
+                .where(qStructure.worldLocation().world.eq(location.getWorld().getName())
+                        .and(qStructure.dimension().startX.loe(location.getBlockX()))
+                        .and(qStructure.dimension().endX.goe(location.getBlockX()))
+                        .and(qStructure.dimension().startZ.loe(location.getBlockZ()))
+                        .and(qStructure.dimension().endZ.goe(location.getBlockZ()))
+                        .and(qStructure.dimension().startY.loe(location.getBlockY()))
+                        .and(qStructure.dimension().endY.goe(location.getBlockY()))
+                ).uniqueResult(qStructure);
+
+        session.close();
+        return structure;
+    }
+
     public boolean overlaps(Structure structure) {
-     QStructure qStructure = QStructure.structure;
-     Session session = HibernateUtil.getSession();
-     JPQLQuery query = new HibernateQuery(session);
-     
+        QStructure qStructure = QStructure.structure;
+        Session session = HibernateUtil.getSession();
+        JPQLQuery query = new HibernateQuery(session);
+
         ReservedArea ra = structure.getReserved();
         int xMinus = ra.getR_xMinus();
         int zMinus = ra.getR_zMinus();
@@ -138,15 +135,14 @@ public class StructureService extends AbstractService {
         int up = ra.getR_up();
         int down = ra.getR_down();
 
-      boolean overlaps = query.from(qStructure)
-              .where(qStructure.worldLocation().world.eq(structure.getLocation().getWorld().getName())
-                      .and(qStructure.dimension().endX.add(qStructure.reserved().r_xPlus).goe(structure.getDimension().getStartX() - xMinus).and(qStructure.dimension().startX.subtract(qStructure.reserved().r_xMinus).loe(structure.getDimension().getEndX() + xPlus)))
-                      .and(qStructure.dimension().endY.add(qStructure.reserved().r_up).goe(structure.getDimension().getStartY() - down).and(qStructure.dimension().startY.subtract(qStructure.reserved().r_down).loe(structure.getDimension().getEndY() + up)))
-                      .and(qStructure.dimension().endZ.add(qStructure.reserved().r_zPlus).goe(structure.getDimension().getStartZ() - zMinus).and(qStructure.dimension().startZ.subtract(qStructure.reserved().r_zMinus).loe(structure.getDimension().getEndZ() + zPlus)))
-             
-      ).exists();
-      session.close();
-      return overlaps;
+        boolean overlaps = query.from(qStructure)
+                .where(qStructure.worldLocation().world.eq(structure.getLocation().getWorld().getName())
+                        .and(qStructure.dimension().endX.add(qStructure.reserved().r_xPlus).goe(structure.getDimension().getStartX() - xMinus).and(qStructure.dimension().startX.subtract(qStructure.reserved().r_xMinus).loe(structure.getDimension().getEndX() + xPlus)))
+                        .and(qStructure.dimension().endY.add(qStructure.reserved().r_up).goe(structure.getDimension().getStartY() - down).and(qStructure.dimension().startY.subtract(qStructure.reserved().r_down).loe(structure.getDimension().getEndY() + up)))
+                        .and(qStructure.dimension().endZ.add(qStructure.reserved().r_zPlus).goe(structure.getDimension().getStartZ() - zMinus).and(qStructure.dimension().startZ.subtract(qStructure.reserved().r_zMinus).loe(structure.getDimension().getEndZ() + zPlus)))
+                ).exists();
+        session.close();
+        return overlaps;
     }
 
 }

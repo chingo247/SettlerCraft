@@ -16,8 +16,6 @@
  */
 package com.sc.api.structure.model.progress;
 
-
-
 import com.sc.api.structure.model.Structure;
 import com.sc.api.structure.model.schematic.SchematicBlockReport;
 import com.sc.api.structure.model.schematic.SchematicMaterialLayer;
@@ -39,26 +37,28 @@ import javax.persistence.OneToOne;
  */
 @Entity
 public class StructureProgress implements Serializable {
-    
+
     @Id
     @GeneratedValue
     private Long id;
-    
+
     private int currentLayer = 0;
-    
+
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Structure structure;
-    
+
     @OneToMany(cascade = CascadeType.ALL)
     private List<StructureProgressLayer> layerRequirements;
-    
+
     /**
      * JPA Constructor.
      */
-    protected StructureProgress(){}
+    protected StructureProgress() {
+    }
 
     /**
      * Constructor.
+     *
      * @param blockReport
      * @param structure The structure
      */
@@ -67,38 +67,37 @@ public class StructureProgress implements Serializable {
         this.structure = structure;
         this.setProgressLayers(blockReport.getLayerRequirements());
     }
-    
-    private  void setProgressLayers(List<SchematicMaterialLayer> layerRqs) {
-        for(SchematicMaterialLayer lr : layerRqs) {
+
+    private void setProgressLayers(List<SchematicMaterialLayer> layerRqs) {
+        for (SchematicMaterialLayer lr : layerRqs) {
             StructureProgressLayer progressLayer = new StructureProgressLayer(this, lr.getLayer());
-            for(SchematicMaterialResource materialResource : lr.getResources()) {
+            for (SchematicMaterialResource materialResource : lr.getResources()) {
                 progressLayer.addResource(new StructureProgressMaterialResource(
-                        progressLayer, 
-                        materialResource.getMaterial(), 
-                        materialResource.getData(), 
+                        progressLayer,
+                        materialResource.getMaterial(),
+                        materialResource.getData(),
                         materialResource.getAmount()));
             }
             layerRequirements.add(progressLayer);
         }
     }
 
-    
     public boolean setNext() {
-        if(layerRequirements.get(currentLayer).getResources().isEmpty() && currentLayer < layerRequirements.size()) {
+        if (layerRequirements.get(currentLayer).getResources().isEmpty() && currentLayer < layerRequirements.size()) {
             currentLayer++;
             return true;
         }
         return false;
     }
-    
+
     public StructureProgressLayer getCurrentLayerRequirement() {
         return layerRequirements.get(currentLayer);
     }
-    
+
     public StructureProgressLayer getLayerRequirement(int index) {
         return layerRequirements.get(index);
     }
-    
+
     public int size() {
         return layerRequirements.size();
     }
@@ -106,7 +105,7 @@ public class StructureProgress implements Serializable {
     public Structure getStructure() {
         return structure;
     }
-    
+
     public Long getId() {
         return id;
     }

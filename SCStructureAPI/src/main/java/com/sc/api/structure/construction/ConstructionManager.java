@@ -48,8 +48,8 @@ import org.bukkit.entity.Player;
  * @author Chingo
  */
 public class ConstructionManager {
-    
-        /**
+
+    /**
      * Selects a region between two positions
      *
      * @param player The player to create an editSession
@@ -112,14 +112,13 @@ public class ConstructionManager {
         try {
             mgr.addRegion(region);
             mgr.save();
-        }
-        catch (ProtectionDatabaseException ex) {
+        } catch (ProtectionDatabaseException ex) {
             Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return region;
     }
-    
+
     public boolean createConstructionSite(String id, Player placer, World world, BlockVector pos1, BlockVector pos2, boolean feedback, boolean addSelf) {
         ProtectedCuboidRegion region = new ProtectedCuboidRegion(id, pos1, pos2);
         RegionPermissionModel permModel = SCWorldGuardUtil.getRegionPermissionModel(placer);
@@ -137,8 +136,7 @@ public class ConstructionManager {
         mgr.addRegion(region);
         try {
             mgr.save();
-        }
-        catch (ProtectionDatabaseException ex) {
+        } catch (ProtectionDatabaseException ex) {
             Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
         }
         return true;

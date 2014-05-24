@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.sc.api.structure.construction.progress;
 
 import java.io.Serializable;
@@ -33,11 +32,10 @@ import javax.persistence.OneToMany;
  */
 @Entity
 public class ConstructionEntry implements Serializable {
-    
-    
+
     @Id
-    private final String player; 
-    
+    private final String player;
+
     @OneToMany(cascade = CascadeType.ALL)
     private List<ConstructionTask> constructionQueue;
 
@@ -47,6 +45,7 @@ public class ConstructionEntry implements Serializable {
 
     /**
      * Constructor
+     *
      * @param issuer The player or issuer
      */
     public ConstructionEntry(String issuer) {
@@ -60,9 +59,9 @@ public class ConstructionEntry implements Serializable {
 
     public ConstructionTask remove(ConstructionTask constructionProgress) {
         Iterator<ConstructionTask> it = constructionQueue.iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             ConstructionTask cp = it.next();
-            if(cp.getId().equals(constructionProgress.getId())) {
+            if (cp.getId().equals(constructionProgress.getId())) {
                 it.remove();
                 return cp;
             }
@@ -73,8 +72,6 @@ public class ConstructionEntry implements Serializable {
     public String getEntryName() {
         return player;
     }
-
-
 
     @Override
     public int hashCode() {
@@ -97,10 +94,5 @@ public class ConstructionEntry implements Serializable {
         }
         return true;
     }
-    
-    
 
-
-   
-    
 }

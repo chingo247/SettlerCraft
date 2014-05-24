@@ -20,9 +20,9 @@ import com.sc.api.structure.model.progress.StructureProgress;
 import com.sc.api.structure.model.progress.StructureProgressLayer;
 import com.sc.api.structure.model.progress.StructureProgressMaterialResource;
 import com.sc.api.structure.persistence.HSQLServer;
-import com.sc.api.structure.persistence.service.StructurePlanService;
 import com.sc.api.structure.persistence.HibernateUtil;
 import com.sc.api.structure.persistence.MemDBUtil;
+import com.sc.api.structure.persistence.service.StructurePlanService;
 import com.sc.api.structure.util.CuboidUtil;
 import com.sc.api.structure.util.plugins.SCAsyncWorldEditUtil;
 import com.sk89q.worldedit.CuboidClipboard;
@@ -136,7 +136,7 @@ public class SCStructureAPI extends JavaPlugin {
                 getCommand("sc").setExecutor(new StructureCommands());
             }
         }).start();
-        
+
     }
 
     public static WorldEditPlugin getWorldEditPlugin() {
@@ -183,8 +183,7 @@ public class SCStructureAPI extends JavaPlugin {
         StructurePlanLoader spLoader = new StructurePlanLoader();
         try {
             spLoader.loadStructures(structureFolder);
-        }
-        catch (FileNotFoundException ex) {
+        } catch (FileNotFoundException ex) {
             Logger.getLogger(SCStructureAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -280,6 +279,5 @@ public class SCStructureAPI extends JavaPlugin {
 
         MenuManager.getInstance().register(planShop);
     }
-
 
 }

@@ -40,10 +40,10 @@ public class StructurePlanLoader {
 
     public List<StructurePlan> loadStructures(File buildingFolder) throws FileNotFoundException {
         StructurePlanService sps = new StructurePlanService();
-        if(sps.getPlans().size() > 0) {
+        if (sps.getPlans().size() > 0) {
             sps.clear();
         }
-         
+
         String[] extensions = {"yml"};
         Iterator<File> it = FileUtils.iterateFiles(buildingFolder, extensions, true);
         List<StructurePlan> structurePlans = new ArrayList<>();
@@ -134,8 +134,7 @@ public class StructurePlanLoader {
             }
 
             return spv;
-        }
-        catch (IOException | DataException ex) {
+        } catch (IOException | DataException ex) {
             Logger.getLogger(StructurePlanLoader.class.getName()).log(Level.SEVERE, null, ex);
         }
         return spv;

@@ -71,17 +71,16 @@ public class Structure implements Serializable {
     @Nullable
     @OneToOne(cascade = CascadeType.ALL)
     private StructureProgress progress;
-    
+
     @Nullable
     @OneToOne(cascade = CascadeType.ALL)
     private ConstructionTask task;
-    
+
     @Nullable
     private String structureRegion;
 
     @Embedded
     private ReservedArea reserved;
-
 
     /**
      * JPA Constructor
@@ -137,8 +136,7 @@ public class Structure implements Serializable {
     }
 
     /**
-     * Sets the owner of this structure Use a Structure to handle this as a
-     * transaction!
+     * Sets the owner of this structure Use a Structure to handle this as a transaction!
      *
      * @param owner The new owner of this structure
      */
@@ -179,8 +177,6 @@ public class Structure implements Serializable {
     public String getStructureRegion() {
         return structureRegion;
     }
-    
-    
 
     public boolean isOnLot(Location location) {
         return (location.getPosition().getBlockX() >= dimension.getStartX() && location.getPosition().getBlockX() <= dimension.getEndX()

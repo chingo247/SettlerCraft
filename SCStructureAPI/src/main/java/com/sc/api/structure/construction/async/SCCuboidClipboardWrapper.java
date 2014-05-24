@@ -26,7 +26,7 @@ import org.primesoft.asyncworldedit.worldedit.CuboidClipboardWrapper;
  */
 public class SCCuboidClipboardWrapper extends CuboidClipboardWrapper {
 //    
-    
+
     public SCCuboidClipboardWrapper(String player, SmartClipBoard smartClipboard) {
         this(player, smartClipboard, -1);
     }

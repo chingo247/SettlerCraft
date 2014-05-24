@@ -26,8 +26,8 @@ import com.sc.api.structure.construction.progress.ConstructionState;
 import com.sc.api.structure.construction.progress.ConstructionTask;
 import com.sc.api.structure.construction.progress.QConstructionTask;
 import com.sc.api.structure.model.Structure;
-import com.sc.api.structure.persistence.service.AbstractService;
 import com.sc.api.structure.persistence.HibernateUtil;
+import com.sc.api.structure.persistence.service.AbstractService;
 import com.sc.api.structure.util.WorldUtil;
 import com.sc.api.structure.util.plugins.SCAsyncWorldEditUtil;
 import com.sc.api.structure.util.plugins.SCWorldGuardUtil;
@@ -87,17 +87,14 @@ class SCConstructionRestoreService extends AbstractService {
             }
 
             tx.commit();
-        }
-        catch (HibernateException e) {
+        } catch (HibernateException e) {
             try {
                 tx.rollback();
-            }
-            catch (HibernateException rbe) {
+            } catch (HibernateException rbe) {
                 java.util.logging.Logger.getLogger(AbstractService.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
             }
             throw e;
-        }
-        finally {
+        } finally {
             if (session != null) {
                 session.close();
             }
@@ -205,8 +202,7 @@ class SCConstructionRestoreService extends AbstractService {
 
         try {
             AsyncBuilder.placeStructure(placer, structure);
-        }
-        catch (ConstructionException ex) {
+        } catch (ConstructionException ex) {
             java.util.logging.Logger.getLogger(SCConstructionRestoreService.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

@@ -30,7 +30,8 @@ import org.bukkit.Material;
  * @author Chingo
  */
 @Entity
-public class StructureProgressMaterialResource implements Serializable  {
+public class StructureProgressMaterialResource implements Serializable {
+
     @ManyToOne(cascade = CascadeType.ALL)
     private StructureProgressLayer layerRequirement;
 
@@ -38,18 +39,20 @@ public class StructureProgressMaterialResource implements Serializable  {
     private SchematicMaterialResourceId materialResourceId;
     @Id
     private Long id;
-    
+
     private int amount;
-    
+
     /**
      * JPA Constructor.
      */
-    protected StructureProgressMaterialResource() {}
+    protected StructureProgressMaterialResource() {
+    }
 
     /**
      * Constructor.
      *
-     * @param layerRequirement The parent layer requirement which holds this material resources as element of a collection
+     * @param layerRequirement The parent layer requirement which holds this material resources as
+     * element of a collection
      * @param material The material
      * @param amount The amount
      */
@@ -58,7 +61,7 @@ public class StructureProgressMaterialResource implements Serializable  {
         this.layerRequirement = layerRequirement;
         this.amount = amount;
     }
-    
+
     public StructureProgressMaterialResource(StructureProgressLayer layerRequirement, Material material, Integer data, int amount) {
         this(layerRequirement, material, data.byteValue(), amount);
     }
@@ -70,7 +73,7 @@ public class StructureProgressMaterialResource implements Serializable  {
     public Long getId() {
         return id;
     }
-    
+
     public Material getMaterial() {
         return materialResourceId.getMaterial();
     }
@@ -86,6 +89,5 @@ public class StructureProgressMaterialResource implements Serializable  {
     public void setAmount(int amount) {
         this.amount = amount;
     }
-    
-    
+
 }

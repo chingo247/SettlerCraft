@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.sc.api.structure.util.plugins;
 
 import static com.sc.api.structure.util.plugins.SCWorldEditUtil.getLocalWorld;
@@ -30,15 +29,15 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSessionFactory;
  * @author Chingo
  */
 public class SCAsyncWorldEditUtil {
-    
+
     public static PluginMain getAsyncWorldEditPlugin() {
         return PluginMain.getInstance();
     }
-    
+
     public static BlockPlacer getBlockPlacer() {
         return getAsyncWorldEditPlugin().getBlockPlacer();
     }
-    
+
     public static AsyncEditSessionFactory getAsyncSessionFactory() {
         return new AsyncEditSessionFactory(getAsyncWorldEditPlugin());
     }
@@ -46,11 +45,9 @@ public class SCAsyncWorldEditUtil {
     public static AsyncEditSession createAsyncEditSession(Player issuer, int maxblocks) {
         return new AsyncEditSession(getAsyncSessionFactory(), getAsyncWorldEditPlugin(), issuer.getName(), getLocalWorld(issuer), maxblocks);
     }
-    
+
     public static AsyncEditSession createAsyncEditSession(String issuer, LocalWorld world, int maxblocks) {
         return new AsyncEditSession(getAsyncSessionFactory(), getAsyncWorldEditPlugin(), issuer, world, maxblocks);
     }
-    
- 
-    
+
 }

@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.sc.api.structure.model.schematic;
 
 import com.sc.api.structure.util.SettlerCraftMaterials;
@@ -32,47 +31,47 @@ import org.bukkit.Material;
 
 /**
  * Contains all the required information of a Cuboid, used to construct/paste structures
+ *
  * @author Chingo
  */
-
-
 public class SchematicBlockReport implements Serializable {
+
     private final int height;
     private final int length;
     private final int width;
     private final ArrayList<SchematicMaterialLayer> layerRequirements;        // For player to build structures themselves
     private final ArrayList<CuboidClipboard> layeredCuboidClipboards;   // For WorldEdit to paste a layer
-    
+
     public SchematicBlockReport(File schematic) throws IOException, DataException {
         SchematicFormat format = SchematicFormat.getFormat(schematic);
         CuboidClipboard ccb = format.load(schematic);
         this.height = ccb.getHeight();
         this.length = ccb.getLength();
-        this.width  = ccb.getWidth();
+        this.width = ccb.getWidth();
         this.layerRequirements = new ArrayList<>(height);
         this.layeredCuboidClipboards = new ArrayList<>(height);
-        
+
         for (int layer = 0; layer < height; layer++) {
             CuboidClipboard layerCCb = new CuboidClipboard(new Vector(width, 1, length));
             for (int l = 0; l < l; l++) {
                 for (int w = 0; w < w; w++) {
-                  BaseBlock b = ccb.getBlock(new Vector(w, layer, l));
-                  layerCCb.setBlock(new Vector(w, 0, l), b);
+                    BaseBlock b = ccb.getBlock(new Vector(w, layer, l));
+                    layerCCb.setBlock(new Vector(w, 0, l), b);
                 }
             }
             layeredCuboidClipboards.add(layer, layerCCb);
             layerRequirements.add(processCuboidLayer(layer, layerCCb));
         }
-        
+
     }
-    
+
     private SchematicMaterialLayer processCuboidLayer(int layer, CuboidClipboard ccb) {
         SchematicMaterialLayer layerRequirement = new SchematicMaterialLayer(layer);
-        for(Countable<BaseBlock> b : ccb.getBlockDistributionWithData()) {
+        for (Countable<BaseBlock> b : ccb.getBlockDistributionWithData()) {
             layerRequirement.addResource(
                     new SchematicMaterialResource(
                             Material.getMaterial(b.getID().getType()),
-                            b.getID().getData(), 
+                            b.getID().getData(),
                             Math.round(b.getAmount() * SettlerCraftMaterials.getValue(b.getID()))));
         }
         return layerRequirement;
@@ -86,7 +85,6 @@ public class SchematicBlockReport implements Serializable {
         return new ArrayList<>(layeredCuboidClipboards);
     }
 
-
     public int getHeight() {
         return height;
     }
@@ -98,5 +96,5 @@ public class SchematicBlockReport implements Serializable {
     public int getWidth() {
         return width;
     }
-    
+
 }

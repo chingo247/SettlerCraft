@@ -42,9 +42,9 @@ import org.bukkit.entity.Player;
  * @author Chingo
  */
 public class SCWorldEditUtil {
-    
+
     public static Location getLocation(org.bukkit.Location location) {
-        return new Location(getLocalWorld(location.getWorld().getName()),new BlockVector(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+        return new Location(getLocalWorld(location.getWorld().getName()), new BlockVector(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
     }
 
     public static CuboidClipboard load(File SchematicFile) throws FileNotFoundException, DataException, IOException {
@@ -55,11 +55,11 @@ public class SCWorldEditUtil {
     public static WorldEditPlugin getWorldEditPlugin() {
         return (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
     }
-    
+
     public static EditSession createEditSession(Player player, int maxblocks) {
         return getWorldEditPlugin().createEditSession(player);
     }
-    
+
     public static EditSession getEditSession(LocalWorld world, int maxblocks) {
         return WorldEdit.getInstance().getEditSessionFactory().getEditSession(world, maxblocks);
     }
@@ -75,11 +75,11 @@ public class SCWorldEditUtil {
     public static LocalWorld getLocalWorld(Player player) {
         return getLocalPlayer(player).getWorld();
     }
-    
+
     public static LocalWorld getLocalWorld(String world) {
         List<LocalWorld> worlds = getWorldEditPlugin().getWorldEdit().getServer().getWorlds();
-        for(LocalWorld lw : worlds) {
-            if(lw.getName().equals(world)) {
+        for (LocalWorld lw : worlds) {
+            if (lw.getName().equals(world)) {
                 return lw;
             }
         }
@@ -87,18 +87,16 @@ public class SCWorldEditUtil {
     }
 
     public static void selectClipboardArea(Player player, Location pos1, Location pos2) {
-            LocalPlayer localPlayer = getLocalPlayer(player);
-            LocalWorld world = localPlayer.getWorld();
-            LocalSession session = getLocalSession(player);
-            
+        LocalPlayer localPlayer = getLocalPlayer(player);
+        LocalWorld world = localPlayer.getWorld();
+        LocalSession session = getLocalSession(player);
+
 //            Vector pos = getBlockWorldVector(location);
 //            Vector pos2 = pos.add(clipboard.getSize().subtract(1,1,1));
-            
-            session.setRegionSelector(world, new CuboidRegionSelector(world, pos1.getPosition(), pos2.getPosition()));
-            session.getRegionSelector(world).learnChanges();
-            session.getRegionSelector(world).explainRegionAdjust(localPlayer, session);
-            
-            
+        session.setRegionSelector(world, new CuboidRegionSelector(world, pos1.getPosition(), pos2.getPosition()));
+        session.getRegionSelector(world).learnChanges();
+        session.getRegionSelector(world).explainRegionAdjust(localPlayer, session);
+
     }
 
 }

@@ -101,15 +101,14 @@ public class CuboidUtil {
 
     public static int count(CuboidClipboard c, boolean noAir) {
         int count = 0;
-        for(Countable<BaseBlock> b : c.getBlockDistributionWithData()){
-            if(b.getID().isAir() && noAir) continue;
+        for (Countable<BaseBlock> b : c.getBlockDistributionWithData()) {
+            if (b.getID().isAir() && noAir) {
+                continue;
+            }
             count += b.getAmount();
         }
         return count;
     }
-    
-    
-
 
     public static CuboidClipboard getLayer(CuboidClipboard whole, int layer) {
         CuboidClipboard layerClip = new CuboidClipboard(new BlockVector(whole.getWidth(), 1, whole.getLength()));

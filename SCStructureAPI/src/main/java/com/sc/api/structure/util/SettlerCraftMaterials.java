@@ -20,6 +20,7 @@ import com.sk89q.worldedit.blocks.BaseBlock;
 
 /**
  * TODO Read values from a file
+ *
  * @author Chingo
  */
 public class SettlerCraftMaterials {
@@ -320,7 +321,7 @@ public class SettlerCraftMaterials {
 //        } else if (isDirt(block)) {
 //            return DIRT.get(mat);
 //        } else {
-            return 1.0f; // Default value
+        return 1.0f; // Default value
 //        }
     }
 //

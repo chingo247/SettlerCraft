@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.sc.api.structure.construction.generator;
 
 import com.google.common.base.Preconditions;
@@ -24,17 +23,20 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.blocks.BaseBlock;
 
 /**
- * Enclosures should only cover the border of a structure. The function of an enclosure is to mark construction areas, so that players can see that a 
- * the ground they are standing on is claimed or in progress. It kinda visualize the WorldGuard region border of a structure as a structure has it's own region.
- * 
- * For now it will only be able to visualize a structure or cuboid. In the future it may also be able to visualize worldguard borders
+ * Enclosures should only cover the border of a structure. The function of an enclosure is to mark
+ * construction areas, so that players can see that a the ground they are standing on is claimed or
+ * in progress. It kinda visualize the WorldGuard region border of a structure as a structure has
+ * it's own region.
+ *
+ * For now it will only be able to visualize a structure or cuboid. In the future it may also be
+ * able to visualize worldguard borders
+ *
  * @author Chingo
  */
 public class EnclosureGenerator {
-    
+
     /**
-     * Generates an enclosure for a clipboard, enclosures only mark the edge of
-     * a clipboard
+     * Generates an enclosure for a clipboard, enclosures only mark the edge of a clipboard
      *
      * @param session The session to be used
      * @param clipboard The clipboard

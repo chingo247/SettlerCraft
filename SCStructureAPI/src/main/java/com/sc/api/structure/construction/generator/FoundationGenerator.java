@@ -21,15 +21,20 @@ import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.blocks.BaseBlock;
 
 /**
- * Foundation generator can be used to generate a foundation for a specific Structure or CuboidClipboard.
+ * Foundation generator can be used to generate a foundation for a specific Structure or
+ * CuboidClipboard.
+ *
  * @author Chingo
  */
 public class FoundationGenerator {
 
     /**
-     * Uses a very simple algorithm to generates a clipboard with a height of 1 block with the length and with of the given clipboard
+     * Uses a very simple algorithm to generates a clipboard with a height of 1 block with the
+     * length and with of the given clipboard
+     *
      * @param clipboard The clipboard to generate the foundation for (remains untouched)
-     * @param material The material (for ease use worldedit's {@link com.sk89q.worldedit.blocks.BlockID})
+     * @param material The material (for ease use worldedit's
+     * {@link com.sk89q.worldedit.blocks.BlockID})
      * @return The foundation as CuboidClipboard
      */
     public static CuboidClipboard generateFoundation(CuboidClipboard clipboard, int material) {

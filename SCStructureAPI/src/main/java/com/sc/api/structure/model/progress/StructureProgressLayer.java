@@ -34,20 +34,18 @@ import javax.persistence.OneToMany;
  */
 @Entity
 public class StructureProgressLayer implements Serializable {
-    
+
     protected final int layer;
-    
+
     @OneToMany(cascade = CascadeType.ALL)
     private List<StructureProgressMaterialResource> resources = new ArrayList<>();
-    
+
     @Id
     @GeneratedValue
     private Long id;
-    
 
     @ManyToOne(cascade = CascadeType.ALL)
     private StructureProgress progress;
-
 
     public StructureProgressLayer() {
         this.layer = -1;
@@ -63,58 +61,56 @@ public class StructureProgressLayer implements Serializable {
         return id;
     }
 
-
     public StructureProgress getProgress() {
         return progress;
     }
 
-        public List<StructureProgressMaterialResource> getResources() {
+    public List<StructureProgressMaterialResource> getResources() {
         return new ArrayList<>(resources);
     }
-    
+
     public int size() {
         return resources.size();
     }
-    
+
     public boolean isEmpty() {
         return resources.isEmpty();
     }
-    
-    
+
     public void addResource(StructureProgressMaterialResource resource) {
         Iterator<StructureProgressMaterialResource> it = resources.iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             StructureProgressMaterialResource mr = it.next();
-            if(mr.getMaterial() == resource.getMaterial() && mr.getData() == resource.getData()) {
+            if (mr.getMaterial() == resource.getMaterial() && mr.getData() == resource.getData()) {
                 mr.setAmount(mr.getAmount() + resource.getAmount());
                 return;
             }
         }
         resources.add(resource);
     }
-    
+
     public boolean hasResource(StructureProgressMaterialResource resource) {
-       Iterator<StructureProgressMaterialResource> it = resources.iterator();
-        while(it.hasNext()) {
+        Iterator<StructureProgressMaterialResource> it = resources.iterator();
+        while (it.hasNext()) {
             StructureProgressMaterialResource mr = it.next();
-            if(mr.getMaterial() == resource.getMaterial() && mr.getData() == resource.getData()) {
+            if (mr.getMaterial() == resource.getMaterial() && mr.getData() == resource.getData()) {
                 return true;
             }
-        } 
+        }
         return false;
     }
-    
+
     public StructureProgressMaterialResource getResource(StructureProgressMaterialResource resource) {
-       Iterator<StructureProgressMaterialResource> it = resources.iterator();
-        while(it.hasNext()) {
+        Iterator<StructureProgressMaterialResource> it = resources.iterator();
+        while (it.hasNext()) {
             StructureProgressMaterialResource mr = it.next();
-            if(mr.getMaterial() == resource.getMaterial() && mr.getData() == resource.getData()) {
+            if (mr.getMaterial() == resource.getMaterial() && mr.getData() == resource.getData()) {
                 return mr;
             }
-        } 
+        }
         return null;
     }
-    
+
     public void removeResource(SchematicMaterialResource resource) {
         Iterator<StructureProgressMaterialResource> it = resources.iterator();
         while (it.hasNext()) {

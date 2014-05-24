@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.sc.api.structure.commands;
 
 import com.sc.api.menu.plugin.shop.ItemShopCategoryMenu;
@@ -35,23 +34,24 @@ public class StructureCommands implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
-        if(args.length == 0) {
+        if (args.length == 0) {
             return false;
         } else {
-            switch(args[0]) {
+            switch (args[0]) {
                 case "menu":
-                    if(args.length == 1) {
+                    if (args.length == 1) {
                         return openPlanMenu((Player) cs);
                     } else {
                         return false;
                     }
                 case "shop":
-                    if(args.length == 1) {
+                    if (args.length == 1) {
                         return openShopMenu((Player) cs);
                     } else {
                         return false;
                     }
-                default: return false;
+                default:
+                    return false;
             }
         }
     }
@@ -61,9 +61,9 @@ public class StructureCommands implements CommandExecutor {
         menu.onEnter(player, true);
         return true;
     }
-    
+
     private boolean openShopMenu(Player player) {
-        if(Bukkit.getPluginManager().getPlugin("Vault") == null) {
+        if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
             player.sendMessage(ChatColor.RED + " Planshop requires Vault to work");
             return false;
         }
@@ -71,5 +71,5 @@ public class StructureCommands implements CommandExecutor {
         menu.onEnter(player);
         return true;
     }
-    
+
 }

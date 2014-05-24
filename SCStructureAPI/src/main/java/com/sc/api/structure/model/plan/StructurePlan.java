@@ -31,19 +31,19 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 
-
 /**
  *
  * @author Chingo
  */
 @Entity
 public class StructurePlan implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String category = "default";
     private String faction = "default";
-    private String displayName; 
+    private String displayName;
     private String description;
     private int startY = 0;
     @Lob
@@ -76,21 +76,15 @@ public class StructurePlan implements Serializable {
         this.startY = startY;
     }
 
-    public CuboidClipboard getSchematic()  {
+    public CuboidClipboard getSchematic() {
         try {
             CuboidClipboard structure = SchematicFormat.getFormat(structureSchematic).load(structureSchematic);
             return structure;
-        }
-        catch (IOException | DataException ex) {
+        } catch (IOException | DataException ex) {
             Logger.getLogger(StructurePlan.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }
-    
-
-    
-
-    
 
     public double getPrice() {
         return price;
@@ -179,7 +173,7 @@ public class StructurePlan implements Serializable {
     public String getDescription() {
         return description;
     }
-    
+
     public EnumMap<ReservedSide, Integer> getReserved() {
         EnumMap<ReservedSide, Integer> reserved = new EnumMap<>(ReservedSide.class);
         reserved.put(ReservedSide.UP, reservedUp);

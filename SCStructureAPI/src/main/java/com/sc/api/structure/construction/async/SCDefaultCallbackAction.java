@@ -16,7 +16,6 @@
  */
 package com.sc.api.structure.construction.async;
 
-import com.sc.api.structure.construction.async.SCJobCallback;
 import com.sc.api.structure.construction.progress.ConstructionState;
 import com.sc.api.structure.construction.progress.ConstructionTask;
 import com.sc.api.structure.event.structure.StructureCompleteEvent;
@@ -62,7 +61,7 @@ public class SCDefaultCallbackAction implements SCJobCallback {
                     if (ply != null && ply.isOnline()) {
                         ply.sendMessage(ChatColor.YELLOW + "Building:  " + ChatColor.BLUE + structure.getPlan().getDisplayName());
                     }
-                   constructionService.updateStatus(task, ConstructionState.IN_PROGRESS);
+                    constructionService.updateStatus(task, ConstructionState.IN_PROGRESS);
                 } else if (bpje.getStatus() == BlockPlacerJobEntry.JobStatus.Done) {
                     Player ply = Bukkit.getPlayer(placer);
                     if (ply != null && ply.isOnline()) {
@@ -82,7 +81,7 @@ public class SCDefaultCallbackAction implements SCJobCallback {
         if (ply != null && ply.isOnline()) {
             ply.sendMessage(ChatColor.RED + "Construction canceled: " + ChatColor.BLUE + structure.getPlan().getDisplayName());
         }
-        
+
         entry.getEditSession().undo(entry.getEditSession());
         session.undo(session);
 

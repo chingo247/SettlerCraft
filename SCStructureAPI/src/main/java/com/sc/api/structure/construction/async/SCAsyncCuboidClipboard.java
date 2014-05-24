@@ -35,9 +35,11 @@ import org.primesoft.asyncworldedit.worldedit.WorldeditOperations;
 
 /**
  * Modfied version of AsyncClipboard
+ *
  * @author Chingo
  */
 public class SCAsyncCuboidClipboard extends ProxyCuboidClipboard {
+
     /**
      * The player
      */
@@ -90,21 +92,20 @@ public class SCAsyncCuboidClipboard extends ProxyCuboidClipboard {
         final SCBlockPlacerJobEntry job = new SCBlockPlacerJobEntry(m_player, jobId, "pasteEntities");
         m_blockPlacer.addJob(m_player, job);
 
-
         m_schedule.runTaskAsynchronously(m_plugin, new SCClipBoardAsyncTask(cc, null, m_player, "pasteEntities",
                 m_blockPlacer, job, callback) {
-            @Override
-            public void task(CuboidClipboard cc)
+                    @Override
+                    public void task(CuboidClipboard cc)
                     throws MaxChangedBlocksException {
-                cc.pasteEntities(pos);
-            }
-        });
+                        cc.pasteEntities(pos);
+                    }
+                });
 
         return new LocalEntity[0];
     }
 
     public void place(final EditSession editSession, final Vector pos,
-                      final boolean noAir, SCJobCallback callback)
+            final boolean noAir, SCJobCallback callback)
             throws MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.paste);
         if (!isAsync) {
@@ -127,21 +128,19 @@ public class SCAsyncCuboidClipboard extends ProxyCuboidClipboard {
         }
 
         m_blockPlacer.addJob(m_player, job);
-        
 
         m_schedule.runTaskAsynchronously(m_plugin, new SCClipBoardAsyncTask(cc, editSession, m_player, "place",
                 m_blockPlacer, job, callback) {
-            @Override
-            public void task(CuboidClipboard cc)
+                    @Override
+                    public void task(CuboidClipboard cc)
                     throws MaxChangedBlocksException {
-                cc.place(session, pos, noAir);
-            }
-        });
+                        cc.place(session, pos, noAir);
+                    }
+                });
     }
 
-    
     public void paste(final EditSession editSession, final Vector newOrigin,
-                      final boolean noAir, SCJobCallback callback)
+            final boolean noAir, SCJobCallback callback)
             throws MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.paste);
         if (!isAsync) {
@@ -162,18 +161,18 @@ public class SCAsyncCuboidClipboard extends ProxyCuboidClipboard {
             session = editSession;
             job = new SCBlockPlacerJobEntry(m_player, jobId, "place");
         }
-        
+
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new SCClipBoardAsyncTask(cc, editSession, m_player, "paste",
                 m_blockPlacer, job, callback) {
-            @Override
-            public void task(CuboidClipboard cc)
+                    @Override
+                    public void task(CuboidClipboard cc)
                     throws MaxChangedBlocksException {
-                cc.paste(session, newOrigin, noAir);
-                System.out.println("paste!");
-            }
-        });
+                        cc.paste(session, newOrigin, noAir);
+                        System.out.println("paste!");
+                    }
+                });
     }
 
     @Override
@@ -182,7 +181,7 @@ public class SCAsyncCuboidClipboard extends ProxyCuboidClipboard {
     }
 
     public void paste(final EditSession editSession, final Vector newOrigin,
-                      final boolean noAir, final boolean entities, SCJobCallback callback)
+            final boolean noAir, final boolean entities, SCJobCallback callback)
             throws MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.paste);
         if (!isAsync) {
@@ -204,16 +203,15 @@ public class SCAsyncCuboidClipboard extends ProxyCuboidClipboard {
         }
         m_blockPlacer.addJob(m_player, job);
 
-
         m_schedule.runTaskAsynchronously(m_plugin, new SCClipBoardAsyncTask(cc, editSession, m_player, "paste",
                 m_blockPlacer, job, callback) {
-            @Override
-            public void task(CuboidClipboard cc)
+                    @Override
+                    public void task(CuboidClipboard cc)
                     throws MaxChangedBlocksException {
-                System.out.println("paste!");
-                cc.paste(session, newOrigin, noAir, entities);
-            }
-        });
+                        System.out.println("paste!");
+                        cc.paste(session, newOrigin, noAir, entities);
+                    }
+                });
     }
 
     /**

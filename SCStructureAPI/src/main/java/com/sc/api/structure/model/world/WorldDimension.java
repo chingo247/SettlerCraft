@@ -30,8 +30,8 @@ import org.bukkit.World;
  *
  * @author Chingo
  */
-public class WorldDimension implements Serializable{
-    
+public class WorldDimension implements Serializable {
+
     @NotNull
     @Column(name = "world")
     protected String world;
@@ -60,11 +60,11 @@ public class WorldDimension implements Serializable{
     @Column(name = "endZ")
     private int endZ;
 
-    
     /**
      * JPA Constructor.
      */
-    protected WorldDimension() {}
+    protected WorldDimension() {
+    }
 
     public WorldDimension(Location start, Location end) {
         Preconditions.checkArgument(start.getWorld().getName().equals(end.getWorld().getName()));
@@ -76,10 +76,11 @@ public class WorldDimension implements Serializable{
         this.endZ = Math.max(start.getPosition().getBlockZ(), end.getPosition().getBlockZ());
         this.world = start.getWorld().getName();
     }
-    
+
     public World getWorld() {
         return Bukkit.getWorld(world);
-    } 
+    }
+
     public int getStartX() {
         return startX;
     }
@@ -135,5 +136,5 @@ public class WorldDimension implements Serializable{
     public Location getEnd() {
         return new Location(SCWorldEditUtil.getLocalWorld(world), new Vector(endX, endY, endZ));
     }
-    
+
 }

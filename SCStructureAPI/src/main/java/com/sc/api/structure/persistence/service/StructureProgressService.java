@@ -16,7 +16,6 @@
  */
 package com.sc.api.structure.persistence.service;
 
-
 import com.sc.api.structure.model.schematic.SchematicMaterialResource;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -59,12 +58,14 @@ public class StructureProgressService extends AbstractService {
 //        }
         return removed;
     }
-    
+
     /**
-     * Sets the current progress to the next layer, but only if there are no more resources left to do
+     * Sets the current progress to the next layer, but only if there are no
+     * more resources left to do
+     *
      * @param progress The structure w
      * @param force If true it wont check if the resource requirements are met
-     * @return 
+     * @return
      */
 //    public boolean nextLayer(final StructureProgress progress, boolean force) {
 //        Session session = null;
@@ -96,5 +97,4 @@ public class StructureProgressService extends AbstractService {
 //            }
 //        }
 //    } 
-
 }

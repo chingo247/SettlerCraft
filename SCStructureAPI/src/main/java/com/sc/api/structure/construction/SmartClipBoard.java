@@ -16,7 +16,6 @@
  */
 package com.sc.api.structure.construction;
 
-
 import com.sc.api.structure.construction.progress.ConstructionStrategyType;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
@@ -30,10 +29,10 @@ import org.bukkit.Material;
  * The SmartClipboard was originally meant to place blocks in a provided order.
  * In the current state it's also able to skip blocks if the target block
  * already is of the same type as the cuboid wants to place. e.g. When a
- * structure was placed and construction was halted (e.g. on server shutdown) next
- * time it will try to rebuild the structure at the same position but will skip
- * all blocks that are already out there, therefore the blockplace will continue
- * to place blocks he left.
+ * structure was placed and construction was halted (e.g. on server shutdown)
+ * next time it will try to rebuild the structure at the same position but will
+ * skip all blocks that are already out there, therefore the blockplace will
+ * continue to place blocks he left.
  *
  * @author Chingo
  */
@@ -43,14 +42,15 @@ public class SmartClipBoard extends CuboidClipboard {
     private final CuboidClipboard parent;
     private final Vector sign;
 
-    
     /**
      * Constructor when using structures
+     *
      * @param clipboard The clipboard
      * @param sign The location of the sign within this clipboard
      * @param strategy The strategy
      * @param noAir Wheter or not to use air
-     * @deprecated Assumes the sign workaround is used, may lose support once there is a reliable API for storing NBT data in blocks
+     * @deprecated Assumes the sign workaround is used, may lose support once
+     * there is a reliable API for storing NBT data in blocks
      */
     public SmartClipBoard(CuboidClipboard clipboard, Vector sign, ConstructionStrategyType strategy, boolean noAir) {
         super(clipboard.getSize());
@@ -58,7 +58,7 @@ public class SmartClipBoard extends CuboidClipboard {
         this.vertices = strategy.getList(clipboard, noAir);
         this.sign = sign;
     }
-    
+
     /**
      * Constructor.
      *
@@ -68,8 +68,6 @@ public class SmartClipBoard extends CuboidClipboard {
     public SmartClipBoard(CuboidClipboard clipboard, ConstructionStrategyType strategy) {
         this(clipboard, strategy, true);
     }
-    
-    
 
     /**
      * Constructor.
@@ -86,7 +84,8 @@ public class SmartClipBoard extends CuboidClipboard {
     }
 
     /**
-     * Place blocks that 
+     * Place blocks that
+     *
      * @param editSession
      * @param pos
      * @param noAir
@@ -94,18 +93,18 @@ public class SmartClipBoard extends CuboidClipboard {
      */
     @Override
     public void place(EditSession editSession, Vector pos, boolean noAir) throws MaxChangedBlocksException {
-        
+
         long start = System.currentTimeMillis();
         for (Vector v : vertices) {
-            
-            if(sign != null && v.equals(sign)) {
+
+            if (sign != null && v.equals(sign)) {
                 continue;
             }
-            
+
             BaseBlock worldBlock = editSession.getBlock(v.add(pos));
             BaseBlock b = parent.getBlock(v);
-            
-            if( b != null && !b.isAir() && worldBlock.getId() == b.getId() && worldBlock.getData() == b.getData()){
+
+            if (b != null && !b.isAir() && worldBlock.getId() == b.getId() && worldBlock.getData() == b.getData()) {
                 System.out.println("SKIP: " + Material.getMaterial(b.getType()));
             }
 
@@ -115,14 +114,13 @@ public class SmartClipBoard extends CuboidClipboard {
 
             editSession.setBlock((v.add(pos)), b);
         }
-        if(sign != null) {
+        if (sign != null) {
             BaseBlock b = parent.getBlock(sign);
             editSession.setBlock(sign.add(pos), b);
         }
-        
-        
+
         long end = System.currentTimeMillis();
-        System.out.println(vertices.size() + " vertices in " + (end - start) + "ms"); 
+        System.out.println(vertices.size() + " vertices in " + (end - start) + "ms");
 
     }
 

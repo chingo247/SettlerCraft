@@ -7,12 +7,11 @@ import org.hibernate.cfg.AnnotationConfiguration;
 public class HibernateUtil {
 
     private static SessionFactory factory;
-    
-    private static final  AnnotationConfiguration config = new AnnotationConfiguration();
-    
+
+    private static final AnnotationConfiguration config = new AnnotationConfiguration();
+
 //    private static final String PATH = "plugins/SCStructureAPI/DataBase/hibernate.cfg.xml";
 //    private static final String PATH = "com/sc/api/structure/persistence/util/hibernate.cfg.xml";
-    
     static {
 //        File file = new File(PATH);
 //        File f = new File(".");
@@ -28,9 +27,9 @@ public class HibernateUtil {
         config.addAnnotatedClass(clazz);
         factory = config.buildSessionFactory();
     }
-    
+
     public static void addAnnotatedClasses(Class... clazzes) {
-        for(Class clazz : clazzes) {
+        for (Class clazz : clazzes) {
             config.addAnnotatedClass(clazz);
         }
 //        File file = new File(PATH);

@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.sc.api.structure.model.schematic;
 
 import java.io.Serializable;
@@ -26,13 +25,11 @@ import java.util.List;
  *
  * @author Chingo
  */
-
 public class SchematicMaterialLayer implements Serializable {
-    
-    protected final int layer;
-    
-    protected List<SchematicMaterialResource> resources = new ArrayList<>();
 
+    protected final int layer;
+
+    protected List<SchematicMaterialResource> resources = new ArrayList<>();
 
     /**
      * JPA Constructor
@@ -41,7 +38,6 @@ public class SchematicMaterialLayer implements Serializable {
         this.layer = -1;
     }
 
-    
     public SchematicMaterialLayer(int layer) {
         this.layer = layer;
     }
@@ -49,52 +45,51 @@ public class SchematicMaterialLayer implements Serializable {
     public int getLayer() {
         return layer;
     }
-    
+
     public ArrayList<SchematicMaterialResource> getResources() {
         return new ArrayList<>(resources);
     }
-    
+
     public int size() {
         return resources.size();
     }
-    
+
     public boolean isEmpty() {
         return resources.isEmpty();
     }
-    
-    
+
     public void addResource(SchematicMaterialResource resource) {
         Iterator<SchematicMaterialResource> it = resources.iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             SchematicMaterialResource mr = it.next();
-            if(mr.getMaterial() == resource.getMaterial() && mr.getData() == resource.getData()) {
+            if (mr.getMaterial() == resource.getMaterial() && mr.getData() == resource.getData()) {
                 mr.setAmount(mr.getAmount() + resource.getAmount());
                 return;
             }
         }
         resources.add(resource);
     }
-    
+
     public boolean hasResource(SchematicMaterialResource resource) {
-       Iterator<SchematicMaterialResource> it = resources.iterator();
-        while(it.hasNext()) {
+        Iterator<SchematicMaterialResource> it = resources.iterator();
+        while (it.hasNext()) {
             SchematicMaterialResource mr = it.next();
-            if(mr.getMaterial() == resource.getMaterial() && mr.getData() == resource.getData()) {
+            if (mr.getMaterial() == resource.getMaterial() && mr.getData() == resource.getData()) {
                 return true;
             }
-        } 
+        }
         return false;
     }
-    
+
     public SchematicMaterialResource getResource(SchematicMaterialResource resource) {
-       Iterator<SchematicMaterialResource> it = resources.iterator();
-        while(it.hasNext()) {
+        Iterator<SchematicMaterialResource> it = resources.iterator();
+        while (it.hasNext()) {
             SchematicMaterialResource mr = it.next();
-            if(mr.getMaterial() == resource.getMaterial() && mr.getData() == resource.getData()) {
+            if (mr.getMaterial() == resource.getMaterial() && mr.getData() == resource.getData()) {
                 return mr;
             }
-        } 
+        }
         return null;
     }
-    
+
 }

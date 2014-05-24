@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.sc.api.structure.construction.async;
 
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
@@ -24,7 +23,9 @@ import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
  * @author Chingo
  */
 public interface SCJobCallback {
+
     void onJobAdded(BlockPlacerJobEntry entry);
 //    void onJobComplete(BlockPlacerJobEntry entry);
+
     void onJobCanceled(BlockPlacerJobEntry entry);
 }

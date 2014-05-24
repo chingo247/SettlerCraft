@@ -29,10 +29,11 @@ import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
 /**
  * Silent non-standard-talkative version of the original see ClipboardAsyncTask
- * 
+ *
  * @author Chingo
  */
-public abstract class SCClipBoardAsyncTask extends BukkitRunnable{
+public abstract class SCClipBoardAsyncTask extends BukkitRunnable {
+
     /**
      * Command name
      */
@@ -74,7 +75,7 @@ public abstract class SCClipBoardAsyncTask extends BukkitRunnable{
 //                        + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
 //            }
             m_blockPlacer.addTasks(m_player, m_job);
-            if(callback != null) {
+            if (callback != null) {
                 callback.onJobAdded(m_job);
             }
             task(m_clipboard);
@@ -90,7 +91,7 @@ public abstract class SCClipBoardAsyncTask extends BukkitRunnable{
         } catch (IllegalArgumentException ex) {
             if (ex.getCause() instanceof CancelabeEditSession.SessionCanceled) {
 //                PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Job canceled.");
-                if(callback != null) {
+                if (callback != null) {
                     callback.onJobCanceled(m_job);
                 }
             }

@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.sc.api.structure.construction.progress;
 
 import com.sk89q.worldedit.CuboidClipboard;
@@ -28,14 +27,13 @@ import java.util.List;
  * @author Chingo
  */
 abstract class ConstructionStrategy {
-    
-    
+
     public List<Vector> getList(CuboidClipboard cliboard) {
         return getList(cliboard, true);
     }
-    
+
     public abstract List<Vector> getList(CuboidClipboard cliboard, boolean noAir);
-    
+
     protected boolean isLava(BaseBlock b) {
         Integer bi = b.getType();
         if (bi == BlockID.LAVA || bi == BlockID.STATIONARY_LAVA) {
@@ -51,5 +49,5 @@ abstract class ConstructionStrategy {
         }
         return false;
     }
-    
+
 }

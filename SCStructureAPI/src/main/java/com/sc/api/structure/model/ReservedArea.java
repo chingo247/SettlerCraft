@@ -50,7 +50,7 @@ public class ReservedArea implements Serializable {
     public ReservedArea(Structure structure) {
         EnumMap<ReservedSide, Integer> reserved = structure.getPlan().getReserved();
         switch (structure.getCardinal()) {
-            
+
             case NORTH:
                 this.r_zMinus = reserved.get(ReservedSide.NORTH);
                 this.r_xPlus = reserved.get(ReservedSide.EAST);
@@ -106,5 +106,4 @@ public class ReservedArea implements Serializable {
         return r_down;
     }
 
-    
 }

@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.sc.api.structure.construction.async;
 
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
@@ -27,6 +26,7 @@ import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
  * @author Chingo
  */
 public class SCBlockPlacerJobEntry extends BlockPlacerJobEntry {
+
     private String player;
 
     public SCBlockPlacerJobEntry(AsyncEditSession editSession, CancelabeEditSession cEditSession, int jobId, String name) {
@@ -61,7 +61,5 @@ public class SCBlockPlacerJobEntry extends BlockPlacerJobEntry {
                 break;
         }
     }
-    
-    
-   
+
 }

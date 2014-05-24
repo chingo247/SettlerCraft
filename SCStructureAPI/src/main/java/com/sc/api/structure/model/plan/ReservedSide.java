@@ -21,6 +21,7 @@ package com.sc.api.structure.model.plan;
  * @author Chingo
  */
 public enum ReservedSide {
+
     NORTH,
     EAST,
     SOUTH,

@@ -17,8 +17,8 @@
 package com.sc.api.structure.listeners;
 
 import com.sc.api.structure.SCStructureAPI;
-import com.sc.api.structure.construction.ConstructionManager;
 import com.sc.api.structure.construction.AsyncBuilder;
+import com.sc.api.structure.construction.ConstructionManager;
 import com.sc.api.structure.construction.progress.ConstructionException;
 import com.sc.api.structure.model.Structure;
 import com.sc.api.structure.model.plan.StructurePlan;
@@ -55,21 +55,20 @@ import org.bukkit.inventory.ItemStack;
  */
 public class StructurePlanListener implements Listener {
 
-    
     @EventHandler
     public void onPlayerInteractDebug(PlayerInteractEvent pie) {
-        if(pie.getAction() == Action.RIGHT_CLICK_AIR || pie.getAction() == Action.RIGHT_CLICK_BLOCK) {
+        if (pie.getAction() == Action.RIGHT_CLICK_AIR || pie.getAction() == Action.RIGHT_CLICK_BLOCK) {
 //            org.bukkit.Location l = pie.getClickedBlock().getLocation();
 //            DefaultNmsBlock dmBlock = DefaultNmsBlock.get(l.getWorld(), SCWorldEditUtil.getLocation(l).getPosition(), l.getBlock().getTypeId(), new Byte(l.getBlock().getData()).intValue());
 //            if(dmBlock != null && dmBlock.hasNbtData()) {
 //                System.out.println(dmBlock.getNbtData());
 //            }
-            
+
         }
 //        System.out.println(tags.get("sid").getValue());
 //        System.out.println(tags.get("progress").getValue());
     }
-    
+
     /**
      * Places a structure on player's target location
      *
@@ -102,8 +101,7 @@ public class StructurePlanListener implements Listener {
                         pie.getPlayer().updateInventory();
 
                     }
-                }
-                catch (IncompleteRegionException ex) {
+                } catch (IncompleteRegionException ex) {
                     Logger.getLogger(StructurePlanListener.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } else {
@@ -173,8 +171,7 @@ public class StructurePlanListener implements Listener {
                     structure = service.save(structure);
                     System.out.println("Clicked: " + location);
                     AsyncBuilder.placeStructure(player, structure);
-                }
-                catch (ConstructionException ex) {
+                } catch (ConstructionException ex) {
                     service.delete(structure);
                     SCWorldGuardUtil.getGlobalRegionManager(target.getWorld()).removeRegion(region.getId());
                     Logger.getLogger(StructurePlanListener.class.getName()).log(Level.SEVERE, null, ex);
@@ -224,8 +221,7 @@ public class StructurePlanListener implements Listener {
                             structure = service.save(structure);
 //                            System.out.println("Clicked: " + location);
                             AsyncBuilder.placeStructure(player, structure);
-                        }
-                        catch (ConstructionException ex) {
+                        } catch (ConstructionException ex) {
                             service.delete(structure);
                             SCWorldGuardUtil.getGlobalRegionManager(target.getWorld()).removeRegion(region.getId());
                             Logger.getLogger(StructurePlanListener.class.getName()).log(Level.SEVERE, null, ex);

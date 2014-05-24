@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.sc.api.structure.model.schematic;
 
 import java.io.Serializable;
@@ -24,11 +23,14 @@ import javax.validation.constraints.NotNull;
 import org.bukkit.Material;
 
 /**
- * The material and the Integer data value will serve as unique idenitifier for {@link  SchematicMaterialResource}
+ * The material and the Integer data value will serve as unique idenitifier for
+ * {@link  SchematicMaterialResource}
+ *
  * @author Chingo
  */
 @Embeddable
 public class SchematicMaterialResourceId implements Serializable {
+
     @NotNull
     private Material material;
     @NotNull
@@ -42,6 +44,7 @@ public class SchematicMaterialResourceId implements Serializable {
 
     /**
      * Constructor.
+     *
      * @param material The material
      * @param data The data or Byte value
      */
@@ -52,7 +55,8 @@ public class SchematicMaterialResourceId implements Serializable {
 
     /**
      * Get the data
-     * @return The data value 
+     *
+     * @return The data value
      */
     public Integer getData() {
         return data;
@@ -60,12 +64,13 @@ public class SchematicMaterialResourceId implements Serializable {
 
     /**
      * Get the material
+     *
      * @return The material
      */
     public Material getMaterial() {
         return material;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -87,7 +92,5 @@ public class SchematicMaterialResourceId implements Serializable {
         hash = 11 * hash + Objects.hashCode(this.material);
         return hash;
     }
-    
-    
-    
+
 }

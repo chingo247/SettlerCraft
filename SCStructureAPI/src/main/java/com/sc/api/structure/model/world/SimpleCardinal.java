@@ -21,6 +21,7 @@ package com.sc.api.structure.model.world;
  * @author Chingo
  */
 public enum SimpleCardinal {
+
     NORTH,
     EAST,
     SOUTH,

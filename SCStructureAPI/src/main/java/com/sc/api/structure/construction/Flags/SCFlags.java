@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.sc.api.structure.construction.Flags;
 
 import com.sk89q.worldguard.protection.flags.Flag;
@@ -26,8 +25,8 @@ import com.sk89q.worldguard.protection.flags.StringFlag;
  * @author Chingo
  */
 public class SCFlags {
-    
+
     public static final Flag STRUCTURE = new StringFlag("sc-structure", RegionGroup.MEMBERS);
 //    public static final Flag CONSTRUCTION_ZONE = new StringFlag(null, RegionGroup.MEMBERS);
-    
+
 }

@@ -31,11 +31,11 @@ public class MaterialUtil {
     public static boolean isAttachable(Material material, byte data) {
         return (material.getData().cast(material.getNewData(data)) instanceof Attachable);
     }
-    
+
     public static boolean isDirectional(Material material, byte data) {
         return (material.getData().cast(material.getNewData(data)) instanceof Directional);
     }
-    
+
     public static boolean isSimpleAttachable(Material material, byte data) {
         return (material.getData().cast(material.getNewData(data)) instanceof SimpleAttachableMaterialData);
     }

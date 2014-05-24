@@ -37,8 +37,6 @@ import java.util.logging.Logger;
  */
 public class SyncBuilder {
 
-
-
     /**
      * Clears an area within the cliboards target area
      *
@@ -118,8 +116,7 @@ public class SyncBuilder {
         Location t = align(cuboidClipboard, target, cardinal);
         try {
             SyncBuilder.place(SCWorldEditUtil.getEditSession(t.getWorld(), -1), cuboidClipboard, t, cardinal);
-        }
-        catch (MaxChangedBlocksException ex) {
+        } catch (MaxChangedBlocksException ex) {
             Logger.getLogger(SyncBuilder.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -136,8 +133,7 @@ public class SyncBuilder {
     public static void placeLayer(CuboidClipboard whole, int layer, Location location, SimpleCardinal cardinal) {
         try {
             placeLayer(SCWorldEditUtil.getEditSession(location.getWorld(), -1), whole, layer, location, cardinal);
-        }
-        catch (MaxChangedBlocksException ex) {
+        } catch (MaxChangedBlocksException ex) {
             Logger.getLogger(SyncBuilder.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -159,8 +155,6 @@ public class SyncBuilder {
         SyncBuilder.place(editSession, layerClip, t, cardinal);
     }
 
-   
-
     /**
      * Aligns the clipboard to given cardinal and places a cuboidClipBoard in
      * layers. A runnable is used to fire the placement of each layer at a
@@ -181,8 +175,7 @@ public class SyncBuilder {
         try {
             all.get(index).paste(editSession, location.getPosition().add(new BlockVector(0, 1, 0)), true);
 
-        }
-        catch (MaxChangedBlocksException ex) {
+        } catch (MaxChangedBlocksException ex) {
             Logger.getLogger(SyncBuilder.class.getName()).log(Level.SEVERE, null, ex);
         }
         final int next = index + 1;
