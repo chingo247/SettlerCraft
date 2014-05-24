@@ -18,7 +18,7 @@ package com.sc.api.structure.model.world;
 
 import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
-import com.sc.api.structure.util.plugins.WorldEditUtil;
+import com.sc.api.structure.util.plugins.SCWorldEditUtil;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.Vector;
 import java.io.Serializable;
@@ -92,7 +92,7 @@ public class WorldLocation implements Serializable {
     }
 
     public Location getLocation() {
-        return new Location(WorldEditUtil.getLocalWorld(world), new Vector(x, y, z));
+        return new Location(SCWorldEditUtil.getLocalWorld(world), new Vector(x, y, z));
     }
 
 }

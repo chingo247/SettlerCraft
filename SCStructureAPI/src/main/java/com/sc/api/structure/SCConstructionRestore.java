@@ -29,8 +29,8 @@ import com.sc.api.structure.model.Structure;
 import com.sc.api.structure.persistence.service.AbstractService;
 import com.sc.api.structure.persistence.HibernateUtil;
 import com.sc.api.structure.util.WorldUtil;
-import com.sc.api.structure.util.plugins.AsyncWorldEditUtil;
-import com.sc.api.structure.util.plugins.WorldGuardUtil;
+import com.sc.api.structure.util.plugins.SCAsyncWorldEditUtil;
+import com.sc.api.structure.util.plugins.SCWorldGuardUtil;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -133,7 +133,7 @@ class SCConstructionRestoreService extends AbstractService {
                     removed.add(t);
                     System.out.println("task #" + t.getId() + " has been assigned for removal");
                     if (t.getStructure() != null) {
-                        WorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(t.getStructure().getLocation().getWorld().getName())).removeRegion(t.getStructure().getStructureRegion());
+                        SCWorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(t.getStructure().getLocation().getWorld().getName())).removeRegion(t.getStructure().getStructureRegion());
                         System.out.println("removed  associated structure region: " + t.getStructure().getStructureRegion());
                     }
 
@@ -197,7 +197,7 @@ class SCConstructionRestoreService extends AbstractService {
 
     private static void place(String placer, ConstructionTask task) {
         final Structure structure = task.getStructure();
-        final AsyncEditSession asyncSession = AsyncWorldEditUtil.createAsyncEditSession(placer, structure.getLocation().getWorld(), -1); // -1 = infinite
+        final AsyncEditSession asyncSession = SCAsyncWorldEditUtil.createAsyncEditSession(placer, structure.getLocation().getWorld(), -1); // -1 = infinite
 
         System.out.println("Added " + structure.getStructureRegion() + " to Queue");
         //TODO Place enclosure

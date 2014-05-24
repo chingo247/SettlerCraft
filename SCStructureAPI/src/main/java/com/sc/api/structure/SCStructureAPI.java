@@ -24,7 +24,7 @@ import com.sc.api.structure.persistence.service.StructurePlanService;
 import com.sc.api.structure.persistence.HibernateUtil;
 import com.sc.api.structure.persistence.MemDBUtil;
 import com.sc.api.structure.util.CuboidUtil;
-import com.sc.api.structure.util.plugins.AsyncWorldEditUtil;
+import com.sc.api.structure.util.plugins.SCAsyncWorldEditUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.bukkit.WorldEditAPI;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
@@ -69,7 +69,7 @@ public class SCStructureAPI extends JavaPlugin {
      * @return AsyncWorldEdit's config().getInt("rendering.blocks")
      */
     public static int getSaveThreshold() {
-        return AsyncWorldEditUtil.getAsyncWorldEditPlugin().getConfig().getInt("rendering.blocks");
+        return SCAsyncWorldEditUtil.getAsyncWorldEditPlugin().getConfig().getInt("rendering.blocks");
     }
 
     public boolean isRestrictZonesEnabled() {

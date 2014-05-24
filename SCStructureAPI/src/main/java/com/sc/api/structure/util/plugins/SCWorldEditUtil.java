@@ -41,7 +41,7 @@ import org.bukkit.entity.Player;
  *
  * @author Chingo
  */
-public class WorldEditUtil {
+public class SCWorldEditUtil {
     
     public static Location getLocation(org.bukkit.Location location) {
         return new Location(getLocalWorld(location.getWorld().getName()),new BlockVector(location.getBlockX(), location.getBlockY(), location.getBlockZ()));

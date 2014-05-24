@@ -26,9 +26,9 @@ import com.sc.api.structure.model.world.SimpleCardinal;
 import com.sc.api.structure.persistence.service.StructurePlanService;
 import com.sc.api.structure.persistence.service.StructureService;
 import com.sc.api.structure.util.WorldUtil;
-import com.sc.api.structure.util.plugins.WorldEditUtil;
-import static com.sc.api.structure.util.plugins.WorldEditUtil.getLocalSession;
-import com.sc.api.structure.util.plugins.WorldGuardUtil;
+import com.sc.api.structure.util.plugins.SCWorldEditUtil;
+import static com.sc.api.structure.util.plugins.SCWorldEditUtil.getLocalSession;
+import com.sc.api.structure.util.plugins.SCWorldGuardUtil;
 import com.sk89q.worldedit.BlockWorldVector;
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalSession;
@@ -60,7 +60,7 @@ public class StructurePlanListener implements Listener {
     public void onPlayerInteractDebug(PlayerInteractEvent pie) {
         if(pie.getAction() == Action.RIGHT_CLICK_AIR || pie.getAction() == Action.RIGHT_CLICK_BLOCK) {
 //            org.bukkit.Location l = pie.getClickedBlock().getLocation();
-//            DefaultNmsBlock dmBlock = DefaultNmsBlock.get(l.getWorld(), WorldEditUtil.getLocation(l).getPosition(), l.getBlock().getTypeId(), new Byte(l.getBlock().getData()).intValue());
+//            DefaultNmsBlock dmBlock = DefaultNmsBlock.get(l.getWorld(), SCWorldEditUtil.getLocation(l).getPosition(), l.getBlock().getTypeId(), new Byte(l.getBlock().getData()).intValue());
 //            if(dmBlock != null && dmBlock.hasNbtData()) {
 //                System.out.println(dmBlock.getNbtData());
 //            }
@@ -127,10 +127,10 @@ public class StructurePlanListener implements Listener {
         }
 
         if (!ConstructionManager.canClaim(player)) {
-            WorldConfiguration wcfg = WorldGuardUtil.getWorldGuard().getGlobalStateManager().get(player.getWorld());
-            RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(player.getWorld());
+            WorldConfiguration wcfg = SCWorldGuardUtil.getWorldGuard().getGlobalStateManager().get(player.getWorld());
+            RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(player.getWorld());
             int plyMaxRegionCount = wcfg.getMaxRegionCount(player);
-            int plyCurRegionCount = mgr.getRegionCountOfPlayer(WorldGuardUtil.getLocalPlayer(player));
+            int plyCurRegionCount = mgr.getRegionCountOfPlayer(SCWorldGuardUtil.getLocalPlayer(player));
             player.sendMessage(ChatColor.RED + " You have reached your region claim limit (" + plyCurRegionCount + "/" + plyMaxRegionCount + ")");
             player.sendMessage(ChatColor.RED + " Therefore your are not able to place structures");
             return false;
@@ -150,7 +150,7 @@ public class StructurePlanListener implements Listener {
 
     private boolean handleSimplePlayerSelect(Player player, org.bukkit.Location target, StructurePlan plan, Action action, boolean defaultFeedBack) {
         if (action == Action.LEFT_CLICK_BLOCK) {
-            LocalWorld world = WorldEditUtil.getLocalWorld(player);
+            LocalWorld world = SCWorldEditUtil.getLocalWorld(player);
             int x = target.getBlockX();
             int y = target.getBlockY();
             int z = target.getBlockZ();
@@ -176,7 +176,7 @@ public class StructurePlanListener implements Listener {
                 }
                 catch (ConstructionException ex) {
                     service.delete(structure);
-                    WorldGuardUtil.getGlobalRegionManager(target.getWorld()).removeRegion(region.getId());
+                    SCWorldGuardUtil.getGlobalRegionManager(target.getWorld()).removeRegion(region.getId());
                     Logger.getLogger(StructurePlanListener.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
@@ -185,12 +185,12 @@ public class StructurePlanListener implements Listener {
     }
 
     private boolean handleCUIPlayerSelect(Player player, org.bukkit.Location target, StructurePlan plan, Action action, boolean defaultFeedBack) throws IncompleteRegionException {
-        LocalWorld world = WorldEditUtil.getLocalWorld(player);
+        LocalWorld world = SCWorldEditUtil.getLocalWorld(player);
         int x = target.getBlockX();
         int y = target.getBlockY();
         int z = target.getBlockZ();
         Location location = new Location(world, new BlockWorldVector(world, x, y, z));
-        LocalSession session = WorldEditUtil.getLocalSession(player);
+        LocalSession session = SCWorldEditUtil.getLocalSession(player);
         SimpleCardinal direction = WorldUtil.getCardinal(player);
 
         Structure structure = new Structure(player.getName(), location, WorldUtil.getCardinal(player), plan);
@@ -208,7 +208,7 @@ public class StructurePlanListener implements Listener {
                 if (oldRegion.getPos1().equals(newRegion.getPos1()) && oldRegion.getPos2().equals(newRegion.getPos2())) {
                     if (canPlace(player, location, direction, plan)) {
                         session.getRegionSelector(world).clear();
-                        session.dispatchCUISelection(WorldEditUtil.getLocalPlayer(player));
+                        session.dispatchCUISelection(SCWorldEditUtil.getLocalPlayer(player));
                         StructureService service = new StructureService();
                         structure = service.save(structure);
 //                        System.out.println("Claiming ground");
@@ -227,7 +227,7 @@ public class StructurePlanListener implements Listener {
                         }
                         catch (ConstructionException ex) {
                             service.delete(structure);
-                            WorldGuardUtil.getGlobalRegionManager(target.getWorld()).removeRegion(region.getId());
+                            SCWorldGuardUtil.getGlobalRegionManager(target.getWorld()).removeRegion(region.getId());
                             Logger.getLogger(StructurePlanListener.class.getName()).log(Level.SEVERE, null, ex);
                         }
                         return true;
@@ -247,7 +247,7 @@ public class StructurePlanListener implements Listener {
         } else {
             if (session.getRegionSelector(world).isDefined()) {
                 session.getRegionSelector(world).clear();
-                session.dispatchCUISelection(WorldEditUtil.getLocalPlayer(player));
+                session.dispatchCUISelection(SCWorldEditUtil.getLocalPlayer(player));
                 player.sendMessage("Cleared selection");
             }
         }

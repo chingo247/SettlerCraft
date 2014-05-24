@@ -31,7 +31,7 @@ import org.bukkit.entity.Player;
  *
  * @author Chingo
  */
-public class WorldGuardUtil {
+public class SCWorldGuardUtil {
     
     public static WorldGuardPlugin getWorldGuard() {
         return WorldGuardPlugin.inst();

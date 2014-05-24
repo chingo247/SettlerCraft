@@ -17,7 +17,7 @@
 
 package com.sc.api.structure.util.plugins;
 
-import static com.sc.api.structure.util.plugins.WorldEditUtil.getLocalWorld;
+import static com.sc.api.structure.util.plugins.SCWorldEditUtil.getLocalWorld;
 import com.sk89q.worldedit.LocalWorld;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.PluginMain;
@@ -29,7 +29,7 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSessionFactory;
  *
  * @author Chingo
  */
-public class AsyncWorldEditUtil {
+public class SCAsyncWorldEditUtil {
     
     public static PluginMain getAsyncWorldEditPlugin() {
         return PluginMain.getInstance();

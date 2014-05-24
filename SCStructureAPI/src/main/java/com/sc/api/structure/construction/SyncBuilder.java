@@ -19,7 +19,7 @@ package com.sc.api.structure.construction;
 import com.sc.api.structure.model.world.SimpleCardinal;
 import com.sc.api.structure.util.CuboidUtil;
 import com.sc.api.structure.util.WorldUtil;
-import com.sc.api.structure.util.plugins.WorldEditUtil;
+import com.sc.api.structure.util.plugins.SCWorldEditUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
@@ -117,7 +117,7 @@ public class SyncBuilder {
     public static void place(CuboidClipboard cuboidClipboard, Location target, SimpleCardinal cardinal) {
         Location t = align(cuboidClipboard, target, cardinal);
         try {
-            SyncBuilder.place(WorldEditUtil.getEditSession(t.getWorld(), -1), cuboidClipboard, t, cardinal);
+            SyncBuilder.place(SCWorldEditUtil.getEditSession(t.getWorld(), -1), cuboidClipboard, t, cardinal);
         }
         catch (MaxChangedBlocksException ex) {
             Logger.getLogger(SyncBuilder.class.getName()).log(Level.SEVERE, null, ex);
@@ -135,7 +135,7 @@ public class SyncBuilder {
      */
     public static void placeLayer(CuboidClipboard whole, int layer, Location location, SimpleCardinal cardinal) {
         try {
-            placeLayer(WorldEditUtil.getEditSession(location.getWorld(), -1), whole, layer, location, cardinal);
+            placeLayer(SCWorldEditUtil.getEditSession(location.getWorld(), -1), whole, layer, location, cardinal);
         }
         catch (MaxChangedBlocksException ex) {
             Logger.getLogger(SyncBuilder.class.getName()).log(Level.SEVERE, null, ex);

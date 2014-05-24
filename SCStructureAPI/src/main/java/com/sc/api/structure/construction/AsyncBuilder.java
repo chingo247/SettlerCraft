@@ -30,8 +30,8 @@ import com.sc.api.structure.model.plan.StructurePlan;
 import com.sc.api.structure.model.world.SimpleCardinal;
 import com.sc.api.structure.persistence.service.ConstructionService;
 import com.sc.api.structure.util.WorldUtil;
-import com.sc.api.structure.util.plugins.AsyncWorldEditUtil;
-import com.sc.api.structure.util.plugins.WorldGuardUtil;
+import com.sc.api.structure.util.plugins.SCAsyncWorldEditUtil;
+import com.sc.api.structure.util.plugins.SCWorldGuardUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.MaxChangedBlocksException;
@@ -65,7 +65,7 @@ public class AsyncBuilder {
 
     public static void place(Player player, CuboidClipboard cuboidClipboard, Location target, SimpleCardinal cardinal, String jobName) {
         try {
-            place(AsyncWorldEditUtil.createAsyncEditSession(player, -1), cuboidClipboard, target, cardinal, jobName);
+            place(SCAsyncWorldEditUtil.createAsyncEditSession(player, -1), cuboidClipboard, target, cardinal, jobName);
         }
         catch (MaxChangedBlocksException ex) {
             Logger.getLogger(AsyncBuilder.class.getName()).log(Level.SEVERE, null, ex);
@@ -73,7 +73,7 @@ public class AsyncBuilder {
     }
 
     public static void placeLayer(Player player, CuboidClipboard clipboard, int layer, Location location, SimpleCardinal direction) throws MaxChangedBlocksException {
-        SyncBuilder.place(AsyncWorldEditUtil.createAsyncEditSession(player, -1), clipboard, location, direction);
+        SyncBuilder.place(SCAsyncWorldEditUtil.createAsyncEditSession(player, -1), clipboard, location, direction);
     }
 
     public static void placeLayer(AsyncEditSession asyncEditSession, CuboidClipboard clipboard, int layer, Location location, SimpleCardinal direction) throws MaxChangedBlocksException {
@@ -92,14 +92,14 @@ public class AsyncBuilder {
         if (service.hasConstructionTask(structure)) {
             throw new ConstructionTaskException("Already have a task reserved for structure" + structure.getId());
         }
-        final RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
+        final RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
 
         if (structure.getStructureRegion() == null || !mgr.hasRegion(structure.getStructureRegion())) {
             throw new ConstructionException("Tried to place a structure without a region");
         }
 
         final ConstructionEntry entry = service.hasEntry(placer) ? service.getEntry(placer) : service.createEntry(placer);
-        final AsyncEditSession asyncSession = AsyncWorldEditUtil.createAsyncEditSession(placer, structure.getLocation().getWorld(), -1); // -1 = infinite
+        final AsyncEditSession asyncSession = SCAsyncWorldEditUtil.createAsyncEditSession(placer, structure.getLocation().getWorld(), -1); // -1 = infinite
 
         ConstructionTask task = new ConstructionTask(entry, structure, ConstructionTask.ConstructionType.BUILDING_AUTO, ConstructionStrategyType.LAYERED);
 

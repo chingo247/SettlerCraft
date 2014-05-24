@@ -22,8 +22,8 @@ import com.sc.api.structure.model.plan.StructurePlan;
 import com.sc.api.structure.model.world.SimpleCardinal;
 import com.sc.api.structure.model.world.WorldDimension;
 import com.sc.api.structure.util.WorldUtil;
-import com.sc.api.structure.util.plugins.WorldEditUtil;
-import com.sc.api.structure.util.plugins.WorldGuardUtil;
+import com.sc.api.structure.util.plugins.SCWorldEditUtil;
+import com.sc.api.structure.util.plugins.SCWorldGuardUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;
@@ -70,7 +70,7 @@ public class ConstructionManager {
      * @param pos2 The secondary position
      */
     public static void select(Player player, Location pos1, Location pos2) {
-        WorldEditUtil.selectClipboardArea(player, pos1, pos2);
+        SCWorldEditUtil.selectClipboardArea(player, pos1, pos2);
     }
 
     public static void selectStructure(Player player, Structure structure) {
@@ -99,7 +99,7 @@ public class ConstructionManager {
             return null;
         }
 
-        RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
+        RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
         WorldDimension dim = structure.getDimension();
         Vector p1 = dim.getStart().getPosition();
         Vector p2 = dim.getEnd().getPosition();
@@ -122,9 +122,9 @@ public class ConstructionManager {
     
     public boolean createConstructionSite(String id, Player placer, World world, BlockVector pos1, BlockVector pos2, boolean feedback, boolean addSelf) {
         ProtectedCuboidRegion region = new ProtectedCuboidRegion(id, pos1, pos2);
-        RegionPermissionModel permModel = WorldGuardUtil.getRegionPermissionModel(placer);
+        RegionPermissionModel permModel = SCWorldGuardUtil.getRegionPermissionModel(placer);
         // Can't replace existing regions
-        RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(world);
+        RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(world);
         if (mgr.hasRegion(id)) {
             if (feedback) {
                 placer.sendMessage(ChatColor.RED + "That region already exists. Please choose a different name.");
@@ -146,15 +146,15 @@ public class ConstructionManager {
     }
 
     public static boolean overlapsUnowned(Player player, Structure structure) {
-        return overlapsUnowned(WorldGuardUtil.getLocalPlayer(player), structure);
+        return overlapsUnowned(SCWorldGuardUtil.getLocalPlayer(player), structure);
     }
 
     public static boolean overlapsUnowned(Player player, StructurePlan plan, Location location, SimpleCardinal cardinal) {
-        return overlapsUnowned(WorldGuardUtil.getLocalPlayer(player), plan, location, cardinal);
+        return overlapsUnowned(SCWorldGuardUtil.getLocalPlayer(player), plan, location, cardinal);
     }
 
     public static boolean overlapsUnowned(LocalPlayer player, Structure structure) {
-        RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
+        RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
         WorldDimension dim = structure.getDimension();
         Vector p1 = dim.getStart().getPosition();
         Vector p2 = dim.getEnd().getPosition();
@@ -176,7 +176,7 @@ public class ConstructionManager {
     }
 
     public static boolean overlapsStructure(Structure structure) {
-        RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
+        RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
         WorldDimension dim = structure.getDimension();
         Vector p1 = dim.getStart().getPosition();
         Vector p2 = dim.getEnd().getPosition();
@@ -198,7 +198,7 @@ public class ConstructionManager {
     }
 
     public static boolean mayClaim(Player player) {
-        RegionPermissionModel permissionModel = WorldGuardUtil.getRegionPermissionModel(player);
+        RegionPermissionModel permissionModel = SCWorldGuardUtil.getRegionPermissionModel(player);
         // Has permission to claim
         if (!permissionModel.mayClaim()) {
             return false;
@@ -207,15 +207,15 @@ public class ConstructionManager {
     }
 
     public static boolean canClaim(Player player) {
-        WorldConfiguration wcfg = WorldGuardUtil.getWorldGuard().getGlobalStateManager().get(player.getWorld());
-        RegionPermissionModel permissionModel = WorldGuardUtil.getRegionPermissionModel(player);
-        RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(player.getWorld());
+        WorldConfiguration wcfg = SCWorldGuardUtil.getWorldGuard().getGlobalStateManager().get(player.getWorld());
+        RegionPermissionModel permissionModel = SCWorldGuardUtil.getRegionPermissionModel(player);
+        RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(player.getWorld());
 
         // Check whether the player has created too many regions
         if (!permissionModel.mayClaimRegionsUnbounded()) {
             int maxRegionCount = wcfg.getMaxRegionCount(player);
             if (maxRegionCount >= 0
-                    && mgr.getRegionCountOfPlayer(WorldGuardUtil.getLocalPlayer(player)) >= maxRegionCount) {
+                    && mgr.getRegionCountOfPlayer(SCWorldGuardUtil.getLocalPlayer(player)) >= maxRegionCount) {
 
                 return false;
             }
@@ -224,7 +224,7 @@ public class ConstructionManager {
     }
 
     public static boolean exists(World world, String id) {
-        return WorldGuardUtil.getGlobalRegionManager(world).hasRegion(id);
+        return SCWorldGuardUtil.getGlobalRegionManager(world).hasRegion(id);
     }
 
     public static boolean isWithinConstructionZone(Structure structure) {
