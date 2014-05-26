@@ -128,6 +128,8 @@ public class AsyncBuilder {
         }
 
     }
+    
+
 
     public static void placeStructure(Player player, final Structure structure) throws ConstructionException {
         placeStructure(player.getName(), structure);

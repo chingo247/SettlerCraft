@@ -90,6 +90,8 @@ public class SyncBuilder {
                 throw new AssertionError("unreachable");
         }
     }
+    
+
 
     /**
      * Aligns clipboard to direction and pastes it on target location

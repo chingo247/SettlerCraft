@@ -53,6 +53,21 @@ public class WorldUtil {
             return SimpleCardinal.SOUTH;
         }
     }
+    
+    public static Location setOffset(Location location, SimpleCardinal direction, int xOffset, int yOffset, int zOffset) {
+        switch (direction) {
+            case EAST:
+                return location.add(zOffset, yOffset, xOffset);
+            case SOUTH:
+                return location.add(-xOffset, yOffset, zOffset);
+            case WEST:
+               return location.add(-zOffset, yOffset, -xOffset);
+            case NORTH:
+                return location.add(xOffset, yOffset, -zOffset);
+            default:
+                throw new AssertionError("unreachable");
+        }
+    }
 
     private static com.sk89q.worldedit.Location calculatePoint2(com.sk89q.worldedit.Location point1, SimpleCardinal direction, CuboidClipboard clipboard) {
         switch (direction) {

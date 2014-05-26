@@ -16,9 +16,9 @@
  */
 package com.sc.api.structure.listeners;
 
-import com.sc.api.structure.SCStructureAPI;
 import com.sc.api.structure.AsyncBuilder;
 import com.sc.api.structure.ConstructionManager;
+import com.sc.api.structure.SCStructureAPI;
 import com.sc.api.structure.construction.progress.ConstructionException;
 import com.sc.api.structure.entity.Structure;
 import com.sc.api.structure.entity.plan.StructurePlan;
@@ -188,22 +188,23 @@ public class StructurePlanListener implements Listener {
         int z = target.getBlockZ();
         Location location = new Location(world, new BlockWorldVector(world, x, y, z));
         LocalSession session = SCWorldEditUtil.getLocalSession(player);
-        SimpleCardinal direction = WorldUtil.getCardinal(player);
+        SimpleCardinal cardinal = WorldUtil.getCardinal(player);
 
-        Structure structure = new Structure(player.getName(), location, WorldUtil.getCardinal(player), plan);
+        Location l = WorldUtil.setOffset(location, cardinal, 0, 0, 1);
+        Structure structure = new Structure(player.getName(), l, WorldUtil.getCardinal(player), plan);
 //         SCConstrucStructureBuilderce().placeSafe(player, structure, true, true);
         if (action == Action.LEFT_CLICK_BLOCK) {
             if (!session.getRegionSelector(world).isDefined()) {
-                ConstructionManager.select(player, location, direction, structure.getPlan().getSchematic());
+                ConstructionManager.select(player, location, cardinal, structure.getPlan().getSchematic());
                 player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
                 player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
             } else {
 
                 CuboidRegion oldRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
-                ConstructionManager.select(player, location, direction, structure.getPlan().getSchematic());
+                ConstructionManager.select(player, location, cardinal, structure.getPlan().getSchematic());
                 CuboidRegion newRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
                 if (oldRegion.getPos1().equals(newRegion.getPos1()) && oldRegion.getPos2().equals(newRegion.getPos2())) {
-                    if (canPlace(player, location, direction, plan)) {
+                    if (canPlace(player, location, cardinal, plan)) {
                         session.getRegionSelector(world).clear();
                         session.dispatchCUISelection(SCWorldEditUtil.getLocalPlayer(player));
                         StructureService service = new StructureService();
@@ -229,7 +230,7 @@ public class StructurePlanListener implements Listener {
                         return true;
                     }
                 } else {
-                    ConstructionManager.select(player, location, direction, structure.getPlan().getSchematic());
+                    ConstructionManager.select(player, l, cardinal, structure.getPlan().getSchematic());
                     if (ConstructionManager.overlapsStructure(structure)) {
                         player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
                     } else if (ConstructionManager.overlapsUnowned(player, structure)) {
