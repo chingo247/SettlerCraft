@@ -16,7 +16,7 @@
  */
 package com.sc.api.structure.construction.progress;
 
-import com.sc.api.structure.model.Structure;
+import com.sc.api.structure.entity.Structure;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Countable;
 import com.sk89q.worldedit.Location;
@@ -27,13 +27,14 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Objects;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Version;
-import javax.validation.constraints.NotNull;
 
 /**
  *
@@ -43,32 +44,34 @@ import javax.validation.constraints.NotNull;
 public class ConstructionTask implements Serializable {
 
     @Id
-    @GeneratedValue
+    @Column(name = "TASK_ID")
     private Long id;
 
     private int jobSize;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @Embedded
+    private StructureData sd;
+
+    @OneToOne
+    @PrimaryKeyJoinColumn(name = "TASK_ID", referencedColumnName = "STRUCTURE_ID")
     private Structure structure;
 
-    @NotNull
-    private Timestamp createdAt;
-
     private Timestamp completeAt;
+    
+    private Timestamp removeDate;
 
     @Version
     private Timestamp lastModified;
 
     public enum ConstructionType {
-
         BUILDING_AUTO,
         DEMOLISHING_AUTO,
         MANUAL
     }
 
-    private ConstructionState state;
+    private ConstructionState constructionState;
 
-    private ConstructionType constructionType;
+    private final ConstructionType constructionType;
 
     private final ConstructionStrategyType strategyType;
 
@@ -90,32 +93,31 @@ public class ConstructionTask implements Serializable {
             count += b.getAmount();
         }
         this.jobSize = count;
-        this.state = ConstructionState.PREPARING;
+        this.constructionState = ConstructionState.PREPARING;
         this.structure = structure;
-        this.createdAt = new Timestamp(new Date().getTime());
-
+        this.id = structure.getId();
+        this.sd = new StructureData(structure.getPlan().getPrice(), structure.getDimension(), structure.getStructureRegion());
     }
 
     public ConstructionEntry getConstructionEntry() {
         return constructionEntry;
     }
 
-    public void setState(ConstructionState state) {
-        this.state = state;
+    public void setState(ConstructionState newState) {
+        if (newState == ConstructionState.COMPLETE) {
+            this.completeAt = new Timestamp(new Date().getTime());
+        } else if (newState == ConstructionState.IN_RECYCLE_BIN) {
+            this.removeDate = new Timestamp(new Date().getTime());
+        }
+        this.constructionState = newState;
     }
 
-//    public void setState(ConstructionState state) {
-//        if(state == ConstructionState.FINISHED) {
-//            this.completeAt = new Timestamp(new Date().getTime());
-//        }
-//        this.state = state;
-//    }
     public Timestamp getCompleteAt() {
         return completeAt;
     }
 
-    public Timestamp getCreatedAt() {
-        return createdAt;
+    public StructureData getStructureData() {
+        return sd;
     }
 
     public Location getSignLocation() {
@@ -131,7 +133,7 @@ public class ConstructionTask implements Serializable {
     public final ConstructionState getState() {
 //        Sign sign = WorldUtil.getSign(getSignLocation()) == null ? WorldUtil.createSign(structure.getLocation(), structure.getCardinal()) : WorldUtil.getSign(getSignLocation());
 //        sign.setLine(2, getState().name());
-        return state;
+        return constructionState;
     }
 
     public Timestamp getLastModified() {

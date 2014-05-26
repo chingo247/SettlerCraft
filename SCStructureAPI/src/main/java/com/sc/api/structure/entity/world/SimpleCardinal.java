@@ -14,18 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.model.plan;
+package com.sc.api.structure.entity.world;
 
 /**
  *
  * @author Chingo
  */
-public enum ReservedSide {
+public enum SimpleCardinal {
 
     NORTH,
     EAST,
     SOUTH,
-    WEST,
-    UP,
-    DOWN
+    WEST
 }

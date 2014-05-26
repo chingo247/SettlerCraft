@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.construction;
+package com.sc.api.structure;
 
 import com.sc.api.structure.construction.progress.ConstructionStrategyType;
 import com.sk89q.worldedit.CuboidClipboard;
@@ -23,7 +23,6 @@ import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import java.util.List;
-import org.bukkit.Material;
 
 /**
  * The SmartClipboard was originally meant to place blocks in a provided order.
@@ -104,9 +103,9 @@ public class SmartClipBoard extends CuboidClipboard {
             BaseBlock worldBlock = editSession.getBlock(v.add(pos));
             BaseBlock b = parent.getBlock(v);
 
-            if (b != null && !b.isAir() && worldBlock.getId() == b.getId() && worldBlock.getData() == b.getData()) {
-                System.out.println("SKIP: " + Material.getMaterial(b.getType()));
-            }
+//            if (b != null && !b.isAir() && worldBlock.getId() == b.getId() && worldBlock.getData() == b.getData()) {
+//                System.out.println("SKIP: " + Material.getMaterial(b.getType()));
+//            }
 
             if (b == null || (noAir && b.isAir()) || (worldBlock.getId() == b.getId() && worldBlock.getData() == b.getData())) {
                 continue;

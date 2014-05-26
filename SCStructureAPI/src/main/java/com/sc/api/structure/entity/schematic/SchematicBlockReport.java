@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.model.schematic;
+package com.sc.api.structure.entity.schematic;
 
 import com.sc.api.structure.util.SettlerCraftMaterials;
 import com.sk89q.worldedit.Countable;

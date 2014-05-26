@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
@@ -36,8 +37,8 @@ public class ConstructionEntry implements Serializable {
     @Id
     private final String player;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<ConstructionTask> constructionQueue;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<ConstructionTask> tasks;
 
     protected ConstructionEntry() {
         this.player = null;
@@ -50,15 +51,19 @@ public class ConstructionEntry implements Serializable {
      */
     public ConstructionEntry(String issuer) {
         this.player = issuer;
-        this.constructionQueue = new ArrayList<>();
+        this.tasks = new ArrayList<>();
     }
 
     public boolean add(ConstructionTask constructionProgress) {
-        return constructionQueue.add(constructionProgress);
+        return tasks.add(constructionProgress);
     }
 
+    public List<ConstructionTask> getTasks() {
+        return tasks;
+    }
+    
     public ConstructionTask remove(ConstructionTask constructionProgress) {
-        Iterator<ConstructionTask> it = constructionQueue.iterator();
+        Iterator<ConstructionTask> it = tasks.iterator();
         while (it.hasNext()) {
             ConstructionTask cp = it.next();
             if (cp.getId().equals(constructionProgress.getId())) {

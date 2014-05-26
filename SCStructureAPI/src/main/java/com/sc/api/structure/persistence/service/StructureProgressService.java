@@ -16,7 +16,7 @@
  */
 package com.sc.api.structure.persistence.service;
 
-import com.sc.api.structure.model.schematic.SchematicMaterialResource;
+import com.sc.api.structure.entity.schematic.SchematicMaterialResource;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 

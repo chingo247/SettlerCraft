@@ -21,7 +21,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  *
@@ -34,7 +33,6 @@ public class ItemShopCategoryMenu extends CategoryMenu {
     private final Map<String, Session> visitors;
     private boolean chooseDefaultCategory = false;
     private String defaultCategory;
-    private String mark;
     private ShopCallback callback;
 
     /**
@@ -119,6 +117,10 @@ public class ItemShopCategoryMenu extends CategoryMenu {
         return defaultCategory != null;
     }
 
+    public void addItem(ItemStack item, String itemName, String category) {
+        addItem(item, itemName, 0, category);
+    }
+    
     public void addItem(MenuSlot slot, String category, double price) {
         Preconditions.checkArgument(slot.getType() == MenuSlotType.ITEM);
         category = getCategoryName(category);
@@ -297,7 +299,7 @@ public class ItemShopCategoryMenu extends CategoryMenu {
 
             // Create a session for this player
             Inventory inv = Bukkit.createInventory(null, MENUSIZE, title);
-            visitors.put(player.getName(), new Session(0, inv, null, getsForFree));
+            visitors.put(player.getName(), new Session(0, inv, null));
 
             if (chooseDefaultCategory) {
                 visitors.get(player.getName()).currentCategory = defaultCategory;
@@ -394,50 +396,35 @@ public class ItemShopCategoryMenu extends CategoryMenu {
     }
 
     public void onItemClicked(MenuSlot slot, Player whoClicked) {
-        boolean getsForFree = visitors.get(whoClicked.getName()).getsForFree;
 
         if (!SCVaultEconomyUtil.getInstance().getEconomy().hasAccount(whoClicked.getName())) {
-            if (!getsForFree) {
-                whoClicked.closeInventory();
-                playerLeave(whoClicked);
-                whoClicked.sendMessage(ChatColor.RED + "You don't have a bankaccount");
-                return;
-            }
+            whoClicked.closeInventory();
+            playerLeave(whoClicked);
+            whoClicked.sendMessage(ChatColor.RED + "You don't have a bankaccount");
+            return;
         }
-        if (getsForFree) {
-            ItemStack stack = slot.getItemStack().clone();
-            ItemMeta meta = stack.getItemMeta();
-            meta.setLore(null);
-            stack.setItemMeta(meta);
 
-            whoClicked.getInventory().addItem(stack);
+        double price = slot.getPrice();
+
+        EconomyResponse er = SCVaultEconomyUtil.getInstance().getEconomy().withdrawPlayer(whoClicked.getName(), price);
+        if (er.transactionSuccess()) {
             whoClicked.sendMessage(ChatColor.YELLOW + "[" + getTitle() + "]: "
                     + ChatColor.BLUE + slot.getName()
                     + ChatColor.YELLOW + " has been added to your inventory");
-        } else { // Pay!
-            double price = slot.getPrice();
-
-            EconomyResponse er = SCVaultEconomyUtil.getInstance().getEconomy().withdrawPlayer(whoClicked.getName(), price);
-            if (er.transactionSuccess()) {
-                whoClicked.sendMessage(ChatColor.YELLOW + "[" + getTitle() + "]: "
-                        + ChatColor.BLUE + slot.getName()
-                        + ChatColor.YELLOW + " has been added to your inventory");
-                double balance = er.balance;
-                if (balance > 0) {
-                    whoClicked.sendMessage(ChatColor.YELLOW + "Your new balance: " + ChatColor.GREEN + balance);
-                } else {
-                    whoClicked.sendMessage(ChatColor.YELLOW + "Your new balance: " + ChatColor.RED + balance);
-                }
-
-                ItemStack stack = slot.getItemStack().clone();
-                if (callback != null) {
-                    callback.onItemSold(whoClicked, stack, price);
-                }
-                whoClicked.getInventory().addItem(stack);
+            double balance = er.balance;
+            if (balance > 0) {
+                whoClicked.sendMessage(ChatColor.YELLOW + "Your new balance: " + ChatColor.GREEN + balance);
             } else {
-                whoClicked.sendMessage(ChatColor.RED + "[" + title + "]: Transaction failed, " + er.errorMessage);
+                whoClicked.sendMessage(ChatColor.YELLOW + "Your new balance: " + ChatColor.RED + balance);
             }
 
+            ItemStack stack = slot.getItemStack().clone();
+            if (callback != null) {
+                callback.onItemSold(whoClicked, stack, price);
+            }
+            whoClicked.getInventory().addItem(stack);
+        } else {
+            whoClicked.sendMessage(ChatColor.RED + "[" + title + "]: Transaction failed, " + er.errorMessage);
         }
 
     }
@@ -473,14 +460,12 @@ public class ItemShopCategoryMenu extends CategoryMenu {
         private Inventory inventory;
         private int currentPage = 0;
         private Map<Integer, List<MenuSlot>> pages;
-        private final boolean getsForFree;
         private MenuSlot playerInfo;
 
-        public Session(int currentPage, Inventory inventory, String currentCategory, boolean getsForFree) {
+        public Session(int currentPage, Inventory inventory, String currentCategory) {
             this.inventory = inventory;
             this.currentCategory = currentCategory;
             this.pages = Maps.newHashMap();
-            this.getsForFree = getsForFree;
         }
 
         public boolean hasNext() {

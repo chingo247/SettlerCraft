@@ -17,7 +17,7 @@
  */
 package com.sc.api.structure.io;
 
-import com.sc.api.structure.model.plan.StructurePlan;
+import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.persistence.service.StructurePlanService;
 import com.sk89q.worldedit.data.DataException;
 import com.sk89q.worldedit.schematic.SchematicFormat;

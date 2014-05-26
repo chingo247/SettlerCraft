@@ -33,6 +33,7 @@ public class ShopListener implements Listener {
             }
 //        }
     }
+    
 
     @EventHandler
     public void onMenuSlotClicked(InventoryClickEvent ice) {

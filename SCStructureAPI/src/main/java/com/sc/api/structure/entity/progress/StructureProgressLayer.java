@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.model.progress;
+package com.sc.api.structure.entity.progress;
 
-import com.sc.api.structure.model.schematic.SchematicMaterialResource;
+import com.sc.api.structure.entity.schematic.SchematicMaterialResource;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;

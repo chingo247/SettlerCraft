@@ -13,12 +13,12 @@ import com.sc.api.structure.construction.progress.ConstructionEntry;
 import com.sc.api.structure.construction.progress.ConstructionTask;
 import com.sc.api.structure.io.StructurePlanLoader;
 import com.sc.api.structure.listeners.StructurePlanListener;
-import com.sc.api.structure.model.Structure;
-import com.sc.api.structure.model.StructureJob;
-import com.sc.api.structure.model.plan.StructurePlan;
-import com.sc.api.structure.model.progress.StructureProgress;
-import com.sc.api.structure.model.progress.StructureProgressLayer;
-import com.sc.api.structure.model.progress.StructureProgressMaterialResource;
+import com.sc.api.structure.entity.Structure;
+import com.sc.api.structure.entity.StructureJob;
+import com.sc.api.structure.entity.plan.StructurePlan;
+import com.sc.api.structure.entity.progress.StructureProgress;
+import com.sc.api.structure.entity.progress.StructureProgressLayer;
+import com.sc.api.structure.entity.progress.StructureProgressMaterialResource;
 import com.sc.api.structure.persistence.HSQLServer;
 import com.sc.api.structure.persistence.HibernateUtil;
 import com.sc.api.structure.persistence.MemDBUtil;
@@ -118,8 +118,7 @@ public class SCStructureAPI extends JavaPlugin {
         HSQLServer.getInstance().start();
         initDB();
 
-        //FIXME WIll also be fired at RELOAD!!! 
-        SCConstructionRestoreService.restoreProgress();
+        ConstructionRestoreService.getInstance().restoreProgress();
 
         new Thread(new Runnable() {
 
@@ -143,15 +142,6 @@ public class SCStructureAPI extends JavaPlugin {
         return (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
     }
 
-// TODO SHADING  
-//    public static void init(JavaPlugin plugin) {
-//        initDB();
-//        Bukkit.getPluginManager().registerEvents(new StructurePlanListener(plugin), plugin);
-//        if(instance == null) {
-//            instance = new SCStructureAPI();
-//        }
-//        instance.getCommand("sc").setExecutor(new StructureCommandExecutor());
-//    }
     private static void initDB() {
         addClassesToDB(
                 Structure.class,

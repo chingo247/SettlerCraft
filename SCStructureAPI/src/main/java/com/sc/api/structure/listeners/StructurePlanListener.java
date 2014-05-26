@@ -17,12 +17,12 @@
 package com.sc.api.structure.listeners;
 
 import com.sc.api.structure.SCStructureAPI;
-import com.sc.api.structure.construction.AsyncBuilder;
-import com.sc.api.structure.construction.ConstructionManager;
+import com.sc.api.structure.AsyncBuilder;
+import com.sc.api.structure.ConstructionManager;
 import com.sc.api.structure.construction.progress.ConstructionException;
-import com.sc.api.structure.model.Structure;
-import com.sc.api.structure.model.plan.StructurePlan;
-import com.sc.api.structure.model.world.SimpleCardinal;
+import com.sc.api.structure.entity.Structure;
+import com.sc.api.structure.entity.plan.StructurePlan;
+import com.sc.api.structure.entity.world.SimpleCardinal;
 import com.sc.api.structure.persistence.service.StructurePlanService;
 import com.sc.api.structure.persistence.service.StructureService;
 import com.sc.api.structure.util.WorldUtil;

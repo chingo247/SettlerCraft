@@ -21,20 +21,37 @@ package com.sc.api.structure.construction.progress;
  * @author Chingo
  */
 public enum ConstructionState {
-
-    REMOVED,
+    
+    /**
+     * Task has been created
+     */
     PREPARING,
     /**
-     * When
+     * Task is in AsyncWorldEdit's Queue and is waiting to be processed
      */
     IN_QUEUE,
     /*
-     * Constructing
+     * Task is being executed
      */
     IN_PROGRESS,
+    /**
+     * Task has been marked completed
+     */
+    COMPLETE,
+    /**
+     * The completion of the task has been confirmed at startup, the sign has been read and matches the state of this task
+     */
+    COMPLETION_CONFIRMED,
+    /**
+     * Task has been canceled and will continue as DEMOLISION task
+     */
     CANCELED,
     /**
-     * ConstructionSite is complete
+     * Task has been marked for removal (structure still exists)
      */
-    FINISHED
+     REMOVED,
+     /**
+      * Task's removal has been confirmed (structure will be deleted)
+      */
+    IN_RECYCLE_BIN
 }

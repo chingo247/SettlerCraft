@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.construction;
+package com.sc.api.structure;
 
 import com.sc.api.structure.construction.Flags.SCFlags;
-import com.sc.api.structure.model.Structure;
-import com.sc.api.structure.model.plan.StructurePlan;
-import com.sc.api.structure.model.world.SimpleCardinal;
-import com.sc.api.structure.model.world.WorldDimension;
+import com.sc.api.structure.entity.Structure;
+import com.sc.api.structure.entity.plan.StructurePlan;
+import com.sc.api.structure.entity.world.SimpleCardinal;
+import com.sc.api.structure.entity.world.WorldDimension;
 import com.sc.api.structure.util.WorldUtil;
 import com.sc.api.structure.util.plugins.SCWorldEditUtil;
 import com.sc.api.structure.util.plugins.SCWorldGuardUtil;

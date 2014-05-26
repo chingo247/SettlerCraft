@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.construction;
+package com.sc.api.structure;
 
 import com.sc.api.structure.construction.async.SCAsyncCuboidClipboard;
 import com.sc.api.structure.construction.async.SCDefaultCallbackAction;
@@ -24,10 +24,11 @@ import com.sc.api.structure.construction.progress.ConstructionException;
 import com.sc.api.structure.construction.progress.ConstructionStrategyType;
 import com.sc.api.structure.construction.progress.ConstructionTask;
 import com.sc.api.structure.construction.progress.ConstructionTaskException;
-import com.sc.api.structure.model.Structure;
-import com.sc.api.structure.model.plan.StructurePlan;
-import com.sc.api.structure.model.world.SimpleCardinal;
+import com.sc.api.structure.entity.Structure;
+import com.sc.api.structure.entity.plan.StructurePlan;
+import com.sc.api.structure.entity.world.SimpleCardinal;
 import com.sc.api.structure.persistence.service.ConstructionService;
+import com.sc.api.structure.persistence.service.StructureService;
 import com.sc.api.structure.util.WorldUtil;
 import com.sc.api.structure.util.plugins.SCAsyncWorldEditUtil;
 import com.sc.api.structure.util.plugins.SCWorldGuardUtil;
@@ -86,8 +87,9 @@ public class AsyncBuilder {
     }
 
     public static void placeStructure(String placer, Structure structure) throws ConstructionException {
-        final ConstructionService service = new ConstructionService();
-        if (service.hasConstructionTask(structure)) {
+        final ConstructionService constructionService = new ConstructionService();
+        final StructureService structureService = new StructureService();
+        if (constructionService.hasConstructionTask(structure)) {
             throw new ConstructionTaskException("Already have a task reserved for structure" + structure.getId());
         }
         final RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
@@ -96,11 +98,12 @@ public class AsyncBuilder {
             throw new ConstructionException("Tried to place a structure without a region");
         }
 
-        final ConstructionEntry entry = service.hasEntry(placer) ? service.getEntry(placer) : service.createEntry(placer);
+        final ConstructionEntry entry = constructionService.hasEntry(placer) ? constructionService.getEntry(placer) : constructionService.createEntry(placer);
         final AsyncEditSession asyncSession = SCAsyncWorldEditUtil.createAsyncEditSession(placer, structure.getLocation().getWorld(), -1); // -1 = infinite
 
         ConstructionTask task = new ConstructionTask(entry, structure, ConstructionTask.ConstructionType.BUILDING_AUTO, ConstructionStrategyType.LAYERED);
-
+        entry.add(task);
+        
         // WORKAROUND / HACK...
         Sign sign = WorldUtil.createSign(structure.getLocation(), structure.getCardinal());
         sign.setLine(0, String.valueOf(structure.getId()));
@@ -108,10 +111,10 @@ public class AsyncBuilder {
         sign.setLine(2, task.getState().name());
         sign.update(true);
 
-//        TODO Place enclosure
-        task = service.save(task); // first save, retrieve id, etc...
+        task = constructionService.save(task);
+        
         SCDefaultCallbackAction dca = new SCDefaultCallbackAction(placer, structure, task, asyncSession);
-//
+
         CuboidClipboard schematic = structure.getPlan().getSchematic();
         Location t = SyncBuilder.align(schematic, structure.getLocation(), structure.getCardinal());
         Vector signVec = structure.getLocation().getPosition().subtract(t.getPosition()).add(0, 1, 0);
@@ -126,7 +129,7 @@ public class AsyncBuilder {
 
     }
 
-    public static void placeStructure(Player player, Structure structure) throws ConstructionException {
+    public static void placeStructure(Player player, final Structure structure) throws ConstructionException {
         placeStructure(player.getName(), structure);
     }
 

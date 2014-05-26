@@ -14,16 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.model;
+package com.sc.api.structure.entity;
 
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
-import com.sc.api.structure.construction.progress.ConstructionTask;
-import com.sc.api.structure.model.plan.StructurePlan;
-import com.sc.api.structure.model.progress.StructureProgress;
-import com.sc.api.structure.model.world.SimpleCardinal;
-import com.sc.api.structure.model.world.WorldDimension;
-import com.sc.api.structure.model.world.WorldLocation;
+import com.sc.api.structure.entity.plan.StructurePlan;
+import com.sc.api.structure.entity.progress.StructureProgress;
+import com.sc.api.structure.entity.world.SimpleCardinal;
+import com.sc.api.structure.entity.world.WorldDimension;
+import com.sc.api.structure.entity.world.WorldLocation;
 import com.sc.api.structure.util.WorldUtil;
 import com.sk89q.worldedit.Location;
 import java.io.Serializable;
@@ -34,7 +33,6 @@ import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.OneToOne;
@@ -49,7 +47,8 @@ import javax.persistence.Table;
 public class Structure implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
+    @Column(name = "STRUCTURE_ID")
     private Long id;
 
     @NotNull
@@ -72,9 +71,7 @@ public class Structure implements Serializable {
     @OneToOne(cascade = CascadeType.ALL)
     private StructureProgress progress;
 
-    @Nullable
-    @OneToOne(cascade = CascadeType.ALL)
-    private ConstructionTask task;
+
 
     @Nullable
     private String structureRegion;
@@ -108,6 +105,16 @@ public class Structure implements Serializable {
         this.dimension = WorldUtil.getWorldDimension(target, direction, plan.getSchematic());
 //        this.progress = new StructureProgress(this, blockReport);
     }
+
+//    public ConstructionTask getTask() {
+//        return task;
+//    }
+//
+//    public void setTask(ConstructionTask task) {
+//        this.task = task;
+//    }
+//    
+    
 
     public void setStructureRegionId(String structureRegion) {
         this.structureRegion = structureRegion;

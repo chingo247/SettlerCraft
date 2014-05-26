@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.construction;
+package com.sc.api.structure;
 
-import com.sc.api.structure.model.world.SimpleCardinal;
+import com.sc.api.structure.entity.world.SimpleCardinal;
 import com.sc.api.structure.util.CuboidUtil;
 import com.sc.api.structure.util.WorldUtil;
 import com.sc.api.structure.util.plugins.SCWorldEditUtil;
@@ -66,7 +66,7 @@ public class SyncBuilder {
 
     /**
      * Aligns target clipboard to speficied direction, assuming that the initial
-     * state is pointed to EAST
+     * state is pointed to EAST (entrance to the west)
      *
      * @param clipboard
      * @param location

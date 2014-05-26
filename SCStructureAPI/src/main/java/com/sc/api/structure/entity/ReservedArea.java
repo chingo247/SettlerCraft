@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.model;
+package com.sc.api.structure.entity;
 
-import com.sc.api.structure.model.plan.ReservedSide;
+import com.sc.api.structure.entity.plan.ReservedSide;
 import java.io.Serializable;
 import java.util.EnumMap;
 import javax.persistence.Embeddable;
