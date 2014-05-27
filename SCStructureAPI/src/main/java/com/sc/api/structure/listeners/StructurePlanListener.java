@@ -23,6 +23,7 @@ import com.sc.api.structure.construction.progress.ConstructionException;
 import com.sc.api.structure.entity.Structure;
 import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.entity.world.SimpleCardinal;
+import com.sc.api.structure.entity.world.WorldDimension;
 import com.sc.api.structure.persistence.service.StructurePlanService;
 import com.sc.api.structure.persistence.service.StructureService;
 import com.sc.api.structure.util.WorldUtil;
@@ -34,6 +35,7 @@ import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Location;
+import com.sk89q.worldedit.bukkit.DefaultNmsBlock;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldguard.bukkit.WorldConfiguration;
 import com.sk89q.worldguard.protection.managers.RegionManager;
@@ -58,11 +60,11 @@ public class StructurePlanListener implements Listener {
     @EventHandler
     public void onPlayerInteractDebug(PlayerInteractEvent pie) {
         if (pie.getAction() == Action.RIGHT_CLICK_AIR || pie.getAction() == Action.RIGHT_CLICK_BLOCK) {
-//            org.bukkit.Location l = pie.getClickedBlock().getLocation();
-//            DefaultNmsBlock dmBlock = DefaultNmsBlock.get(l.getWorld(), SCWorldEditUtil.getLocation(l).getPosition(), l.getBlock().getTypeId(), new Byte(l.getBlock().getData()).intValue());
-//            if(dmBlock != null && dmBlock.hasNbtData()) {
-//                System.out.println(dmBlock.getNbtData());
-//            }
+            org.bukkit.Location l = pie.getClickedBlock().getLocation();
+            DefaultNmsBlock dmBlock = DefaultNmsBlock.get(l.getWorld(), SCWorldEditUtil.getLocation(l).getPosition(), l.getBlock().getTypeId(), new Byte(l.getBlock().getData()).intValue());
+            if (dmBlock != null && dmBlock.hasNbtData()) {
+                System.out.println(dmBlock.getNbtData());
+            }
 
         }
 //        System.out.println(tags.get("sid").getValue());
@@ -90,6 +92,7 @@ public class StructurePlanListener implements Listener {
                 && pie.getClickedBlock().getType() != Material.AIR) {
 
             pie.setCancelled(true); // default action would break a block
+
             LocalSession session = getLocalSession(pie.getPlayer());
 
             if (session.hasCUISupport()) {
@@ -146,21 +149,25 @@ public class StructurePlanListener implements Listener {
         return true;
     }
 
-    private boolean handleSimplePlayerSelect(Player player, org.bukkit.Location target, StructurePlan plan, Action action, boolean defaultFeedBack) {
+    private boolean handleSimplePlayerSelect(Player player, org.bukkit.Location location, StructurePlan plan, Action action, boolean defaultFeedBack) {
         if (action == Action.LEFT_CLICK_BLOCK) {
             LocalWorld world = SCWorldEditUtil.getLocalWorld(player);
-            int x = target.getBlockX();
-            int y = target.getBlockY();
-            int z = target.getBlockZ();
-            Location location = new Location(world, new BlockWorldVector(world, x, y, z));
-            SimpleCardinal cardinal = WorldUtil.getCardinal(player);
-            Structure structure = new Structure(player.getName(), location, WorldUtil.getCardinal(player), plan);
+            int x = location.getBlockX();
+            int y = location.getBlockY();
+            int z = location.getBlockZ();
 
-            if (canPlace(player, location, cardinal, plan)) {
+            SimpleCardinal cardinal = WorldUtil.getCardinal(player);
+            Location pos1 = new Location(world, new BlockWorldVector(world, x, y, z));
+            Location pos2 = WorldUtil.getPos2(pos1, cardinal, plan.getSchematic());
+            pos2 = WorldUtil.addOffset(pos2, cardinal, 0, 0, 1);
+            WorldDimension dimension = new WorldDimension(pos1, pos2);  // Included sign
+            Structure structure = new Structure(player.getName(), pos1, cardinal, plan, dimension);
+
+            if (canPlace(player, pos1, cardinal, plan)) {
                 StructureService service = new StructureService();
                 structure = service.save(structure);
 
-                ProtectedRegion region = ConstructionManager.claimGround(player, structure);
+                ProtectedRegion region = ConstructionManager.claimGround(player, structure, dimension);
                 if (region == null) {
                     service.delete(structure);
                     player.sendMessage(ChatColor.RED + " Failed to claim ground for structure");
@@ -169,11 +176,10 @@ public class StructurePlanListener implements Listener {
                 try {
                     structure.setStructureRegionId(region.getId());
                     structure = service.save(structure);
-                    System.out.println("Clicked: " + location);
                     AsyncBuilder.placeStructure(player, structure);
                 } catch (ConstructionException ex) {
                     service.delete(structure);
-                    SCWorldGuardUtil.getGlobalRegionManager(target.getWorld()).removeRegion(region.getId());
+                    SCWorldGuardUtil.getGlobalRegionManager(location.getWorld()).removeRegion(region.getId());
                     Logger.getLogger(StructurePlanListener.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
@@ -186,31 +192,31 @@ public class StructurePlanListener implements Listener {
         int x = target.getBlockX();
         int y = target.getBlockY();
         int z = target.getBlockZ();
-        Location location = new Location(world, new BlockWorldVector(world, x, y, z));
         LocalSession session = SCWorldEditUtil.getLocalSession(player);
         SimpleCardinal cardinal = WorldUtil.getCardinal(player);
-
-        Location l = WorldUtil.setOffset(location, cardinal, 0, 0, 1);
-        Structure structure = new Structure(player.getName(), l, WorldUtil.getCardinal(player), plan);
-//         SCConstrucStructureBuilderce().placeSafe(player, structure, true, true);
+        Location pos1 = new Location(world, new BlockWorldVector(world, x, y, z));
+        Location pos2 = WorldUtil.getPos2(pos1, cardinal, plan.getSchematic());
+        pos2 = WorldUtil.addOffset(pos2, cardinal, 0, 0, 1);
+        WorldDimension dimension = new WorldDimension(pos1, pos2);  // Included sign
+        Structure structure = new Structure(player.getName(), pos1, cardinal, plan, dimension);
         if (action == Action.LEFT_CLICK_BLOCK) {
             if (!session.getRegionSelector(world).isDefined()) {
-                ConstructionManager.select(player, location, cardinal, structure.getPlan().getSchematic());
+                ConstructionManager.select(player, pos1, pos2);
                 player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
                 player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
             } else {
 
                 CuboidRegion oldRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
-                ConstructionManager.select(player, location, cardinal, structure.getPlan().getSchematic());
+                ConstructionManager.select(player, pos1, pos2);
                 CuboidRegion newRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
                 if (oldRegion.getPos1().equals(newRegion.getPos1()) && oldRegion.getPos2().equals(newRegion.getPos2())) {
-                    if (canPlace(player, location, cardinal, plan)) {
+                    if (canPlace(player, pos1, cardinal, plan)) {
                         session.getRegionSelector(world).clear();
                         session.dispatchCUISelection(SCWorldEditUtil.getLocalPlayer(player));
                         StructureService service = new StructureService();
                         structure = service.save(structure);
 //                        System.out.println("Claiming ground");
-                        ProtectedRegion region = ConstructionManager.claimGround(player, structure);
+                        ProtectedRegion region = ConstructionManager.claimGround(player, structure, dimension);
                         if (region == null) {
                             service.delete(structure);
                             player.sendMessage(ChatColor.RED + " Failed to claim ground for structure");
@@ -230,7 +236,7 @@ public class StructurePlanListener implements Listener {
                         return true;
                     }
                 } else {
-                    ConstructionManager.select(player, l, cardinal, structure.getPlan().getSchematic());
+                    ConstructionManager.select(player, pos1, pos2);
                     if (ConstructionManager.overlapsStructure(structure)) {
                         player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
                     } else if (ConstructionManager.overlapsUnowned(player, structure)) {

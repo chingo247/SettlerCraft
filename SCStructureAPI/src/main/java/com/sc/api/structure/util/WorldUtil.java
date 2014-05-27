@@ -54,7 +54,7 @@ public class WorldUtil {
         }
     }
     
-    public static Location setOffset(Location location, SimpleCardinal direction, int xOffset, int yOffset, int zOffset) {
+    public static Location addOffset(Location location, SimpleCardinal direction, int xOffset, int yOffset, int zOffset) {
         switch (direction) {
             case EAST:
                 return location.add(zOffset, yOffset, xOffset);
@@ -156,7 +156,7 @@ public class WorldUtil {
         return l;
     }
 
-    public static Location calculateEndLocation(Location point1, SimpleCardinal direction, CuboidClipboard clipboard) {
+    public static Location getPos2(Location point1, SimpleCardinal direction, CuboidClipboard clipboard) {
         switch (direction) {
             case EAST:
                 return point1.add(clipboard.getSize().subtract(1, 1, 1));

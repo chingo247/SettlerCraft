@@ -33,12 +33,12 @@ public class LayeredConstructionStrategy extends ConstructionStrategy {
     @Override
     public List<Vector> getList(CuboidClipboard cliboard, boolean noAir) {
         List<Vector> placeFirst = new ArrayList<>();
-        List<Vector> placeLater = new ArrayList<>();
-        List<Vector> placeFinal = new ArrayList<>();
-        List<Vector> water = new ArrayList<>();
-        List<Vector> lava = new ArrayList<>();
 
         for (int y = 0; y < cliboard.getHeight(); y++) {
+            List<Vector> placeLater = new ArrayList<>();
+            List<Vector> placeFinal = new ArrayList<>();
+            List<Vector> water = new ArrayList<>();
+            List<Vector> lava = new ArrayList<>();
             for (int x = 0; x < cliboard.getWidth(); x++) {
                 for (int z = 0; z < cliboard.getLength(); z++) {
                     final BlockVector v = new BlockVector(x, y, z);
@@ -66,11 +66,12 @@ public class LayeredConstructionStrategy extends ConstructionStrategy {
                     }
                 }
             }
+            placeFirst.addAll(lava);
+            placeFirst.addAll(water);
+            placeFirst.addAll(placeLater);
+            placeFirst.addAll(placeFinal);
         }
-        placeFirst.addAll(lava);
-        placeFirst.addAll(water);
-        placeFirst.addAll(placeLater);
-        placeFirst.addAll(placeFinal);
+
 //        placeFirst.add(cliboard.getOffset().add(0,1,0));
         return placeFirst;
     }

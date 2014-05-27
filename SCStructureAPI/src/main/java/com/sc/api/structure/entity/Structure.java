@@ -65,7 +65,7 @@ public class Structure implements Serializable {
     @AttributeOverride(name = "world", column = @Column(name = "dim_world"))
     private WorldDimension dimension;
 
-    private SimpleCardinal direction;
+    private SimpleCardinal cardinal;
 
     @Nullable
     @OneToOne(cascade = CascadeType.ALL)
@@ -94,16 +94,19 @@ public class Structure implements Serializable {
      * @param plan The plan
      */
     public Structure(String owner, Location target, SimpleCardinal direction, StructurePlan plan) {
+        this(owner, target, direction, plan,  WorldUtil.getWorldDimension(target, direction, plan.getSchematic()));
+    }
+    
+    public Structure(String owner, Location target, SimpleCardinal cardinal, StructurePlan plan, WorldDimension dimension) {
         Preconditions.checkNotNull(plan);
         Preconditions.checkNotNull(target);
-        Preconditions.checkNotNull(direction);
+        Preconditions.checkNotNull(cardinal);
         this.plan = plan;
         this.owner = owner;
-        this.direction = direction;
+        this.cardinal = cardinal;
         this.worldLocation = new WorldLocation(target);
         this.reserved = new ReservedArea(this);
-        this.dimension = WorldUtil.getWorldDimension(target, direction, plan.getSchematic());
-//        this.progress = new StructureProgress(this, blockReport);
+        this.dimension = dimension;
     }
 
 //    public ConstructionTask getTask() {
@@ -157,7 +160,7 @@ public class Structure implements Serializable {
      * @return The direction
      */
     public SimpleCardinal getCardinal() {
-        return direction;
+        return cardinal;
     }
 
     /**

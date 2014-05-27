@@ -16,7 +16,7 @@
  */
 package com.sc.api.structure;
 
-import com.sc.api.structure.construction.Flags.SCFlags;
+import com.sc.api.structure.construction.flags.SCFlags;
 import com.sc.api.structure.entity.Structure;
 import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.entity.world.SimpleCardinal;
@@ -58,7 +58,7 @@ public class ConstructionManager {
      * @param cuboidClipboard The cuboidClipboard
      */
     public static void select(Player player, Location target, SimpleCardinal cardinal, CuboidClipboard cuboidClipboard) {
-        Location pos2 = WorldUtil.calculateEndLocation(target, cardinal, cuboidClipboard);
+        Location pos2 = WorldUtil.getPos2(target, cardinal, cuboidClipboard);
         select(player, target, pos2);
     }
 
@@ -74,7 +74,7 @@ public class ConstructionManager {
     }
 
     public static void selectStructure(Player player, Structure structure) {
-        Location pos2 = WorldUtil.calculateEndLocation(structure.getLocation(), structure.getCardinal(), structure.getPlan().getSchematic());
+        Location pos2 = WorldUtil.getPos2(structure.getLocation(), structure.getCardinal(), structure.getPlan().getSchematic());
         select(player, structure.getLocation(), pos2);
     }
 
@@ -87,8 +87,8 @@ public class ConstructionManager {
         String s = String.valueOf("sc_s_" + (structure.getPlan().getDisplayName().replaceAll("\\s", "") + "_" + structure.getId())).toLowerCase();
         return s;
     }
-
-    public static ProtectedRegion claimGround(final Player player, final Structure structure) {
+    
+    public static ProtectedRegion claimGround(final Player player, final Structure structure, final WorldDimension dimension) {
         if (structure.getId() == null) {
             throw new AssertionError("Save the structure instance first! (e.g. structure = structureService.save(structure)"); // Should only happen if the programmer forgets to save the instance before this
         }
@@ -98,9 +98,8 @@ public class ConstructionManager {
                 || ConstructionManager.overlapsUnowned(player, structure)) {
             return null;
         }
-
         RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
-        WorldDimension dim = structure.getDimension();
+        WorldDimension dim = dimension;
         Vector p1 = dim.getStart().getPosition();
         Vector p2 = dim.getEnd().getPosition();
         String id = getIdForStructure(structure);
@@ -117,6 +116,11 @@ public class ConstructionManager {
         }
 
         return region;
+        
+    }
+
+    public static ProtectedRegion claimGround(final Player player, final Structure structure) {
+        return claimGround(player, structure, structure.getDimension());
     }
 
     public boolean createConstructionSite(String id, Player placer, World world, BlockVector pos1, BlockVector pos2, boolean feedback, boolean addSelf) {

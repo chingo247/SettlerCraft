@@ -355,7 +355,7 @@ public class ConstructionRestoreService extends AbstractService {
         CuboidClipboard schematic = structure.getPlan().getSchematic();
         Location t = SyncBuilder.align(schematic, structure.getLocation(), structure.getCardinal());
         Vector signVec = structure.getLocation().getPosition().subtract(t.getPosition()).add(0, 1, 0);
-        SmartClipBoard smartClipboard = new SmartClipBoard(schematic, signVec, ConstructionStrategyType.LAYERED, false);
+        SmartClipBoard smartClipboard = new SmartClipBoard(schematic, ConstructionStrategyType.LAYERED, false);
         SCAsyncCuboidClipboard asyncCuboidClipboard = new SCAsyncCuboidClipboard(asyncSession.getPlayer(), smartClipboard);
 
         try {

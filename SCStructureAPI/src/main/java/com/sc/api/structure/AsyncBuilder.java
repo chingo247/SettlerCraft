@@ -28,7 +28,6 @@ import com.sc.api.structure.entity.Structure;
 import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.entity.world.SimpleCardinal;
 import com.sc.api.structure.persistence.service.ConstructionService;
-import com.sc.api.structure.persistence.service.StructureService;
 import com.sc.api.structure.util.WorldUtil;
 import com.sc.api.structure.util.plugins.SCAsyncWorldEditUtil;
 import com.sc.api.structure.util.plugins.SCWorldGuardUtil;
@@ -88,12 +87,11 @@ public class AsyncBuilder {
 
     public static void placeStructure(String placer, Structure structure) throws ConstructionException {
         final ConstructionService constructionService = new ConstructionService();
-        final StructureService structureService = new StructureService();
         if (constructionService.hasConstructionTask(structure)) {
             throw new ConstructionTaskException("Already have a task reserved for structure" + structure.getId());
         }
+        
         final RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
-
         if (structure.getStructureRegion() == null || !mgr.hasRegion(structure.getStructureRegion())) {
             throw new ConstructionException("Tried to place a structure without a region");
         }
@@ -104,25 +102,28 @@ public class AsyncBuilder {
         ConstructionTask task = new ConstructionTask(entry, structure, ConstructionTask.ConstructionType.BUILDING_AUTO, ConstructionStrategyType.LAYERED);
         entry.add(task);
         
+
+       
+        
         // WORKAROUND / HACK...
-        Sign sign = WorldUtil.createSign(structure.getLocation(), structure.getCardinal());
-        sign.setLine(0, String.valueOf(structure.getId()));
+        final Sign sign = WorldUtil.createSign(structure.getLocation(), structure.getCardinal());
+        sign.setLine(0, String.valueOf(task.getId()));
         sign.setLine(1, String.valueOf(structure.getPlan().getDisplayName()));
         sign.setLine(2, task.getState().name());
         sign.update(true);
-
+        
         task = constructionService.save(task);
         
-        SCDefaultCallbackAction dca = new SCDefaultCallbackAction(placer, structure, task, asyncSession);
+        final SCDefaultCallbackAction dca = new SCDefaultCallbackAction(placer, structure, task, asyncSession);
 
-        CuboidClipboard schematic = structure.getPlan().getSchematic();
-        Location t = SyncBuilder.align(schematic, structure.getLocation(), structure.getCardinal());
-        Vector signVec = structure.getLocation().getPosition().subtract(t.getPosition()).add(0, 1, 0);
-        SmartClipBoard smartClipboard = new SmartClipBoard(schematic, signVec, ConstructionStrategyType.LAYERED, false);
-        SCAsyncCuboidClipboard asyncCuboidClipboard = new SCAsyncCuboidClipboard(asyncSession.getPlayer(), smartClipboard);
+        final CuboidClipboard schematic = structure.getPlan().getSchematic();
+        final Location t = SyncBuilder.align(schematic, structure.getLocation(), structure.getCardinal());
+        final Vector signVec = structure.getLocation().getPosition().subtract(t.getPosition()).add(0, 1, 0);
+        final SmartClipBoard smartClipboard = new SmartClipBoard(schematic, ConstructionStrategyType.LAYERED, false);
+        final SCAsyncCuboidClipboard asyncCuboidClipboard = new SCAsyncCuboidClipboard(asyncSession.getPlayer(), smartClipboard);
 
         try {
-            asyncCuboidClipboard.place(asyncSession, t.getPosition(), false, dca);
+            asyncCuboidClipboard.place(asyncSession, WorldUtil.addOffset(structure.getLocation(), structure.getCardinal(), 0, 0, 1).getPosition(), false, dca);
         } catch (MaxChangedBlocksException ex) {
             Logger.getLogger(SyncBuilder.class.getName()).log(Level.SEVERE, null, ex); // Won't happen
         }

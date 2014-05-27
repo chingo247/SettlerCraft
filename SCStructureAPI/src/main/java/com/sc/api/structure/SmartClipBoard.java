@@ -39,24 +39,24 @@ public class SmartClipBoard extends CuboidClipboard {
 
     private final List<Vector> vertices;
     private final CuboidClipboard parent;
-    private final Vector sign;
+//    private final Vector sign;
 
-    /**
-     * Constructor when using structures
-     *
-     * @param clipboard The clipboard
-     * @param sign The location of the sign within this clipboard
-     * @param strategy The strategy
-     * @param noAir Wheter or not to use air
-     * @deprecated Assumes the sign workaround is used, may lose support once
-     * there is a reliable API for storing NBT data in blocks
-     */
-    public SmartClipBoard(CuboidClipboard clipboard, Vector sign, ConstructionStrategyType strategy, boolean noAir) {
-        super(clipboard.getSize());
-        this.parent = clipboard;
-        this.vertices = strategy.getList(clipboard, noAir);
-        this.sign = sign;
-    }
+//    /**
+//     * Constructor when using structures
+//     *
+//     * @param clipboard The clipboard
+//     * @param sign The location of the sign within this clipboard
+//     * @param strategy The strategy
+//     * @param noAir Wheter or not to use air
+//     * @deprecated Assumes the sign workaround is used, may lose support once
+//     * there is a reliable API for storing NBT data in blocks
+//     */
+//    public SmartClipBoard(CuboidClipboard clipboard, Vector sign, ConstructionStrategyType strategy, boolean noAir) {
+//        super(clipboard.getSize());
+//        this.parent = clipboard;
+//        this.vertices = strategy.getList(clipboard, noAir);
+//        this.sign = sign;
+//    }
 
     /**
      * Constructor.
@@ -79,7 +79,7 @@ public class SmartClipBoard extends CuboidClipboard {
         super(clipboard.getSize());
         this.parent = clipboard;
         this.vertices = strategy.getList(clipboard, noAir);
-        this.sign = null;
+//        this.sign = null;
     }
 
     /**
@@ -96,9 +96,9 @@ public class SmartClipBoard extends CuboidClipboard {
         long start = System.currentTimeMillis();
         for (Vector v : vertices) {
 
-            if (sign != null && v.equals(sign)) {
-                continue;
-            }
+//            if (sign != null && v.equals(sign)) {
+//                continue;
+//            }
 
             BaseBlock worldBlock = editSession.getBlock(v.add(pos));
             BaseBlock b = parent.getBlock(v);
@@ -113,10 +113,10 @@ public class SmartClipBoard extends CuboidClipboard {
 
             editSession.setBlock((v.add(pos)), b);
         }
-        if (sign != null) {
-            BaseBlock b = parent.getBlock(sign);
-            editSession.setBlock(sign.add(pos), b);
-        }
+//        if (sign != null) {
+//            BaseBlock b = parent.getBlock(sign);
+//            editSession.setBlock(sign.add(pos), b);
+//        }
 
         long end = System.currentTimeMillis();
         System.out.println(vertices.size() + " vertices in " + (end - start) + "ms");

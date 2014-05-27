@@ -47,7 +47,7 @@ public class SyncBuilder {
      * @throws MaxChangedBlocksException
      */
     public static void clear(EditSession editSession, Location target, SimpleCardinal cardinal, CuboidClipboard cuboidClipboard) throws MaxChangedBlocksException {
-        Location pos2 = WorldUtil.calculateEndLocation(target, cardinal, cuboidClipboard);
+        Location pos2 = WorldUtil.getPos2(target, cardinal, cuboidClipboard);
         clear(editSession, pos2, pos2);
     }
 
