@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.construction.progress;
+package com.sc.api.structure.entity.progress;
 
+import com.sc.api.structure.construction.progress.ConstructionStrategyType;
 import com.sc.api.structure.entity.Structure;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Countable;
@@ -48,9 +49,11 @@ public class ConstructionTask implements Serializable {
     private Long id;
 
     private int jobSize;
+    
+    private final String placer;
 
     @Embedded
-    private StructureData sd;
+    private ConstructionTaskData constructionTaskData;
 
     @OneToOne(cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn(name = "TASK_ID", referencedColumnName = "STRUCTURE_ID")
@@ -59,12 +62,13 @@ public class ConstructionTask implements Serializable {
     private Timestamp completeAt;
 
     private Timestamp removeDate;
+    
+    private final Timestamp createdAt;
 
     @Version
     private Timestamp lastModified;
 
     public enum ConstructionType {
-
         BUILDING_AUTO,
         DEMOLISHING_AUTO,
         MANUAL
@@ -76,16 +80,18 @@ public class ConstructionTask implements Serializable {
 
     private final ConstructionStrategyType strategyType;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @ManyToOne(cascade = CascadeType.ALL)
     private final ConstructionEntry constructionEntry;
 
     protected ConstructionTask() {
         this.constructionType = null;
         this.strategyType = null;
         this.constructionEntry = null;
+        this.createdAt = null;
+        this.placer = null;
     }
 
-    public ConstructionTask(ConstructionEntry entry, Structure structure, ConstructionType constructionType, ConstructionStrategyType strategyType) {
+    public ConstructionTask(String placer, ConstructionEntry entry, Structure structure, ConstructionType constructionType, ConstructionStrategyType strategyType) {
         this.constructionType = constructionType;
         this.strategyType = strategyType;
         this.constructionEntry = entry;
@@ -93,16 +99,30 @@ public class ConstructionTask implements Serializable {
         for (Countable<BaseBlock> b : structure.getPlan().getSchematic().getBlockDistributionWithData()) {
             count += b.getAmount();
         }
+        this.createdAt = new Timestamp(new Date().getTime());
         this.jobSize = count;
         this.constructionState = State.QUEUED;
         this.structure = structure;
         this.id = structure.getId();
-        this.sd = new StructureData(structure.getPlan().getPrice(), structure.getDimension(), structure.getStructureRegion());
+        this.constructionTaskData = new ConstructionTaskData(structure.getPlan().getPrice(), structure.getDimension(), structure.getStructureRegion());
+        this.placer = placer;
     }
 
+    public String getPlacer() {
+        return placer;
+    }
+
+    
+    
     public ConstructionEntry getConstructionEntry() {
         return constructionEntry;
     }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+    
+    
 
     public void setState(State newState) {
         if (newState == State.COMPLETE) {
@@ -117,8 +137,8 @@ public class ConstructionTask implements Serializable {
         return completeAt;
     }
 
-    public StructureData getStructureData() {
-        return sd;
+    public ConstructionTaskData getData() {
+        return constructionTaskData;
     }
 
     public Location getSignLocation() {

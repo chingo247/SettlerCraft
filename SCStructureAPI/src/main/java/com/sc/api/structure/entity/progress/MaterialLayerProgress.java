@@ -33,25 +33,25 @@ import javax.persistence.OneToMany;
  * @author Chingo
  */
 @Entity
-public class StructureProgressLayer implements Serializable {
+public class MaterialLayerProgress implements Serializable {
 
     protected final int layer;
 
     @OneToMany(cascade = CascadeType.ALL)
-    private List<StructureProgressMaterialResource> resources = new ArrayList<>();
+    private List<MaterialResourceProgress> resources = new ArrayList<>();
 
     @Id
     @GeneratedValue
     private Long id;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    private StructureProgress progress;
+    private MaterialProgress progress;
 
-    public StructureProgressLayer() {
+    public MaterialLayerProgress() {
         this.layer = -1;
     }
 
-    public StructureProgressLayer(StructureProgress progress, int layer) {
+    public MaterialLayerProgress(MaterialProgress progress, int layer) {
         this.progress = progress;
         this.resources = new ArrayList<>();
         this.layer = layer;
@@ -61,11 +61,11 @@ public class StructureProgressLayer implements Serializable {
         return id;
     }
 
-    public StructureProgress getProgress() {
+    public MaterialProgress getProgress() {
         return progress;
     }
 
-    public List<StructureProgressMaterialResource> getResources() {
+    public List<MaterialResourceProgress> getResources() {
         return new ArrayList<>(resources);
     }
 
@@ -77,10 +77,10 @@ public class StructureProgressLayer implements Serializable {
         return resources.isEmpty();
     }
 
-    public void addResource(StructureProgressMaterialResource resource) {
-        Iterator<StructureProgressMaterialResource> it = resources.iterator();
+    public void addResource(MaterialResourceProgress resource) {
+        Iterator<MaterialResourceProgress> it = resources.iterator();
         while (it.hasNext()) {
-            StructureProgressMaterialResource mr = it.next();
+            MaterialResourceProgress mr = it.next();
             if (mr.getMaterial() == resource.getMaterial() && mr.getData() == resource.getData()) {
                 mr.setAmount(mr.getAmount() + resource.getAmount());
                 return;
@@ -89,10 +89,10 @@ public class StructureProgressLayer implements Serializable {
         resources.add(resource);
     }
 
-    public boolean hasResource(StructureProgressMaterialResource resource) {
-        Iterator<StructureProgressMaterialResource> it = resources.iterator();
+    public boolean hasResource(MaterialResourceProgress resource) {
+        Iterator<MaterialResourceProgress> it = resources.iterator();
         while (it.hasNext()) {
-            StructureProgressMaterialResource mr = it.next();
+            MaterialResourceProgress mr = it.next();
             if (mr.getMaterial() == resource.getMaterial() && mr.getData() == resource.getData()) {
                 return true;
             }
@@ -100,10 +100,10 @@ public class StructureProgressLayer implements Serializable {
         return false;
     }
 
-    public StructureProgressMaterialResource getResource(StructureProgressMaterialResource resource) {
-        Iterator<StructureProgressMaterialResource> it = resources.iterator();
+    public MaterialResourceProgress getResource(MaterialResourceProgress resource) {
+        Iterator<MaterialResourceProgress> it = resources.iterator();
         while (it.hasNext()) {
-            StructureProgressMaterialResource mr = it.next();
+            MaterialResourceProgress mr = it.next();
             if (mr.getMaterial() == resource.getMaterial() && mr.getData() == resource.getData()) {
                 return mr;
             }
@@ -112,9 +112,9 @@ public class StructureProgressLayer implements Serializable {
     }
 
     public void removeResource(SchematicMaterialResource resource) {
-        Iterator<StructureProgressMaterialResource> it = resources.iterator();
+        Iterator<MaterialResourceProgress> it = resources.iterator();
         while (it.hasNext()) {
-            StructureProgressMaterialResource mr = it.next();
+            MaterialResourceProgress mr = it.next();
             if (mr.getMaterial() == resource.getMaterial() && mr.getData() == resource.getData()) {
                 it.remove();
                 return;

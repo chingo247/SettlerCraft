@@ -9,14 +9,14 @@ import com.sc.api.menu.plugin.shop.ItemShopCategoryMenu;
 import com.sc.api.menu.plugin.shop.MenuManager;
 import com.sc.api.menu.plugin.shop.MenuSlot;
 import com.sc.api.structure.commands.StructureCommands;
-import com.sc.api.structure.construction.progress.ConstructionEntry;
-import com.sc.api.structure.construction.progress.ConstructionTask;
 import com.sc.api.structure.entity.Structure;
 import com.sc.api.structure.entity.StructureJob;
 import com.sc.api.structure.entity.plan.StructurePlan;
-import com.sc.api.structure.entity.progress.StructureProgress;
-import com.sc.api.structure.entity.progress.StructureProgressLayer;
-import com.sc.api.structure.entity.progress.StructureProgressMaterialResource;
+import com.sc.api.structure.entity.progress.ConstructionEntry;
+import com.sc.api.structure.entity.progress.ConstructionTask;
+import com.sc.api.structure.entity.progress.MaterialLayerProgress;
+import com.sc.api.structure.entity.progress.MaterialProgress;
+import com.sc.api.structure.entity.progress.MaterialResourceProgress;
 import com.sc.api.structure.io.StructurePlanLoader;
 import com.sc.api.structure.listener.StructurePlanListener;
 import com.sc.api.structure.persistence.HSQLServer;
@@ -118,7 +118,8 @@ public class SCStructureAPI extends JavaPlugin {
         HSQLServer.getInstance().start();
         initDB();
 
-//        ConstructionRestoreService.getInstance().restoreProgress();
+        RestoreService service = new RestoreService();
+        service.restore();
 
         new Thread(new Runnable() {
 
@@ -145,9 +146,9 @@ public class SCStructureAPI extends JavaPlugin {
     private static void initDB() {
         addClassesToDB(
                 Structure.class,
-                StructureProgress.class,
-                StructureProgressLayer.class,
-                StructureProgressMaterialResource.class,
+                MaterialProgress.class,
+                MaterialLayerProgress.class,
+                MaterialResourceProgress.class,
                 StructurePlan.class,
                 StructureJob.class,
                 ConstructionEntry.class,

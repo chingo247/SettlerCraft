@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.construction.progress;
+package com.sc.api.structure.entity.progress;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -35,13 +35,13 @@ import javax.persistence.OneToMany;
 public class ConstructionEntry implements Serializable {
 
     @Id
-    private final String player;
+    private final String entryName;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ConstructionTask> tasks;
 
     protected ConstructionEntry() {
-        this.player = null;
+        this.entryName = null;
     }
 
     /**
@@ -50,7 +50,7 @@ public class ConstructionEntry implements Serializable {
      * @param issuer The player or issuer
      */
     public ConstructionEntry(String issuer) {
-        this.player = issuer;
+        this.entryName = issuer;
         this.tasks = new ArrayList<>();
     }
 
@@ -75,13 +75,13 @@ public class ConstructionEntry implements Serializable {
     }
 
     public String getEntryName() {
-        return player;
+        return entryName;
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 47 * hash + Objects.hashCode(this.player);
+        hash = 47 * hash + Objects.hashCode(this.entryName);
         return hash;
     }
 
@@ -94,7 +94,7 @@ public class ConstructionEntry implements Serializable {
             return false;
         }
         final ConstructionEntry other = (ConstructionEntry) obj;
-        if (!Objects.equals(this.player, other.player)) {
+        if (!Objects.equals(this.entryName, other.entryName)) {
             return false;
         }
         return true;

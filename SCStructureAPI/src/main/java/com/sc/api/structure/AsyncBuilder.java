@@ -19,16 +19,15 @@ package com.sc.api.structure;
 import com.sc.api.structure.construction.async.SCAsyncCuboidClipboard;
 import com.sc.api.structure.construction.async.SCDefaultCallbackAction;
 import com.sc.api.structure.construction.async.SCJobCallback;
-import com.sc.api.structure.construction.progress.ConstructionEntry;
 import com.sc.api.structure.construction.progress.ConstructionException;
 import com.sc.api.structure.construction.progress.ConstructionStrategyType;
-import com.sc.api.structure.construction.progress.ConstructionTask;
 import com.sc.api.structure.construction.progress.ConstructionTaskException;
 import com.sc.api.structure.entity.Structure;
 import com.sc.api.structure.entity.plan.StructurePlan;
+import com.sc.api.structure.entity.progress.ConstructionEntry;
+import com.sc.api.structure.entity.progress.ConstructionTask;
 import com.sc.api.structure.entity.world.SimpleCardinal;
 import com.sc.api.structure.persistence.service.ConstructionService;
-import com.sc.api.structure.util.WorldUtil;
 import com.sc.api.structure.util.plugins.SCAsyncWorldEditUtil;
 import com.sc.api.structure.util.plugins.SCWorldGuardUtil;
 import com.sk89q.worldedit.CuboidClipboard;
@@ -97,7 +96,7 @@ public class AsyncBuilder {
         final ConstructionEntry entry = constructionService.hasEntry(placer) ? constructionService.getEntry(placer) : constructionService.createEntry(placer);
         final AsyncEditSession asyncSession = SCAsyncWorldEditUtil.createAsyncEditSession(placer, structure.getLocation().getWorld(), -1); // -1 = infinite
 
-        ConstructionTask task = new ConstructionTask(entry, structure, ConstructionTask.ConstructionType.BUILDING_AUTO, ConstructionStrategyType.LAYERED);
+        ConstructionTask task = new ConstructionTask(placer, entry, structure, ConstructionTask.ConstructionType.BUILDING_AUTO, ConstructionStrategyType.LAYERED);
         entry.add(task);
         constructionService.save(entry);
         task = constructionService.save(task);
@@ -110,7 +109,7 @@ public class AsyncBuilder {
         final SCAsyncCuboidClipboard asyncCuboidClipboard = new SCAsyncCuboidClipboard(asyncSession.getPlayer(), smartClipboard);
 
         try {
-            asyncCuboidClipboard.place(asyncSession, WorldUtil.addOffset(t, structure.getCardinal(), 0, 0, 1).getPosition(), false, dca);
+            asyncCuboidClipboard.place(asyncSession, t.getPosition(), false, dca);
         } catch (MaxChangedBlocksException ex) {
             Logger.getLogger(SyncBuilder.class.getName()).log(Level.SEVERE, null, ex); // Won't happen
         }

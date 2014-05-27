@@ -19,7 +19,7 @@ package com.sc.api.structure.entity;
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
 import com.sc.api.structure.entity.plan.StructurePlan;
-import com.sc.api.structure.entity.progress.StructureProgress;
+import com.sc.api.structure.entity.progress.MaterialProgress;
 import com.sc.api.structure.entity.world.SimpleCardinal;
 import com.sc.api.structure.entity.world.WorldDimension;
 import com.sc.api.structure.entity.world.WorldLocation;
@@ -69,9 +69,7 @@ public class Structure implements Serializable {
 
     @Nullable
     @OneToOne(cascade = CascadeType.ALL)
-    private StructureProgress progress;
-
-
+    private MaterialProgress progress;
 
     @Nullable
     private String structureRegion;
@@ -87,17 +85,12 @@ public class Structure implements Serializable {
 
     /**
      * Constructor.
-     *
      * @param owner The owner of this structure
      * @param target The start location of this structure
-     * @param direction The player's direction on placement
+     * @param cardinal The player's direction on placement
      * @param plan The plan
      */
-    public Structure(String owner, Location target, SimpleCardinal direction, StructurePlan plan) {
-        this(owner, target, direction, plan,  WorldUtil.getWorldDimension(target, direction, plan.getSchematic()));
-    }
-    
-    public Structure(String owner, Location target, SimpleCardinal cardinal, StructurePlan plan, WorldDimension dimension) {
+    public Structure(String owner, Location target, SimpleCardinal cardinal, StructurePlan plan) {
         Preconditions.checkNotNull(plan);
         Preconditions.checkNotNull(target);
         Preconditions.checkNotNull(cardinal);
@@ -106,19 +99,9 @@ public class Structure implements Serializable {
         this.cardinal = cardinal;
         this.worldLocation = new WorldLocation(target);
         this.reserved = new ReservedArea(this);
-        this.dimension = dimension;
+        this.dimension = WorldUtil.getWorldDimension(target, cardinal, plan.getSchematic());
     }
-
-//    public ConstructionTask getTask() {
-//        return task;
-//    }
-//
-//    public void setTask(ConstructionTask task) {
-//        this.task = task;
-//    }
-//    
     
-
     public void setStructureRegionId(String structureRegion) {
         this.structureRegion = structureRegion;
     }
@@ -176,7 +159,7 @@ public class Structure implements Serializable {
         return dimension;
     }
 
-    public StructureProgress getProgress() {
+    public MaterialProgress getProgress() {
         return progress;
     }
 

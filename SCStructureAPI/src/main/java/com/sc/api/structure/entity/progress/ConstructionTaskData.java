@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.construction.progress;
+package com.sc.api.structure.entity.progress;
 
 import com.sc.api.structure.entity.world.WorldDimension;
 import java.io.Serializable;
@@ -32,7 +32,7 @@ import org.bukkit.World;
  *
  */
 @Embeddable
-public class StructureData implements Serializable {
+public class ConstructionTaskData implements Serializable {
 
     private UUID worldId;
     @NotNull
@@ -44,10 +44,10 @@ public class StructureData implements Serializable {
     
     private boolean refunded = false;
 
-    protected StructureData() {
+    protected ConstructionTaskData() {
     }
 
-    StructureData(double refundValue, WorldDimension region, String regionId) {
+    ConstructionTaskData(double refundValue, WorldDimension region, String regionId) {
         this.refundValue = refundValue;
         this.region = region;
         this.regionId = regionId;

@@ -18,18 +18,16 @@ package com.sc.api.structure.persistence.service;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.api.structure.construction.progress.ConstructionEntry;
-import com.sc.api.structure.construction.progress.ConstructionTask;
-import com.sc.api.structure.construction.progress.ConstructionTask.State;
-import com.sc.api.structure.construction.progress.QConstructionEntry;
-import com.sc.api.structure.construction.progress.QConstructionTask;
 import com.sc.api.structure.entity.Structure;
+import com.sc.api.structure.entity.progress.ConstructionEntry;
+import com.sc.api.structure.entity.progress.ConstructionTask;
+import com.sc.api.structure.entity.progress.ConstructionTask.State;
+import com.sc.api.structure.entity.progress.QConstructionEntry;
+import com.sc.api.structure.entity.progress.QConstructionTask;
 import com.sc.api.structure.persistence.HibernateUtil;
-import com.sc.api.structure.util.WorldUtil;
 import java.util.List;
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
-import org.bukkit.block.Sign;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -42,11 +40,22 @@ public class ConstructionService extends AbstractService {
 
     private final Logger logger = Logger.getLogger("ConstructionService");
 
+    /**
+     * Creates an entry for speficied issuer, the issuer may be a player or something else (group / npc) as long as it has a valid representative or owner
+     * or a bankaccount (if vault)
+     * @param issuer The issuer
+     * @return The created entry
+     */
     public ConstructionEntry createEntry(String issuer) {
         ConstructionEntry entry = new ConstructionEntry(issuer);
         return save(entry);
     }
 
+    /**
+     * Saves a task
+     * @param constructionTask The constructionTask
+     * @return The save instance
+     */
     public ConstructionTask save(ConstructionTask constructionTask) {
         Session session = null;
         Transaction tx = null;
@@ -70,6 +79,11 @@ public class ConstructionService extends AbstractService {
         return constructionTask;
     }
 
+    /**
+     * Saves a constructionEntry
+     * @param constructionEntry The constructionEntry
+     * @return The saved instance
+     */
     public ConstructionEntry save(ConstructionEntry constructionEntry) {
         Session session = null;
         Transaction tx = null;
@@ -93,6 +107,11 @@ public class ConstructionService extends AbstractService {
         return constructionEntry;
     }
 
+    /**
+     * Determines wheter this structure already has a task
+     * @param structure The structure
+     * @return true if this structure already has a task
+     */
     public boolean hasConstructionTask(Structure structure) {
         Session session = HibernateUtil.getSession();
         QConstructionTask qt = QConstructionTask.constructionTask;
@@ -102,8 +121,13 @@ public class ConstructionService extends AbstractService {
         return exists;
     }
 
+    /**
+     * Updates the the status of a task and saves the task
+     * @param task The task
+     * @param newStatus The newstatus of the task
+     * @return the updated/saved instance of the task
+     */
     public ConstructionTask updateStatus(ConstructionTask task, State newStatus) {
-
         Session session = null;
         Transaction tx = null;
         try {
@@ -124,12 +148,6 @@ public class ConstructionService extends AbstractService {
                 session.close();
             }
         }
-
-        Sign sign = WorldUtil.getSign(task.getSignLocation());
-        if (sign != null) {
-            sign.setLine(2, newStatus.name());
-            sign.update(true);
-        }
         return task;
     }
 
@@ -142,15 +160,24 @@ public class ConstructionService extends AbstractService {
             return cachedEntry;
         }
         JPQLQuery query = new HibernateQuery(session);
-        ConstructionEntry ce = query.from(qce).where(qce.player.eq(player)).uniqueResult(qce);
+        ConstructionEntry ce = query.from(qce).where(qce.entryName.eq(player)).uniqueResult(qce);
         session.close();
         return ce;
     }
 
+    /**
+     * Checks whether the entry exists or not
+     * @param entryName The name of the entry
+     * @return True if entry exists, othwerwise false
+     */
     public boolean hasEntry(String entryName) {
         return getEntry(entryName) != null;
     }
 
+    /**
+     * Gets the entries
+     * @return  List of all entries
+     */
     public List<ConstructionEntry> getEntries() {
         Session session = HibernateUtil.getSession();
         QConstructionEntry qce = QConstructionEntry.constructionEntry;

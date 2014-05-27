@@ -159,9 +159,8 @@ public class StructurePlanListener implements Listener {
             SimpleCardinal cardinal = WorldUtil.getCardinal(player);
             Location pos1 = new Location(world, new BlockWorldVector(world, x, y, z));
             Location pos2 = WorldUtil.getPos2(pos1, cardinal, plan.getSchematic());
-            pos2 = WorldUtil.addOffset(pos2, cardinal, 0, 0, 1);
             WorldDimension dimension = new WorldDimension(pos1, pos2);  // Included sign
-            Structure structure = new Structure(player.getName(), pos1, cardinal, plan, dimension);
+            Structure structure = new Structure(player.getName(), pos1, cardinal, plan);
 
             if (canPlace(player, pos1, cardinal, plan)) {
                 StructureService service = new StructureService();
@@ -196,9 +195,8 @@ public class StructurePlanListener implements Listener {
         SimpleCardinal cardinal = WorldUtil.getCardinal(player);
         Location pos1 = new Location(world, new BlockWorldVector(world, x, y, z));
         Location pos2 = WorldUtil.getPos2(pos1, cardinal, plan.getSchematic());
-        pos2 = WorldUtil.addOffset(pos2, cardinal, 0, 0, 1);
         WorldDimension dimension = new WorldDimension(pos1, pos2);  // Included sign
-        Structure structure = new Structure(player.getName(), pos1, cardinal, plan, dimension);
+        Structure structure = new Structure(player.getName(), pos1, cardinal, plan);
         if (action == Action.LEFT_CLICK_BLOCK) {
             if (!session.getRegionSelector(world).isDefined()) {
                 ConstructionManager.select(player, pos1, pos2);
@@ -215,7 +213,6 @@ public class StructurePlanListener implements Listener {
                         session.dispatchCUISelection(SCWorldEditUtil.getLocalPlayer(player));
                         StructureService service = new StructureService();
                         structure = service.save(structure);
-//                        System.out.println("Claiming ground");
                         ProtectedRegion region = ConstructionManager.claimGround(player, structure, dimension);
                         if (region == null) {
                             service.delete(structure);
@@ -226,7 +223,6 @@ public class StructurePlanListener implements Listener {
                         try {
                             structure.setStructureRegionId(region.getId());
                             structure = service.save(structure);
-//                            System.out.println("Clicked: " + location);
                             AsyncBuilder.placeStructure(player, structure);
                         } catch (ConstructionException ex) {
                             service.delete(structure);

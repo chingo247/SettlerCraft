@@ -36,7 +36,7 @@ import javax.persistence.OneToOne;
  * @author Chingo
  */
 @Entity
-public class StructureProgress implements Serializable {
+public class MaterialProgress implements Serializable {
 
     @Id
     @GeneratedValue
@@ -48,12 +48,12 @@ public class StructureProgress implements Serializable {
     private Structure structure;
 
     @OneToMany(cascade = CascadeType.ALL)
-    private List<StructureProgressLayer> layerRequirements;
+    private List<MaterialLayerProgress> layerRequirements;
 
     /**
      * JPA Constructor.
      */
-    protected StructureProgress() {
+    protected MaterialProgress() {
     }
 
     /**
@@ -62,7 +62,7 @@ public class StructureProgress implements Serializable {
      * @param blockReport
      * @param structure The structure
      */
-    public StructureProgress(Structure structure, SchematicBlockReport blockReport) {
+    public MaterialProgress(Structure structure, SchematicBlockReport blockReport) {
         this.layerRequirements = new ArrayList<>(blockReport.getHeight());
         this.structure = structure;
         this.setProgressLayers(blockReport.getLayerRequirements());
@@ -70,9 +70,9 @@ public class StructureProgress implements Serializable {
 
     private void setProgressLayers(List<SchematicMaterialLayer> layerRqs) {
         for (SchematicMaterialLayer lr : layerRqs) {
-            StructureProgressLayer progressLayer = new StructureProgressLayer(this, lr.getLayer());
+            MaterialLayerProgress progressLayer = new MaterialLayerProgress(this, lr.getLayer());
             for (SchematicMaterialResource materialResource : lr.getResources()) {
-                progressLayer.addResource(new StructureProgressMaterialResource(
+                progressLayer.addResource(new MaterialResourceProgress(
                         progressLayer,
                         materialResource.getMaterial(),
                         materialResource.getData(),
@@ -90,11 +90,11 @@ public class StructureProgress implements Serializable {
         return false;
     }
 
-    public StructureProgressLayer getCurrentLayerRequirement() {
+    public MaterialLayerProgress getCurrentLayerRequirement() {
         return layerRequirements.get(currentLayer);
     }
 
-    public StructureProgressLayer getLayerRequirement(int index) {
+    public MaterialLayerProgress getLayerRequirement(int index) {
         return layerRequirements.get(index);
     }
 

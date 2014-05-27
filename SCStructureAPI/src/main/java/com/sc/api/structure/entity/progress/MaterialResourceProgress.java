@@ -30,10 +30,10 @@ import org.bukkit.Material;
  * @author Chingo
  */
 @Entity
-public class StructureProgressMaterialResource implements Serializable {
+public class MaterialResourceProgress implements Serializable {
 
     @ManyToOne(cascade = CascadeType.ALL)
-    private StructureProgressLayer layerRequirement;
+    private MaterialLayerProgress layerRequirement;
 
     @Embedded
     private SchematicMaterialResourceId materialResourceId;
@@ -45,28 +45,28 @@ public class StructureProgressMaterialResource implements Serializable {
     /**
      * JPA Constructor.
      */
-    protected StructureProgressMaterialResource() {
+    protected MaterialResourceProgress() {
     }
 
     /**
      * Constructor.
      *
-     * @param layerRequirement The parent layer requirement which holds this material resources as
+     * @param materialProgressLayer The parent layer requirement which holds this material resources as
      * element of a collection
      * @param material The material
      * @param amount The amount
      */
-    public StructureProgressMaterialResource(StructureProgressLayer layerRequirement, Material material, byte data, int amount) {
+    public MaterialResourceProgress(MaterialLayerProgress materialProgressLayer, Material material, byte data, int amount) {
         this.materialResourceId = new SchematicMaterialResourceId(material, data);
-        this.layerRequirement = layerRequirement;
+        this.layerRequirement = materialProgressLayer;
         this.amount = amount;
     }
 
-    public StructureProgressMaterialResource(StructureProgressLayer layerRequirement, Material material, Integer data, int amount) {
+    public MaterialResourceProgress(MaterialLayerProgress layerRequirement, Material material, Integer data, int amount) {
         this(layerRequirement, material, data.byteValue(), amount);
     }
 
-    public StructureProgressLayer getLayerRequirement() {
+    public MaterialLayerProgress getMaterialLayerProgress() {
         return layerRequirement;
     }
 

@@ -16,8 +16,8 @@
  */
 package com.sc.api.structure.construction.async;
 
-import com.sc.api.structure.construction.progress.ConstructionTask;
-import com.sc.api.structure.construction.progress.ConstructionTask.State;
+import com.sc.api.structure.entity.progress.ConstructionTask;
+import com.sc.api.structure.entity.progress.ConstructionTask.State;
 import com.sc.api.structure.entity.Structure;
 import com.sc.api.structure.event.structure.StructureCompleteEvent;
 import com.sc.api.structure.persistence.service.ConstructionService;
