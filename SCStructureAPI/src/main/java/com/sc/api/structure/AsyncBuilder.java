@@ -97,8 +97,6 @@ public class AsyncBuilder {
         final AsyncEditSession asyncSession = SCAsyncWorldEditUtil.createAsyncEditSession(placer, structure.getLocation().getWorld(), -1); // -1 = infinite
 
         ConstructionTask task = new ConstructionTask(placer, entry, structure, ConstructionTask.ConstructionType.BUILDING_AUTO, ConstructionStrategyType.LAYERED);
-        entry.add(task);
-        constructionService.save(entry);
         task = constructionService.save(task);
        
         final SCDefaultCallbackAction dca = new SCDefaultCallbackAction(placer, structure, task, asyncSession);

@@ -23,13 +23,13 @@ import com.sc.api.structure.entity.schematic.SchematicMaterialResource;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import org.hibernate.annotations.Cascade;
 
 /**
  *
@@ -44,10 +44,12 @@ public class MaterialProgress implements Serializable {
 
     private int currentLayer = 0;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER)
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private Structure structure;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private List<MaterialLayerProgress> layerRequirements;
 
     /**

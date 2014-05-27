@@ -28,7 +28,6 @@ import com.sk89q.worldedit.Location;
 import java.io.Serializable;
 import javax.annotation.Nullable;
 import javax.persistence.AttributeOverride;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -68,9 +67,9 @@ public class Structure implements Serializable {
     private SimpleCardinal cardinal;
 
     @Nullable
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     private MaterialProgress progress;
-
+    
     @Nullable
     private String structureRegion;
 
@@ -101,6 +100,7 @@ public class Structure implements Serializable {
         this.reserved = new ReservedArea(this);
         this.dimension = WorldUtil.getWorldDimension(target, cardinal, plan.getSchematic());
     }
+
     
     public void setStructureRegionId(String structureRegion) {
         this.structureRegion = structureRegion;

@@ -30,7 +30,7 @@ public class HSQLServer {
     private final String HOST = "localhost";
     private final int PORT = 9001; // default
     private final String DATABASE = "StructureAPI";
-    private final String PATH = "plugins//SCStructureAPI//Database//Data//scstructuredb";
+    private final String PATH = "plugins//SCStructureAPI//Database//data//scstructuredb";
     private static HSQLServer instance;
     private Server server;
 

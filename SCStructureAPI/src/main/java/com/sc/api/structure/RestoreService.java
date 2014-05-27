@@ -65,7 +65,6 @@ public class RestoreService {
     
     RestoreService() {
         int processors = Runtime.getRuntime().availableProcessors();
-        System.out.println("Cores: " + processors);
         this.executor = Executors.newFixedThreadPool(processors);
     }
     
@@ -149,7 +148,7 @@ public class RestoreService {
             tx = session.beginTransaction();
             QConstructionTask qct = QConstructionTask.constructionTask;
             JPQLQuery query = new HibernateQuery(session);
-            List<ConstructionTask> tasks = query.from(qct).where(qct.completeAt.before(timestamp)).list(qct);
+            List<ConstructionTask> tasks = query.from(qct).where(qct.completeAt.after(timestamp)).list(qct);
             Iterator<ConstructionTask> it = tasks.iterator();
             while (it.hasNext()) {
                 ConstructionTask t = it.next();
@@ -179,17 +178,21 @@ public class RestoreService {
             tx = session.beginTransaction();
             QConstructionTask qct = QConstructionTask.constructionTask;
             JPQLQuery query = new HibernateQuery(session);
-            List<ConstructionTask> tasks = query.from(qct).where(qct.createdAt.before(timestamp)).list(qct);
+            List<ConstructionTask> tasks = query.from(qct).where(qct.createdAt.after(timestamp)).list(qct);
+            if(!tasks.isEmpty()) {
+                System.out.println("[SCStructureAPI]:" + world + " has " + tasks.size() + " tasks / structure that were placed after the last save");
+            } 
             Iterator<ConstructionTask> it = tasks.iterator();
             World w = Bukkit.getWorld(world);
             RegionManager rmgr = SCWorldGuardUtil.getGlobalRegionManager(w);
             while (it.hasNext()) {
                 ConstructionTask t = it.next();
                 rmgr.removeRegion(t.getData().getRegionId());
-                System.out.println("removed region: " + t.getData().getRegionId());
+                System.out.println("[SCStructureAPI]: " + t.getData().getRegionId() + " has been removed");
                 t.setState(ConstructionTask.State.REMOVED);
                 session.merge(t);
             }
+            
             try {
                 rmgr.save();
                 tx.commit();
@@ -219,7 +222,7 @@ public class RestoreService {
             tx = session.beginTransaction();
             QConstructionTask qct = QConstructionTask.constructionTask;
             JPQLQuery query = new HibernateQuery(session);
-            List<ConstructionTask> tasks = query.from(qct).where(qct.completeAt.before(timestamp)).list(qct);
+            List<ConstructionTask> tasks = query.from(qct).where(qct.completeAt.after(timestamp)).list(qct);
             Iterator<ConstructionTask> it = tasks.iterator();
             while (it.hasNext()) {
                 ConstructionTask t = it.next();
@@ -275,8 +278,13 @@ public class RestoreService {
     
     private void continueTask(ConstructionTask task) {
         String placer = task.getPlacer();
+        
+        System.out.println("placer: " + placer);
+        
         Structure structure = task.getStructure();
         AsyncEditSession session = SCAsyncWorldEditUtil.createAsyncEditSession(placer, null, INFINITE);
+        
+        System.out.println(session.getPlayer());
         
         final SCDefaultCallbackAction dca = new SCDefaultCallbackAction(placer, structure, task, session);
 

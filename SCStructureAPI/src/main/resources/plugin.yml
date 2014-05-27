@@ -20,9 +20,6 @@ version: 1.0
 
 depend: [WorldEdit, AsyncWorldEdit, WorldGuard]
 
-commands:
-    sc:
-        description: Structure related commands
-        usage: /sc [arg]
+
         
           

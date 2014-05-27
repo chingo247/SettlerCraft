@@ -8,10 +8,11 @@ package com.sc.plugin;
 import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.persistence.service.StructurePlanService;
 import com.sc.api.structure.util.CuboidUtil;
-import com.sc.plugin.commands.SettlerCraftCommands;
+import com.sc.plugin.commands.SettlerCraftCommandExecutor;
 import com.sc.plugin.menu.MenuManager;
 import com.sc.plugin.menu.MenuSlot;
 import com.sc.plugin.menu.shop.ItemShopCategoryMenu;
+import com.sc.plugin.menu.shop.ShopListener;
 import com.sk89q.worldedit.CuboidClipboard;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,18 +42,14 @@ public class SettlerCraft extends JavaPlugin {
             this.setEnabled(false);
             return;
         }
-        if (Bukkit.getPluginManager().getPlugin("SCMenu") == null) {
-            System.out.println("Couldn't find SCMenu, DISABLING SettlerCraft");
-            this.setEnabled(false);
-            return;
-        }
 
         setupMenu();
         if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
             setupPlanShop();
         }
 
-        getCommand("sc").setExecutor(new SettlerCraftCommands());
+        Bukkit.getPluginManager().registerEvents(new ShopListener(), this);
+        getCommand("sc").setExecutor(new SettlerCraftCommandExecutor());
     }
 
     private static void setupMenu() {

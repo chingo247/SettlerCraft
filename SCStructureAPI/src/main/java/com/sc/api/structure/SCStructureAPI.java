@@ -5,6 +5,7 @@
  */
 package com.sc.api.structure;
 
+import com.sc.api.structure.entity.SCSession;
 import com.sc.api.structure.entity.Structure;
 import com.sc.api.structure.entity.StructureJob;
 import com.sc.api.structure.entity.plan.StructurePlan;
@@ -73,14 +74,16 @@ public class SCStructureAPI extends JavaPlugin {
             return;
         }
 
-
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(), this);
         HSQLServer.getInstance().start();
         initDB();
-
+        
         RestoreService service = new RestoreService();
         service.restore();
+
         loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
+        
+        
     }
 
     public static WorldEditPlugin getWorldEditPlugin() {
@@ -88,7 +91,10 @@ public class SCStructureAPI extends JavaPlugin {
     }
 
     private static void initDB() {
-        addClassesToDB(
+        MemDBUtil.addAnnotatedClasses(
+                SCSession.class,
+                StructurePlan.class);
+        HibernateUtil.addAnnotatedClasses(
                 Structure.class,
                 MaterialProgress.class,
                 MaterialLayerProgress.class,
@@ -96,14 +102,10 @@ public class SCStructureAPI extends JavaPlugin {
                 StructurePlan.class,
                 StructureJob.class,
                 ConstructionEntry.class,
-                ConstructionTask.class
-        );
+                ConstructionTask.class);
     }
 
-    private static void addClassesToDB(Class... clazzes) {
-        MemDBUtil.addAnnotatedClasses(clazzes);
-        HibernateUtil.addAnnotatedClasses(clazzes);
-    }
+   
 
     /**
      * Loads structures from a directory
@@ -122,7 +124,5 @@ public class SCStructureAPI extends JavaPlugin {
             Logger.getLogger(SCStructureAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
-    
 
 }

@@ -18,12 +18,12 @@ package com.sc.api.structure.entity.progress;
 
 import com.sc.api.structure.entity.schematic.SchematicMaterialResourceId;
 import java.io.Serializable;
-import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import org.bukkit.Material;
+import org.hibernate.annotations.Cascade;
 
 /**
  *
@@ -32,7 +32,8 @@ import org.bukkit.Material;
 @Entity
 public class MaterialResourceProgress implements Serializable {
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private MaterialLayerProgress layerRequirement;
 
     @Embedded

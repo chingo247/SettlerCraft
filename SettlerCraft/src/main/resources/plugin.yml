@@ -1,11 +1,11 @@
 name: SettlerCraft
 main: com.sc.plugin.SettlerCraft
 version: 1.0
-
 depend: [SCStructureAPI]
+
 commands:
     sc:
-        description: Structure related commands
+        description: SettlerCraft related commands
         usage: /sc [arg]
 
           

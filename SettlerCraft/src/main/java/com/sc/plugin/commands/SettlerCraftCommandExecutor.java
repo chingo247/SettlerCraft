@@ -30,7 +30,7 @@ import org.bukkit.entity.Player;
  *
  * @author Chingo
  */
-public class SettlerCraftCommands implements CommandExecutor {
+public class SettlerCraftCommandExecutor implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {

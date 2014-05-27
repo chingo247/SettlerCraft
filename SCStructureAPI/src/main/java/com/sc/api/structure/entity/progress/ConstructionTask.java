@@ -27,7 +27,6 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Objects;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -36,6 +35,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Version;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 
 /**
  *
@@ -55,14 +56,19 @@ public class ConstructionTask implements Serializable {
     @Embedded
     private ConstructionTaskData constructionTaskData;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @PrimaryKeyJoinColumn(name = "TASK_ID", referencedColumnName = "STRUCTURE_ID")
     private Structure structure;
+    
+    @ManyToOne
+    @Cascade(CascadeType.ALL)
+    private final ConstructionEntry constructionEntry;
 
     private Timestamp completeAt;
 
     private Timestamp removeDate;
     
+    @Column(insertable = false, updatable = false)
     private final Timestamp createdAt;
 
     @Version
@@ -80,8 +86,7 @@ public class ConstructionTask implements Serializable {
 
     private final ConstructionStrategyType strategyType;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    private final ConstructionEntry constructionEntry;
+    
 
     protected ConstructionTask() {
         this.constructionType = null;

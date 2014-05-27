@@ -21,11 +21,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import org.hibernate.annotations.Cascade;
 
 /**
  *
@@ -37,7 +37,8 @@ public class ConstructionEntry implements Serializable {
     @Id
     private final String entryName;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "constructionEntry")
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private List<ConstructionTask> tasks;
 
     protected ConstructionEntry() {
