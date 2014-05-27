@@ -19,8 +19,8 @@ package com.sc.api.structure.persistence.service;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.api.structure.construction.progress.ConstructionEntry;
-import com.sc.api.structure.construction.progress.ConstructionState;
 import com.sc.api.structure.construction.progress.ConstructionTask;
+import com.sc.api.structure.construction.progress.ConstructionTask.State;
 import com.sc.api.structure.construction.progress.QConstructionEntry;
 import com.sc.api.structure.construction.progress.QConstructionTask;
 import com.sc.api.structure.entity.Structure;
@@ -102,7 +102,7 @@ public class ConstructionService extends AbstractService {
         return exists;
     }
 
-    public ConstructionTask updateStatus(ConstructionTask task, ConstructionState newStatus) {
+    public ConstructionTask updateStatus(ConstructionTask task, State newStatus) {
 
         Session session = null;
         Transaction tx = null;

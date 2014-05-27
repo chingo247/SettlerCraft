@@ -16,7 +16,7 @@
  */
 package com.sc.api.structure;
 
-import com.sc.api.structure.construction.flags.SCFlags;
+import com.sc.api.structure.construction.flag.SCFlags;
 import com.sc.api.structure.entity.Structure;
 import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.entity.world.SimpleCardinal;

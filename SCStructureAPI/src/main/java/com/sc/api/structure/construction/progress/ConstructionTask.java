@@ -52,30 +52,31 @@ public class ConstructionTask implements Serializable {
     @Embedded
     private StructureData sd;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn(name = "TASK_ID", referencedColumnName = "STRUCTURE_ID")
     private Structure structure;
 
     private Timestamp completeAt;
-    
+
     private Timestamp removeDate;
 
     @Version
     private Timestamp lastModified;
 
     public enum ConstructionType {
+
         BUILDING_AUTO,
         DEMOLISHING_AUTO,
         MANUAL
     }
 
-    private ConstructionState constructionState;
+    private State constructionState;
 
     private final ConstructionType constructionType;
 
     private final ConstructionStrategyType strategyType;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private final ConstructionEntry constructionEntry;
 
     protected ConstructionTask() {
@@ -93,7 +94,7 @@ public class ConstructionTask implements Serializable {
             count += b.getAmount();
         }
         this.jobSize = count;
-        this.constructionState = ConstructionState.PREPARING;
+        this.constructionState = State.QUEUED;
         this.structure = structure;
         this.id = structure.getId();
         this.sd = new StructureData(structure.getPlan().getPrice(), structure.getDimension(), structure.getStructureRegion());
@@ -103,10 +104,10 @@ public class ConstructionTask implements Serializable {
         return constructionEntry;
     }
 
-    public void setState(ConstructionState newState) {
-        if (newState == ConstructionState.COMPLETE) {
+    public void setState(State newState) {
+        if (newState == State.COMPLETE) {
             this.completeAt = new Timestamp(new Date().getTime());
-        } else if (newState == ConstructionState.IN_RECYCLE_BIN) {
+        } else if (newState == State.REMOVED) {
             this.removeDate = new Timestamp(new Date().getTime());
         }
         this.constructionState = newState;
@@ -130,7 +131,7 @@ public class ConstructionTask implements Serializable {
         return l;
     }
 
-    public final ConstructionState getState() {
+    public final State getState() {
 //        Sign sign = WorldUtil.getSign(getSignLocation()) == null ? WorldUtil.createSign(structure.getLocation(), structure.getCardinal()) : WorldUtil.getSign(getSignLocation());
 //        sign.setLine(2, getState().name());
         return constructionState;
@@ -176,6 +177,29 @@ public class ConstructionTask implements Serializable {
             return false;
         }
         return true;
+    }
+
+    /**
+     *
+     * @author Chingo
+     */
+    public enum State {
+        /**
+         * Task has been issued
+         */
+        QUEUED,
+        /**
+         * Task has been completed
+         */
+        COMPLETE,
+        /**
+         * Task has been canceled and will continue as DEMOLISION task
+         */
+        CANCELED,
+        /**
+         * Task has been marked for removal (structure still exists)
+         */
+        REMOVED,
     }
 
 }

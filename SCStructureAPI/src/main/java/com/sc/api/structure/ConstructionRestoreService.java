@@ -22,9 +22,9 @@ import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.api.structure.construction.async.SCAsyncCuboidClipboard;
 import com.sc.api.structure.construction.async.SCDefaultCallbackAction;
 import com.sc.api.structure.construction.progress.ConstructionEntry;
-import com.sc.api.structure.construction.progress.ConstructionState;
 import com.sc.api.structure.construction.progress.ConstructionStrategyType;
 import com.sc.api.structure.construction.progress.ConstructionTask;
+import com.sc.api.structure.construction.progress.ConstructionTask.State;
 import com.sc.api.structure.construction.progress.QConstructionTask;
 import com.sc.api.structure.entity.Structure;
 import com.sc.api.structure.persistence.HibernateUtil;
@@ -55,7 +55,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
-
 /**
  *
  * @author Chingo
@@ -125,7 +124,7 @@ public class ConstructionRestoreService extends AbstractService {
         JPQLQuery query = new HibernateQuery(session);
         List<ConstructionTask> tasks = query.from(qct)
                 .where(
-                        qct.constructionState.eq(ConstructionState.REMOVED)
+                        qct.constructionState.eq(State.REMOVED)
                 ).list(qct);
       
         Iterator<ConstructionTask> it = tasks.iterator();
@@ -134,7 +133,7 @@ public class ConstructionRestoreService extends AbstractService {
         
             Sign sign = WorldUtil.getSign(t.getSignLocation());
             if(sign == null) {
-                t.setState(ConstructionState.IN_RECYCLE_BIN);
+                t.setState(State.REMOVED);
                 session.merge(t);
             } 
         }
@@ -151,22 +150,13 @@ public class ConstructionRestoreService extends AbstractService {
                 session.close();
             }
         }
-        
-        
-        
-        
     }
 
     public List<ConstructionTask> getTasks() {
         Session session = HibernateUtil.getSession();
         QConstructionTask qct = QConstructionTask.constructionTask;
         JPQLQuery query = new HibernateQuery(session);
-        List<ConstructionTask> tasks = query.from(qct).orderBy(qct.id.asc())
-                .where(
-                        qct.constructionState.ne(ConstructionState.IN_RECYCLE_BIN)
-                        .and(qct.constructionState.ne(ConstructionState.COMPLETION_CONFIRMED)
-                        )
-                ).list(qct);
+        List<ConstructionTask> tasks = query.from(qct).list(qct);
         session.close();
         return tasks;
     }
@@ -184,13 +174,13 @@ public class ConstructionRestoreService extends AbstractService {
 
             while (ri.hasNext()) {
                 ConstructionTask ct = ri.next();
-                ct.setState(ConstructionState.IN_RECYCLE_BIN);
+                ct.setState(State.REMOVED);
                 session.merge(ct);
             }
 
             while (ci.hasNext()) {
                 ConstructionTask ct = ci.next();
-                ct.setState(ConstructionState.COMPLETION_CONFIRMED);
+                ct.setState(State.COMPLETE);
                 session.merge(ct);
             }
 
@@ -216,17 +206,17 @@ public class ConstructionRestoreService extends AbstractService {
             ConstructionTask t = it.next();
             World world = t.getStructureData().getWorld();
             if (world == null || t.getStructure() == null) {
-                t.setState(ConstructionState.REMOVED); // World doesnt exist by UUID!
+                t.setState(State.REMOVED); // World doesnt exist by UUID!
                 continue;
             }
             if (!hasSign(t)) {
-                if (t.getState() == ConstructionState.COMPLETE) {
+                if (t.getState() == State.COMPLETE) {
 
                     if (validProgress(t)) {
                         System.out.println("completion confirmed task #" + t.getId());
                         confirmed.add(t);
                     }
-                } else if (t.getState() == ConstructionState.IN_RECYCLE_BIN) {
+                } else if (t.getState() == State.REMOVED) {
                     RegionManager mgr = SCWorldGuardUtil.getGlobalRegionManager(world);
                     if (mgr.hasRegion(t.getStructureData().getRegionId())) {
                         System.out.println("Removing region: " + t.getStructureData().getRegionId() + " from " + world.getName());
@@ -261,7 +251,7 @@ public class ConstructionRestoreService extends AbstractService {
     private boolean validProgress(ConstructionTask task) {
 
         Sign sign = WorldUtil.getSign(task.getSignLocation());
-        if (task.getState() == ConstructionState.COMPLETE && sign == null) {
+        if (task.getState() == State.COMPLETE && sign == null) {
             return true;
         }
 
@@ -320,13 +310,13 @@ public class ConstructionRestoreService extends AbstractService {
         while (it.hasNext()) {
             ConstructionTask t = it.next();
             System.out.println("task: " + t.getId());
-            if (t.getState() == ConstructionState.IN_RECYCLE_BIN) {
+            if (t.getState() == State.REMOVED) {
                 continue;
             }
             // Means it was validated and marked as invalid
-            if (t.getState() == ConstructionState.COMPLETE) {
+            if (t.getState() == State.COMPLETE) {
                 unfinished.add(t);
-            } else if (t.getState() == ConstructionState.IN_PROGRESS) {
+            } else if (t.getState() == State.QUEUED) {
                 inprogress.add(t);
             } else {
                 other.add(t);
@@ -368,7 +358,7 @@ public class ConstructionRestoreService extends AbstractService {
     public void cleanBin() {
         Session session = HibernateUtil.getSession();
         QConstructionTask qct = QConstructionTask.constructionTask;
-        new HibernateDeleteClause(session, qct).where(qct.constructionState.eq(ConstructionState.IN_RECYCLE_BIN));
+        new HibernateDeleteClause(session, qct).where(qct.constructionState.eq(State.REMOVED));
         session.close();
     }
 
@@ -376,7 +366,7 @@ public class ConstructionRestoreService extends AbstractService {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QConstructionTask qct = QConstructionTask.constructionTask;
-        List<ConstructionTask> tasks = query.from(qct).where(qct.constructionState.eq(ConstructionState.IN_RECYCLE_BIN).and(qct.sd().refunded.ne(Boolean.TRUE))).list(qct);
+        List<ConstructionTask> tasks = query.from(qct).where(qct.constructionState.eq(State.REMOVED).and(qct.sd().refunded.eq(Boolean.FALSE))).list(qct);
         session.close();
         return tasks;
     }

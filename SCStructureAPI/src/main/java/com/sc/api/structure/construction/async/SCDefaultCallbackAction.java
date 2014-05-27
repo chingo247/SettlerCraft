@@ -16,10 +16,10 @@
  */
 package com.sc.api.structure.construction.async;
 
-import com.sc.api.structure.construction.progress.ConstructionState;
 import com.sc.api.structure.construction.progress.ConstructionTask;
-import com.sc.api.structure.event.structure.StructureCompleteEvent;
+import com.sc.api.structure.construction.progress.ConstructionTask.State;
 import com.sc.api.structure.entity.Structure;
+import com.sc.api.structure.event.structure.StructureCompleteEvent;
 import com.sc.api.structure.persistence.service.ConstructionService;
 import com.sk89q.worldedit.EditSession;
 import org.bukkit.Bukkit;
@@ -61,7 +61,7 @@ public class SCDefaultCallbackAction implements SCJobCallback {
                     if (ply != null && ply.isOnline()) {
                         ply.sendMessage(ChatColor.YELLOW + "Building:  " + ChatColor.BLUE + structure.getPlan().getDisplayName());
                     }
-                    task = constructionService.updateStatus(task, ConstructionState.IN_PROGRESS);
+                    task = constructionService.updateStatus(task, State.QUEUED);
                 } else if (bpje.getStatus() == BlockPlacerJobEntry.JobStatus.Done) {
                     Player ply = Bukkit.getPlayer(placer);
                     if (ply != null && ply.isOnline()) {
@@ -69,7 +69,7 @@ public class SCDefaultCallbackAction implements SCJobCallback {
                         ply.playSound(ply.getLocation(), Sound.NOTE_SNARE_DRUM, 2, 0);
                     }
                     Bukkit.getPluginManager().callEvent(new StructureCompleteEvent(structure));
-                    task = constructionService.updateStatus(task, ConstructionState.COMPLETE);
+                    task = constructionService.updateStatus(task, State.COMPLETE);
                 }
             }
         });
@@ -86,7 +86,7 @@ public class SCDefaultCallbackAction implements SCJobCallback {
         session.undo(session);
 
         final ConstructionService constructionService = new ConstructionService();
-        constructionService.updateStatus(task, ConstructionState.CANCELED);
+        constructionService.updateStatus(task, State.CANCELED);
     }
 
 }

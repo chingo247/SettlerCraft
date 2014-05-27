@@ -58,16 +58,19 @@
                     </execution>
                 </executions>
             </plugin>
-                        <plugin>
+<!--                        <plugin>
                 <groupId>com.mysema.maven</groupId>
                 <artifactId>apt-maven-plugin</artifactId>
                 <version>1.0.9</version>
                 <executions>
                     <execution>
+                        
                         <goals>
                             <goal>process</goal>
+                            
                         </goals>
                         <configuration>
+                            
                             <outputDirectory>target/generated-sources/java</outputDirectory>
                             <processor>com.mysema.query.apt.jpa.JPAAnnotationProcessor</processor>
                             <options>
@@ -76,7 +79,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
         </plugins>
     </build>
     <dependencies>
@@ -89,13 +92,13 @@
 <!--        <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>craftbukkit</artifactId>
-            <version>1.7.2-R0.3</version>
+            <version>1.7.5-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>-->
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.7.2-R0.3</version>
+            <version>1.7.2-R0.2</version>
             <scope>provided</scope>
         </dependency>
         <!--WorldEdit-->

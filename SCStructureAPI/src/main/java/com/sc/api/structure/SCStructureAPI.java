@@ -18,7 +18,7 @@ import com.sc.api.structure.entity.progress.StructureProgress;
 import com.sc.api.structure.entity.progress.StructureProgressLayer;
 import com.sc.api.structure.entity.progress.StructureProgressMaterialResource;
 import com.sc.api.structure.io.StructurePlanLoader;
-import com.sc.api.structure.listeners.StructurePlanListener;
+import com.sc.api.structure.listener.StructurePlanListener;
 import com.sc.api.structure.persistence.HSQLServer;
 import com.sc.api.structure.persistence.HibernateUtil;
 import com.sc.api.structure.persistence.MemDBUtil;

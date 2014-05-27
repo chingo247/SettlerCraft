@@ -34,12 +34,10 @@ import com.sc.api.structure.util.plugins.SCWorldGuardUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.Vector;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
-import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
@@ -101,29 +99,18 @@ public class AsyncBuilder {
 
         ConstructionTask task = new ConstructionTask(entry, structure, ConstructionTask.ConstructionType.BUILDING_AUTO, ConstructionStrategyType.LAYERED);
         entry.add(task);
-        
-
-       
-        
-        // WORKAROUND / HACK...
-        final Sign sign = WorldUtil.createSign(structure.getLocation(), structure.getCardinal());
-        sign.setLine(0, String.valueOf(task.getId()));
-        sign.setLine(1, String.valueOf(structure.getPlan().getDisplayName()));
-        sign.setLine(2, task.getState().name());
-        sign.update(true);
-        
+        constructionService.save(entry);
         task = constructionService.save(task);
-        
+       
         final SCDefaultCallbackAction dca = new SCDefaultCallbackAction(placer, structure, task, asyncSession);
 
         final CuboidClipboard schematic = structure.getPlan().getSchematic();
         final Location t = SyncBuilder.align(schematic, structure.getLocation(), structure.getCardinal());
-        final Vector signVec = structure.getLocation().getPosition().subtract(t.getPosition()).add(0, 1, 0);
         final SmartClipBoard smartClipboard = new SmartClipBoard(schematic, ConstructionStrategyType.LAYERED, false);
         final SCAsyncCuboidClipboard asyncCuboidClipboard = new SCAsyncCuboidClipboard(asyncSession.getPlayer(), smartClipboard);
 
         try {
-            asyncCuboidClipboard.place(asyncSession, WorldUtil.addOffset(structure.getLocation(), structure.getCardinal(), 0, 0, 1).getPosition(), false, dca);
+            asyncCuboidClipboard.place(asyncSession, WorldUtil.addOffset(t, structure.getCardinal(), 0, 0, 1).getPosition(), false, dca);
         } catch (MaxChangedBlocksException ex) {
             Logger.getLogger(SyncBuilder.class.getName()).log(Level.SEVERE, null, ex); // Won't happen
         }
