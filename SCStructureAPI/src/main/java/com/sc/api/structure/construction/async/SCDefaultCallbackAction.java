@@ -16,11 +16,11 @@
  */
 package com.sc.api.structure.construction.async;
 
+import com.sc.api.structure.entity.Structure;
 import com.sc.api.structure.entity.progress.ConstructionTask;
 import com.sc.api.structure.entity.progress.ConstructionTask.State;
-import com.sc.api.structure.entity.Structure;
 import com.sc.api.structure.event.structure.StructureCompleteEvent;
-import com.sc.api.structure.persistence.service.ConstructionService;
+import com.sc.api.structure.persistence.service.TaskService;
 import com.sk89q.worldedit.EditSession;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -50,8 +50,9 @@ public class SCDefaultCallbackAction implements SCJobCallback {
 
     @Override
     public void onJobAdded(BlockPlacerJobEntry entry) {
-        final ConstructionService constructionService = new ConstructionService();
-
+        final TaskService constructionService = new TaskService();
+        task = constructionService.setJobId(task, entry.getJobId());
+        
         entry.addStateChangedListener(new IJobEntryListener() {
 
             @Override
@@ -61,15 +62,17 @@ public class SCDefaultCallbackAction implements SCJobCallback {
                     if (ply != null && ply.isOnline()) {
                         ply.sendMessage(ChatColor.YELLOW + "Building:  " + ChatColor.BLUE + structure.getPlan().getDisplayName());
                     }
-                    task = constructionService.updateStatus(task, State.QUEUED);
+                    task.setHasPlacedBlocks(true);
+                    task = constructionService.updateStatus(task, State.PROGRESSING);
                 } else if (bpje.getStatus() == BlockPlacerJobEntry.JobStatus.Done) {
                     Player ply = Bukkit.getPlayer(placer);
-                    if (ply != null && ply.isOnline()) {
+                    if (ply != null && ply.isOnline() && task.getState() != State.COMPLETE) {
                         ply.sendMessage(ChatColor.YELLOW + "Construction complete: " + ChatColor.BLUE + structure.getPlan().getDisplayName());
                         ply.playSound(ply.getLocation(), Sound.NOTE_SNARE_DRUM, 2, 0);
                     }
                     Bukkit.getPluginManager().callEvent(new StructureCompleteEvent(structure));
                     task = constructionService.updateStatus(task, State.COMPLETE);
+                    task = constructionService.setJobId(task, -1);
                 }
             }
         });
@@ -85,8 +88,9 @@ public class SCDefaultCallbackAction implements SCJobCallback {
         entry.getEditSession().undo(entry.getEditSession());
         session.undo(session);
 
-        final ConstructionService constructionService = new ConstructionService();
+        final TaskService constructionService = new TaskService();
         constructionService.updateStatus(task, State.CANCELED);
+        task = constructionService.setJobId(task, -1);
     }
 
 }

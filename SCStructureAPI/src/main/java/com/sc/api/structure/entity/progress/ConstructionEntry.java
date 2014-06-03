@@ -37,7 +37,7 @@ public class ConstructionEntry implements Serializable {
     @Id
     private final String entryName;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "constructionEntry")
+    @OneToMany(fetch = FetchType.EAGER)
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private List<ConstructionTask> tasks;
 

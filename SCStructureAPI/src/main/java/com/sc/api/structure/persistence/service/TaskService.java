@@ -36,13 +36,25 @@ import org.hibernate.Transaction;
  *
  * @author Chingo
  */
-public class ConstructionService extends AbstractService {
+public class TaskService extends AbstractService {
 
     private final Logger logger = Logger.getLogger("ConstructionService");
+    
+    private static final int INFINITE = -1;
+    
+    public ConstructionTask getTask(Long id) {
+        Session session = HibernateUtil.getSession();
+        JPQLQuery query = new HibernateQuery(session);
+        QConstructionTask qct = QConstructionTask.constructionTask;
+        ConstructionTask task = query.from(qct).where(qct.id.eq(id)).uniqueResult(qct);
+        session.close();
+        return task;
+    }
 
     /**
-     * Creates an entry for speficied issuer, the issuer may be a player or something else (group / npc) as long as it has a valid representative or owner
-     * or a bankaccount (if vault)
+     * Creates an entry for speficied issuer, the issuer may be a player or something else (group /
+     * npc) as long as it has a valid representative or owner or a bankaccount (if vault)
+     *
      * @param issuer The issuer
      * @return The created entry
      */
@@ -53,6 +65,7 @@ public class ConstructionService extends AbstractService {
 
     /**
      * Saves a task
+     *
      * @param constructionTask The constructionTask
      * @return The save instance
      */
@@ -81,6 +94,7 @@ public class ConstructionService extends AbstractService {
 
     /**
      * Saves a constructionEntry
+     *
      * @param constructionEntry The constructionEntry
      * @return The saved instance
      */
@@ -109,6 +123,7 @@ public class ConstructionService extends AbstractService {
 
     /**
      * Determines wheter this structure already has a task
+     *
      * @param structure The structure
      * @return true if this structure already has a task
      */
@@ -123,6 +138,7 @@ public class ConstructionService extends AbstractService {
 
     /**
      * Updates the the status of a task and saves the task
+     *
      * @param task The task
      * @param newStatus The newstatus of the task
      * @return the updated/saved instance of the task
@@ -134,6 +150,31 @@ public class ConstructionService extends AbstractService {
             session = HibernateUtil.getSession();
             tx = session.beginTransaction();
             task.setState(newStatus);
+            task = (ConstructionTask) session.merge(task);
+            tx.commit();
+        } catch (HibernateException e) {
+            try {
+                tx.rollback();
+            } catch (HibernateException rbe) {
+                java.util.logging.Logger.getLogger(AbstractService.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
+            }
+            throw e;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return task;
+    }
+
+    public ConstructionTask setJobId(ConstructionTask task, int jobId) {
+        Session session = null;
+        Transaction tx = null;
+        try {
+            
+            session = HibernateUtil.getSession();
+            tx = session.beginTransaction();
+            task.setJobId(jobId);
             task = (ConstructionTask) session.merge(task);
             tx.commit();
         } catch (HibernateException e) {
@@ -166,9 +207,10 @@ public class ConstructionService extends AbstractService {
     }
 
     /**
-     * Checks whether the entry exists or not
+     * Checks whether the entry regionExists or not
+     *
      * @param entryName The name of the entry
-     * @return True if entry exists, othwerwise false
+     * @return True if entry regionExists, othwerwise false
      */
     public boolean hasEntry(String entryName) {
         return getEntry(entryName) != null;
@@ -176,7 +218,7 @@ public class ConstructionService extends AbstractService {
 
     /**
      * Gets the entries
-     * @return  List of all entries
+     * @return List of all entries
      */
     public List<ConstructionEntry> getEntries() {
         Session session = HibernateUtil.getSession();
@@ -186,32 +228,14 @@ public class ConstructionService extends AbstractService {
         session.close();
         return entries;
     }
+    
+   
+    
+    
 
+   
+    
 
-    public ConstructionEntry removeConstructionTask(String issuer, ConstructionTask constructionTask) {
-        Session session = null;
-        Transaction tx = null;
-        ConstructionEntry entry = null;
-        try {
-            session = HibernateUtil.getSession();
-            tx = session.beginTransaction();
-            entry = getEntry(issuer);
-            entry.remove(constructionTask);
-            entry = (ConstructionEntry) session.merge(entry);
+    
 
-            tx.commit();
-        } catch (HibernateException e) {
-            try {
-                tx.rollback();
-            } catch (HibernateException rbe) {
-                java.util.logging.Logger.getLogger(AbstractService.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
-            }
-            throw e;
-        } finally {
-            if (session != null) {
-                session.close();
-            }
-        }
-        return entry;
-    }
 }

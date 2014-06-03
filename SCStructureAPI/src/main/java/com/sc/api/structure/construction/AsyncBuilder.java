@@ -14,29 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure;
+package com.sc.api.structure.construction;
 
+import com.sc.api.structure.SmartClipBoard;
 import com.sc.api.structure.construction.async.SCAsyncCuboidClipboard;
-import com.sc.api.structure.construction.async.SCDefaultCallbackAction;
 import com.sc.api.structure.construction.async.SCJobCallback;
-import com.sc.api.structure.construction.progress.ConstructionException;
 import com.sc.api.structure.construction.progress.ConstructionStrategyType;
-import com.sc.api.structure.construction.progress.ConstructionTaskException;
-import com.sc.api.structure.entity.Structure;
-import com.sc.api.structure.entity.plan.StructurePlan;
-import com.sc.api.structure.entity.progress.ConstructionEntry;
-import com.sc.api.structure.entity.progress.ConstructionTask;
 import com.sc.api.structure.entity.world.SimpleCardinal;
-import com.sc.api.structure.persistence.service.ConstructionService;
 import com.sc.api.structure.util.plugins.SCAsyncWorldEditUtil;
-import com.sc.api.structure.util.plugins.SCWorldGuardUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldguard.protection.managers.RegionManager;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
@@ -55,7 +45,7 @@ public class AsyncBuilder {
     }
 
     public static void place(AsyncEditSession editSession, CuboidClipboard cuboidClipboard, Location target, SimpleCardinal cardinal, String jobName) throws MaxChangedBlocksException {
-        Location t = SyncBuilder.align(cuboidClipboard, target, cardinal);
+        Location t = ConstructionManager.align(cuboidClipboard, target, cardinal);
         cuboidClipboard.place(editSession, t.getPosition(), true);
     }
 
@@ -76,51 +66,15 @@ public class AsyncBuilder {
     }
 
     public static void placeLayered(AsyncEditSession asyncEditSession, CuboidClipboard whole, Location location, SimpleCardinal cardinal, String jobName, SCJobCallback callback) throws MaxChangedBlocksException {
-        Location t = SyncBuilder.align(whole, location, cardinal);
+        Location t = ConstructionManager.align(whole, location, cardinal);
         SmartClipBoard smartClipboard = new SmartClipBoard(whole, ConstructionStrategyType.LAYERED, false);
         SCAsyncCuboidClipboard asyncCuboidClipboard = new SCAsyncCuboidClipboard(asyncEditSession.getPlayer(), smartClipboard);
         asyncCuboidClipboard.place(asyncEditSession, t.getPosition(), false, callback);
     }
 
-    public static void placeStructure(String placer, Structure structure) throws ConstructionException {
-        final ConstructionService constructionService = new ConstructionService();
-        if (constructionService.hasConstructionTask(structure)) {
-            throw new ConstructionTaskException("Already have a task reserved for structure" + structure.getId());
-        }
-        
-        final RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
-        if (structure.getStructureRegion() == null || !mgr.hasRegion(structure.getStructureRegion())) {
-            throw new ConstructionException("Tried to place a structure without a region");
-        }
-
-        final ConstructionEntry entry = constructionService.hasEntry(placer) ? constructionService.getEntry(placer) : constructionService.createEntry(placer);
-        final AsyncEditSession asyncSession = SCAsyncWorldEditUtil.createAsyncEditSession(placer, structure.getLocation().getWorld(), -1); // -1 = infinite
-
-        ConstructionTask task = new ConstructionTask(placer, entry, structure, ConstructionTask.ConstructionType.BUILDING_AUTO, ConstructionStrategyType.LAYERED);
-        task = constructionService.save(task);
-       
-        final SCDefaultCallbackAction dca = new SCDefaultCallbackAction(placer, structure, task, asyncSession);
-
-        final CuboidClipboard schematic = structure.getPlan().getSchematic();
-        final Location t = SyncBuilder.align(schematic, structure.getLocation(), structure.getCardinal());
-        final SmartClipBoard smartClipboard = new SmartClipBoard(schematic, ConstructionStrategyType.LAYERED, false);
-        final SCAsyncCuboidClipboard asyncCuboidClipboard = new SCAsyncCuboidClipboard(asyncSession.getPlayer(), smartClipboard);
-
-        try {
-            asyncCuboidClipboard.place(asyncSession, t.getPosition(), false, dca);
-        } catch (MaxChangedBlocksException ex) {
-            Logger.getLogger(SyncBuilder.class.getName()).log(Level.SEVERE, null, ex); // Won't happen
-        }
-
-    }
+    
     
 
 
-    public static void placeStructure(Player player, final Structure structure) throws ConstructionException {
-        placeStructure(player.getName(), structure);
-    }
-
-    public static void placeStructure(Player player, StructurePlan plan, Location location, SimpleCardinal cardinal) throws ConstructionException {
-        placeStructure(player, new Structure(player.getName(), location, cardinal, plan));
-    }
+    
 }

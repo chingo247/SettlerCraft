@@ -14,15 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure;
+package com.sc.api.structure.construction;
 
 import com.sc.api.structure.construction.flag.SCFlags;
 import com.sc.api.structure.entity.Structure;
 import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.entity.world.SimpleCardinal;
 import com.sc.api.structure.entity.world.WorldDimension;
-import com.sc.api.structure.util.WorldUtil;
-import com.sc.api.structure.util.plugins.SCWorldEditUtil;
 import com.sc.api.structure.util.plugins.SCWorldGuardUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
@@ -48,56 +46,53 @@ import org.bukkit.entity.Player;
  * @author Chingo
  */
 public class ConstructionManager {
+    
+    private static final int INFINITE_BLOCKS = -1;
 
     /**
-     * Selects a region between two positions
+     * Aligns target clipboard to speficied direction, assuming that the initial state is pointed to
+     * EAST (entrance to the west)
      *
-     * @param player The player to create an editSession
-     * @param cardinal The cardinal direction
-     * @param target The target location
-     * @param cuboidClipboard The cuboidClipboard
+     * @param clipboard
+     * @param location
+     * @param direction
+     * @return The new target location
      */
-    public static void select(Player player, Location target, SimpleCardinal cardinal, CuboidClipboard cuboidClipboard) {
-        Location pos2 = WorldUtil.getPos2(target, cardinal, cuboidClipboard);
-        select(player, target, pos2);
-    }
-
-    /**
-     * Selects a region between two points
-     *
-     * @param player The player to create an editsession
-     * @param pos1 The first position
-     * @param pos2 The secondary position
-     */
-    public static void select(Player player, Location pos1, Location pos2) {
-        SCWorldEditUtil.selectClipboardArea(player, pos1, pos2);
-    }
-
-    public static void selectStructure(Player player, Structure structure) {
-        Location pos2 = WorldUtil.getPos2(structure.getLocation(), structure.getCardinal(), structure.getPlan().getSchematic());
-        select(player, structure.getLocation(), pos2);
-    }
-
-    public static void selectStructure(Player player, StructurePlan plan, Location location, SimpleCardinal cardinal) {
-        Structure structure = new Structure("", location, cardinal, plan);
-        selectStructure(player, structure);
+    public static Location align(final CuboidClipboard clipboard, Location location, SimpleCardinal direction) {
+        switch (direction) {
+            case EAST:
+                return location;
+            case SOUTH:
+                clipboard.rotate2D(90);
+                return location.add(new BlockVector(-(clipboard.getWidth() - 1), 0, 0));
+            case WEST:
+                clipboard.rotate2D(180);
+                return location.add(new BlockVector(-(clipboard.getWidth() - 1), 0, -(clipboard.getLength() - 1)));
+            case NORTH:
+                clipboard.rotate2D(270);
+                return location.add(new BlockVector(0, 0, -(clipboard.getLength() - 1)));
+            default:
+                throw new AssertionError("unreachable");
+        }
     }
 
     private static String getIdForStructure(Structure structure) {
         String s = String.valueOf("sc_s_" + (structure.getPlan().getDisplayName().replaceAll("\\s", "") + "_" + structure.getId())).toLowerCase();
         return s;
     }
-    
+
     public static ProtectedRegion claimGround(final Player player, final Structure structure, final WorldDimension dimension) {
         if (structure.getId() == null) {
-            throw new AssertionError("Save the structure instance first! (e.g. structure = structureService.save(structure)"); // Should only happen if the programmer forgets to save the instance before this
+            throw new AssertionError("Structure id was null, save the structure instance first! (e.g. structure = structureService.save(structure)"); // Should only happen if the programmer forgets to save the instance before this
         }
+
         if (!ConstructionManager.canClaim(player)
                 || !ConstructionManager.mayClaim(player)
                 || ConstructionManager.overlapsStructure(structure)
                 || ConstructionManager.overlapsUnowned(player, structure)) {
             return null;
         }
+
         RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
         WorldDimension dim = dimension;
         Vector p1 = dim.getStart().getPosition();
@@ -116,35 +111,11 @@ public class ConstructionManager {
         }
 
         return region;
-        
+
     }
 
     public static ProtectedRegion claimGround(final Player player, final Structure structure) {
         return claimGround(player, structure, structure.getDimension());
-    }
-
-    public boolean createConstructionSite(String id, Player placer, World world, BlockVector pos1, BlockVector pos2, boolean feedback, boolean addSelf) {
-        ProtectedCuboidRegion region = new ProtectedCuboidRegion(id, pos1, pos2);
-        RegionPermissionModel permModel = SCWorldGuardUtil.getRegionPermissionModel(placer);
-        // Can't replace existing regions
-        RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(world);
-        if (mgr.hasRegion(id)) {
-            if (feedback) {
-                placer.sendMessage(ChatColor.RED + "That region already exists. Please choose a different name.");
-            }
-            return false;
-        }
-
-        region.getOwners().addPlayer(placer.getName());
-
-        mgr.addRegion(region);
-        try {
-            mgr.save();
-        } catch (ProtectionDatabaseException ex) {
-            Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return true;
-
     }
 
     public static boolean overlapsUnowned(Player player, Structure structure) {
@@ -225,16 +196,18 @@ public class ConstructionManager {
         return true;
     }
 
-    public static boolean exists(World world, String id) {
+    public static boolean regionExists(World world, String id) {
         return SCWorldGuardUtil.getGlobalRegionManager(world).hasRegion(id);
     }
+    
+   
 
-    public static boolean isWithinConstructionZone(Structure structure) {
-        return false;
-    }
-
-    public static boolean exceedsLimit(Player player, Structure structure) {
-        return false;
-    }
+//    public static boolean isWithinConstructionZone(Structure structure) {
+//        return false;
+//    }
+//
+//    public static boolean exceedsLimit(Player player, Structure structure) {
+//        return false;
+//    }
 
 }

@@ -24,8 +24,15 @@ import com.sc.api.structure.entity.world.SimpleCardinal;
 import com.sc.api.structure.entity.world.WorldDimension;
 import com.sc.api.structure.entity.world.WorldLocation;
 import com.sc.api.structure.util.WorldUtil;
+import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;
+import com.sk89q.worldedit.data.DataException;
+import com.sk89q.worldedit.schematic.SchematicFormat;
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
@@ -75,6 +82,9 @@ public class Structure implements Serializable {
 
     @Embedded
     private ReservedArea reserved;
+    
+    
+    private File areaBefore;
 
     /**
      * JPA Constructor
@@ -101,6 +111,24 @@ public class Structure implements Serializable {
         this.dimension = WorldUtil.getWorldDimension(target, cardinal, plan.getSchematic());
     }
 
+    public void setAreaBefore(CuboidClipboard backup) {
+        try {
+            areaBefore = File.createTempFile(owner + "_", "str_" + id + "_" + getPlan().getDisplayName().replaceAll("\\s", "_"));
+            SchematicFormat.MCEDIT.save(backup, areaBefore);
+        } catch (IOException | DataException ex) {
+            Logger.getLogger(Structure.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public CuboidClipboard getAreaBefore() {
+        CuboidClipboard area = null;
+        try {
+            area = SchematicFormat.MCEDIT.load(areaBefore);
+        } catch (IOException | DataException ex) {
+            Logger.getLogger(Structure.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return area;
+    }
     
     public void setStructureRegionId(String structureRegion) {
         this.structureRegion = structureRegion;

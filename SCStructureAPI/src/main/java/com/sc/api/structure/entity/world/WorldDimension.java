@@ -19,6 +19,7 @@ package com.sc.api.structure.entity.world;
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
 import com.sc.api.structure.util.plugins.SCWorldEditUtil;
+import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.Vector;
 import java.io.Serializable;
@@ -79,6 +80,10 @@ public class WorldDimension implements Serializable {
 
     public World getWorld() {
         return Bukkit.getWorld(world);
+    }
+    
+    public LocalWorld getLocalWorld() {
+        return getStart().getWorld();
     }
 
     public int getStartX() {

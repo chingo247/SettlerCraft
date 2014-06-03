@@ -58,7 +58,7 @@
                     </execution>
                 </executions>
             </plugin>
-                        <plugin>
+<!--                        <plugin>
                 <groupId>com.mysema.maven</groupId>
                 <artifactId>apt-maven-plugin</artifactId>
                 <version>1.0.9</version>
@@ -79,7 +79,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
         </plugins>
     </build>
     <dependencies>
@@ -95,12 +95,17 @@
             <version>1.7.5-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>-->
-        <dependency>
+                <dependency>
+            <groupId>org.sc.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>1.7.9</version>
+        </dependency>
+<!--        <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
             <version>1.7.2-R0.2</version>
             <scope>provided</scope>
-        </dependency>
+        </dependency>-->
         <!--WorldEdit-->
         <dependency>
             <groupId>com.sk89q</groupId>

@@ -34,7 +34,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Version;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 
@@ -68,25 +67,23 @@ public class ConstructionTask implements Serializable {
 
     private Timestamp removeDate;
     
+    private boolean hasPlacedBlocks = false;
+    
     @Column(insertable = false, updatable = false)
     private final Timestamp createdAt;
 
-    @Version
-    private Timestamp lastModified;
-
     public enum ConstructionType {
-        BUILDING_AUTO,
-        DEMOLISHING_AUTO,
-        MANUAL
+        BUILDING,
+        DEMOLISHING
     }
 
     private State constructionState;
 
-    private final ConstructionType constructionType;
+    private ConstructionType constructionType;
 
     private final ConstructionStrategyType strategyType;
 
-    
+    private Integer jobId = -1;
 
     protected ConstructionTask() {
         this.constructionType = null;
@@ -113,11 +110,21 @@ public class ConstructionTask implements Serializable {
         this.placer = placer;
     }
 
+    public void setConstructionType(ConstructionType constructionType) {
+        this.constructionType = constructionType;
+    }
+
+    public void setJobId(int jobId) {
+        this.jobId = jobId;
+    }
+
+    public Integer getJobId() {
+        return jobId;
+    }
+    
     public String getPlacer() {
         return placer;
     }
-
-    
     
     public ConstructionEntry getConstructionEntry() {
         return constructionEntry;
@@ -126,10 +133,27 @@ public class ConstructionTask implements Serializable {
     public Timestamp getCreatedAt() {
         return createdAt;
     }
-    
-    
 
+    public boolean hasPlacedBlocks() {
+        return hasPlacedBlocks;
+    }
+
+    public void setHasPlacedBlocks(boolean hasPlacedBlocks) {
+        this.hasPlacedBlocks = hasPlacedBlocks;
+    }
+    
     public void setState(State newState) {
+        if(constructionState == newState) {
+            return;
+        }
+        if(constructionState == State.COMPLETE) {
+            this.completeAt = null;
+        }
+        
+        if(constructionState == State.REMOVED) {
+            this.removeDate = null;
+        }
+        
         if (newState == State.COMPLETE) {
             this.completeAt = new Timestamp(new Date().getTime());
         } else if (newState == State.REMOVED) {
@@ -162,10 +186,6 @@ public class ConstructionTask implements Serializable {
         return constructionState;
     }
 
-    public Timestamp getLastModified() {
-        return lastModified;
-    }
-
     public Long getId() {
         return id;
     }
@@ -174,6 +194,7 @@ public class ConstructionTask implements Serializable {
         return structure;
     }
 
+    
     public ConstructionType getConstructionType() {
         return constructionType;
     }
@@ -214,6 +235,10 @@ public class ConstructionTask implements Serializable {
          */
         QUEUED,
         /**
+         * Task is being processed
+         */
+        PROGRESSING,
+        /**
          * Task has been completed
          */
         COMPLETE,
@@ -225,6 +250,11 @@ public class ConstructionTask implements Serializable {
          * Task has been marked for removal (structure still exists)
          */
         REMOVED,
+        
+        STOPPED
     }
+    
+    
+    
 
 }

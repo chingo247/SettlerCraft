@@ -86,7 +86,7 @@ public class SCWorldEditUtil {
         return null;
     }
 
-    public static void selectClipboardArea(Player player, Location pos1, Location pos2) {
+    public static void select(Player player, Location pos1, Location pos2) {
         LocalPlayer localPlayer = getLocalPlayer(player);
         LocalWorld world = localPlayer.getWorld();
         LocalSession session = getLocalSession(player);

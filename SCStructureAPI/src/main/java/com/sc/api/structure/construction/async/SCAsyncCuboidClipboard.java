@@ -19,7 +19,6 @@ package com.sc.api.structure.construction.async;
 import com.sc.api.structure.SmartClipBoard;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.LocalEntity;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -81,29 +80,6 @@ public class SCAsyncCuboidClipboard extends ProxyCuboidClipboard {
         m_wrapper = m_plugin.getPlayerManager().getPlayer(player);
     }
 
-    public LocalEntity[] pasteEntities(final Vector pos, SCJobCallback callback) {
-        boolean isAsync = checkAsync(WorldeditOperations.paste);
-        if (!isAsync) {
-            return super.pasteEntities(pos);
-        }
-
-        final int jobId = getJobId();
-        final CuboidClipboardWrapper cc = new CuboidClipboardWrapper(m_player, m_clipboard, jobId);
-        final SCBlockPlacerJobEntry job = new SCBlockPlacerJobEntry(m_player, jobId, "pasteEntities");
-        m_blockPlacer.addJob(m_player, job);
-
-        m_schedule.runTaskAsynchronously(m_plugin, new SCClipBoardAsyncTask(cc, null, m_player, "pasteEntities",
-                m_blockPlacer, job, callback) {
-                    @Override
-                    public void task(CuboidClipboard cc)
-                    throws MaxChangedBlocksException {
-                        cc.pasteEntities(pos);
-                    }
-                });
-
-        return new LocalEntity[0];
-    }
-
     public void place(final EditSession editSession, final Vector pos,
             final boolean noAir, SCJobCallback callback)
             throws MaxChangedBlocksException {
@@ -139,80 +115,8 @@ public class SCAsyncCuboidClipboard extends ProxyCuboidClipboard {
                 });
     }
 
-    public void paste(final EditSession editSession, final Vector newOrigin,
-            final boolean noAir, SCJobCallback callback)
-            throws MaxChangedBlocksException {
-        boolean isAsync = checkAsync(WorldeditOperations.paste);
-        if (!isAsync) {
-            super.paste(editSession, newOrigin, noAir);
-            return;
-        }
-
-        final int jobId = getJobId();
-        final EditSession session;
-        final CuboidClipboardWrapper cc = new CuboidClipboardWrapper(m_player, m_clipboard, jobId);
-        final SCBlockPlacerJobEntry job;
-
-        if (editSession instanceof AsyncEditSession) {
-            AsyncEditSession aSession = (AsyncEditSession) editSession;
-            session = new CancelabeEditSession(aSession, aSession.getAsyncMask(), jobId);
-            job = new SCBlockPlacerJobEntry(m_player, (CancelabeEditSession) session, jobId, "place");
-        } else {
-            session = editSession;
-            job = new SCBlockPlacerJobEntry(m_player, jobId, "place");
-        }
-
-        m_blockPlacer.addJob(m_player, job);
-
-        m_schedule.runTaskAsynchronously(m_plugin, new SCClipBoardAsyncTask(cc, editSession, m_player, "paste",
-                m_blockPlacer, job, callback) {
-                    @Override
-                    public void task(CuboidClipboard cc)
-                    throws MaxChangedBlocksException {
-                        cc.paste(session, newOrigin, noAir);
-                        System.out.println("paste!");
-                    }
-                });
-    }
-
-    @Override
-    public void paste(EditSession editSession, Vector newOrigin, boolean noAir) throws MaxChangedBlocksException {
-        paste(editSession, newOrigin, noAir, null);
-    }
-
-    public void paste(final EditSession editSession, final Vector newOrigin,
-            final boolean noAir, final boolean entities, SCJobCallback callback)
-            throws MaxChangedBlocksException {
-        boolean isAsync = checkAsync(WorldeditOperations.paste);
-        if (!isAsync) {
-            super.paste(editSession, newOrigin, noAir, entities);
-            return;
-        }
-
-        final int jobId = getJobId();
-        final EditSession session;
-        final CuboidClipboardWrapper cc = new CuboidClipboardWrapper(m_player, m_clipboard, jobId);
-        final SCBlockPlacerJobEntry job;
-        if (editSession instanceof AsyncEditSession) {
-            AsyncEditSession aSession = (AsyncEditSession) editSession;
-            session = new CancelabeEditSession(aSession, aSession.getAsyncMask(), jobId);
-            job = new SCBlockPlacerJobEntry(m_player, (CancelabeEditSession) session, jobId, "place");
-        } else {
-            session = editSession;
-            job = new SCBlockPlacerJobEntry(m_player, jobId, "place");
-        }
-        m_blockPlacer.addJob(m_player, job);
-
-        m_schedule.runTaskAsynchronously(m_plugin, new SCClipBoardAsyncTask(cc, editSession, m_player, "paste",
-                m_blockPlacer, job, callback) {
-                    @Override
-                    public void task(CuboidClipboard cc)
-                    throws MaxChangedBlocksException {
-                        System.out.println("paste!");
-                        cc.paste(session, newOrigin, noAir, entities);
-                    }
-                });
-    }
+    
+    
 
     /**
      * This function checks if async mode is enabled for specific command

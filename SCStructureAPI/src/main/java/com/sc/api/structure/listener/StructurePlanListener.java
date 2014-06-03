@@ -16,9 +16,8 @@
  */
 package com.sc.api.structure.listener;
 
-import com.sc.api.structure.AsyncBuilder;
-import com.sc.api.structure.ConstructionManager;
 import com.sc.api.structure.SCStructureAPI;
+import com.sc.api.structure.construction.ConstructionManager;
 import com.sc.api.structure.construction.progress.ConstructionException;
 import com.sc.api.structure.entity.Structure;
 import com.sc.api.structure.entity.plan.StructurePlan;
@@ -35,7 +34,6 @@ import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Location;
-import com.sk89q.worldedit.bukkit.DefaultNmsBlock;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldguard.bukkit.WorldConfiguration;
 import com.sk89q.worldguard.protection.managers.RegionManager;
@@ -57,19 +55,6 @@ import org.bukkit.inventory.ItemStack;
  */
 public class StructurePlanListener implements Listener {
 
-    @EventHandler
-    public void onPlayerInteractDebug(PlayerInteractEvent pie) {
-        if (pie.getAction() == Action.RIGHT_CLICK_AIR || pie.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            org.bukkit.Location l = pie.getClickedBlock().getLocation();
-            DefaultNmsBlock dmBlock = DefaultNmsBlock.get(l.getWorld(), SCWorldEditUtil.getLocation(l).getPosition(), l.getBlock().getTypeId(), new Byte(l.getBlock().getData()).intValue());
-            if (dmBlock != null && dmBlock.hasNbtData()) {
-                System.out.println(dmBlock.getNbtData());
-            }
-
-        }
-//        System.out.println(tags.get("sid").getValue());
-//        System.out.println(tags.get("progress").getValue());
-    }
 
     /**
      * Places a structure on player's target location
@@ -175,7 +160,7 @@ public class StructurePlanListener implements Listener {
                 try {
                     structure.setStructureRegionId(region.getId());
                     structure = service.save(structure);
-                    AsyncBuilder.placeStructure(player, structure);
+                    return SCStructureAPI.place(player, structure);
                 } catch (ConstructionException ex) {
                     service.delete(structure);
                     SCWorldGuardUtil.getGlobalRegionManager(location.getWorld()).removeRegion(region.getId());
@@ -195,44 +180,30 @@ public class StructurePlanListener implements Listener {
         SimpleCardinal cardinal = WorldUtil.getCardinal(player);
         Location pos1 = new Location(world, new BlockWorldVector(world, x, y, z));
         Location pos2 = WorldUtil.getPos2(pos1, cardinal, plan.getSchematic());
-        WorldDimension dimension = new WorldDimension(pos1, pos2);  // Included sign
         Structure structure = new Structure(player.getName(), pos1, cardinal, plan);
+        
         if (action == Action.LEFT_CLICK_BLOCK) {
             if (!session.getRegionSelector(world).isDefined()) {
-                ConstructionManager.select(player, pos1, pos2);
+                SCWorldEditUtil.select(player, pos1, pos2);
                 player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
                 player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
             } else {
 
                 CuboidRegion oldRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
-                ConstructionManager.select(player, pos1, pos2);
+                SCWorldEditUtil.select(player, pos1, pos2);
                 CuboidRegion newRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
                 if (oldRegion.getPos1().equals(newRegion.getPos1()) && oldRegion.getPos2().equals(newRegion.getPos2())) {
                     if (canPlace(player, pos1, cardinal, plan)) {
                         session.getRegionSelector(world).clear();
                         session.dispatchCUISelection(SCWorldEditUtil.getLocalPlayer(player));
-                        StructureService service = new StructureService();
-                        structure = service.save(structure);
-                        ProtectedRegion region = ConstructionManager.claimGround(player, structure, dimension);
-                        if (region == null) {
-                            service.delete(structure);
-                            player.sendMessage(ChatColor.RED + " Failed to claim ground for structure");
-                            return false;
-                        }
-
                         try {
-                            structure.setStructureRegionId(region.getId());
-                            structure = service.save(structure);
-                            AsyncBuilder.placeStructure(player, structure);
+                            return SCStructureAPI.place(player, structure);
                         } catch (ConstructionException ex) {
-                            service.delete(structure);
-                            SCWorldGuardUtil.getGlobalRegionManager(target.getWorld()).removeRegion(region.getId());
                             Logger.getLogger(StructurePlanListener.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                        return true;
                     }
                 } else {
-                    ConstructionManager.select(player, pos1, pos2);
+                    SCWorldEditUtil.select(player, pos1, pos2);
                     if (ConstructionManager.overlapsStructure(structure)) {
                         player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
                     } else if (ConstructionManager.overlapsUnowned(player, structure)) {
