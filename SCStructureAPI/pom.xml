@@ -21,11 +21,6 @@
             <id>bukkit-repo</id>
             <url>http://repo.bukkit.org/content/groups/public/</url>
         </repository>
-        <!--JNBT Repo--> 
-        <repository>
-            <id>royal-dev repo</id>
-            <url>http://minor.royaldev.org:8081/nexus/content/repositories/public/</url>
-        </repository>
     </repositories>
     <build>
         <plugins>
@@ -58,7 +53,7 @@
                     </execution>
                 </executions>
             </plugin>
-<!--                        <plugin>
+            <plugin>
                 <groupId>com.mysema.maven</groupId>
                 <artifactId>apt-maven-plugin</artifactId>
                 <version>1.0.9</version>
@@ -79,43 +74,31 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>-->
+            </plugin>
         </plugins>
     </build>
     <dependencies>
-        <!-- Bukkit Libraries -->
+<!--        <dependency>
+            <groupId>org.lambdaj</groupId>
+            <artifactId>lambdaj</artifactId>
+            <version>2.4</version>
+        </dependency>-->
         <dependency>
-            <groupId>org.jnbt</groupId>
-            <artifactId>jnbt</artifactId>
-            <version>1.1</version>
-        </dependency>
-<!--        <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>craftbukkit</artifactId>
-            <version>1.7.5-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>-->
-                <dependency>
-            <groupId>org.sc.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.7.9</version>
-        </dependency>
-<!--        <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.7.2-R0.2</version>
+            <version>1.6.4-R2.0</version>
             <scope>provided</scope>
-        </dependency>-->
-        <!--WorldEdit-->
+        </dependency>
+        
         <dependency>
             <groupId>com.sk89q</groupId>
             <artifactId>worldedit</artifactId>  
             <version>5.6</version>
             <scope>provided</scope>
         </dependency>
-        <!--WorldGuard-->
+        <!--WorldGuard from backup-repo-->
         <dependency>
-            <groupId>com.sk89q</groupId>
+            <groupId>com.sc.worldguard</groupId>
             <artifactId>worldguard</artifactId>  
             <version>5.9</version>
             <scope>provided</scope>
@@ -139,6 +122,7 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate</artifactId>
             <version>3.2.6.ga</version>
+            
         </dependency>
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>
@@ -233,12 +217,6 @@
             <groupId>com.mysema.querydsl</groupId>
             <artifactId>querydsl-hql</artifactId>
             <version>0.5.4</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>SCMenu</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
     <reporting>

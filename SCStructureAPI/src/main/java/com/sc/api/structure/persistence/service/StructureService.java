@@ -20,8 +20,8 @@ import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateDeleteClause;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.api.structure.entity.QStructure;
-import com.sc.api.structure.entity.ReservedArea;
 import com.sc.api.structure.entity.Structure;
+import com.sc.api.structure.entity.progress.ConstructionTask;
 import com.sc.api.structure.persistence.HibernateUtil;
 import java.util.List;
 import java.util.logging.Level;
@@ -40,6 +40,10 @@ public class StructureService extends AbstractService {
     public Structure getStructure(Long id) {
         QStructure qstructure = QStructure.structure;
         Session session = HibernateUtil.getSession();
+        Structure cachedStructure = (Structure) session.get(Structure.class, id);
+        if(cachedStructure != null) {
+            return cachedStructure;
+        }
         JPQLQuery query = new HibernateQuery(session);
         Structure structure = query.from(qstructure).where(qstructure.id.eq(id)).uniqueResult(qstructure);
         session.close();
@@ -110,39 +114,40 @@ public class StructureService extends AbstractService {
 
         Structure structure = query.from(qStructure)
                 .where(qStructure.worldLocation().world.eq(location.getWorld().getName())
-                        .and(qStructure.dimension().startX.loe(location.getBlockX()))
-                        .and(qStructure.dimension().endX.goe(location.getBlockX()))
-                        .and(qStructure.dimension().startZ.loe(location.getBlockZ()))
-                        .and(qStructure.dimension().endZ.goe(location.getBlockZ()))
-                        .and(qStructure.dimension().startY.loe(location.getBlockY()))
-                        .and(qStructure.dimension().endY.goe(location.getBlockY()))
-                ).uniqueResult(qStructure);
+                        .and(qStructure.dimension().minX.loe(location.getBlockX()))
+                        .and(qStructure.dimension().maxX.goe(location.getBlockX()))
+                        .and(qStructure.dimension().minZ.loe(location.getBlockZ()))
+                        .and(qStructure.dimension().maxZ.goe(location.getBlockZ()))
+                        .and(qStructure.dimension().minY.loe(location.getBlockY()))
+                        .and(qStructure.dimension().maxY.goe(location.getBlockY()))
+                        .and(qStructure.task().constructionState.eq(ConstructionTask.State.COMPLETE))
+                ).singleResult(qStructure);
 
         session.close();
         return structure;
     }
 
-    public boolean overlaps(Structure structure) {
-        QStructure qStructure = QStructure.structure;
-        Session session = HibernateUtil.getSession();
-        JPQLQuery query = new HibernateQuery(session);
-
-        ReservedArea ra = structure.getReserved();
-        int xMinus = ra.getR_xMinus();
-        int zMinus = ra.getR_zMinus();
-        int xPlus = ra.getR_xPlus();
-        int zPlus = ra.getR_zPlus();
-        int up = ra.getR_up();
-        int down = ra.getR_down();
-
-        boolean overlaps = query.from(qStructure)
-                .where(qStructure.worldLocation().world.eq(structure.getLocation().getWorld().getName())
-                        .and(qStructure.dimension().endX.add(qStructure.reserved().r_xPlus).goe(structure.getDimension().getStartX() - xMinus).and(qStructure.dimension().startX.subtract(qStructure.reserved().r_xMinus).loe(structure.getDimension().getEndX() + xPlus)))
-                        .and(qStructure.dimension().endY.add(qStructure.reserved().r_up).goe(structure.getDimension().getStartY() - down).and(qStructure.dimension().startY.subtract(qStructure.reserved().r_down).loe(structure.getDimension().getEndY() + up)))
-                        .and(qStructure.dimension().endZ.add(qStructure.reserved().r_zPlus).goe(structure.getDimension().getStartZ() - zMinus).and(qStructure.dimension().startZ.subtract(qStructure.reserved().r_zMinus).loe(structure.getDimension().getEndZ() + zPlus)))
-                ).exists();
-        session.close();
-        return overlaps;
-    }
+//    public boolean overlaps(Structure structure) {
+//        QStructure qStructure = QStructure.structure;
+//        Session session = HibernateUtil.getSession();
+//        JPQLQuery query = new HibernateQuery(session);
+//
+//        ReservedArea ra = structure.getReserved();
+//        int xMinus = ra.getR_xMinus();
+//        int zMinus = ra.getR_zMinus();
+//        int xPlus = ra.getR_xPlus();
+//        int zPlus = ra.getR_zPlus();
+//        int up = ra.getR_up();
+//        int down = ra.getR_down();
+//
+//        boolean overlaps = query.from(qStructure)
+//                .where(qStructure.worldLocation().world.eq(structure.getLocation().getWorld().getName())
+//                        .and(qStructure.dimension().maxX.add(qStructure.reserved().r_xPlus).goe(structure.getDimension().getMinX()- xMinus).and(qStructure.dimension().minX.subtract(qStructure.reserved().r_xMinus).loe(structure.getDimension().getMaxX()+ xPlus)))
+//                        .and(qStructure.dimension().maxY.add(qStructure.reserved().r_up).goe(structure.getDimension().getMinY() - down).and(qStructure.dimension().minY.subtract(qStructure.reserved().r_down).loe(structure.getDimension().getMaxY()+ up)))
+//                        .and(qStructure.dimension().maxZ.add(qStructure.reserved().r_zPlus).goe(structure.getDimension().getMinZ()- zMinus).and(qStructure.dimension().minZ.subtract(qStructure.reserved().r_zMinus).loe(structure.getDimension().getMaxZ()+ zPlus)))
+//                ).exists();
+//        session.close();
+//        return overlaps;
+//    }
 
 }

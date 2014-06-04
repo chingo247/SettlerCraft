@@ -22,48 +22,45 @@ import com.sk89q.worldedit.schematic.SchematicFormat;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.EnumMap;
+import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.Embeddable;
 import javax.persistence.Lob;
+import org.bukkit.ChatColor;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
  * @author Chingo
  */
-@Entity
+@Embeddable
 public class StructurePlan implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String category = "default";
-    private String faction = "default";
-    private String displayName;
-    private String description;
-    private int startY = 0;
+    private final String id;
+    private final String displayName;
     @Lob
     private final File structureSchematic;
+    private String category = "default";
+    private String faction = "default";
+    private String description;
+    private int startHeight = 0;
     private double price = 0.0;
-    private int reservedNorth = 0;
-    private int reservedEast = 0;
-    private int reservedSouth = 0;
-    private int reservedWest = 0;
-    private int reservedUp = 0;
-    private int reservedDown = 0;
+    
+    
 
     /**
      * JPA Constructor
      */
     protected StructurePlan() {
         this.structureSchematic = null;
+        this.id = null;
+        this.displayName = null;
     }
 
-    public StructurePlan(String displayName, File schematic) throws IOException, DataException {
+    public StructurePlan(String id, String displayName, File schematic) throws IOException, DataException {
+        this.id = id;
         this.displayName = displayName;
         this.structureSchematic = schematic;
     }
@@ -73,7 +70,7 @@ public class StructurePlan implements Serializable {
     }
 
     public void setStartY(int startY) {
-        this.startY = startY;
+        this.startHeight = startY;
     }
 
     public CuboidClipboard getSchematic() {
@@ -94,58 +91,6 @@ public class StructurePlan implements Serializable {
         this.price = cost;
     }
 
-    public int getReservedNorth() {
-        return reservedNorth;
-    }
-
-    public void setReservedNorth(int reservedNorth) {
-        this.reservedNorth = reservedNorth;
-    }
-
-    public int getReservedEast() {
-        return reservedEast;
-    }
-
-    public void setReservedEast(int reservedEast) {
-        this.reservedEast = reservedEast;
-    }
-
-    public int getReservedSouth() {
-        return reservedSouth;
-    }
-
-    public void setReservedSouth(int reservedSouth) {
-        this.reservedSouth = reservedSouth;
-    }
-
-    public int getReservedWest() {
-        return reservedWest;
-    }
-
-    public void setReservedWest(int reservedWest) {
-        this.reservedWest = reservedWest;
-    }
-
-    public int getReservedUp() {
-        return reservedUp;
-    }
-
-    public void setReservedUp(int reservedUp) {
-        this.reservedUp = reservedUp;
-    }
-
-    public int getReservedDown() {
-        return reservedDown;
-    }
-
-    public void setReservedDown(int reservedDown) {
-        this.reservedDown = reservedDown;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
     public void setCategory(String category) {
         this.category = category;
     }
@@ -154,7 +99,7 @@ public class StructurePlan implements Serializable {
         this.faction = faction;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
@@ -174,19 +119,57 @@ public class StructurePlan implements Serializable {
         return description;
     }
 
-    public EnumMap<ReservedSide, Integer> getReserved() {
-        EnumMap<ReservedSide, Integer> reserved = new EnumMap<>(ReservedSide.class);
-        reserved.put(ReservedSide.UP, reservedUp);
-        reserved.put(ReservedSide.DOWN, reservedDown);
-        reserved.put(ReservedSide.EAST, reservedEast);
-        reserved.put(ReservedSide.NORTH, reservedNorth);
-        reserved.put(ReservedSide.SOUTH, reservedSouth);
-        reserved.put(ReservedSide.WEST, reservedWest);
-        return reserved;
+    public int getHeight() {
+        return startHeight;
     }
 
-    public int getStartY() {
-        return startY;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final StructurePlan other = (StructurePlan) obj;
+        if (!Objects.equals(this.id, other.id)) {
+            return false;
+        }
+        return true;
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 89 * hash + Objects.hashCode(this.id);
+        return hash;
+    }
+
+    public static boolean isStructurePlan(ItemStack itemStack) {
+        List<String> lore = itemStack.getItemMeta().getLore();
+        if(lore.isEmpty()) return false;
+        else {
+            for(String s : lore) {
+                if(s.contains("[Type]") && s.contains("Plan")){
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+    
+    public static String getPlanID(ItemStack itemStack) {
+        if(isStructurePlan(itemStack)) {
+            List<String> lore = itemStack.getItemMeta().getLore();
+            for(String s : lore) {
+                if(s.contains("Id")){
+                    s = s.substring(s.indexOf(":") + 1);
+                    s = ChatColor.stripColor(s);
+                    return s.trim();
+                }
+            }
+        } 
+        return null;
+    }
+    
 }

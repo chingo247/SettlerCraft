@@ -95,8 +95,8 @@ public class ConstructionManager {
 
         RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
         WorldDimension dim = dimension;
-        Vector p1 = dim.getStart().getPosition();
-        Vector p2 = dim.getEnd().getPosition();
+        Vector p1 = dim.getMin().getPosition();
+        Vector p2 = dim.getMax().getPosition();
         String id = getIdForStructure(structure);
         ProtectedCuboidRegion region = new ProtectedCuboidRegion(id, new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
 
@@ -129,8 +129,8 @@ public class ConstructionManager {
     public static boolean overlapsUnowned(LocalPlayer player, Structure structure) {
         RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
         WorldDimension dim = structure.getDimension();
-        Vector p1 = dim.getStart().getPosition();
-        Vector p2 = dim.getEnd().getPosition();
+        Vector p1 = dim.getMin().getPosition();
+        Vector p2 = dim.getMax().getPosition();
         ProtectedCuboidRegion dummy = new ProtectedCuboidRegion("", new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
         ApplicableRegionSet regions = mgr.getApplicableRegions(dummy);
 
@@ -151,8 +151,8 @@ public class ConstructionManager {
     public static boolean overlapsStructure(Structure structure) {
         RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
         WorldDimension dim = structure.getDimension();
-        Vector p1 = dim.getStart().getPosition();
-        Vector p2 = dim.getEnd().getPosition();
+        Vector p1 = dim.getMin().getPosition();
+        Vector p2 = dim.getMax().getPosition();
         ProtectedCuboidRegion dummy = new ProtectedCuboidRegion("", new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
         ApplicableRegionSet regions = mgr.getApplicableRegions(dummy);
 

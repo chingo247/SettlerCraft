@@ -14,22 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package com.sc.api.structure.event.structure;
 
-import com.sc.api.structure.entity.Structure;
+import com.sc.api.structure.entity.progress.ConstructionTask;
+import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 /**
- * Fired when a structure is being build
  *
  * @author Chingo
  */
-public class StructureConstructionStartEvent extends StructureEvent {
-
-    public StructureConstructionStartEvent(Structure structure) {
-        super(structure);
+public class ConstructionTaskStateChangedEvent extends Event {
+    
+    private final ConstructionTask task;
+    
+    public ConstructionTaskStateChangedEvent(ConstructionTask task) {
+        this.task = task;
     }
 
+    public ConstructionTask getTask() {
+        return task;
+    }
+    
     private static final HandlerList handlers = new HandlerList();
 
     @Override
@@ -41,4 +48,5 @@ public class StructureConstructionStartEvent extends StructureEvent {
         return handlers;
     }
 
+    
 }

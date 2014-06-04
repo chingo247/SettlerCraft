@@ -34,32 +34,32 @@ import org.bukkit.World;
 public class WorldDimension implements Serializable {
 
     @NotNull
-    @Column(name = "world")
+    @Column(name = "dim_world")
     protected String world;
 
     @NotNull
     @Column(name = "startX")
-    private int startX;
+    private int minX;
 
     @NotNull
     @Column(name = "startY")
-    private int startY;
+    private int minY;
 
     @NotNull
     @Column(name = "startZ")
-    private int startZ;
+    private int minZ;
 
     @NotNull
     @Column(name = "endX")
-    private int endX;
+    private int maxX;
 
     @NotNull
     @Column(name = "endY")
-    private int endY;
+    private int maxY;
 
     @NotNull
     @Column(name = "endZ")
-    private int endZ;
+    private int maxZ;
 
     /**
      * JPA Constructor.
@@ -69,12 +69,12 @@ public class WorldDimension implements Serializable {
 
     public WorldDimension(Location start, Location end) {
         Preconditions.checkArgument(start.getWorld().getName().equals(end.getWorld().getName()));
-        this.startX = Math.min(start.getPosition().getBlockX(), end.getPosition().getBlockX());
-        this.startY = Math.min(start.getPosition().getBlockY(), end.getPosition().getBlockY());
-        this.startZ = Math.min(start.getPosition().getBlockZ(), end.getPosition().getBlockZ());
-        this.endX = Math.max(start.getPosition().getBlockX(), end.getPosition().getBlockX());
-        this.endY = Math.max(start.getPosition().getBlockY(), end.getPosition().getBlockY());
-        this.endZ = Math.max(start.getPosition().getBlockZ(), end.getPosition().getBlockZ());
+        this.minX = Math.min(start.getPosition().getBlockX(), end.getPosition().getBlockX());
+        this.minY = Math.min(start.getPosition().getBlockY(), end.getPosition().getBlockY());
+        this.minZ = Math.min(start.getPosition().getBlockZ(), end.getPosition().getBlockZ());
+        this.maxX = Math.max(start.getPosition().getBlockX(), end.getPosition().getBlockX());
+        this.maxY = Math.max(start.getPosition().getBlockY(), end.getPosition().getBlockY());
+        this.maxZ = Math.max(start.getPosition().getBlockZ(), end.getPosition().getBlockZ());
         this.world = start.getWorld().getName();
     }
 
@@ -83,63 +83,65 @@ public class WorldDimension implements Serializable {
     }
     
     public LocalWorld getLocalWorld() {
-        return getStart().getWorld();
+        return getMin().getWorld();
     }
 
-    public int getStartX() {
-        return startX;
+    public int getMinX() {
+        return minX;
     }
 
-    public void setStartX(int startX) {
-        this.startX = startX;
+    public void setMinX(int minX) {
+        this.minX = minX;
     }
 
-    public int getStartY() {
-        return startY;
+    public int getMinY() {
+        return minY;
     }
 
-    public void setStartY(int startY) {
-        this.startY = startY;
+    public void setMinY(int minY) {
+        this.minY = minY;
     }
 
-    public int getStartZ() {
-        return startZ;
+    public int getMinZ() {
+        return minZ;
     }
 
-    public void setStartZ(int startZ) {
-        this.startZ = startZ;
+    public void setMinZ(int minZ) {
+        this.minZ = minZ;
     }
 
-    public int getEndX() {
-        return endX;
+    public int getMaxX() {
+        return maxX;
     }
 
-    public void setEndX(int endX) {
-        this.endX = endX;
+    public void setMaxX(int maxX) {
+        this.maxX = maxX;
     }
 
-    public int getEndY() {
-        return endY;
+    public int getMaxY() {
+        return maxY;
     }
 
-    public void setEndY(int endY) {
-        this.endY = endY;
+    public void setMaxY(int maxY) {
+        this.maxY = maxY;
     }
 
-    public int getEndZ() {
-        return endZ;
+    public int getMaxZ() {
+        return maxZ;
     }
 
-    public void setEndZ(int endZ) {
-        this.endZ = endZ;
+    public void setMaxZ(int maxZ) {
+        this.maxZ = maxZ;
     }
 
-    public Location getStart() {
-        return new Location(SCWorldEditUtil.getLocalWorld(world), new Vector(startX, startY, startZ));
+    
+
+    public Location getMin() {
+        return new Location(SCWorldEditUtil.getLocalWorld(world), new Vector(minX, minY, minZ));
     }
 
-    public Location getEnd() {
-        return new Location(SCWorldEditUtil.getLocalWorld(world), new Vector(endX, endY, endZ));
+    public Location getMax() {
+        return new Location(SCWorldEditUtil.getLocalWorld(world), new Vector(maxX, maxY, maxZ));
     }
 
 }

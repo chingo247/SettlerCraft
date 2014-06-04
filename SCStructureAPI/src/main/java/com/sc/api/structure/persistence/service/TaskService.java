@@ -24,10 +24,12 @@ import com.sc.api.structure.entity.progress.ConstructionTask;
 import com.sc.api.structure.entity.progress.ConstructionTask.State;
 import com.sc.api.structure.entity.progress.QConstructionEntry;
 import com.sc.api.structure.entity.progress.QConstructionTask;
+import com.sc.api.structure.event.structure.ConstructionTaskStateChangedEvent;
 import com.sc.api.structure.persistence.HibernateUtil;
 import java.util.List;
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
+import org.bukkit.Bukkit;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -38,12 +40,15 @@ import org.hibernate.Transaction;
  */
 public class TaskService extends AbstractService {
 
-    private final Logger logger = Logger.getLogger("ConstructionService");
-    
+    private final Logger logger = Logger.getLogger(TaskService.class);
     private static final int INFINITE = -1;
     
     public ConstructionTask getTask(Long id) {
         Session session = HibernateUtil.getSession();
+        ConstructionTask cachedTask =  (ConstructionTask) session.get(ConstructionTask.class, id);
+        if(cachedTask != null) {
+            return cachedTask;
+        }
         JPQLQuery query = new HibernateQuery(session);
         QConstructionTask qct = QConstructionTask.constructionTask;
         ConstructionTask task = query.from(qct).where(qct.id.eq(id)).uniqueResult(qct);
@@ -137,13 +142,20 @@ public class TaskService extends AbstractService {
     }
 
     /**
-     * Updates the the status of a task and saves the task
+     * Updates the the status of a task and saves the task. If the task was removed the newStatus will be ignored.
      *
      * @param task The task
      * @param newStatus The newstatus of the task
+     * 
      * @return the updated/saved instance of the task
      */
     public ConstructionTask updateStatus(ConstructionTask task, State newStatus) {
+        if(task.getState() == State.REMOVED || task.getState() == newStatus) {
+            return task;
+        }
+        
+        
+        
         Session session = null;
         Transaction tx = null;
         try {
@@ -164,6 +176,7 @@ public class TaskService extends AbstractService {
                 session.close();
             }
         }
+        Bukkit.getPluginManager().callEvent(new ConstructionTaskStateChangedEvent(task));
         return task;
     }
 
@@ -197,7 +210,6 @@ public class TaskService extends AbstractService {
         QConstructionEntry qce = QConstructionEntry.constructionEntry;
         ConstructionEntry cachedEntry = (ConstructionEntry) session.get(ConstructionEntry.class, player);
         if (cachedEntry != null) {
-            logger.info("Used a cached entry!");
             return cachedEntry;
         }
         JPQLQuery query = new HibernateQuery(session);

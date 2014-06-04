@@ -14,30 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package com.sc.api.structure.event.structure;
 
-import com.sc.api.structure.entity.progress.ConstructionTask.State;
-import com.sc.api.structure.entity.Structure;
+import com.sc.api.structure.entity.progress.ConstructionTask;
+import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 /**
- * Automatically fired when the structure.setStatus() method is called
  *
  * @author Chingo
  */
-public class StructureStateChangedEvent extends StructureEvent {
-
-    private final State oldState;
-
-    public StructureStateChangedEvent(Structure structure, State oldState) {
-        super(structure);
-        this.oldState = oldState;
+public class ConstructionTaskAddedEvent extends Event {
+     private final ConstructionTask task;
+    
+    public ConstructionTaskAddedEvent(ConstructionTask task) {
+        this.task = task;
     }
 
-    public State getOldState() {
-        return oldState;
+    public ConstructionTask getTask() {
+        return task;
     }
-
+    
     private static final HandlerList handlers = new HandlerList();
 
     @Override
@@ -48,5 +46,4 @@ public class StructureStateChangedEvent extends StructureEvent {
     public static HandlerList getHandlerList() {
         return handlers;
     }
-
 }

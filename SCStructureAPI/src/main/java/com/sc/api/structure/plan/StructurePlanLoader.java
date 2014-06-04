@@ -15,18 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.io;
+package com.sc.api.structure.plan;
 
 import com.sc.api.structure.entity.plan.StructurePlan;
-import com.sc.api.structure.persistence.service.StructurePlanService;
+import com.sc.api.structure.plan.StructurePlanException;
+import com.sc.api.structure.plan.PlanManager;
 import com.sk89q.worldedit.data.DataException;
 import com.sk89q.worldedit.schematic.SchematicFormat;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
@@ -38,27 +37,23 @@ import org.bukkit.configuration.file.YamlConfiguration;
  */
 public class StructurePlanLoader {
 
-    public List<StructurePlan> loadStructures(File buildingFolder) throws FileNotFoundException {
-        StructurePlanService sps = new StructurePlanService();
-        if (sps.getPlans().size() > 0) {
-            sps.clear();
-        }
-
+    public void loadStructures(File buildingFolder) throws FileNotFoundException {
         String[] extensions = {"yml"};
         Iterator<File> it = FileUtils.iterateFiles(buildingFolder, extensions, true);
-        List<StructurePlan> structurePlans = new ArrayList<>();
 
         while (it.hasNext()) {
             File yamlStructureFile = it.next();
-            StructurePlan plan = load(yamlStructureFile);
-            structurePlans.add(plan);
+            StructurePlan plan;
+            try {
+                plan = load(yamlStructureFile);
+                PlanManager.getInstance().add(plan);
+            } catch (StructurePlanException ex) {
+                Logger.getLogger(StructurePlanLoader.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
-        sps.save(structurePlans);
-
-        return structurePlans;
     }
 
-    public StructurePlan load(File structureYAML) throws FileNotFoundException {
+    public StructurePlan load(File structureYAML) throws FileNotFoundException, StructurePlanException {
         StructurePlan spv = null;
         try {
             YamlConfiguration config = YamlConfiguration.loadConfiguration(structureYAML);
@@ -78,43 +73,22 @@ public class StructurePlanLoader {
             if (config.contains("id")) {
                 id = String.valueOf(config.get("id"));
             } else {
-
-                id = schematicStructureFile.getName();
-                config.addDefault("id", id);
+                throw new StructurePlanException("Missing 'id' node in " + structureYAML.getAbsolutePath());
             }
-
-            spv = new StructurePlan(id, schematicStructureFile);
-
+            String displayName;
             if (config.contains("displayname")) {
-                spv.setDisplayName(String.valueOf(config.get("displayname")));
+                displayName = String.valueOf(config.get("displayname"));
+            } else {
+                throw new StructurePlanException("Missing 'displayname' node");
             }
+            
+
+            spv = new StructurePlan(id, displayName, schematicStructureFile);
+
+            
 
             if (config.contains("price")) {
                 spv.setPrice(config.getDouble("price"));
-            }
-
-            if (config.contains("reserved.north")) {
-                spv.setReservedNorth(config.getInt("reserved.north"));
-            }
-
-            if (config.contains("reserved.east")) {
-                spv.setReservedEast(config.getInt("reserved.east"));
-            }
-
-            if (config.contains("reserved.south")) {
-                spv.setReservedSouth(config.getInt("reserved.south"));
-            }
-
-            if (config.contains("reserved.west")) {
-                spv.setReservedWest(config.getInt("reserved.west"));
-            }
-
-            if (config.contains("reserved.up")) {
-                spv.setReservedUp(config.getInt("reserved.up"));
-            }
-
-            if (config.contains("reserved.down")) {
-                spv.setReservedDown(config.getInt("reserved.down"));
             }
 
             if (config.contains("description")) {

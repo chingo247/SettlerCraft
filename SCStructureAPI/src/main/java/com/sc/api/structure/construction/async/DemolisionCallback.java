@@ -16,10 +16,9 @@
  */
 package com.sc.api.structure.construction.async;
 
+import com.sc.api.structure.SCStructureAPI;
 import com.sc.api.structure.entity.Structure;
 import com.sc.api.structure.entity.progress.ConstructionTask;
-import com.sc.api.structure.entity.progress.ConstructionTask.State;
-import com.sc.api.structure.event.structure.StructureCompleteEvent;
 import com.sc.api.structure.persistence.service.TaskService;
 import com.sk89q.worldedit.EditSession;
 import org.bukkit.Bukkit;
@@ -30,19 +29,18 @@ import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.IJobEntryListener;
 
 /**
- * The default action to for
  *
  * @author Chingo
  */
-public class SCDefaultCallbackAction implements SCJobCallback {
+public class DemolisionCallback implements SCJobCallback {
 
-    private final String placer;
+    private final String issuer;
     private final Structure structure;
     private final EditSession session;
     private ConstructionTask task;
 
-    public SCDefaultCallbackAction(String placer, Structure structure, ConstructionTask task, EditSession session) {
-        this.placer = placer;
+    public DemolisionCallback(String issuer, Structure structure, ConstructionTask task, EditSession session) {
+        this.issuer = issuer;
         this.structure = structure;
         this.session = session;
         this.task = task;
@@ -52,27 +50,29 @@ public class SCDefaultCallbackAction implements SCJobCallback {
     public void onJobAdded(BlockPlacerJobEntry entry) {
         final TaskService constructionService = new TaskService();
         task = constructionService.setJobId(task, entry.getJobId());
-        
+
         entry.addStateChangedListener(new IJobEntryListener() {
 
             @Override
             public void jobStateChanged(BlockPlacerJobEntry bpje) {
                 if (bpje.getStatus() == BlockPlacerJobEntry.JobStatus.PlacingBlocks) {
-                    Player ply = Bukkit.getPlayer(placer);
+                    Player ply = Bukkit.getPlayer(issuer);
                     if (ply != null && ply.isOnline()) {
-                        ply.sendMessage(ChatColor.YELLOW + "Building:  " + ChatColor.BLUE + structure.getPlan().getDisplayName());
+                        ply.sendMessage(ChatColor.YELLOW + "Demolision started:  " + ChatColor.BLUE + structure.getPlan().getDisplayName());
                     }
                     task.setHasPlacedBlocks(true);
-                    task = constructionService.updateStatus(task, State.PROGRESSING);
+                    task = constructionService.updateStatus(task, ConstructionTask.State.PROGRESSING);
                 } else if (bpje.getStatus() == BlockPlacerJobEntry.JobStatus.Done) {
-                    Player ply = Bukkit.getPlayer(placer);
-                    if (ply != null && ply.isOnline() && task.getState() != State.COMPLETE) {
-                        ply.sendMessage(ChatColor.YELLOW + "Construction complete: " + ChatColor.BLUE + structure.getPlan().getDisplayName());
+                    Player ply = Bukkit.getPlayer(issuer);
+                    if (ply != null && ply.isOnline() && task.getState() != ConstructionTask.State.REMOVED) {
+                        ply.sendMessage(ChatColor.YELLOW + "Demolision complete: " + ChatColor.BLUE + structure.getPlan().getDisplayName());
                         ply.playSound(ply.getLocation(), Sound.NOTE_SNARE_DRUM, 2, 0);
                     }
-                    Bukkit.getPluginManager().callEvent(new StructureCompleteEvent(structure));
-                    task = constructionService.updateStatus(task, State.COMPLETE);
+//                    Bukkit.getPluginManager().callEvent(new StructureCompleteEvent(structure));
+                    SCStructureAPI.removeRegion(structure);
                     task = constructionService.setJobId(task, -1);
+                    task = constructionService.updateStatus(task, ConstructionTask.State.REMOVED);
+                    
                 }
             }
         });
@@ -80,17 +80,10 @@ public class SCDefaultCallbackAction implements SCJobCallback {
 
     @Override
     public void onJobCanceled(BlockPlacerJobEntry entry) {
-        Player ply = Bukkit.getPlayer(placer);
+        Player ply = Bukkit.getPlayer(issuer);
         if (ply != null && ply.isOnline()) {
-            ply.sendMessage(ChatColor.RED + "Construction canceled: " + ChatColor.BLUE + structure.getPlan().getDisplayName());
+            ply.sendMessage(ChatColor.RED + "Demolision canceled: " + ChatColor.BLUE + structure.getPlan().getDisplayName());
         }
-
-        entry.getEditSession().undo(entry.getEditSession());
-        session.undo(session);
-
-        final TaskService constructionService = new TaskService();
-        constructionService.updateStatus(task, State.CANCELED);
-        task = constructionService.setJobId(task, -1);
     }
 
 }

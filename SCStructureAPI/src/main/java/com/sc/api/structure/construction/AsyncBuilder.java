@@ -16,7 +16,6 @@
  */
 package com.sc.api.structure.construction;
 
-import com.sc.api.structure.SmartClipBoard;
 import com.sc.api.structure.construction.async.SCAsyncCuboidClipboard;
 import com.sc.api.structure.construction.async.SCJobCallback;
 import com.sc.api.structure.construction.progress.ConstructionStrategyType;

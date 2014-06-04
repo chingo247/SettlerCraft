@@ -19,6 +19,7 @@ package com.sc.api.structure.entity;
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
 import com.sc.api.structure.entity.plan.StructurePlan;
+import com.sc.api.structure.entity.progress.ConstructionTask;
 import com.sc.api.structure.entity.progress.MaterialProgress;
 import com.sc.api.structure.entity.world.SimpleCardinal;
 import com.sc.api.structure.entity.world.WorldDimension;
@@ -34,15 +35,16 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Lob;
 import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 
 /**
  *
@@ -60,15 +62,13 @@ public class Structure implements Serializable {
     @NotNull
     private String owner; //TODO Create Owner class
 
-    @Lob
+    @Embedded
     private StructurePlan plan;
 
     @Embedded
-    @AttributeOverride(name = "world", column = @Column(name = "loc_world"))
     private WorldLocation worldLocation;
 
     @Embedded
-    @AttributeOverride(name = "world", column = @Column(name = "dim_world"))
     private WorldDimension dimension;
 
     private SimpleCardinal cardinal;
@@ -80,8 +80,10 @@ public class Structure implements Serializable {
     @Nullable
     private String structureRegion;
 
-    @Embedded
-    private ReservedArea reserved;
+    @OneToOne
+    @Cascade(CascadeType.ALL)
+    @PrimaryKeyJoinColumn(name = "STRUCTURE_ID", referencedColumnName = "TASK_ID")
+    private ConstructionTask task;
     
     
     private File areaBefore;
@@ -107,7 +109,6 @@ public class Structure implements Serializable {
         this.owner = owner;
         this.cardinal = cardinal;
         this.worldLocation = new WorldLocation(target);
-        this.reserved = new ReservedArea(this);
         this.dimension = WorldUtil.getWorldDimension(target, cardinal, plan.getSchematic());
     }
 
@@ -146,6 +147,12 @@ public class Structure implements Serializable {
     public StructurePlan getPlan() {
         return plan;
     }
+
+    public ConstructionTask getTask() {
+        return task;
+    }
+    
+    
 
     /**
      * Gets the name of the owner of this structure Owner may be a Player or NPC
@@ -191,18 +198,14 @@ public class Structure implements Serializable {
         return progress;
     }
 
-    public ReservedArea getReserved() {
-        return reserved;
-    }
-
     public String getStructureRegion() {
         return structureRegion;
     }
 
     public boolean isOnLot(Location location) {
-        return (location.getPosition().getBlockX() >= dimension.getStartX() && location.getPosition().getBlockX() <= dimension.getEndX()
-                && location.getPosition().getBlockY() >= dimension.getStartY() && location.getPosition().getBlockY() <= dimension.getEndY()
-                && location.getPosition().getBlockZ() >= dimension.getStartZ() && location.getPosition().getBlockZ() <= dimension.getEndZ());
+        return (location.getPosition().getBlockX() >= dimension.getMinX()&& location.getPosition().getBlockX() <= dimension.getMaxX()
+                && location.getPosition().getBlockY() >= dimension.getMinY()&& location.getPosition().getBlockY() <= dimension.getMaxY()
+                && location.getPosition().getBlockZ() >= dimension.getMinZ()&& location.getPosition().getBlockZ() <= dimension.getMaxZ());
     }
 
 }

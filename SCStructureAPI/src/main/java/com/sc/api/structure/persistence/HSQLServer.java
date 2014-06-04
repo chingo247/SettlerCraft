@@ -30,9 +30,9 @@ public class HSQLServer {
     private final String HOST = "localhost";
     private final int PORT = 9001; // default
     private final String DATABASE = "StructureAPI";
-    private final String PATH = "plugins//SCStructureAPI//Database//data//scstructuredb";
+    private final String PATH = "plugins//SettlerCraft//SCStructureAPI//Database//data//scstructuredb";
     private static HSQLServer instance;
-    private Server server;
+    private final Server server;
 
     private HSQLServer() {
         this.server = new Server();
@@ -41,7 +41,6 @@ public class HSQLServer {
         server.setPort(PORT);
         server.setDatabaseName(0, DATABASE);
         server.setDatabasePath(0, PATH);
-
     }
 
     public static HSQLServer getInstance() {

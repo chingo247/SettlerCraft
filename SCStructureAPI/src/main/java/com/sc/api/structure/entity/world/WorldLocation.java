@@ -46,7 +46,7 @@ public class WorldLocation implements Serializable {
 
     @NotEmpty
     @NotNull
-    @Column(name = "world")
+    @Column(name = "loc_world")
     protected String world;
 
     public WorldLocation() {

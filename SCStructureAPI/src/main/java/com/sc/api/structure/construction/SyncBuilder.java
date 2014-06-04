@@ -30,6 +30,7 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.Bukkit;
 
 /**
  *
@@ -63,10 +64,6 @@ public class SyncBuilder {
         editSession.setBlocks(new CuboidRegion(pos1.getPosition(), pos2.getPosition()), new BaseBlock(0));
         editSession.flushQueue();
     }
-
-
-    
-
 
     /**
      * Aligns clipboard to direction and pastes it on target location
@@ -156,7 +153,14 @@ public class SyncBuilder {
         }
         final int next = index + 1;
         if (next < all.size()) {
-            placeLayered(editSession, whole, all, location, delayBetweenLayers, next);
+            Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin("SettlerCraft"), new Runnable() {
+
+                @Override
+                public void run() {
+                    placeLayered(editSession, whole, all, location, delayBetweenLayers, index);
+                }
+            }, delayBetweenLayers);
+            
         }
     }
 

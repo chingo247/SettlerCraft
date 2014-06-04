@@ -14,16 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure;
+package com.sc.api.structure.persistence.service;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateDeleteClause;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.mysema.query.jpa.hibernate.HibernateUpdateClause;
+import com.sc.api.structure.construction.SmartClipBoard;
 import com.sc.api.structure.construction.ConstructionManager;
 import com.sc.api.structure.construction.SyncBuilder;
+import com.sc.api.structure.construction.async.ConstructionCallback;
 import com.sc.api.structure.construction.async.SCAsyncCuboidClipboard;
-import com.sc.api.structure.construction.async.SCDefaultCallbackAction;
 import com.sc.api.structure.construction.progress.ConstructionStrategyType;
 import com.sc.api.structure.entity.Structure;
 import com.sc.api.structure.entity.progress.ConstructionEntry;
@@ -66,7 +67,7 @@ public class RestoreService {
 
     private static final int INFINITE = -1;
 
-    RestoreService() {
+    public RestoreService() {
         int processors = Runtime.getRuntime().availableProcessors();
         this.executor = Executors.newFixedThreadPool(processors);
     }
@@ -260,20 +261,7 @@ public class RestoreService {
         session.close();
     }
 
-    /**
-     * Gets all the tasks that have been removed, but haven't been refunded (requires vault to
-     * refund)
-     *
-     * @return A list of unrefunded tasks
-     */
-    public List<ConstructionTask> getRefundables() {
-        Session session = HibernateUtil.getSession();
-        JPQLQuery query = new HibernateQuery(session);
-        QConstructionTask qct = QConstructionTask.constructionTask;
-        List<ConstructionTask> tasks = query.from(qct).where(qct.constructionState.eq(ConstructionTask.State.REMOVED).and(qct.constructionTaskData().refunded.eq(Boolean.FALSE))).list(qct);
-        session.close();
-        return tasks;
-    }
+
 
     public void processEntry(ConstructionEntry e) {
         List<ConstructionTask> tasks = getQueuedTasks(e);
@@ -296,7 +284,7 @@ public class RestoreService {
 
         System.out.println(session.getPlayer());
 
-        final SCDefaultCallbackAction dca = new SCDefaultCallbackAction(placer, structure, task, session);
+        final ConstructionCallback dca = new ConstructionCallback(placer, structure, task, session);
 
         final CuboidClipboard schematic = structure.getPlan().getSchematic();
         final Location t = ConstructionManager.align(schematic, structure.getLocation(), structure.getCardinal());

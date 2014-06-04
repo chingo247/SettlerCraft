@@ -57,6 +57,7 @@ public class ConstructionTask implements Serializable {
 
     @OneToOne
     @PrimaryKeyJoinColumn(name = "TASK_ID", referencedColumnName = "STRUCTURE_ID")
+    @Cascade(CascadeType.ALL)
     private Structure structure;
     
     @ManyToOne
@@ -72,29 +73,24 @@ public class ConstructionTask implements Serializable {
     @Column(insertable = false, updatable = false)
     private final Timestamp createdAt;
 
-    public enum ConstructionType {
-        BUILDING,
-        DEMOLISHING
-    }
+    private boolean isDemolishing = false;
 
     private State constructionState;
 
-    private ConstructionType constructionType;
 
     private final ConstructionStrategyType strategyType;
 
     private Integer jobId = -1;
 
     protected ConstructionTask() {
-        this.constructionType = null;
+        
         this.strategyType = null;
         this.constructionEntry = null;
         this.createdAt = null;
         this.placer = null;
     }
 
-    public ConstructionTask(String placer, ConstructionEntry entry, Structure structure, ConstructionType constructionType, ConstructionStrategyType strategyType) {
-        this.constructionType = constructionType;
+    public ConstructionTask(String placer, ConstructionEntry entry, Structure structure, ConstructionStrategyType strategyType) {
         this.strategyType = strategyType;
         this.constructionEntry = entry;
         int count = 0;
@@ -110,10 +106,16 @@ public class ConstructionTask implements Serializable {
         this.placer = placer;
     }
 
-    public void setConstructionType(ConstructionType constructionType) {
-        this.constructionType = constructionType;
+    public void setIsDemolishing(boolean isDemolishing) {
+        this.isDemolishing = isDemolishing;
     }
 
+    public boolean isDemolishing() {
+        return isDemolishing;
+    }
+
+    
+    
     public void setJobId(int jobId) {
         this.jobId = jobId;
     }
@@ -192,11 +194,6 @@ public class ConstructionTask implements Serializable {
 
     public Structure getStructure() {
         return structure;
-    }
-
-    
-    public ConstructionType getConstructionType() {
-        return constructionType;
     }
 
     public ConstructionStrategyType getStrategyType() {

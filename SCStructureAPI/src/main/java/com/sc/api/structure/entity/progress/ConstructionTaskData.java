@@ -42,7 +42,7 @@ public class ConstructionTaskData implements Serializable {
     private WorldDimension region;
     private String regionId;
     
-    private boolean refunded = false;
+    private boolean refundable = true;
 
     protected ConstructionTaskData() {
     }
@@ -52,7 +52,7 @@ public class ConstructionTaskData implements Serializable {
         this.region = region;
         this.regionId = regionId;
         this.createdAt = new Timestamp(new Date().getTime());
-        this.worldId = Bukkit.getWorld(region.getEnd().getWorld().getName()).getUID();
+        this.worldId = Bukkit.getWorld(region.getMax().getWorld().getName()).getUID();
     }
     
     public World getWorld() {
@@ -80,11 +80,11 @@ public class ConstructionTaskData implements Serializable {
     }
 
     public boolean isRefunded() {
-        return refunded;
+        return refundable;
     }
 
-    public void setRefunded(boolean refunded) {
-        this.refunded = refunded;
+    public void setRefundable(boolean refundable) {
+        this.refundable = refundable;
     }
     
     

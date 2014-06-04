@@ -191,8 +191,8 @@ public class WorldUtil {
 //        }
 //
 //        WorldDimension dimension = targetStructure.getDimension();
-//        Location start = dimension.getStart();
-//        Location end = dimension.getEnd();
+//        Location start = dimension.getMin();
+//        Location end = dimension.getMax();
 //        if (entity.getLocation().distance(start) < entity.getLocation().distance(end)) {
 //            Location xMinus = new Location(start.getWorld(),
 //                    start.getBlockX() - distance, // X

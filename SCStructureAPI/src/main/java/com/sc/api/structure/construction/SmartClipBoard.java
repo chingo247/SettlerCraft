@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure;
+package com.sc.api.structure.construction;
 
 import com.sc.api.structure.construction.progress.ConstructionStrategyType;
 import com.sk89q.worldedit.CuboidClipboard;
@@ -22,7 +22,6 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,7 +43,7 @@ public class SmartClipBoard extends CuboidClipboard {
 
     public SmartClipBoard(CuboidClipboard clipboard, List<Vector> vertices) {
         super(clipboard.getSize());
-        this.vertices = new ArrayList<>();
+        this.vertices = vertices;
         this.parent = clipboard;
     }
     
@@ -55,7 +54,7 @@ public class SmartClipBoard extends CuboidClipboard {
      * @param strategy The strategy
      */
     public SmartClipBoard(CuboidClipboard clipboard, ConstructionStrategyType strategy) {
-        this(clipboard, strategy, true);
+        this(clipboard, strategy, false);
     }
 
     /**
@@ -82,19 +81,11 @@ public class SmartClipBoard extends CuboidClipboard {
     @Override
     public void place(EditSession editSession, Vector pos, boolean noAir) throws MaxChangedBlocksException {
         
-        long start = System.currentTimeMillis();
         for (Vector v : vertices) {
-
-//            if (sign != null && v.equals(sign)) {
-//                continue;
-//            }
 
             BaseBlock worldBlock = editSession.getBlock(v.add(pos));
             BaseBlock b = parent.getBlock(v);
-
-//            if (b != null && !b.isAir() && worldBlock.getId() == b.getId() && worldBlock.getData() == b.getData()) {
-//                System.out.println("SKIP: " + Material.getMaterial(b.getType()));
-//            }
+            
 
             if (b == null || (noAir && b.isAir()) || (worldBlock.getId() == b.getId() && worldBlock.getData() == b.getData())) {
                 continue;
@@ -102,13 +93,6 @@ public class SmartClipBoard extends CuboidClipboard {
             
             editSession.setBlock((v.add(pos)), b);
         }
-//        if (sign != null) {
-//            BaseBlock b = parent.getBlock(sign);
-//            editSession.setBlock(sign.add(pos), b);
-//        }
-
-        long end = System.currentTimeMillis();
-        System.out.println(vertices.size() + " vertices in " + (end - start) + "ms");
 
     }
 
