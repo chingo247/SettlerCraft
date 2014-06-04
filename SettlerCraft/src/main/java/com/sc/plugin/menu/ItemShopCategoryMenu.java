@@ -3,14 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.plugin.menu.shop;
+package com.sc.plugin.menu;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import com.sc.plugin.menu.CategoryMenu;
-import com.sc.plugin.menu.MenuSlot;
 import com.sc.plugin.menu.MenuSlot.MenuSlotType;
-import com.sc.plugin.menu.SCVaultEconomyUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,7 +32,6 @@ public class ItemShopCategoryMenu extends CategoryMenu {
     private final Map<String, Session> visitors;
     private boolean chooseDefaultCategory = false;
     private String defaultCategory;
-    private ShopCallback callback;
 
     /**
      * Constructor
@@ -44,29 +40,15 @@ public class ItemShopCategoryMenu extends CategoryMenu {
      * @param wontDeplete If infinite items in this shop will/must never deplete Note: if infinite
      * all pick actions on this shop's inventory will be cancelled
      * @param endless wheter the shop should be endless(scrollable) or not
-     * @param callback
-     *
      */
-    public ItemShopCategoryMenu(String title, boolean wontDeplete, boolean endless, ShopCallback callback) {
+    public ItemShopCategoryMenu(String title, boolean wontDeplete, boolean endless) {
         super(title, wontDeplete);
         this.endless = endless;
         this.items = Maps.newHashMap();
         this.visitors = Maps.newHashMap();
-        this.callback = callback;
     }
 
-    /**
-     * Constructor
-     *
-     * @param title The title of this shop
-     * @param wontDeplete If infinite items in this shop will/must never deplete Note: if infinite
-     * all pick actions on this shop's inventory will be cancelled
-     * @param endless wheter the shop should be endless(scrollable) or not
-     *
-     */
-    public ItemShopCategoryMenu(String title, boolean wontDeplete, boolean endless) {
-        this(title, wontDeplete, endless, null);
-    }
+    
 
     /**
      * Checks if this shop has the specified player as a visitor (player has the shops menu opened)
@@ -117,6 +99,10 @@ public class ItemShopCategoryMenu extends CategoryMenu {
      */
     public boolean hasDefaultCategory() {
         return defaultCategory != null;
+    }
+    
+    public void addItem(MenuSlot slot, String category) {
+        addItem(slot, category, 0f);
     }
 
     public void addItem(ItemStack item, String itemName, String category) {
@@ -284,14 +270,14 @@ public class ItemShopCategoryMenu extends CategoryMenu {
     }
 
     public void onEnter(Player player, boolean getsForFree) {
-        System.out.println("REMOVE THE CREDIT BONUS!!!!!");
-        SCVaultEconomyUtil.getInstance().getEconomy().depositPlayer(player.getName(), 100000);
-        player.sendMessage(ChatColor.YELLOW + "[" + title + "]: Hello " + player.getName() + "!");
+//        System.out.println("REMOVE THE CREDIT BONUS!!!!!");
+//        SCVaultEconomyUtil.getInstance().getEconomy().depositPlayer(player.getName(), 100000);
+        player.sendMessage(ChatColor.YELLOW + "[" + title + "]: "+ChatColor.RESET+"Hello " + ChatColor.GREEN + player.getName() + ChatColor.RESET + "!");
         double balance = SCVaultEconomyUtil.getInstance().getEconomy().getBalance(player.getName());
         if (balance > 0) {
-            player.sendMessage(ChatColor.YELLOW + "[" + title + "]: Your balance is " + ChatColor.GREEN + balance);
+            player.sendMessage(ChatColor.YELLOW + "[" + title + "]: "+ChatColor.RESET+" Your balance is " + ChatColor.GOLD + balance);
         } else {
-            player.sendMessage(ChatColor.YELLOW + "[" + title + "]: Your balance is " + ChatColor.RED + balance);
+            player.sendMessage(ChatColor.YELLOW + "[" + title + "]: "+ChatColor.RESET+" Your balance is " + ChatColor.RED + balance);
         }
 
         if (visitors.containsKey(player.getName())) {
@@ -412,21 +398,19 @@ public class ItemShopCategoryMenu extends CategoryMenu {
         if (er.transactionSuccess()) {
             whoClicked.sendMessage(ChatColor.YELLOW + "[" + getTitle() + "]: "
                     + ChatColor.BLUE + slot.getName()
-                    + ChatColor.YELLOW + " has been added to your inventory");
+                    + ChatColor.RESET + " has been added to your inventory");
             double balance = er.balance;
             if (balance > 0) {
-                whoClicked.sendMessage(ChatColor.YELLOW + "Your new balance: " + ChatColor.GREEN + balance);
+                whoClicked.sendMessage("Your new balance: " + ChatColor.GOLD + balance);
             } else {
-                whoClicked.sendMessage(ChatColor.YELLOW + "Your new balance: " + ChatColor.RED + balance);
+                // Not even possible?
+                whoClicked.sendMessage("Your new balance: " + ChatColor.RED + balance);
             }
 
             ItemStack stack = slot.getItemStack().clone();
-            if (callback != null) {
-                callback.onItemSold(whoClicked, stack, price);
-            }
             whoClicked.getInventory().addItem(stack);
         } else {
-            whoClicked.sendMessage(ChatColor.RED + "[" + title + "]: Transaction failed, " + er.errorMessage);
+            whoClicked.sendMessage(ChatColor.YELLOW + "[" + title + "]: "+ ChatColor.RED + " Transaction failed, " + er.errorMessage);
         }
 
     }
@@ -540,9 +524,5 @@ public class ItemShopCategoryMenu extends CategoryMenu {
 
     }
 
-    public interface ShopCallback {
-
-        void onItemSold(final Player buyer, final ItemStack stack, final double price);
-
-    }
+    
 }

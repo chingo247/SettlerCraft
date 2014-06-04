@@ -6,7 +6,7 @@
 
 package com.sc.plugin.menu;
 
-import com.sc.plugin.menu.shop.ShopListener;
+import com.sc.plugin.listener.ShopListener;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 

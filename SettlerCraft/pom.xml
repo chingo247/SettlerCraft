@@ -9,6 +9,30 @@
     
     <name>SettlerCraft</name>
     <url>http://maven.apache.org</url>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>assemble-all</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
     <repositories>
         <!--Private ThirdParty Repo-->
         <repository>
@@ -31,7 +55,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>SCStructureAPI</artifactId>
             <version>${project.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.bukkit</groupId>
@@ -39,6 +62,12 @@
             <version>1.6.4-R2.0</version>
             <scope>provided</scope>
         </dependency>
+        <!--        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>1.7.2-R0.3</version>
+            <scope>provided</scope>
+        </dependency>-->
         <!--Vault-->
         <dependency>
             <groupId>org.vault</groupId>
@@ -51,6 +80,20 @@
             <groupId>com.sk89q</groupId>
             <artifactId>worldedit</artifactId>  
             <version>5.6</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--WorldGuard from private repo-->
+        <dependency>
+            <groupId>com.sc.worldguard</groupId>
+            <artifactId>worldguard</artifactId>  
+            <version>5.9</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--holographicdisplays from private repo -->
+        <dependency>
+            <groupId>org.holographicdisplay</groupId>
+            <artifactId>holographicdisplay</artifactId>
+            <version>1.8.2</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -6,7 +6,6 @@
 
 package com.sc.plugin.menu;
 
-import com.sc.plugin.menu.shop.ItemShopCategoryMenu;
 import com.google.common.collect.Maps;
 import java.util.Map;
 

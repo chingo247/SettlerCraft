@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.plugin.menu.shop;
+package com.sc.plugin.listener;
 
 import com.sc.plugin.menu.Menu;
 import com.sc.plugin.menu.MenuManager;
 import com.sc.plugin.menu.MenuSlot;
-import com.sc.plugin.menu.shop.ItemShopCategoryMenu;
+import com.sc.plugin.menu.ItemShopCategoryMenu;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -39,16 +39,17 @@ public class ShopListener implements Listener {
     }
     
 
+    
+
     @EventHandler
     public void onMenuSlotClicked(InventoryClickEvent ice) {
 //
 //        System.out.println("Inventory Click!");
-//        if (ice.getInventory().getTitle().hasMenu(":")) {
             String title = ice.getInventory().getTitle().trim();
             if(MenuManager.getInstance().hasMenu(title) && (ice.getClick() == ClickType.RIGHT || ice.getClick() == ClickType.SHIFT_RIGHT || ice.getClick() == ClickType.SHIFT_LEFT)) { 
                 ice.setCancelled(true);
             }
-            if (MenuManager.getInstance().hasMenu(title) && ice.getRawSlot()< Menu.MENUSIZE && ice.getRawSlot()>= 0) {
+            if (MenuManager.getInstance().hasMenu(title) && ice.getRawSlot() < Menu.MENUSIZE && ice.getRawSlot()>= 0) {
                 ice.setCancelled(true);
                 
                 Menu menu = MenuManager.getInstance().getMenu(title);
