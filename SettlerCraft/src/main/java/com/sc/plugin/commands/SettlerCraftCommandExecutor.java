@@ -18,13 +18,13 @@ package com.sc.plugin.commands;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.api.structure.persistence.service.RestoreService;
-import com.sc.api.structure.entity.progress.ConstructionTask;
-import com.sc.api.structure.entity.progress.QConstructionTask;
+import com.sc.api.structure.construction.ConstructionProgress.State;
+import com.sc.api.structure.construction.QStructure;
+import com.sc.api.structure.construction.Structure;
 import com.sc.api.structure.persistence.HibernateUtil;
 import com.sc.plugin.SettlerCraft;
 import com.sc.plugin.menu.MenuManager;
-import com.sc.plugin.menu.ItemShopCategoryMenu;
+import com.sc.plugin.menu.ShopCategoryMenu;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -58,7 +58,11 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                 case "menu":
                     if (!settlerCraft.isPlanMenuEnabled()) {
                         cs.sendMessage(ChatColor.RED + "Planmenu is disabled");
-                        return false;
+                        return true;
+                    }
+                    if(!MenuManager.getInstance().hasMenu(SettlerCraft.PLANSHOP)) {
+                        cs.sendMessage(ChatColor.RED + "Planmenu is not loaded yet");
+                        return true;
                     }
 
                     // HAS PERMISSION
@@ -66,12 +70,16 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         return openPlanMenu(player);
                     } else {
                         cs.sendMessage(ChatColor.RED + "Too many arguments!");
-                        return false;
+                        return true;
                     }
                 case "shop":
                     if (!settlerCraft.isPlanShopEnabled()) {
                         cs.sendMessage(ChatColor.RED + "Planshop is disabled");
-                        return false;
+                        return true;
+                    }
+                    if(!MenuManager.getInstance().hasMenu(SettlerCraft.PLANSHOP)) {
+                        cs.sendMessage(ChatColor.RED + "Planshop is not loaded yet");
+                        return true;
                     }
 
                     // HAS PERMISSION
@@ -82,12 +90,12 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         return false;
                     }
 
-                case "restore":
+                case "bin":
                     if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
                         cs.sendMessage(ChatColor.RED + " refund is not possible without vault");
                         return false;
                     }
-                    return restore(player, args);
+                    return recycleBin(player, args);
                 default:
                     return false;
             }
@@ -95,8 +103,8 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
     }
 
     private boolean openPlanMenu(Player player) {
-        ItemShopCategoryMenu menu = (ItemShopCategoryMenu) MenuManager.getInstance().getMenu(SettlerCraft.PLAN_MENU_NAME);
-        menu.onEnter(player, true);
+        ShopCategoryMenu menu = (ShopCategoryMenu) MenuManager.getInstance().getMenu(SettlerCraft.PLAN_MENU_NAME);
+        menu.onEnter(player);
         return true;
     }
 
@@ -105,17 +113,16 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
             player.sendMessage(ChatColor.RED + " Planshop requires Vault to work");
             return false;
         }
-        ItemShopCategoryMenu menu = (ItemShopCategoryMenu) MenuManager.getInstance().getMenu(SettlerCraft.PLANSHOP);
+        ShopCategoryMenu menu = (ShopCategoryMenu) MenuManager.getInstance().getMenu(SettlerCraft.PLANSHOP);
         menu.onEnter(player);
         return true;
     }
 
-    private boolean restore(Player player, String[] args) {
+    private boolean recycleBin(Player player, String[] args) {
         if (!player.isOp()) {
             player.sendMessage(ChatColor.RED + "You are not OP");
             return true;
         }
-        RestoreService rs = new RestoreService();
         int index;
         Player ply = null;
         if (args.length == 1) {
@@ -148,18 +155,18 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
             player.sendMessage(ChatColor.RED + "Too many arguments!");
             return true;
         }
-        List<ConstructionTask> tasks;
+        List<Structure> structures;
         if(ply == null) {
-            tasks = getRefundables();
+            structures = getRemoved();
         } else {
-            tasks = getRefundables(ply);
+            structures = getRemoved(ply);
         }
         
-        if(tasks.isEmpty()) {
+        if(structures.isEmpty()) {
             player.sendMessage(ChatColor.RED + "There are currently no tasks that need to be refunded");
             return true;
         } else {
-            int amountOfRefundables = tasks.size();
+            int amountOfRefundables = structures.size();
             String[] message = new String[MAX_LINES];
             int pages = (amountOfRefundables / (MAX_LINES - 1)) + 1;
             if (index > pages) {
@@ -171,9 +178,9 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
             int line = 1;
             int startIndex = (index - 1) * (MAX_LINES - 1);
             for (int i = startIndex; i < startIndex + (MAX_LINES - 1) && i < amountOfRefundables; i++) {
-                ConstructionTask task = tasks.get(i);
-                String value = toPriceString(task.getStructure().getPlan().getPrice());
-                String l = "ID: " + ChatColor.GOLD + task.getId() + ChatColor.RESET + " value: " + ChatColor.GOLD + value + ChatColor.RESET + " by: " + ChatColor.GREEN + task.getPlacer();
+                Structure structure = structures.get(i);
+                String value = toPriceString(structure.getPlan().getPrice());
+                String l = "#" + ChatColor.GOLD + structure.getId() + ChatColor.RESET + " value: " + ChatColor.GOLD + value + ChatColor.RESET + " owned by: " + ChatColor.GREEN + structure.getOwner();
                 message[line] = l;
                 line++;
             }
@@ -202,13 +209,13 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
      *
      * @return A list of unrefunded tasks
      */
-    public List<ConstructionTask> getRefundables() {
+    public List<Structure> getRemoved() {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
-        QConstructionTask qct = QConstructionTask.constructionTask;
-        List<ConstructionTask> tasks = query.from(qct).where(qct.constructionState.eq(ConstructionTask.State.REMOVED).and(qct.constructionTaskData().refundable.eq(Boolean.FALSE))).list(qct);
+        QStructure qs = QStructure.structure;
+        List<Structure> structures = query.from(qs).orderBy(qs.progress().removedAt.desc()).where(qs.progress().progressStatus.eq(State.REMOVED)).list(qs);
         session.close();
-        return tasks;
+        return structures;
     }
     
         /**
@@ -218,18 +225,13 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
      * @param owner The owner
      * @return A list of unrefunded tasks
      */
-    public List<ConstructionTask> getRefundables(Player owner) {
+    public List<Structure> getRemoved(Player owner) {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
-        QConstructionTask qct = QConstructionTask.constructionTask;
-        List<ConstructionTask> tasks = query.from(qct)
-            .where(
-                qct.constructionState.eq(ConstructionTask.State.REMOVED)
-                .and(qct.constructionTaskData().refundable.eq(Boolean.FALSE))
-                .and(qct.placer.eq(owner.getName()))
-            ).list(qct);
+        QStructure qs = QStructure.structure;
+        List<Structure> structures = query.from(qs).orderBy(qs.progress().removedAt.desc()).where(qs.progress().progressStatus.eq(State.REMOVED).and(qs.owner.eq(owner.getName()))).list(qs);
         session.close();
-        return tasks;
+        return structures;
     }
 
 }

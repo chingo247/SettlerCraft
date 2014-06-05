@@ -8,6 +8,10 @@ package com.sc.plugin.menu;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import org.bukkit.entity.Player;
 
 /**
  * @author Chingo
@@ -15,10 +19,22 @@ import java.util.Map;
 public class MenuManager {
     
     private final Map<String,Menu> menus = Maps.newHashMap(); 
+    private final ConcurrentMap<UUID, Player> visiting;
     private static MenuManager instance;
     
     private MenuManager() {
+        this.visiting = new ConcurrentHashMap<>();
     }
+    
+    public void putVisitor(Player player) {
+        visiting.put(player.getUniqueId(), player);
+    }
+    
+    public void removeVisitor(Player player) {
+        visiting.remove(player.getUniqueId());
+    }
+    
+    
     
     public static MenuManager getInstance() {
         if(instance == null) {
@@ -31,8 +47,8 @@ public class MenuManager {
         if(menus.containsKey(menu.getTitle())) {
             return false;
         } else {
-            if(menu instanceof ItemShopCategoryMenu) {
-                menus.put(menu.getTitle(), (ItemShopCategoryMenu) menu);
+            if(menu instanceof ShopCategoryMenu) {
+                menus.put(menu.getTitle(), (ShopCategoryMenu) menu);
             }
             menus.put(menu.getTitle(), menu);
             return true;
@@ -45,5 +61,12 @@ public class MenuManager {
     
     public Menu getMenu(String menuTitle) {
         return menus.get(menuTitle);
+    }
+    
+    public void clearVisitors() {
+        for(Player player : visiting.values()) {
+            player.closeInventory();
+        }
+        visiting.clear();
     }
 }

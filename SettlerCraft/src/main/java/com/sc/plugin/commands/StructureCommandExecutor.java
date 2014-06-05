@@ -7,10 +7,9 @@ package com.sc.plugin.commands;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.api.structure.SCStructureAPI;
-import com.sc.api.structure.entity.QStructure;
-import com.sc.api.structure.entity.Structure;
-import com.sc.api.structure.entity.progress.ConstructionTask;
+import com.sc.api.structure.construction.ConstructionProgress;
+import com.sc.api.structure.construction.QStructure;
+import com.sc.api.structure.construction.Structure;
 import com.sc.api.structure.persistence.HibernateUtil;
 import com.sc.api.structure.persistence.service.StructureService;
 import java.util.List;
@@ -45,8 +44,7 @@ public class StructureCommandExecutor implements CommandExecutor {
                 return displayInfo(player, args);
             case "list":
                 return displayStructures(player, args);
-            case "demolish":
-                return demolish(player, args);
+            
             default:
                 player.sendMessage(ChatColor.RED + "No actions known for: " + arg);
                 return false;
@@ -126,7 +124,7 @@ public class StructureCommandExecutor implements CommandExecutor {
             int startIndex = (index - 1) * (MAX_LINES - 1);
             for (int i = startIndex; i < startIndex + (MAX_LINES - 1) && i < structures.size(); i++) {
                 Structure structure = structures.get(i);
-                String l = "ID: " + ChatColor.GOLD + structure.getId() + " " + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET + " RegionID: " + ChatColor.GOLD + structure.getStructureRegion();
+                String l = "# " + ChatColor.GOLD + structure.getId() + " " + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET + " RegionID: " + ChatColor.GOLD + structure.getStructureRegion();
                 message[line] = l;
                 line++;
             }
@@ -139,51 +137,12 @@ public class StructureCommandExecutor implements CommandExecutor {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QStructure qs = QStructure.structure;
-        List<Structure> structures = query.from(qs).where(qs.owner.eq(player.getName()).and(qs.task().constructionState.eq(ConstructionTask.State.COMPLETE))).list(qs);
+        List<Structure> structures = query.from(qs).where(qs.owner.eq(player.getName()).and(qs.progress().progressStatus.ne(ConstructionProgress.State.REMOVED))).list(qs);
         session.close();
         return structures;
     }
 
-    private boolean demolish(Player player, String[] args) {
-        StructureService ss = new StructureService();
-        Structure structure;
-        if(args.length < 2) {
-            player.sendMessage(new String[]{
-                ChatColor.RED + "Too few arguments!",
-                ChatColor.RED + CMD + " demolish [id]"
-            });
-            return true;
-        } else if(args.length == 2) {
-            Long id;
-            try {
-                id = Long.parseLong(args[1]);
-            } catch(NumberFormatException nfe) {
-                player.sendMessage(ChatColor.RED + "No valid ID");
-                return true;
-            }
-            structure = ss.getStructure(id);
-            if(structure == null) {
-                player.sendMessage(ChatColor.RED + "No structure found with id: " + id);
-                return true;
-            }
-        } else {
-            player.sendMessage(new String[]{
-                ChatColor.RED + "Too many arguments!",
-                ChatColor.RED + CMD + " demolish [id]"
-            });
-            return true;
-        }
-        
-        if(SCStructureAPI.owns(player, structure)) {
-            SCStructureAPI.demolish(player, structure);
-            player.sendMessage("Structure " + structure.getId() + " (" + structure.getPlan().getDisplayName() + ") will be demolished soon");
-            return true;
-        } else {
-            player.sendMessage(ChatColor.RED + "You don't have ownership of this structure!");
-            return true;
-        }
-        
-    }
+    
 
     private boolean displayInfo(Player player, String[] args) {
         StructureService service = new StructureService();

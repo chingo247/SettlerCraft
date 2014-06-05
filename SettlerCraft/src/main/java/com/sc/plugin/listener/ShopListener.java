@@ -8,7 +8,7 @@ package com.sc.plugin.listener;
 import com.sc.plugin.menu.Menu;
 import com.sc.plugin.menu.MenuManager;
 import com.sc.plugin.menu.MenuSlot;
-import com.sc.plugin.menu.ItemShopCategoryMenu;
+import com.sc.plugin.menu.ShopCategoryMenu;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,8 +29,8 @@ public class ShopListener implements Listener {
             if (MenuManager.getInstance().hasMenu(title)) {
                 Menu menu = MenuManager.getInstance().getMenu(title);
                 if (ice.getPlayer() instanceof Player) {
-                    if (menu instanceof ItemShopCategoryMenu) {
-                        ItemShopCategoryMenu iscm = (ItemShopCategoryMenu) menu;
+                    if (menu instanceof ShopCategoryMenu) {
+                        ShopCategoryMenu iscm = (ShopCategoryMenu) menu;
                         iscm.playerLeave((Player) ice.getPlayer());
                     }
                 }
@@ -55,8 +55,8 @@ public class ShopListener implements Listener {
                 Menu menu = MenuManager.getInstance().getMenu(title);
 //                System.out.println("Menu: " + menu.getTitle());
                 if (ice.getWhoClicked() instanceof Player) {
-                    if (menu instanceof ItemShopCategoryMenu) {
-                        ItemShopCategoryMenu iscm = (ItemShopCategoryMenu) menu;
+                    if (menu instanceof ShopCategoryMenu) {
+                        ShopCategoryMenu iscm = (ShopCategoryMenu) menu;
                         MenuSlot slot = iscm.getSlot(ice.getSlot());
                         
                         if (slot != null) {

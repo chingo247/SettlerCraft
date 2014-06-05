@@ -25,7 +25,7 @@ import org.bukkit.inventory.ItemStack;
  *
  * @author Chingo
  */
-public class ItemShopCategoryMenu extends CategoryMenu {
+public class ShopCategoryMenu extends CategoryMenu {
 
     private final boolean endless;
     private final Map<String, List<MenuSlot>> items;
@@ -41,7 +41,7 @@ public class ItemShopCategoryMenu extends CategoryMenu {
      * all pick actions on this shop's inventory will be cancelled
      * @param endless wheter the shop should be endless(scrollable) or not
      */
-    public ItemShopCategoryMenu(String title, boolean wontDeplete, boolean endless) {
+    public ShopCategoryMenu(String title, boolean wontDeplete, boolean endless) {
         super(title, wontDeplete);
         this.endless = endless;
         this.items = Maps.newHashMap();
@@ -266,10 +266,7 @@ public class ItemShopCategoryMenu extends CategoryMenu {
 
     @Override
     public void onEnter(Player player) {
-        onEnter(player, false);
-    }
-
-    public void onEnter(Player player, boolean getsForFree) {
+        MenuManager.getInstance().putVisitor(player);
 //        System.out.println("REMOVE THE CREDIT BONUS!!!!!");
 //        SCVaultEconomyUtil.getInstance().getEconomy().depositPlayer(player.getName(), 100000);
         player.sendMessage(ChatColor.YELLOW + "[" + title + "]: "+ChatColor.RESET+"Hello " + ChatColor.GREEN + player.getName() + ChatColor.RESET + "!");
@@ -324,6 +321,7 @@ public class ItemShopCategoryMenu extends CategoryMenu {
     public void playerLeave(Player player) {
         if (visitors.containsKey(player.getName())) {
             visitors.remove(player.getName());
+            MenuManager.getInstance().removeVisitor(player);
         }
     }
 
@@ -446,7 +444,6 @@ public class ItemShopCategoryMenu extends CategoryMenu {
         private Inventory inventory;
         private int currentPage = 0;
         private Map<Integer, List<MenuSlot>> pages;
-        private MenuSlot playerInfo;
 
         public Session(int currentPage, Inventory inventory, String currentCategory) {
             this.inventory = inventory;

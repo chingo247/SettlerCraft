@@ -17,7 +17,9 @@
 
 package com.sc.api.structure.construction;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  *
@@ -31,6 +33,9 @@ public class ConstructionEntry {
         progressQueue = new HashMap<>();
     }
     
+    public List<ConstructionProgress> list() {
+        return new ArrayList<>(progressQueue.values());
+    }
     
 
     public ConstructionProgress get(Integer key) {

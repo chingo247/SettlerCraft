@@ -16,10 +16,8 @@
  */
 package com.sc.plugin.listener;
 
-import com.sc.api.structure.SCStructureAPI;
-import com.sc.api.structure.construction.ConstructionManager;
-import com.sc.api.structure.construction.progress.ConstructionException;
-import com.sc.api.structure.entity.Structure;
+import com.sc.api.structure.construction.StructureException;
+import com.sc.api.structure.construction.StructureManager;
 import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.entity.world.SimpleCardinal;
 import com.sc.api.structure.entity.world.WorldDimension;
@@ -113,13 +111,15 @@ public class StructurePlanListener implements Listener {
     }
 
     private boolean canPlace(Player player, Location location, SimpleCardinal cardinal, StructurePlan plan) {
-        if (!ConstructionManager.mayClaim(player)) {
+        StructureManager sm = StructureManager.getInstance();
+
+        if (!sm.mayClaim(player)) {
             player.sendMessage(ChatColor.RED + " You have no permission to claim regions");
             player.sendMessage(ChatColor.RED + " Therefore your are not able to place structures");
             return false;
         }
 
-        if (!ConstructionManager.canClaim(player)) {
+        if (!sm.canClaim(player)) {
             WorldConfiguration wcfg = SCWorldGuardUtil.getWorldGuard().getGlobalStateManager().get(player.getWorld());
             RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(player.getWorld());
             int plyMaxRegionCount = wcfg.getMaxRegionCount(player);
@@ -129,12 +129,12 @@ public class StructurePlanListener implements Listener {
             return false;
         }
 
-        if (ConstructionManager.overlapsStructure(plan, location, cardinal)) {
+        if (sm.overlaps(plan, location, cardinal)) {
             player.sendMessage(ChatColor.RED + " Structure will overlap another structure");
             return false;
         }
 
-        if (ConstructionManager.overlapsUnowned(player, plan, location, cardinal)) {
+        if (sm.overlapsUnowned(player, plan, location, cardinal)) {
             player.sendMessage(ChatColor.RED + " Structure overlaps a region you don't own");
             return false;
         }
@@ -152,13 +152,13 @@ public class StructurePlanListener implements Listener {
             Location pos1 = new Location(world, new BlockWorldVector(world, x, y, z));
             Location pos2 = WorldUtil.getPos2(pos1, cardinal, plan.getSchematic());
             WorldDimension dimension = new WorldDimension(pos1, pos2);  // Included sign
-            Structure structure = new Structure(player.getName(), pos1, cardinal, plan);
+            StructureManager sm = StructureManager.getInstance();
 
             if (canPlace(player, pos1, cardinal, plan)) {
                 try {
-                    return SCStructureAPI.place(player, structure);
-                } catch (ConstructionException ex) {
-                    Logger.getLogger(StructurePlanListener.class.getName()).log(Level.SEVERE, null, ex);
+                    sm.construct(player, plan, pos1, cardinal);
+                } catch (StructureException ex) {
+                    player.sendMessage(ChatColor.RED + ex.getMessage());
                 }
             }
         }
@@ -174,7 +174,7 @@ public class StructurePlanListener implements Listener {
         SimpleCardinal cardinal = WorldUtil.getCardinal(player);
         Location pos1 = new Location(world, new BlockWorldVector(world, x, y, z));
         Location pos2 = WorldUtil.getPos2(pos1, cardinal, plan.getSchematic());
-        Structure structure = new Structure(player.getName(), pos1, cardinal, plan);
+        StructureManager sm = StructureManager.getInstance();
 
         if (action == Action.LEFT_CLICK_BLOCK) {
             if (!session.getRegionSelector(world).isDefined()) {
@@ -191,16 +191,17 @@ public class StructurePlanListener implements Listener {
                         session.getRegionSelector(world).clear();
                         session.dispatchCUISelection(SCWorldEditUtil.getLocalPlayer(player));
                         try {
-                            return SCStructureAPI.place(player, structure);
-                        } catch (ConstructionException ex) {
-                            Logger.getLogger(StructurePlanListener.class.getName()).log(Level.SEVERE, null, ex);
+                            sm.construct(player, plan, pos1, cardinal);
+                        } catch (StructureException ex) {
+                            player.sendMessage(ChatColor.RED + ex.getMessage());
                         }
+
                     }
                 } else {
                     SCWorldEditUtil.select(player, pos1, pos2);
-                    if (ConstructionManager.overlapsStructure(structure)) {
+                    if (sm.overlaps(plan, pos1, cardinal)) {
                         player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
-                    } else if (ConstructionManager.overlapsUnowned(player, structure)) {
+                    } else if (sm.overlapsUnowned(player, plan, pos1, cardinal)) {
                         player.sendMessage(ChatColor.RED + "Structure overlaps a region u dont own");
                     } else {
                         player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");

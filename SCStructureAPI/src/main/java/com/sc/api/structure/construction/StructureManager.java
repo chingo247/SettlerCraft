@@ -29,7 +29,6 @@ import com.sc.api.structure.construction.async.SCJobCallback;
 import com.sc.api.structure.construction.async.SmartClipBoard;
 import com.sc.api.structure.construction.flag.SCFlags;
 import com.sc.api.structure.construction.progress.ConstructionStrategyType;
-import com.sc.api.structure.construction.progress.ConstructionTaskException;
 import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.entity.world.SimpleCardinal;
 import com.sc.api.structure.entity.world.WorldDimension;
@@ -57,8 +56,8 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
@@ -79,20 +78,25 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
  */
 public class StructureManager {
 
+    public static final int STRUCTURE_ID_INDEX = 0;
+    public static final int STRUCTURE_PLAN_INDEX = 1;
+    public static final int STRUCTURE_OWNER_INDEX = 2;
+    public static final int STRUCTURE_STATUS_INDEX = 3;
     private static final org.apache.log4j.Logger LOGGER = org.apache.log4j.Logger.getLogger(StructureManager.class);
     private static final int INFINITE = -1;
     private static final String REGION_PREFIX = "settlercraft_s_";
-    private final HashMap<String, ConstructionEntry> entries;
-    private final HashMap<Long, Hologram> structureHolos; // Structure id / Holo
+    private final ConcurrentHashMap<String, ConstructionEntry> entries;
+    private final ConcurrentHashMap<Long, Hologram> structureHolos; // Structure id / Holo
     private final Lock regionLock;
+    private boolean initialized = false;
 
     private static StructureManager instance;
 
     private StructureManager() {
         this.regionLock = new ReentrantLock();
-        this.entries = new HashMap<>();
-        this.structureHolos = new HashMap<>();
-        initHolos();
+        this.entries = new ConcurrentHashMap<>();
+        this.structureHolos = new ConcurrentHashMap<>();
+
     }
 
     public static StructureManager getInstance() {
@@ -102,14 +106,29 @@ public class StructureManager {
         return instance;
     }
 
+    public void init() {
+        if (!initialized) {
+            initHolos();
+            initialized = true;
+        }
+    }
+
     private void initHolos() {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QStructure qs = QStructure.structure;
         List<Structure> structures = query.from(qs).where(qs.progress.progressStatus.ne(State.REMOVED)).list(qs);
         session.close();
-        for(Structure s : structures) {
+        for (Structure s : structures) {
             structureHolos.put(s.getId(), createStructureHolo(s));
+        }
+    }
+
+    public List<ConstructionProgress> listProgress(String owner) {
+        if (entries.get(owner) == null) {
+            return null;
+        } else {
+            return entries.get(owner).list();
         }
     }
 
@@ -117,6 +136,7 @@ public class StructureManager {
         if (entries.get(progress.getStructure().getOwner()) != null) {
             entries.get(progress.getStructure().getOwner()).remove(jobId);
         }
+        updateHolo(progress);
     }
 
     public void putProgress(Integer jobId, ConstructionProgress progress) {
@@ -124,6 +144,7 @@ public class StructureManager {
             entries.put(progress.getStructure().getOwner(), new ConstructionEntry());
         }
         entries.get(progress.getStructure().getOwner()).put(jobId, progress);
+        updateHolo(progress);
     }
 
     public ConstructionProgress getProgress(String owner, Integer jobId) {
@@ -132,6 +153,44 @@ public class StructureManager {
         } else {
             return entries.get(owner).get(jobId);
         }
+    }
+
+    private void updateHolo(ConstructionProgress progress) {
+        Hologram holo = structureHolos.get(progress.getId());
+        State state = progress.getProgressStatus();
+
+        if (holo != null) {
+            if (state == State.COMPLETE) {
+                holo.removeLine(STRUCTURE_STATUS_INDEX);
+                holo.update();
+            } else if (state == State.REMOVED) {
+                structureHolos.remove(progress.getId());
+                holo.delete();
+                return;
+            }
+            String statusString = "Status: ";
+            switch (state) {
+                case DEMOLISHING:
+                    statusString += ChatColor.YELLOW;
+                    break;
+                case BUILDING:
+                    statusString += ChatColor.YELLOW;
+                    break;
+                case COMPLETE:
+                    statusString += ChatColor.GREEN;
+                    break;
+                case STOPPED:
+                    statusString += ChatColor.RED;
+                    break;
+                default:
+                    statusString += ChatColor.WHITE;
+                    break;
+            }
+            statusString += state.name();
+            holo.setLine(STRUCTURE_STATUS_INDEX, statusString);
+            holo.update();
+        }
+
     }
 
     private Hologram createStructureHolo(Structure structure) {
@@ -144,7 +203,7 @@ public class StructureManager {
         String statusString = "Status: ";
         State state = structure.getProgress().getProgressStatus();
 
-        switch (structure.getProgress().getProgressStatus()) {
+        switch (state) {
             case DEMOLISHING:
                 statusString += ChatColor.YELLOW;
                 break;
@@ -176,8 +235,8 @@ public class StructureManager {
         String s = String.valueOf(REGION_PREFIX + (structure.getPlan().getId().replaceAll("\\s", "") + "_" + structure.getId())).toLowerCase();
         return s;
     }
-    
-        /**
+
+    /**
      * Selects a the structures cuboid region with worldedit
      *
      * @param player The player to perform the selection
@@ -201,7 +260,7 @@ public class StructureManager {
         select(player, structure);
     }
 
-    public Structure construct(Player owner, Location location, StructurePlan plan, SimpleCardinal cardinal) throws StructureException {
+    public Structure construct(Player owner, StructurePlan plan, Location location, SimpleCardinal cardinal) throws StructureException {
         Structure structure = new Structure(owner.getName(), location, cardinal, plan);
         StructureService service = new StructureService();
         structure = service.save(structure);
@@ -229,27 +288,29 @@ public class StructureManager {
 
         return structure;
     }
-    
+
     /**
-     * Demolishes a structure, the area of the structure will be restored to the moment before this structure was placed
+     * Demolishes a structure, the area of the structure will be restored to the moment before this
+     * structure was placed
+     *
      * @param player The demolisher
      * @param structure The target structure
      * @return True if demolision was succesfull
      */
     public boolean demolish(Player player, Structure structure) {
-            if(!structure.getOwner().equals(player.getName())) {
-                player.sendMessage(ChatColor.RED + "You don't own this structure");
-                return false;
-            }
-            ConstructionProgress progress = structure.getProgress();
-            progress.setIsDemolishing(true);
-            try {
-                continueProgress(progress, true);
-                return true;
-            } catch (ConstructionTaskException ex) {
-                java.util.logging.Logger.getLogger(SCStructureAPI.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        
+        if (!structure.getOwner().equals(player.getName())) {
+            player.sendMessage(ChatColor.RED + "You don't own this structure");
+            return false;
+        }
+        ConstructionProgress progress = structure.getProgress();
+        progress.setIsDemolishing(true);
+        try {
+            continueProgress(progress, true);
+            return true;
+        } catch (StructureException ex) {
+            java.util.logging.Logger.getLogger(SCStructureAPI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         return false;
     }
 
@@ -288,11 +349,11 @@ public class StructureManager {
                 throw new StructureException("Can't build structure, no permission");
             }
 
-            if (overlaps(structure)) {
+            if (overlaps(structure.getPlan(), structure.getLocation(), structure.getCardinal())) {
                 throw new StructureException("Structure overlaps another structure");
             }
 
-            if (overlapsUnowned(player, structure)) {
+            if (overlapsUnowned(player, structure.getPlan(), structure.getLocation(), structure.getCardinal())) {
                 throw new StructureException("Structure overlaps an regions owned other players");
             }
 
@@ -327,8 +388,11 @@ public class StructureManager {
     }
 
     /**
-     * Removes the region of this structure, a structure without it's region will no longer be recognized by the ConstructionManager. 
-     * This method is automatically called after demolision is complete or the structure was removed. This method should not be used for any other purpose
+     * Removes the region of this structure, a structure without it's region will no longer be
+     * recognized by the ConstructionManager. This method is automatically called after demolision
+     * is complete or the structure was removed. This method should not be used for any other
+     * purpose
+     *
      * @param structure The structure
      */
     private void removeRegion(Structure structure) {
@@ -343,23 +407,24 @@ public class StructureManager {
             }
         }
     }
-    
+
     /**
      * Determines if the player is an owner of this structure
+     *
      * @param player The player
      * @param structure The structure
      * @return True if this player owns the structure
      */
-    public static boolean owns(Player player, Structure structure) {
+    public boolean owns(Player player, Structure structure) {
         // TODO WorldGuard Region Ownership!
         return structure.getOwner().equals(player.getName());
     }
 
-    private boolean regionExists(World world, String id) {
+    public boolean regionExists(World world, String id) {
         return SCWorldGuardUtil.getGlobalRegionManager(world).hasRegion(id);
     }
 
-    private boolean mayClaim(Player player) {
+    public boolean mayClaim(Player player) {
         RegionPermissionModel permissionModel = SCWorldGuardUtil.getRegionPermissionModel(player);
         // Has permission to claim
         if (!permissionModel.mayClaim()) {
@@ -368,7 +433,7 @@ public class StructureManager {
         return true;
     }
 
-    private boolean canClaim(Player player) {
+    public boolean canClaim(Player player) {
         WorldConfiguration wcfg = SCWorldGuardUtil.getWorldGuard().getGlobalStateManager().get(player.getWorld());
         RegionPermissionModel permissionModel = SCWorldGuardUtil.getRegionPermissionModel(player);
         RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(player.getWorld());
@@ -385,7 +450,8 @@ public class StructureManager {
         return true;
     }
 
-    public boolean overlaps(Structure structure) {
+    public boolean overlaps(StructurePlan plan, Location location,  SimpleCardinal cardinal) {
+        Structure structure = new Structure("", location, cardinal, plan);
         RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
         WorldDimension dim = structure.getDimension();
         Vector p1 = dim.getMin().getPosition();
@@ -401,7 +467,8 @@ public class StructureManager {
         return false;
     }
 
-    public boolean overlapsUnowned(Player player, Structure structure) {
+    public boolean overlapsUnowned(Player player, StructurePlan plan, Location location,  SimpleCardinal cardinal) {
+        Structure structure = new Structure("", location, cardinal, plan);
         LocalPlayer localPlayer = SCWorldGuardUtil.getLocalPlayer(player);
         RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
         WorldDimension dim = structure.getDimension();
@@ -436,10 +503,9 @@ public class StructureManager {
      * @param progress The progress to continue
      * @param force will ignore the task current state, therefore even if the task was marked
      * completed it will try to continue the task
-     * @throws com.sc.api.structure.construction.progress.ConstructionTaskException if task was
-     * removed
+     * @throws com.sc.api.structure.construction.StructureException
      */
-    public void continueProgress(ConstructionProgress progress, boolean force) throws ConstructionTaskException {
+    public void continueProgress(ConstructionProgress progress, boolean force) throws StructureException {
         Structure structure = progress.getStructure();
         State progressStatus = progress.getProgressStatus();
         if ((progressStatus == State.BUILDING
@@ -449,7 +515,7 @@ public class StructureManager {
         }
 
         if (progressStatus == State.REMOVED) {
-            throw new ConstructionTaskException("Tried to continue a removed structure");
+            throw new StructureException("Tried to continue a removed structure");
         }
 
         String owner = structure.getOwner();
@@ -487,10 +553,8 @@ public class StructureManager {
      *
      * @param progress The progress to stop
      * @param force whether to check if the progress already has stopped
-     * @throws com.sc.api.structure.construction.progress.ConstructionTaskException when trying to
-     * stop a removed structure (progress)
      */
-    public void stopProgress(ConstructionProgress progress, boolean force) throws ConstructionTaskException {
+    public void stopProgress(ConstructionProgress progress, boolean force) throws StructureException {
         Structure structure = progress.getStructure();
         State progressStatus = progress.getProgressStatus();
         if (progressStatus == State.STOPPED && !force) {
@@ -498,7 +562,7 @@ public class StructureManager {
         }
 
         if (progressStatus == State.REMOVED) {
-            throw new ConstructionTaskException("Tried to stop a removed structure");
+            throw new StructureException("Tried to stop a removed structure");
         }
 
         Session session = null;
@@ -539,9 +603,9 @@ public class StructureManager {
      * by AsyncWorldEdit
      *
      * @param progress The progress
-     * @throws com.sc.api.structure.construction.progress.ConstructionTaskException
+     * @throws com.sc.api.structure.construction.StructureException
      */
-    public void delayProgress(ConstructionProgress progress) throws ConstructionTaskException {
+    public void delayProgress(ConstructionProgress progress) throws StructureException {
         if (progress.getJobId() == -1) {
             return;
         }
@@ -551,10 +615,10 @@ public class StructureManager {
     }
 
     public void stopAll() {
-        
+
     }
-    
+
     public void continueAll() {
-        
+
     }
 }

@@ -62,6 +62,7 @@ public class ConstructionCallback implements SCJobCallback {
                     } else {
                         progress.setProgressStatus(ConstructionProgress.State.DEMOLISHING);
                     }
+                    progress.setHasPlacedBlocks(true);
                     progress = ss.save(progress);
                     structureManager.putProgress(entry.getJobId(), progress);
                 } else if (bpje.getStatus() == BlockPlacerJobEntry.JobStatus.Done) {

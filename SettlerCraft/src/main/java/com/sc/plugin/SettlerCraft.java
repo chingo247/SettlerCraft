@@ -6,14 +6,10 @@
 package com.sc.plugin;
 
 import com.sc.api.structure.SCStructureAPI;
-import com.sc.api.structure.entity.Structure;
-import com.sc.api.structure.entity.StructureJob;
+import com.sc.api.structure.construction.ConstructionProgress;
+import com.sc.api.structure.construction.Structure;
+import com.sc.api.structure.construction.StructureManager;
 import com.sc.api.structure.entity.plan.StructurePlan;
-import com.sc.api.structure.entity.progress.ConstructionEntry;
-import com.sc.api.structure.entity.progress.ConstructionTask;
-import com.sc.api.structure.entity.progress.MaterialLayerProgress;
-import com.sc.api.structure.entity.progress.MaterialProgress;
-import com.sc.api.structure.entity.progress.MaterialResourceProgress;
 import com.sc.api.structure.persistence.HSQLServer;
 import com.sc.api.structure.persistence.HibernateUtil;
 import com.sc.api.structure.plan.PlanManager;
@@ -21,14 +17,15 @@ import com.sc.api.structure.util.CuboidUtil;
 import com.sc.plugin.commands.ConstructionCommandExecutor;
 import com.sc.plugin.commands.SettlerCraftCommandExecutor;
 import com.sc.plugin.commands.StructureCommandExecutor;
-import com.sc.plugin.listener.ConstructionTaskListener;
+import com.sc.plugin.listener.PluginListener;
 import com.sc.plugin.listener.ShopListener;
 import com.sc.plugin.listener.StructurePlanListener;
-import com.sc.plugin.menu.ItemShopCategoryMenu;
 import com.sc.plugin.menu.MenuManager;
 import com.sc.plugin.menu.MenuSlot;
+import com.sc.plugin.menu.ShopCategoryMenu;
 import com.sk89q.worldedit.CuboidClipboard;
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -41,12 +38,13 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author Chingo
  */
 public class SettlerCraft extends JavaPlugin {
-
+    private final Logger LOGGER = Logger.getLogger(SettlerCraft.class);
     private boolean restrictZones = false; // Config...
     public static final String PLAN_MENU_NAME = "Plan Menu";
-    private static ItemShopCategoryMenu planMenu;
+    private ShopCategoryMenu planMenu;
     public static final String PLANSHOP = "Buy & Build"; // Unique Identifier for shop
-    private static ItemShopCategoryMenu planShop;
+    private ShopCategoryMenu planShop;
+    private StructureManager structureManager;
 
     @Override
     public void onEnable() {
@@ -66,17 +64,24 @@ public class SettlerCraft extends JavaPlugin {
             this.setEnabled(false);
             return;
         }
-
-        HSQLServer.getInstance().start();
         initDB();
+        if(!HSQLServer.getInstance().isRunning()) {
+            System.out.println("Server wasn't running! Starting server now!");
+            HSQLServer.getInstance().start();
+//            RestoreService service = new RestoreService();
+//            service.restore();
+        }
+        new Thread(new Runnable() {
 
-//        RestoreService service = new RestoreService();
-//        service.restore();
-
-        SCStructureAPI.loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
-
-        setupMenu();
-        setupPlanShop();
+            @Override
+            public void run() {
+                SCStructureAPI.loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
+                setupMenu();
+                setupPlanShop();
+                Bukkit.broadcastMessage(ChatColor.GOLD + "[SettlerCraft]: " + ChatColor.RESET + " Structures loaded");
+            }
+        }).start();
+        
 
         getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
         getCommand("cst").setExecutor(new ConstructionCommandExecutor(this));
@@ -84,8 +89,14 @@ public class SettlerCraft extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new StructurePlanListener(), this);
         Bukkit.getPluginManager().registerEvents(new ShopListener(), this);
-        Bukkit.getPluginManager().registerEvents(new ConstructionTaskListener(), this);
+        Bukkit.getPluginManager().registerEvents(new PluginListener(), this);
+        
+        StructureManager.getInstance().init();
+//        
+//        ConstructionTaskManager manager = new ConstructionTaskManager();
+//        manager.continueAll();
     }
+    
     
     public static boolean isHolographicDisplaysEnabled() {
         Plugin plugin = Bukkit.getPluginManager().getPlugin("HolographicDisplays");
@@ -108,13 +119,9 @@ public class SettlerCraft extends JavaPlugin {
     private static void initDB() {
         HibernateUtil.addAnnotatedClasses(
                 Structure.class,
-                MaterialProgress.class,
-                MaterialLayerProgress.class,
-                MaterialResourceProgress.class,
                 StructurePlan.class,
-                StructureJob.class,
-                ConstructionEntry.class,
-                ConstructionTask.class);
+                ConstructionProgress.class
+        );
     }
 
     public boolean isPlanMenuEnabled() {
@@ -124,9 +131,10 @@ public class SettlerCraft extends JavaPlugin {
     public boolean isPlanShopEnabled() {
         return getConfig().getBoolean("menus.planshop");
     }
+    
 
-    private static void setupMenu() {
-        planMenu = new ItemShopCategoryMenu(PLAN_MENU_NAME, true, true);
+    private void setupMenu() {
+        planMenu = new ShopCategoryMenu(PLAN_MENU_NAME, true, true);
 
         // Add Plan Categories
         planMenu.addCategory(0, new ItemStack(Material.NETHER_STAR), "All");
@@ -160,8 +168,8 @@ public class SettlerCraft extends JavaPlugin {
         MenuManager.getInstance().register(planMenu);
     }
 
-    private static void setupPlanShop() {
-        planShop = new ItemShopCategoryMenu(PLANSHOP, true, true);
+    private void setupPlanShop() {
+        planShop = new ShopCategoryMenu(PLANSHOP, true, true);
 
         // Add Plan Categories
         planShop.addCategory(0, new ItemStack(Material.NETHER_STAR), "All");

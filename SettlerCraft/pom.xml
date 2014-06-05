@@ -89,13 +89,7 @@
             <version>5.9</version>
             <scope>provided</scope>
         </dependency>
-        <!--holographicdisplays from private repo -->
-        <dependency>
-            <groupId>org.holographicdisplay</groupId>
-            <artifactId>holographicdisplay</artifactId>
-            <version>1.8.2</version>
-            <scope>provided</scope>
-        </dependency>
+
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

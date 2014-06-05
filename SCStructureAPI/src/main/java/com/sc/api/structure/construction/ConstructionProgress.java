@@ -70,6 +70,7 @@ public class ConstructionProgress implements Serializable {
     private Timestamp completedAt;
     private Timestamp removedAt;
     private boolean isDemolishing;
+    private boolean hasPlacedBlocks = false;
     private State progressStatus;
     @Transient
     private int jobId = -1;
@@ -102,7 +103,14 @@ public class ConstructionProgress implements Serializable {
     public void setJobId(int jobId) {
         this.jobId = jobId;
     }
-    
+
+    public void setHasPlacedBlocks(boolean hasPlacedBlocks) {
+        this.hasPlacedBlocks = hasPlacedBlocks;
+    }
+
+    public boolean hasPlacedBlocks() {
+        return hasPlacedBlocks;
+    }
 
     public double getRefundValue() {
         return refundValue;
