@@ -15,31 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.sc.api.structure.entity;
-
-import java.io.Serializable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+package com.sc.api.structure.construction;
 
 /**
  *
  * @author Chingo
  */
-@Entity
-public class SCSession implements Serializable {
-    @Id
-    @GeneratedValue
-    private Long id;
+public class StructureException extends Exception {
+
+    public StructureException(String message) {
+        super(message);
+    }
     
-    private final boolean loaded = false;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    
     
 }

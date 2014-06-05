@@ -17,7 +17,7 @@
 
 package com.sc.api.structure.event.structure;
 
-import com.sc.api.structure.entity.progress.ConstructionTask;
+import com.sc.api.structure.construction.Structure;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
@@ -25,15 +25,15 @@ import org.bukkit.event.HandlerList;
  *
  * @author Chingo
  */
-public class ConstructionTaskAddedEvent extends Event {
-     private final ConstructionTask task;
+public class StructureJobAddedEvent extends Event {
+     private final Structure structure;
     
-    public ConstructionTaskAddedEvent(ConstructionTask task) {
-        this.task = task;
+    public StructureJobAddedEvent(Structure structure) {
+        this.structure = structure;
     }
 
-    public ConstructionTask getTask() {
-        return task;
+    public Structure getStructure() {
+        return structure;
     }
     
     private static final HandlerList handlers = new HandlerList();

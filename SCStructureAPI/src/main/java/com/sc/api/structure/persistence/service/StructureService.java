@@ -19,9 +19,10 @@ package com.sc.api.structure.persistence.service;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateDeleteClause;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.api.structure.entity.QStructure;
-import com.sc.api.structure.entity.Structure;
-import com.sc.api.structure.entity.progress.ConstructionTask;
+import com.sc.api.structure.construction.ConstructionProgress;
+import com.sc.api.structure.construction.ConstructionProgress.State;
+import com.sc.api.structure.construction.QStructure;
+import com.sc.api.structure.construction.Structure;
 import com.sc.api.structure.persistence.HibernateUtil;
 import java.util.List;
 import java.util.logging.Level;
@@ -58,6 +59,7 @@ public class StructureService extends AbstractService {
         session.close();
         return structures;
     }
+    
 
     public List<Structure> getStructures(String owner) {
         QStructure structure = QStructure.structure;
@@ -96,6 +98,31 @@ public class StructureService extends AbstractService {
         }
         return structure;
     }
+    
+       public ConstructionProgress save(ConstructionProgress progress) {
+        Session session = null;
+        Transaction tx = null;
+        try {
+            session = HibernateUtil.getSession();
+            tx = session.beginTransaction();
+            progress = (ConstructionProgress) session.merge(progress);
+            tx.commit();
+        } catch (HibernateException e) {
+            try {
+                tx.rollback();
+            } catch (HibernateException rbe) {
+                Logger.getLogger(AbstractService.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
+            }
+            throw e;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return progress;
+    }
+    
+  
 
     /**
      * Determines if given location is on a structure.
@@ -120,7 +147,7 @@ public class StructureService extends AbstractService {
                         .and(qStructure.dimension().maxZ.goe(location.getBlockZ()))
                         .and(qStructure.dimension().minY.loe(location.getBlockY()))
                         .and(qStructure.dimension().maxY.goe(location.getBlockY()))
-                        .and(qStructure.task().constructionState.eq(ConstructionTask.State.COMPLETE))
+                        .and(qStructure.progress().progressStatus.ne(State.REMOVED))
                 ).singleResult(qStructure);
 
         session.close();

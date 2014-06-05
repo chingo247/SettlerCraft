@@ -96,7 +96,15 @@
             <version>5.6</version>
             <scope>provided</scope>
         </dependency>
-        <!--WorldGuard from backup-repo-->
+        <!--holographicDisplays-->
+        <dependency>
+            <groupId>org.holographicdisplay</groupId>
+            <artifactId>holographicdisplay</artifactId>
+            <version>1.8.2</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <!--WorldGuard-->
         <dependency>
             <groupId>com.sc.worldguard</groupId>
             <artifactId>worldguard</artifactId>  

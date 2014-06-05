@@ -66,6 +66,33 @@ public class SyncBuilder {
     }
 
     /**
+     * Aligns target clipboard to speficied direction, assuming that the initial state is pointed to
+     * EAST (entrance to the west)
+     *
+     * @param clipboard
+     * @param location
+     * @param direction
+     * @return The new target location
+     */
+    public static Location align(final CuboidClipboard clipboard, Location location, SimpleCardinal direction) {
+        switch (direction) {
+            case EAST:
+                return location;
+            case SOUTH:
+                clipboard.rotate2D(90);
+                return location.add(new BlockVector(-(clipboard.getWidth() - 1), 0, 0));
+            case WEST:
+                clipboard.rotate2D(180);
+                return location.add(new BlockVector(-(clipboard.getWidth() - 1), 0, -(clipboard.getLength() - 1)));
+            case NORTH:
+                clipboard.rotate2D(270);
+                return location.add(new BlockVector(0, 0, -(clipboard.getLength() - 1)));
+            default:
+                throw new AssertionError("unreachable");
+        }
+    }
+    
+    /**
      * Aligns clipboard to direction and pastes it on target location
      *
      * @param editSession The editSession
@@ -74,8 +101,8 @@ public class SyncBuilder {
      * @param cardinal The cardinal
      */
     public static void place(EditSession editSession, CuboidClipboard clipboard, Location target, SimpleCardinal cardinal) throws MaxChangedBlocksException {
-        Location t = ConstructionManager.align(clipboard, target, cardinal);
-        clipboard.paste(editSession, t.getPosition(), true);
+        target = align(clipboard, target, cardinal);
+        clipboard.paste(editSession, target.getPosition(), true);
     }
 
     /**
@@ -87,9 +114,9 @@ public class SyncBuilder {
      * @param cardinal The direction
      */
     public static void place(CuboidClipboard cuboidClipboard, Location target, SimpleCardinal cardinal) {
-        Location t = ConstructionManager.align(cuboidClipboard, target, cardinal);
+        target = align(cuboidClipboard, target, cardinal);
         try {
-            SyncBuilder.place(SCWorldEditUtil.getEditSession(t.getWorld(), -1), cuboidClipboard, t, cardinal);
+            SyncBuilder.place(SCWorldEditUtil.getEditSession(target.getWorld(), -1), cuboidClipboard, target, cardinal);
         } catch (MaxChangedBlocksException ex) {
             Logger.getLogger(SyncBuilder.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -125,8 +152,8 @@ public class SyncBuilder {
      */
     public static void placeLayer(EditSession editSession, CuboidClipboard whole, int layer, Location target, SimpleCardinal cardinal) throws MaxChangedBlocksException {
         CuboidClipboard layerClip = CuboidUtil.getLayer(whole, layer);
-        Location t =  ConstructionManager.align(layerClip, target, cardinal);
-        SyncBuilder.place(editSession, layerClip, t, cardinal);
+        target = align(layerClip, target, cardinal);
+        SyncBuilder.place(editSession, layerClip, target, cardinal);
     }
 
     /**
@@ -141,8 +168,8 @@ public class SyncBuilder {
      * @param interval The interval at which layers will be placed
      */
     public static void placeLayered(EditSession editSession, CuboidClipboard whole, Location target, SimpleCardinal cardinal, int interval) {
-        Location t =  ConstructionManager.align(whole, target, cardinal);
-        placeLayered(editSession, whole, CuboidUtil.getLayers(whole), t, interval, 0);
+        target = align(whole, target, cardinal);
+        placeLayered(editSession, whole, CuboidUtil.getLayers(whole), target, interval, 0);
     }
 
     private static void placeLayered(final EditSession editSession, final CuboidClipboard whole, final List<CuboidClipboard> all, final Location location, final int delayBetweenLayers, final int index) {

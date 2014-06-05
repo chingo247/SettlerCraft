@@ -14,13 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.entity;
+package com.sc.api.structure.construction;
 
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
 import com.sc.api.structure.entity.plan.StructurePlan;
-import com.sc.api.structure.entity.progress.ConstructionTask;
-import com.sc.api.structure.entity.progress.MaterialProgress;
 import com.sc.api.structure.entity.world.SimpleCardinal;
 import com.sc.api.structure.entity.world.WorldDimension;
 import com.sc.api.structure.entity.world.WorldLocation;
@@ -35,13 +33,11 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
@@ -56,11 +52,13 @@ public class Structure implements Serializable {
 
     @Id
     @GeneratedValue
-    @Column(name = "STRUCTURE_ID")
     private Long id;
 
+    /**
+     * Only used for lookups, for authorized actions worldguard will be used
+     */
     @NotNull
-    private String owner; //TODO Create Owner class
+    private String owner; 
 
     @Embedded
     private StructurePlan plan;
@@ -73,17 +71,17 @@ public class Structure implements Serializable {
 
     private SimpleCardinal cardinal;
 
-    @Nullable
     @OneToOne
-    private MaterialProgress progress;
+    @Cascade(CascadeType.ALL)
+    private ConstructionProgress progress;
     
     @Nullable
     private String structureRegion;
 
-    @OneToOne
-    @Cascade(CascadeType.ALL)
-    @PrimaryKeyJoinColumn(name = "STRUCTURE_ID", referencedColumnName = "TASK_ID")
-    private ConstructionTask task;
+//    @OneToOne
+//    @Cascade(CascadeType.ALL)
+////    @PrimaryKeyJoinColumn(name = "STRUCTURE_ID", referencedColumnName = "TASK_ID")
+//    private ConstructionTask task;
     
     
     private File areaBefore;
@@ -101,7 +99,7 @@ public class Structure implements Serializable {
      * @param cardinal The player's direction on placement
      * @param plan The plan
      */
-    public Structure(String owner, Location target, SimpleCardinal cardinal, StructurePlan plan) {
+    Structure(String owner, Location target, SimpleCardinal cardinal, StructurePlan plan) {
         Preconditions.checkNotNull(plan);
         Preconditions.checkNotNull(target);
         Preconditions.checkNotNull(cardinal);
@@ -110,8 +108,13 @@ public class Structure implements Serializable {
         this.cardinal = cardinal;
         this.worldLocation = new WorldLocation(target);
         this.dimension = WorldUtil.getWorldDimension(target, cardinal, plan.getSchematic());
+        this.progress = new ConstructionProgress(this);
     }
 
+    public ConstructionProgress getProgress() {
+        return progress;
+    }
+    
     public void setAreaBefore(CuboidClipboard backup) {
         try {
             areaBefore = File.createTempFile(owner + "_", "str_" + id + "_" + getPlan().getDisplayName().replaceAll("\\s", "_"));
@@ -148,9 +151,9 @@ public class Structure implements Serializable {
         return plan;
     }
 
-    public ConstructionTask getTask() {
-        return task;
-    }
+//    public ConstructionTask getTask() {
+//        return task;
+//    }
     
     
 
@@ -192,10 +195,6 @@ public class Structure implements Serializable {
 
     public WorldDimension getDimension() {
         return dimension;
-    }
-
-    public MaterialProgress getProgress() {
-        return progress;
     }
 
     public String getStructureRegion() {

@@ -51,21 +51,22 @@ public class HSQLServer {
     }
 
     public void start() {
-
-        if (!isRunning()) {
             System.out.println("Starting HSQL server on port " + server.getPort());
             server.start();
-        }
     }
 
     public void shutdown() {
         System.out.println("HSQL server shutting down");
         server.shutdown();
+        
     }
+    
+    
 
-    private boolean isRunning() {
+    public boolean isRunning() {
         try {
             Connection c = DriverManager.getConnection("jdbc:hsqldb:hsql://" + HOST + "/" + DATABASE);
+            c.commit();
             return true;
         } catch (SQLException ex) {
         }

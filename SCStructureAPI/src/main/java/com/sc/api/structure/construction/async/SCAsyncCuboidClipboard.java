@@ -16,7 +16,6 @@
  */
 package com.sc.api.structure.construction.async;
 
-import com.sc.api.structure.construction.SmartClipBoard;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;

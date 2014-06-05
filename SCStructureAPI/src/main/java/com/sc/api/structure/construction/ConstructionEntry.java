@@ -15,38 +15,40 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.sc.api.structure.event.structure;
+package com.sc.api.structure.construction;
 
-import com.sc.api.structure.entity.progress.ConstructionTask;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
+import java.util.HashMap;
 
 /**
  *
  * @author Chingo
  */
-public class ConstructionTaskStateChangedEvent extends Event {
+public class ConstructionEntry {
     
-    private final ConstructionTask task;
-    
-    public ConstructionTaskStateChangedEvent(ConstructionTask task) {
-        this.task = task;
-    }
+    private final HashMap<Integer, ConstructionProgress> progressQueue;
 
-    public ConstructionTask getTask() {
-        return task;
+    ConstructionEntry() {
+        progressQueue = new HashMap<>();
     }
     
-    private static final HandlerList handlers = new HandlerList();
+    
 
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
+    public ConstructionProgress get(Integer key) {
+        return progressQueue.get(key);
     }
 
-    public static HandlerList getHandlerList() {
-        return handlers;
+    public boolean containsKey(Integer key) {
+        return progressQueue.containsKey(key);
     }
 
+    public ConstructionProgress put(Integer key, ConstructionProgress value) {
+        return progressQueue.put(key, value);
+    }
+
+    public ConstructionProgress remove(Integer key) {
+        return progressQueue.remove(key);
+    }
+    
+    
     
 }

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.construction;
+package com.sc.api.structure.construction.async;
 
 import com.sc.api.structure.construction.progress.ConstructionStrategyType;
 import com.sk89q.worldedit.CuboidClipboard;
