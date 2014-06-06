@@ -18,7 +18,7 @@ package com.sc.plugin.commands;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.api.structure.construction.ConstructionProgress.State;
+import com.sc.api.structure.construction.ConstructionProcess.State;
 import com.sc.api.structure.construction.QStructure;
 import com.sc.api.structure.construction.Structure;
 import com.sc.api.structure.persistence.HibernateUtil;

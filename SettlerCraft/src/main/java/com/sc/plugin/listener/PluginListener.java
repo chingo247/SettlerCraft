@@ -25,7 +25,7 @@ public class PluginListener implements Listener {
          String plugin = disableEvent.getPlugin().getName();
          if(plugin.equals(SettlerCraft.getSettlerCraft().getName())) {
              MenuManager.getInstance().clearVisitors();
-             StructureManager.getInstance().stopAll();
+             StructureManager.getInstance().shutdown();
          }
     }
     

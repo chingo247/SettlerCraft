@@ -22,8 +22,7 @@ import com.google.common.base.Preconditions;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.api.structure.SCStructureAPI;
-import com.sc.api.structure.construction.ConstructionProgress.State;
-import com.sc.api.structure.construction.async.ConstructionCallback;
+import com.sc.api.structure.construction.ConstructionProcess.State;
 import com.sc.api.structure.construction.async.SCAsyncCuboidClipboard;
 import com.sc.api.structure.construction.async.SCJobCallback;
 import com.sc.api.structure.construction.async.SmartClipBoard;
@@ -35,6 +34,7 @@ import com.sc.api.structure.entity.world.WorldDimension;
 import com.sc.api.structure.persistence.HibernateUtil;
 import com.sc.api.structure.persistence.service.AbstractService;
 import com.sc.api.structure.persistence.service.StructureService;
+import com.sc.api.structure.plan.PlanManager;
 import com.sc.api.structure.util.WorldUtil;
 import com.sc.api.structure.util.plugins.SCAsyncWorldEditUtil;
 import com.sc.api.structure.util.plugins.SCWorldEditUtil;
@@ -47,6 +47,7 @@ import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.bukkit.RegionPermissionModel;
 import com.sk89q.worldguard.bukkit.WorldConfiguration;
@@ -86,7 +87,7 @@ public class StructureManager {
     private static final int INFINITE = -1;
     private static final String REGION_PREFIX = "settlercraft_s_";
     private final ConcurrentHashMap<String, ConstructionEntry> entries;
-    private final ConcurrentHashMap<Long, Hologram> structureHolos; // Structure id / Holo
+    private final ConcurrentHashMap<Long, Hologram> holos; // Structure id / Holo
     private final Lock regionLock;
     private boolean initialized = false;
 
@@ -95,7 +96,7 @@ public class StructureManager {
     private StructureManager() {
         this.regionLock = new ReentrantLock();
         this.entries = new ConcurrentHashMap<>();
-        this.structureHolos = new ConcurrentHashMap<>();
+        this.holos = new ConcurrentHashMap<>();
 
     }
 
@@ -120,11 +121,11 @@ public class StructureManager {
         List<Structure> structures = query.from(qs).where(qs.progress.progressStatus.ne(State.REMOVED)).list(qs);
         session.close();
         for (Structure s : structures) {
-            structureHolos.put(s.getId(), createStructureHolo(s));
+            holos.put(s.getId(), createStructureHolo(s));
         }
     }
 
-    public List<ConstructionProgress> listProgress(String owner) {
+    public List<ConstructionProcess> listProgress(String owner) {
         if (entries.get(owner) == null) {
             return null;
         } else {
@@ -132,14 +133,14 @@ public class StructureManager {
         }
     }
 
-    public void removeProgress(Integer jobId, ConstructionProgress progress) {
+    public void removeProgress(Integer jobId, ConstructionProcess progress) {
         if (entries.get(progress.getStructure().getOwner()) != null) {
             entries.get(progress.getStructure().getOwner()).remove(jobId);
         }
         updateHolo(progress);
     }
 
-    public void putProgress(Integer jobId, ConstructionProgress progress) {
+    public void putProgress(Integer jobId, ConstructionProcess progress) {
         if (entries.get(progress.getStructure().getOwner()) == null) {
             entries.put(progress.getStructure().getOwner(), new ConstructionEntry());
         }
@@ -147,7 +148,7 @@ public class StructureManager {
         updateHolo(progress);
     }
 
-    public ConstructionProgress getProgress(String owner, Integer jobId) {
+    public ConstructionProcess getProgress(String owner, Integer jobId) {
         if (entries.get(owner) != null) {
             return null;
         } else {
@@ -155,42 +156,47 @@ public class StructureManager {
         }
     }
 
-    private void updateHolo(ConstructionProgress progress) {
-        Hologram holo = structureHolos.get(progress.getId());
-        State state = progress.getProgressStatus();
+    private void updateHolo(ConstructionProcess progress) {
+        Hologram holo = holos.get(progress.getId());
+        State state = progress.getStatus();
 
+        
         if (holo != null) {
             if (state == State.COMPLETE) {
-                holo.removeLine(STRUCTURE_STATUS_INDEX);
+                holo.setLine(STRUCTURE_STATUS_INDEX, "");
                 holo.update();
+                return;
             } else if (state == State.REMOVED) {
-                structureHolos.remove(progress.getId());
+                holos.remove(progress.getId());
                 holo.delete();
                 return;
             }
-            String statusString = "Status: ";
+            String statusString;
             switch (state) {
-                case DEMOLISHING:
-                    statusString += ChatColor.YELLOW;
-                    break;
-                case BUILDING:
-                    statusString += ChatColor.YELLOW;
-                    break;
-                case COMPLETE:
-                    statusString += ChatColor.GREEN;
-                    break;
-                case STOPPED:
-                    statusString += ChatColor.RED;
-                    break;
-                default:
-                    statusString += ChatColor.WHITE;
-                    break;
+            case DEMOLISHING:
+                statusString = "Status: " + ChatColor.YELLOW;
+                statusString += state.name();
+                break;
+            case BUILDING:
+                statusString = "Status: " + ChatColor.YELLOW;
+                statusString += state.name();
+                break;
+            case COMPLETE:
+                statusString = "";
+                break;
+            case STOPPED:
+                statusString = "Status: " + ChatColor.RED;
+                statusString += state.name();
+                break;
+            default:
+                statusString = "Status: " + ChatColor.WHITE;
+                statusString += state.name();
+                break;
             }
-            statusString += state.name();
+            
             holo.setLine(STRUCTURE_STATUS_INDEX, statusString);
             holo.update();
         }
-
     }
 
     private Hologram createStructureHolo(Structure structure) {
@@ -200,33 +206,37 @@ public class StructureManager {
                 structure.getLocation().getPosition().getBlockY() + 3,
                 structure.getLocation().getPosition().getBlockZ());
 
-        String statusString = "Status: ";
-        State state = structure.getProgress().getProgressStatus();
+        String statusString;
+        State state = structure.getProgress().getStatus();
 
         switch (state) {
             case DEMOLISHING:
-                statusString += ChatColor.YELLOW;
+                statusString = "Status: " + ChatColor.YELLOW;
+                statusString += state.name();
                 break;
             case BUILDING:
-                statusString += ChatColor.YELLOW;
+                statusString = "Status: " + ChatColor.YELLOW;
+                statusString += state.name();
                 break;
             case COMPLETE:
-                statusString += ChatColor.GREEN;
+                statusString = "";
                 break;
             case STOPPED:
-                statusString += ChatColor.RED;
+                statusString = "Status: " + ChatColor.RED;
+                statusString += state.name();
                 break;
             default:
-                statusString += ChatColor.WHITE;
+                statusString = "Status: " + ChatColor.WHITE;
+                statusString += state.name();
                 break;
         }
-        statusString += state.name();
+        
 
         Hologram hologram = HolographicDisplaysAPI.createHologram(SCStructureAPI.getMainPlugin(), location,
                 "Id: " + ChatColor.GOLD + structure.getId(),
                 "Plan: " + ChatColor.BLUE + structure.getPlan().getDisplayName(),
                 "Owner: " + ChatColor.GREEN + structure.getOwner(),
-                "Status: " + statusString
+                statusString
         );
         return hologram;
     }
@@ -243,7 +253,8 @@ public class StructureManager {
      * @param structure The structure
      */
     public static void select(Player player, Structure structure) {
-        Location pos2 = WorldUtil.getPos2(structure.getLocation(), structure.getCardinal(), structure.getPlan().getSchematic());
+        CuboidClipboard clipboard = PlanManager.getInstance().getClipBoard(structure.getPlan().getChecksum());
+        Location pos2 = WorldUtil.getPos2(structure.getLocation(), structure.getCardinal(), clipboard);
         SCWorldEditUtil.select(player, structure.getLocation(), pos2);
     }
 
@@ -259,19 +270,53 @@ public class StructureManager {
         Structure structure = new Structure("", location, cardinal, plan);
         select(player, structure);
     }
+    
+    public CuboidClipboard cloneArea(Player player, StructurePlan plan, Location location, SimpleCardinal cardinal) {
+        Structure dummy = new Structure("", location, cardinal, plan);
+        return cloneArea(dummy);
+    }
+    
+    public CuboidClipboard cloneArea(Structure structure) {
+        WorldDimension dimension = structure.getDimension();
+        CuboidRegion region = new CuboidRegion(dimension.getLocalWorld(), dimension.getMin().getPosition(), dimension.getMax().getPosition());
+        Vector min = region.getMinimumPoint();
+        Vector max = region.getMaximumPoint();
+        Vector pos = structure.getLocation().getPosition();
+        AsyncEditSession copySession = SCAsyncWorldEditUtil.createAsyncEditSession(structure.getOwner(), structure.getLocation().getWorld(), INFINITE);
+        
+        CuboidClipboard clipboard = new CuboidClipboard(
+                max.subtract(min).add(Vector.ONE),
+                min, min.subtract(pos));
+        
+        clipboard.copy(copySession, region);
+        return clipboard;
+    }
 
-    public Structure construct(Player owner, StructurePlan plan, Location location, SimpleCardinal cardinal) throws StructureException {
+    public Structure construct(Player owner, StructurePlan plan, Location location, SimpleCardinal cardinal) {
+        long start = System.currentTimeMillis();
         Structure structure = new Structure(owner.getName(), location, cardinal, plan);
-        StructureService service = new StructureService();
-        structure = service.save(structure);
+        StructureService ss = new StructureService();
+        structure = ss.save(structure);
+        structure.setStructureRegionId(generateRegionId(structure));
+        ConstructionProcess progress = new ConstructionProcess(structure);
+        structure.setConstructionProgress(progress);
+        ss.save(progress);
+        long end = System.currentTimeMillis();
+        
+        System.out.println("Created and saved in: " + (end - start) + "ms");
+        
+        long sr = System.currentTimeMillis();
         ProtectedRegion structureRegion = claimGround(owner, structure);
+        long er = System.currentTimeMillis();
+        System.out.println("Region created and saved in: " + (er - sr) + "ms");
         if (structureRegion == null) {
-            service.delete(structure);
-            throw new StructureException("Failed to claim region for structure");
+            ss.delete(structure);
+            owner.sendMessage(ChatColor.RED + "Failed to claim region for structure");
+            return null;
         }
-
-        final CuboidClipboard schematic = structure.getPlan().getSchematic();
-        final AsyncEditSession asyncSession = SCAsyncWorldEditUtil.createAsyncEditSession(owner.getName(), structure.getLocation().getWorld(), -1); // -1 = infinite
+        
+        final CuboidClipboard schematic = PlanManager.getInstance().getClipBoard(structure.getPlan().getChecksum());
+        final AsyncEditSession asyncSession = SCAsyncWorldEditUtil.createAsyncEditSession(owner.getName(), structure.getLocation().getWorld(), INFINITE); 
         final SmartClipBoard smartClipboard = new SmartClipBoard(schematic, ConstructionStrategyType.LAYERED, false);
         final SCAsyncCuboidClipboard asyncCuboidClipboard = new SCAsyncCuboidClipboard(asyncSession.getPlayer(), smartClipboard);
         final ConstructionCallback cc = new ConstructionCallback(owner.getName(), structure, asyncSession);
@@ -284,7 +329,7 @@ public class StructureManager {
             LOGGER.error(ex);
         }
 
-        createStructureHolo(structure);
+        holos.put(structure.getId(), createStructureHolo(structure));
 
         return structure;
     }
@@ -302,10 +347,10 @@ public class StructureManager {
             player.sendMessage(ChatColor.RED + "You don't own this structure");
             return false;
         }
-        ConstructionProgress progress = structure.getProgress();
+        ConstructionProcess progress = structure.getProgress();
         progress.setIsDemolishing(true);
         try {
-            continueProgress(progress, true);
+            continueProcess(progress, true);
             return true;
         } catch (StructureException ex) {
             java.util.logging.Logger.getLogger(SCStructureAPI.class.getName()).log(Level.SEVERE, null, ex);
@@ -332,7 +377,7 @@ public class StructureManager {
         }
     }
 
-    private ProtectedRegion claimGround(Player player, final Structure structure) throws StructureException {
+    private ProtectedRegion claimGround(Player player, final Structure structure) {
         if (structure.getId() == null) {
             throw new AssertionError("Structure id was null, save the structure instance first! (e.g. structure = structureService.save(structure)"); // Should only happen if the programmer forgets to save the instance before this
         }
@@ -342,19 +387,23 @@ public class StructureManager {
             regionLock.lock();
 
             if (!canClaim(player)) {
-                throw new StructureException("Can't build structure, region limit reached");
+                player.sendMessage(ChatColor.RED + "Can't build structure, region limit reached");
+                return null;
             }
 
             if (!mayClaim(player)) {
-                throw new StructureException("Can't build structure, no permission");
+                player.sendMessage(ChatColor.RED + "Can't build structure, no permission");
+                return null;
             }
 
             if (overlaps(structure.getPlan(), structure.getLocation(), structure.getCardinal())) {
-                throw new StructureException("Structure overlaps another structure");
+                player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
+                return null;
             }
 
             if (overlapsUnowned(player, structure.getPlan(), structure.getLocation(), structure.getCardinal())) {
-                throw new StructureException("Structure overlaps an regions owned other players");
+                player.sendMessage(ChatColor.RED + "Structure overlaps an regions owned other players");
+                return null;
             }
 
             RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
@@ -364,7 +413,8 @@ public class StructureManager {
             String id = generateRegionId(structure);
 
             if (regionExists(structure.getDimension().getWorld(), id)) {
-                throw new StructureRegionException("Assigned region id already exists! This shouldn't happen!");
+                player.sendMessage(ChatColor.RED + "Assigned region id already exists! This shouldn't happen!");
+                return null;
             }
 
             ProtectedCuboidRegion region = new ProtectedCuboidRegion(id, new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
@@ -486,9 +536,10 @@ public class StructureManager {
         return false;
     }
 
-    public int size(Structure structure, boolean noAir) {
+    public int size(StructurePlan plan, boolean noAir) {
+        CuboidClipboard clipboard = PlanManager.getInstance().getClipBoard(plan.getChecksum());
         int count = 0;
-        for (Countable<BaseBlock> b : structure.getPlan().getSchematic().getBlockDistributionWithData()) {
+        for (Countable<BaseBlock> b : clipboard.getBlockDistributionWithData()) {
             if (b.getID().isAir() && noAir) {
                 continue;
             }
@@ -500,24 +551,28 @@ public class StructureManager {
     /**
      * Continues construction of a structure
      *
-     * @param progress The progress to continue
+     * @param process The process to continue
      * @param force will ignore the task current state, therefore even if the task was marked
      * completed it will try to continue the task
      * @throws com.sc.api.structure.construction.StructureException
      */
-    public void continueProgress(ConstructionProgress progress, boolean force) throws StructureException {
-        Structure structure = progress.getStructure();
-        State progressStatus = progress.getProgressStatus();
-        if ((progressStatus == State.BUILDING
-                || progressStatus == State.QUEUED
-                || progressStatus == State.COMPLETE) && !force) {
+    public void continueProcess(ConstructionProcess process, boolean force) throws StructureException {
+        Structure structure = process.getStructure();
+        State status = process.getStatus();
+        if ((status == State.BUILDING
+                || status == State.QUEUED
+                || status == State.COMPLETE) && !force) {
             return;
         }
 
-        if (progressStatus == State.REMOVED) {
+        if (status == State.REMOVED) {
             throw new StructureException("Tried to continue a removed structure");
         }
 
+        StructureService ss = new StructureService();
+        process.setJobId(-1);
+        process = ss.save(process);
+        
         String owner = structure.getOwner();
 
         LocalWorld world = structure.getLocation().getWorld();
@@ -527,17 +582,34 @@ public class StructureManager {
         List<Vector> vertices;
         SCJobCallback jc;
         CuboidClipboard schematic;
-        if (!progress.isDemolishing()) {
-            schematic = structure.getPlan().getSchematic();
+        if (!process.isDemolishing()) {
+            
+            schematic = PlanManager.getInstance().getClipBoard(structure.getPlan().getChecksum());
             vertices = ConstructionStrategyType.LAYERED.getList(schematic, false);
+            align(schematic, structure.getDimension().getMin(), structure.getCardinal());
         } else {
-            schematic = structure.getAreaBefore();
+            CuboidClipboard structureSchematic = PlanManager.getInstance().getClipBoard(structure.getPlan().getChecksum());
+            schematic = new CuboidClipboard(structureSchematic.getSize());
+            align(schematic, structure.getDimension().getMin(), structure.getCardinal());
+            for(int x = 0; x < schematic.getWidth(); x++) {
+                for(int y = 0; y < schematic.getHeight(); y++) {
+                    for(int z = 0; z < schematic.getLength(); z++) {
+                        if(y != 0) {
+                            schematic.setBlock(new BlockVector(x, y, z), new BaseBlock(0));
+                        } else {
+                            BaseBlock worldBlock = session.getBlock(new BlockVector(x, y - 1, z).add(structure.getDimension().getMin().getPosition()));
+                            schematic.setBlock(new BlockVector(x, y, z), worldBlock); 
+                        }
+                    }
+                }
+            }
             vertices = ConstructionStrategyType.LAYERED.getList(schematic, false);
             Collections.reverse(vertices);
         }
         jc = new ConstructionCallback(owner, structure, session);
 
-        align(schematic, structure.getDimension().getMin(), structure.getCardinal());
+        
+        
         final SmartClipBoard smartClipBoard = new SmartClipBoard(schematic, vertices);
         final SCAsyncCuboidClipboard asyncCuboidClipboard = new SCAsyncCuboidClipboard(session.getPlayer(), smartClipBoard);
         try {
@@ -551,19 +623,18 @@ public class StructureManager {
      * Stops the task, the task will be removed from AsyncWorldEdit's blockplacer queue, but will
      * still remain in the database
      *
-     * @param progress The progress to stop
+     * @param process The process to stop
      * @param force whether to check if the progress already has stopped
      */
-    public void stopProgress(ConstructionProgress progress, boolean force) throws StructureException {
-        Structure structure = progress.getStructure();
-        State progressStatus = progress.getProgressStatus();
+    public void stopProcess(ConstructionProcess process, boolean force)  {
+        Preconditions.checkArgument(process.getStatus() != State.REMOVED);
+        Structure structure = process.getStructure();
+        State progressStatus = process.getStatus();
         if (progressStatus == State.STOPPED && !force) {
             return;
         }
 
-        if (progressStatus == State.REMOVED) {
-            throw new StructureException("Tried to stop a removed structure");
-        }
+        
 
         Session session = null;
         Transaction tx = null;
@@ -571,7 +642,8 @@ public class StructureManager {
             session = HibernateUtil.getSession();
             tx = session.beginTransaction();
             BlockPlacer placer = SCAsyncWorldEditUtil.getBlockPlacer();
-            int jobId = progress.getJobId();
+            int jobId = process.getJobId();
+            System.out.println("JobId: " + jobId);
 
             if (jobId != -1) {
                 placer.cancelJob(structure.getOwner(), jobId);
@@ -579,10 +651,10 @@ public class StructureManager {
                 // Task already stopped
                 return;
             }
-            removeProgress(jobId, progress);
-            progress.setJobId(-1);
-            progress.setProgressStatus(State.STOPPED);
-            session.merge(progress);
+            process.setProgressStatus(State.STOPPED);
+            removeProgress(jobId, process);
+            process.setJobId(-1);
+            session.merge(process);
             tx.commit();
         } catch (HibernateException e) {
             try {
@@ -602,20 +674,31 @@ public class StructureManager {
      * Stops the task and continue's it. As result the task will be added at the back of the queue
      * by AsyncWorldEdit
      *
-     * @param progress The progress
+     * @param process The process
      * @throws com.sc.api.structure.construction.StructureException
      */
-    public void delayProgress(ConstructionProgress progress) throws StructureException {
-        if (progress.getJobId() == -1) {
+    public void delayProcess(ConstructionProcess process) throws StructureException {
+        if (process.getJobId() == -1) {
             return;
         }
 
-        stopProgress(progress, true);
-        continueProgress(progress, true);
+        stopProcess(process, true);
+        continueProcess(process, true);
     }
 
     public void stopAll() {
-
+        for(ConstructionEntry ce : entries.values()) {
+            for(ConstructionProcess process : ce.list()) {
+                stopProcess(process, true);
+            }
+        }
+    }
+    
+    public void shutdown() {
+        stopAll();
+        for(Hologram holo : holos.values()) {
+            holo.delete();
+        }
     }
 
     public void continueAll() {

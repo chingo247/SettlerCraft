@@ -41,5 +41,7 @@ public enum ConstructionStrategyType {
     public List<Vector> getList(CuboidClipboard clipboard, boolean noAir) {
         return strategy.getList(clipboard, noAir);
     }
+    
+   
 
 }

@@ -27,18 +27,18 @@ import java.util.List;
  */
 public class ConstructionEntry {
     
-    private final HashMap<Integer, ConstructionProgress> progressQueue;
+    private final HashMap<Integer, ConstructionProcess> progressQueue;
 
     ConstructionEntry() {
         progressQueue = new HashMap<>();
     }
     
-    public List<ConstructionProgress> list() {
+    public List<ConstructionProcess> list() {
         return new ArrayList<>(progressQueue.values());
     }
     
 
-    public ConstructionProgress get(Integer key) {
+    public ConstructionProcess get(Integer key) {
         return progressQueue.get(key);
     }
 
@@ -46,11 +46,11 @@ public class ConstructionEntry {
         return progressQueue.containsKey(key);
     }
 
-    public ConstructionProgress put(Integer key, ConstructionProgress value) {
+    public ConstructionProcess put(Integer key, ConstructionProcess value) {
         return progressQueue.put(key, value);
     }
 
-    public ConstructionProgress remove(Integer key) {
+    public ConstructionProcess remove(Integer key) {
         return progressQueue.remove(key);
     }
     

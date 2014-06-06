@@ -19,8 +19,8 @@ package com.sc.api.structure.persistence.service;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateDeleteClause;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.api.structure.construction.ConstructionProgress;
-import com.sc.api.structure.construction.ConstructionProgress.State;
+import com.sc.api.structure.construction.ConstructionProcess;
+import com.sc.api.structure.construction.ConstructionProcess.State;
 import com.sc.api.structure.construction.QStructure;
 import com.sc.api.structure.construction.Structure;
 import com.sc.api.structure.persistence.HibernateUtil;
@@ -99,13 +99,13 @@ public class StructureService extends AbstractService {
         return structure;
     }
     
-       public ConstructionProgress save(ConstructionProgress progress) {
+       public ConstructionProcess save(ConstructionProcess progress) {
         Session session = null;
         Transaction tx = null;
         try {
             session = HibernateUtil.getSession();
             tx = session.beginTransaction();
-            progress = (ConstructionProgress) session.merge(progress);
+            progress = (ConstructionProcess) session.merge(progress);
             tx.commit();
         } catch (HibernateException e) {
             try {

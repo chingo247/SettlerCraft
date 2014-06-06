@@ -22,20 +22,17 @@ import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.entity.world.SimpleCardinal;
 import com.sc.api.structure.entity.world.WorldDimension;
 import com.sc.api.structure.entity.world.WorldLocation;
+import com.sc.api.structure.plan.PlanManager;
 import com.sc.api.structure.util.WorldUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;
-import com.sk89q.worldedit.data.DataException;
-import com.sk89q.worldedit.schematic.SchematicFormat;
-import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.Nullable;
+import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -46,12 +43,14 @@ import org.hibernate.annotations.CascadeType;
  *
  * @author Chingo
  */
+
+@Table(name = "SC_STRUCTURE")
 @Entity
-@Table(name = "sc_structure")
 public class Structure implements Serializable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "SC_STRUCTURE_ID")
     private Long id;
 
     /**
@@ -73,7 +72,7 @@ public class Structure implements Serializable {
 
     @OneToOne
     @Cascade(CascadeType.ALL)
-    private ConstructionProgress progress;
+    private ConstructionProcess progress;
     
     @Nullable
     private String structureRegion;
@@ -84,8 +83,6 @@ public class Structure implements Serializable {
 //    private ConstructionTask task;
     
     
-    private File areaBefore;
-
     /**
      * JPA Constructor
      */
@@ -107,33 +104,20 @@ public class Structure implements Serializable {
         this.owner = owner;
         this.cardinal = cardinal;
         this.worldLocation = new WorldLocation(target);
-        this.dimension = WorldUtil.getWorldDimension(target, cardinal, plan.getSchematic());
-        this.progress = new ConstructionProgress(this);
+        CuboidClipboard structureSchematic = PlanManager.getInstance().getClipBoard(getPlan().getChecksum());
+        this.dimension = WorldUtil.getWorldDimension(target, cardinal, structureSchematic);
     }
 
-    public ConstructionProgress getProgress() {
+    public ConstructionProcess getProgress() {
         return progress;
     }
     
-    public void setAreaBefore(CuboidClipboard backup) {
-        try {
-            areaBefore = File.createTempFile(owner + "_", "str_" + id + "_" + getPlan().getDisplayName().replaceAll("\\s", "_"));
-            SchematicFormat.MCEDIT.save(backup, areaBefore);
-        } catch (IOException | DataException ex) {
-            Logger.getLogger(Structure.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    public CuboidClipboard getAreaBefore() {
-        CuboidClipboard area = null;
-        try {
-            area = SchematicFormat.MCEDIT.load(areaBefore);
-        } catch (IOException | DataException ex) {
-            Logger.getLogger(Structure.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return area;
+    void setConstructionProgress(ConstructionProcess progress) {
+        this.progress = progress;
     }
     
+
+
     public void setStructureRegionId(String structureRegion) {
         this.structureRegion = structureRegion;
     }

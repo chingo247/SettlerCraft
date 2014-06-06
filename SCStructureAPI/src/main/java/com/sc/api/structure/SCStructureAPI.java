@@ -5,6 +5,13 @@
  */
 package com.sc.api.structure;
 
+import com.sc.api.structure.construction.ConstructionProcess;
+import com.sc.api.structure.construction.Structure;
+import com.sc.api.structure.construction.StructureManager;
+import com.sc.api.structure.entity.plan.StructurePlan;
+import com.sc.api.structure.entity.plan.StructureSchematic;
+import com.sc.api.structure.persistence.HSQLServer;
+import com.sc.api.structure.persistence.HibernateUtil;
 import com.sc.api.structure.plan.StructurePlanLoader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -25,6 +32,20 @@ public class SCStructureAPI extends JavaPlugin {
     
     public static Plugin getMainPlugin() {
         return Bukkit.getPluginManager().getPlugin("SettlerCraft");
+    }
+    
+    public static void init() {
+        HSQLServer.getInstance().start();
+        
+        
+        HibernateUtil.addAnnotatedClasses(
+                Structure.class,
+                StructurePlan.class,
+                ConstructionProcess.class,
+                StructureSchematic.class
+        );
+        
+        StructureManager.getInstance().init();
     }
     
     /**

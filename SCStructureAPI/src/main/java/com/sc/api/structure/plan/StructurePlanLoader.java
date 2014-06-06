@@ -18,8 +18,6 @@
 package com.sc.api.structure.plan;
 
 import com.sc.api.structure.entity.plan.StructurePlan;
-import com.sc.api.structure.plan.StructurePlanException;
-import com.sc.api.structure.plan.PlanManager;
 import com.sk89q.worldedit.data.DataException;
 import com.sk89q.worldedit.schematic.SchematicFormat;
 import java.io.File;
@@ -46,7 +44,8 @@ public class StructurePlanLoader {
             StructurePlan plan;
             try {
                 plan = load(yamlStructureFile);
-                PlanManager.getInstance().add(plan);
+                File schematic = FileUtils.getFile(yamlStructureFile.getParent(), YamlConfiguration.loadConfiguration(yamlStructureFile).getString("schematic"));
+                PlanManager.getInstance().add(plan, schematic);
             } catch (StructurePlanException ex) {
                 Logger.getLogger(StructurePlanLoader.class.getName()).log(Level.SEVERE, null, ex);
             }

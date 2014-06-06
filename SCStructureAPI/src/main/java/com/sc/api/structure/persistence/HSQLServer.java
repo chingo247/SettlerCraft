@@ -16,9 +16,6 @@
  */
 package com.sc.api.structure.persistence;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import org.hsqldb.Server;
 
 /**
@@ -28,7 +25,7 @@ import org.hsqldb.Server;
 public class HSQLServer {
 
     private final String HOST = "localhost";
-    private final int PORT = 9001; // default
+    private final int PORT = 9002; 
     private final String DATABASE = "StructureAPI";
     private final String PATH = "plugins//SettlerCraft//SCStructureAPI//Database//data//scstructuredb";
     private static HSQLServer instance;
@@ -41,6 +38,8 @@ public class HSQLServer {
         server.setPort(PORT);
         server.setDatabaseName(0, DATABASE);
         server.setDatabasePath(0, PATH);
+        server.setLogWriter(null);
+        server.setErrWriter(null);
     }
 
     public static HSQLServer getInstance() {
@@ -51,26 +50,16 @@ public class HSQLServer {
     }
 
     public void start() {
-            System.out.println("Starting HSQL server on port " + server.getPort());
-            server.start();
+                server.start();
     }
 
-    public void shutdown() {
-        System.out.println("HSQL server shutting down");
-        server.shutdown();
-        
+    public void stop() {
+        System.out.println("Stopping HSQL server");
+        server.stop();
     }
     
     
 
-    public boolean isRunning() {
-        try {
-            Connection c = DriverManager.getConnection("jdbc:hsqldb:hsql://" + HOST + "/" + DATABASE);
-            c.commit();
-            return true;
-        } catch (SQLException ex) {
-        }
-        return false;
-    }
+  
 
 }

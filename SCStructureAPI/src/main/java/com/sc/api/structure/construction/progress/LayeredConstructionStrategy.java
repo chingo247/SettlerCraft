@@ -32,7 +32,7 @@ public class LayeredConstructionStrategy extends ConstructionStrategy {
 
     @Override
     public List<Vector> getList(CuboidClipboard cliboard, boolean noAir) {
-        List<Vector> placeFirst = new ArrayList<>();
+         List<Vector> placeFirst = new ArrayList<>();
 
         for (int y = 0; y < cliboard.getHeight(); y++) {
             List<Vector> placeLater = new ArrayList<>();
@@ -42,11 +42,13 @@ public class LayeredConstructionStrategy extends ConstructionStrategy {
             for (int x = 0; x < cliboard.getWidth(); x++) {
                 for (int z = 0; z < cliboard.getLength(); z++) {
                     final BlockVector v = new BlockVector(x, y, z);
-                    final BaseBlock b = cliboard.getBlock(v);
+                    BaseBlock b = cliboard.getBlock(v);
 
                     if (v.equals(cliboard.getOffset().add(0, 1, 0))) {
                         continue;
                     }
+
+                    
 
                     // Only set if block isn't null or block isn't already of the same type as target
                     if (b == null || (noAir && b.isAir())) {
@@ -76,4 +78,5 @@ public class LayeredConstructionStrategy extends ConstructionStrategy {
         return placeFirst;
     }
 
+    
 }

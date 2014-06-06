@@ -21,10 +21,11 @@ import com.google.common.base.Preconditions;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Date;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
-import javax.persistence.Transient;
+import javax.persistence.PrimaryKeyJoinColumn;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 
@@ -33,7 +34,7 @@ import org.hibernate.annotations.CascadeType;
  * @author Chingo
  */
 @Entity
-public class ConstructionProgress implements Serializable {
+public class ConstructionProcess implements Serializable {
 
     public enum State {
         INITIALIZED,
@@ -64,6 +65,7 @@ public class ConstructionProgress implements Serializable {
     }
 
     @Id
+    @Column(name = "PROGRESS_ID")
     private Long id;
     private double refundValue;
     private Timestamp createdAt;
@@ -72,18 +74,19 @@ public class ConstructionProgress implements Serializable {
     private boolean isDemolishing;
     private boolean hasPlacedBlocks = false;
     private State progressStatus;
-    @Transient
-    private int jobId = -1;
+    private Integer jobId = -1;
     
     @OneToOne
     @NotNull
     @Cascade(CascadeType.ALL)
+    @PrimaryKeyJoinColumn(name = "PROGRESS_ID", referencedColumnName = "SC_STRUCTURE_ID")
     private Structure structure;
 
-    protected ConstructionProgress() {}
+    protected ConstructionProcess() {}
 
-    public ConstructionProgress(Structure structure) {
+    ConstructionProcess(Structure structure) {
         Preconditions.checkNotNull(structure);
+        Preconditions.checkNotNull(structure.getId());
         this.id = structure.getId();
         this.refundValue = structure.getPlan().getPrice();
         this.createdAt = new Timestamp(new Date().getTime());
@@ -132,7 +135,7 @@ public class ConstructionProgress implements Serializable {
         return isDemolishing;
     }
 
-    public State getProgressStatus() {
+    public State getStatus() {
         return progressStatus;
     }
 

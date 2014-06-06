@@ -7,7 +7,7 @@ package com.sc.plugin.commands;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.api.structure.construction.ConstructionProgress;
+import com.sc.api.structure.construction.ConstructionProcess;
 import com.sc.api.structure.construction.QStructure;
 import com.sc.api.structure.construction.Structure;
 import com.sc.api.structure.persistence.HibernateUtil;
@@ -137,7 +137,7 @@ public class StructureCommandExecutor implements CommandExecutor {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QStructure qs = QStructure.structure;
-        List<Structure> structures = query.from(qs).where(qs.owner.eq(player.getName()).and(qs.progress().progressStatus.ne(ConstructionProgress.State.REMOVED))).list(qs);
+        List<Structure> structures = query.from(qs).where(qs.owner.eq(player.getName()).and(qs.progress().progressStatus.ne(ConstructionProcess.State.REMOVED))).list(qs);
         session.close();
         return structures;
     }

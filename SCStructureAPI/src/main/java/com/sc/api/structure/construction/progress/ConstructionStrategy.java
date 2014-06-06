@@ -31,6 +31,7 @@ public abstract class ConstructionStrategy {
     public List<Vector> getList(CuboidClipboard cliboard) {
         return getList(cliboard, true);
     }
+    
 
     public abstract List<Vector> getList(CuboidClipboard cliboard, boolean noAir);
 

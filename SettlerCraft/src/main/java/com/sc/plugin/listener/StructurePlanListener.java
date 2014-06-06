@@ -16,7 +16,6 @@
  */
 package com.sc.plugin.listener;
 
-import com.sc.api.structure.construction.StructureException;
 import com.sc.api.structure.construction.StructureManager;
 import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.entity.world.SimpleCardinal;
@@ -28,6 +27,7 @@ import static com.sc.api.structure.util.plugins.SCWorldEditUtil.getLocalSession;
 import com.sc.api.structure.util.plugins.SCWorldGuardUtil;
 import com.sc.plugin.SettlerCraft;
 import com.sk89q.worldedit.BlockWorldVector;
+import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.LocalWorld;
@@ -150,16 +150,13 @@ public class StructurePlanListener implements Listener {
 
             SimpleCardinal cardinal = WorldUtil.getCardinal(player);
             Location pos1 = new Location(world, new BlockWorldVector(world, x, y, z));
-            Location pos2 = WorldUtil.getPos2(pos1, cardinal, plan.getSchematic());
+            CuboidClipboard structureSchematic = PlanManager.getInstance().getClipBoard(plan.getChecksum());
+            Location pos2 = WorldUtil.getPos2(pos1, cardinal, structureSchematic);
             WorldDimension dimension = new WorldDimension(pos1, pos2);  // Included sign
             StructureManager sm = StructureManager.getInstance();
 
             if (canPlace(player, pos1, cardinal, plan)) {
-                try {
-                    sm.construct(player, plan, pos1, cardinal);
-                } catch (StructureException ex) {
-                    player.sendMessage(ChatColor.RED + ex.getMessage());
-                }
+                sm.construct(player, plan, pos1, cardinal);
             }
         }
         return false;
@@ -173,7 +170,8 @@ public class StructurePlanListener implements Listener {
         LocalSession session = SCWorldEditUtil.getLocalSession(player);
         SimpleCardinal cardinal = WorldUtil.getCardinal(player);
         Location pos1 = new Location(world, new BlockWorldVector(world, x, y, z));
-        Location pos2 = WorldUtil.getPos2(pos1, cardinal, plan.getSchematic());
+        CuboidClipboard structureSchematic = PlanManager.getInstance().getClipBoard(plan.getChecksum());
+        Location pos2 = WorldUtil.getPos2(pos1, cardinal, structureSchematic);
         StructureManager sm = StructureManager.getInstance();
 
         if (action == Action.LEFT_CLICK_BLOCK) {
@@ -187,26 +185,24 @@ public class StructurePlanListener implements Listener {
                 SCWorldEditUtil.select(player, pos1, pos2);
                 CuboidRegion newRegion = CuboidRegion.makeCuboid(session.getRegionSelector(world).getRegion());
                 if (oldRegion.getPos1().equals(newRegion.getPos1()) && oldRegion.getPos2().equals(newRegion.getPos2())) {
-                    if (canPlace(player, pos1, cardinal, plan)) {
-                        session.getRegionSelector(world).clear();
-                        session.dispatchCUISelection(SCWorldEditUtil.getLocalPlayer(player));
-                        try {
-                            sm.construct(player, plan, pos1, cardinal);
-                        } catch (StructureException ex) {
-                            player.sendMessage(ChatColor.RED + ex.getMessage());
-                        }
+//                    if (canPlace(player, pos1, cardinal, plan)) {
+//                        session.getRegionSelector(world).clear();
+//                        session.dispatchCUISelection(SCWorldEditUtil.getLocalPlayer(player));
+                    sm.construct(player, plan, pos1, cardinal);
+                    session.getRegionSelector(world).clear();
+                    session.dispatchCUISelection(SCWorldEditUtil.getLocalPlayer(player));
 
-                    }
+//                    }
                 } else {
                     SCWorldEditUtil.select(player, pos1, pos2);
-                    if (sm.overlaps(plan, pos1, cardinal)) {
-                        player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
-                    } else if (sm.overlapsUnowned(player, plan, pos1, cardinal)) {
-                        player.sendMessage(ChatColor.RED + "Structure overlaps a region u dont own");
-                    } else {
-                        player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
-                        player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
-                    }
+//                    if (sm.overlaps(plan, pos1, cardinal)) {
+//                        player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
+//                    } else if (sm.overlapsUnowned(player, plan, pos1, cardinal)) {
+//                        player.sendMessage(ChatColor.RED + "Structure overlaps a region u dont own");
+//                    } else {
+                    player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
+                    player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
+//                    }
                 }
             }
         } else {

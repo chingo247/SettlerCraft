@@ -14,11 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.construction.async;
+package com.sc.api.structure.construction;
 
-import com.sc.api.structure.construction.ConstructionProgress;
-import com.sc.api.structure.construction.Structure;
-import com.sc.api.structure.construction.StructureManager;
+import com.sc.api.structure.construction.async.SCJobCallback;
 import com.sc.api.structure.event.structure.StructureCompleteEvent;
 import com.sc.api.structure.persistence.service.StructureService;
 import com.sk89q.worldedit.EditSession;
@@ -48,30 +46,38 @@ public class ConstructionCallback implements SCJobCallback {
         final StructureService ss = new StructureService();
         final Structure structure = ss.getStructure(structureId);
         final StructureManager structureManager = StructureManager.getInstance();
-        ConstructionProgress progress = structure.getProgress();
+        ConstructionProcess progress = structure.getProgress();
         progress.setJobId(entry.getJobId());
+        progress = ss.save(progress);
         structureManager.putProgress(entry.getJobId(), progress);
         entry.addStateChangedListener(new IJobEntryListener() {
 
             @Override
             public void jobStateChanged(BlockPlacerJobEntry bpje) {
                 if (bpje.getStatus() == BlockPlacerJobEntry.JobStatus.PlacingBlocks) {
-                    ConstructionProgress progress = structure.getProgress();
+                    ConstructionProcess progress = structure.getProgress();
                     if (!progress.isDemolishing()) {
-                        progress.setProgressStatus(ConstructionProgress.State.BUILDING);
+                        progress.setProgressStatus(ConstructionProcess.State.BUILDING);
                     } else {
-                        progress.setProgressStatus(ConstructionProgress.State.DEMOLISHING);
+                        progress.setProgressStatus(ConstructionProcess.State.DEMOLISHING);
                     }
                     progress.setHasPlacedBlocks(true);
                     progress = ss.save(progress);
                     structureManager.putProgress(entry.getJobId(), progress);
                 } else if (bpje.getStatus() == BlockPlacerJobEntry.JobStatus.Done) {
                     Bukkit.getPluginManager().callEvent(new StructureCompleteEvent(structure));
-                    ConstructionProgress progress = structure.getProgress();
+                    ConstructionProcess progress = structure.getProgress();
                     progress.setJobId(-1);
-                    progress.setProgressStatus(ConstructionProgress.State.COMPLETE);
-                    progress = ss.save(progress);
-                    structureManager.putProgress(entry.getJobId(), progress);
+                    if(!progress.isDemolishing()) {
+                        progress.setProgressStatus(ConstructionProcess.State.COMPLETE);
+                        progress = ss.save(progress);
+                        structureManager.putProgress(entry.getJobId(), progress);
+                    } else {
+                        progress.setProgressStatus(ConstructionProcess.State.REMOVED);
+                        progress = ss.save(progress);
+                        structureManager.removeProgress(entry.getJobId(), progress);
+                    }
+                   
                 }
             }
         });
@@ -82,8 +88,8 @@ public class ConstructionCallback implements SCJobCallback {
         final StructureService ss = new StructureService();
         final Structure structure = ss.getStructure(structureId);
         final StructureManager structureManager = StructureManager.getInstance();
-        ConstructionProgress progress = structure.getProgress();
-        progress.setProgressStatus(ConstructionProgress.State.STOPPED);
+        ConstructionProcess progress = structure.getProgress();
+        progress.setProgressStatus(ConstructionProcess.State.STOPPED);
         progress = ss.save(progress);
         structureManager.putProgress(entry.getJobId(), progress);
     }

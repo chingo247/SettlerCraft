@@ -16,18 +16,16 @@
  */
 package com.sc.api.structure.entity.plan;
 
-import com.sk89q.worldedit.CuboidClipboard;
+import com.google.common.io.Files;
 import com.sk89q.worldedit.data.DataException;
-import com.sk89q.worldedit.schematic.SchematicFormat;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.zip.CRC32;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.Lob;
 import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 
@@ -38,31 +36,36 @@ import org.bukkit.inventory.ItemStack;
 @Embeddable
 public class StructurePlan implements Serializable {
 
-    private final String id;
+    private final String planId;
     private final String displayName;
-    @Lob
-    private final File structureSchematic;
+//    @Lob
+//    private final File structureSchematic;
     private String category = "default";
     private String faction = "default";
     private String description;
     private int startHeight = 0;
     private double price = 0.0;
-    
+    @Column(updatable = false)
+    private final Long checksum;
     
 
     /**
      * JPA Constructor
      */
     protected StructurePlan() {
-        this.structureSchematic = null;
-        this.id = null;
+        this.checksum = null;
+        this.planId = null;
         this.displayName = null;
     }
 
     public StructurePlan(String id, String displayName, File schematic) throws IOException, DataException {
-        this.id = id;
+        this.planId = id;
         this.displayName = displayName;
-        this.structureSchematic = schematic;
+        this.checksum = Files.getChecksum(schematic, new CRC32());
+    }
+
+    public Long getChecksum() {
+        return checksum;
     }
 
     public void setDescription(String description) {
@@ -73,15 +76,15 @@ public class StructurePlan implements Serializable {
         this.startHeight = startY;
     }
 
-    public CuboidClipboard getSchematic() {
-        try {
-            CuboidClipboard structure = SchematicFormat.getFormat(structureSchematic).load(structureSchematic);
-            return structure;
-        } catch (IOException | DataException ex) {
-            Logger.getLogger(StructurePlan.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
-    }
+//    public CuboidClipboard getSchematic() {
+//        try {
+//            CuboidClipboard structure = SchematicFormat.getFormat(structureSchematic).load(structureSchematic);
+//            return structure;
+//        } catch (IOException | DataException ex) {
+//            Logger.getLogger(StructurePlan.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        return null;
+//    }
 
     public double getPrice() {
         return price;
@@ -100,7 +103,7 @@ public class StructurePlan implements Serializable {
     }
 
     public String getId() {
-        return id;
+        return planId;
     }
 
     public String getCategory() {
@@ -132,7 +135,7 @@ public class StructurePlan implements Serializable {
             return false;
         }
         final StructurePlan other = (StructurePlan) obj;
-        if (!Objects.equals(this.id, other.id)) {
+        if (!Objects.equals(this.planId, other.planId)) {
             return false;
         }
         return true;
@@ -141,7 +144,7 @@ public class StructurePlan implements Serializable {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 89 * hash + Objects.hashCode(this.id);
+        hash = 89 * hash + Objects.hashCode(this.planId);
         return hash;
     }
 

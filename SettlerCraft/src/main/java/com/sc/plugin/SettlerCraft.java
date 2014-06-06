@@ -6,12 +6,8 @@
 package com.sc.plugin;
 
 import com.sc.api.structure.SCStructureAPI;
-import com.sc.api.structure.construction.ConstructionProgress;
-import com.sc.api.structure.construction.Structure;
 import com.sc.api.structure.construction.StructureManager;
 import com.sc.api.structure.entity.plan.StructurePlan;
-import com.sc.api.structure.persistence.HSQLServer;
-import com.sc.api.structure.persistence.HibernateUtil;
 import com.sc.api.structure.plan.PlanManager;
 import com.sc.api.structure.util.CuboidUtil;
 import com.sc.plugin.commands.ConstructionCommandExecutor;
@@ -64,13 +60,11 @@ public class SettlerCraft extends JavaPlugin {
             this.setEnabled(false);
             return;
         }
-        initDB();
-        if(!HSQLServer.getInstance().isRunning()) {
-            System.out.println("Server wasn't running! Starting server now!");
-            HSQLServer.getInstance().start();
-//            RestoreService service = new RestoreService();
-//            service.restore();
-        }
+        
+        SCStructureAPI.init();
+        
+        
+        
         new Thread(new Runnable() {
 
             @Override
@@ -91,7 +85,7 @@ public class SettlerCraft extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new ShopListener(), this);
         Bukkit.getPluginManager().registerEvents(new PluginListener(), this);
         
-        StructureManager.getInstance().init();
+
 //        
 //        ConstructionTaskManager manager = new ConstructionTaskManager();
 //        manager.continueAll();
@@ -114,14 +108,6 @@ public class SettlerCraft extends JavaPlugin {
 
     public void setRestrictZonesEnabled(boolean restrictZones) {
         this.restrictZones = restrictZones;
-    }
-
-    private static void initDB() {
-        HibernateUtil.addAnnotatedClasses(
-                Structure.class,
-                StructurePlan.class,
-                ConstructionProgress.class
-        );
     }
 
     public boolean isPlanMenuEnabled() {
@@ -155,7 +141,7 @@ public class SettlerCraft extends JavaPlugin {
         for (StructurePlan plan : PlanManager.getInstance().getPlans()) {
             ItemStack is = new ItemStack(Material.PAPER);
             MenuSlot slot = new MenuSlot(is, plan.getDisplayName(), MenuSlot.MenuSlotType.ITEM);
-            CuboidClipboard cc = plan.getSchematic();
+            CuboidClipboard cc  = PlanManager.getInstance().getClipBoard(plan.getChecksum());
             int size = CuboidUtil.count(cc, true);
             String sizeString = sizeString(size);
             slot.setData("Size", cc.getLength() + "x" + cc.getWidth() + "x" + cc.getHeight(), ChatColor.GOLD);
@@ -190,7 +176,7 @@ public class SettlerCraft extends JavaPlugin {
         for (StructurePlan plan : PlanManager.getInstance().getPlans()) {
             ItemStack is = new ItemStack(Material.PAPER);
             MenuSlot slot = new MenuSlot(is, plan.getDisplayName(), MenuSlot.MenuSlotType.ITEM);
-            CuboidClipboard cc = plan.getSchematic();
+            CuboidClipboard cc  = PlanManager.getInstance().getClipBoard(plan.getChecksum());
             int size = CuboidUtil.count(cc, true);
             String sizeString = sizeString(size);
             slot.setData("Size", cc.getLength() + "x" + cc.getWidth() + "x" + cc.getHeight(), ChatColor.GOLD);
