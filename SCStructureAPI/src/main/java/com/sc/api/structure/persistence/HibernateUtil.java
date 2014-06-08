@@ -1,59 +1,61 @@
+/*
+ * Copyright (C) 2014 Chingo
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.sc.api.structure.persistence;
 
+import com.sc.api.structure.ConstructionProcess;
+import com.sc.api.structure.Structure;
+import com.sc.api.structure.entity.plan.StructurePlan;
+import com.sc.api.structure.entity.plan.StructureSchematic;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
 
+/**
+ * Hibernate Utility class with a convenient method to get Session Factory object.
+ *
+ * @author Chingo
+ */
 public class HibernateUtil {
 
-    private static SessionFactory factory;
-
-    private static final AnnotationConfiguration config = new AnnotationConfiguration();
-
-//    private static final String PATH = "plugins/SCStructureAPI/DataBase/hibernate.cfg.xml";
-//    private static final String PATH = "com/sc/api/structure/persistence/util/hibernate.cfg.xml";
+    private static final SessionFactory sessionFactory;
+    
     static {
-//        File file = new File(PATH);
-//        File f = new File(".");
-        factory = config.configure().buildSessionFactory();
-    }
-
-    public static Session getSession() {
-        return factory.openSession();
-    }
-
-    public static void addAnnotatedClass(Class clazz) {
-        config.addAnnotatedClass(clazz);
-        factory = config.buildSessionFactory();
-    }
-
-    public static void addAnnotatedClasses(Class... clazzes) {
-        for (Class clazz : clazzes) {
-            config.addAnnotatedClass(clazz);
+        try {
+            // Create the SessionFactory from standard (hibernate.cfg.xml) 
+            // config file.
+            AnnotationConfiguration configuration = new AnnotationConfiguration();
+            configuration.addAnnotatedClass(Structure.class);
+            configuration.addAnnotatedClass(StructurePlan.class);
+            configuration.addAnnotatedClass(ConstructionProcess.class);
+            configuration.addAnnotatedClass(StructureSchematic.class);
+            sessionFactory = configuration.configure().buildSessionFactory();
+        } catch (Throwable ex) {
+            // Log the exception. 
+            System.err.println("Initial SessionFactory creation failed." + ex);
+            throw new ExceptionInInitializerError(ex);
         }
-//        File file = new File(PATH);
-        factory = config.configure().buildSessionFactory();
     }
-
-    public static void shutdown() {
-        factory.close();
+    
+    public static Session getSession() {
+        return getSessionFactory().openSession();
     }
-
-//    private static List<Class> getAnnotatedClasses() {
-//        List<Class> clazzes = new LinkedList();
-//        ClassPathScanningCandidateComponentProvider scanner
-//                = new ClassPathScanningCandidateComponentProvider(false);
-//        scanner.addIncludeFilter(new AnnotationTypeFilter(Entity.class));
-//
-//        // only register classes within "com.settlercraft.model" package
-//        for (BeanDefinition bd : scanner.findCandidateComponents(null)) {
-//            String name = bd.getBeanClassName();
-//            try {
-//                clazzes.add(Class.forName(name));
-//            } catch (ClassNotFoundException ex) {
-//                Logger.getLogger(HibernateUtil.class.getName()).log(Level.SEVERE, ex.getMessage());
-//            }
-//        }
-//        return clazzes;
-//    }
+    
+    public static SessionFactory getSessionFactory() {
+        return sessionFactory;
+    }
 }

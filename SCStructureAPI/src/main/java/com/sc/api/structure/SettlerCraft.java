@@ -17,13 +17,11 @@ import com.sc.api.structure.listener.PluginListener;
 import com.sc.api.structure.listener.ShopListener;
 import com.sc.api.structure.listener.StructureListener;
 import com.sc.api.structure.persistence.HSQLServer;
-import com.sc.api.structure.persistence.HibernateUtil;
 import com.sc.api.structure.plan.StructurePlanLoader;
 import com.sc.api.structure.util.CuboidUtil;
 import com.sc.plugin.commands.StructureCommandExecutor;
 import com.sk89q.worldedit.CuboidClipboard;
 import java.io.File;
-import java.util.logging.Level;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
@@ -50,59 +48,51 @@ public class SettlerCraft extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        
         if (Bukkit.getPluginManager().getPlugin("WorldEdit") == null) {
-            System.out.println("[SCStructureAPI]: WorldEdit NOT FOUND!!! Disabling...");
+            System.out.println("[SettlerCraft]: WorldEdit NOT FOUND!!! Disabling...");
             this.setEnabled(false);
             return;
         }
         if (Bukkit.getPluginManager().getPlugin("AsyncWorldEdit") == null) {
-            System.out.println("[SCStructureAPI]: AsyncWorldEdit NOT FOUND!!! Disabling...");
+            System.out.println("[SettlerCraft]: AsyncWorldEdit NOT FOUND!!! Disabling...");
             this.setEnabled(false);
             return;
         }
 
         if (Bukkit.getPluginManager().getPlugin("WorldGuard") == null) {
-            System.out.println("[SCStructureAPI]: WorldGuard NOT FOUND!!! Disabling...");
+            System.out.println("[SettlerCraft]: WorldGuard NOT FOUND!!! Disabling...");
             this.setEnabled(false);
             return;
         }
         
         if (Bukkit.getPluginManager().getPlugin("HolographicDisplays") == null) {
-            System.out.println("[SCStructureAPI]: HolographicDisplays NOT FOUND!!! Disabling...");
+            System.out.println("[SettlerCraft]: HolographicDisplays NOT FOUND!!! Disabling...");
             this.setEnabled(false);
             return;
         }
-        
-        
-        
-        
-        
-        HibernateUtil.addAnnotatedClasses(
-                Structure.class,
-                StructurePlan.class,
-                ConstructionProcess.class,
-                StructureSchematic.class
-        );
-
         if (!HSQLServer.getInstance().isRunning()) {
             HSQLServer.getInstance().start();
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException ex) {
-                java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            System.out.println("[SCStructureAPI]: Checking invalid structures");
+            System.out.println("[SettlerCraft]: Checking for invalid structures");
             new RestoreService().restore(); // only execute on server start, not on reload!
-
         }
-        
-        SettlerCraft.loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
-        setupMenu();
-        setupPlanShop();
+            
 
-        Bukkit.getPluginManager().registerEvents(new StructureListener(), plugin);
-        Bukkit.getPluginManager().registerEvents(new PlayerListener(), plugin);
-                Bukkit.getPluginManager().registerEvents(new ShopListener(), this);
+        
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
+                setupMenu();
+                setupPlanShop();
+                Bukkit.broadcastMessage(ChatColor.GOLD + "[SettlerCraft]: Structure plans loaded");
+            }
+        }).start();
+        
+        Bukkit.getPluginManager().registerEvents(new StructureListener(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
+        Bukkit.getPluginManager().registerEvents(new ShopListener(), this);
         Bukkit.getPluginManager().registerEvents(new PluginListener(), this);
         
         getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
@@ -113,8 +103,6 @@ public class SettlerCraft extends JavaPlugin {
     public static SettlerCraft getSettlerCraft() {
         return (SettlerCraft) Bukkit.getPluginManager().getPlugin("SettlerCraft");
     }
-
-
 
     public boolean isPlanMenuEnabled() {
         return getConfig().getBoolean("menus.planmenu");
@@ -129,7 +117,7 @@ public class SettlerCraft extends JavaPlugin {
  * @param structureDirectory The directory to search
  * @param executor The executor
  */
-public static void loadStructures(File structureDirectory) {
+    public static void loadStructures(File structureDirectory) {
         File structureFolder = new File(structureDirectory.getAbsolutePath());
         if (!structureFolder.exists()) {
             structureFolder.mkdirs();
