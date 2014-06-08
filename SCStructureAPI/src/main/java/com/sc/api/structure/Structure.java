@@ -22,7 +22,7 @@ import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.entity.world.SimpleCardinal;
 import com.sc.api.structure.entity.world.WorldDimension;
 import com.sc.api.structure.entity.world.WorldLocation;
-import com.sc.api.structure.util.WorldUtil;
+import com.sc.util.WorldUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;

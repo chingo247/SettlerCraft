@@ -16,13 +16,14 @@
  */
 package com.sc.api.structure;
 
+import com.sc.plugin.SettlerCraft;
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.entity.plan.StructureSchematic;
 import com.sc.api.structure.entity.world.SimpleCardinal;
-import com.sc.api.structure.util.WorldUtil;
-import com.sc.api.structure.util.plugins.SCWorldEditUtil;
+import com.sc.util.WorldUtil;
+import com.sc.util.SCWorldEditUtil;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Location;

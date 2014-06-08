@@ -18,9 +18,9 @@ package com.sc.api.structure;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.api.structure.persistence.HibernateUtil;
-import com.sc.api.structure.persistence.service.AbstractService;
-import com.sc.api.structure.util.plugins.SCWorldGuardUtil;
+import com.sc.persistence.HibernateUtil;
+import com.sc.persistence.service.AbstractService;
+import com.sc.util.SCWorldGuardUtil;
 import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import java.io.File;
@@ -42,8 +42,7 @@ import org.hibernate.Transaction;
  *
  * @author Chingo
  */
-class RestoreService {
-
+public class RestoreService {
 
     public void restore() {
         HashMap<String, Timestamp> worlddata = getWorldData();

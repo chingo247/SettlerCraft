@@ -16,6 +16,7 @@
  */
 package com.sc.api.structure;
 
+import com.sc.plugin.SettlerCraft;
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.google.common.base.Preconditions;
@@ -28,12 +29,12 @@ import com.sc.api.structure.entity.world.SimpleCardinal;
 import com.sc.api.structure.entity.world.WorldDimension;
 import com.sc.api.structure.flag.SCFlags;
 import com.sc.api.structure.generator.Enclosures;
-import com.sc.api.structure.persistence.HibernateUtil;
-import com.sc.api.structure.persistence.service.AbstractService;
-import com.sc.api.structure.persistence.service.StructureService;
+import com.sc.persistence.HibernateUtil;
+import com.sc.persistence.service.AbstractService;
+import com.sc.persistence.service.StructureService;
 import com.sc.api.structure.progress.ConstructionStrategyType;
-import com.sc.api.structure.util.plugins.SCAsyncWorldEditUtil;
-import com.sc.api.structure.util.plugins.SCWorldGuardUtil;
+import com.sc.util.SCAsyncWorldEditUtil;
+import com.sc.util.SCWorldGuardUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Countable;
 import com.sk89q.worldedit.CuboidClipboard;

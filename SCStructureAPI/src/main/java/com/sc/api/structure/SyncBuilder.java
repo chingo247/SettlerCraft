@@ -17,9 +17,9 @@
 package com.sc.api.structure;
 
 import com.sc.api.structure.entity.world.SimpleCardinal;
-import com.sc.api.structure.util.CuboidUtil;
-import com.sc.api.structure.util.WorldUtil;
-import com.sc.api.structure.util.plugins.SCWorldEditUtil;
+import com.sc.util.CuboidUtil;
+import com.sc.util.WorldUtil;
+import com.sc.util.SCWorldEditUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;

@@ -18,7 +18,7 @@ package com.sc.api.structure.entity.world;
 
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
-import com.sc.api.structure.util.plugins.SCWorldEditUtil;
+import com.sc.util.SCWorldEditUtil;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.Vector;

@@ -17,7 +17,7 @@
 
 package com.sc.api.structure;
 
-import com.sc.api.structure.persistence.service.StructureService;
+import com.sc.persistence.service.StructureService;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.IJobEntryListener;
 

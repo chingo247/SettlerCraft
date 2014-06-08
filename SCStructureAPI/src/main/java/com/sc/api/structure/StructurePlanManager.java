@@ -19,7 +19,7 @@ package com.sc.api.structure;
 import com.google.common.io.Files;
 import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.entity.plan.StructureSchematic;
-import com.sc.api.structure.persistence.service.SchematicService;
+import com.sc.persistence.service.SchematicService;
 import com.sc.api.structure.plan.StructurePlanException;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.data.DataException;

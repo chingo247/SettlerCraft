@@ -16,11 +16,11 @@
  */
 package com.sc.api.structure;
 
-import com.sc.api.structure.event.structure.StructureCompleteEvent;
-import com.sc.api.structure.event.structure.StructureConstructionEvent;
-import com.sc.api.structure.event.structure.StructureDemolisionEvent;
-import com.sc.api.structure.event.structure.StructureRemovedEvent;
-import com.sc.api.structure.persistence.service.StructureService;
+import com.sc.event.structure.StructureCompleteEvent;
+import com.sc.event.structure.StructureConstructionEvent;
+import com.sc.event.structure.StructureDemolisionEvent;
+import com.sc.event.structure.StructureRemovedEvent;
+import com.sc.persistence.service.StructureService;
 import com.sk89q.worldedit.EditSession;
 import org.bukkit.Bukkit;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
