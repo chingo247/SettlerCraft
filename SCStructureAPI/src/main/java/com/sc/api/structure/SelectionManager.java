@@ -44,7 +44,7 @@ public class SelectionManager {
 
     private final StructurePlanManager pm = StructurePlanManager.getInstance();
     private final Logger LOGGER = Logger.getLogger(SelectionManager.class);
-    private final Plugin plugin = SCStructureAPI.getInstance().getMainPlugin();
+    private final Plugin plugin = SettlerCraft.getSettlerCraft();
 
     private class CUIStructureSelection {
 

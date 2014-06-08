@@ -232,7 +232,7 @@ public class StructureManager {
                 break;
         }
 
-        Hologram hologram = HolographicDisplaysAPI.createHologram(SCStructureAPI.getInstance().getMainPlugin(), location,
+        Hologram hologram = HolographicDisplaysAPI.createHologram(SettlerCraft.getSettlerCraft(), location,
                 "Id: " + ChatColor.GOLD + structure.getId(),
                 "Plan: " + ChatColor.BLUE + structure.getPlan().getDisplayName(),
                 "Owner: " + ChatColor.GREEN + structure.getOwner(),
@@ -340,7 +340,7 @@ public class StructureManager {
             continueProcess(progress, true);
             return true;
         } catch (StructureException ex) {
-            java.util.logging.Logger.getLogger(SCStructureAPI.class.getName()).log(Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return false;

@@ -1,25 +1,29 @@
 /*
  * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose SettlerCraftTools | Templates
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.plugin;
+package com.sc.api.structure;
 
-import com.sc.api.structure.SCStructureAPI;
-import com.sc.api.structure.StructureManager;
-import com.sc.api.structure.StructurePlanManager;
+import com.cc.plugin.api.menu.MenuManager;
+import com.cc.plugin.api.menu.MenuSlot;
+import com.cc.plugin.api.menu.ShopCategoryMenu;
+import com.sc.api.structure.commands.ConstructionCommandExecutor;
+import com.sc.api.structure.commands.SettlerCraftCommandExecutor;
 import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.entity.plan.StructureSchematic;
+import com.sc.api.structure.listener.PlayerListener;
+import com.sc.api.structure.listener.PluginListener;
+import com.sc.api.structure.listener.ShopListener;
+import com.sc.api.structure.listener.StructureListener;
+import com.sc.api.structure.persistence.HSQLServer;
+import com.sc.api.structure.persistence.HibernateUtil;
+import com.sc.api.structure.plan.StructurePlanLoader;
 import com.sc.api.structure.util.CuboidUtil;
-import com.sc.plugin.commands.ConstructionCommandExecutor;
-import com.sc.plugin.commands.SettlerCraftCommandExecutor;
 import com.sc.plugin.commands.StructureCommandExecutor;
-import com.sc.plugin.listener.PluginListener;
-import com.sc.plugin.listener.ShopListener;
-import com.sc.plugin.menu.MenuManager;
-import com.sc.plugin.menu.MenuSlot;
-import com.sc.plugin.menu.ShopCategoryMenu;
 import com.sk89q.worldedit.CuboidClipboard;
+import java.io.File;
+import java.util.logging.Level;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
@@ -35,13 +39,14 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class SettlerCraft extends JavaPlugin {
 
-    private final Logger LOGGER = Logger.getLogger(SettlerCraft.class);
-    private boolean restrictZones = false; // Config...
     public static final String PLAN_MENU_NAME = "Plan Menu";
+    public static final String PLANSHOP = "Buy & Build";
+    private static final int INFINITE_BLOCKS = -1;
+    private static final Logger LOGGER = Logger.getLogger(SettlerCraft.class);
+    private Plugin plugin;
+    private static SettlerCraft instance;
     private ShopCategoryMenu planMenu;
-    public static final String PLANSHOP = "Buy & Build"; // Unique Identifier for shop
     private ShopCategoryMenu planShop;
-    private StructureManager structureManager;
 
     @Override
     public void onEnable() {
@@ -61,48 +66,55 @@ public class SettlerCraft extends JavaPlugin {
             this.setEnabled(false);
             return;
         }
+        
+        if (Bukkit.getPluginManager().getPlugin("HolographicDisplays") == null) {
+            System.out.println("[SCStructureAPI]: HolographicDisplays NOT FOUND!!! Disabling...");
+            this.setEnabled(false);
+            return;
+        }
+        
+        
+        
+        
+        
+        HibernateUtil.addAnnotatedClasses(
+                Structure.class,
+                StructurePlan.class,
+                ConstructionProcess.class,
+                StructureSchematic.class
+        );
 
-        System.out.println("[SettlerCraft]: Loading structure plans");
-        SCStructureAPI.getInstance().init(this);
-        SCStructureAPI.loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
+        if (!HSQLServer.getInstance().isRunning()) {
+            HSQLServer.getInstance().start();
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException ex) {
+                java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            System.out.println("[SCStructureAPI]: Checking invalid structures");
+            new RestoreService().restore(); // only execute on server start, not on reload!
+
+        }
+        
+        SettlerCraft.loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
         setupMenu();
         setupPlanShop();
-        StructureManager.getInstance().init();
-        System.out.println("[SettlerCraft]: Structure plans loaded");
-        Bukkit.broadcastMessage(ChatColor.GOLD + "[SettlerCraft]: " + ChatColor.RESET + " Structure plans loaded");
 
+        Bukkit.getPluginManager().registerEvents(new StructureListener(), plugin);
+        Bukkit.getPluginManager().registerEvents(new PlayerListener(), plugin);
+                Bukkit.getPluginManager().registerEvents(new ShopListener(), this);
+        Bukkit.getPluginManager().registerEvents(new PluginListener(), this);
+        
         getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
         getCommand("cst").setExecutor(new ConstructionCommandExecutor(this));
         getCommand("stt").setExecutor(new StructureCommandExecutor());
-
-        Bukkit.getPluginManager().registerEvents(new ShopListener(), this);
-        Bukkit.getPluginManager().registerEvents(new PluginListener(), this);
-    
-
-//        
-//        ConstructionTaskManager manager = new ConstructionTaskManager();
-//        manager.continueAll();
-    }
-
-    public static boolean isHolographicDisplaysEnabled() {
-        Plugin plugin = Bukkit.getPluginManager().getPlugin("HolographicDisplays");
-        if (plugin == null) {
-            return false;
-        }
-        return plugin.isEnabled();
     }
 
     public static SettlerCraft getSettlerCraft() {
         return (SettlerCraft) Bukkit.getPluginManager().getPlugin("SettlerCraft");
     }
 
-    public boolean isRestrictZonesEnabled() {
-        return restrictZones;
-    }
 
-    public void setRestrictZonesEnabled(boolean restrictZones) {
-        this.restrictZones = restrictZones;
-    }
 
     public boolean isPlanMenuEnabled() {
         return getConfig().getBoolean("menus.planmenu");
@@ -111,7 +123,21 @@ public class SettlerCraft extends JavaPlugin {
     public boolean isPlanShopEnabled() {
         return getConfig().getBoolean("menus.planshop");
     }
-
+/**
+ * Loads structures from a directory
+ *
+ * @param structureDirectory The directory to search
+ * @param executor The executor
+ */
+public static void loadStructures(File structureDirectory) {
+        File structureFolder = new File(structureDirectory.getAbsolutePath());
+        if (!structureFolder.exists()) {
+            structureFolder.mkdirs();
+        }
+        StructurePlanLoader spLoader = new StructurePlanLoader();
+        spLoader.loadStructures(structureFolder);
+    }
+    
     private void setupMenu() {
         planMenu = new ShopCategoryMenu(PLAN_MENU_NAME, true, true);
 
@@ -136,7 +162,7 @@ public class SettlerCraft extends JavaPlugin {
             MenuSlot slot = new MenuSlot(is, plan.getDisplayName(), MenuSlot.MenuSlotType.ITEM);
             CuboidClipboard cc = StructurePlanManager.getInstance().getClipBoard(plan.getChecksum());
             int size = CuboidUtil.count(cc, true);
-            String sizeString = sizeString(size);
+            String sizeString = valueString(size);
             slot.setData("Size", cc.getLength() + "x" + cc.getWidth() + "x" + cc.getHeight(), ChatColor.GOLD);
             slot.setData("Blocks", sizeString, ChatColor.GOLD);
             slot.setData("Type", "Plan", ChatColor.GOLD);
@@ -171,7 +197,7 @@ public class SettlerCraft extends JavaPlugin {
             MenuSlot slot = new MenuSlot(is, plan.getDisplayName(), MenuSlot.MenuSlotType.ITEM);
             StructureSchematic ss = StructurePlanManager.getInstance().getSchematic(plan.getChecksum());
             int size = ss.getBlocks();
-            String sizeString = sizeString(size);
+            String sizeString = valueString(size);
             slot.setData("Size", ss.getLength() + "x" + ss.getWidth() + "x" + ss.getHeight(), ChatColor.GOLD);
             slot.setData("Blocks", sizeString, ChatColor.GOLD);
             planShop.addItem(slot, plan.getCategory(), plan.getPrice());
@@ -179,8 +205,15 @@ public class SettlerCraft extends JavaPlugin {
 
         MenuManager.getInstance().register(planShop);
     }
-
-    private static String sizeString(double value) {
+    
+    /**
+     * Creates a string from a value 
+     * e.g. value > 1E3 = value/1E3 + "K" 
+     * e.g. value > 1E6 = value/1E6 + "M"
+     * @param value
+     * @return 
+     */
+    public static String valueString(double value) {
         if (value < 1000) {
             return String.valueOf(value);
         } else if (value < 1E6) {

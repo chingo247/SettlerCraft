@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.sc.plugin.menu;
+package com.cc.plugin.api.menu;
 
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;

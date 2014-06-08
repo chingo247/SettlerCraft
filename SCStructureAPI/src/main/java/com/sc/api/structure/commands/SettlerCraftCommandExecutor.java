@@ -14,17 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.plugin.commands;
+package com.sc.api.structure.commands;
 
+import com.cc.plugin.api.menu.MenuManager;
+import com.cc.plugin.api.menu.ShopCategoryMenu;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.api.structure.ConstructionProcess.State;
 import com.sc.api.structure.QStructure;
+import com.sc.api.structure.SettlerCraft;
 import com.sc.api.structure.Structure;
 import com.sc.api.structure.persistence.HibernateUtil;
-import com.sc.plugin.SettlerCraft;
-import com.sc.plugin.menu.MenuManager;
-import com.sc.plugin.menu.ShopCategoryMenu;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

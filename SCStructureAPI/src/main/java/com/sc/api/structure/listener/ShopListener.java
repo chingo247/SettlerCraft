@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.plugin.listener;
+package com.sc.api.structure.listener;
 
-import com.sc.plugin.menu.Menu;
-import com.sc.plugin.menu.MenuManager;
-import com.sc.plugin.menu.MenuSlot;
-import com.sc.plugin.menu.ShopCategoryMenu;
+import com.cc.plugin.api.menu.Menu;
+import com.cc.plugin.api.menu.MenuManager;
+import com.cc.plugin.api.menu.MenuSlot;
+import com.cc.plugin.api.menu.ShopCategoryMenu;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

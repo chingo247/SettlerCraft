@@ -4,11 +4,11 @@
  * and open the template in the editor.
  */
 
-package com.sc.plugin.listener;
+package com.sc.api.structure.listener;
 
+import com.cc.plugin.api.menu.MenuManager;
+import com.sc.api.structure.SettlerCraft;
 import com.sc.api.structure.StructureManager;
-import com.sc.plugin.SettlerCraft;
-import com.sc.plugin.menu.MenuManager;
 import org.apache.log4j.Logger;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

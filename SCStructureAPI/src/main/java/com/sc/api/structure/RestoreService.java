@@ -93,7 +93,7 @@ class RestoreService {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QStructure qStructure = QStructure.structure;
-        boolean exists = query.from(qStructure).where(qStructure.worldLocation.world.eq(world.getName())).exists();
+        boolean exists = query.from(qStructure).where(qStructure.worldUUID.eq(world.getUID())).exists();
         session.close();
         return exists;
     }

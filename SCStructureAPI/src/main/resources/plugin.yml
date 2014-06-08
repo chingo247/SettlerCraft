@@ -1,0 +1,18 @@
+name: SettlerCraft
+main: com.sc.api.structure.SettlerCraft
+version: 1.0
+depend: [WorldEdit, AsyncWorldEdit, WorldGuard, HolographicDisplays]
+softdepend: [Vault]
+
+commands:
+    sc:
+        description: Show SettlerCraft Commands
+        usage: /sc
+    cst:
+        description: Show Construction Commands
+        usage: /cst
+    stt:
+        description: Show Structure Commands
+        usage: /stt
+
+          

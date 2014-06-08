@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.plugin.menu;
+package com.cc.plugin.api.menu;
 
-import com.sc.plugin.menu.MenuSlot.MenuSlotType;
+import com.cc.plugin.api.menu.MenuSlot.MenuSlotType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;

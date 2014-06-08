@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.plugin.menu;
+package com.cc.plugin.api.menu;
 
 import com.google.common.base.Preconditions;
-import com.sc.plugin.menu.MenuSlot.MenuSlotType;
+import com.cc.plugin.api.menu.MenuSlot.MenuSlotType;
 import org.bukkit.entity.Player;
 
 /**

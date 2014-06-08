@@ -1,18 +1,19 @@
+package com.sc.api.structure.commands;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.plugin.commands;
 
+import com.cc.plugin.api.menu.SCVaultEconomyUtil;
 import com.sc.api.structure.ConstructionProcess;
 import com.sc.api.structure.ConstructionProcess.State;
+import com.sc.api.structure.SettlerCraft;
 import com.sc.api.structure.Structure;
 import com.sc.api.structure.StructureException;
 import com.sc.api.structure.StructureManager;
 import com.sc.api.structure.persistence.service.StructureService;
-import com.sc.plugin.SettlerCraft;
-import com.sc.plugin.menu.SCVaultEconomyUtil;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;

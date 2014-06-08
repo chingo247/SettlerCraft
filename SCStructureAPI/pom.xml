@@ -103,6 +103,13 @@
             <version>1.8.2</version>
             <scope>provided</scope>
         </dependency>
+        <!--Vault-->
+        <dependency>
+            <groupId>org.vault</groupId>
+            <artifactId>Vault</artifactId>
+            <scope>provided</scope>
+            <version>1.2.31</version>
+        </dependency>
         
         <!--WorldGuard-->
         <dependency>
@@ -225,6 +232,11 @@
             <groupId>com.mysema.querydsl</groupId>
             <artifactId>querydsl-hql</artifactId>
             <version>0.5.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cc.plugin</groupId>
+            <artifactId>SCMenu</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <reporting>
