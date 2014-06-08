@@ -6,11 +6,10 @@
 
 package com.sc.plugin.menu;
 
-import com.google.common.collect.Maps;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import org.bukkit.entity.Player;
 
 /**
@@ -18,14 +17,11 @@ import org.bukkit.entity.Player;
  */
 public class MenuManager {
     
-    private final Map<String,Menu> menus = Maps.newHashMap(); 
-    private final ConcurrentMap<UUID, Player> visiting;
+    private final Map<String,Menu> menus = Collections.synchronizedMap(new HashMap<String,Menu>()); 
+    private final Map<UUID, Player> visiting = Collections.synchronizedMap(new HashMap<UUID, Player>());
     private static MenuManager instance;
     
-    private MenuManager() {
-        this.visiting = new ConcurrentHashMap<>();
-    }
-    
+    private MenuManager() {} 
     public void putVisitor(Player player) {
         visiting.put(player.getUniqueId(), player);
     }

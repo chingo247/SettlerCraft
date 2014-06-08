@@ -14,30 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.event.structure;
 
-import com.sc.api.structure.Structure;
-import org.bukkit.event.HandlerList;
+package com.sc.api.structure;
 
 /**
  *
  * @author Chingo
  */
-public class StructureCompleteEvent extends StructureEvent {
+public class StructureException extends Exception {
 
-    public StructureCompleteEvent(Structure structure) {
-        super(structure);
+    public StructureException(String message) {
+        super(message);
     }
-
-    private static final HandlerList handlers = new HandlerList();
-
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
-
+    
+    
+    
 }

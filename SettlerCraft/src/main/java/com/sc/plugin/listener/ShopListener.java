@@ -32,6 +32,7 @@ public class ShopListener implements Listener {
                     if (menu instanceof ShopCategoryMenu) {
                         ShopCategoryMenu iscm = (ShopCategoryMenu) menu;
                         iscm.playerLeave((Player) ice.getPlayer());
+                        
                     }
                 }
             }

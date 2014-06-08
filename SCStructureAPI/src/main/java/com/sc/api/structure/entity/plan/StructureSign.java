@@ -14,30 +14,48 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.event.structure;
 
-import com.sc.api.structure.Structure;
-import org.bukkit.event.HandlerList;
+package com.sc.api.structure.entity.plan;
+
+import java.io.Serializable;
+import javax.persistence.Embeddable;
 
 /**
  *
  * @author Chingo
  */
-public class StructureCompleteEvent extends StructureEvent {
+@Embeddable
+public class StructureSign implements Serializable {
+    
+    private final Integer sign_x;
+    private final Integer sign_y;
+    private final Integer sign_z;
 
-    public StructureCompleteEvent(Structure structure) {
-        super(structure);
+    public StructureSign() {
+        this.sign_x = 0;
+        this.sign_y = 0;
+        this.sign_z = 0;
+    }
+    
+    public StructureSign(int x, int y, int z) {
+        this.sign_x = x;
+        this.sign_y = y;
+        this.sign_z = z;
     }
 
-    private static final HandlerList handlers = new HandlerList();
-
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
+    public int getX() {
+        return sign_x;
     }
 
-    public static HandlerList getHandlerList() {
-        return handlers;
+    public int getY() {
+        return sign_y;
     }
 
+    public int getZ() {
+        return sign_z;
+    }
+
+    
+    
+    
 }

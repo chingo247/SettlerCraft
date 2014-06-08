@@ -5,11 +5,11 @@
  */
 package com.sc.plugin.commands;
 
-import com.sc.api.structure.construction.ConstructionProcess;
-import com.sc.api.structure.construction.ConstructionProcess.State;
-import com.sc.api.structure.construction.Structure;
-import com.sc.api.structure.construction.StructureException;
-import com.sc.api.structure.construction.StructureManager;
+import com.sc.api.structure.ConstructionProcess;
+import com.sc.api.structure.ConstructionProcess.State;
+import com.sc.api.structure.Structure;
+import com.sc.api.structure.StructureException;
+import com.sc.api.structure.StructureManager;
 import com.sc.api.structure.persistence.service.StructureService;
 import com.sc.plugin.SettlerCraft;
 import com.sc.plugin.menu.SCVaultEconomyUtil;
@@ -52,7 +52,7 @@ public class ConstructionCommandExecutor implements CommandExecutor {
                 return displayInfo(player, args);
             case "cancel":
                 return cancelTask(player, args);
-            case "stop":
+            case "halt":
                 return stopTask(player, args);
             case "move":
                 return moveTask(player, args);
@@ -184,12 +184,13 @@ public class ConstructionCommandExecutor implements CommandExecutor {
                 progress.setIsDemolishing(false);
                 sm.continueProcess(progress, true);
                 player.sendMessage("Demolision for " + ChatColor.GOLD + id + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET + " was canceled");
-            } else if (progress.getStatus() == State.BUILDING) {
+            } else if (progress.getStatus() == State.BUILDING || progress.getStatus() == State.INITIALIZED) {
                 sm.stopProcess(progress, true);
                 progress.setIsDemolishing(true);
                 sm.continueProcess(progress, true);
                 player.sendMessage("Construction for " + ChatColor.GOLD + id + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET + " was canceled");
             } else if (progress.getStatus() == State.QUEUED) {
+                //FIXME EVER REACHED?
                 if (!progress.hasPlacedBlocks()) {
                     sm.stopProcess(progress, true);
                     player.sendMessage("Construction for " + ChatColor.GOLD + id + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET + " was canceled");
@@ -257,6 +258,7 @@ public class ConstructionCommandExecutor implements CommandExecutor {
         }
         ConstructionProcess progress = structure.getProgress();
 
+        
         sm.stopProcess(progress, true);
         player.sendMessage("Stopping #" + ChatColor.GOLD + id + " " + ChatColor.BLUE + structure.getPlan().getDisplayName());
         

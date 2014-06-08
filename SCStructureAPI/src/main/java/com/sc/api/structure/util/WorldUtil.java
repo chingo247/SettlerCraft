@@ -54,7 +54,7 @@ public class WorldUtil {
         }
     }
     
-    public static Location addOffset(Location location, SimpleCardinal direction, int xOffset, int yOffset, int zOffset) {
+    public static Location addOffset(Location location, SimpleCardinal direction, double xOffset, double yOffset, double zOffset) {
         switch (direction) {
             case EAST:
                 return location.add(zOffset, yOffset, xOffset);
@@ -64,6 +64,21 @@ public class WorldUtil {
                return location.add(-zOffset, yOffset, -xOffset);
             case NORTH:
                 return location.add(xOffset, yOffset, -zOffset);
+            default:
+                throw new AssertionError("unreachable");
+        }
+    }
+    
+    public static org.bukkit.Location addOffset(org.bukkit.Location location, SimpleCardinal direction, double xOffset, double yOffset, double zOffset) {
+        switch (direction) {
+            case EAST:
+                return location.add(zOffset, yOffset, xOffset);
+            case SOUTH:
+                return location.add(-1 * xOffset, yOffset, zOffset);
+            case WEST:
+               return location.add(-1 * zOffset, yOffset, -1 * xOffset);
+            case NORTH:
+                return location.add(xOffset, yOffset, -1 * zOffset);
             default:
                 throw new AssertionError("unreachable");
         }

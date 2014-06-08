@@ -14,30 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.event.structure;
+package com.sc.api.structure.flag;
 
-import com.sc.api.structure.Structure;
-import org.bukkit.event.HandlerList;
+import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.flags.RegionGroup;
+import com.sk89q.worldguard.protection.flags.StringFlag;
 
 /**
  *
  * @author Chingo
  */
-public class StructureCompleteEvent extends StructureEvent {
+public class SCFlags {
 
-    public StructureCompleteEvent(Structure structure) {
-        super(structure);
-    }
-
-    private static final HandlerList handlers = new HandlerList();
-
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
+    public static final Flag STRUCTURE = new StringFlag("sc-structure", RegionGroup.MEMBERS);
+//    public static final Flag CONSTRUCTION_ZONE = new StringFlag(null, RegionGroup.MEMBERS);
 
 }

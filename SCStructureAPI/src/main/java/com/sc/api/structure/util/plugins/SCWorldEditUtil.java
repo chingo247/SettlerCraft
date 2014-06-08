@@ -23,6 +23,7 @@ import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Location;
+import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.data.DataException;
@@ -86,14 +87,14 @@ public class SCWorldEditUtil {
         return null;
     }
 
-    public static void select(Player player, Location pos1, Location pos2) {
+    public static void select(Player player, Vector pos1, Vector pos2) {
         LocalPlayer localPlayer = getLocalPlayer(player);
         LocalWorld world = localPlayer.getWorld();
         LocalSession session = getLocalSession(player);
 
 //            Vector pos = getBlockWorldVector(location);
 //            Vector pos2 = pos.add(clipboard.getSize().subtract(1,1,1));
-        session.setRegionSelector(world, new CuboidRegionSelector(world, pos1.getPosition(), pos2.getPosition()));
+        session.setRegionSelector(world, new CuboidRegionSelector(world, pos1, pos2));
         session.getRegionSelector(world).learnChanges();
         session.getRegionSelector(world).explainRegionAdjust(localPlayer, session);
 

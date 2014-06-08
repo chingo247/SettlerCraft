@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package com.sc.api.structure.event.structure;
 
 import com.sc.api.structure.Structure;
@@ -23,12 +24,14 @@ import org.bukkit.event.HandlerList;
  *
  * @author Chingo
  */
-public class StructureCompleteEvent extends StructureEvent {
-
-    public StructureCompleteEvent(Structure structure) {
-        super(structure);
+public class StructureConstructionEvent extends StructureEvent {
+    
+    public StructureConstructionEvent(Structure structure) {
+       super(structure);
     }
 
+   
+    
     private static final HandlerList handlers = new HandlerList();
 
     @Override
@@ -39,5 +42,4 @@ public class StructureCompleteEvent extends StructureEvent {
     public static HandlerList getHandlerList() {
         return handlers;
     }
-
 }

@@ -7,15 +7,18 @@ package com.sc.plugin.commands;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.api.structure.construction.ConstructionProcess;
-import com.sc.api.structure.construction.QStructure;
-import com.sc.api.structure.construction.Structure;
+import com.sc.api.structure.ConstructionProcess;
+import com.sc.api.structure.QStructure;
+import com.sc.api.structure.Structure;
 import com.sc.api.structure.persistence.HibernateUtil;
 import com.sc.api.structure.persistence.service.StructureService;
+import com.sc.api.structure.util.plugins.SCWorldEditUtil;
+import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldedit.Location;
+import com.sk89q.worldedit.Vector;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -34,8 +37,13 @@ public class StructureCommandExecutor implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
         if (args.length == 0) {
-            cs.sendMessage(ChatColor.RED + "Too few arguments");
-            return false;
+            cs.sendMessage(new String[]
+            {
+            ChatColor.LIGHT_PURPLE + CMD + " info " + ChatColor.RESET + " - displays info about the structure you are within",
+            ChatColor.LIGHT_PURPLE + CMD + " list [playerName][index]" + ChatColor.RESET + " - displays a list of structures the player owns, no arg for own",
+            ChatColor.LIGHT_PURPLE + CMD + " pos [structure id]" + ChatColor.RESET + " - displays your relative position from the structure" 
+            });
+            return true;
         }
         String arg = args[0];
         Player player = (Player) cs;
@@ -44,7 +52,9 @@ public class StructureCommandExecutor implements CommandExecutor {
                 return displayInfo(player, args);
             case "list":
                 return displayStructures(player, args);
-            
+            case "pos":
+                return getPos(player, args);
+
             default:
                 player.sendMessage(ChatColor.RED + "No actions known for: " + arg);
                 return false;
@@ -119,12 +129,16 @@ public class StructureCommandExecutor implements CommandExecutor {
                 return true;
             }
 
-            message[0] = "-----------(Page: " + (index) + "/" + ((amountOfStructures / (MAX_LINES - 1)) + 1) + " Structures: "+amountOfStructures+")-----------";
+            message[0] = "-----------(Page: " + (index) + "/" + ((amountOfStructures / (MAX_LINES - 1)) + 1) + ", Structures: " + amountOfStructures + ")-----------";
             int line = 1;
             int startIndex = (index - 1) * (MAX_LINES - 1);
             for (int i = startIndex; i < startIndex + (MAX_LINES - 1) && i < structures.size(); i++) {
                 Structure structure = structures.get(i);
-                String l = "# " + ChatColor.GOLD + structure.getId() + " " + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET + " RegionID: " + ChatColor.GOLD + structure.getStructureRegion();
+                String l = "#" + ChatColor.GOLD + structure.getId() + " " + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET
+                        + " " + ChatColor.YELLOW + "X: " + ChatColor.RESET + structure.getLocation().getPosition().getBlockX()
+                        + " " + ChatColor.YELLOW + "Y: " + ChatColor.RESET + structure.getLocation().getPosition().getBlockY()
+                        + " " + ChatColor.YELLOW + "Z: " + ChatColor.RESET + structure.getLocation().getPosition().getBlockZ()
+                        + " " + ChatColor.YELLOW + "World: " + ChatColor.RESET + structure.getLocation().getWorld().getName();
                 message[line] = l;
                 line++;
             }
@@ -142,53 +156,63 @@ public class StructureCommandExecutor implements CommandExecutor {
         return structures;
     }
 
-    
-
     private boolean displayInfo(Player player, String[] args) {
         StructureService service = new StructureService();
         Structure structure = service.getStructure(player.getLocation());
+
+        if(args.length > 1) {
+            player.sendMessage(ChatColor.RED + CMD + " info doesnt require arguments");
+            return true;
+        }
         
-        if(args.length == 1) {
-            if(structure == null) {
+            if (structure == null) {
                 player.sendMessage(ChatColor.RED + " Currently not within a structure");
             } else {
                 player.sendMessage("#" + structure.getId() + " " + structure.getPlan().getDisplayName() + " owner: " + structure.getOwner());
             }
             return true;
-        } else if (args.length == 4) {
-            int x;
-            int y; 
-            int z;
-            try {
-                x = Integer.parseInt(args[1]);
-                y = Integer.parseInt(args[2]);
-                z = Integer.parseInt(args[3]);
-            } catch (NumberFormatException nfe) {
-                player.sendMessage(ChatColor.RED + "Invalid coordinates");
+    }
+
+    private boolean getPos(Player player, String[] args) {
+        StructureService service = new StructureService();
+        Structure structure;
+        if (args.length == 1) {
+            structure = service.getStructure(player.getLocation());
+            if (structure == null) {
+                player.sendMessage(new String[]{
+                    ChatColor.RED + "Currently not within a structure",
+                    ChatColor.RED + "You may also try " + CMD + " pos [id]"
+                });
                 return true;
             }
-            
-            Location location = new Location(player.getWorld(), x, y, z);
-            structure = service.getStructure(location);
-            if(structure == null) {
-                player.sendMessage(ChatColor.RED + "No structure found at coordinates " + x + " " + y + " " + z);
+        } else if (args.length == 2) {
+            Long id;
+            try {
+                id = Long.parseLong(args[1]);
+            } catch (NumberFormatException nfe) {
+                player.sendMessage("No valid id");
                 return true;
-            } else {
-                player.sendMessage("ID: " + ChatColor.GOLD + structure.getId() + " " + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET + " owner: " + ChatColor.AQUA + structure.getOwner());
+            }
+            structure = service.getStructure(id);
+            if (structure == null) {
+                player.sendMessage(ChatColor.RED + "No structure found with id: " + id);
                 return true;
             }
         } else {
-            if(args.length < 4) {
-                player.sendMessage(ChatColor.RED + "Too few arguments!");
-            } else {
-                player.sendMessage(ChatColor.RED + "Too many arguments!");
-            }
+            player.sendMessage(ChatColor.RED + "Too many arguments!");
             return true;
-            
         }
-        
-        
-        
+        Vector pos = structure.getRelativePosition(new Location(SCWorldEditUtil.getLocalWorld(player), new BlockVector(player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ())));
+
+        player.sendMessage("#" + ChatColor.GOLD + structure.getId() + " "
+                + ChatColor.BLUE + structure.getPlan().getDisplayName()
+                + ChatColor.RESET + ": Your position is "
+                + ChatColor.YELLOW + "x:" + ChatColor.RESET + pos.getBlockX() + " "
+                + ChatColor.YELLOW + "y:" + ChatColor.RESET + pos.getBlockY() + " "
+                + ChatColor.YELLOW + "z:" + ChatColor.RESET + pos.getBlockZ()
+        );
+
+        return true;
     }
 
 }

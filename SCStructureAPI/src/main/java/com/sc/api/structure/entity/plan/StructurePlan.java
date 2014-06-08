@@ -17,6 +17,7 @@
 package com.sc.api.structure.entity.plan;
 
 import com.google.common.io.Files;
+import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.data.DataException;
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +27,7 @@ import java.util.Objects;
 import java.util.zip.CRC32;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
 import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 
@@ -38,15 +40,20 @@ public class StructurePlan implements Serializable {
 
     private final String planId;
     private final String displayName;
-//    @Lob
-//    private final File structureSchematic;
+    
+    @Embedded
+    private StructureSign sign;
+    
     private String category = "default";
     private String faction = "default";
     private String description;
     private int startHeight = 0;
     private double price = 0.0;
+    private boolean hideSignOnComplete;
+    
     @Column(updatable = false)
     private final Long checksum;
+    
     
 
     /**
@@ -56,13 +63,33 @@ public class StructurePlan implements Serializable {
         this.checksum = null;
         this.planId = null;
         this.displayName = null;
+        this.sign = null;
     }
 
     public StructurePlan(String id, String displayName, File schematic) throws IOException, DataException {
         this.planId = id;
         this.displayName = displayName;
         this.checksum = Files.getChecksum(schematic, new CRC32());
+        this.sign = new StructureSign(0, 2, 0);
+        this.hideSignOnComplete = false;
     }
+    
+    public void setSignLocation(int x, int y, int z) {
+        this.sign = new StructureSign(x, y, z);
+    }
+
+    public void setHideSignOnComplete(boolean hideSignOnComplete) {
+        this.hideSignOnComplete = hideSignOnComplete;
+    }
+
+    public boolean isHideSignOnComplete() {
+        return hideSignOnComplete;
+    }
+    
+    public Vector getSignLocation() {
+        return new Vector(sign.getX(), sign.getY(), sign.getZ());
+    }
+    
 
     public Long getChecksum() {
         return checksum;
@@ -75,6 +102,8 @@ public class StructurePlan implements Serializable {
     public void setStartY(int startY) {
         this.startHeight = startY;
     }
+    
+    
 
 //    public CuboidClipboard getSchematic() {
 //        try {

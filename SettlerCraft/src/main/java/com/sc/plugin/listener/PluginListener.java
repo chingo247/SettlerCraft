@@ -6,9 +6,10 @@
 
 package com.sc.plugin.listener;
 
-import com.sc.api.structure.construction.StructureManager;
+import com.sc.api.structure.StructureManager;
 import com.sc.plugin.SettlerCraft;
 import com.sc.plugin.menu.MenuManager;
+import org.apache.log4j.Logger;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
@@ -20,13 +21,18 @@ import org.bukkit.event.server.PluginDisableEvent;
  */
 public class PluginListener implements Listener {
     
+    private final Logger LOGGER = Logger.getLogger(PluginListener.class);
+    
     @EventHandler
     public void onReload(PluginDisableEvent disableEvent) {
          String plugin = disableEvent.getPlugin().getName();
          if(plugin.equals(SettlerCraft.getSettlerCraft().getName())) {
              MenuManager.getInstance().clearVisitors();
              StructureManager.getInstance().shutdown();
+             LOGGER.debug("StructureManager shutting down");
          }
     }
+    
+    
     
 }

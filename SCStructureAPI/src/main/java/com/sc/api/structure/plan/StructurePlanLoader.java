@@ -17,6 +17,7 @@
  */
 package com.sc.api.structure.plan;
 
+import com.sc.api.structure.StructurePlanManager;
 import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sk89q.worldedit.data.DataException;
 import com.sk89q.worldedit.schematic.SchematicFormat;
@@ -34,21 +35,27 @@ import org.bukkit.configuration.file.YamlConfiguration;
  * @author Chingo
  */
 public class StructurePlanLoader {
+    
 
-    public void loadStructures(File buildingFolder) throws FileNotFoundException {
+     
+
+
+    public void loadStructures(File buildingFolder) {
         String[] extensions = {"yml"};
         Iterator<File> it = FileUtils.iterateFiles(buildingFolder, extensions, true);
 
         while (it.hasNext()) {
-            File yamlStructureFile = it.next();
-            StructurePlan plan;
-            try {
-                plan = load(yamlStructureFile);
-                File schematic = FileUtils.getFile(yamlStructureFile.getParent(), YamlConfiguration.loadConfiguration(yamlStructureFile).getString("schematic"));
-                PlanManager.getInstance().add(plan, schematic);
-            } catch (StructurePlanException ex) {
-                Logger.getLogger(StructurePlanLoader.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            final File f = it.next();
+                    File yamlStructureFile = f;
+                    StructurePlan plan;
+                    try {
+                        plan = load(yamlStructureFile);
+                        File schematic = FileUtils.getFile(yamlStructureFile.getParent(), YamlConfiguration.loadConfiguration(yamlStructureFile).getString("schematic"));
+                        StructurePlanManager.getInstance().add(plan, schematic);
+                    } catch (StructurePlanException | FileNotFoundException ex) {
+                        Logger.getLogger(StructurePlanLoader.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+            
         }
     }
 
@@ -80,12 +87,41 @@ public class StructurePlanLoader {
             } else {
                 throw new StructurePlanException("Missing 'displayname' node");
             }
-            
 
             spv = new StructurePlan(id, displayName, schematicStructureFile);
 
-            
+            if (config.contains("sign")) {
+                String[] sign = config.getString("sign").split("\\s");
+                if (sign.length != 3) {
+                    throw new StructurePlanException("Invalid coordinates for sign in " + structureYAML.getAbsolutePath());
+                } else {
+                    try {
+                        int x = Integer.parseInt(sign[0]);
+                        int y = Integer.parseInt(sign[1]);
+                        int z = Integer.parseInt(sign[2]);
+                        spv.setSignLocation(x, y, z);
+                    } catch (NumberFormatException nfe) {
+                        throw new StructurePlanException("Invalid coordinates for sign in " + structureYAML.getAbsolutePath());
+                    }
+                }
+            }
 
+            if (config.contains("hide-sign-onComplete")) {
+                spv.setHideSignOnComplete(config.getBoolean("hide-sign-onComplete"));
+            }
+
+//            if (config.contains("exits")) {
+//                for (Object o : config.getList("exits")) {
+//                    if (o instanceof List) {
+//                        List l = (List) o;
+//                        for (int i = 0; i < 3; i++) { // X Y Z
+//                            System.out.println(l.get(i));
+//                        }
+//                    } else {
+//                        throw new StructurePlanException("Invalid exits list");
+//                    }
+//                }
+//            }
             if (config.contains("price")) {
                 spv.setPrice(config.getDouble("price"));
             }

@@ -18,9 +18,9 @@ package com.sc.plugin.commands;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.api.structure.construction.ConstructionProcess.State;
-import com.sc.api.structure.construction.QStructure;
-import com.sc.api.structure.construction.Structure;
+import com.sc.api.structure.ConstructionProcess.State;
+import com.sc.api.structure.QStructure;
+import com.sc.api.structure.Structure;
 import com.sc.api.structure.persistence.HibernateUtil;
 import com.sc.plugin.SettlerCraft;
 import com.sc.plugin.menu.MenuManager;
@@ -174,12 +174,12 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                 return true;
             }
 
-            message[0] = "-----------(Page: " + (index) + "/" + ((amountOfRefundables / (MAX_LINES - 1)) + 1) + " Refundable: "+amountOfRefundables+")-----------";
+            message[0] = "-----------(Page: " + (index) + "/" + ((amountOfRefundables / (MAX_LINES - 1)) + 1) + " Structures: "+amountOfRefundables+")-----------";
             int line = 1;
             int startIndex = (index - 1) * (MAX_LINES - 1);
             for (int i = startIndex; i < startIndex + (MAX_LINES - 1) && i < amountOfRefundables; i++) {
                 Structure structure = structures.get(i);
-                String value = toPriceString(structure.getPlan().getPrice());
+                String value = toPriceString(structure.getProgress().getRefundValue());
                 String l = "#" + ChatColor.GOLD + structure.getId() + ChatColor.RESET + " value: " + ChatColor.GOLD + value + ChatColor.RESET + " owned by: " + ChatColor.GREEN + structure.getOwner();
                 message[line] = l;
                 line++;
@@ -213,7 +213,11 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QStructure qs = QStructure.structure;
-        List<Structure> structures = query.from(qs).orderBy(qs.progress().removedAt.desc()).where(qs.progress().progressStatus.eq(State.REMOVED)).list(qs);
+        List<Structure> structures = query.from(qs).orderBy(qs.progress().removedAt.desc())
+                .where(
+                        qs.progress().progressStatus.eq(State.REMOVED)
+                        .and(qs.progress().refundValue.gt(0)))
+                .list(qs);
         session.close();
         return structures;
     }
@@ -229,7 +233,12 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QStructure qs = QStructure.structure;
-        List<Structure> structures = query.from(qs).orderBy(qs.progress().removedAt.desc()).where(qs.progress().progressStatus.eq(State.REMOVED).and(qs.owner.eq(owner.getName()))).list(qs);
+        List<Structure> structures = query.from(qs).orderBy(qs.progress().removedAt.desc())
+                .where(
+                        qs.progress().progressStatus.eq(State.REMOVED)
+                        .and(qs.owner.eq(owner.getName()))
+                        .and(qs.progress().refundValue.gt(0)))
+                .list(qs);
         session.close();
         return structures;
     }

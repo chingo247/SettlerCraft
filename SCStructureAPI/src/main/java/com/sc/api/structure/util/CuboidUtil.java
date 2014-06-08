@@ -46,9 +46,6 @@ public class CuboidUtil {
 
     public static int[][] getHeightMap(CuboidClipboard clipboard) {
         int[][] hMap = new int[clipboard.getWidth()][clipboard.getLength()];
-        System.out.println("length:" + clipboard.getLength());
-        System.out.println("width: " + clipboard.getWidth());
-
         for (int x = 0; x < clipboard.getWidth(); x++) {
             for (int z = 0; z < clipboard.getLength(); z++) {
                 hMap[x][z] = getHighestYAt(clipboard, x, z);

@@ -14,30 +14,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.event.structure;
+package com.sc.api.structure.progress;
 
-import com.sc.api.structure.Structure;
-import org.bukkit.event.HandlerList;
+import com.sk89q.worldedit.CuboidClipboard;
+import com.sk89q.worldedit.Vector;
+import java.util.List;
 
 /**
  *
  * @author Chingo
  */
-public class StructureCompleteEvent extends StructureEvent {
+public enum ConstructionStrategyType {
 
-    public StructureCompleteEvent(Structure structure) {
-        super(structure);
+    LAYERED(new LayeredConstructionStrategy());
+
+    private final ConstructionStrategy strategy;
+
+    private ConstructionStrategyType(ConstructionStrategy strategy) {
+        this.strategy = strategy;
     }
 
-    private static final HandlerList handlers = new HandlerList();
-
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
+    public List<Vector> getList(CuboidClipboard clipboard) {
+        return strategy.getList(clipboard);
     }
 
-    public static HandlerList getHandlerList() {
-        return handlers;
+    public List<Vector> getList(CuboidClipboard clipboard, boolean noAir) {
+        return strategy.getList(clipboard, noAir);
     }
+    
+   
 
 }

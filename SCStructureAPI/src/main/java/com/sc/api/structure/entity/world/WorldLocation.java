@@ -19,11 +19,14 @@ package com.sc.api.structure.entity.world;
 import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
 import com.sc.api.structure.util.plugins.SCWorldEditUtil;
+import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.Vector;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 
 /**
  *
@@ -83,9 +86,18 @@ public class WorldLocation implements Serializable {
         this.z = z;
     }
 
-    public String getWorld() {
+    public String getWorldName() {
         return world;
     }
+    
+    public World getWorld() {
+        return Bukkit.getWorld(world);
+    }
+    
+    public LocalWorld getLocalWorld() {
+        return getLocation().getWorld();
+    }
+    
 
     public void setWorld(String world) {
         this.world = world;

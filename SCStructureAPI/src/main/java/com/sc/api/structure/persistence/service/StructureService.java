@@ -19,15 +19,17 @@ package com.sc.api.structure.persistence.service;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateDeleteClause;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.api.structure.construction.ConstructionProcess;
-import com.sc.api.structure.construction.ConstructionProcess.State;
-import com.sc.api.structure.construction.QStructure;
-import com.sc.api.structure.construction.Structure;
+import com.sc.api.structure.ConstructionProcess;
+import com.sc.api.structure.ConstructionProcess.State;
+import com.sc.api.structure.QStructure;
+import com.sc.api.structure.Structure;
 import com.sc.api.structure.persistence.HibernateUtil;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -43,6 +45,7 @@ public class StructureService extends AbstractService {
         Session session = HibernateUtil.getSession();
         Structure cachedStructure = (Structure) session.get(Structure.class, id);
         if(cachedStructure != null) {
+            session.close();
             return cachedStructure;
         }
         JPQLQuery query = new HibernateQuery(session);
@@ -133,6 +136,16 @@ public class StructureService extends AbstractService {
     public boolean isOnStructure(Location location) {
         return getStructure(location) != null;
     }
+    
+    public Structure getStructure(com.sk89q.worldedit.Location location) {
+        World world = Bukkit.getWorld(location.getWorld().getName());
+        return getStructure(new Location(
+                world, 
+                location.getPosition().getBlockX(), 
+                location.getPosition().getBlockY(), 
+                location.getPosition().getBlockZ())
+        );
+    }
 
     public Structure getStructure(Location location) {
         QStructure qStructure = QStructure.structure;
@@ -153,28 +166,25 @@ public class StructureService extends AbstractService {
         session.close();
         return structure;
     }
+    
+    public boolean overlaps(Structure structure) {
+        return getOverlappingStructure(structure) != null;
+    }
 
-//    public boolean overlaps(Structure structure) {
-//        QStructure qStructure = QStructure.structure;
-//        Session session = HibernateUtil.getSession();
-//        JPQLQuery query = new HibernateQuery(session);
-//
-//        ReservedArea ra = structure.getReserved();
-//        int xMinus = ra.getR_xMinus();
-//        int zMinus = ra.getR_zMinus();
-//        int xPlus = ra.getR_xPlus();
-//        int zPlus = ra.getR_zPlus();
-//        int up = ra.getR_up();
-//        int down = ra.getR_down();
-//
-//        boolean overlaps = query.from(qStructure)
-//                .where(qStructure.worldLocation().world.eq(structure.getLocation().getWorld().getName())
-//                        .and(qStructure.dimension().maxX.add(qStructure.reserved().r_xPlus).goe(structure.getDimension().getMinX()- xMinus).and(qStructure.dimension().minX.subtract(qStructure.reserved().r_xMinus).loe(structure.getDimension().getMaxX()+ xPlus)))
-//                        .and(qStructure.dimension().maxY.add(qStructure.reserved().r_up).goe(structure.getDimension().getMinY() - down).and(qStructure.dimension().minY.subtract(qStructure.reserved().r_down).loe(structure.getDimension().getMaxY()+ up)))
-//                        .and(qStructure.dimension().maxZ.add(qStructure.reserved().r_zPlus).goe(structure.getDimension().getMinZ()- zMinus).and(qStructure.dimension().minZ.subtract(qStructure.reserved().r_zMinus).loe(structure.getDimension().getMaxZ()+ zPlus)))
-//                ).exists();
-//        session.close();
-//        return overlaps;
-//    }
+    public Structure getOverlappingStructure(Structure structure) {
+        QStructure qStructure = QStructure.structure;
+        Session session = HibernateUtil.getSession();
+        JPQLQuery query = new HibernateQuery(session);
+
+        Structure result = query.from(qStructure)
+                .where(qStructure.worldLocation().world.eq(structure.getLocation().getWorld().getName())
+                        .and(qStructure.dimension().maxX.goe(structure.getDimension().getMinX()).and(qStructure.dimension().minX.loe(structure.getDimension().getMaxX())))
+                        .and(qStructure.dimension().maxY.goe(structure.getDimension().getMinY()).and(qStructure.dimension().minY.loe(structure.getDimension().getMaxY())))
+                        .and(qStructure.dimension().maxZ.goe(structure.getDimension().getMinZ()).and(qStructure.dimension().minZ.loe(structure.getDimension().getMaxZ())))
+                        .and(qStructure.progress().progressStatus.ne(State.REMOVED))
+                ).singleResult(qStructure); // return the first
+        session.close();
+        return result;
+    }
 
 }

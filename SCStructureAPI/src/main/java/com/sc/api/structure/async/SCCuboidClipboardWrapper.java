@@ -14,30 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure.event.structure;
+package com.sc.api.structure.async;
 
-import com.sc.api.structure.Structure;
-import org.bukkit.event.HandlerList;
+import com.sc.api.structure.SmartClipBoard;
+import org.primesoft.asyncworldedit.worldedit.CuboidClipboardWrapper;
 
 /**
+ * CuboidClipBoardWrapper for vertical emplacement
  *
  * @author Chingo
  */
-public class StructureCompleteEvent extends StructureEvent {
+public class SCCuboidClipboardWrapper extends CuboidClipboardWrapper {
+//    
 
-    public StructureCompleteEvent(Structure structure) {
-        super(structure);
+    public SCCuboidClipboardWrapper(String player, SmartClipBoard smartClipboard) {
+        this(player, smartClipboard, -1);
     }
 
-    private static final HandlerList handlers = new HandlerList();
-
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
+    public SCCuboidClipboardWrapper(String player, SmartClipBoard smartClipboard, int jobId) {
+        super(player, smartClipboard, jobId);
     }
 
 }

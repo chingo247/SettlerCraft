@@ -6,16 +6,16 @@
 package com.sc.plugin;
 
 import com.sc.api.structure.SCStructureAPI;
-import com.sc.api.structure.construction.StructureManager;
+import com.sc.api.structure.StructureManager;
+import com.sc.api.structure.StructurePlanManager;
 import com.sc.api.structure.entity.plan.StructurePlan;
-import com.sc.api.structure.plan.PlanManager;
+import com.sc.api.structure.entity.plan.StructureSchematic;
 import com.sc.api.structure.util.CuboidUtil;
 import com.sc.plugin.commands.ConstructionCommandExecutor;
 import com.sc.plugin.commands.SettlerCraftCommandExecutor;
 import com.sc.plugin.commands.StructureCommandExecutor;
 import com.sc.plugin.listener.PluginListener;
 import com.sc.plugin.listener.ShopListener;
-import com.sc.plugin.listener.StructurePlanListener;
 import com.sc.plugin.menu.MenuManager;
 import com.sc.plugin.menu.MenuSlot;
 import com.sc.plugin.menu.ShopCategoryMenu;
@@ -34,6 +34,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author Chingo
  */
 public class SettlerCraft extends JavaPlugin {
+
     private final Logger LOGGER = Logger.getLogger(SettlerCraft.class);
     private boolean restrictZones = false; // Config...
     public static final String PLAN_MENU_NAME = "Plan Menu";
@@ -60,44 +61,37 @@ public class SettlerCraft extends JavaPlugin {
             this.setEnabled(false);
             return;
         }
-        
-        SCStructureAPI.init();
-        
-        
-        
-        new Thread(new Runnable() {
 
-            @Override
-            public void run() {
-                SCStructureAPI.loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
-                setupMenu();
-                setupPlanShop();
-                Bukkit.broadcastMessage(ChatColor.GOLD + "[SettlerCraft]: " + ChatColor.RESET + " Structures loaded");
-            }
-        }).start();
-        
+        System.out.println("[SettlerCraft]: Loading structure plans");
+        SCStructureAPI.getInstance().init(this);
+        SCStructureAPI.loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
+        setupMenu();
+        setupPlanShop();
+        StructureManager.getInstance().init();
+        System.out.println("[SettlerCraft]: Structure plans loaded");
+        Bukkit.broadcastMessage(ChatColor.GOLD + "[SettlerCraft]: " + ChatColor.RESET + " Structure plans loaded");
 
         getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
         getCommand("cst").setExecutor(new ConstructionCommandExecutor(this));
         getCommand("stt").setExecutor(new StructureCommandExecutor());
 
-        Bukkit.getPluginManager().registerEvents(new StructurePlanListener(), this);
         Bukkit.getPluginManager().registerEvents(new ShopListener(), this);
         Bukkit.getPluginManager().registerEvents(new PluginListener(), this);
-        
+    
 
 //        
 //        ConstructionTaskManager manager = new ConstructionTaskManager();
 //        manager.continueAll();
     }
-    
-    
+
     public static boolean isHolographicDisplaysEnabled() {
         Plugin plugin = Bukkit.getPluginManager().getPlugin("HolographicDisplays");
-        if(plugin == null) return false;
+        if (plugin == null) {
+            return false;
+        }
         return plugin.isEnabled();
     }
-    
+
     public static SettlerCraft getSettlerCraft() {
         return (SettlerCraft) Bukkit.getPluginManager().getPlugin("SettlerCraft");
     }
@@ -117,7 +111,6 @@ public class SettlerCraft extends JavaPlugin {
     public boolean isPlanShopEnabled() {
         return getConfig().getBoolean("menus.planshop");
     }
-    
 
     private void setupMenu() {
         planMenu = new ShopCategoryMenu(PLAN_MENU_NAME, true, true);
@@ -138,10 +131,10 @@ public class SettlerCraft extends JavaPlugin {
         planMenu.setDefaultCategory("All");
         planMenu.setChooseDefaultCategory(true);
 
-        for (StructurePlan plan : PlanManager.getInstance().getPlans()) {
+        for (StructurePlan plan : StructurePlanManager.getInstance().getPlans()) {
             ItemStack is = new ItemStack(Material.PAPER);
             MenuSlot slot = new MenuSlot(is, plan.getDisplayName(), MenuSlot.MenuSlotType.ITEM);
-            CuboidClipboard cc  = PlanManager.getInstance().getClipBoard(plan.getChecksum());
+            CuboidClipboard cc = StructurePlanManager.getInstance().getClipBoard(plan.getChecksum());
             int size = CuboidUtil.count(cc, true);
             String sizeString = sizeString(size);
             slot.setData("Size", cc.getLength() + "x" + cc.getWidth() + "x" + cc.getHeight(), ChatColor.GOLD);
@@ -173,13 +166,13 @@ public class SettlerCraft extends JavaPlugin {
         planShop.setDefaultCategory("All");
         planShop.setChooseDefaultCategory(true);
 
-        for (StructurePlan plan : PlanManager.getInstance().getPlans()) {
+        for (StructurePlan plan : StructurePlanManager.getInstance().getPlans()) {
             ItemStack is = new ItemStack(Material.PAPER);
             MenuSlot slot = new MenuSlot(is, plan.getDisplayName(), MenuSlot.MenuSlotType.ITEM);
-            CuboidClipboard cc  = PlanManager.getInstance().getClipBoard(plan.getChecksum());
-            int size = CuboidUtil.count(cc, true);
+            StructureSchematic ss = StructurePlanManager.getInstance().getSchematic(plan.getChecksum());
+            int size = ss.getBlocks();
             String sizeString = sizeString(size);
-            slot.setData("Size", cc.getLength() + "x" + cc.getWidth() + "x" + cc.getHeight(), ChatColor.GOLD);
+            slot.setData("Size", ss.getLength() + "x" + ss.getWidth() + "x" + ss.getHeight(), ChatColor.GOLD);
             slot.setData("Blocks", sizeString, ChatColor.GOLD);
             planShop.addItem(slot, plan.getCategory(), plan.getPrice());
         }

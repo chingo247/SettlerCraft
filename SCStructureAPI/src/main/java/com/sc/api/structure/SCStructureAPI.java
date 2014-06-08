@@ -5,53 +5,74 @@
  */
 package com.sc.api.structure;
 
-import com.sc.api.structure.construction.ConstructionProcess;
-import com.sc.api.structure.construction.Structure;
-import com.sc.api.structure.construction.StructureManager;
 import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.entity.plan.StructureSchematic;
+import com.sc.api.structure.listener.PlayerListener;
+import com.sc.api.structure.listener.StructureListener;
 import com.sc.api.structure.persistence.HSQLServer;
 import com.sc.api.structure.persistence.HibernateUtil;
 import com.sc.api.structure.plan.StructurePlanLoader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  *
  * @author Chingo
  */
-public class SCStructureAPI extends JavaPlugin {
+public class SCStructureAPI {
     
     
     private static final int INFINITE_BLOCKS = -1;
     private static final Logger LOGGER = Logger.getLogger(SCStructureAPI.class);
+    private Plugin plugin;
+    private static SCStructureAPI instance;
+    private boolean initialized = false;
     
-    public static Plugin getMainPlugin() {
-        return Bukkit.getPluginManager().getPlugin("SettlerCraft");
+    public Plugin getMainPlugin() {
+        return plugin;
     }
     
-    public static void init() {
-        HSQLServer.getInstance().start();
-        
-        
-        HibernateUtil.addAnnotatedClasses(
+    private SCStructureAPI() {
+    
+    }
+    
+    public static SCStructureAPI getInstance() {
+        if(instance == null) {
+            System.out.println("Instantiated");
+            instance = new SCStructureAPI();
+        }
+        return instance;
+    }
+    
+    public void init(Plugin plugin) {
+        if(!HSQLServer.getInstance().isRunning()) {
+            HSQLServer.getInstance().start();
+            new RestoreService().restore(); // only execute on server start, not on reload!
+        } 
+        if(!initialized) {
+            HibernateUtil.addAnnotatedClasses(
                 Structure.class,
                 StructurePlan.class,
                 ConstructionProcess.class,
                 StructureSchematic.class
         );
+        Bukkit.getPluginManager().registerEvents(new StructureListener(), plugin);
+        Bukkit.getPluginManager().registerEvents(new PlayerListener(), plugin);
+        initialized = true;
+        }
         
-        StructureManager.getInstance().init();
     }
+  
+    
+    
     
     /**
      * Loads structures from a directory
      *
      * @param structureDirectory The directory to search
+     * @param executor The executor
      */
     public static void loadStructures(File structureDirectory) {
         File structureFolder = new File(structureDirectory.getAbsolutePath());
@@ -59,11 +80,7 @@ public class SCStructureAPI extends JavaPlugin {
             structureFolder.mkdirs();
         }
         StructurePlanLoader spLoader = new StructurePlanLoader();
-        try {
-            spLoader.loadStructures(structureFolder);
-        } catch (FileNotFoundException ex) {
-            LOGGER.error(ex);
-        }
+        spLoader.loadStructures(structureFolder);
     }
 
     

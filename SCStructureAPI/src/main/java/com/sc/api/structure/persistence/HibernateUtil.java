@@ -15,7 +15,6 @@ public class HibernateUtil {
     static {
 //        File file = new File(PATH);
 //        File f = new File(".");
-//        System.out.println(f.getAbsolutePath());
         factory = config.configure().buildSessionFactory();
     }
 
@@ -41,7 +40,6 @@ public class HibernateUtil {
     }
 
 //    private static List<Class> getAnnotatedClasses() {
-//        System.out.println("getting annotated clazzes");
 //        List<Class> clazzes = new LinkedList();
 //        ClassPathScanningCandidateComponentProvider scanner
 //                = new ClassPathScanningCandidateComponentProvider(false);
@@ -50,14 +48,12 @@ public class HibernateUtil {
 //        // only register classes within "com.settlercraft.model" package
 //        for (BeanDefinition bd : scanner.findCandidateComponents(null)) {
 //            String name = bd.getBeanClassName();
-//            System.out.println(name);
 //            try {
 //                clazzes.add(Class.forName(name));
 //            } catch (ClassNotFoundException ex) {
 //                Logger.getLogger(HibernateUtil.class.getName()).log(Level.SEVERE, ex.getMessage());
 //            }
 //        }
-//        System.out.println(clazzes.size());
 //        return clazzes;
 //    }
 }

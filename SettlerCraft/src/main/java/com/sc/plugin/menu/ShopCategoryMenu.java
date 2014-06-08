@@ -11,6 +11,7 @@ import com.sc.plugin.menu.MenuSlot.MenuSlotType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +46,7 @@ public class ShopCategoryMenu extends CategoryMenu {
         super(title, wontDeplete);
         this.endless = endless;
         this.items = Maps.newHashMap();
-        this.visitors = Maps.newHashMap();
+        this.visitors = Collections.synchronizedMap(new HashMap<String, Session>());
     }
 
     
