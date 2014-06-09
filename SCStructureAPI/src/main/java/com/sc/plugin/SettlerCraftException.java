@@ -14,18 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.api.structure;
 
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
+package com.sc.plugin;
 
 /**
  *
  * @author Chingo
  */
-public interface SCJobCallback {
+public class SettlerCraftException extends Exception {
 
-    void onJobAdded(BlockPlacerJobEntry entry);
-//    void onJobComplete(BlockPlacerJobEntry entry);
-
-    void onJobCanceled(BlockPlacerJobEntry entry);
+    public SettlerCraftException(String message) {
+        super(message);
+    }
+    
+    
+    
 }

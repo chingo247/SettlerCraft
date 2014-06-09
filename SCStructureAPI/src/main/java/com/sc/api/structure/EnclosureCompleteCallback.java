@@ -25,7 +25,7 @@ import org.primesoft.asyncworldedit.blockPlacer.IJobEntryListener;
  *
  * @author Chingo
  */
-public abstract class EnclosureCompleteCallback implements SCJobCallback {
+public abstract class EnclosureCompleteCallback implements JobCallback {
  
 
     private final Long structure;
@@ -47,9 +47,7 @@ public abstract class EnclosureCompleteCallback implements SCJobCallback {
                 if (bpje.getStatus() == BlockPlacerJobEntry.JobStatus.Done) {
                     if(!s.getProgress().hasPlacedEnclosure()) {
                         s.getProgress().setHasPlacedEnclosure(true);
-                        
                         ss.save(s);
-                        
                         onComplete();
                     }
                 }

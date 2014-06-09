@@ -9,21 +9,24 @@ import com.cc.plugin.api.menu.MenuManager;
 import com.cc.plugin.api.menu.MenuSlot;
 import com.cc.plugin.api.menu.ShopCategoryMenu;
 import com.sc.api.structure.RestoreService;
+import com.sc.api.structure.StructureManager;
 import com.sc.api.structure.StructurePlanManager;
-import com.sc.commands.ConstructionCommandExecutor;
-import com.sc.commands.SettlerCraftCommandExecutor;
 import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.entity.plan.StructureSchematic;
+import com.sc.api.structure.plan.StructurePlanLoader;
+import com.sc.commands.ConstructionCommandExecutor;
+import com.sc.commands.SettlerCraftCommandExecutor;
+import com.sc.commands.StructureCommandExecutor;
 import com.sc.listener.PlayerListener;
 import com.sc.listener.PluginListener;
 import com.sc.listener.ShopListener;
 import com.sc.listener.StructureListener;
 import com.sc.persistence.HSQLServer;
-import com.sc.api.structure.plan.StructurePlanLoader;
 import com.sc.util.CuboidUtil;
-import com.sc.commands.StructureCommandExecutor;
 import com.sk89q.worldedit.CuboidClipboard;
 import java.io.File;
+import java.util.Iterator;
+import java.util.logging.Level;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
@@ -47,10 +50,15 @@ public class SettlerCraft extends JavaPlugin {
     private static SettlerCraft instance;
     private ShopCategoryMenu planMenu;
     private ShopCategoryMenu planShop;
+    private boolean plansLoaded;
+
+    private double refundPercentage;
+    private boolean menuEnabled;
+    private boolean shopEnabled;
 
     @Override
     public void onEnable() {
-        
+
         if (Bukkit.getPluginManager().getPlugin("WorldEdit") == null) {
             System.out.println("[SettlerCraft]: WorldEdit NOT FOUND!!! Disabling...");
             this.setEnabled(false);
@@ -67,7 +75,7 @@ public class SettlerCraft extends JavaPlugin {
             this.setEnabled(false);
             return;
         }
-        
+
         if (Bukkit.getPluginManager().getPlugin("HolographicDisplays") == null) {
             System.out.println("[SettlerCraft]: HolographicDisplays NOT FOUND!!! Disabling...");
             this.setEnabled(false);
@@ -78,9 +86,7 @@ public class SettlerCraft extends JavaPlugin {
             System.out.println("[SettlerCraft]: Checking for invalid structures");
             new RestoreService().restore(); // only execute on server start, not on reload!
         }
-            
 
-        
         new Thread(new Runnable() {
 
             @Override
@@ -88,37 +94,62 @@ public class SettlerCraft extends JavaPlugin {
                 loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
                 setupMenu();
                 setupPlanShop();
-                Bukkit.broadcastMessage(ChatColor.GOLD + "[SettlerCraft]: Structure plans loaded");
+                Bukkit.broadcastMessage(ChatColor.GOLD + "[SettlerCraft]: " + ChatColor.RESET + "Structure plans loaded");
+                StructureManager.getInstance().init();
             }
         }).start();
-        
+
         Bukkit.getPluginManager().registerEvents(new StructureListener(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
         Bukkit.getPluginManager().registerEvents(new ShopListener(), this);
         Bukkit.getPluginManager().registerEvents(new PluginListener(), this);
-        
+        initConfig();
+
         getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
         getCommand("cst").setExecutor(new ConstructionCommandExecutor(this));
         getCommand("stt").setExecutor(new StructureCommandExecutor());
+
     }
 
     public static SettlerCraft getSettlerCraft() {
         return (SettlerCraft) Bukkit.getPluginManager().getPlugin("SettlerCraft");
     }
 
+    private void initConfig() {
+        try {
+            this.menuEnabled = getConfig().getBoolean("menus.planmenu");
+            this.shopEnabled = getConfig().getBoolean("menus.planshop");
+            this.refundPercentage = getConfig().getDouble("structure.refund");
+            if (refundPercentage < 0) {
+                throw new SettlerCraftException("refund node in config was negative");
+            }
+        } catch (SettlerCraftException ex) {
+            java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     public boolean isPlanMenuEnabled() {
-        return getConfig().getBoolean("menus.planmenu");
+        return menuEnabled;
     }
 
     public boolean isPlanShopEnabled() {
-        return getConfig().getBoolean("menus.planshop");
+        return shopEnabled;
     }
-/**
- * Loads structures from a directory
- *
- * @param structureDirectory The directory to search
- * @param executor The executor
- */
+
+    public double getRefundPercentage() {
+        return refundPercentage;
+    }
+
+    public boolean isPlansLoaded() {
+        return plansLoaded;
+    }
+
+    /**
+     * Loads structures from a directory
+     *
+     * @param structureDirectory The directory to search
+     * @param executor The executor
+     */
     public static void loadStructures(File structureDirectory) {
         File structureFolder = new File(structureDirectory.getAbsolutePath());
         if (!structureFolder.exists()) {
@@ -127,7 +158,7 @@ public class SettlerCraft extends JavaPlugin {
         StructurePlanLoader spLoader = new StructurePlanLoader();
         spLoader.loadStructures(structureFolder);
     }
-    
+
     private void setupMenu() {
         planMenu = new ShopCategoryMenu(PLAN_MENU_NAME, true, true);
 
@@ -147,7 +178,10 @@ public class SettlerCraft extends JavaPlugin {
         planMenu.setDefaultCategory("All");
         planMenu.setChooseDefaultCategory(true);
 
-        for (StructurePlan plan : StructurePlanManager.getInstance().getPlans()) {
+        Iterator<StructurePlan> pit = StructurePlanManager.getInstance().getPlans().iterator();
+
+        while (pit.hasNext()) {
+            StructurePlan plan = pit.next();
             ItemStack is = new ItemStack(Material.PAPER);
             MenuSlot slot = new MenuSlot(is, plan.getDisplayName(), MenuSlot.MenuSlotType.ITEM);
             CuboidClipboard cc = StructurePlanManager.getInstance().getClipBoard(plan.getChecksum());
@@ -157,7 +191,7 @@ public class SettlerCraft extends JavaPlugin {
             slot.setData("Blocks", sizeString, ChatColor.GOLD);
             slot.setData("Type", "Plan", ChatColor.GOLD);
             slot.setData("Id", plan.getId(), ChatColor.GOLD);
-            planMenu.addItem(slot, plan.getCategory()); // FOR FREEEE
+            planMenu.addItem(slot, plan.getCategory()); //Dont fill in these slots
         }
 
         MenuManager.getInstance().register(planMenu);
@@ -178,30 +212,33 @@ public class SettlerCraft extends JavaPlugin {
         planShop.addCategory(8, new ItemStack(Material.BUCKET), "Misc");
         planShop.addActionSlot(9, new ItemStack(Material.BED_BLOCK), "Previous");
         planShop.addActionSlot(17, new ItemStack(Material.BED_BLOCK), "Next");
-        planShop.setLocked(10, 11, 12, 13, 14, 15, 16);
+        planShop.setLocked(10, 11, 12, 13, 14, 15, 16); // //Dont fill in these slots
         planShop.setDefaultCategory("All");
         planShop.setChooseDefaultCategory(true);
 
-        for (StructurePlan plan : StructurePlanManager.getInstance().getPlans()) {
+        Iterator<StructurePlan> pit = StructurePlanManager.getInstance().getPlans().iterator();
+        while (pit.hasNext()) {
+            StructurePlan plan = pit.next();
             ItemStack is = new ItemStack(Material.PAPER);
             MenuSlot slot = new MenuSlot(is, plan.getDisplayName(), MenuSlot.MenuSlotType.ITEM);
             StructureSchematic ss = StructurePlanManager.getInstance().getSchematic(plan.getChecksum());
             int size = ss.getBlocks();
             String sizeString = valueString(size);
             slot.setData("Size", ss.getLength() + "x" + ss.getWidth() + "x" + ss.getHeight(), ChatColor.GOLD);
+            slot.setData("Type", "Plan", ChatColor.GOLD);
             slot.setData("Blocks", sizeString, ChatColor.GOLD);
             planShop.addItem(slot, plan.getCategory(), plan.getPrice());
         }
 
         MenuManager.getInstance().register(planShop);
     }
-    
+
     /**
-     * Creates a string from a value 
-     * e.g. value > 1E3 = value/1E3 + "K" 
-     * e.g. value > 1E6 = value/1E6 + "M"
+     * Creates a string from a value e.g. value > 1E3 = value/1E3 + "K" e.g. value > 1E6 = value/1E6
+     * + "M"
+     *
      * @param value
-     * @return 
+     * @return
      */
     public static String valueString(double value) {
         if (value < 1000) {

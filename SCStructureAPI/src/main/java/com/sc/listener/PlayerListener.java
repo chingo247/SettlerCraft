@@ -22,10 +22,11 @@ import com.sc.api.structure.StructurePlanManager;
 import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.entity.world.SimpleCardinal;
 import com.sc.api.structure.entity.world.WorldDimension;
-import com.sc.util.WorldUtil;
+import com.sc.plugin.SettlerCraft;
 import com.sc.util.SCWorldEditUtil;
 import static com.sc.util.SCWorldEditUtil.getLocalSession;
 import com.sc.util.SCWorldGuardUtil;
+import com.sc.util.WorldUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.BlockWorldVector;
 import com.sk89q.worldedit.CuboidClipboard;
@@ -73,7 +74,12 @@ public class PlayerListener implements Listener {
         StructurePlan plan = StructurePlanManager.getInstance().getPlan(structurePlanId);
         Player player = pie.getPlayer();
         if (plan == null) {
-            player.sendMessage(ChatColor.RED + "This plan is not valid anymore, please refund it or throw it away");
+            if(!SettlerCraft.getSettlerCraft().isPlansLoaded()) {
+                player.sendMessage(ChatColor.RED + "This plan is invalid, please refund it or throw it away");
+            } else {
+                player.sendMessage(ChatColor.RED + "Plans aren't loaded yet please wait...");
+            }
+            
             return;
         }
 

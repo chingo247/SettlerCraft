@@ -16,7 +16,7 @@
  */
 package com.sc.api.structure.async;
 
-import com.sc.api.structure.SCJobCallback;
+import com.sc.api.structure.JobCallback;
 import com.sc.api.structure.SmartClipBoard;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
@@ -82,7 +82,7 @@ public class SCAsyncCuboidClipboard extends ProxyCuboidClipboard {
     }
 
     public void place(final EditSession editSession, final Vector pos,
-            final boolean noAir, SCJobCallback callback)
+            final boolean noAir, JobCallback callback)
             throws MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.paste);
         if (!isAsync) {

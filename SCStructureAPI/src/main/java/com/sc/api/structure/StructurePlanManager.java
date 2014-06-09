@@ -19,16 +19,18 @@ package com.sc.api.structure;
 import com.google.common.io.Files;
 import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.entity.plan.StructureSchematic;
-import com.sc.persistence.service.SchematicService;
 import com.sc.api.structure.plan.StructurePlanException;
+import com.sc.persistence.service.SchematicService;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.data.DataException;
 import com.sk89q.worldedit.schematic.SchematicFormat;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.CRC32;
@@ -39,14 +41,14 @@ import java.util.zip.CRC32;
  */
 public class StructurePlanManager {
 
-    private final ConcurrentHashMap<String, StructurePlan> plans;
-    private final ConcurrentHashMap<Long, StructureSchematic> schematics;
+    private final Map<String, StructurePlan> plans;
+    private final Map<Long, StructureSchematic> schematics;
     private static StructurePlanManager instance;
     private final SchematicService ss = new SchematicService();
 
     private StructurePlanManager() {
-        this.plans = new ConcurrentHashMap<>();
-        this.schematics = new ConcurrentHashMap<>();
+        this.plans = Collections.synchronizedMap(new HashMap<String, StructurePlan>());
+        this.schematics = Collections.synchronizedMap(new HashMap<Long, StructureSchematic>());
     }
 
     public static StructurePlanManager getInstance() {

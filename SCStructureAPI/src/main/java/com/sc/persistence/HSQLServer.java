@@ -16,9 +16,9 @@
  */
 package com.sc.persistence;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.io.IOException;
+import java.net.Socket;
+import org.hsqldb.HsqlException;
 import org.hsqldb.Server;
 
 /**
@@ -28,9 +28,9 @@ import org.hsqldb.Server;
 public class HSQLServer {
 
     private final String HOST = "localhost";
-    private final int PORT = 9002;
-    private final String DATABASE = "StructureAPI";
-    private final String PATH = "plugins//SettlerCraft//SCStructureAPI//Database//data//scstructuredb";
+    private final int PORT = 9001;
+    private final String DATABASE = "SettlerCraft";
+    private final String PATH = "plugins//SettlerCraft//Database//data//SettlerCraftDB";
     private static HSQLServer instance;
     private final Server server;
 
@@ -41,7 +41,8 @@ public class HSQLServer {
         server.setPort(PORT);
         server.setDatabaseName(0, DATABASE);
         server.setDatabasePath(0, PATH);
-//        server.setLogWriter(null);
+        server.setLogWriter(null);
+        
     }
 
     public static HSQLServer getInstance() {
@@ -52,11 +53,12 @@ public class HSQLServer {
     }
 
     public boolean isRunning() {
-        try {
-            Connection conn = DriverManager.getConnection("jdbc:hsqldb:hsql://localhost:9002/StructureAPI", "SA", "");
+        
+        try(Socket socket = new Socket(HOST, PORT)) {
+            System.out.println("HSQL Server already running");        
             return true;
-        } catch (SQLException ex) {
-            System.out.println("NOT RUNNING!");
+        } catch(IOException | HsqlException ex) {
+            System.out.println("HSQL Server not running, startng it on port " + PORT);        
             return false;
         }
     }

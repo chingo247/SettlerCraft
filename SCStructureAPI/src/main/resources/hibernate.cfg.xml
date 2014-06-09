@@ -6,7 +6,7 @@
     <session-factory>
         <property name="hibernate.bytecode.use_reflection_optimizer">false</property>
         <property name="hibernate.connection.driver_class">org.hsqldb.jdbcDriver</property>
-        <property name="connection.url">jdbc:hsqldb:hsql://localhost:9002/StructureAPI;</property>
+        <property name="connection.url">jdbc:hsqldb:hsql://localhost:9001/SettlerCraft;</property>
         <property name="hibernate.cache.provider_class">org.hibernate.cache.EhCacheProvider</property>
         <property name="hibernate.connection.username">SA</property>
         <property name="hibernate.connection.password"></property>

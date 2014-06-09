@@ -74,6 +74,8 @@ public class Structure implements Serializable {
     private WorldDimension dimension;
 
     private SimpleCardinal cardinal;
+    
+    private Double refundValue;
 
     @OneToOne
     @Cascade(CascadeType.ALL)
@@ -112,8 +114,17 @@ public class Structure implements Serializable {
         CuboidClipboard structureSchematic = StructurePlanManager.getInstance().getClipBoard(getPlan().getChecksum());
         this.dimension = WorldUtil.getWorldDimension(target, cardinal, structureSchematic);
         this.worldUUID = worldLocation.getWorld().getUID();
+        this.refundValue = plan.getPrice();
     }
 
+    public void setRefundValue(Double refundValue) {
+        this.refundValue = refundValue;
+    }
+
+    public Double getRefundValue() {
+        return refundValue;
+    }
+    
     public UUID getWorldUUID() {
         return worldUUID;
     }

@@ -1,5 +1,5 @@
 name: SettlerCraft
-main: com.sc.api.structure.SettlerCraft
+main: com.sc.plugin.SettlerCraft
 version: 1.0
 depend: [WorldEdit, AsyncWorldEdit, WorldGuard, HolographicDisplays]
 softdepend: [Vault]

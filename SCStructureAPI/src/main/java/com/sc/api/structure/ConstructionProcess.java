@@ -67,7 +67,7 @@ public class ConstructionProcess implements Serializable {
     @Id
     @Column(name = "PROGRESS_ID")
     private Long id;
-    private Double refundValue;
+    
     private Timestamp createdAt;
     private Timestamp completedAt;
     private Timestamp removedAt;
@@ -90,7 +90,6 @@ public class ConstructionProcess implements Serializable {
         Preconditions.checkNotNull(structure);
         Preconditions.checkNotNull(structure.getId());
         this.id = structure.getId();
-        this.refundValue = structure.getPlan().getPrice();
         this.createdAt = new Timestamp(new Date().getTime());
         this.isDemolishing = false;
         this.progressStatus = State.INITIALIZED;
@@ -133,10 +132,6 @@ public class ConstructionProcess implements Serializable {
         return hasPlacedBlocks;
     }
 
-    public double getRefundValue() {
-        return refundValue;
-    }
-
     public Timestamp getCreatedAt() {
         return createdAt;
     }
@@ -161,10 +156,6 @@ public class ConstructionProcess implements Serializable {
         return structure;
     }
 
-    public void setRefundValue(double refundValue) {
-        this.refundValue = refundValue;
-    }
-
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
@@ -182,6 +173,9 @@ public class ConstructionProcess implements Serializable {
     }
 
     public void setProgressStatus(State progressStatus) {
+        if(this.progressStatus == State.COMPLETE) {
+            this.completedAt = null;
+        }
         this.progressStatus = progressStatus;
     }
     

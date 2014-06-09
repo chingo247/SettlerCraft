@@ -16,7 +16,7 @@
  */
 package com.sc.api.structure.async;
 
-import com.sc.api.structure.SCJobCallback;
+import com.sc.api.structure.JobCallback;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
@@ -50,11 +50,11 @@ public abstract class SCClipBoardAsyncTask extends BukkitRunnable {
     private final BlockPlacer m_blockPlacer;
     private final SCBlockPlacerJobEntry m_job;
     private final AsyncEditSession m_editSession;
-    private final SCJobCallback callback;
+    private final JobCallback callback;
 
     public SCClipBoardAsyncTask(final CuboidClipboard clipboard, final EditSession editSession,
             final String player, final String commandName, BlockPlacer blocksPlacer,
-            SCBlockPlacerJobEntry job, SCJobCallback callback) {
+            SCBlockPlacerJobEntry job, JobCallback callback) {
         m_clipboard = clipboard;
         m_player = player;
         m_command = commandName;

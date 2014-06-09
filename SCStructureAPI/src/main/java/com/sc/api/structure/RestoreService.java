@@ -109,8 +109,10 @@ public class RestoreService {
             Iterator<Structure> it = structures.iterator();
             while (it.hasNext()) {
                 Structure structure = it.next();
-                structure.getProgress().setProgressStatus(ConstructionProcess.State.STOPPED);
-                session.merge(structure);
+                ConstructionProcess progress = structure.getProgress();
+                System.out.println("Structure: " + structure.getId());
+                progress.setProgressStatus(ConstructionProcess.State.STOPPED);
+                session.merge(progress);
             }
             tx.commit();
         } catch (HibernateException e) {

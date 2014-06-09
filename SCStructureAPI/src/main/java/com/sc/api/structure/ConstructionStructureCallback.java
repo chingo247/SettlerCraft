@@ -21,7 +21,10 @@ import com.sc.event.structure.StructureConstructionEvent;
 import com.sc.event.structure.StructureDemolisionEvent;
 import com.sc.event.structure.StructureRemovedEvent;
 import com.sc.persistence.service.StructureService;
+import com.sc.plugin.SettlerCraft;
 import com.sk89q.worldedit.EditSession;
+import java.sql.Timestamp;
+import java.util.Date;
 import org.bukkit.Bukkit;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.IJobEntryListener;
@@ -31,7 +34,7 @@ import org.primesoft.asyncworldedit.blockPlacer.IJobEntryListener;
  *
  * @author Chingo
  */
-public class ConstructionStructureCallback implements SCJobCallback {
+public class ConstructionStructureCallback implements JobCallback {
 
     private final String issuer;
     private final Long structureId;
@@ -55,7 +58,6 @@ public class ConstructionStructureCallback implements SCJobCallback {
         progress.setJobId(entry.getJobId());
         progress = ss.save(progress);
         structureManager.putProgress(entry.getJobId(), progress);
-        System.out.println("JobID added: " + progress.getJobId());
         entry.addStateChangedListener(new IJobEntryListener() {
 
             @Override
@@ -84,15 +86,20 @@ public class ConstructionStructureCallback implements SCJobCallback {
                         if(progress.getStatus() != ConstructionProcess.State.COMPLETE) {
                             Bukkit.getPluginManager().callEvent(new StructureCompleteEvent(structure));
                             progress.setProgressStatus(ConstructionProcess.State.COMPLETE);
+                            progress.setCompletedAt(new Timestamp(new Date().getTime()));
                             progress = ss.save(progress);
                             structureManager.putProgress(entry.getJobId(), progress);
                         }
                     } else {
                         if(progress.getStatus() != ConstructionProcess.State.REMOVED) {
                              progress.setProgressStatus(ConstructionProcess.State.REMOVED);
+                             structure.setRefundValue(structure.getRefundValue() * SettlerCraft.getSettlerCraft().getRefundPercentage());
+                             if(structure.getRefundValue() > 0) {
+                                structureManager.refund(structure);
+                             }
+                             structure.setRefundValue(0d);
+                             ss.save(structure);
                              Bukkit.getPluginManager().callEvent(new StructureRemovedEvent(structure));
-                             progress.setProgressStatus(ConstructionProcess.State.REMOVED);
-                             progress = ss.save(progress);
                              structureManager.removeRegion(structure);
                              structureManager.removeProgress(entry.getJobId(), progress);
                         }

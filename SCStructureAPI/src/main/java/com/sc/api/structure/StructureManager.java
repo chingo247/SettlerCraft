@@ -16,7 +16,7 @@
  */
 package com.sc.api.structure;
 
-import com.sc.plugin.SettlerCraft;
+import com.cc.plugin.api.menu.SCVaultEconomyUtil;
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.google.common.base.Preconditions;
@@ -29,10 +29,11 @@ import com.sc.api.structure.entity.world.SimpleCardinal;
 import com.sc.api.structure.entity.world.WorldDimension;
 import com.sc.api.structure.flag.SCFlags;
 import com.sc.api.structure.generator.Enclosures;
+import com.sc.api.structure.progress.ConstructionStrategyType;
 import com.sc.persistence.HibernateUtil;
 import com.sc.persistence.service.AbstractService;
 import com.sc.persistence.service.StructureService;
-import com.sc.api.structure.progress.ConstructionStrategyType;
+import com.sc.plugin.SettlerCraft;
 import com.sc.util.SCAsyncWorldEditUtil;
 import com.sc.util.SCWorldGuardUtil;
 import com.sk89q.worldedit.BlockVector;
@@ -55,13 +56,16 @@ import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -144,7 +148,6 @@ public class StructureManager {
             playerEntries.put(progress.getStructure().getOwner(), new ConstructionEntry());
         }
         playerEntries.get(progress.getStructure().getOwner()).put(jobId, progress);
-        System.out.println(playerEntries.get(progress.getStructure().getOwner()).get(jobId));
         updateHolo(progress);
     }
 
@@ -160,6 +163,7 @@ public class StructureManager {
         Hologram holo = holos.get(progress.getId());
         State state = progress.getStatus();
 
+        synchronized(holo) {
         if (holo != null) {
             if (state == State.COMPLETE) {
                 holo.setLine(STRUCTURE_STATUS_INDEX, "");
@@ -195,6 +199,7 @@ public class StructureManager {
 
             holo.setLine(STRUCTURE_STATUS_INDEX, statusString);
             holo.update();
+        }
         }
     }
 
@@ -449,8 +454,44 @@ public class StructureManager {
      * @return True if this player owns the structure
      */
     public boolean owns(Player player, Structure structure) {
-        // TODO WorldGuard Region Ownership!
+        if(getOwners(structure).contains(player.getName())) {
+            return true;
+        }
         return structure.getOwner().equals(player.getName());
+    }
+    
+    public Set<String> getOwners(Structure structure) {
+        World world = structure.getWorld();
+        Set<String> owners = new HashSet<>();
+        if(world == null) {
+            return owners;
+        }
+        
+        RegionManager rmgr = SCWorldGuardUtil.getGlobalRegionManager(world);
+        ProtectedRegion region = rmgr.getRegion(structure.getStructureRegion());
+        if(region == null) {
+            return owners;
+        }
+        
+        owners = region.getOwners().getPlayers();
+        return owners;
+    }
+    
+    public Set<String> getMembers(Structure structure) {
+        World world = structure.getWorld();
+        Set<String> members = new HashSet<>();
+        if(world == null) {
+            return members;
+        }
+        
+        RegionManager rmgr = SCWorldGuardUtil.getGlobalRegionManager(world);
+        ProtectedRegion region = rmgr.getRegion(structure.getStructureRegion());
+        if(region == null) {
+            return members;
+        }
+        
+        members = region.getMembers().getPlayers();
+        return members;
     }
 
     public boolean regionExists(World world, String id) {
@@ -563,7 +604,7 @@ public class StructureManager {
 //        ConstructionStructureCallback dca = 
 
         List<Vector> vertices;
-        final SCJobCallback jc;
+        final JobCallback jc;
         CuboidClipboard schematic;
         if (!process.isDemolishing()) {
 
@@ -627,6 +668,25 @@ public class StructureManager {
         }
 
     }
+    
+    public void refund(Structure structure) {
+        if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
+            Economy economy = SCVaultEconomyUtil.getInstance().getEconomy();
+            if (economy != null) {
+                Player player = Bukkit.getPlayer(structure.getOwner());
+                if (player != null) {
+                    double refundValue = structure.getRefundValue();
+                    economy.depositPlayer(structure.getOwner(), refundValue);
+                    if (player.isOnline()) {
+                        player.sendMessage(new String[]{
+                            "Refunded " + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.GOLD + refundValue,
+                            ChatColor.RESET + "Your new balance: " + ChatColor.GOLD + economy.getBalance(player.getName())
+                        });
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Stops the task, the task will be removed from AsyncWorldEdit's blockplacer queue, but will
@@ -639,9 +699,16 @@ public class StructureManager {
         Preconditions.checkArgument(process.getStatus() != State.REMOVED);
         Structure structure = process.getStructure();
         State progressStatus = process.getStatus();
+        
+        
         if (progressStatus == State.STOPPED && !force) {
             return;
         }
+        
+        if(progressStatus == State.COMPLETE || process.getJobId() == -1) {
+            return;
+        }
+       
 
         Session session = null;
         Transaction tx = null;
@@ -685,7 +752,7 @@ public class StructureManager {
      * by AsyncWorldEdit
      *
      * @param process The process
-     * @throws com.sc.api.structure.construction.StructureException
+     * @throws com.sc.api.structure.StructureException
      */
     public void delayProcess(ConstructionProcess process) throws StructureException {
         if (process.getJobId() == -1) {
@@ -699,10 +766,13 @@ public class StructureManager {
     public void stopAll() {
         for (ConstructionEntry ce : playerEntries.values()) {
             for (ConstructionProcess process : ce.list()) {
-                stopProcess(process, true);
+                if(process.getStatus() != State.COMPLETE && process.getStatus() != State.REMOVED) {
+                    stopProcess(process, true);
+                }
             }
         }
     }
+    
 
     public void shutdown() {
         stopAll();
@@ -711,7 +781,5 @@ public class StructureManager {
         }
     }
 
-    public void continueAll() {
-
-    }
+   
 }

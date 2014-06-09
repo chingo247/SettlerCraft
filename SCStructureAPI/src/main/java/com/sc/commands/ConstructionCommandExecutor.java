@@ -6,19 +6,16 @@ package com.sc.commands;
  * and open the template in the editor.
  */
 
-import com.cc.plugin.api.menu.SCVaultEconomyUtil;
 import com.sc.api.structure.ConstructionProcess;
 import com.sc.api.structure.ConstructionProcess.State;
-import com.sc.plugin.SettlerCraft;
 import com.sc.api.structure.Structure;
 import com.sc.api.structure.StructureException;
 import com.sc.api.structure.StructureManager;
 import com.sc.persistence.service.StructureService;
+import com.sc.plugin.SettlerCraft;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.milkbowl.vault.economy.Economy;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -195,8 +192,9 @@ public class ConstructionCommandExecutor implements CommandExecutor {
                 if (!progress.hasPlacedBlocks()) {
                     sm.stopProcess(progress, true);
                     player.sendMessage("Construction for " + ChatColor.GOLD + id + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET + " was canceled");
-                    refund(structure);
-                    progress.setRefundValue(0);
+                    sm.refund(structure);
+                    structure.setRefundValue(0d);
+                    ss.save(structure);
                     progress.setProgressStatus(State.REMOVED);
 
                 } else {
@@ -211,23 +209,7 @@ public class ConstructionCommandExecutor implements CommandExecutor {
         return true;
     }
 
-    private void refund(Structure structure) {
-        if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
-            Economy economy = SCVaultEconomyUtil.getInstance().getEconomy();
-            if (economy != null) {
-                Player player = Bukkit.getPlayer(structure.getOwner());
-                if (player != null) {
-                    economy.depositPlayer(structure.getOwner(), structure.getPlan().getPrice());
-                    if (player.isOnline()) {
-                        player.sendMessage(new String[]{
-                            "Refunded " + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.GOLD + structure.getPlan().getPrice(),
-                            ChatColor.RESET + "Your new balance: " + ChatColor.GOLD + economy.getBalance(player.getName())
-                        });
-                    }
-                }
-            }
-        }
-    }
+
 
     private boolean stopTask(Player player, String[] args) {
         if (args.length > 2) {
@@ -256,9 +238,12 @@ public class ConstructionCommandExecutor implements CommandExecutor {
         } else if (structure.getProgress().getStatus() == State.REMOVED) {
             player.sendMessage(ChatColor.RED + "#" + ChatColor.GOLD + structure.getId() + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RED + " was removed, can't stop task...");
             return true;
-        }
+        } 
         ConstructionProcess progress = structure.getProgress();
-
+        if(progress.getStatus() == State.COMPLETE) {
+            player.sendMessage(ChatColor.RED + "#" + ChatColor.GOLD + structure.getId() + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RED + " already complete...");
+            return true;
+        }
         
         sm.stopProcess(progress, true);
         player.sendMessage("Stopping #" + ChatColor.GOLD + id + " " + ChatColor.BLUE + structure.getPlan().getDisplayName());
