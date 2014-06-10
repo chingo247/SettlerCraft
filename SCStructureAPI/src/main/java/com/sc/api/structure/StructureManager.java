@@ -31,7 +31,6 @@ import static com.sc.api.structure.entity.world.SimpleCardinal.NORTH;
 import static com.sc.api.structure.entity.world.SimpleCardinal.SOUTH;
 import static com.sc.api.structure.entity.world.SimpleCardinal.WEST;
 import com.sc.api.structure.entity.world.WorldDimension;
-import com.sc.api.structure.flag.SCFlags;
 import com.sc.api.structure.generator.Enclosures;
 import com.sc.api.structure.progress.ConstructionStrategyType;
 import com.sc.persistence.HibernateUtil;
@@ -283,7 +282,14 @@ public class StructureManager {
 
     public Structure construct(Player owner, StructurePlan plan, Location location, SimpleCardinal cardinal) {
 
+        
+        
         Structure structure = new Structure(owner.getName(), location, cardinal, plan);
+        if (overlaps(structure.getPlan(), structure.getLocation(), structure.getCardinal())) {
+            owner.sendMessage(ChatColor.RED + " Structure overlaps another structure");
+            return null;
+        }
+        
         StructureService ss = new StructureService();
         structure = ss.save(structure);
         structure.setStructureRegionId(UUID.randomUUID().toString());
@@ -399,10 +405,7 @@ public class StructureManager {
                 return null;
             }
 
-            if (overlaps(structure.getPlan(), structure.getLocation(), structure.getCardinal())) {
-                player.sendMessage(ChatColor.RED + " Structure overlaps another structure");
-                return null;
-            }
+            
 
             if (overlapsRegion(player, structure.getPlan(), structure.getLocation(), structure.getCardinal())) {
                 player.sendMessage(ChatColor.RED + "Structure overlaps an regions owned other players");
@@ -423,7 +426,6 @@ public class StructureManager {
             ProtectedCuboidRegion region = new ProtectedCuboidRegion(id, new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
 
             // Set Flag
-            region.setFlag(SCFlags.STRUCTURE, String.valueOf(structure.getId()));
             region.getOwners().addPlayer(player.getName());
             mgr.addRegion(region);
             mgr.save();
@@ -529,22 +531,8 @@ public class StructureManager {
 
     public boolean overlaps(StructurePlan plan, Location location, SimpleCardinal cardinal) {
         Structure structure = new Structure("", location, cardinal, plan);
-        RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
-        WorldDimension dim = structure.getDimension();
-        Vector p1 = dim.getMin().getPosition();
-        Vector p2 = dim.getMax().getPosition();
-        ProtectedCuboidRegion region = new ProtectedCuboidRegion("", new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
-        ApplicableRegionSet regions = mgr.getApplicableRegions(region);
-
-        for (ProtectedRegion r : regions) {
-            if (r.getId().equals("")) {
-                continue;
-            }
-            if (r.getFlag(SCFlags.STRUCTURE) != null) {
-                return true;
-            }
-        }
-        return false;
+        StructureService service = new StructureService();
+        return service.overlaps(structure);
     }
 
     public boolean overlapsRegion(Player player, StructurePlan plan, Location location, SimpleCardinal cardinal) {

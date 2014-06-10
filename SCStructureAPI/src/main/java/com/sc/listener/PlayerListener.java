@@ -112,6 +112,11 @@ public class PlayerListener implements Listener {
 
     private boolean canPlace(Player player, Location location, SimpleCardinal cardinal, StructurePlan plan) {
         StructureManager sm = StructureManager.getInstance();
+        
+        if (sm.overlaps(plan, location, cardinal)) {
+            player.sendMessage(ChatColor.RED + " Structure overlaps another structure");
+            return false;
+        }
 
         if (!sm.mayClaim(player)) {
             player.sendMessage(ChatColor.RED + " You have no permission to claim regions");
