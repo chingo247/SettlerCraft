@@ -22,6 +22,7 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.blocks.BlockType;
 import java.util.List;
 
@@ -100,18 +101,23 @@ public class SmartClipBoard extends CuboidClipboard {
             }
 
             BaseBlock worldBlock = editSession.getBlock(v.add(pos));
+            
+            
+            
             if(!isReversed()) {
-                if (worldBlock.getId() == b.getId() && worldBlock.getData() == b.getData()) {
+                if (worldBlock.getId() == BlockID.BEDROCK || (worldBlock.getId() == b.getId() && worldBlock.getData() == b.getData())) {
                     continue;
                 }
                 editSession.rawSetBlock((v.add(pos)), b);
             } else {
-                if(b.isAir()) {
-                    continue;
+                if(b.isAir() && worldBlock.isAir() || worldBlock.getId() == BlockID.BEDROCK) {
+                continue;
                 }
                 
-                if(!worldBlock.isAir() || worldBlock.getId() == b.getId() 
-                        || !BlockType.isNaturalTerrainBlock(worldBlock.getId(), worldBlock.getId())){
+                if(worldBlock.getId() == b.getId() && !b.isAir() 
+                        || (!BlockType.isNaturalTerrainBlock(worldBlock.getId(), worldBlock.getId()) && !worldBlock.isAir())
+                        
+                        ){
                     editSession.rawSetBlock((v.add(pos)), new BaseBlock(0));
                 }
             }

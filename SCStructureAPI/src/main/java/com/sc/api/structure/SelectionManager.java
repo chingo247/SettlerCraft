@@ -16,14 +16,14 @@
  */
 package com.sc.api.structure;
 
-import com.sc.plugin.SettlerCraft;
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.sc.api.structure.entity.plan.StructurePlan;
 import com.sc.api.structure.entity.plan.StructureSchematic;
 import com.sc.api.structure.entity.world.SimpleCardinal;
-import com.sc.util.WorldUtil;
+import com.sc.plugin.SettlerCraft;
 import com.sc.util.SCWorldEditUtil;
+import com.sc.util.WorldUtil;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Location;
@@ -94,9 +94,9 @@ public class SelectionManager {
             
             StructureSchematic schematic = pm.getSchematic(planChecksum);
             
-            org.bukkit.Location xLoc = WorldUtil.addOffset(self.clone(), cardinal, 1, 1, 0);
+            org.bukkit.Location xLoc = WorldUtil.addOffset(self.clone(), cardinal, 2, 1, 0);
             org.bukkit.Location yLoc = WorldUtil.addOffset(self.clone(), cardinal, 0, 1, 0);
-            org.bukkit.Location zLoc = WorldUtil.addOffset(self.clone(), cardinal, 0, 1, 1);
+            org.bukkit.Location zLoc = WorldUtil.addOffset(self.clone(), cardinal, 0, 1, 2);
 
             holos[SELF] = HolographicDisplaysAPI.createIndividualHologram(plugin, self, whoCanSee, ChatColor.GREEN + "[X]");
             

@@ -60,13 +60,13 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.milkbowl.vault.economy.Economy;
@@ -79,6 +79,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
@@ -123,6 +124,29 @@ public class StructureManager {
             initialized = true;
         }
     }
+    
+    public void removeHolo(Long structureId) {
+        holos.get(structureId).delete();
+        holos.remove(structureId);
+    }
+    
+    private boolean exceedsLimit(Player player) {
+        List<ConstructionProcess> processes = listProgress(player.getName());
+        if(processes == null) {
+            return false;
+        } else {
+            int blocks = 0;
+            int limit = ConfigProvider.getQueueSoftLimit();
+            for(ConstructionProcess p : processes) {
+                blocks += StructurePlanManager.getInstance().getSchematic(p.getStructure().getPlan().getChecksum()).getBlocks();
+            }
+            
+            
+            return blocks > limit;
+        }
+        
+        
+    }
 
     private void initHolos() {
         Session session = HibernateUtil.getSession();
@@ -149,7 +173,6 @@ public class StructureManager {
         if (playerEntries.get(progress.getStructure().getOwner()) != null) {
             playerEntries.get(progress.getStructure().getOwner()).remove(jobId);
         }
-        updateHolo(progress);
     }
 
     public void putProgress(Integer jobId, ConstructionProcess progress) {
@@ -157,7 +180,6 @@ public class StructureManager {
             playerEntries.put(progress.getStructure().getOwner(), new ConstructionEntry());
         }
         playerEntries.get(progress.getStructure().getOwner()).put(jobId, progress);
-        updateHolo(progress);
     }
 
     public ConstructionProcess getProgress(String owner, Integer jobId) {
@@ -168,52 +190,53 @@ public class StructureManager {
         }
     }
 
-    private void updateHolo(ConstructionProcess progress) {
-        Hologram holo = holos.get(progress.getId());
-        State state = progress.getStatus();
-
-        if (holo != null) {
-            if (state == State.COMPLETE) {
-                if(progress.getStructure().getPlan().isHideSignOnComplete()) {
-                holo.hide();
-                return;
-                } else {
-                holo.setLine(STRUCTURE_STATUS_INDEX, "");
-                holo.update();
-                return;
-                }
-            } else if (state == State.REMOVED) {
-                holos.remove(progress.getId());
-                holo.delete();
-                return;
-            }
-            String statusString;
-            switch (state) {
-                case DEMOLISHING:
-                    statusString = "Status: " + ChatColor.YELLOW;
-                    statusString += state.name();
-                    break;
-                case BUILDING:
-                    statusString = "Status: " + ChatColor.YELLOW;
-                    statusString += state.name();
-                    break;
-                case COMPLETE:
-                    statusString = "";
-                    break;
-                case STOPPED:
-                    statusString = "Status: " + ChatColor.RED;
-                    statusString += state.name();
-                    break;
-                default:
-                    statusString = "Status: " + ChatColor.WHITE;
-                    statusString += state.name();
-                    break;
-            }
-
-            holo.setLine(STRUCTURE_STATUS_INDEX, statusString);
-            holo.update();
-        }
-    }
+//  Cause plugin to crash when used Async
+//    private synchronized void updateHolo(ConstructionProcess progress) {
+//        Hologram holo = holos.get(progress.getId());
+//        State state = progress.getStatus();
+//
+//        if (holo != null) {
+//            if (state == State.COMPLETE) {
+//                if(progress.getStructure().getPlan().isHideSignOnComplete()) {
+//                holo.hide();
+//                return;
+//                } else {
+//                holo.setLine(STRUCTURE_STATUS_INDEX, "");
+//                holo.update();
+//                return;
+//                }
+//            } else if (state == State.REMOVED) {
+//                holos.remove(progress.getId());
+//                holo.delete();
+//                return;
+//            }
+//            String statusString;
+//            switch (state) {
+//                case DEMOLISHING:
+//                    statusString = "Status: " + ChatColor.YELLOW;
+//                    statusString += state.name();
+//                    break;
+//                case BUILDING:
+//                    statusString = "Status: " + ChatColor.YELLOW;
+//                    statusString += state.name();
+//                    break;
+//                case COMPLETE:
+//                    statusString = "";
+//                    break;
+//                case STOPPED:
+//                    statusString = "Status: " + ChatColor.RED;
+//                    statusString += state.name();
+//                    break;
+//                default:
+//                    statusString = "Status: " + ChatColor.WHITE;
+//                    statusString += state.name();
+//                    break;
+//            }
+//
+//            holo.setLine(STRUCTURE_STATUS_INDEX, statusString);
+//            
+//        }
+//    }
 
     private Hologram createStructureHolo(Structure structure) {
         Location pos = structure.getLocation(structure.getPlan().getSignLocation());
@@ -225,36 +248,12 @@ public class StructureManager {
                 pos.getPosition().getZ()
         );
 
-        String statusString;
-        State state = structure.getProgress().getStatus();
-
-        switch (state) {
-            case DEMOLISHING:
-                statusString = "Status: " + ChatColor.YELLOW;
-                statusString += state.name();
-                break;
-            case BUILDING:
-                statusString = "Status: " + ChatColor.YELLOW;
-                statusString += state.name();
-                break;
-            case COMPLETE:
-                statusString = "";
-                break;
-            case STOPPED:
-                statusString = "Status: " + ChatColor.RED;
-                statusString += state.name();
-                break;
-            default:
-                statusString = "Status: " + ChatColor.WHITE;
-                statusString += state.name();
-                break;
-        }
+        
 
         Hologram hologram = HolographicDisplaysAPI.createHologram(plugin, location,
                 "Id: " + ChatColor.GOLD + structure.getId(),
                 "Plan: " + ChatColor.BLUE + structure.getPlan().getDisplayName(),
-                "Owner: " + ChatColor.GREEN + structure.getOwner(),
-                statusString
+                "Owner: " + ChatColor.GREEN + structure.getOwner()
         );
         return hologram;
     }
@@ -281,18 +280,21 @@ public class StructureManager {
     }
 
     public Structure construct(Player owner, StructurePlan plan, Location location, SimpleCardinal cardinal) {
-
+        if(exceedsLimit(owner)) {
+            owner.sendMessage(ChatColor.RED + "Structure queue is full! Wait for the structure(s) to finish");
+            return null;
+        }
         
         
         Structure structure = new Structure(owner.getName(), location, cardinal, plan);
         if (overlaps(structure.getPlan(), structure.getLocation(), structure.getCardinal())) {
             owner.sendMessage(ChatColor.RED + " Structure overlaps another structure");
-            return null;
+                return null;
         }
         
         StructureService ss = new StructureService();
         structure = ss.save(structure);
-        structure.setStructureRegionId(UUID.randomUUID().toString());
+        structure.setStructureRegionId("sc"+structure.getId() + "" + new Date().getTime());
         ConstructionProcess progress = new ConstructionProcess(structure);
         structure.setConstructionProgress(progress);
         ss.save(progress);
@@ -394,16 +396,16 @@ public class StructureManager {
         }
 
 
-
-            if (!canClaim(player)) {
-                player.sendMessage(ChatColor.RED + "Can't build structure, region limit reached");
-                return null;
-            }
-
-            if (!mayClaim(player)) {
-                player.sendMessage(ChatColor.RED + "Can't build structure, no permission");
-                return null;
-            }
+// FIXME REPLACE WITH CONSTRUCT PERMISSION
+//            if (!canClaim(player)) {
+//                player.sendMessage(ChatColor.RED + "Can't build structure, region limit reached");
+//                return null;
+//            }
+//
+//            if (!mayClaim(player)) {
+//                player.sendMessage(ChatColor.RED + "Can't build structure, no permission");
+//                return null;
+//            }
 
             
 
@@ -587,6 +589,8 @@ public class StructureManager {
             throw new StructureException("Tried to continue a removed structure");
         }
         
+        
+        
         stopProcess(process, true); // also stops enclosure task
 
         StructureService ss = new StructureService();
@@ -605,12 +609,12 @@ public class StructureManager {
         CuboidClipboard schematic;
         if (!process.isDemolishing()) {
             schematic = StructurePlanManager.getInstance().getClipBoard(structure.getPlan().getChecksum());
-            vertices = ConstructionStrategyType.LAYERED.getList(schematic, false);
             align(schematic, structure.getDimension().getMin(), structure.getCardinal());
+            vertices = ConstructionStrategyType.LAYERED.getList(schematic, false);
         } else {
             schematic = StructurePlanManager.getInstance().getClipBoard(structure.getPlan().getChecksum());
-            vertices = ConstructionStrategyType.LAYERED.getList(schematic, false);
             align(schematic, structure.getDimension().getMin(), structure.getCardinal());
+            vertices = ConstructionStrategyType.LAYERED.getList(schematic, false);
             Collections.reverse(vertices);
         }
         jc = new ConstructionStructureCallback(owner, structure, session);
@@ -620,7 +624,7 @@ public class StructureManager {
             smartClipBoard.setReverse(true);
         }
         
-        final SCAsyncCuboidClipboard asyncCuboidClipboard = new SCAsyncCuboidClipboard(session.getPlayer(), smartClipBoard);
+        final SCAsyncCuboidClipboard asyncCuboidClipboard = new SCAsyncCuboidClipboard(structure.getOwner(), smartClipBoard);
 
         if (structure.getProgress().isDemolishing()) {
             try {
@@ -680,6 +684,7 @@ public class StructureManager {
      * @param process The process to stop
      * @param force whether to check if the progress already has stopped
      */
+    
     public void stopProcess(ConstructionProcess process, boolean force) {
         Preconditions.checkArgument(process.getStatus() != State.REMOVED);
         Structure structure = process.getStructure();

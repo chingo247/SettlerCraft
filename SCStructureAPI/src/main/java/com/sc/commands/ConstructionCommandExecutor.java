@@ -50,9 +50,14 @@ public class ConstructionCommandExecutor implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String label, String[] args) {
+        if(! (cs instanceof Player)) {
+            cs.sendMessage("You are not a player!"); // Command is issued from server console
+            return true;
+        }
+        
         if (args.length == 0) {
             cs.sendMessage(ChatColor.RED + "Too few arguments");
-            return false;
+            return true;
         }
         String arg = args[0];
         Player player = (Player) cs;
@@ -147,7 +152,6 @@ public class ConstructionCommandExecutor implements CommandExecutor {
                         break;
                 }
                 l += state.name();
-                l += " " + ChatColor.RESET + task.getCreatedAt();
                 message[line] = l;
                 line++;
             }

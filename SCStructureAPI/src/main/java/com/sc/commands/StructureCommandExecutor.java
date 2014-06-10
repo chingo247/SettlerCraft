@@ -66,14 +66,13 @@ public class StructureCommandExecutor implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
+        if(! (cs instanceof Player)) {
+            cs.sendMessage("You are not a player!"); // Command is issued from server console
+            return true;
+        }
+        
         if (args.length == 0) {
-            cs.sendMessage(new String[]{
-                ChatColor.LIGHT_PURPLE + CMD + " info " + ChatColor.RESET + " - displays info about the structure you are within",
-                ChatColor.LIGHT_PURPLE + CMD + " list [playerName][index]" + ChatColor.RESET + " - displays a list of structures the player owns, no arg for own",
-                ChatColor.LIGHT_PURPLE + CMD + " pos [structure id]" + ChatColor.RESET + " - displays your relative position from the structure",
-                ChatColor.LIGHT_PURPLE + CMD + " flag [structure id][add/remove][flag][value]" + ChatColor.RESET + " - displays flags, add flags, remove flags",
-                ChatColor.LIGHT_PURPLE + CMD + " owner [structure id][add/remove][player]" + ChatColor.RESET + " - displays owner, add owner, remove owner"
-            });
+            cs.sendMessage(ChatColor.RED + "Too few arguments");
             return true;
         }
         String arg = args[0];
@@ -167,7 +166,6 @@ public class StructureCommandExecutor implements CommandExecutor {
                         + " " + ChatColor.YELLOW + "X: " + ChatColor.RESET + structure.getLocation().getPosition().getBlockX()
                         + " " + ChatColor.YELLOW + "Y: " + ChatColor.RESET + structure.getLocation().getPosition().getBlockY()
                         + " " + ChatColor.YELLOW + "Z: " + ChatColor.RESET + structure.getLocation().getPosition().getBlockZ()
-                        + " " + ChatColor.YELLOW + "World: " + ChatColor.RESET + structure.getLocation().getWorld().getName()
                         + " " + ChatColor.RESET + "Value: " + ChatColor.GOLD + SettlerCraft.valueString(structure.getPlan().getPrice());
                 message[line] = l;
                 line++;
@@ -252,7 +250,7 @@ public class StructureCommandExecutor implements CommandExecutor {
 
         player.sendMessage("#" + ChatColor.GOLD + structure.getId() + " "
                 + ChatColor.BLUE + structure.getPlan().getDisplayName()
-                + ChatColor.RESET + ": Your position is "
+                + ChatColor.RESET + ": relative position is "
                 + ChatColor.YELLOW + "x:" + ChatColor.RESET + pos.getBlockX() + " "
                 + ChatColor.YELLOW + "y:" + ChatColor.RESET + pos.getBlockY() + " "
                 + ChatColor.YELLOW + "z:" + ChatColor.RESET + pos.getBlockZ()
@@ -572,11 +570,7 @@ public class StructureCommandExecutor implements CommandExecutor {
         
         String ply = args[3];
         Boolean flag = region.getFlag(DefaultFlag.BUYABLE);
-        Player p = Bukkit.getPlayer(ply);
-        if(p == null) {
-            player.sendMessage(ChatColor.RED + "Player " + ply + " doesn't exist");
-            return true;
-        }
+        
         String id = structure.getStructureRegion();
         LocalPlayer localPlayer = SCWorldGuardUtil.getLocalPlayer(player);
         DefaultDomain owners = region.getOwners();

@@ -40,6 +40,7 @@ public class ConstructionStructureCallback implements JobCallback {
     private final Long structureId;
     private final EditSession session;
     private final int count;
+    private int jobId;
     
 
     public ConstructionStructureCallback(String issuer, Structure structure, EditSession session) {
@@ -57,7 +58,8 @@ public class ConstructionStructureCallback implements JobCallback {
         ConstructionProcess progress = structure.getProgress();
         progress.setJobId(entry.getJobId());
         progress = ss.save(progress);
-        structureManager.putProgress(entry.getJobId(), progress);
+        this.jobId = entry.getJobId();
+        structureManager.putProgress(jobId, progress);
         entry.addStateChangedListener(new IJobEntryListener() {
 
             @Override
@@ -78,7 +80,7 @@ public class ConstructionStructureCallback implements JobCallback {
                     }
                     progress.setHasPlacedBlocks(true);
                     progress = ss.save(progress);
-                    structureManager.putProgress(entry.getJobId(), progress);
+                    structureManager.putProgress(jobId, progress);
                 } else if (bpje.getStatus() == BlockPlacerJobEntry.JobStatus.Done) {
                     ConstructionProcess progress = structure.getProgress();
                     progress.setJobId(-1);
@@ -88,7 +90,7 @@ public class ConstructionStructureCallback implements JobCallback {
                             progress.setProgressStatus(ConstructionProcess.State.COMPLETE);
                             progress.setCompletedAt(new Timestamp(new Date().getTime()));
                             progress = ss.save(progress);
-                            structureManager.putProgress(entry.getJobId(), progress);
+                            structureManager.removeProgress(jobId, progress);
                         }
                     } else {
                         if(progress.getStatus() != ConstructionProcess.State.REMOVED) {
@@ -100,8 +102,9 @@ public class ConstructionStructureCallback implements JobCallback {
                              structure.setRefundValue(0d);
                              ss.save(structure);
                              Bukkit.getPluginManager().callEvent(new StructureRemovedEvent(structure));
+                             structureManager.removeHolo(structureId);
                              structureManager.removeRegion(structure);
-                             structureManager.removeProgress(entry.getJobId(), progress);
+                             structureManager.removeProgress(jobId, progress);
                         }
                        
                         

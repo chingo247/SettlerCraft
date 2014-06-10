@@ -105,12 +105,11 @@ public class RestoreService {
             tx = session.beginTransaction();
             QStructure qct = QStructure.structure;
             JPQLQuery query = new HibernateQuery(session);
-            List<Structure> structures = query.from(qct).where(qct.progress().autoRemoved.eq(Boolean.FALSE).and(qct.progress().completedAt.after(timestamp).or(qct.progress().removedAt.after(timestamp)))).list(qct);
+            List<Structure> structures = query.from(qct).where(qct.progress().autoRemoved.eq(Boolean.FALSE).and(qct.progress.structure().worldLocation().world.eq(world)).and(qct.progress().completedAt.after(timestamp).or(qct.progress().removedAt.after(timestamp)))).list(qct);
             Iterator<Structure> it = structures.iterator();
             while (it.hasNext()) {
                 Structure structure = it.next();
                 ConstructionProcess progress = structure.getProgress();
-                System.out.println("Structure: " + structure.getId());
                 progress.setProgressStatus(ConstructionProcess.State.STOPPED);
                 session.merge(progress);
             }
@@ -137,7 +136,7 @@ public class RestoreService {
             tx = session.beginTransaction();
             QStructure qct = QStructure.structure;
             JPQLQuery query = new HibernateQuery(session);
-            List<Structure> structures = query.from(qct).where(qct.progress().createdAt.after(timestamp)).list(qct);
+            List<Structure> structures = query.from(qct).where(qct.progress().createdAt.after(timestamp).and(qct.progress.structure().worldLocation().world.eq(world))).list(qct);
             if (!structures.isEmpty()) {
                 System.out.println("[SCStructureAPI]:" + world + " has " + structures.size() + " structures that were placed after the last save");
             }

@@ -58,9 +58,14 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
+        if(! (cs instanceof Player)) {
+            cs.sendMessage("You are not a player!"); // Command is issued from server console
+            return true;
+        }
+        
         if (args.length == 0) {
             cs.sendMessage(ChatColor.RED + "Too few arguments");
-            return false;
+            return true;
         } else {
             Player player = (Player) cs;
             switch (args[0]) {
