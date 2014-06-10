@@ -37,7 +37,7 @@ import org.hibernate.annotations.CascadeType;
 public class ConstructionProcess implements Serializable {
 
     public enum State {
-        INITIALIZED,
+        WAITING,
         /**
          * Structure has been issued
          */
@@ -92,7 +92,7 @@ public class ConstructionProcess implements Serializable {
         this.id = structure.getId();
         this.createdAt = new Timestamp(new Date().getTime());
         this.isDemolishing = false;
-        this.progressStatus = State.INITIALIZED;
+        this.progressStatus = State.WAITING;
         this.structure = structure;
     }
 

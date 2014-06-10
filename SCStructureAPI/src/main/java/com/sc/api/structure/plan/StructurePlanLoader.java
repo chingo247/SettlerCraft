@@ -87,6 +87,7 @@ public class StructurePlanLoader {
             } else {
                 throw new StructurePlanException("Missing 'displayname' node");
             }
+            
 
             spv = new StructurePlan(id, displayName, schematicStructureFile);
 
@@ -105,6 +106,8 @@ public class StructurePlanLoader {
                     }
                 }
             }
+            
+            
 
             if (config.contains("hide-sign-onComplete")) {
                 spv.setHideSignOnComplete(config.getBoolean("hide-sign-onComplete"));

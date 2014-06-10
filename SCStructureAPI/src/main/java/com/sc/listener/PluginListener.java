@@ -6,9 +6,7 @@
 
 package com.sc.listener;
 
-import com.cc.plugin.api.menu.MenuManager;
 import com.sc.plugin.SettlerCraft;
-import com.sc.api.structure.StructureManager;
 import org.apache.log4j.Logger;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,8 +25,7 @@ public class PluginListener implements Listener {
     public void onReload(PluginDisableEvent disableEvent) {
          String plugin = disableEvent.getPlugin().getName();
          if(plugin.equals(SettlerCraft.getSettlerCraft().getName())) {
-             MenuManager.getInstance().clearVisitors();
-             StructureManager.getInstance().shutdown();
+             SettlerCraft.getSettlerCraft().stop();
              LOGGER.debug("StructureManager shutting down");
          }
     }

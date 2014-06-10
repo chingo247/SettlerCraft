@@ -50,6 +50,7 @@ public class StructurePlanManager {
         this.plans = Collections.synchronizedMap(new HashMap<String, StructurePlan>());
         this.schematics = Collections.synchronizedMap(new HashMap<Long, StructureSchematic>());
     }
+    
 
     public static StructurePlanManager getInstance() {
         if (instance == null) {

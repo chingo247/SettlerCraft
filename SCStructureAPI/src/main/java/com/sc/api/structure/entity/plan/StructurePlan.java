@@ -42,7 +42,7 @@ public class StructurePlan implements Serializable {
     private final String displayName;
     
     @Embedded
-    private StructureSign sign;
+    private StructureLocation sign;
     
     private String category = "default";
     private String faction = "default";
@@ -70,12 +70,14 @@ public class StructurePlan implements Serializable {
         this.planId = id;
         this.displayName = displayName;
         this.checksum = Files.getChecksum(schematic, new CRC32());
-        this.sign = new StructureSign(0, 2, 0);
+        this.sign = new StructureLocation(0, 2, 0);
         this.hideSignOnComplete = false;
     }
     
+   
+    
     public void setSignLocation(int x, int y, int z) {
-        this.sign = new StructureSign(x, y, z);
+        this.sign = new StructureLocation(x, y, z);
     }
 
     public void setHideSignOnComplete(boolean hideSignOnComplete) {

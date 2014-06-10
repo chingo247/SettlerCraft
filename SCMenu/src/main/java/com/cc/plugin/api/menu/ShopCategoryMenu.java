@@ -1,26 +1,40 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2014 Chingo
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.cc.plugin.api.menu;
 
+import com.cc.plugin.api.menu.MenuSlot.MenuSlotType;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import com.cc.plugin.api.menu.MenuSlot.MenuSlotType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  *
@@ -33,6 +47,7 @@ public class ShopCategoryMenu extends CategoryMenu {
     private final Map<String, Session> visitors;
     private boolean chooseDefaultCategory = false;
     private String defaultCategory;
+    private final HashSet<String> accepts = new HashSet<>();;
 
     /**
      * Constructor
@@ -49,7 +64,9 @@ public class ShopCategoryMenu extends CategoryMenu {
         this.visitors = Collections.synchronizedMap(new HashMap<String, Session>());
     }
 
-    
+    public boolean accepts(String type) {
+        return accepts.add(type.toLowerCase());
+    }
 
     /**
      * Checks if this shop has the specified player as a visitor (player has the shops menu opened)
@@ -101,7 +118,7 @@ public class ShopCategoryMenu extends CategoryMenu {
     public boolean hasDefaultCategory() {
         return defaultCategory != null;
     }
-    
+
     public void addItem(MenuSlot slot, String category) {
         addItem(slot, category, 0f);
     }
@@ -109,7 +126,7 @@ public class ShopCategoryMenu extends CategoryMenu {
     public void addItem(ItemStack item, String itemName, String category) {
         addItem(item, itemName, 0, category);
     }
-    
+
     public void addItem(MenuSlot slot, String category, double price) {
         Preconditions.checkArgument(slot.getType() == MenuSlotType.ITEM);
         category = getCategoryName(category);
@@ -270,12 +287,12 @@ public class ShopCategoryMenu extends CategoryMenu {
         MenuManager.getInstance().putVisitor(player);
 //        System.out.println("REMOVE THE CREDIT BONUS!!!!!");
 //        SCVaultEconomyUtil.getInstance().getEconomy().depositPlayer(player.getName(), 100000);
-        player.sendMessage(ChatColor.YELLOW + "[" + title + "]: "+ChatColor.RESET+"Hello " + ChatColor.GREEN + player.getName() + ChatColor.RESET + "!");
+        player.sendMessage(ChatColor.YELLOW + "[" + title + "]: " + ChatColor.RESET + "Hello " + ChatColor.GREEN + player.getName() + ChatColor.RESET + "!");
         double balance = SCVaultEconomyUtil.getInstance().getEconomy().getBalance(player.getName());
         if (balance > 0) {
-            player.sendMessage(ChatColor.YELLOW + "[" + title + "]: "+ChatColor.RESET+" Your balance is " + ChatColor.GOLD + balance);
+            player.sendMessage(ChatColor.YELLOW + "[" + title + "]: " + ChatColor.RESET + " Your balance is " + ChatColor.GOLD + balance);
         } else {
-            player.sendMessage(ChatColor.YELLOW + "[" + title + "]: "+ChatColor.RESET+" Your balance is " + ChatColor.RED + balance);
+            player.sendMessage(ChatColor.YELLOW + "[" + title + "]: " + ChatColor.RESET + " Your balance is " + ChatColor.RED + balance);
         }
 
         if (visitors.containsKey(player.getName())) {
@@ -384,35 +401,58 @@ public class ShopCategoryMenu extends CategoryMenu {
 
     public void onItemClicked(MenuSlot slot, Player whoClicked) {
 
-        if (!SCVaultEconomyUtil.getInstance().getEconomy().hasAccount(whoClicked.getName())) {
-            whoClicked.closeInventory();
-            playerLeave(whoClicked);
-            whoClicked.sendMessage(ChatColor.RED + "You don't have a bankaccount");
-            return;
-        }
-
         double price = slot.getPrice();
 
-        EconomyResponse er = SCVaultEconomyUtil.getInstance().getEconomy().withdrawPlayer(whoClicked.getName(), price);
-        if (er.transactionSuccess()) {
+        if (price > 0) {
+            EconomyResponse er = SCVaultEconomyUtil.getInstance().getEconomy().withdrawPlayer(whoClicked.getName(), price);
+            if (er.transactionSuccess()) {
+                whoClicked.sendMessage(ChatColor.YELLOW + "[" + getTitle() + "]: "
+                        + ChatColor.BLUE + slot.getName()
+                        + ChatColor.RESET + " has been added to your inventory");
+                double balance = er.balance;
+                if (balance > 0) {
+                    whoClicked.sendMessage("Your new balance: " + ChatColor.GOLD + balance);
+                } else {
+                    //FIXME Is this even possible?
+                    whoClicked.sendMessage("Your new balance: " + ChatColor.RED + balance);
+                }
+
+                ItemStack stack = slot.getItemStack().clone();
+                priceToValue(stack, price);
+                whoClicked.getInventory().addItem(stack);
+            } else {
+                whoClicked.sendMessage(ChatColor.YELLOW + "[" + title + "]: " + ChatColor.RED + " Transaction failed, " + er.errorMessage);
+            }
+        } else {
+            ItemStack stack = slot.getItemStack().clone();
+            priceToValue(stack, price);
+            whoClicked.getInventory().addItem(stack);
             whoClicked.sendMessage(ChatColor.YELLOW + "[" + getTitle() + "]: "
                     + ChatColor.BLUE + slot.getName()
                     + ChatColor.RESET + " has been added to your inventory");
-            double balance = er.balance;
-            if (balance > 0) {
-                whoClicked.sendMessage("Your new balance: " + ChatColor.GOLD + balance);
-            } else {
-                // Not even possible?
-                whoClicked.sendMessage("Your new balance: " + ChatColor.RED + balance);
-            }
-
-            ItemStack stack = slot.getItemStack().clone();
-            whoClicked.getInventory().addItem(stack);
-        } else {
-            whoClicked.sendMessage(ChatColor.YELLOW + "[" + title + "]: "+ ChatColor.RED + " Transaction failed, " + er.errorMessage);
         }
 
     }
+    
+    
+    private void priceToValue(final ItemStack stack, double value) {
+        
+        List<String> lore = stack.getItemMeta().getLore();
+        if (lore != null) {
+            for (int i = 0; i < lore.size(); i++) {
+                if(lore.get(i).contains("Price")){
+                    lore.set(i, "Value: " + ChatColor.GOLD + value);
+                }
+            }
+        }
+        ItemMeta meta = stack.getItemMeta();
+        meta.setLore(lore);
+        stack.setItemMeta(meta);
+
+    }
+    
+    
+    
 
     public void onActionClicked(MenuSlot slot, Player whoClicked) {
 //        System.out.println("Action!" + slot.getName());
@@ -438,6 +478,57 @@ public class ShopCategoryMenu extends CategoryMenu {
             return res;
         }
     };
+
+    public boolean sellItem(final ItemStack item, Player player) {
+        
+        if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
+            player.sendMessage(ChatColor.RED + "Vault is not enabled");
+            return false;
+        }
+
+        if (SCVaultEconomyUtil.getInstance().getEconomy() == null) {
+            player.sendMessage(ChatColor.RED + "Economy not found");
+            return false;
+        }
+
+        ItemMeta meta = item.getItemMeta();
+        List<String> lore = meta.getLore();
+        String type = null;
+        Double price = null;
+        for (String s : lore) {
+            if (s.contains("Value")) {
+                s = s.substring(s.indexOf(":") + 1);
+                s = ChatColor.stripColor(s);
+                price = Double.parseDouble(s.trim());
+            }
+
+            if (s.contains("Type")) {
+                s = s.substring(s.indexOf(":") + 1);
+                s = ChatColor.stripColor(s);
+                type = s.trim().toLowerCase();
+                System.out.println(type);
+            }
+        }
+        if (type == null || !accepts.contains(type)) {
+            player.sendMessage(ChatColor.RED + "[" + title + "]: Sorry, we don't accept your item");
+            return false;
+        }
+
+        if (price == null) {
+            player.sendMessage(ChatColor.YELLOW + "[" + title + "]: Your item doesn't have any value!");
+            return false;
+        }
+
+        Economy economy = SCVaultEconomyUtil.getInstance().getEconomy();
+        economy.depositPlayer(player.getName(), price * item.getAmount());
+        player.sendMessage(new String[]{
+            ChatColor.YELLOW + "[" + title + "]: " + ChatColor.RESET + "You have been refunded " + ChatColor.GOLD + (price * item.getAmount()),
+            ChatColor.BLUE + item.getItemMeta().getDisplayName() + ChatColor.RESET + " has been removed from your inventory"
+        });
+
+        return true;
+
+    }
 
     private class Session {
 
@@ -522,5 +613,4 @@ public class ShopCategoryMenu extends CategoryMenu {
 
     }
 
-    
 }

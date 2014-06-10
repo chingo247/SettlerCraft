@@ -18,8 +18,8 @@ package com.sc.api.structure;
 
 import com.sc.api.structure.entity.world.SimpleCardinal;
 import com.sc.util.CuboidUtil;
-import com.sc.util.WorldUtil;
 import com.sc.util.SCWorldEditUtil;
+import com.sc.util.WorldUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
@@ -91,7 +91,7 @@ public class SyncBuilder {
                 throw new AssertionError("unreachable");
         }
     }
-    
+
     /**
      * Aligns clipboard to direction and pastes it on target location
      *
@@ -106,8 +106,8 @@ public class SyncBuilder {
     }
 
     /**
-     * Aligns the clipboard to given cardinal and creates a session for infinite
-     * blocks and places a CuboidClipBoard instantly aligned to direction
+     * Aligns the clipboard to given cardinal and creates a session for infinite blocks and places a
+     * CuboidClipBoard instantly aligned to direction
      *
      * @param cuboidClipboard The cuboidclipboard
      * @param target The target location
@@ -123,8 +123,8 @@ public class SyncBuilder {
     }
 
     /**
-     * Aligns the clipboard to given cardinal and creates a session for infinite
-     * blocks and places a specified layer of a cuboid at target location,
+     * Aligns the clipboard to given cardinal and creates a session for infinite blocks and places a
+     * specified layer of a cuboid at target location,
      *
      * @param whole The whole cuboidClipBoard
      * @param layer The layer, must be between 0 and height
@@ -140,8 +140,8 @@ public class SyncBuilder {
     }
 
     /**
-     * Aligns the Clipboard to given cardinal and uses the specified session to
-     * place a layer of a cuboid at target location
+     * Aligns the Clipboard to given cardinal and uses the specified session to place a layer of a
+     * cuboid at target location
      *
      * @param editSession
      * @param whole The whole cuboidClipBoard
@@ -157,9 +157,8 @@ public class SyncBuilder {
     }
 
     /**
-     * Aligns the clipboard to given cardinal and places a cuboidClipBoard in
-     * layers. A runnable is used to fire the placement of each layer at a
-     * certain interval
+     * Aligns the clipboard to given cardinal and places a cuboidClipBoard in layers. A runnable is
+     * used to fire the placement of each layer at a certain interval
      *
      * @param editSession The editsession
      * @param whole The complete clipboard
@@ -187,10 +186,10 @@ public class SyncBuilder {
                     placeLayered(editSession, whole, all, location, delayBetweenLayers, index);
                 }
             }, delayBetweenLayers);
-            
+
         }
     }
-    
-   
+
+
 
 }

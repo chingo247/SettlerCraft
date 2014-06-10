@@ -48,10 +48,7 @@ public class SettlerCraft extends JavaPlugin {
     private static final Logger LOGGER = Logger.getLogger(SettlerCraft.class);
     private Plugin plugin;
     private static SettlerCraft instance;
-    private ShopCategoryMenu planMenu;
-    private ShopCategoryMenu planShop;
     private boolean plansLoaded;
-
     private double refundPercentage;
     private boolean menuEnabled;
     private boolean shopEnabled;
@@ -87,17 +84,11 @@ public class SettlerCraft extends JavaPlugin {
             new RestoreService().restore(); // only execute on server start, not on reload!
         }
 
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
-                setupMenu();
-                setupPlanShop();
-                Bukkit.broadcastMessage(ChatColor.GOLD + "[SettlerCraft]: " + ChatColor.RESET + "Structure plans loaded");
-                StructureManager.getInstance().init();
-            }
-        }).start();
+        loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
+        setupMenu();
+        setupPlanShop();
+        Bukkit.broadcastMessage(ChatColor.GOLD + "[SettlerCraft]: " + ChatColor.RESET + "Structure plans loaded");
+        StructureManager.getInstance().init();
 
         Bukkit.getPluginManager().registerEvents(new StructureListener(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
@@ -113,6 +104,14 @@ public class SettlerCraft extends JavaPlugin {
 
     public static SettlerCraft getSettlerCraft() {
         return (SettlerCraft) Bukkit.getPluginManager().getPlugin("SettlerCraft");
+    }
+
+    /**
+     * Stops all processes
+     */
+    public void stop() {
+        StructureManager.getInstance().shutdown();
+        MenuManager.getInstance().clearVisitors();
     }
 
     private void initConfig() {
@@ -148,7 +147,6 @@ public class SettlerCraft extends JavaPlugin {
      * Loads structures from a directory
      *
      * @param structureDirectory The directory to search
-     * @param executor The executor
      */
     public static void loadStructures(File structureDirectory) {
         File structureFolder = new File(structureDirectory.getAbsolutePath());
@@ -160,11 +158,11 @@ public class SettlerCraft extends JavaPlugin {
     }
 
     private void setupMenu() {
-        planMenu = new ShopCategoryMenu(PLAN_MENU_NAME, true, true);
+        ShopCategoryMenu planMenu = new ShopCategoryMenu(PLAN_MENU_NAME, true, true);
 
         // Add Plan Categories
         planMenu.addCategory(0, new ItemStack(Material.NETHER_STAR), "All");
-        planMenu.addCategory(1, new ItemStack(Material.WORKBENCH), "General", "Town Center");
+        planMenu.addCategory(1, new ItemStack(Material.WORKBENCH), "General");
         planMenu.addCategory(2, new ItemStack(Material.ANVIL), "Industry", "Industrial", "Industries");
         planMenu.addCategory(3, new ItemStack(Material.BED), "Residency", "Residence", "Residencial", "Houses", "House");
         planMenu.addCategory(4, new ItemStack(Material.GOLD_INGOT), "Economy", "Economical", "Shops", "Shop", "Market", "Markets");
@@ -176,6 +174,7 @@ public class SettlerCraft extends JavaPlugin {
         planMenu.addActionSlot(17, new ItemStack(Material.COAL_BLOCK), "Next");
         planMenu.setLocked(10, 11, 12, 13, 14, 15, 16);
         planMenu.setDefaultCategory("All");
+        planMenu.accepts("Plan");
         planMenu.setChooseDefaultCategory(true);
 
         Iterator<StructurePlan> pit = StructurePlanManager.getInstance().getPlans().iterator();
@@ -198,11 +197,11 @@ public class SettlerCraft extends JavaPlugin {
     }
 
     private void setupPlanShop() {
-        planShop = new ShopCategoryMenu(PLANSHOP, true, true);
+        ShopCategoryMenu planShop = new ShopCategoryMenu(PLANSHOP, true, true);
 
         // Add Plan Categories
         planShop.addCategory(0, new ItemStack(Material.NETHER_STAR), "All");
-        planShop.addCategory(1, new ItemStack(Material.WORKBENCH), "General", "Town Center");
+        planShop.addCategory(1, new ItemStack(Material.WORKBENCH), "General");
         planShop.addCategory(2, new ItemStack(Material.ANVIL), "Industry", "Industrial", "Industries");
         planShop.addCategory(3, new ItemStack(Material.BED), "Residency", "Residence", "Residencial", "Houses", "House");
         planShop.addCategory(4, new ItemStack(Material.GOLD_INGOT), "Economy", "Economical", "Shops", "Shop", "Market", "Markets");
@@ -214,6 +213,7 @@ public class SettlerCraft extends JavaPlugin {
         planShop.addActionSlot(17, new ItemStack(Material.BED_BLOCK), "Next");
         planShop.setLocked(10, 11, 12, 13, 14, 15, 16); // //Dont fill in these slots
         planShop.setDefaultCategory("All");
+        planShop.accepts("Plan");
         planShop.setChooseDefaultCategory(true);
 
         Iterator<StructurePlan> pit = StructurePlanManager.getInstance().getPlans().iterator();
@@ -227,6 +227,7 @@ public class SettlerCraft extends JavaPlugin {
             slot.setData("Size", ss.getLength() + "x" + ss.getWidth() + "x" + ss.getHeight(), ChatColor.GOLD);
             slot.setData("Type", "Plan", ChatColor.GOLD);
             slot.setData("Blocks", sizeString, ChatColor.GOLD);
+            slot.setData("Id", plan.getId(), ChatColor.GOLD);
             planShop.addItem(slot, plan.getCategory(), plan.getPrice());
         }
 

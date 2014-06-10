@@ -22,6 +22,7 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.blocks.BlockType;
 import java.util.List;
 
 /**
@@ -39,6 +40,7 @@ public class SmartClipBoard extends CuboidClipboard {
 
     private final List<Vector> vertices;
     private final CuboidClipboard parent;
+    private boolean reversed;
 
 
     public SmartClipBoard(CuboidClipboard clipboard, List<Vector> vertices) {
@@ -46,6 +48,16 @@ public class SmartClipBoard extends CuboidClipboard {
         this.vertices = vertices;
         this.parent = clipboard;
     }
+    
+    public void setReverse(boolean reversed) {
+        this.reversed = reversed;
+    }
+
+    public boolean isReversed() {
+        return reversed;
+    }
+    
+    
     
     /**
      * Constructor.
@@ -88,10 +100,22 @@ public class SmartClipBoard extends CuboidClipboard {
             }
 
             BaseBlock worldBlock = editSession.getBlock(v.add(pos));
-            if (worldBlock.getId() == b.getId() && worldBlock.getData() == b.getData()) {
-                continue;
+            if(!isReversed()) {
+                if (worldBlock.getId() == b.getId() && worldBlock.getData() == b.getData()) {
+                    continue;
+                }
+                editSession.rawSetBlock((v.add(pos)), b);
+            } else {
+                if(b.isAir()) {
+                    continue;
+                }
+                
+                if(!worldBlock.isAir() || worldBlock.getId() == b.getId() 
+                        || !BlockType.isNaturalTerrainBlock(worldBlock.getId(), worldBlock.getId())){
+                    editSession.rawSetBlock((v.add(pos)), new BaseBlock(0));
+                }
             }
-            editSession.rawSetBlock((v.add(pos)), b);
+            
         }
 
     }
