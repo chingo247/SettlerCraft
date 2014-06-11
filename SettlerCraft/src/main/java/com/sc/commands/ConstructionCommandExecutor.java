@@ -20,7 +20,7 @@ package com.sc.commands;
 import com.sc.structure.construction.ConstructionProcess;
 import com.sc.structure.construction.ConstructionProcess.State;
 import com.sc.entity.Structure;
-import com.sc.structure.StructureException;
+import com.sc.structure.exception.StructureException;
 import com.sc.structure.StructureManager;
 import com.sc.persistence.StructureService;
 import com.sc.plugin.SettlerCraft;

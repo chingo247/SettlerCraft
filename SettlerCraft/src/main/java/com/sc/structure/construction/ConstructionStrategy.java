@@ -18,8 +18,6 @@ package com.sc.structure.construction;
 
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.blocks.BlockID;
 import java.util.List;
 
 /**
@@ -35,20 +33,6 @@ public abstract class ConstructionStrategy {
 
     public abstract List<Vector> getList(CuboidClipboard cliboard, boolean noAir);
 
-    protected boolean isLava(BaseBlock b) {
-        Integer bi = b.getType();
-        if (bi == BlockID.LAVA || bi == BlockID.STATIONARY_LAVA) {
-            return true;
-        }
-        return false;
-    }
 
-    protected boolean isWater(BaseBlock b) {
-        Integer bi = b.getType();
-        if (bi == BlockID.WATER || bi == BlockID.STATIONARY_WATER) {
-            return true;
-        }
-        return false;
-    }
 
 }

@@ -16,15 +16,14 @@
  */
 package com.sc.structure.construction;
 
+import com.sc.entity.Structure;
 import com.sc.event.structure.StructureCompleteEvent;
 import com.sc.event.structure.StructureConstructionEvent;
 import com.sc.event.structure.StructureDemolisionEvent;
 import com.sc.event.structure.StructureRemovedEvent;
 import com.sc.persistence.StructureService;
 import com.sc.plugin.SettlerCraft;
-import com.sc.entity.Structure;
 import com.sc.structure.StructureManager;
-import com.sc.structure.StructurePlanManager;
 import com.sk89q.worldedit.EditSession;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -42,7 +41,6 @@ public class ConstructionStructureCallback implements JobCallback {
     private final String issuer;
     private final Long structureId;
     private final EditSession session;
-    private final int count;
     private int jobId;
     
 
@@ -50,7 +48,6 @@ public class ConstructionStructureCallback implements JobCallback {
         this.issuer = issuer;
         this.structureId = structure.getId();
         this.session = session;
-        this.count = StructurePlanManager.getInstance().getSchematic(structure.getPlan().getChecksum()).getBlocks();
     }
 
     @Override

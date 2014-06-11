@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.sc.structure;
+package com.sc.structure.exception;
 
 /**
  *

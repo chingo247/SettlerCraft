@@ -19,11 +19,11 @@ package com.sc.structure;
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.sc.entity.plan.StructurePlan;
-import com.sc.entity.plan.StructureSchematic;
 import com.sc.entity.world.SimpleCardinal;
 import com.sc.plugin.SettlerCraft;
 import com.sc.util.SCWorldEditUtil;
 import com.sc.util.WorldUtil;
+import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Location;
@@ -92,7 +92,7 @@ public class SelectionManager {
             self = WorldUtil.addOffset(self, cardinal, 0, 1, 0);
             LOGGER.info(self);
             
-            StructureSchematic schematic = pm.getSchematic(planChecksum);
+            CuboidClipboard schematic = pm.getClipBoard(planChecksum);
             
             org.bukkit.Location xLoc = WorldUtil.addOffset(self.clone(), cardinal, 2, 1, 0);
             org.bukkit.Location yLoc = WorldUtil.addOffset(self.clone(), cardinal, 0, 1, 0);

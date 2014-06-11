@@ -14,25 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.structure.async;
-
-import com.sc.structure.construction.SmartClipBoard;
-import org.primesoft.asyncworldedit.worldedit.CuboidClipboardWrapper;
+package com.sc.structure.exception;
 
 /**
- * CuboidClipBoardWrapper for vertical emplacement
  *
  * @author Chingo
  */
-public class SCCuboidClipboardWrapper extends CuboidClipboardWrapper {
-//    
+public class ConstructionException extends Exception {
 
-    public SCCuboidClipboardWrapper(String player, SmartClipBoard smartClipboard) {
-        this(player, smartClipboard, -1);
-    }
-
-    public SCCuboidClipboardWrapper(String player, SmartClipBoard smartClipboard, int jobId) {
-        super(player, smartClipboard, jobId);
+    public ConstructionException(String message) {
+        super(message);
     }
 
 }

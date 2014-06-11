@@ -21,13 +21,14 @@ import com.cc.plugin.api.menu.SCVaultEconomyUtil;
 import com.cc.plugin.api.menu.ShopCategoryMenu;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.structure.construction.ConstructionProcess.State;
+import com.sc.entity.QStructure;
 import com.sc.entity.Structure;
-import com.sc.persistence.HibernateUtil;
 import com.sc.persistence.AbstractService;
+import com.sc.persistence.HibernateUtil;
 import com.sc.persistence.StructureService;
 import com.sc.plugin.SettlerCraft;
-import com.sc.structure.QStructure;
+import com.sc.structure.StructurePlanManager;
+import com.sc.structure.construction.ConstructionProcess.State;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -74,7 +75,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         cs.sendMessage(ChatColor.RED + "Planmenu is disabled");
                         return true;
                     }
-                    if (!MenuManager.getInstance().hasMenu(SettlerCraft.PLANSHOP)) {
+                    if (!MenuManager.getInstance().hasMenu(StructurePlanManager.PLANSHOP)) {
                         cs.sendMessage(ChatColor.RED + "Planmenu is not loaded yet");
                         return true;
                     }
@@ -91,7 +92,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         cs.sendMessage(ChatColor.RED + "Planshop is disabled");
                         return true;
                     }
-                    if (!MenuManager.getInstance().hasMenu(SettlerCraft.PLANSHOP)) {
+                    if (!MenuManager.getInstance().hasMenu(StructurePlanManager.PLAN_MENU)) {
                         cs.sendMessage(ChatColor.RED + "Planshop is not loaded yet");
                         return true;
                     }
@@ -113,7 +114,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
     }
 
     private boolean openPlanMenu(Player player) {
-        ShopCategoryMenu menu = (ShopCategoryMenu) MenuManager.getInstance().getMenu(SettlerCraft.PLAN_MENU_NAME);
+        ShopCategoryMenu menu = (ShopCategoryMenu) MenuManager.getInstance().getMenu(StructurePlanManager.PLAN_MENU);
         menu.onEnter(player);
         return true;
     }
@@ -123,7 +124,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
             player.sendMessage(ChatColor.RED + " Planshop requires Vault to work");
             return false;
         }
-        ShopCategoryMenu menu = (ShopCategoryMenu) MenuManager.getInstance().getMenu(SettlerCraft.PLANSHOP);
+        ShopCategoryMenu menu = (ShopCategoryMenu) MenuManager.getInstance().getMenu(StructurePlanManager.PLANSHOP);
         menu.onEnter(player);
         return true;
     }

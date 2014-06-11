@@ -18,7 +18,7 @@ package com.sc.persistence;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.structure.QStructure;
+import com.sc.entity.QStructure;
 import com.sc.entity.Structure;
 import com.sc.structure.construction.ConstructionProcess;
 import com.sc.util.SCWorldGuardUtil;

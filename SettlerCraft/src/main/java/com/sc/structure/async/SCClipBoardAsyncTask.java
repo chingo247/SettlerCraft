@@ -16,13 +16,13 @@
  */
 package com.sc.structure.async;
 
+import com.google.common.base.Preconditions;
 import com.sc.structure.construction.JobCallback;
 import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
@@ -38,72 +38,66 @@ public abstract class SCClipBoardAsyncTask extends BukkitRunnable {
     /**
      * Command name
      */
-    private final String m_command;
+    private final String command;
     /**
      * Clipboard
      */
-    private final CuboidClipboard m_clipboard;
+    private final CuboidClipboard clipboard;
     /**
      * The player
      */
-    private final String m_player;
-    private final BlockPlacer m_blockPlacer;
-    private final SCBlockPlacerJobEntry m_job;
-    private final AsyncEditSession m_editSession;
+    private final String player;
+    private final BlockPlacer blockPlacer;
+    private final SCBlockPlacerJobEntry job;
+    private final AsyncEditSession editSession;
     private final JobCallback callback;
 
-    public SCClipBoardAsyncTask(final CuboidClipboard clipboard, final EditSession editSession,
+    public SCClipBoardAsyncTask(final CuboidClipboard clipboard, final AsyncEditSession editSession,
             final String player, final String commandName, BlockPlacer blocksPlacer,
             SCBlockPlacerJobEntry job, JobCallback callback) {
-        m_clipboard = clipboard;
-        m_player = player;
-        m_command = commandName;
-        m_blockPlacer = blocksPlacer;
-        m_job = job;
+        Preconditions.checkNotNull(editSession);
+        this.clipboard = clipboard;
+        this.player = player;
+        this.command = commandName;
+        this.blockPlacer = blocksPlacer;
+        this.job = job;
         this.callback = callback;
-        m_editSession = (editSession instanceof AsyncEditSession) ? (AsyncEditSession) editSession : null;
-        if (m_editSession != null) {
-            m_editSession.addAsync(job);
-        }
+        this.editSession = editSession;
+        this.editSession.addAsync(job);
     }
 
     @Override
     public void run() {
         try {
-            m_job.setStatus(BlockPlacerJobEntry.JobStatus.Preparing);
+            job.setStatus(BlockPlacerJobEntry.JobStatus.Preparing);
 //            if (ConfigProvider.isTalkative()) {
 //                PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
 //                        + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
 //            }
-            m_blockPlacer.addTasks(m_player, m_job);
+            blockPlacer.addTasks(player, job);
             if (callback != null) {
-                callback.onJobAdded(m_job);
+                callback.onJobAdded(job);
             }
-            task(m_clipboard);
+            task(clipboard);
 
-            if (m_editSession != null && m_editSession.isQueueEnabled()) {
-                m_editSession.flushQueue();
+            if (editSession != null && editSession.isQueueEnabled()) {
+                editSession.flushQueue();
             }
-            m_job.setStatus(BlockPlacerJobEntry.JobStatus.Waiting);
-            m_blockPlacer.addTasks(m_player, m_job);
-//            PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Clipboard operation done.");
+            job.setStatus(BlockPlacerJobEntry.JobStatus.Waiting);
+            blockPlacer.addTasks(player, job);
         } catch (MaxChangedBlocksException ex) {
-            PluginMain.say(m_player, ChatColor.RED + "Maximum block change limit.");
+            Bukkit.getPlayer(player).sendMessage(ChatColor.RED + "Maximum block change limit has been reached");
         } catch (IllegalArgumentException ex) {
             if (ex.getCause() instanceof CancelabeEditSession.SessionCanceled) {
 //                PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Job canceled.");
                 if (callback != null) {
-                    callback.onJobCanceled(m_job);
+                    callback.onJobCanceled(job);
                 }
             }
         }
 
-        m_job.taskDone();
-        
-        
-        if (m_editSession != null) {
-            m_editSession.removeAsync(m_job);
-        }
+        job.taskDone();
+        editSession.removeAsync(job);
     }
 
     /**

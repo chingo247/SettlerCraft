@@ -20,6 +20,7 @@ import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.blocks.BlockType;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ public class LayeredConstructionStrategy extends ConstructionStrategy {
 
     @Override
     public List<Vector> getList(CuboidClipboard cliboard, boolean noAir) {
-         List<Vector> placeFirst = new ArrayList<>();
+         List<Vector> place = new ArrayList<>();
 
         for (int y = 0; y < cliboard.getHeight(); y++) {
             List<Vector> placeLater = new ArrayList<>();
@@ -57,18 +58,33 @@ public class LayeredConstructionStrategy extends ConstructionStrategy {
                     } else if (BlockType.shouldPlaceFinal(b.getId())) {
                         placeFinal.add(v);
                     } else {
-                        placeFirst.add(v);
+                        place.add(v);
                     }
                 }
             }
-            placeFirst.addAll(lava);
-            placeFirst.addAll(water);
-            placeFirst.addAll(placeLater);
-            placeFirst.addAll(placeFinal);
+            place.addAll(lava);
+            place.addAll(water);
+            place.addAll(placeLater);
+            place.addAll(placeFinal);
         }
 
-        return placeFirst;
+        return place;
     }
 
+        private boolean isLava(BaseBlock b) {
+        Integer bi = b.getType();
+        if (bi == BlockID.LAVA || bi == BlockID.STATIONARY_LAVA) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isWater(BaseBlock b) {
+        Integer bi = b.getType();
+        if (bi == BlockID.WATER || bi == BlockID.STATIONARY_WATER) {
+            return true;
+        }
+        return false;
+    }
     
 }

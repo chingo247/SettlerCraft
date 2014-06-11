@@ -16,14 +16,21 @@
  */
 package com.sc.structure;
 
-import com.sc.structure.construction.SmartClipBoard;
-import com.sc.entity.Structure;
 import com.cc.plugin.api.menu.SCVaultEconomyUtil;
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.google.common.base.Preconditions;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
+import com.sc.entity.QStructure;
+import com.sc.entity.Structure;
+import com.sc.entity.plan.StructurePlan;
+import com.sc.entity.world.SimpleCardinal;
+import static com.sc.entity.world.SimpleCardinal.EAST;
+import static com.sc.entity.world.SimpleCardinal.NORTH;
+import static com.sc.entity.world.SimpleCardinal.SOUTH;
+import static com.sc.entity.world.SimpleCardinal.WEST;
+import com.sc.entity.world.WorldDimension;
 import com.sc.persistence.AbstractService;
 import com.sc.persistence.HibernateUtil;
 import com.sc.persistence.StructureService;
@@ -32,16 +39,8 @@ import com.sc.structure.async.SCAsyncCuboidClipboard;
 import com.sc.structure.construction.ConstructionEntry;
 import com.sc.structure.construction.ConstructionProcess;
 import com.sc.structure.construction.ConstructionProcess.State;
-import com.sc.structure.construction.ConstructionStrategyType;
 import com.sc.structure.construction.ConstructionStructureCallback;
-import com.sc.structure.construction.JobCallback;
-import com.sc.entity.plan.StructurePlan;
-import com.sc.entity.world.SimpleCardinal;
-import static com.sc.entity.world.SimpleCardinal.EAST;
-import static com.sc.entity.world.SimpleCardinal.NORTH;
-import static com.sc.entity.world.SimpleCardinal.SOUTH;
-import static com.sc.entity.world.SimpleCardinal.WEST;
-import com.sc.entity.world.WorldDimension;
+import com.sc.structure.exception.StructureException;
 import com.sc.structure.generator.Enclosures;
 import com.sc.structure.sync.SyncBuilder;
 import com.sc.structure.sync.SyncPlaceTask;
@@ -51,7 +50,6 @@ import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Countable;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
@@ -86,7 +84,6 @@ import org.bukkit.scheduler.BukkitTask;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
@@ -95,21 +92,21 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
  * @author Chingo
  */
 public class StructureManager {
-
-    private final Plugin plugin;
+    
     public static final int STRUCTURE_ID_INDEX = 0;
     public static final int STRUCTURE_PLAN_INDEX = 1;
     public static final int STRUCTURE_OWNER_INDEX = 2;
     public static final int STRUCTURE_STATUS_INDEX = 3;
+    private static StructureManager instance;
     private static final int ENCLOSURE_BUFFER_SIZE = 100;
-    private final org.apache.log4j.Logger LOGGER = org.apache.log4j.Logger.getLogger(StructureManager.class);
     private static final int INFINITE = -1;
+   
     private final Map<String, ConstructionEntry> playerEntries;
     private final Map<Long, Hologram> holos; // Structure id / Holo
     private final Map<Long, BukkitTask> enclosureTasks; // Structure id , BukkitTaskId
+    private final Plugin plugin;
+    private final org.apache.log4j.Logger LOGGER = org.apache.log4j.Logger.getLogger(StructureManager.class);
     private boolean initialized = false;
-
-    private static StructureManager instance;
 
     private StructureManager() {
         this.playerEntries = Collections.synchronizedMap(new HashMap<String, ConstructionEntry>());
@@ -138,20 +135,20 @@ public class StructureManager {
     }
     
     private boolean exceedsLimit(Player player) {
-        List<ConstructionProcess> processes = listProgress(player.getName());
-        if(processes == null) {
-            return false;
-        } else {
-            int blocks = 0;
-            int limit = ConfigProvider.getQueueSoftLimit();
-            for(ConstructionProcess p : processes) {
-                blocks += StructurePlanManager.getInstance().getSchematic(p.getStructure().getPlan().getChecksum()).getBlocks();
-            }
-            
-            
-            return blocks > limit;
-        }
-        
+//        List<ConstructionProcess> processes = listProgress(player.getName());
+//        if(processes == null) {
+//            return false;
+//        } else {
+//            int blocks = 0;
+//            int limit = ConfigProvider.getQueueSoftLimit();
+//            for(ConstructionProcess p : processes) {
+//                blocks += StructurePlanManager.getInstance().getSchematic(p.getStructure().getPlan().getChecksum()).getBlocks();
+//            }
+//            
+//            
+//            return blocks > limit;
+//        }
+        return false;
         
     }
 
@@ -159,7 +156,7 @@ public class StructureManager {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QStructure qs = QStructure.structure;
-        List<Structure> structures = query.from(qs).where(qs.progress.progressStatus.ne(State.REMOVED)).list(qs);
+        List<Structure> structures = query.from(qs).where(qs.progress().progressStatus.ne(State.REMOVED)).list(qs);
         session.close();
         Iterator<Structure> sit = structures.iterator();
         while (sit.hasNext()) {
@@ -288,7 +285,7 @@ public class StructureManager {
 
     public Structure construct(Player owner, StructurePlan plan, Location location, SimpleCardinal cardinal) {
         if(exceedsLimit(owner)) {
-            owner.sendMessage(ChatColor.RED + "Structure queue is full! Wait for the structure(s) to finish");
+            owner.sendMessage(ChatColor.RED + "Construction queue is full! Wait for the structure(s) to finish");
             return null;
         }
         
@@ -301,7 +298,7 @@ public class StructureManager {
         
         StructureService ss = new StructureService();
         structure = ss.save(structure);
-        structure.setStructureRegionId("sc"+structure.getId() + "" + new Date().getTime());
+        structure.setStructureRegionId("sc" + structure.getId() + "" + new Date().getTime());
         ConstructionProcess progress = new ConstructionProcess(structure);
         structure.setConstructionProgress(progress);
         ss.save(progress);
@@ -318,10 +315,26 @@ public class StructureManager {
             return null;
         }
 
+        long start = System.currentTimeMillis();
+        
+        long getStart = System.currentTimeMillis();
         final CuboidClipboard schematic = StructurePlanManager.getInstance().getClipBoard(structure.getPlan().getChecksum());
+        long getEnd = System.currentTimeMillis();
+        System.out.println("get in :" + (getEnd - getStart) + "ms");
+        
+        long alignStart = System.currentTimeMillis();
         align(schematic, structure.getLocation(), structure.getCardinal());
+        long alignEnd = System.currentTimeMillis();
+        System.out.println("aligned in :" + (alignEnd - alignStart) + "ms");
+        
+        
         final AsyncEditSession structureSession = SCAsyncWorldEditUtil.createAsyncEditSession(owner.getName(), structure.getLocation().getWorld(), INFINITE);
-        final SmartClipBoard structureClipboard = new SmartClipBoard(schematic, ConstructionStrategyType.LAYERED, false);
+        long layeredStart = System.currentTimeMillis();
+        final StructureClipboard structureClipboard = new StructureClipboard(schematic); // creates copy
+        
+        long layeredEnd = System.currentTimeMillis();
+        System.out.println("layered in :" + (layeredEnd - layeredStart) + "ms");
+        
         final SCAsyncCuboidClipboard asyncStructureClipboard = new SCAsyncCuboidClipboard(structureSession.getPlayer(), structureClipboard);
 
         final Vector pos = structure.getDimension().getMin().getPosition();
@@ -345,7 +358,8 @@ public class StructureManager {
         
         enclosureTasks.put(structure.getId(), task);
         holos.put(structure.getId(), createStructureHolo(structure));
-
+        long end = System.currentTimeMillis();
+        System.out.println("Job added in :" + (end - start) + "ms");
         
 
         
@@ -584,84 +598,84 @@ public class StructureManager {
      * @throws com.sc.api.structure.StructureException
      */
     public void continueProcess(ConstructionProcess process, boolean force) throws StructureException {
-        final Structure structure = process.getStructure();
-        State status = process.getStatus();
-        if ((status == State.BUILDING
-                || status == State.QUEUED
-                || status == State.COMPLETE) && !force) {
-            return;
-        }
-
-        if (status == State.REMOVED) {
-            throw new StructureException("Tried to continue a removed structure");
-        }
-        
-        
-        
-        stopProcess(process, true); // also stops enclosure task
-
-        StructureService ss = new StructureService();
-        process.setJobId(-1);
-        process.setHasPlacedEnclosure(false);
-        process = ss.save(process);
-
-        String owner = structure.getOwner();
-
-        LocalWorld world = structure.getLocation().getWorld();
-        final AsyncEditSession session = SCAsyncWorldEditUtil.createAsyncEditSession(owner, world, INFINITE);
-//        ConstructionStructureCallback dca = 
-
-        List<Vector> vertices;
-        final JobCallback jc;
-        CuboidClipboard schematic;
-        if (!process.isDemolishing()) {
-            schematic = StructurePlanManager.getInstance().getClipBoard(structure.getPlan().getChecksum());
-            align(schematic, structure.getDimension().getMin(), structure.getCardinal());
-            vertices = ConstructionStrategyType.LAYERED.getList(schematic, false);
-        } else {
-            schematic = StructurePlanManager.getInstance().getClipBoard(structure.getPlan().getChecksum());
-            align(schematic, structure.getDimension().getMin(), structure.getCardinal());
-            vertices = ConstructionStrategyType.LAYERED.getList(schematic, false);
-            Collections.reverse(vertices);
-        }
-        jc = new ConstructionStructureCallback(owner, structure, session);
-
-        final SmartClipBoard smartClipBoard = new SmartClipBoard(schematic, vertices);
-        if(process.isDemolishing()) {
-            smartClipBoard.setReverse(true);
-        }
-        
-        final SCAsyncCuboidClipboard asyncCuboidClipboard = new SCAsyncCuboidClipboard(structure.getOwner(), smartClipBoard);
-
-        if (structure.getProgress().isDemolishing()) {
-            try {
-                asyncCuboidClipboard.place(session, structure.getDimension().getMin().getPosition(), false, jc);
-            } catch (MaxChangedBlocksException ex) {
-                Logger.getLogger(StructureManager.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } else {
-
-            final CuboidClipboard enclosure = Enclosures.standard(schematic, BlockID.IRON_BARS);
-//            align(enclosure, structure.getLocation(), structure.getCardinal());
-            EditSession enclosureSession = new EditSession(world, INFINITE);
-            BukkitTask task = SyncBuilder.placeBuffered(enclosureSession, enclosure, structure.getDimension().getMin(), ENCLOSURE_BUFFER_SIZE, new SyncPlaceTask.PlaceCallback() {
-
-                @Override
-                public void onComplete() {
-                    try {
-                        enclosureTasks.remove(structure.getId());
-                        asyncCuboidClipboard.place(session, structure.getDimension().getMin().getPosition(), false, jc);
-                    } catch (MaxChangedBlocksException ex) {
-                        Logger.getLogger(StructureManager.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            });
-            enclosureTasks.put(structure.getId(), task);
-            
+//        final Structure structure = process.getStructure();
+//        State status = process.getStatus();
+//        if ((status == State.BUILDING
+//                || status == State.QUEUED
+//                || status == State.COMPLETE) && !force) {
+//            return;
+//        }
+//
+//        if (status == State.REMOVED) {
+//            throw new StructureException("Tried to continue a removed structure");
+//        }
+//        
+//        
+//        
+//        stopProcess(process, true); // also stops enclosure task
+//
+//        StructureService ss = new StructureService();
+//        process.setJobId(-1);
+//        process.setHasPlacedEnclosure(false);
+//        process = ss.save(process);
+//
+//        String owner = structure.getOwner();
+//
+//        LocalWorld world = structure.getLocation().getWorld();
+//        final AsyncEditSession session = SCAsyncWorldEditUtil.createAsyncEditSession(owner, world, INFINITE);
+////        ConstructionStructureCallback dca = 
+//
+//        List<Vector> vertices;
+//        final JobCallback jc;
+//        CuboidClipboard schematic;
+//        if (!process.isDemolishing()) {
+//            schematic = StructurePlanManager.getInstance().getClipBoard(structure.getPlan().getChecksum());
+//            align(schematic, structure.getDimension().getMin(), structure.getCardinal());
+//            vertices = ConstructionStrategyType.LAYERED.getList(schematic, false);
+//        } else {
+//            schematic = StructurePlanManager.getInstance().getClipBoard(structure.getPlan().getChecksum());
+//            align(schematic, structure.getDimension().getMin(), structure.getCardinal());
+//            vertices = ConstructionStrategyType.LAYERED.getList(schematic, false);
+//            Collections.reverse(vertices);
+//        }
+//        jc = new ConstructionStructureCallback(owner, structure, session);
+//
+//        final SmartClipBoard smartClipBoard = new SmartClipBoard(schematic, vertices);
+//        if(process.isDemolishing()) {
+//            smartClipBoard.setReverse(true);
+//        }
+//        
+//        final SCAsyncCuboidClipboard asyncCuboidClipboard = new SCAsyncCuboidClipboard(structure.getOwner(), smartClipBoard);
+//
+//        if (structure.getProgress().isDemolishing()) {
+//            try {
+//                asyncCuboidClipboard.place(session, structure.getDimension().getMin().getPosition(), false, jc);
+//            } catch (MaxChangedBlocksException ex) {
+//                Logger.getLogger(StructureManager.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        } else {
+//
+//            final CuboidClipboard enclosure = Enclosures.standard(schematic, BlockID.IRON_BARS);
+////            align(enclosure, structure.getLocation(), structure.getCardinal());
+//            EditSession enclosureSession = new EditSession(world, INFINITE);
+//            BukkitTask task = SyncBuilder.placeBuffered(enclosureSession, enclosure, structure.getDimension().getMin(), ENCLOSURE_BUFFER_SIZE, new SyncPlaceTask.PlaceCallback() {
+//
+//                @Override
+//                public void onComplete() {
+//                    try {
+//                        enclosureTasks.remove(structure.getId());
+//                        asyncCuboidClipboard.place(session, structure.getDimension().getMin().getPosition(), false, jc);
+//                    } catch (MaxChangedBlocksException ex) {
+//                        Logger.getLogger(StructureManager.class.getName()).log(Level.SEVERE, null, ex);
+//                    }
+//                }
+//            });
+//            enclosureTasks.put(structure.getId(), task);
+//            
             
             
            
-        }
+//        }
 
     }
 

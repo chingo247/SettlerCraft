@@ -16,14 +16,13 @@
  */
 package com.sc.structure.async;
 
+import com.sc.structure.StructureClipboard;
 import com.sc.structure.construction.JobCallback;
-import com.sc.structure.construction.SmartClipBoard;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import org.bukkit.scheduler.BukkitScheduler;
-import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PlayerWrapper;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
@@ -31,7 +30,6 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 import org.primesoft.asyncworldedit.worldedit.CuboidClipboardWrapper;
 import org.primesoft.asyncworldedit.worldedit.ProxyCuboidClipboard;
-import org.primesoft.asyncworldedit.worldedit.WorldeditOperations;
 
 /**
  * Modfied version of AsyncClipboard
@@ -70,8 +68,8 @@ public class SCAsyncCuboidClipboard extends ProxyCuboidClipboard {
      */
     private final PluginMain m_plugin;
 
-    public SCAsyncCuboidClipboard(String player, SmartClipBoard parrent) {
-        super(new SCCuboidClipboardWrapper(player, parrent));
+    public SCAsyncCuboidClipboard(String player, StructureClipboard parrent) {
+        super(new CuboidClipboardWrapper(player, parrent));
 
         m_plugin = PluginMain.getInstance();
         m_schedule = m_plugin.getServer().getScheduler();
@@ -81,33 +79,32 @@ public class SCAsyncCuboidClipboard extends ProxyCuboidClipboard {
         m_wrapper = m_plugin.getPlayerManager().getPlayer(player);
     }
 
-    public void place(final EditSession editSession, final Vector pos,
+    /**
+     * Place cuboid with a jobcallback
+     * @param editSession The asyncSession
+     * @param pos The position
+     * @param noAir whete
+     * @param callback
+     * @throws MaxChangedBlocksException 
+     */
+    public void place(final AsyncEditSession editSession,  final Vector pos,
             final boolean noAir, JobCallback callback)
             throws MaxChangedBlocksException {
-        boolean isAsync = checkAsync(WorldeditOperations.paste);
-        if (!isAsync) {
-            super.place(editSession, pos, noAir);
-            return;
-        }
 
-        final int jobId = getJobId();
+        final int jobId = m_blockPlacer.getJobId(m_player);
         final EditSession session;
         final CuboidClipboardWrapper cc = new CuboidClipboardWrapper(m_player, m_clipboard, jobId);
         final SCBlockPlacerJobEntry job;
 
-        if (editSession instanceof AsyncEditSession) {
-            AsyncEditSession aSession = (AsyncEditSession) editSession;
-            session = new CancelabeEditSession(aSession, aSession.getAsyncMask(), jobId);
-            job = new SCBlockPlacerJobEntry(m_player, (CancelabeEditSession) session, jobId, "place");
-        } else {
-            session = editSession;
-            job = new SCBlockPlacerJobEntry(m_player, jobId, "place");
-        }
+        AsyncEditSession aSession = (AsyncEditSession) editSession;
+        session = new CancelabeEditSession(aSession, aSession.getAsyncMask(), jobId);
+        job = new SCBlockPlacerJobEntry(m_player, (CancelabeEditSession) session, jobId, "place");
 
         m_blockPlacer.addJob(m_player, job);
 
+        // Modified Below
         m_schedule.runTaskAsynchronously(m_plugin, new SCClipBoardAsyncTask(cc, editSession, m_player, "place",
-                m_blockPlacer, job, callback) {
+                m_blockPlacer, job, callback) { 
                     @Override
                     public void task(CuboidClipboard cc)
                     throws MaxChangedBlocksException {
@@ -119,21 +116,5 @@ public class SCAsyncCuboidClipboard extends ProxyCuboidClipboard {
     
     
 
-    /**
-     * This function checks if async mode is enabled for specific command
-     *
-     * @param operation
-     */
-    private boolean checkAsync(WorldeditOperations operation) {
-        return ConfigProvider.isAsyncAllowed(operation) && (m_wrapper == null || m_wrapper.getMode());
-    }
 
-    /**
-     * Get next job id for current player
-     *
-     * @return Job id
-     */
-    private int getJobId() {
-        return m_blockPlacer.getJobId(m_player);
-    }
 }
