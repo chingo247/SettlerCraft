@@ -93,7 +93,7 @@ public class StructurePlan implements Serializable {
     }
     
 
-    public Long getChecksum() {
+    public Long getSchematicChecksum() {
         return checksum;
     }
 

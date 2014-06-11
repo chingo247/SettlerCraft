@@ -1,0 +1,10 @@
+
+0.95
+- Plans and schematics will load asynchronously
+- New schematics are read multithreaded
+- Fixed performance issues while selecting
+- Improved performance for placing structures
+  
+
+
+0.9 Alhpa Release

@@ -47,13 +47,11 @@ import com.sc.structure.sync.SyncPlaceTask;
 import com.sc.util.SCAsyncWorldEditUtil;
 import com.sc.util.SCWorldGuardUtil;
 import com.sk89q.worldedit.BlockVector;
-import com.sk89q.worldedit.Countable;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldguard.LocalPlayer;
@@ -142,7 +140,7 @@ public class StructureManager {
 //            int blocks = 0;
 //            int limit = ConfigProvider.getQueueSoftLimit();
 //            for(ConstructionProcess p : processes) {
-//                blocks += StructurePlanManager.getInstance().getSchematic(p.getStructure().getPlan().getChecksum()).getBlocks();
+//                blocks += StructurePlanManager.getInstance().getSchematic(p.getStructure().getPlan().getSchematicChecksum()).getBlocks();
 //            }
 //            
 //            
@@ -318,7 +316,7 @@ public class StructureManager {
         long start = System.currentTimeMillis();
         
         long getStart = System.currentTimeMillis();
-        final CuboidClipboard schematic = StructurePlanManager.getInstance().getClipBoard(structure.getPlan().getChecksum());
+        final CuboidClipboard schematic = StructurePlanManager.getInstance().getClipBoard(structure.getPlan().getSchematicChecksum());
         long getEnd = System.currentTimeMillis();
         System.out.println("get in :" + (getEnd - getStart) + "ms");
         
@@ -577,17 +575,6 @@ public class StructureManager {
         return false;
     }
 
-    public int size(StructurePlan plan, boolean noAir) {
-        CuboidClipboard clipboard = StructurePlanManager.getInstance().getClipBoard(plan.getChecksum());
-        int count = 0;
-        for (Countable<BaseBlock> b : clipboard.getBlockDistributionWithData()) {
-            if (b.getID().isAir() && noAir) {
-                continue;
-            }
-            count += b.getAmount();
-        }
-        return count;
-    }
 
     /**
      * Continues construction of a structure
@@ -595,7 +582,6 @@ public class StructureManager {
      * @param process The process to continue
      * @param force will ignore the task current state, therefore even if the task was marked
      * completed it will try to continue the task
-     * @throws com.sc.api.structure.StructureException
      */
     public void continueProcess(ConstructionProcess process, boolean force) throws StructureException {
 //        final Structure structure = process.getStructure();
@@ -629,11 +615,11 @@ public class StructureManager {
 //        final JobCallback jc;
 //        CuboidClipboard schematic;
 //        if (!process.isDemolishing()) {
-//            schematic = StructurePlanManager.getInstance().getClipBoard(structure.getPlan().getChecksum());
+//            schematic = StructurePlanManager.getInstance().getCligetSchematicChecksumcture.getPlan().getChecksum());
 //            align(schematic, structure.getDimension().getMin(), structure.getCardinal());
 //            vertices = ConstructionStrategyType.LAYERED.getList(schematic, false);
 //        } else {
-//            schematic = StructurePlanManager.getInstance().getClipBoard(structure.getPlan().getChecksum());
+//            schematic = StructurePlanManager.getInstancegetSchematicChecksumoard(structure.getPlan().getChecksum());
 //            align(schematic, structure.getDimension().getMin(), structure.getCardinal());
 //            vertices = ConstructionStrategyType.LAYERED.getList(schematic, false);
 //            Collections.reverse(vertices);

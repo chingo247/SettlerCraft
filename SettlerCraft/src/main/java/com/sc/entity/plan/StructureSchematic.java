@@ -20,6 +20,7 @@ import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.zip.CRC32;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -45,12 +46,15 @@ public class StructureSchematic implements Serializable {
     @Column(updatable = false)
     private File schematic;
 
+
+
     protected StructureSchematic() {
     }
 
     public StructureSchematic(File schematic) throws IOException {
         this.checkSum = Files.getChecksum(schematic, new CRC32());
         this.schematic = schematic;
+        
     }
 
     public Long getId() {
@@ -64,5 +68,30 @@ public class StructureSchematic implements Serializable {
     public File getSchematic() {
         return schematic;
     }
+
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 47 * hash + Objects.hashCode(this.checkSum);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final StructureSchematic other = (StructureSchematic) obj;
+        if (!Objects.equals(this.checkSum, other.checkSum)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 
 }

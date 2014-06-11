@@ -16,14 +16,13 @@
  */
 package com.sc.listener;
 
+import com.sc.entity.plan.StructurePlan;
+import com.sc.entity.world.SimpleCardinal;
+import com.sc.plugin.PermissionManager;
+import com.sc.plugin.SettlerCraft;
 import com.sc.structure.SelectionManager;
 import com.sc.structure.StructureManager;
 import com.sc.structure.StructurePlanManager;
-import com.sc.entity.plan.StructurePlan;
-import com.sc.entity.world.SimpleCardinal;
-import com.sc.entity.world.WorldDimension;
-import com.sc.plugin.PermissionManager;
-import com.sc.plugin.SettlerCraft;
 import com.sc.util.SCWorldEditUtil;
 import static com.sc.util.SCWorldEditUtil.getLocalSession;
 import com.sc.util.SCWorldGuardUtil;
@@ -35,6 +34,7 @@ import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Location;
+import com.sk89q.worldedit.Vector;
 import com.sk89q.worldguard.bukkit.WorldConfiguration;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import org.apache.log4j.Logger;
@@ -71,6 +71,7 @@ public class PlayerListener implements Listener {
         if (!StructurePlan.isStructurePlan(planStack)) {
             return;
         }
+        pie.setCancelled(true); // default action would break a block
         String structurePlanId = StructurePlan.getPlanID(planStack);
         StructurePlan plan = StructurePlanManager.getInstance().getPlan(structurePlanId);
         Player player = pie.getPlayer();
@@ -88,9 +89,6 @@ public class PlayerListener implements Listener {
             player.sendMessage(ChatColor.RED + "You don't have permission to place structures");
             return;
         }
-        
-
-        pie.setCancelled(true); // default action would break a block
 
         LocalSession session = getLocalSession(pie.getPlayer());
 
@@ -163,7 +161,6 @@ public class PlayerListener implements Listener {
             return false;
         }
         StructureManager sm = StructureManager.getInstance();
-
         org.bukkit.Location location = block.getLocation();
 
         if (action == Action.LEFT_CLICK_BLOCK) {
@@ -174,14 +171,16 @@ public class PlayerListener implements Listener {
 
             SimpleCardinal cardinal = WorldUtil.getCardinal(player);
             Location pos1 = new Location(world, new BlockWorldVector(world, x, y, z));
-            CuboidClipboard structureSchematic = StructurePlanManager.getInstance().getClipBoard(plan.getChecksum());
-            if (structureSchematic == null) {
-                player.sendMessage(ChatColor.RED + "Schematic for this plan doesnt exist");
+            
+            
+            Vector v = StructurePlanManager.getInstance().getSize(plan.getSchematicChecksum());
+            if(v == null) {
+                player.sendMessage(ChatColor.RED + "Schematic for for this plan doesn't exist! This isn't supposed to happen!"); // Should never happen!
                 return false;
             }
+            
 
-            Location pos2 = WorldUtil.getPos2(pos1, cardinal, structureSchematic);
-            WorldDimension dimension = new WorldDimension(pos1, pos2);  // Included sign
+            Location pos2 = WorldUtil.addOffset(pos1, cardinal, v.getBlockX(), v.getBlockX(), v.getBlockZ());
 
             if (slm.hasSimpleSelection(player)) {
                 if (slm.matchesSimple(player, plan, pos1)) {
@@ -222,13 +221,18 @@ public class PlayerListener implements Listener {
         int z = target.getBlockZ();
         LocalSession session = SCWorldEditUtil.getLocalSession(player);
         SimpleCardinal cardinal = WorldUtil.getCardinal(player);
-        CuboidClipboard structureSchematic = StructurePlanManager.getInstance().getClipBoard(plan.getChecksum());
+        CuboidClipboard structureSchematic = StructurePlanManager.getInstance().getClipBoard(plan.getSchematicChecksum());
         if (structureSchematic == null) {
             player.sendMessage(ChatColor.RED + "Schematic for this plan doesnt exist");
             return false;
         }
         Location location = new Location(world, new BlockVector(x, y, z));
-        Location pos2 = WorldUtil.getPos2(location, cardinal, structureSchematic);
+        Vector v = StructurePlanManager.getInstance().getSize(plan.getSchematicChecksum());
+            if(v == null) {
+                player.sendMessage(ChatColor.RED + "Schematic for for this plan doesn't exist! This isn't supposed to happen!"); // Should never happen!
+                return false;
+            }
+        Location pos2 = WorldUtil.addOffset(location, cardinal, v.getBlockX(), v.getBlockY(), v.getBlockZ());
 
         if (action == Action.LEFT_CLICK_BLOCK) {
             if (!session.getRegionSelector(world).isDefined()) {

@@ -23,7 +23,6 @@ import com.sc.entity.world.SimpleCardinal;
 import com.sc.plugin.SettlerCraft;
 import com.sc.util.SCWorldEditUtil;
 import com.sc.util.WorldUtil;
-import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Location;
@@ -65,7 +64,7 @@ public class SelectionManager {
 
         private final Vector pos1;
         private final Vector pos2;
-        private final Long planChecksum;
+        private final String planId;
 
         private final Hologram[] holos;
 
@@ -79,7 +78,7 @@ public class SelectionManager {
             this.pos1 = pos1;
             this.pos2 = pos2;
             this.holos = new Hologram[5];
-            this.planChecksum = plan.getChecksum();
+            this.planId = plan.getId();
 
             org.bukkit.Location self = new org.bukkit.Location(whoCanSee.getWorld(), pos1.getX(), pos1.getY(), pos1.getZ());
             switch(cardinal) {
@@ -92,7 +91,6 @@ public class SelectionManager {
             self = WorldUtil.addOffset(self, cardinal, 0, 1, 0);
             LOGGER.info(self);
             
-            CuboidClipboard schematic = pm.getClipBoard(planChecksum);
             
             org.bukkit.Location xLoc = WorldUtil.addOffset(self.clone(), cardinal, 2, 1, 0);
             org.bukkit.Location yLoc = WorldUtil.addOffset(self.clone(), cardinal, 0, 1, 0);
@@ -100,17 +98,18 @@ public class SelectionManager {
 
             holos[SELF] = HolographicDisplaysAPI.createIndividualHologram(plugin, self, whoCanSee, ChatColor.GREEN + "[X]");
             
+            Vector v = StructurePlanManager.getInstance().getSize(plan.getSchematicChecksum());
 
             holos[X_AXIS] = HolographicDisplaysAPI.createIndividualHologram(plugin, xLoc, whoCanSee, 
-                    ChatColor.YELLOW + "X-AXIS" + ChatColor.RESET + "+" +schematic.getWidth()
+                    ChatColor.YELLOW + "X-AXIS" + ChatColor.RESET + "+" + v.getBlockX()
             );
 
             holos[Y_AXIS] = HolographicDisplaysAPI.createIndividualHologram(plugin, yLoc,whoCanSee, 
-                    ChatColor.YELLOW + "Y-AXIS" + ChatColor.RESET + "+" +schematic.getHeight()
+                    ChatColor.YELLOW + "Y-AXIS" + ChatColor.RESET + "+" + v.getBlockY()
             );
 
             holos[Z_AXIS] = HolographicDisplaysAPI.createIndividualHologram(plugin, zLoc, whoCanSee, 
-                    ChatColor.YELLOW + "Z-AXIS" + ChatColor.RESET + "+" +schematic.getLength()
+                    ChatColor.YELLOW + "Z-AXIS" + ChatColor.RESET + "+" + v.getBlockZ()
             );
 
             org.bukkit.Location eLoc = new org.bukkit.Location(whoCanSee.getWorld(), pos2.getX(), pos2.getY(), pos2.getZ());
@@ -163,7 +162,7 @@ public class SelectionManager {
             return false;
         } else {
             CUIStructureSelection selection = cuiSelections.get(player.getUniqueId());
-            return selection.plan.getChecksum().equals(plan.getChecksum())
+            return selection.plan.getSchematicChecksum().equals(plan.getSchematicChecksum())
                     && target.equals(selection.pos1)
                     && pos2.equals(selection.pos2);
         }
@@ -189,7 +188,8 @@ public class SelectionManager {
     public boolean matchesSimple(Player player, StructurePlan plan, Location target) {
         if (simpleSelections.get(player.getUniqueId()) != null) {
             HoloStructureSelection selection = simpleSelections.get(player.getUniqueId());
-            return selection.planChecksum.equals(plan.getChecksum()) && selection.pos1.equals(target.getPosition());
+            // is it the same structure and at the same position?
+            return selection.planId.equals(plan.getId()) && selection.pos1.equals(target.getPosition());
         }
         return false;
     }

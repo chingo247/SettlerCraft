@@ -171,23 +171,6 @@ public class WorldUtil {
         return l;
     }
 
-    public static Location getPos2(Location point1, SimpleCardinal direction, CuboidClipboard clipboard) {
-        switch (direction) {
-            case EAST:
-                return point1.add(clipboard.getSize().subtract(1, 1, 1));
-            case SOUTH:
-                clipboard.rotate2D(90);
-                return point1.add(-(clipboard.getWidth() - 1), clipboard.getHeight() - 1, (clipboard.getLength() - 1));
-            case WEST:
-                clipboard.rotate2D(180);
-                return point1.add(-(clipboard.getWidth() - 1), clipboard.getHeight(), -(clipboard.getLength() - 1));
-            case NORTH:
-                clipboard.rotate2D(270);
-                return point1.add((clipboard.getWidth() - 1), clipboard.getHeight() - 1, -(clipboard.getLength() - 1));
-            default:
-                throw new AssertionError("unreachable");
-        }
-    }
 
 //    /**
 //     * Moves the given entity from the given target structure, the entity will be moved beyond the

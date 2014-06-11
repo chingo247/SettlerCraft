@@ -25,6 +25,7 @@ import com.sc.persistence.SchematicService;
 import com.sc.structure.exception.StructurePlanException;
 import com.sc.util.SettlerCraftUtil;
 import com.sk89q.worldedit.CuboidClipboard;
+import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.data.DataException;
 import com.sk89q.worldedit.schematic.SchematicFormat;
 import java.io.File;
@@ -79,6 +80,15 @@ public class StructurePlanManager {
         }
         return instance;
     }
+    
+    public Vector getSize(Long checksum) {
+        CuboidClipboard clipboard = clipboards.get(checksum);
+        if(checksum != null) {
+            return clipboard.getSize();
+        } else {
+            return null;
+        }
+    }
 
     private void setupMenus() {
         setupPlanMenu();
@@ -112,10 +122,11 @@ public class StructurePlanManager {
         while (pit.hasNext()) {
             StructurePlan plan = pit.next();
             ItemStack is = new ItemStack(Material.PAPER);
+            Vector v = StructurePlanManager.getInstance().getSize(plan.getSchematicChecksum());
             MenuSlot slot = new MenuSlot(is, plan.getDisplayName(), MenuSlot.MenuSlotType.ITEM);
-            CuboidClipboard cc = StructurePlanManager.getInstance().getClipBoard(plan.getChecksum());
-            String sizeString = SettlerCraftUtil.valueString(cc.getHeight() * cc.getLength() * cc.getWidth());
-            slot.setData("Size", cc.getLength() + "x" + cc.getWidth() + "x" + cc.getHeight(), ChatColor.GOLD);
+            int size = v.getBlockX() * v.getBlockY() * v.getBlockZ();
+            String sizeString = SettlerCraftUtil.valueString(size);
+            slot.setData("Size", v.getBlockX() + "x" + v.getBlockY()+ "x" + v.getBlockZ(), ChatColor.GOLD);
             slot.setData("Blocks", sizeString, ChatColor.GOLD);
             slot.setData("Type", "Plan", ChatColor.GOLD);
             slot.setData("Id", plan.getId(), ChatColor.GOLD);
@@ -150,10 +161,10 @@ public class StructurePlanManager {
             StructurePlan plan = pit.next();
             ItemStack is = new ItemStack(Material.PAPER);
             MenuSlot slot = new MenuSlot(is, plan.getDisplayName(), MenuSlot.MenuSlotType.ITEM);
-            CuboidClipboard cc = StructurePlanManager.getInstance().getClipBoard(plan.getChecksum());
-            int size = cc.getHeight() * cc.getLength() * cc.getWidth();
+            Vector v = StructurePlanManager.getInstance().getSize(plan.getSchematicChecksum());
+            int size = v.getBlockX() * v.getBlockY() * v.getBlockZ();
             String sizeString = SettlerCraftUtil.valueString(size);
-            slot.setData("Size", cc.getLength() + "x" + cc.getWidth() + "x" + cc.getHeight(), ChatColor.GOLD);
+            slot.setData("Size", v.getBlockX() + "x" + v.getBlockY()+ "x" + v.getBlockZ(), ChatColor.GOLD);
             slot.setData("Type", "Plan", ChatColor.GOLD);
             slot.setData("Blocks", sizeString, ChatColor.GOLD);
             slot.setData("Id", plan.getId(), ChatColor.GOLD);
@@ -216,9 +227,7 @@ public class StructurePlanManager {
                         addPlans(plan);
                     } catch (FileNotFoundException | StructurePlanException ex) {
                         LOGGER.error(ex);
-                    } catch (IOException ex) {
-                        java.util.logging.Logger.getLogger(StructurePlanManager.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    } 
                 } else if (extension.equals("schematic")) {
                     try {
                         schematics.add(new StructureSchematic(f));
@@ -239,12 +248,12 @@ public class StructurePlanManager {
         }
     }
 
-    private void addSchematics(List<StructureSchematic> schematics) {
+    private void addSchematics(List<StructureSchematic> schematics)  {
         List<StructureSchematic> absent = new LinkedList<>();
         for (StructureSchematic schematic : schematics) {
             if (!ss.exists(schematic)) {
                 absent.add(schematic);
-                ss.save(schematic);
+                schematic = ss.save(schematic);
             }
         }
         if(absent.isEmpty()) {
@@ -258,9 +267,9 @@ public class StructurePlanManager {
             executor.execute(new SchematicLoadThread(s, new SchematicCallback() {
 
                 @Override
-                public void onComplete(Long checksum, CuboidClipboard cc) {
-                    clipboards.put(checksum, cc);
-                    System.out.println("Loaded " + s.getSchematic().getName() + " " + checksum);
+                public void onComplete(StructureSchematic schematic, CuboidClipboard cc) {
+                    clipboards.put(schematic.getCheckSum(), cc);
+                    ss.save(schematic);
                     if (count.incrementAndGet() == total) {
                         setupMenus();
                         loaded = true;
@@ -375,7 +384,7 @@ public class StructurePlanManager {
         public void run() {
             try {
                 CuboidClipboard cc = SchematicFormat.MCEDIT.load(schematic.getSchematic());
-                callback.onComplete(schematic.getCheckSum(), cc);
+                callback.onComplete(schematic, cc);
             } catch (IOException | DataException ex) {
                 java.util.logging.Logger.getLogger(StructurePlanManager.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -384,7 +393,7 @@ public class StructurePlanManager {
 
     private interface SchematicCallback {
 
-        void onComplete(Long checksum, CuboidClipboard cc);
+        void onComplete(StructureSchematic schematic, CuboidClipboard cc);
     }
 
 }

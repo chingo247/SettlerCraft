@@ -17,16 +17,11 @@
 package com.sc.structure.sync;
 
 import com.sc.plugin.SettlerCraft;
-import com.sc.entity.world.SimpleCardinal;
 import com.sc.structure.sync.SyncPlaceTask.PlaceCallback;
 import com.sc.util.Ticks;
-import com.sc.util.WorldUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Location;
-import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.regions.CuboidRegion;
 import org.bukkit.scheduler.BukkitTask;
 
 /**
@@ -34,33 +29,6 @@ import org.bukkit.scheduler.BukkitTask;
  * @author Chingo
  */
 public class SyncBuilder {
-
-    /**
-     * Clears an area within the cliboards target area
-     *
-     * @param editSession The editSession
-     * @param cardinal The cardinal
-     * @param target The target location
-     * @param cuboidClipboard The cuboidClipboard
-     * @throws MaxChangedBlocksException
-     */
-    public static void clear(EditSession editSession, Location target, SimpleCardinal cardinal, CuboidClipboard cuboidClipboard) throws MaxChangedBlocksException {
-        Location pos2 = WorldUtil.getPos2(target, cardinal, cuboidClipboard);
-        clear(editSession, pos2, pos2);
-    }
-
-    /**
-     * Clears an area between two points
-     *
-     * @param editSession The editsession
-     * @param pos1 The first location
-     * @param pos2 The secondary location
-     * @throws MaxChangedBlocksException
-     */
-    public static void clear(EditSession editSession, Location pos1, Location pos2) throws MaxChangedBlocksException {
-        editSession.setBlocks(new CuboidRegion(pos1.getPosition(), pos2.getPosition()), new BaseBlock(0));
-        editSession.flushQueue();
-    }
     
     public static BukkitTask placeBuffered(final EditSession editSession, 
             final CuboidClipboard whole, final Location location, int blocksPerSecond, PlaceCallback callback) {

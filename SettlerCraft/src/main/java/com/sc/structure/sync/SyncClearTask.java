@@ -29,11 +29,11 @@ public class SyncClearTask extends BukkitRunnable {
     private final CuboidClipboard whole;
     private final ClearCallback callback;
 
-    public SyncClearTask(EditSession session, CuboidClipboard whole, Location location, int blocksPerInterval) {
+    SyncClearTask(EditSession session, CuboidClipboard whole, Location location, int blocksPerInterval) {
         this(session, whole, location, blocksPerInterval, null);
     }
 
-    public SyncClearTask(EditSession session, CuboidClipboard whole, Location location, int blocksPerInterval, ClearCallback callback) {
+    SyncClearTask(EditSession session, CuboidClipboard whole, Location location, int blocksPerInterval, ClearCallback callback) {
         this.whole = whole;
         List<Vector> vertices = ConstructionStrategyType.LAYERED.getList(whole);
         Collections.reverse(vertices);

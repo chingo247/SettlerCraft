@@ -112,7 +112,7 @@ public class Structure implements Serializable {
         this.owner = owner;
         this.cardinal = cardinal;
         this.worldLocation = new WorldLocation(target);
-        CuboidClipboard structureSchematic = StructurePlanManager.getInstance().getClipBoard(getPlan().getChecksum());
+        CuboidClipboard structureSchematic = StructurePlanManager.getInstance().getClipBoard(getPlan().getSchematicChecksum());
         this.dimension = WorldUtil.getWorldDimension(target, cardinal, structureSchematic);
         this.worldUUID = worldLocation.getWorld().getUID();
         this.refundValue = plan.getPrice();
