@@ -37,13 +37,13 @@ public class SyncPlaceTask extends BukkitRunnable {
     private final CuboidClipboard whole;
     private final PlaceCallback callback;
 
-    public SyncPlaceTask(EditSession session, CuboidClipboard whole, Location location, int blocksPerInterval) {
+    SyncPlaceTask(EditSession session, CuboidClipboard whole, Location location, int blocksPerInterval) {
         this(session, whole, location, blocksPerInterval, null);
     }
     
     
 
-    public SyncPlaceTask(EditSession session, CuboidClipboard whole, Location location, int blocksPerInterval, PlaceCallback callback) {
+    SyncPlaceTask(EditSession session, CuboidClipboard whole, Location location, int blocksPerInterval, PlaceCallback callback) {
         this.whole = whole;
         this.it = ConstructionStrategyType.LAYERED.getList(whole).iterator();
         this.editSession = session;

@@ -16,10 +16,9 @@
  */
 package com.sc.structure.sync;
 
-import com.sc.structure.sync.SyncPlaceTask;
 import com.sc.plugin.SettlerCraft;
-import com.sc.structure.sync.SyncPlaceTask.PlaceCallback;
 import com.sc.structure.entity.world.SimpleCardinal;
+import com.sc.structure.sync.SyncPlaceTask.PlaceCallback;
 import com.sc.util.Ticks;
 import com.sc.util.WorldUtil;
 import com.sk89q.worldedit.CuboidClipboard;
@@ -64,13 +63,13 @@ public class SyncBuilder {
     }
     
     public static BukkitTask placeBuffered(final EditSession editSession, 
-            final CuboidClipboard whole, int blocksPerSecond, final Location location, PlaceCallback callback) {
+            final CuboidClipboard whole, final Location location, int blocksPerSecond, PlaceCallback callback) {
          SyncPlaceTask task = new SyncPlaceTask(editSession, whole, location, blocksPerSecond, callback);
          return task.runTaskTimer(SettlerCraft.getSettlerCraft(), Ticks.ONE_SECOND, Ticks.ONE_SECOND);
     }
 
     public static BukkitTask placeLayered(final EditSession editSession, final CuboidClipboard whole, final Location location, PlaceCallback callback) {
-        return placeBuffered(editSession, whole, whole.getLength() * whole.getWidth(), location, callback);
+        return placeBuffered(editSession, whole, location, whole.getLength() * whole.getWidth() , callback);
     }
 
 

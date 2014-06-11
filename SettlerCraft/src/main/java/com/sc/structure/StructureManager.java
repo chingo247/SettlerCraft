@@ -16,23 +16,23 @@
  */
 package com.sc.structure;
 
-import com.sc.structure.sync.SyncPlaceTask;
-import com.sc.structure.construction.JobCallback;
-import com.sc.structure.construction.ConstructionStructureCallback;
-import com.sc.structure.construction.ConstructionEntry;
-import com.sc.structure.construction.ConstructionProcess;
 import com.cc.plugin.api.menu.SCVaultEconomyUtil;
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.google.common.base.Preconditions;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.persistence.HibernateUtil;
 import com.sc.persistence.AbstractService;
+import com.sc.persistence.HibernateUtil;
 import com.sc.persistence.StructureService;
 import com.sc.plugin.SettlerCraft;
-import com.sc.structure.construction.ConstructionProcess.State;
 import com.sc.structure.async.SCAsyncCuboidClipboard;
+import com.sc.structure.construction.ConstructionEntry;
+import com.sc.structure.construction.ConstructionProcess;
+import com.sc.structure.construction.ConstructionProcess.State;
+import com.sc.structure.construction.ConstructionStrategyType;
+import com.sc.structure.construction.ConstructionStructureCallback;
+import com.sc.structure.construction.JobCallback;
 import com.sc.structure.entity.plan.StructurePlan;
 import com.sc.structure.entity.world.SimpleCardinal;
 import static com.sc.structure.entity.world.SimpleCardinal.EAST;
@@ -41,10 +41,10 @@ import static com.sc.structure.entity.world.SimpleCardinal.SOUTH;
 import static com.sc.structure.entity.world.SimpleCardinal.WEST;
 import com.sc.structure.entity.world.WorldDimension;
 import com.sc.structure.generator.Enclosures;
-import com.sc.structure.construction.ConstructionStrategyType;
+import com.sc.structure.sync.SyncBuilder;
+import com.sc.structure.sync.SyncPlaceTask;
 import com.sc.util.SCAsyncWorldEditUtil;
 import com.sc.util.SCWorldGuardUtil;
-import com.sc.util.Ticks;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Countable;
 import com.sk89q.worldedit.CuboidClipboard;
@@ -328,7 +328,7 @@ public class StructureManager {
         final CuboidClipboard enclosure = Enclosures.standard(schematic, BlockID.IRON_BARS);
         final EditSession enclosureSession = new EditSession(structure.getLocation().getWorld(), INFINITE);
         
-        BukkitTask task = new SyncPlaceTask(enclosureSession, enclosure, structure.getDimension().getMin(), ENCLOSURE_BUFFER_SIZE, new SyncPlaceTask.PlaceCallback() {
+        BukkitTask task = SyncBuilder.placeBuffered(enclosureSession, enclosure, structure.getDimension().getMin(), ENCLOSURE_BUFFER_SIZE, new SyncPlaceTask.PlaceCallback() {
 
             @Override
             public void onComplete() {
@@ -339,7 +339,7 @@ public class StructureManager {
                     Logger.getLogger(StructureManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-        }).runTaskTimer(plugin, Ticks.ONE_SECOND, Ticks.ONE_SECOND);
+        });
         
         enclosureTasks.put(structure.getId(), task);
         holos.put(structure.getId(), createStructureHolo(structure));
@@ -642,7 +642,7 @@ public class StructureManager {
             final CuboidClipboard enclosure = Enclosures.standard(schematic, BlockID.IRON_BARS);
 //            align(enclosure, structure.getLocation(), structure.getCardinal());
             EditSession enclosureSession = new EditSession(world, INFINITE);
-            BukkitTask task = new SyncPlaceTask(enclosureSession, enclosure, structure.getDimension().getMin(), ENCLOSURE_BUFFER_SIZE, new SyncPlaceTask.PlaceCallback() {
+            BukkitTask task = SyncBuilder.placeBuffered(enclosureSession, enclosure, structure.getDimension().getMin(), ENCLOSURE_BUFFER_SIZE, new SyncPlaceTask.PlaceCallback() {
 
                 @Override
                 public void onComplete() {
@@ -653,7 +653,7 @@ public class StructureManager {
                         Logger.getLogger(StructureManager.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-            }).runTaskTimer(plugin, Ticks.ONE_SECOND, Ticks.ONE_SECOND);
+            });
             enclosureTasks.put(structure.getId(), task);
             
             
