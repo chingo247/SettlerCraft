@@ -17,8 +17,8 @@
 package com.sc.util;
 
 import com.google.common.base.Preconditions;
-import com.sc.api.structure.entity.world.SimpleCardinal;
-import com.sc.api.structure.entity.world.WorldDimension;
+import com.sc.structure.entity.world.SimpleCardinal;
+import com.sc.structure.entity.world.WorldDimension;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;

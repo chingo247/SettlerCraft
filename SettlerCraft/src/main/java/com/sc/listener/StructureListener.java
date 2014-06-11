@@ -6,7 +6,7 @@
 
 package com.sc.listener;
 
-import com.sc.api.structure.Structure;
+import com.sc.structure.Structure;
 import com.sc.event.structure.StructureCompleteEvent;
 import com.sc.event.structure.StructureConstructionEvent;
 import com.sc.event.structure.StructureDemolisionEvent;

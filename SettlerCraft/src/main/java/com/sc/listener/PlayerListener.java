@@ -16,12 +16,12 @@
  */
 package com.sc.listener;
 
-import com.sc.api.structure.SelectionManager;
-import com.sc.api.structure.StructureManager;
-import com.sc.api.structure.StructurePlanManager;
-import com.sc.api.structure.entity.plan.StructurePlan;
-import com.sc.api.structure.entity.world.SimpleCardinal;
-import com.sc.api.structure.entity.world.WorldDimension;
+import com.sc.structure.SelectionManager;
+import com.sc.structure.StructureManager;
+import com.sc.structure.StructurePlanManager;
+import com.sc.structure.entity.plan.StructurePlan;
+import com.sc.structure.entity.world.SimpleCardinal;
+import com.sc.structure.entity.world.WorldDimension;
 import com.sc.plugin.PermissionManager;
 import com.sc.plugin.SettlerCraft;
 import com.sc.util.SCWorldEditUtil;

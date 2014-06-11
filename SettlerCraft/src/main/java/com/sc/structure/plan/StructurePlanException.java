@@ -14,14 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.util;
+
+package com.sc.structure.plan;
 
 /**
  *
  * @author Chingo
  */
-public class CuboidUtil {
-
+public class StructurePlanException extends Exception {
     
-
+    public StructurePlanException(String message) {
+        super(message);
+    }
+    
 }

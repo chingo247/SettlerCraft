@@ -17,12 +17,12 @@ package com.sc.commands;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import com.sc.api.structure.ConstructionProcess;
-import com.sc.api.structure.ConstructionProcess.State;
-import com.sc.api.structure.Structure;
-import com.sc.api.structure.StructureException;
-import com.sc.api.structure.StructureManager;
-import com.sc.persistence.service.StructureService;
+import com.sc.structure.construction.ConstructionProcess;
+import com.sc.structure.construction.ConstructionProcess.State;
+import com.sc.structure.Structure;
+import com.sc.structure.StructureException;
+import com.sc.structure.StructureManager;
+import com.sc.persistence.StructureService;
 import com.sc.plugin.SettlerCraft;
 import java.util.List;
 import java.util.logging.Level;

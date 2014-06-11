@@ -14,14 +14,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.util;
+package com.sc.structure.construction;
+
+import com.sk89q.worldedit.CuboidClipboard;
+import com.sk89q.worldedit.Vector;
+import java.util.List;
 
 /**
  *
  * @author Chingo
  */
-public class CuboidUtil {
+public enum ConstructionStrategyType {
 
+    LAYERED(new LayeredConstructionStrategy());
+
+    private final ConstructionStrategy strategy;
+
+    private ConstructionStrategyType(ConstructionStrategy strategy) {
+        this.strategy = strategy;
+    }
+
+    public List<Vector> getList(CuboidClipboard clipboard) {
+        return strategy.getList(clipboard);
+    }
+
+    public List<Vector> getList(CuboidClipboard clipboard, boolean noAir) {
+        return strategy.getList(clipboard, noAir);
+    }
     
+   
 
 }

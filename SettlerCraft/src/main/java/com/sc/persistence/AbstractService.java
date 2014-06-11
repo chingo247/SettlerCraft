@@ -14,14 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.util;
+package com.sc.persistence;
+
+import com.mysema.query.jpa.impl.JPAQuery;
+import com.mysema.query.types.EntityPath;
+import javax.persistence.EntityManager;
 
 /**
- *
  * @author Chingo
  */
-public class CuboidUtil {
+public abstract class AbstractService {
 
-    
+    protected EntityManager entityManager;
+
+    protected JPAQuery from(EntityPath<?>... paths) {
+        return new JPAQuery(entityManager).from(paths);
+    }
+
+    protected void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
 
 }

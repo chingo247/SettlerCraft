@@ -18,13 +18,13 @@ package com.sc.commands;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.api.structure.ConstructionProcess;
-import com.sc.api.structure.QStructure;
-import com.sc.api.structure.Structure;
-import com.sc.api.structure.StructureManager;
+import com.sc.structure.construction.ConstructionProcess;
+import com.sc.structure.Structure;
+import com.sc.structure.StructureManager;
 import com.sc.persistence.HibernateUtil;
-import com.sc.persistence.service.StructureService;
+import com.sc.persistence.StructureService;
 import com.sc.plugin.SettlerCraft;
+import com.sc.structure.QStructure;
 import com.sc.util.SCWorldEditUtil;
 import com.sc.util.SCWorldGuardUtil;
 import com.sk89q.minecraft.util.commands.CommandPermissionsException;
