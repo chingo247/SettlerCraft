@@ -16,6 +16,8 @@
  */
 package com.sc.structure;
 
+import com.sc.structure.construction.SmartClipBoard;
+import com.sc.entity.Structure;
 import com.cc.plugin.api.menu.SCVaultEconomyUtil;
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
@@ -33,13 +35,13 @@ import com.sc.structure.construction.ConstructionProcess.State;
 import com.sc.structure.construction.ConstructionStrategyType;
 import com.sc.structure.construction.ConstructionStructureCallback;
 import com.sc.structure.construction.JobCallback;
-import com.sc.structure.entity.plan.StructurePlan;
-import com.sc.structure.entity.world.SimpleCardinal;
-import static com.sc.structure.entity.world.SimpleCardinal.EAST;
-import static com.sc.structure.entity.world.SimpleCardinal.NORTH;
-import static com.sc.structure.entity.world.SimpleCardinal.SOUTH;
-import static com.sc.structure.entity.world.SimpleCardinal.WEST;
-import com.sc.structure.entity.world.WorldDimension;
+import com.sc.entity.plan.StructurePlan;
+import com.sc.entity.world.SimpleCardinal;
+import static com.sc.entity.world.SimpleCardinal.EAST;
+import static com.sc.entity.world.SimpleCardinal.NORTH;
+import static com.sc.entity.world.SimpleCardinal.SOUTH;
+import static com.sc.entity.world.SimpleCardinal.WEST;
+import com.sc.entity.world.WorldDimension;
 import com.sc.structure.generator.Enclosures;
 import com.sc.structure.sync.SyncBuilder;
 import com.sc.structure.sync.SyncPlaceTask;

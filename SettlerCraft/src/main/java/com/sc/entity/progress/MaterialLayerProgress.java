@@ -1,4 +1,4 @@
-package com.sc.structure.entity.progress;
+package com.sc.entity.progress;
 
 ///*
 // * Copyright (C) 2014 Chingo

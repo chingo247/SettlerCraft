@@ -16,10 +16,10 @@
  */
 package com.sc.structure.async;
 
-import com.sc.structure.SmartClipBoard;
+import com.sc.structure.construction.SmartClipBoard;
 import com.sc.structure.sync.SyncBuilder;
 import com.sc.structure.async.SCAsyncCuboidClipboard;
-import com.sc.structure.entity.world.SimpleCardinal;
+import com.sc.entity.world.SimpleCardinal;
 import com.sc.structure.construction.ConstructionStrategyType;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;

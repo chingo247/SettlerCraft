@@ -17,7 +17,7 @@
 package com.sc.structure.sync;
 
 import com.sc.plugin.SettlerCraft;
-import com.sc.structure.entity.world.SimpleCardinal;
+import com.sc.entity.world.SimpleCardinal;
 import com.sc.structure.sync.SyncPlaceTask.PlaceCallback;
 import com.sc.util.Ticks;
 import com.sc.util.WorldUtil;

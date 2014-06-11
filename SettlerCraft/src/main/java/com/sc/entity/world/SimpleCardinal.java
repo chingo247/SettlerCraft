@@ -14,17 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package com.sc.structure;
+package com.sc.entity.world;
 
 /**
  *
  * @author Chingo
  */
-public class StructureRegionException extends StructureException {
+public enum SimpleCardinal {
 
-    public StructureRegionException(String message) {
-        super(message);
-    }
-    
+    NORTH,
+    EAST,
+    SOUTH,
+    WEST
 }

@@ -22,7 +22,7 @@ import com.sc.event.structure.StructureDemolisionEvent;
 import com.sc.event.structure.StructureRemovedEvent;
 import com.sc.persistence.StructureService;
 import com.sc.plugin.SettlerCraft;
-import com.sc.structure.Structure;
+import com.sc.entity.Structure;
 import com.sc.structure.StructureManager;
 import com.sc.structure.StructurePlanManager;
 import com.sk89q.worldedit.EditSession;

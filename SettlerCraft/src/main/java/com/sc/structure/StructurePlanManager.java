@@ -17,8 +17,8 @@
 package com.sc.structure;
 
 import com.google.common.io.Files;
-import com.sc.structure.entity.plan.StructurePlan;
-import com.sc.structure.entity.plan.StructureSchematic;
+import com.sc.entity.plan.StructurePlan;
+import com.sc.entity.plan.StructureSchematic;
 import com.sc.structure.plan.StructurePlanException;
 import com.sc.persistence.SchematicService;
 import com.sk89q.worldedit.CuboidClipboard;

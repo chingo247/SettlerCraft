@@ -18,7 +18,7 @@ package com.sc.persistence;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.structure.entity.plan.StructureSchematic;
+import com.sc.entity.plan.StructureSchematic;
 import com.sc.persistence.HibernateUtil;
 import com.sc.structure.entity.plan.QStructureSchematic;
 import java.util.logging.Level;

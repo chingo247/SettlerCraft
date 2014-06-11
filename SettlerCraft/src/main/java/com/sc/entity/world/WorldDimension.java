@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.structure.entity.world;
+package com.sc.entity.world;
 
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;

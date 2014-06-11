@@ -1,4 +1,4 @@
-package com.sc.structure.entity.schematic;
+package com.sc.entity.schematic;
 
 ///*
 // * Copyright (C) 2014 Chingo

@@ -14,15 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.structure;
+package com.sc.entity;
 
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
+import com.sc.entity.plan.StructurePlan;
+import com.sc.entity.world.SimpleCardinal;
+import com.sc.entity.world.WorldDimension;
+import com.sc.entity.world.WorldLocation;
+import com.sc.structure.StructurePlanManager;
 import com.sc.structure.construction.ConstructionProcess;
-import com.sc.structure.entity.plan.StructurePlan;
-import com.sc.structure.entity.world.SimpleCardinal;
-import com.sc.structure.entity.world.WorldDimension;
-import com.sc.structure.entity.world.WorldLocation;
 import com.sc.util.WorldUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
@@ -137,7 +138,7 @@ public class Structure implements Serializable {
         return progress;
     }
     
-    void setConstructionProgress(ConstructionProcess progress) {
+    public void setConstructionProgress(ConstructionProcess progress) {
         this.progress = progress;
     }
     

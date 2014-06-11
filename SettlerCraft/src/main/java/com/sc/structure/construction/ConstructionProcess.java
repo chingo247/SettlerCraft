@@ -18,7 +18,7 @@ package com.sc.structure.construction;
 
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
-import com.sc.structure.Structure;
+import com.sc.entity.Structure;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Date;

@@ -18,7 +18,7 @@
 package com.sc.structure.plan;
 
 import com.sc.structure.StructurePlanManager;
-import com.sc.structure.entity.plan.StructurePlan;
+import com.sc.entity.plan.StructurePlan;
 import com.sk89q.worldedit.data.DataException;
 import com.sk89q.worldedit.schematic.SchematicFormat;
 import java.io.File;

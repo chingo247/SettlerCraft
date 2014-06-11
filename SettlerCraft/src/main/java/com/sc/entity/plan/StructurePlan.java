@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.structure.entity.plan;
+package com.sc.entity.plan;
 
 import com.google.common.io.Files;
 import com.sk89q.worldedit.Vector;

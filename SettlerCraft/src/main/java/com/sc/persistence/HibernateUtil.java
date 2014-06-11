@@ -18,9 +18,9 @@
 package com.sc.persistence;
 
 import com.sc.structure.construction.ConstructionProcess;
-import com.sc.structure.Structure;
-import com.sc.structure.entity.plan.StructurePlan;
-import com.sc.structure.entity.plan.StructureSchematic;
+import com.sc.entity.Structure;
+import com.sc.entity.plan.StructurePlan;
+import com.sc.entity.plan.StructureSchematic;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;

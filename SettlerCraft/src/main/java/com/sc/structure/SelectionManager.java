@@ -18,9 +18,9 @@ package com.sc.structure;
 
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
-import com.sc.structure.entity.plan.StructurePlan;
-import com.sc.structure.entity.plan.StructureSchematic;
-import com.sc.structure.entity.world.SimpleCardinal;
+import com.sc.entity.plan.StructurePlan;
+import com.sc.entity.plan.StructureSchematic;
+import com.sc.entity.world.SimpleCardinal;
 import com.sc.plugin.SettlerCraft;
 import com.sc.util.SCWorldEditUtil;
 import com.sc.util.WorldUtil;

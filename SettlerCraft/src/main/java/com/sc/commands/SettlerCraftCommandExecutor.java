@@ -22,7 +22,7 @@ import com.cc.plugin.api.menu.ShopCategoryMenu;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.structure.construction.ConstructionProcess.State;
-import com.sc.structure.Structure;
+import com.sc.entity.Structure;
 import com.sc.persistence.HibernateUtil;
 import com.sc.persistence.AbstractService;
 import com.sc.persistence.StructureService;

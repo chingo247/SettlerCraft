@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.structure;
+package com.sc.structure.construction;
 
 import com.sc.structure.construction.ConstructionStrategyType;
 import com.sk89q.worldedit.CuboidClipboard;

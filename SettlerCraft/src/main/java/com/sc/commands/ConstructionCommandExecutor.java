@@ -19,7 +19,7 @@ package com.sc.commands;
 
 import com.sc.structure.construction.ConstructionProcess;
 import com.sc.structure.construction.ConstructionProcess.State;
-import com.sc.structure.Structure;
+import com.sc.entity.Structure;
 import com.sc.structure.StructureException;
 import com.sc.structure.StructureManager;
 import com.sc.persistence.StructureService;
