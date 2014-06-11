@@ -1,8 +1,10 @@
 name: SettlerCraft
 main: com.sc.plugin.SettlerCraft
-version: 1.0
-depend: [WorldEdit, AsyncWorldEdit, WorldGuard]
-softdepend: [HolographicDisplays, Vault]
+version: 0.9
+author: Chingo247
+description: Placing & building of  schematics / structures
+depend: [WorldEdit, AsyncWorldEdit, WorldGuard, HolographicDisplays]
+softdepend: [Vault]
 
 commands:
     sc:
@@ -16,3 +18,13 @@ commands:
         usage: /stt
 
           
+        
+                
+            
+
+                    
+                    
+
+            
+               
+               
