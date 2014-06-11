@@ -75,6 +75,11 @@ public class PlayerListener implements Listener {
         String structurePlanId = StructurePlan.getPlanID(planStack);
         StructurePlan plan = StructurePlanManager.getInstance().getPlan(structurePlanId);
         Player player = pie.getPlayer();
+        if(!PermissionManager.isAllowed(player, PermissionManager.Perms.STRUCTURE_PLACE)) {
+            player.sendMessage(ChatColor.RED + "You have no permission to place structures");
+            return;
+        }
+        
         if (plan == null) {
             if(!SettlerCraft.getSettlerCraft().isPlansLoaded()) {
                 player.sendMessage(ChatColor.RED + "This plan is invalid, please refund it or throw it away");
@@ -173,7 +178,7 @@ public class PlayerListener implements Listener {
             Location pos1 = new Location(world, new BlockWorldVector(world, x, y, z));
             
             
-            Vector v = StructurePlanManager.getInstance().getSize(plan.getSchematicChecksum());
+            Vector v = StructurePlanManager.getInstance().getClipBoard(plan.getSchematicChecksum()).getSize();
             if(v == null) {
                 player.sendMessage(ChatColor.RED + "Schematic for for this plan doesn't exist! This isn't supposed to happen!"); // Should never happen!
                 return false;
@@ -227,7 +232,7 @@ public class PlayerListener implements Listener {
             return false;
         }
         Location location = new Location(world, new BlockVector(x, y, z));
-        Vector v = StructurePlanManager.getInstance().getSize(plan.getSchematicChecksum());
+        Vector v = StructurePlanManager.getInstance().getClipBoard(plan.getSchematicChecksum()).getSize();
             if(v == null) {
                 player.sendMessage(ChatColor.RED + "Schematic for for this plan doesn't exist! This isn't supposed to happen!"); // Should never happen!
                 return false;

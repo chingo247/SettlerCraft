@@ -5,8 +5,10 @@
  */
 package com.sc.plugin;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
 
 /**
  *
@@ -18,14 +20,15 @@ public class PermissionManager {
 
     public enum Perms {
 
-        OPEN_PLAN_MENU(new Permission(prefix + "open.planmenu")),
-        OPEN_PLAN_SHOP(new Permission(prefix + "open.planshop")),
-        STRUCTURE_PLACE(new Permission(prefix + "structure.place"));
+        OPEN_PLAN_MENU(new Permission(prefix + "user.menu.planmenu", "open the plan menu to select plans for free", PermissionDefault.TRUE)),
+        OPEN_PLAN_SHOP(new Permission(prefix + "user.menu.planshop", "open the plan shop to buy plans",PermissionDefault.TRUE)),
+        STRUCTURE_PLACE(new Permission(prefix + "user.structure.place", "placing structures", PermissionDefault.TRUE));
 
         final Permission PERM;
         
         Perms(Permission perm) {
             this.PERM = perm;
+            Bukkit.getPluginManager().addPermission(perm);
         }
     }
 
@@ -39,5 +42,7 @@ public class PermissionManager {
 
         return player.hasPermission(perms.PERM);
     }
+    
+
 
 }

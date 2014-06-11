@@ -65,15 +65,6 @@ public class SchematicService extends AbstractService {
         return exists;
     }
     
-    public boolean exists(Long checksum) {
-        Session session = HibernateUtil.getSession();
-        JPQLQuery query = new HibernateQuery(session);
-        QStructureSchematic qss = QStructureSchematic.structureSchematic;
-        boolean exists = query.from(qss).where(qss.checkSum.eq(checksum)).exists();
-        session.close();
-        return exists;
-    }
-    
     public StructureSchematic getSchematic(Long checksum) {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);

@@ -26,6 +26,7 @@ import com.sc.entity.Structure;
 import com.sc.persistence.AbstractService;
 import com.sc.persistence.HibernateUtil;
 import com.sc.persistence.StructureService;
+import com.sc.plugin.PermissionManager;
 import com.sc.plugin.SettlerCraft;
 import com.sc.structure.StructurePlanManager;
 import com.sc.structure.construction.ConstructionProcess.State;
@@ -59,11 +60,11 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
-        if(! (cs instanceof Player)) {
+        if (!(cs instanceof Player)) {
             cs.sendMessage("You are not a player!"); // Command is issued from server console
             return true;
         }
-        
+
         if (args.length == 0) {
             cs.sendMessage(ChatColor.RED + "Too few arguments");
             return true;
@@ -71,6 +72,10 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
             Player player = (Player) cs;
             switch (args[0]) {
                 case "menu":
+                    if (!PermissionManager.isAllowed(player, PermissionManager.Perms.OPEN_PLAN_MENU)) {
+                        player.sendMessage(ChatColor.RED + "You have no permission to open this menu");
+                        return true;
+                    }
                     if (!settlerCraft.isPlanMenuEnabled()) {
                         cs.sendMessage(ChatColor.RED + "Planmenu is disabled");
                         return true;
@@ -88,6 +93,11 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         return true;
                     }
                 case "shop":
+                    if (!PermissionManager.isAllowed(player, PermissionManager.Perms.OPEN_PLAN_SHOP)) {
+                        player.sendMessage(ChatColor.RED + "You have no permission to open this menu");
+                        return true;
+                    }
+
                     if (!settlerCraft.isPlanShopEnabled()) {
                         cs.sendMessage(ChatColor.RED + "Planshop is disabled");
                         return true;
@@ -128,76 +138,75 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
         menu.onEnter(player);
         return true;
     }
-    
+
     private boolean listRefundables(Player player, String[] args) {
         int index;
-            Player ply = null;
-            if (args.length == 2) {
-                index = 1;
-                ply = null;
-            } else if (args.length == 3) {
-                try {
-                    index = Integer.parseInt(args[2]);
-                } catch (NumberFormatException nfe) {
-                    ply = Bukkit.getPlayer(args[2]);
-                    if (ply == null) {
-                        player.sendMessage(ChatColor.RED + "Third argument needs to be an index or player");
-                        return true;
-                    }
-                    index = 1;
-                }
-            } else if (args.length == 4) {
+        Player ply = null;
+        if (args.length == 2) {
+            index = 1;
+            ply = null;
+        } else if (args.length == 3) {
+            try {
+                index = Integer.parseInt(args[2]);
+            } catch (NumberFormatException nfe) {
                 ply = Bukkit.getPlayer(args[2]);
                 if (ply == null) {
-                    player.sendMessage(ChatColor.RED + "Player not found: " + args[1]);
+                    player.sendMessage(ChatColor.RED + "Third argument needs to be an index or player");
                     return true;
                 }
-                try {
-                    index = Integer.parseInt(args[3]);
-                } catch (NumberFormatException nfe) {
-                    player.sendMessage(ChatColor.RED + "No valid index");
-                    return true;
-                }
-            } else {
-                player.sendMessage(ChatColor.RED + "Too many arguments!");
-                return true;
+                index = 1;
             }
-            List<Structure> structures;
+        } else if (args.length == 4) {
+            ply = Bukkit.getPlayer(args[2]);
             if (ply == null) {
-                structures = getRefundable();
-            } else {
-                structures = getRefundable(ply);
-            }
-
-            if (structures.isEmpty()) {
-                player.sendMessage(ChatColor.RED + "There are currently no tasks that need to be refunded");
-                return true;
-            } else {
-                int amountOfRefundables = structures.size();
-                String[] message = new String[MAX_LINES];
-                int pages = (amountOfRefundables / (MAX_LINES - 1)) + 1;
-                if (index > pages) {
-                    player.sendMessage(ChatColor.RED + "Max page is " + pages);
-                    return true;
-                }
-
-                message[0] = "-----------(Page: " + (index) + "/" + ((amountOfRefundables / (MAX_LINES - 1)) + 1) + " Structures: " + amountOfRefundables + ")-----------";
-                int line = 1;
-                int startIndex = (index - 1) * (MAX_LINES - 1);
-                for (int i = startIndex; i < startIndex + (MAX_LINES - 1) && i < amountOfRefundables; i++) {
-                    Structure structure = structures.get(i);
-                    String value = toPriceString(structure.getRefundValue());
-                    String l = "#" + ChatColor.GOLD + structure.getId() + ChatColor.RESET + " value: " + ChatColor.GOLD + value + ChatColor.RESET + " owned by: " + ChatColor.GREEN + structure.getOwner();
-                    message[line] = l;
-                    line++;
-                }
-                player.sendMessage(message);
+                player.sendMessage(ChatColor.RED + "Player not found: " + args[1]);
                 return true;
             }
+            try {
+                index = Integer.parseInt(args[3]);
+            } catch (NumberFormatException nfe) {
+                player.sendMessage(ChatColor.RED + "No valid index");
+                return true;
+            }
+        } else {
+            player.sendMessage(ChatColor.RED + "Too many arguments!");
+            return true;
+        }
+        List<Structure> structures;
+        if (ply == null) {
+            structures = getRefundable();
+        } else {
+            structures = getRefundable(ply);
+        }
 
-        
+        if (structures.isEmpty()) {
+            player.sendMessage(ChatColor.RED + "There are currently no tasks that need to be refunded");
+            return true;
+        } else {
+            int amountOfRefundables = structures.size();
+            String[] message = new String[MAX_LINES];
+            int pages = (amountOfRefundables / (MAX_LINES - 1)) + 1;
+            if (index > pages) {
+                player.sendMessage(ChatColor.RED + "Max page is " + pages);
+                return true;
+            }
+
+            message[0] = "-----------(Page: " + (index) + "/" + ((amountOfRefundables / (MAX_LINES - 1)) + 1) + " Structures: " + amountOfRefundables + ")-----------";
+            int line = 1;
+            int startIndex = (index - 1) * (MAX_LINES - 1);
+            for (int i = startIndex; i < startIndex + (MAX_LINES - 1) && i < amountOfRefundables; i++) {
+                Structure structure = structures.get(i);
+                String value = toPriceString(structure.getRefundValue());
+                String l = "#" + ChatColor.GOLD + structure.getId() + ChatColor.RESET + " value: " + ChatColor.GOLD + value + ChatColor.RESET + " owned by: " + ChatColor.GREEN + structure.getOwner();
+                message[line] = l;
+                line++;
+            }
+            player.sendMessage(message);
+            return true;
+        }
+
     }
-    
+
     private void refund(Structure structure, boolean talk) {
         if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
             Economy economy = SCVaultEconomyUtil.getInstance().getEconomy();
@@ -215,28 +224,27 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
             }
         }
     }
-    
+
     private void refundAll(Player player) {
         List<Structure> structures = SettlerCraftCommandExecutor.this.getRefundable(player);
-        
+
         Session session = null;
         Transaction tx = null;
         try {
             session = HibernateUtil.getSession();
             tx = session.beginTransaction();
             double totalRefunded = 0;
-            for(Structure s : structures) {
+            for (Structure s : structures) {
                 refund(s, false);
                 totalRefunded += s.getRefundValue();
                 s.setRefundValue(0d);
                 session.merge(s.getProgress());
             }
-            
-            if(player.isOnline()) {
+
+            if (player.isOnline()) {
                 player.sendMessage("You have been refunded " + ChatColor.GOLD + totalRefunded);
             }
-            
-            
+
             tx.commit();
         } catch (HibernateException e) {
             try {
@@ -251,25 +259,25 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
             }
         }
     }
-    
+
     private boolean refundPlayer(Player player, String[] args) {
-        if(args.length <= 2) {
+        if (args.length <= 2) {
             player.sendMessage(ChatColor.RED + "Too few arguments!");
             return true;
         } else if (args.length == 3) {
             Player ply = Bukkit.getPlayer(args[1]);
-            if(ply == null) {
+            if (ply == null) {
                 player.sendMessage(ChatColor.RED + "Player unknown: " + args[1]);
                 return true;
             }
-            if(args[2].equalsIgnoreCase("all")) {
+            if (args[2].equalsIgnoreCase("all")) {
                 refundAll(player);
             } else {
                 Long id;
                 try {
                     id = Long.parseLong(args[2]);
-                    
-                } catch(NumberFormatException nfe) {
+
+                } catch (NumberFormatException nfe) {
                     player.sendMessage(new String[]{
                         ChatColor.RED + "Invalid use of command, should be: ",
                         ChatColor.RED + CMD + " refund " + args[1] + " [id]",
@@ -279,23 +287,23 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                 }
                 StructureService ss = new StructureService();
                 Structure structure = ss.getStructure(id);
-                if(structure == null) {
+                if (structure == null) {
                     player.sendMessage(ChatColor.RED + " Structure #" + ChatColor.GOLD + id + ChatColor.RED + " doesn't exist");
                     return true;
                 } else {
-                    if(ply.getName().equals(structure.getOwner())) {
-                    refund(structure, true); // auto talks
-                    structure.setRefundValue(0d);
-                    ss.save(structure);
+                    if (ply.getName().equals(structure.getOwner())) {
+                        refund(structure, true); // auto talks
+                        structure.setRefundValue(0d);
+                        ss.save(structure);
                     } else {
                         player.sendMessage(ChatColor.RED + ply.getName() + " is not the owner of this structure");
                     }
                 }
-                
+
             }
-            
+
         }
-        
+
         return true;
     }
 
@@ -304,28 +312,27 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
             player.sendMessage(ChatColor.RED + "You are not OP");
             return true;
         }
-        
-        if(args.length == 1) {
+
+        if (args.length == 1) {
             player.sendMessage(ChatColor.RED + "Too few arguments!");
             return true;
         } else if (args.length >= 2 && args.length < 5) {
-            if(args[1].equals("list")) {
+            if (args[1].equals("list")) {
                 return listRefundables(player, args);
             } else {
-               String ply = args[1];
-               if(Bukkit.getPlayer(ply) == null) {
-                   player.sendMessage(ChatColor.RED + "Unknown player: " + args[1]);
-                   return true;
-               } else {
-                   return refundPlayer(player, args);
-               }
+                String ply = args[1];
+                if (Bukkit.getPlayer(ply) == null) {
+                    player.sendMessage(ChatColor.RED + "Unknown player: " + args[1]);
+                    return true;
+                } else {
+                    return refundPlayer(player, args);
+                }
             }
         } else {
             player.sendMessage(ChatColor.RED + "Too many arguments");
             return true;
         }
     }
-
 
     private String toPriceString(double value) {
         if (value < 1000) {

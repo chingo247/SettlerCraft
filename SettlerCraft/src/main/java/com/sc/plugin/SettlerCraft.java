@@ -15,14 +15,18 @@ import com.sc.listener.ShopListener;
 import com.sc.listener.StructureListener;
 import com.sc.persistence.HSQLServer;
 import com.sc.persistence.RestoreService;
+import com.sc.plugin.PermissionManager.Perms;
 import com.sc.structure.StructureManager;
 import com.sc.structure.StructurePlanManager;
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Level;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -87,7 +91,34 @@ public class SettlerCraft extends JavaPlugin {
         getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
         getCommand("cst").setExecutor(new ConstructionCommandExecutor(this));
         getCommand("stt").setExecutor(new StructureCommandExecutor());
-
+        
+        printPerms();
+    }
+    
+    public void printPerms () {
+        File printedFile = new File(SettlerCraft.getSettlerCraft().getDataFolder(), "SettlerCraftPermissions.yml");
+        if(!printedFile.exists()) {
+            try {
+                printedFile.createNewFile();
+            } catch (IOException ex) {
+                java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(printedFile);
+        
+        for(Perms perm : Perms.values()) {
+            Permission p = perm.PERM;
+            config.createSection(p.getName());
+            config.set(p.getName() + ".default", p.getDefault().toString());
+            config.set(p.getName() + ".description", p.getDescription().replaceAll("'", ""));
+        }
+        
+        try {
+            config.save(printedFile);
+        } catch (IOException ex) {
+            java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }
 
     public static SettlerCraft getSettlerCraft() {

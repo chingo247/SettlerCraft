@@ -11,6 +11,11 @@ import com.sk89q.worldedit.Countable;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import org.bukkit.Material;
+import org.bukkit.material.Attachable;
+import org.bukkit.material.Crops;
+import org.bukkit.material.Directional;
+import org.bukkit.material.SimpleAttachableMaterialData;
 
 /**
  *
@@ -78,5 +83,21 @@ public class SettlerCraftUtil {
         } else {
             return String.valueOf(Math.round(value / 1E6)) + "M";
         }
+    }
+    
+     public static boolean isAttachable(Material material, byte data) {
+        return (material.getData().cast(material.getNewData(data)) instanceof Attachable);
+    }
+
+    public static boolean isDirectional(Material material, byte data) {
+        return (material.getData().cast(material.getNewData(data)) instanceof Directional);
+    }
+
+    public static boolean isSimpleAttachable(Material material, byte data) {
+        return (material.getData().cast(material.getNewData(data)) instanceof SimpleAttachableMaterialData);
+    }
+
+    public static boolean isCrops(Material material, byte data) {
+        return (material.getData().cast(material.getNewData(data)) instanceof Crops);
     }
 }

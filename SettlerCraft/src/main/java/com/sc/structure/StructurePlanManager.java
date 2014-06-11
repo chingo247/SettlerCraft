@@ -80,15 +80,6 @@ public class StructurePlanManager {
         }
         return instance;
     }
-    
-    public Vector getSize(Long checksum) {
-        CuboidClipboard clipboard = clipboards.get(checksum);
-        if(checksum != null) {
-            return clipboard.getSize();
-        } else {
-            return null;
-        }
-    }
 
     private void setupMenus() {
         setupPlanMenu();
@@ -122,7 +113,7 @@ public class StructurePlanManager {
         while (pit.hasNext()) {
             StructurePlan plan = pit.next();
             ItemStack is = new ItemStack(Material.PAPER);
-            Vector v = StructurePlanManager.getInstance().getSize(plan.getSchematicChecksum());
+            Vector v = StructurePlanManager.getInstance().getClipBoard(plan.getSchematicChecksum()).getSize();
             MenuSlot slot = new MenuSlot(is, plan.getDisplayName(), MenuSlot.MenuSlotType.ITEM);
             int size = v.getBlockX() * v.getBlockY() * v.getBlockZ();
             String sizeString = SettlerCraftUtil.valueString(size);
@@ -161,7 +152,7 @@ public class StructurePlanManager {
             StructurePlan plan = pit.next();
             ItemStack is = new ItemStack(Material.PAPER);
             MenuSlot slot = new MenuSlot(is, plan.getDisplayName(), MenuSlot.MenuSlotType.ITEM);
-            Vector v = StructurePlanManager.getInstance().getSize(plan.getSchematicChecksum());
+            Vector v = StructurePlanManager.getInstance().getClipBoard(plan.getSchematicChecksum()).getSize();
             int size = v.getBlockX() * v.getBlockY() * v.getBlockZ();
             String sizeString = SettlerCraftUtil.valueString(size);
             slot.setData("Size", v.getBlockX() + "x" + v.getBlockY()+ "x" + v.getBlockZ(), ChatColor.GOLD);
@@ -224,6 +215,7 @@ public class StructurePlanManager {
                     
                     try {
                         StructurePlan plan = readPlan(f);
+                        
                         addPlans(plan);
                     } catch (FileNotFoundException | StructurePlanException ex) {
                         LOGGER.error(ex);
@@ -253,10 +245,11 @@ public class StructurePlanManager {
         for (StructureSchematic schematic : schematics) {
             if (!ss.exists(schematic)) {
                 absent.add(schematic);
-                schematic = ss.save(schematic);
+                ss.save(schematic);
             }
         }
         if(absent.isEmpty()) {
+            System.out.println("No new schematics");
             setupMenus();
             return;
         }
@@ -269,7 +262,6 @@ public class StructurePlanManager {
                 @Override
                 public void onComplete(StructureSchematic schematic, CuboidClipboard cc) {
                     clipboards.put(schematic.getCheckSum(), cc);
-                    ss.save(schematic);
                     if (count.incrementAndGet() == total) {
                         setupMenus();
                         loaded = true;

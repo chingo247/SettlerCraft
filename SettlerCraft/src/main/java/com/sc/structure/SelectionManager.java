@@ -98,18 +98,18 @@ public class SelectionManager {
 
             holos[SELF] = HolographicDisplaysAPI.createIndividualHologram(plugin, self, whoCanSee, ChatColor.GREEN + "[X]");
             
-            Vector v = StructurePlanManager.getInstance().getSize(plan.getSchematicChecksum());
+            
 
             holos[X_AXIS] = HolographicDisplaysAPI.createIndividualHologram(plugin, xLoc, whoCanSee, 
-                    ChatColor.YELLOW + "X-AXIS" + ChatColor.RESET + "+" + v.getBlockX()
+                    ChatColor.YELLOW + "X-AXIS" + ChatColor.RESET + "+" + pos2.subtract(pos1).getBlockX()
             );
 
             holos[Y_AXIS] = HolographicDisplaysAPI.createIndividualHologram(plugin, yLoc,whoCanSee, 
-                    ChatColor.YELLOW + "Y-AXIS" + ChatColor.RESET + "+" + v.getBlockY()
+                    ChatColor.YELLOW + "Y-AXIS" + ChatColor.RESET + "+" + pos2.subtract(pos1).getBlockY()
             );
 
             holos[Z_AXIS] = HolographicDisplaysAPI.createIndividualHologram(plugin, zLoc, whoCanSee, 
-                    ChatColor.YELLOW + "Z-AXIS" + ChatColor.RESET + "+" + v.getBlockZ()
+                    ChatColor.YELLOW + "Z-AXIS" + ChatColor.RESET + "+" + pos2.subtract(pos1).getBlockZ()
             );
 
             org.bukkit.Location eLoc = new org.bukkit.Location(whoCanSee.getWorld(), pos2.getX(), pos2.getY(), pos2.getZ());
@@ -162,9 +162,8 @@ public class SelectionManager {
             return false;
         } else {
             CUIStructureSelection selection = cuiSelections.get(player.getUniqueId());
-            return selection.plan.getSchematicChecksum().equals(plan.getSchematicChecksum())
-                    && target.equals(selection.pos1)
-                    && pos2.equals(selection.pos2);
+            return selection.plan.getId().equals(plan.getId())
+                    && target.equals(selection.pos1);
         }
     }
 
