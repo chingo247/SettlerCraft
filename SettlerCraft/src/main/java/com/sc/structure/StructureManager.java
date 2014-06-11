@@ -16,7 +16,6 @@
  */
 package com.sc.structure;
 
-import com.cc.plugin.api.menu.SCVaultEconomyUtil;
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.google.common.base.Preconditions;
@@ -31,6 +30,7 @@ import static com.sc.entity.world.SimpleCardinal.NORTH;
 import static com.sc.entity.world.SimpleCardinal.SOUTH;
 import static com.sc.entity.world.SimpleCardinal.WEST;
 import com.sc.entity.world.WorldDimension;
+import com.sc.menu.SCVaultEconomyUtil;
 import com.sc.persistence.AbstractService;
 import com.sc.persistence.HibernateUtil;
 import com.sc.persistence.StructureService;
@@ -251,12 +251,7 @@ public class StructureManager {
         structure.setConstructionProgress(progress);
         ss.save(progress);
 
-        ProtectedRegion structureRegion = null;
-        try {
-            structureRegion = claimGround(owner, structure);
-        } catch (ProtectionDatabaseException ex) {
-            Logger.getLogger(StructureManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        ProtectedRegion structureRegion = claimGround(owner, structure);
         if (structureRegion == null) {
             ss.delete(structure);
             owner.sendMessage(ChatColor.RED + "Failed to claim region for structure");
@@ -348,21 +343,13 @@ public class StructureManager {
         }
     }
 
-    private ProtectedRegion claimGround(Player player, final Structure structure) throws ProtectionDatabaseException {
+    private synchronized ProtectedRegion claimGround(Player player, final Structure structure) {
         if (structure.getId() == null) {
-            throw new AssertionError("Structure id was null, save the structure instance first! (e.g. structure = structureService.save(structure)"); // Should only happen if the programmer forgets to save the instance before this
+            // Sanity check
+            throw new AssertionError("Structure id was null, save the structure instance first! (e.g. structure = structureService.save(structure)");
         }
 
-// FIXME REPLACE WITH CONSTRUCT PERMISSION
-//            if (!canClaim(player)) {
-//                player.sendMessage(ChatColor.RED + "Can't build structure, region limit reached");
-//                return null;
-//            }
-//
-//            if (!mayClaim(player)) {
-//                player.sendMessage(ChatColor.RED + "Can't build structure, no permission");
-//                return null;
-//            }
+        //
         if (overlapsRegion(player, structure.getPlan(), structure.getLocation(), structure.getCardinal())) {
             player.sendMessage(ChatColor.RED + "Structure overlaps an regions owned other players");
             return null;
@@ -384,7 +371,11 @@ public class StructureManager {
         // Set Flag
         region.getOwners().addPlayer(player.getName());
         mgr.addRegion(region);
-        mgr.save();
+        try {
+            mgr.save();
+        } catch (ProtectionDatabaseException ex) {
+            Logger.getLogger(StructureManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         return region;
 
@@ -702,5 +693,6 @@ public class StructureManager {
             holo.delete();
         }
     }
+    
 
 }

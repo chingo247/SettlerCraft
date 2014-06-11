@@ -233,11 +233,6 @@
             <artifactId>querydsl-hql</artifactId>
             <version>0.5.4</version>
         </dependency>
-        <dependency>
-            <groupId>com.cc.plugin</groupId>
-            <artifactId>SCMenu</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

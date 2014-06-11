@@ -1,7 +1,6 @@
 
 0.95
-- Plans and schematics will load asynchronously
-- New schematics are read multithreaded
+- Plans and schematics will load asynchronously (on server startup)
 - Fixed performance issues while selecting
 - Improved performance for placing structures
   

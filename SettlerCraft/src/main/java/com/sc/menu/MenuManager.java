@@ -1,4 +1,4 @@
-package com.sc.plugin.scmenu;
+package com.sc.menu;
 
 /*
  * Copyright (C) 2014 Chingo

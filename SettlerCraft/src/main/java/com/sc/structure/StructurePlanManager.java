@@ -16,11 +16,11 @@
  */
 package com.sc.structure;
 
-import com.cc.plugin.api.menu.MenuManager;
-import com.cc.plugin.api.menu.MenuSlot;
-import com.cc.plugin.api.menu.ShopCategoryMenu;
 import com.sc.entity.plan.StructurePlan;
 import com.sc.entity.plan.StructureSchematic;
+import com.sc.menu.MenuManager;
+import com.sc.menu.MenuSlot;
+import com.sc.menu.ShopCategoryMenu;
 import com.sc.persistence.SchematicService;
 import com.sc.structure.exception.StructurePlanException;
 import com.sc.util.SettlerCraftUtil;

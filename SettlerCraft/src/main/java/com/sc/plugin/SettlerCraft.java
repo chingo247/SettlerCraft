@@ -5,7 +5,6 @@
  */
 package com.sc.plugin;
 
-import com.cc.plugin.api.menu.MenuManager;
 import com.sc.commands.ConstructionCommandExecutor;
 import com.sc.commands.SettlerCraftCommandExecutor;
 import com.sc.commands.StructureCommandExecutor;
@@ -13,6 +12,7 @@ import com.sc.listener.PlayerListener;
 import com.sc.listener.PluginListener;
 import com.sc.listener.ShopListener;
 import com.sc.listener.StructureListener;
+import com.sc.menu.MenuManager;
 import com.sc.persistence.HSQLServer;
 import com.sc.persistence.RestoreService;
 import com.sc.plugin.PermissionManager.Perms;

@@ -5,10 +5,10 @@
  */
 package com.sc.listener;
 
-import com.cc.plugin.api.menu.Menu;
-import com.cc.plugin.api.menu.MenuManager;
-import com.cc.plugin.api.menu.MenuSlot;
-import com.cc.plugin.api.menu.ShopCategoryMenu;
+import com.sc.menu.Menu;
+import com.sc.menu.MenuManager;
+import com.sc.menu.MenuSlot;
+import com.sc.menu.ShopCategoryMenu;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

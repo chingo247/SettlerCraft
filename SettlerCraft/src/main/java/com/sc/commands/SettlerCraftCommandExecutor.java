@@ -16,13 +16,13 @@
  */
 package com.sc.commands;
 
-import com.cc.plugin.api.menu.MenuManager;
-import com.cc.plugin.api.menu.SCVaultEconomyUtil;
-import com.cc.plugin.api.menu.ShopCategoryMenu;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.entity.QStructure;
 import com.sc.entity.Structure;
+import com.sc.menu.MenuManager;
+import com.sc.menu.SCVaultEconomyUtil;
+import com.sc.menu.ShopCategoryMenu;
 import com.sc.persistence.AbstractService;
 import com.sc.persistence.HibernateUtil;
 import com.sc.persistence.StructureService;

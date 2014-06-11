@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.plugin.scmenu;
+package com.sc.menu;
 
-import com.sc.plugin.scmenu.MenuSlot.MenuSlotType;
+import com.sc.menu.MenuSlot.MenuSlotType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
