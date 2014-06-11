@@ -94,8 +94,8 @@ public class SettlerCraft extends JavaPlugin {
         
         printPerms();
     }
-    
-    public void printPerms () {
+
+    private void printPerms () {
         File printedFile = new File(SettlerCraft.getSettlerCraft().getDataFolder(), "SettlerCraftPermissions.yml");
         if(!printedFile.exists()) {
             try {
@@ -110,7 +110,7 @@ public class SettlerCraft extends JavaPlugin {
             Permission p = perm.PERM;
             config.createSection(p.getName());
             config.set(p.getName() + ".default", p.getDefault().toString());
-            config.set(p.getName() + ".description", p.getDescription().replaceAll("'", ""));
+            config.set(p.getName() + ".description", p.getDescription());
         }
         
         try {

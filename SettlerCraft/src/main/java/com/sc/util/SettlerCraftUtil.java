@@ -36,8 +36,26 @@ public class SettlerCraftUtil {
         }
         return y;
     }
+    
+    public static int getBlocks(CuboidClipboard clipboard, int x, int z) {
+        int height = clipboard.getHeight();
 
-    public static int[][] getHeightMap(CuboidClipboard clipboard) {
+        int count = 0;
+        for(int y = height - 1; y > 0; y--) {
+            BaseBlock b = clipboard.getBlock(new BlockVector(x, y, z));
+            if(b == null || b.isAir()) {
+                continue;
+            }
+            count++;
+        }
+        
+        return count;
+    }
+
+
+
+    
+     public static int[][] getHeightMap(CuboidClipboard clipboard) {
         int[][] hMap = new int[clipboard.getWidth()][clipboard.getLength()];
         for (int x = 0; x < clipboard.getWidth(); x++) {
             for (int z = 0; z < clipboard.getLength(); z++) {

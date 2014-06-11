@@ -22,27 +22,36 @@ import java.util.Queue;
  */
 public class StructureClipboard extends CuboidClipboard {
 
-    private static final int PRIORITY_FIRST = 3;
-    private static final int PRIORITY_LIQUID = 2;
-    private static final int PRIORITY_LATER = 1;
-    private static final int PRIORITY_FINAL = 0;
-    private boolean reversed = false;
+    private static final int PRIORITY_FIRST = 4;
+    private static final int PRIORITY_LIQUID = 3;
+    private static final int PRIORITY_LATER = 2;
+    private static final int PRIORITY_FINAL = 1;
+    private boolean demolishing = false;
 
     public StructureClipboard(CuboidClipboard parrent) {
         super(parrent.getSize());
         this.setOffset(parrent.getOffset());
         this.setOrigin(parrent.getOrigin());
-
+        
+       
         for (int x = 0; x < getWidth(); x++) {
-            for (int y = 0; y < getHeight(); y++) {
-                for (int z = 0; z < getLength(); z++) {
+            for (int z = 0; z < getLength(); z++) {
+                for (int y = 0; y < getHeight(); y++) {
                     BlockVector pt = new BlockVector(x, y, z);
                     BaseBlock block = parrent.getBlock(pt);
                     this.setBlock(pt, block);
                 }
+                
             }
         }
     }
+    
+    public void setDemolishing(boolean demolishing) {
+        this.demolishing = demolishing;
+    }
+    
+    
+
 
     /**
      * Place blocks that
@@ -55,6 +64,8 @@ public class StructureClipboard extends CuboidClipboard {
     @Override
     public void place(EditSession editSession, Vector pos, boolean noAir) throws MaxChangedBlocksException {
 
+        
+        
         for (int y = 0; y < getHeight(); y++) {
             Queue<StructureBlock> blocks = new PriorityQueue<>();
             for (int x = 0; x < getWidth(); x++) {
@@ -65,7 +76,15 @@ public class StructureClipboard extends CuboidClipboard {
                     if (b == null || (noAir && b.isAir())) {
                         continue;
                     }
-
+                    
+                    BaseBlock worldBlock = editSession.getBlock(v.add(pos));
+                    if(worldBlock.getId() == b.getId() && worldBlock.getData() == b.getData()) {
+                        continue;
+                    }
+                    
+                   
+                    
+                    
                     if (isLava(b) || isWater(b) || BlockType.shouldPlaceLast(b.getId()) || BlockType.shouldPlaceFinal(b.getId())) {
                         blocks.add(new StructureBlock(v, b));
                     } else {
@@ -88,6 +107,8 @@ public class StructureClipboard extends CuboidClipboard {
              session.rawSetBlock(blockPos.add(pos), b);
 //        }
     }
+    
+    
 
     private boolean isLava(BaseBlock b) {
         Integer bi = b.getType();
@@ -118,6 +139,8 @@ public class StructureClipboard extends CuboidClipboard {
         @Override
         public int compareTo(StructureBlock o) {
 
+            
+            
             return this.getPriority().compareTo(o.getPriority());
         }
 
