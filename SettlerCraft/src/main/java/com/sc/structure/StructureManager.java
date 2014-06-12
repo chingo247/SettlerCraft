@@ -233,31 +233,42 @@ public class StructureManager {
     }
 
     public Structure construct(final Player owner, final StructurePlan plan, final Location location, final SimpleCardinal cardinal) {
+       
+        
         if (exceedsLimit(owner)) {
             owner.sendMessage(ChatColor.RED + "Construction queue is full! Wait for the structure(s) to finish");
             return null;
         }
 
+        long os = System.currentTimeMillis();
         Structure structure = new Structure(owner.getName(), location, cardinal, plan);
         if (overlaps(structure.getPlan(), structure.getLocation(), structure.getCardinal())) {
             owner.sendMessage(ChatColor.RED + " Structure overlaps another structure");
             return null;
         }
+        long oe = System.currentTimeMillis();
+        
 
+        long sss = System.currentTimeMillis();
         StructureService ss = new StructureService();
         structure = ss.save(structure);
         structure.setStructureRegionId("sc" + structure.getId() + "" + new Date().getTime());
         ConstructionProcess progress = new ConstructionProcess(structure);
         structure.setConstructionProgress(progress);
         ss.save(progress);
+        long sse = System.currentTimeMillis();
 
+        long sr = System.currentTimeMillis();
         ProtectedRegion structureRegion = claimGround(owner, structure);
         if (structureRegion == null) {
             ss.delete(structure);
             owner.sendMessage(ChatColor.RED + "Failed to claim region for structure");
             return null;
         }
+        long se = System.currentTimeMillis();
         
+        
+        long sts= System.currentTimeMillis();
         final Structure fStructure = structure;
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, new BukkitRunnable() {
@@ -295,6 +306,13 @@ public class StructureManager {
                 holos.put(fStructure.getId(), createStructureHolo(fStructure));
             }
         });
+        long ste = System.currentTimeMillis();
+        
+        System.out.println("Structure overlaps check in " + (oe - os) + "ms");
+        System.out.println("Structure saved in " + (sse - sss) + "ms");
+        System.out.println("Region claimed and saved in " + (se - sr) + "ms");
+        System.out.println("Task scheduled in claimed and saved in " + (ste - sts) + "ms");
+        
 
         return structure;
     }

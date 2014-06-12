@@ -33,7 +33,7 @@ public class SyncBuilder {
     public static BukkitTask placeBuffered(final EditSession editSession, 
             final CuboidClipboard whole, final Location location, int blocksPerSecond, PlaceCallback callback) {
          SyncPlaceTask task = new SyncPlaceTask(editSession, whole, location, blocksPerSecond, callback);
-         return task.runTaskTimer(SettlerCraft.getSettlerCraft(), Ticks.ONE_SECOND, Ticks.ONE_SECOND);
+         return task.runTaskTimerAsynchronously(SettlerCraft.getSettlerCraft(), Ticks.ONE_SECOND, Ticks.ONE_SECOND);
     }
 
     public static BukkitTask placeLayered(final EditSession editSession, final CuboidClipboard whole, final Location location, PlaceCallback callback) {

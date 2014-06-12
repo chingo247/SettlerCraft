@@ -5,6 +5,7 @@
  */
 package com.sc.structure;
 
+import com.sc.StructureBlock;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
@@ -22,10 +23,7 @@ import java.util.Queue;
  */
 public class StructureClipboard extends CuboidClipboard {
 
-    private static final int PRIORITY_FIRST = 4;
-    private static final int PRIORITY_LIQUID = 3;
-    private static final int PRIORITY_LATER = 2;
-    private static final int PRIORITY_FINAL = 1;
+
     private boolean demolishing = false;
 
     public StructureClipboard(CuboidClipboard parrent) {
@@ -94,7 +92,7 @@ public class StructureClipboard extends CuboidClipboard {
             }
             while (blocks.peek() != null) {
                 StructureBlock b = blocks.poll();
-                buildBlock(editSession, b.b, b.p, pos, noAir);
+                buildBlock(editSession, b.getBlock(), b.getPosition(), pos, noAir);
             }
 
         }
@@ -126,41 +124,6 @@ public class StructureClipboard extends CuboidClipboard {
         return false;
     }
 
-    private class StructureBlock implements Comparable<StructureBlock> {
-
-        private final Vector p;
-        private final BaseBlock b;
-
-        StructureBlock(Vector p, BaseBlock b) {
-            this.p = p;
-            this.b = b;
-        }
-
-        @Override
-        public int compareTo(StructureBlock o) {
-
-            
-            
-            return this.getPriority().compareTo(o.getPriority());
-        }
-
-        private Integer getPriority() {
-            if (isWater(b) || isLava(b)) {
-                return PRIORITY_LIQUID; // no 0
-            }
-
-            if (BlockType.shouldPlaceLast(b.getId())) {
-                return PRIORITY_LATER;
-            }
-
-            if (BlockType.shouldPlaceFinal(b.getId())) {
-                return PRIORITY_FINAL;
-            }
-
-            return PRIORITY_FIRST;
-
-        }
-
-    }
+    
 
 }

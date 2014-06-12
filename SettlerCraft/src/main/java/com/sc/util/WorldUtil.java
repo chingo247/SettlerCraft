@@ -84,26 +84,9 @@ public class WorldUtil {
         }
     }
 
-    private static com.sk89q.worldedit.Location calculatePoint2(com.sk89q.worldedit.Location point1, SimpleCardinal direction, CuboidClipboard clipboard) {
-        switch (direction) {
-            case EAST:
-                return point1.add(clipboard.getSize().subtract(1, 1, 1));
-            case SOUTH:
-                clipboard.rotate2D(90);
-                return point1.add(-(clipboard.getWidth() - 1), clipboard.getHeight() - 1, (clipboard.getLength() - 1));
-            case WEST:
-                clipboard.rotate2D(180);
-                return point1.add(-(clipboard.getWidth() - 1), clipboard.getHeight(), -(clipboard.getLength() - 1));
-            case NORTH:
-                clipboard.rotate2D(270);
-                return point1.add((clipboard.getWidth() - 1), clipboard.getHeight() - 1, -(clipboard.getLength() - 1));
-            default:
-                throw new AssertionError("unreachable");
-        }
-    }
-
     public static WorldDimension getWorldDimension(com.sk89q.worldedit.Location location, SimpleCardinal direction, CuboidClipboard clipboard) {
-        return new WorldDimension(location, calculatePoint2(location, direction, clipboard));
+        Location pos2  = addOffset(location, direction, clipboard.getWidth(), clipboard.getHeight(), clipboard.getLength());
+        return new WorldDimension(location, pos2);
     }
 
     /**

@@ -16,12 +16,10 @@
  */
 package com.sc.structure.sync;
 
-import com.sc.structure.construction.ConstructionStrategyType;
+import com.sc.StructureBlock;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Location;
-import com.sk89q.worldedit.Vector;
-import java.util.Iterator;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
@@ -30,22 +28,20 @@ import org.bukkit.scheduler.BukkitRunnable;
  */
 public class SyncPlaceTask extends BukkitRunnable {
 
-    private final Iterator<Vector> it;
     private final int blocksPerSecond;
     private final Location location;
     private final EditSession editSession;
     private final CuboidClipboard whole;
     private final PlaceCallback callback;
+    private final StructureBlockQueue queue;
 
     SyncPlaceTask(EditSession session, CuboidClipboard whole, Location location, int blocksPerInterval) {
         this(session, whole, location, blocksPerInterval, null);
     }
-    
-    
 
     SyncPlaceTask(EditSession session, CuboidClipboard whole, Location location, int blocksPerInterval, PlaceCallback callback) {
         this.whole = whole;
-        this.it = ConstructionStrategyType.LAYERED.getList(whole).iterator();
+        this.queue = new StructureBlockQueue(whole);
         this.editSession = session;
         this.blocksPerSecond = blocksPerInterval;
         this.location = location;
@@ -55,9 +51,9 @@ public class SyncPlaceTask extends BukkitRunnable {
     @Override
     public void run() {
         for (int i = 0; i < blocksPerSecond; i++) {
-            if (it.hasNext()) {
-                Vector v = it.next();
-                editSession.rawSetBlock(location.getPosition().add(v), whole.getBlock(v));
+            if(queue.peek() != null) {
+                StructureBlock b = queue.poll();
+                editSession.rawSetBlock(location.getPosition().add(b.getPosition()), b.getBlock());
             } else {
                 if(callback != null) {
                     callback.onComplete();
