@@ -18,9 +18,9 @@ package com.sc.persistence;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.entity.QStructure;
-import com.sc.entity.Structure;
-import com.sc.structure.construction.ConstructionProcess;
+import com.sc.construction.async.ConstructionProcess;
+import com.sc.construction.structure.QStructure;
+import com.sc.construction.structure.Structure;
 import com.sc.util.SCWorldGuardUtil;
 import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
 import com.sk89q.worldguard.protection.managers.RegionManager;
@@ -137,9 +137,11 @@ public class RestoreService {
             tx = session.beginTransaction();
             QStructure qct = QStructure.structure;
             JPQLQuery query = new HibernateQuery(session);
-            List<Structure> structures = query.from(qct).where(qct.progress().createdAt.after(timestamp).and(qct.progress().structure().worldLocation().world.eq(world))).list(qct);
+            List<Structure> structures = query.from(qct).where(qct.progress().createdAt.after(timestamp)
+                    .and(qct.progress().structure().worldLocation().world.eq(world))
+                    .and(qct.progress().progressStatus.ne(ConstructionProcess.State.REMOVED))).list(qct);
             if (!structures.isEmpty()) {
-                System.out.println("[SCStructureAPI]:" + world + " has " + structures.size() + " structures that were placed after the last save");
+                System.out.println("[SettlerCraft]: World " + world + " has " + structures.size() + " structures that were placed after the last save");
             }
             Iterator<Structure> it = structures.iterator();
             World w = Bukkit.getWorld(world);
@@ -148,7 +150,7 @@ public class RestoreService {
             while (it.hasNext()) {
                 Structure structure = it.next();
                 rmgr.removeRegion(structure.getStructureRegion());
-                System.out.println("[SCStructureAPI]: " + structure.getStructureRegion() + " has been removed");
+                System.out.println("[SettlerCraft]: " + structure.getStructureRegion() + " has been removed");
                 structure.getProgress().setProgressStatus(ConstructionProcess.State.REMOVED);
                 structure.getProgress().setRemovedAt(new Timestamp(removeDate.getTime()));
                 structure.getProgress().setAutoRemoved(true);

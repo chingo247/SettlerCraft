@@ -15,31 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.sc.event.structure;
-
-import com.sc.construction.structure.Structure;
-import org.bukkit.event.HandlerList;
+package com.sc.construction.exception;
 
 /**
  *
  * @author Chingo
  */
-public class StructureConstructionEvent extends StructureEvent {
+public class StructureException extends Exception {
+
+    public StructureException(String message) {
+        super(message);
+    }
     
-    public StructureConstructionEvent(Structure structure) {
-       super(structure);
-    }
-
-   
     
-    private static final HandlerList handlers = new HandlerList();
-
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
+    
 }

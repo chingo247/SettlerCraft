@@ -16,7 +16,7 @@
  */
 package com.sc.event.structure;
 
-import com.sc.entity.Structure;
+import com.sc.construction.structure.Structure;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 

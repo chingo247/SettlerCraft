@@ -17,17 +17,13 @@
 package com.sc.util;
 
 import com.google.common.base.Preconditions;
-import com.sc.entity.world.SimpleCardinal;
-import com.sc.entity.world.WorldDimension;
-import com.sk89q.worldedit.BlockVector;
+import com.sc.SimpleCardinal;
+import com.sc.WorldDimension;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.Vector;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Sign;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
 /**
@@ -53,7 +49,7 @@ public class WorldUtil {
             return SimpleCardinal.SOUTH;
         }
     }
-    
+
     public static Location addOffset(Location location, SimpleCardinal direction, double xOffset, double yOffset, double zOffset) {
         switch (direction) {
             case EAST:
@@ -61,32 +57,51 @@ public class WorldUtil {
             case SOUTH:
                 return location.add(-xOffset, yOffset, zOffset);
             case WEST:
-               return location.add(-zOffset, yOffset, -xOffset);
+                return location.add(-zOffset, yOffset, -xOffset);
             case NORTH:
                 return location.add(xOffset, yOffset, -zOffset);
             default:
                 throw new AssertionError("unreachable");
         }
     }
-    
+
     public static org.bukkit.Location addOffset(org.bukkit.Location location, SimpleCardinal direction, double xOffset, double yOffset, double zOffset) {
         switch (direction) {
             case EAST:
                 return location.add(zOffset, yOffset, xOffset);
             case SOUTH:
-                return location.add(-1 * xOffset, yOffset, zOffset);
+                return location.add(-xOffset, yOffset, zOffset);
             case WEST:
-               return location.add(-1 * zOffset, yOffset, -1 * xOffset);
+                return location.add(-zOffset, yOffset, -xOffset);
             case NORTH:
-                return location.add(xOffset, yOffset, -1 * zOffset);
+                return location.add(xOffset, yOffset, -zOffset);
+            default:
+                throw new AssertionError("unreachable");
+        }
+    }
+
+    public static com.sk89q.worldedit.Location getPoint2(com.sk89q.worldedit.Location point1, SimpleCardinal direction, Vector size) {
+        switch (direction) {
+            case EAST:
+                return point1.add(size.subtract(1, 1, 1));
+            case SOUTH:
+                return point1.add(-(size.getBlockZ() - 1), size.getBlockY() - 1, (size.getBlockX() - 1));
+            case WEST:
+//                clipboard.rotate2D(180);
+                return point1.add(-(size.getBlockX() - 1), size.getBlockY() - 1, -(size.getBlockZ() - 1));
+            case NORTH:
+                return point1.add((size.getBlockZ() - 1), size.getBlockY() - 1, -(size.getBlockX() - 1));
+//                clipboard.rotate2D(270);
+
             default:
                 throw new AssertionError("unreachable");
         }
     }
 
     public static WorldDimension getWorldDimension(com.sk89q.worldedit.Location location, SimpleCardinal direction, CuboidClipboard clipboard) {
-        Location pos2  = addOffset(location, direction, clipboard.getWidth(), clipboard.getHeight(), clipboard.getLength());
-        return new WorldDimension(location, pos2);
+        Location pos2 = addOffset(location, direction, clipboard.getWidth() - 1, clipboard.getHeight() - 1, clipboard.getLength() - 1);
+        World world = Bukkit.getWorld(location.getWorld().getName());
+        return new WorldDimension(world, location.getPosition(), pos2.getPosition());
     }
 
     /**
@@ -154,7 +169,6 @@ public class WorldUtil {
         return l;
     }
 
-
 //    /**
 //     * Moves the given entity from the given target structure, the entity will be moved beyond the
 //     * closest border. If the entity isnt within the structure, no actions will be taken. If the new
@@ -220,63 +234,4 @@ public class WorldUtil {
 //            moveEntityFromLot(entity, distance * 2, structureService.getStructure(target));
 //        }
 //    }
-    /**
-     * Creates a sign on top of target location
-     *
-     * @param location The location
-     * @param cardinal The cardinal
-     * @return The created sign
-     * @deprecated Is currently used as workaround
-     */
-    public static Sign createSign(Location location, SimpleCardinal cardinal) {
-
-        byte data;
-
-        switch (cardinal) {
-            case EAST:
-                data = 4;
-                break;
-            case NORTH:
-                data = 0;
-                break;
-            case WEST:
-                data = 12;
-                break;
-            case SOUTH:
-                data = 8;
-                break;
-            default:
-                throw new AssertionError("Unreachable");
-        }
-
-        Vector pos = location.getPosition().add(new BlockVector(0, 1, 0));
-        Block b = Bukkit.getWorld(location.getWorld().getName()).getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
-        b.setType(Material.SIGN_POST);
-        Sign sign = (Sign) b.getState();
-        sign.getData().setData(data);
-        sign.update();
-        return sign;
-    }
-
-    public static BlockState getBlockState(Location location) {
-        Vector pos = location.getPosition();
-        Block b = Bukkit.getWorld(location.getWorld().getName()).getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
-        return b.getState();
-    }
-
-    /**
-     * Gets the sign at target location
-     *
-     * @param location The location that is a sign
-     * @return The sign
-     * @deprecated Currently used for a workaround
-     */
-    public static Sign getSign(Location location) {
-        BlockState b = getBlockState(location);
-        if (b instanceof Sign) {
-            return (Sign) b;
-        } else {
-            return null;
-        }
-    }
 }

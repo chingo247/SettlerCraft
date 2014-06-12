@@ -16,25 +16,25 @@
  */
 package com.sc.listener;
 
-import com.sc.entity.plan.StructurePlan;
-import com.sc.entity.world.SimpleCardinal;
+import com.sc.SimpleCardinal;
+import com.sc.construction.SelectionManager;
+import com.sc.construction.plan.StructurePlan;
+import com.sc.construction.plan.StructurePlanManager;
+import com.sc.construction.plan.StructureSchematic;
+import com.sc.construction.structure.StructureManager;
+import com.sc.persistence.SchematicService;
 import com.sc.plugin.PermissionManager;
 import com.sc.plugin.SettlerCraft;
-import com.sc.structure.SelectionManager;
-import com.sc.structure.StructureManager;
-import com.sc.structure.StructurePlanManager;
 import com.sc.util.SCWorldEditUtil;
 import static com.sc.util.SCWorldEditUtil.getLocalSession;
 import com.sc.util.SCWorldGuardUtil;
 import com.sc.util.WorldUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.BlockWorldVector;
-import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Location;
-import com.sk89q.worldedit.Vector;
 import com.sk89q.worldguard.bukkit.WorldConfiguration;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import org.apache.log4j.Logger;
@@ -75,22 +75,22 @@ public class PlayerListener implements Listener {
         String structurePlanId = StructurePlan.getPlanID(planStack);
         StructurePlan plan = StructurePlanManager.getInstance().getPlan(structurePlanId);
         Player player = pie.getPlayer();
-        if(!PermissionManager.isAllowed(player, PermissionManager.Perms.STRUCTURE_PLACE)) {
+        if (!PermissionManager.isAllowed(player, PermissionManager.Perms.STRUCTURE_PLACE)) {
             player.sendMessage(ChatColor.RED + "You have no permission to place structures");
             return;
         }
-        
+
         if (plan == null) {
-            if(!SettlerCraft.getSettlerCraft().isPlansLoaded()) {
+            if (!SettlerCraft.getSettlerCraft().isPlansLoaded()) {
                 player.sendMessage(ChatColor.RED + "This plan is invalid, please refund it or throw it away");
             } else {
                 player.sendMessage(ChatColor.RED + "Plans aren't loaded yet please wait...");
             }
-            
+
             return;
         }
-        
-        if(!PermissionManager.isAllowed(player, PermissionManager.Perms.STRUCTURE_PLACE)) {
+
+        if (!PermissionManager.isAllowed(player, PermissionManager.Perms.STRUCTURE_PLACE)) {
             player.sendMessage(ChatColor.RED + "You don't have permission to place structures");
             return;
         }
@@ -120,9 +120,9 @@ public class PlayerListener implements Listener {
         }
     }
 
-    private boolean canPlace(Player player, Location location, SimpleCardinal cardinal, StructurePlan plan) {
+    private boolean canPlace(Player player, Location location, SimpleCardinal cardinal, StructurePlan plan, StructureSchematic schematic) {
         StructureManager sm = StructureManager.getInstance();
-        
+
 //        if (sm.overlaps(plan, location, cardinal)) {
 //            player.sendMessage(ChatColor.RED + " Structure overlaps another structure");
 //            return false;
@@ -133,7 +133,6 @@ public class PlayerListener implements Listener {
 //            player.sendMessage(ChatColor.RED + " Therefore your are not able to place structures");
 //            return false;
 //        }
-
         if (!sm.canClaim(player)) {
             WorldConfiguration wcfg = SCWorldGuardUtil.getWorldGuard().getGlobalStateManager().get(player.getWorld());
             RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(player.getWorld());
@@ -144,12 +143,12 @@ public class PlayerListener implements Listener {
             return false;
         }
 
-        if (sm.overlaps(plan, location, cardinal)) {
+        if (sm.overlaps(plan, location, cardinal, schematic)) {
             player.sendMessage(ChatColor.RED + " Structure overlaps another structure");
             return false;
         }
 
-        if (sm.overlapsRegion(player, plan, location, cardinal)) {
+        if (sm.overlapsRegion(player, plan, location, cardinal, schematic)) {
             player.sendMessage(ChatColor.RED + " Structure overlaps a region you don't own");
             return false;
         }
@@ -176,20 +175,20 @@ public class PlayerListener implements Listener {
 
             SimpleCardinal cardinal = WorldUtil.getCardinal(player);
             Location pos1 = new Location(world, new BlockWorldVector(world, x, y, z));
-            
-            
-            Vector v = StructurePlanManager.getInstance().getClipBoard(plan.getSchematicChecksum()).getSize();
-            if(v == null) {
-                player.sendMessage(ChatColor.RED + "Schematic for for this plan doesn't exist! This isn't supposed to happen!"); // Should never happen!
+
+            SchematicService service = new SchematicService();
+            StructureSchematic s = service.getSchematic(plan.getSchematicChecksum());
+
+            if (s == null) {
+                player.sendMessage(ChatColor.RED + "Schematic for for this plan doesn't exist!"); // Should never happen!
                 return false;
             }
-            
 
-            Location pos2 = WorldUtil.addOffset(pos1, cardinal, v.getBlockX(), v.getBlockX(), v.getBlockZ());
+             Location pos2 = WorldUtil.getPoint2(pos1, cardinal, new BlockVector(s.getWidth(), s.getHeight(), s.getLength()));
 
             if (slm.hasSimpleSelection(player)) {
                 if (slm.matchesSimple(player, plan, pos1)) {
-                    if (canPlace(player, pos1, cardinal, plan)) {
+                    if (canPlace(player, pos1, cardinal, plan, s)) {
                         if (sm.construct(player, plan, pos1, cardinal) != null) {
                             slm.clearsSimple(player, false);
                             return true;
@@ -201,7 +200,7 @@ public class PlayerListener implements Listener {
             }
 
             slm.simpleSelect(player, plan, pos1, pos2);
-            if (canPlace(player, pos1, cardinal, plan)) {
+            if (canPlace(player, pos1, cardinal, plan, s)) {
                 player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " [X] " + ChatColor.RESET + " to " + ChatColor.YELLOW + "confirm");
                 player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
             }
@@ -226,42 +225,40 @@ public class PlayerListener implements Listener {
         int z = target.getBlockZ();
         LocalSession session = SCWorldEditUtil.getLocalSession(player);
         SimpleCardinal cardinal = WorldUtil.getCardinal(player);
-        CuboidClipboard structureSchematic = StructurePlanManager.getInstance().getClipBoard(plan.getSchematicChecksum());
-        if (structureSchematic == null) {
-            player.sendMessage(ChatColor.RED + "Schematic for this plan doesnt exist");
-            return false;
-        }
-        Location location = new Location(world, new BlockVector(x, y, z));
-        Vector v = StructurePlanManager.getInstance().getClipBoard(plan.getSchematicChecksum()).getSize();
-            if(v == null) {
-                player.sendMessage(ChatColor.RED + "Schematic for for this plan doesn't exist! This isn't supposed to happen!"); // Should never happen!
+        //                        session.dispatchCUISelection(SCWorldEditUtil.getLocalPlayer(player));
+
+        Location pos1 = new Location(world, new BlockVector(x, y, z));
+        SchematicService service = new SchematicService();
+        StructureSchematic s = service.getSchematic(plan.getSchematicChecksum());
+
+            if (s == null) {
+                player.sendMessage(ChatColor.RED + "Schematic for for this plan doesn't exist!");
                 return false;
             }
-        Location pos2 = WorldUtil.addOffset(location, cardinal, v.getBlockX(), v.getBlockY(), v.getBlockZ());
+//        Location pos2 = WorldUtil.addOffset(location, cardinal, s.getWidth(), s.getHeight(), s.getLength());
+        Location pos2 = WorldUtil.getPoint2(pos1, cardinal, new BlockVector(s.getWidth(), s.getHeight(), s.getLength()));
+        
 
         if (action == Action.LEFT_CLICK_BLOCK) {
             if (!session.getRegionSelector(world).isDefined()) {
 
-                slm.CUISelect(player, plan, location, pos2);
+                slm.CUISelect(player, plan, pos1, pos2);
                 player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
                 player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
             } else {
 
-                if (slm.matchesCUISelection(player, plan, location, pos2)) {
-                    slm.CUISelect(player, plan, location, pos2);
-//                    if (canPlace(player, pos1, cardinal, plan)) {
-//                        session.getRegionSelector(world).clear();
-//                        session.dispatchCUISelection(SCWorldEditUtil.getLocalPlayer(player));
+                if (slm.matchesCUISelection(player, plan, pos1, pos2)) {
+                    slm.CUISelect(player, plan, pos1, pos2);
 
-                    if (sm.construct(player, plan, location, cardinal) != null) {
+                    if (sm.construct(player, plan, pos1, cardinal) != null) {
                         slm.clearCUISelection(player, false);
                         return true;
                     }
 
 //                    }
                 } else {
-                    slm.CUISelect(player, plan, location, pos2);
-                    if (canPlace(player, location, cardinal, plan)) {
+                    slm.CUISelect(player, plan, pos1, pos2);
+                    if (canPlace(player, pos1, cardinal, plan, s)) {
                         player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
                         player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
                     }

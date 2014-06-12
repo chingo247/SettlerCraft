@@ -18,8 +18,8 @@ package com.sc.persistence;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.entity.plan.QStructureSchematic;
-import com.sc.entity.plan.StructureSchematic;
+import com.sc.construction.plan.QStructureSchematic;
+import com.sc.construction.plan.StructureSchematic;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.hibernate.HibernateException;
@@ -61,6 +61,15 @@ public class SchematicService extends AbstractService {
         JPQLQuery query = new HibernateQuery(session);
         QStructureSchematic qss = QStructureSchematic.structureSchematic;
         boolean exists = query.from(qss).where(qss.checkSum.eq(schematic.getCheckSum())).exists();
+        session.close();
+        return exists;
+    }
+    
+    public boolean exists(Long checksum) {
+        Session session = HibernateUtil.getSession();
+        JPQLQuery query = new HibernateQuery(session);
+        QStructureSchematic qss = QStructureSchematic.structureSchematic;
+        boolean exists = query.from(qss).where(qss.checkSum.eq(checksum)).exists();
         session.close();
         return exists;
     }

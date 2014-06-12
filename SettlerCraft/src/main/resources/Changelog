@@ -3,6 +3,8 @@
 - Plans and schematics will load asynchronously (on server startup)
 - Fixed performance issues while selecting
 - Improved performance for placing structures
+- Fixed wrong display of size in plans
+- Removed inefficient code for construction methods
   
 
 

@@ -16,8 +16,8 @@ import com.sc.menu.MenuManager;
 import com.sc.persistence.HSQLServer;
 import com.sc.persistence.RestoreService;
 import com.sc.plugin.PermissionManager.Perms;
-import com.sc.structure.StructureManager;
-import com.sc.structure.StructurePlanManager;
+import com.sc.construction.structure.StructureManager;
+import com.sc.construction.plan.StructurePlanManager;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -36,7 +36,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class SettlerCraft extends JavaPlugin {
 
-
+    
     private static final int INFINITE_BLOCKS = -1;
     private static final Logger LOGGER = Logger.getLogger(SettlerCraft.class);
     private Plugin plugin;
@@ -94,6 +94,8 @@ public class SettlerCraft extends JavaPlugin {
         
         printPerms();
     }
+    
+    
 
     private void printPerms () {
         File printedFile = new File(SettlerCraft.getSettlerCraft().getDataFolder(), "SettlerCraftPermissions.yml");

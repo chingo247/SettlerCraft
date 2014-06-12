@@ -14,32 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.sc.construction.async;
 
-package com.sc.event.structure;
-
-import com.sc.construction.structure.Structure;
-import org.bukkit.event.HandlerList;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
 
 /**
  *
  * @author Chingo
  */
-public class StructureConstructionEvent extends StructureEvent {
-    
-    public StructureConstructionEvent(Structure structure) {
-       super(structure);
-    }
+public interface JobCallback {
 
-   
-    
-    private static final HandlerList handlers = new HandlerList();
+    void onJobAdded(BlockPlacerJobEntry entry);
+//    void onJobComplete(BlockPlacerJobEntry entry);
 
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
+    void onJobCanceled(BlockPlacerJobEntry entry);
 }

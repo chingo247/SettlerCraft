@@ -18,12 +18,12 @@ package com.sc.commands;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.entity.QStructure;
-import com.sc.entity.Structure;
+import com.sc.construction.async.ConstructionProcess;
+import com.sc.construction.structure.QStructure;
+import com.sc.construction.structure.Structure;
+import com.sc.construction.structure.StructureManager;
 import com.sc.persistence.HibernateUtil;
 import com.sc.persistence.StructureService;
-import com.sc.structure.StructureManager;
-import com.sc.structure.construction.ConstructionProcess;
 import com.sc.util.SCWorldEditUtil;
 import com.sc.util.SCWorldGuardUtil;
 import com.sc.util.SettlerCraftUtil;

@@ -16,17 +16,15 @@ package com.sc.commands;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import com.sc.entity.Structure;
+import com.sc.construction.async.ConstructionProcess;
+import com.sc.construction.async.ConstructionProcess.State;
+import com.sc.construction.exception.StructureException;
+import com.sc.construction.structure.Structure;
+import com.sc.construction.structure.StructureConstructionManager;
+import com.sc.construction.structure.StructureManager;
 import com.sc.persistence.StructureService;
 import com.sc.plugin.SettlerCraft;
-import com.sc.structure.StructureManager;
-import com.sc.structure.construction.ConstructionProcess;
-import com.sc.structure.construction.ConstructionProcess.State;
-import com.sc.structure.exception.StructureException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -40,6 +38,7 @@ import org.bukkit.entity.Player;
 public class ConstructionCommandExecutor implements CommandExecutor {
 
     private final SettlerCraft settlerCraft;
+    private final StructureConstructionManager scm = StructureConstructionManager.getInstance();
     private final StructureManager sm = StructureManager.getInstance();
     private static final int MAX_LINES = 10;
     private static final String CMD = "/cst";
@@ -50,11 +49,11 @@ public class ConstructionCommandExecutor implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String label, String[] args) {
-        if(! (cs instanceof Player)) {
+        if (!(cs instanceof Player)) {
             cs.sendMessage("You are not a player!"); // Command is issued from server console
             return true;
         }
-        
+
         if (args.length == 0) {
             cs.sendMessage(ChatColor.RED + "Too few arguments");
             return true;
@@ -68,7 +67,7 @@ public class ConstructionCommandExecutor implements CommandExecutor {
                 return cancelTask(player, args);
             case "halt":
                 return stopTask(player, args);
-            case "move":
+            case "postpone":
                 return moveTask(player, args);
             case "continue":
                 return continueTask(player, args);
@@ -91,7 +90,7 @@ public class ConstructionCommandExecutor implements CommandExecutor {
      * @return
      */
     private boolean displayInfo(Player player, String[] args) {
-        final List<ConstructionProcess> list = sm.listProgress(player.getName());
+        final List<ConstructionProcess> list = scm.listProgress(player);
         if (list == null) {
             player.sendMessage("No structures in progress...");
             return true;
@@ -128,12 +127,12 @@ public class ConstructionCommandExecutor implements CommandExecutor {
                 return true;
             }
 
-            message[0] = "---------Page(" + (index) + "/" + ((amountOfTasks / (MAX_LINES - 1)) + 1) + " Total: "+ amountOfTasks +")---------";
+            message[0] = "---------Page(" + (index) + "/" + ((amountOfTasks / (MAX_LINES - 1)) + 1) + " Total: " + amountOfTasks + ")---------";
             int line = 1;
             int startIndex = (index - 1) * (MAX_LINES - 1);
             for (int i = startIndex; i < startIndex + (MAX_LINES - 1) && i < list.size(); i++) {
                 ConstructionProcess task = list.get(i);
-                String l =  "#" + ChatColor.GOLD + task.getId() + " " + ChatColor.BLUE + " " + task.getStructure().getPlan().getDisplayName() + " ";
+                String l = "#" + ChatColor.GOLD + task.getId() + " " + ChatColor.BLUE + " " + task.getStructure().getPlan().getDisplayName() + " ";
                 State state = task.getStatus();
 
                 switch (state) {
@@ -191,40 +190,18 @@ public class ConstructionCommandExecutor implements CommandExecutor {
         }
         ConstructionProcess progress = structure.getProgress();
 
-        try {
-            if (progress.getStatus() == State.DEMOLISHING) {
-                sm.stopProcess(progress, true);
-                progress.setIsDemolishing(false);
-                sm.continueProcess(progress, true);
-                player.sendMessage("Demolision for " + ChatColor.GOLD + id + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET + " was canceled");
-            } else if (progress.getStatus() == State.BUILDING || progress.getStatus() == State.WAITING) {
-                sm.stopProcess(progress, true);
-                progress.setIsDemolishing(true);
-                sm.continueProcess(progress, true);
-                player.sendMessage("Construction for " + ChatColor.GOLD + id + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET + " was canceled");
-            } else if (progress.getStatus() == State.QUEUED) {
-                //FIXME EVER REACHED?
-                if (!progress.hasPlacedBlocks()) {
-                    sm.stopProcess(progress, true);
-                    player.sendMessage("Construction for " + ChatColor.GOLD + id + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET + " was canceled");
-                    sm.refund(structure);
-                    structure.setRefundValue(0d);
-                    ss.save(structure);
-                    progress.setProgressStatus(State.REMOVED);
+        scm.stopProcess(player, progress, true);
+        //FIXME EVER REACHED?
+        if (!progress.hasPlacedBlocks()) {
+            player.sendMessage("Construction for " + ChatColor.GOLD + id + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET + " was canceled");
+            sm.refund(structure);
+            structure.setRefundValue(0d);
+            ss.save(structure);
+            progress.setProgressStatus(State.REMOVED);
+        } 
 
-                } else {
-                    sm.stopProcess(progress, true);
-                }
-            } else {
-                player.sendMessage(ChatColor.RED + "#" + ChatColor.GOLD + id + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RED + " is not in progress");
-            }
-        } catch (StructureException ex) {
-            player.sendMessage(ChatColor.RED + "Structure " + id + " was unable to cancel");
-        }
         return true;
     }
-
-
 
     private boolean stopTask(Player player, String[] args) {
         if (args.length > 2) {
@@ -253,16 +230,19 @@ public class ConstructionCommandExecutor implements CommandExecutor {
         } else if (structure.getProgress().getStatus() == State.REMOVED) {
             player.sendMessage(ChatColor.RED + "#" + ChatColor.GOLD + structure.getId() + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RED + " was removed, can't stop task...");
             return true;
-        } 
+        }
         ConstructionProcess progress = structure.getProgress();
-        if(progress.getStatus() == State.COMPLETE) {
+        if (progress.getStatus() == State.COMPLETE) {
             player.sendMessage(ChatColor.RED + "#" + ChatColor.GOLD + structure.getId() + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RED + " already complete...");
             return true;
         }
-        
-        sm.stopProcess(progress, true);
-        player.sendMessage("Stopping #" + ChatColor.GOLD + id + " " + ChatColor.BLUE + structure.getPlan().getDisplayName());
-        
+
+        if(scm.stopProcess(player, progress, true)) {
+            player.sendMessage("Stopping #" + ChatColor.GOLD + id + " " + ChatColor.BLUE + structure.getPlan().getDisplayName());
+        } else {
+            player.sendMessage("Failed to stop #" + ChatColor.GOLD + id + " " + ChatColor.BLUE + structure.getPlan().getDisplayName());
+        }
+
         return true;
     }
 
@@ -297,7 +277,7 @@ public class ConstructionCommandExecutor implements CommandExecutor {
         ConstructionProcess progress = structure.getProgress();
 
         try {
-            sm.delayProcess(progress);
+            scm.delayProcess(player, progress);
             player.sendMessage("#" + ChatColor.GOLD + id + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET + " has been placed at the back of the queue");
         } catch (StructureException ex) {
             player.sendMessage(ChatColor.RED + ex.getMessage());
@@ -336,8 +316,8 @@ public class ConstructionCommandExecutor implements CommandExecutor {
         }
         ConstructionProcess progress = structure.getProgress();
         try {
-            sm.stopProcess(progress, true); //TODO remove this and perform add the force as feature
-            sm.continueProcess(progress, true);
+            scm.stopProcess(player, progress, true); //TODO remove this and perform add the force as feature
+            scm.continueProcess(player, progress, true);
             player.sendMessage(ChatColor.RESET + "Construction for Task #" + ChatColor.GOLD + id + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET + " has been continued");
         } catch (StructureException ex) {
             player.sendMessage(ChatColor.RED + ex.getMessage());
@@ -345,26 +325,26 @@ public class ConstructionCommandExecutor implements CommandExecutor {
 
         return true;
     }
-    
+
     private boolean demolish(Player player, String[] args) {
         StructureService ss = new StructureService();
         Structure structure;
-        if(args.length < 2) {
+        if (args.length < 2) {
             player.sendMessage(new String[]{
                 ChatColor.RED + "Too few arguments!",
                 ChatColor.RED + CMD + " demolish [id]"
             });
             return true;
-        } else if(args.length == 2) {
+        } else if (args.length == 2) {
             Long id;
             try {
                 id = Long.parseLong(args[1]);
-            } catch(NumberFormatException nfe) {
+            } catch (NumberFormatException nfe) {
                 player.sendMessage(ChatColor.RED + "No valid ID");
                 return true;
             }
             structure = ss.getStructure(id);
-            if(structure == null) {
+            if (structure == null) {
                 player.sendMessage(ChatColor.RED + "No structure found with id: " + id);
                 return true;
             }
@@ -376,46 +356,46 @@ public class ConstructionCommandExecutor implements CommandExecutor {
             return true;
         }
         ConstructionProcess progress = structure.getProgress();
-        if(progress.getStatus() == State.DEMOLISHING) {
+        if (progress.getStatus() == State.DEMOLISHING) {
             player.sendMessage(ChatColor.RED + "#" + ChatColor.GOLD + structure.getId() + " " + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RED + " already demolishing");
+            return true;
         }
         
-        if(sm.owns(player, structure)) {
-            try {
-                sm.stopProcess(progress, true);
-                progress.setIsDemolishing(true);
-                sm.continueProcess(progress, true);
-            } catch (StructureException ex) {
-                Logger.getLogger(ConstructionCommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            player.sendMessage("#" + ChatColor.GOLD + structure.getId() + " " + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET + " will be demolished soon");
+        if (structure.getProgress().getStatus() == State.REMOVED) {
+            player.sendMessage(ChatColor.RED + "#" + ChatColor.GOLD + structure.getId() + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RED + " was removed, can't stop task...");
+            return true;
+        }
+
+        if (sm.owns(player, structure)) {
+            scm.demolish(player, structure);
+            player.sendMessage("#" + ChatColor.GOLD + structure.getId() + " " + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET + " will be demolished");
             return true;
         } else {
             player.sendMessage(ChatColor.RED + "You don't have ownership of this structure!");
             return true;
         }
-        
+
     }
 
     private boolean build(Player player, String[] args) {
         StructureService ss = new StructureService();
         Structure structure;
-        if(args.length < 2) {
+        if (args.length < 2) {
             player.sendMessage(new String[]{
                 ChatColor.RED + "Too few arguments!",
                 ChatColor.RED + CMD + " demolish [id]"
             });
             return true;
-        } else if(args.length == 2) {
+        } else if (args.length == 2) {
             Long id;
             try {
                 id = Long.parseLong(args[1]);
-            } catch(NumberFormatException nfe) {
+            } catch (NumberFormatException nfe) {
                 player.sendMessage(ChatColor.RED + "No valid ID");
                 return true;
             }
             structure = ss.getStructure(id);
-            if(structure == null) {
+            if (structure == null) {
                 player.sendMessage(ChatColor.RED + "No structure found with id: " + id);
                 return true;
             }
@@ -427,26 +407,23 @@ public class ConstructionCommandExecutor implements CommandExecutor {
             return true;
         }
         ConstructionProcess progress = structure.getProgress();
-        if(progress.getStatus() == State.BUILDING) {
+        if (progress.getStatus() == State.BUILDING) {
             player.sendMessage(ChatColor.RED + "#" + ChatColor.GOLD + structure.getId() + " " + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RED + " already building");
             return true;
+        } else if (structure.getProgress().getStatus() == State.REMOVED) {
+            player.sendMessage(ChatColor.RED + "#" + ChatColor.GOLD + structure.getId() + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RED + " was removed, can't stop task...");
+            return true;
         }
-        
-        if(sm.owns(player, structure)) {
-            try {
-                sm.stopProcess(progress, true);
-                progress.setIsDemolishing(false);
-                sm.continueProcess(progress, true);
-            } catch (StructureException ex) {
-                Logger.getLogger(ConstructionCommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            player.sendMessage("#" + ChatColor.GOLD + structure.getId() + " " + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET + " will be build soon");
+
+        if (sm.owns(player, structure)) {
+            scm.build(player, structure);
+            player.sendMessage("#" + ChatColor.GOLD + structure.getId() + " " + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET + " will continue construction");
             return true;
         } else {
             player.sendMessage(ChatColor.RED + "You don't have ownership of this structure!");
             return true;
         }
-        
+
     }
 
 }

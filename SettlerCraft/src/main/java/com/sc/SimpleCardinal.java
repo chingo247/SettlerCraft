@@ -14,32 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package com.sc.event.structure;
-
-import com.sc.construction.structure.Structure;
-import org.bukkit.event.HandlerList;
+package com.sc;
 
 /**
  *
  * @author Chingo
  */
-public class StructureConstructionEvent extends StructureEvent {
-    
-    public StructureConstructionEvent(Structure structure) {
-       super(structure);
-    }
+public enum SimpleCardinal {
 
-   
-    
-    private static final HandlerList handlers = new HandlerList();
-
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
+    NORTH,
+    EAST,
+    SOUTH,
+    WEST
 }
