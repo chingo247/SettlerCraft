@@ -18,9 +18,6 @@ package com.sc.construction.structure;
 
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
-import com.sc.SimpleCardinal;
-import com.sc.WorldDimension;
-import com.sc.WorldLocation;
 import com.sc.construction.async.ConstructionProcess;
 import com.sc.construction.plan.StructurePlan;
 import com.sc.construction.plan.StructureSchematic;

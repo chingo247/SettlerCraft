@@ -5,7 +5,6 @@
  */
 package com.sc.construction.structure;
 
-import com.sc.StructureBlock;
 import com.sc.construction.generator.Enclosure;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;

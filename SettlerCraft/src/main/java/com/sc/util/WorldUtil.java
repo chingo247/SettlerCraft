@@ -17,8 +17,8 @@
 package com.sc.util;
 
 import com.google.common.base.Preconditions;
-import com.sc.SimpleCardinal;
-import com.sc.WorldDimension;
+import com.sc.construction.structure.SimpleCardinal;
+import com.sc.construction.structure.WorldDimension;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.Vector;

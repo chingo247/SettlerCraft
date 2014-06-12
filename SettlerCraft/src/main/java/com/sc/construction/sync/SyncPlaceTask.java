@@ -16,7 +16,7 @@
  */
 package com.sc.construction.sync;
 
-import com.sc.StructureBlock;
+import com.sc.construction.structure.StructureBlock;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;

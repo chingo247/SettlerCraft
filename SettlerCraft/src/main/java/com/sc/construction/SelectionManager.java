@@ -18,7 +18,7 @@ package com.sc.construction;
 
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
-import com.sc.SimpleCardinal;
+import com.sc.construction.structure.SimpleCardinal;
 import com.sc.construction.plan.StructurePlan;
 import com.sc.construction.plan.StructurePlanManager;
 import com.sc.plugin.SettlerCraft;
