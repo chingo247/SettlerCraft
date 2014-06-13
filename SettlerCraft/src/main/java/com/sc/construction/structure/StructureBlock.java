@@ -40,7 +40,19 @@ public class StructureBlock implements Comparable<StructureBlock> {
     @Override
     public int compareTo(StructureBlock o) {
 
-        return this.getPriority().compareTo(o.getPriority());
+        int v = this.getPriority().compareTo(o.getPriority());
+        if(v == 0) {
+            Integer yMe = getPosition().getBlockY();
+            Integer yO = getPosition().getBlockY();
+            if(yO.compareTo(yMe) == 0) {
+                Integer xMe = getPosition().getBlockX();
+                Integer xO = getPosition().getBlockX();
+                return xMe.compareTo(xO);
+            }
+            return yO.compareTo(yMe);
+        }
+        
+        return v;
     }
 
     private Integer getPriority() {

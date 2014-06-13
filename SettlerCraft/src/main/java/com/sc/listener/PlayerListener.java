@@ -17,7 +17,7 @@
 package com.sc.listener;
 
 import com.sc.construction.structure.SimpleCardinal;
-import com.sc.construction.SelectionManager;
+import com.sc.construction.feedback.SelectionManager;
 import com.sc.construction.plan.StructurePlan;
 import com.sc.construction.plan.StructurePlanManager;
 import com.sc.construction.plan.StructureSchematic;

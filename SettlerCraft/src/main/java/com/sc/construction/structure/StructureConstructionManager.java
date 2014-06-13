@@ -152,19 +152,25 @@ public class StructureConstructionManager {
             return;
         }
 
-        if (force) {
-            stopProcess(player, process, force);
-        }
-
         if (status == ConstructionProcess.State.REMOVED) {
             throw new StructureException("Tried to continue a removed structure");
         }
+        if (force) {
+            stopProcess(player, process, force);
+        }
+        
+        // Stop the task if any
+        StructureTask task = structureTasks.get(structure.getId());
+        if(task != null) {
+            task.cancel();
+        }
+        
         StructureService ss = new StructureService();
         process.setJobId(-1);
         process.setHasPlacedEnclosure(false);
         ss.save(process);
 
-        StructureTask task = new StructureTask(player, structure, process.isDemolishing());
+        task = new StructureTask(player, structure, process.isDemolishing());
         task.runTaskAsynchronously(plugin);
         structureTasks.put(structure.getId(), task);
     }
@@ -188,6 +194,12 @@ public class StructureConstructionManager {
 
         if (progressStatus == ConstructionProcess.State.COMPLETE || process.getJobId() == -1) {
             return false;
+        }
+        
+         // Stop the task if any, processes always have the same id as their structure
+        StructureTask task = structureTasks.get(process.getId());
+        if(task != null) {
+            task.cancel();
         }
 
         Session session = null;
@@ -218,6 +230,8 @@ public class StructureConstructionManager {
                 session.close();
             }
         }
+        
+        
         return true;
     }
 
@@ -229,7 +243,7 @@ public class StructureConstructionManager {
      * @param process The process
      * @throws com.sc.construction.exception.StructureException if structure was removed
      */
-    public void delayProcess(Player tasker, ConstructionProcess process) throws StructureException {
+    public void postPoneProcess(Player tasker, ConstructionProcess process) throws StructureException {
         if (process.getJobId() == -1) {
             return;
         }

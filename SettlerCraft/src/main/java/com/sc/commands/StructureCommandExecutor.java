@@ -63,6 +63,7 @@ public class StructureCommandExecutor implements CommandExecutor {
 
     private static final int MAX_LINES = 10;
     private static final String CMD = "/stt";
+    private final ChatColor CCC = ChatColor.DARK_PURPLE;
 
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
@@ -97,65 +98,57 @@ public class StructureCommandExecutor implements CommandExecutor {
 
     private boolean displayStructures(Player player, String[] args) {
         List<Structure> structures;
-        if (args.length == 1) {
+        
+        // Who are do we want?
+        if (args.length < 3) { // =>> ME!
             structures = listStructures(player);
-        } else if (args.length >= 2 && args.length < 4) { // 2 || 3
-            String playerName = args[1];
+        } else if (args.length == 3) { // 2 || 3
+            String playerName = args[2];
             Player ply = Bukkit.getPlayer(playerName);
             if (ply == null) {
-                player.sendMessage(ChatColor.RED + "Unknown player: " + playerName);
+                player.sendMessage(ChatColor.RED + "Player doesn't exist!");
                 return true;
             } else {
                 structures = listStructures(ply);
             }
         } else {
             player.sendMessage(ChatColor.RED + "Too many arguments!");
+            player.sendMessage(new String[]{
+                "Usage:",
+                CCC + CMD + " list " + ChatColor.RESET + " - Display a list of your structure at index 1",
+                CCC + CMD + " list [index] " + ChatColor.RESET + " - Display a list of your structures at given index",
+                CCC + CMD + " list [index][player] " + ChatColor.RESET + " - Display a list of structures of a player at given index",
+            });
             return true;
         }
+        
+        
         int amountOfStructures = structures.size();
         if (amountOfStructures == 0) {
+            // Nothing to display...
             player.sendMessage(ChatColor.RED + "No structures found...");
             return true;
         } else {
+            // Now get the index
             int index;
             Player ply;
             if (args.length == 1) {
                 index = 1;
-            } else if (args.length == 2) {
+            } else /*if (args.length <= 3) already done above */{ 
                 try {
                     index = Integer.parseInt(args[1]);
                 } catch (NumberFormatException nfe) {
-                    ply = Bukkit.getPlayer(args[1]);
-                    if (ply == null) {
-                        player.sendMessage(ChatColor.RED + "Second argument should either be an index or player");
-                        return true;
-                    }
-                    index = 1;
+                  player.sendMessage(ChatColor.RED + "Invalid index");
+                  return true;
                 }
-            } else {
-                ply = Bukkit.getPlayer(args[1]);
-                if (ply == null) {
-                    player.sendMessage(ChatColor.RED + "Unknown player: " + args[1]);
-                    return true;
-                }
-
-                try {
-                    index = Integer.parseInt(args[2]);
-                } catch (NumberFormatException nfe) {
-                    ply = Bukkit.getPlayer(args[1]);
-                    if (ply == null) {
-                        player.sendMessage(ChatColor.RED + "Third argument must be an index");
-                        return true;
-                    }
-                    index = 1;
-                }
-            }
+            } 
             String[] message = new String[MAX_LINES];
             int pages = (amountOfStructures / (MAX_LINES - 1)) + 1;
-            if (index > pages) {
-                player.sendMessage(ChatColor.RED + "Max page is " + pages);
+             if (index > pages || index <= 0) {
+                player.sendMessage(ChatColor.RED + "Page " + index + " out of " + pages +"...");
                 return true;
-            }
+            } 
+            
 
             message[0] = "-----------(Page: " + (index) + "/" + ((amountOfStructures / (MAX_LINES - 1)) + 1) + ", Structures: " + amountOfStructures + ")-----------";
             int line = 1;

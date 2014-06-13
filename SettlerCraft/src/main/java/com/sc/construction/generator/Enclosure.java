@@ -51,7 +51,7 @@ public class Enclosure extends CuboidClipboard {
         }
     }
 
-    public CuboidClipboard getEnclosure() {
+    public CuboidClipboard getClipboard() {
         return enclosure;
     }
 

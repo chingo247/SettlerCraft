@@ -33,6 +33,7 @@ import com.sc.persistence.StructureService;
 import com.sc.plugin.SettlerCraft;
 import com.sc.util.SCAsyncWorldEditUtil;
 import com.sc.util.SCWorldGuardUtil;
+import com.sc.util.SettlerCraftUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Location;
@@ -76,9 +77,9 @@ public class StructureManager {
     public static final int STRUCTURE_OWNER_INDEX = 2;
     public static final int STRUCTURE_STATUS_INDEX = 3;
     private static StructureManager instance;
-   
+
     private static final int INFINITE = -1;
-    
+
     private final Map<Long, Hologram> holos; // Structure id / Holo
     private final Plugin plugin;
     private final org.apache.log4j.Logger LOGGER = org.apache.log4j.Logger.getLogger(StructureManager.class);
@@ -186,7 +187,6 @@ public class StructureManager {
             owner.sendMessage(ChatColor.RED + " Structure overlaps another structure");
             return null;
         }
-        
 
         StructureService ss = new StructureService();
         structure = ss.save(structure);
@@ -201,19 +201,17 @@ public class StructureManager {
             owner.sendMessage(ChatColor.RED + "Failed to claim region for structure");
             return null;
         }
-        
+
         try {
             StructureConstructionManager.getInstance().continueProcess(owner, progress, true);
         } catch (StructureException ex) {
             Logger.getLogger(StructureManager.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         holos.put(structure.getId(), createStructureHolo(structure));
 
         return structure;
     }
-
-
 
     public void align(final CuboidClipboard clipboard, SimpleCardinal direction) {
         switch (direction) {
@@ -224,7 +222,7 @@ public class StructureManager {
                 break;
             case WEST:
                 clipboard.rotate2D(180);
-                
+
                 break;
             case NORTH:
                 clipboard.rotate2D(270);
@@ -366,7 +364,7 @@ public class StructureManager {
         }
         return true;
     }
-    
+
     public boolean overlaps(StructurePlan plan, Location location, SimpleCardinal cardinal, StructureSchematic schematic) {
         Structure structure = new Structure(location, cardinal, plan, schematic);
         return overlaps(structure);
@@ -376,7 +374,7 @@ public class StructureManager {
         StructureService service = new StructureService();
         return service.overlaps(structure);
     }
-    
+
     public boolean overlapsRegion(Player player, Structure structure) {
         LocalPlayer localPlayer = SCWorldGuardUtil.getLocalPlayer(player);
         RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
@@ -400,38 +398,29 @@ public class StructureManager {
         return overlapsRegion(player, structure);
     }
 
-    
-
     public void refund(Structure structure) {
         if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
             Economy economy = SCVaultEconomyUtil.getInstance().getEconomy();
             if (economy != null) {
-                Player player = Bukkit.getPlayer(structure.getOwner());
-                if (player != null) {
-                    double refundValue = structure.getRefundValue();
-                    economy.depositPlayer(structure.getOwner(), refundValue);
-                    if (player.isOnline()) {
-                        player.sendMessage(new String[]{
-                            "Refunded " + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.GOLD + refundValue,
-                            ChatColor.RESET + "Your new balance: " + ChatColor.GOLD + economy.getBalance(player.getName())
-                        });
+                    Player player = Bukkit.getPlayer(structure.getOwner());
+                    if (player != null) {
+                        double refundValue = structure.getRefundValue();
+                        economy.depositPlayer(structure.getOwner(), refundValue);
+                        if (player.isOnline()) {
+                            player.sendMessage(new String[]{
+                                "Refunded " + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.GOLD + refundValue,
+                                ChatColor.RESET + "Your new balance: " + ChatColor.GOLD + SettlerCraftUtil.valueString(economy.getBalance(player.getName()))
+                            });
+                        }
                     }
-                }
             }
         }
     }
-
-   
-
-
-
-
 
     public void shutdown() {
         for (Hologram holo : holos.values()) {
             holo.delete();
         }
     }
-    
 
 }
