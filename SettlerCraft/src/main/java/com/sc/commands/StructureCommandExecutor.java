@@ -18,7 +18,7 @@ package com.sc.commands;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.construction.async.ConstructionProcess;
+import com.sc.construction.asyncworldEdit.ConstructionProcess;
 import com.sc.construction.structure.QStructure;
 import com.sc.construction.structure.Structure;
 import com.sc.construction.structure.StructureManager;
@@ -92,7 +92,7 @@ public class StructureCommandExecutor implements CommandExecutor {
 
             default:
                 player.sendMessage(ChatColor.RED + "No actions known for: " + arg);
-                return false;
+                return true;
         }
     }
 

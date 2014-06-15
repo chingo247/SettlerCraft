@@ -14,25 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.construction.async;
+package com.sc.construction.asyncworldEdit;
 
-import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.Vector;
-import java.util.List;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
 
 /**
  *
  * @author Chingo
  */
-public abstract class ConstructionStrategy {
+public interface JobCallback {
 
-    public List<Vector> getList(CuboidClipboard cliboard) {
-        return getList(cliboard, true);
-    }
-    
+    void onJobAdded(BlockPlacerJobEntry entry);
+//    void onJobComplete(BlockPlacerJobEntry entry);
 
-    public abstract List<Vector> getList(CuboidClipboard cliboard, boolean noAir);
-
-
-
+    void onJobCanceled(BlockPlacerJobEntry entry);
 }

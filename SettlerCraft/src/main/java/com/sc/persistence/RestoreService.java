@@ -18,12 +18,17 @@ package com.sc.persistence;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.construction.async.ConstructionProcess;
+import com.sc.construction.asyncworldEdit.ConstructionProcess;
 import com.sc.construction.structure.QStructure;
 import com.sc.construction.structure.Structure;
+import com.sc.construction.structure.WorldDimension;
 import com.sc.util.SCWorldGuardUtil;
+import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldedit.Vector;
 import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
 import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.io.File;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -107,14 +112,32 @@ public class RestoreService {
             QStructure qct = QStructure.structure;
             JPQLQuery query = new HibernateQuery(session);
             List<Structure> structures = query.from(qct).where(qct.progress().autoRemoved.eq(Boolean.FALSE).and(qct.progress().structure().worldLocation().world.eq(world)).and(qct.progress().completedAt.after(timestamp).or(qct.progress().removedAt.after(timestamp)))).list(qct);
+            
+            if(!structures.isEmpty()) {
+            System.out.println("[SettlerCraft]: World " + world + " contains " + structures.size() + " that have an invalid status");
             Iterator<Structure> it = structures.iterator();
+            RegionManager manager = SCWorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(world));
             while (it.hasNext()) {
                 Structure structure = it.next();
                 ConstructionProcess progress = structure.getProgress();
+                
+                if(!manager.hasRegion(structure.getStructureRegion())) {
+                    System.out.println("Structure #" + structure.getId() + " was removed after last save");
+                    reclaim(structure);
+                    System.out.println("Reclaimed region: " + structure.getStructureRegion());
+                }
+                
                 progress.setProgressStatus(ConstructionProcess.State.STOPPED);
                 session.merge(progress);
             }
+            try {
+                manager.save();
+            } catch (ProtectionDatabaseException ex) {
+                Logger.getLogger(RestoreService.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
             tx.commit();
+            }
         } catch (HibernateException e) {
             try {
                 tx.rollback();
@@ -127,6 +150,23 @@ public class RestoreService {
                 session.close();
             }
         }
+    }
+    
+    private synchronized ProtectedRegion reclaim(Structure structure) {
+        RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
+        WorldDimension dim = structure.getDimension();
+        Vector p1 = dim.getMin().getPosition();
+        Vector p2 = dim.getMax().getPosition();
+        String id = structure.getStructureRegion();
+
+        ProtectedCuboidRegion region = new ProtectedCuboidRegion(id, new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
+
+        // Set Flag
+        region.getOwners().addPlayer(structure.getOwner());
+        mgr.addRegion(region);
+
+        return region;
+
     }
 
     private void removeCreatedBefore(String world, Timestamp timestamp) {

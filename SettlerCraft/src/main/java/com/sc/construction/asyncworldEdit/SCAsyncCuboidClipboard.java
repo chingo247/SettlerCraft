@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.construction.async;
+package com.sc.construction.asyncworldEdit;
 
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
@@ -90,13 +90,10 @@ public class SCAsyncCuboidClipboard extends ProxyCuboidClipboard {
             throws MaxChangedBlocksException {
 
         final int jobId = m_blockPlacer.getJobId(m_player);
-        final EditSession session;
         final CuboidClipboardWrapper cc = new CuboidClipboardWrapper(m_player, m_clipboard, jobId);
-        final SCBlockPlacerJobEntry job;
-
         AsyncEditSession aSession = (AsyncEditSession) editSession;
-        session = new CancelabeEditSession(aSession, aSession.getAsyncMask(), jobId);
-        job = new SCBlockPlacerJobEntry(m_player, (CancelabeEditSession) session, jobId, "place");
+        final EditSession session = new CancelabeEditSession(aSession, aSession.getAsyncMask(), jobId);
+        SCBlockPlacerJobEntry job = new SCBlockPlacerJobEntry(m_player, (CancelabeEditSession) session, jobId, "place");
 
         m_blockPlacer.addJob(m_player, job);
 

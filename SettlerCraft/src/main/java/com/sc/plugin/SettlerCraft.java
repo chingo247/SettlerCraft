@@ -8,6 +8,9 @@ package com.sc.plugin;
 import com.sc.commands.ConstructionCommandExecutor;
 import com.sc.commands.SettlerCraftCommandExecutor;
 import com.sc.commands.StructureCommandExecutor;
+import com.sc.construction.feedback.SelectionManager;
+import com.sc.construction.plan.StructurePlanManager;
+import com.sc.construction.structure.StructureManager;
 import com.sc.listener.PlayerListener;
 import com.sc.listener.PluginListener;
 import com.sc.listener.ShopListener;
@@ -16,8 +19,6 @@ import com.sc.menu.MenuManager;
 import com.sc.persistence.HSQLServer;
 import com.sc.persistence.RestoreService;
 import com.sc.plugin.PermissionManager.Perms;
-import com.sc.construction.structure.StructureManager;
-import com.sc.construction.plan.StructurePlanManager;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -41,10 +42,8 @@ public class SettlerCraft extends JavaPlugin {
     private static final Logger LOGGER = Logger.getLogger(SettlerCraft.class);
     private Plugin plugin;
     private static SettlerCraft instance;
-    private boolean plansLoaded;
-    private double refundPercentage;
-    private boolean menuEnabled;
-    private boolean shopEnabled;
+    private boolean plansLoaded = false;
+
 
     @Override
     public void onEnable() {
@@ -66,11 +65,14 @@ public class SettlerCraft extends JavaPlugin {
             return;
         }
 
-        if (Bukkit.getPluginManager().getPlugin("HolographicDisplays") == null) {
-            System.out.println("[SettlerCraft]: HolographicDisplays NOT FOUND!!! Disabling...");
-            this.setEnabled(false);
-            return;
-        }
+//        if (Bukkit.getPluginManager().getPlugin("HolographicDisplays") == null) {
+//            System.out.println("[SettlerCraft]: HolographicDisplays NOT FOUND!!! Disabling...");
+//            this.setEnabled(false);
+//            return;
+//        }
+        
+       
+        
         if (!HSQLServer.getInstance().isRunning()) {
             HSQLServer.getInstance().start();
             System.out.println("[SettlerCraft]: Checking for invalid structures");
@@ -86,7 +88,11 @@ public class SettlerCraft extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
         Bukkit.getPluginManager().registerEvents(new ShopListener(), this);
         Bukkit.getPluginManager().registerEvents(new PluginListener(), this);
-        initConfig();
+        try {
+            ConfigProvider.getInstance().load();
+        } catch (SettlerCraftException ex) {
+            java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
         getCommand("cst").setExecutor(new ConstructionCommandExecutor(this));
@@ -94,6 +100,13 @@ public class SettlerCraft extends JavaPlugin {
         
         printPerms();
     }
+    
+    
+    
+
+    
+    
+    
     
     
 
@@ -133,31 +146,7 @@ public class SettlerCraft extends JavaPlugin {
     public void stop() {
         StructureManager.getInstance().shutdown();
         MenuManager.getInstance().clearVisitors();
-    }
-
-    private void initConfig() {
-        try {
-            this.menuEnabled = getConfig().getBoolean("menus.planmenu");
-            this.shopEnabled = getConfig().getBoolean("menus.planshop");
-            this.refundPercentage = getConfig().getDouble("structure.refund");
-            if (refundPercentage < 0) {
-                throw new SettlerCraftException("refund node in config was negative");
-            }
-        } catch (SettlerCraftException ex) {
-            java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    public boolean isPlanMenuEnabled() {
-        return menuEnabled;
-    }
-
-    public boolean isPlanShopEnabled() {
-        return shopEnabled;
-    }
-
-    public double getRefundPercentage() {
-        return refundPercentage;
+        SelectionManager.getInstance().clearAll();
     }
 
     public boolean isPlansLoaded() {

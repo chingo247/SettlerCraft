@@ -17,7 +17,7 @@
 
 package com.sc.persistence;
 
-import com.sc.construction.async.ConstructionProcess;
+import com.sc.construction.asyncworldEdit.ConstructionProcess;
 import com.sc.construction.structure.Structure;
 import com.sc.construction.plan.StructurePlan;
 import com.sc.construction.plan.StructureSchematic;

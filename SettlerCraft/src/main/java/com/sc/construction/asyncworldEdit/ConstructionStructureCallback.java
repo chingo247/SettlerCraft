@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.construction.async;
+package com.sc.construction.asyncworldEdit;
 
 import com.sc.construction.structure.Structure;
 import com.sc.construction.structure.StructureConstructionManager;
@@ -24,7 +24,7 @@ import com.sc.event.structure.StructureConstructionEvent;
 import com.sc.event.structure.StructureDemolisionEvent;
 import com.sc.event.structure.StructureRemovedEvent;
 import com.sc.persistence.StructureService;
-import com.sc.plugin.SettlerCraft;
+import com.sc.plugin.ConfigProvider;
 import com.sk89q.worldedit.EditSession;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -81,7 +81,7 @@ public class ConstructionStructureCallback implements JobCallback {
                         Bukkit.getPluginManager().callEvent(new StructureDemolisionEvent(structure));
                         }
                     }
-                    progress.setHasPlacedBlocks(true);
+//                    progress.setHasPlacedBlocks(true);
                     progress = ss.save(progress);
                     scm.putProcess(tasker, jobId, progress);
                 } else if (bpje.getStatus() == BlockPlacerJobEntry.JobStatus.Done) {
@@ -92,13 +92,14 @@ public class ConstructionStructureCallback implements JobCallback {
                             Bukkit.getPluginManager().callEvent(new StructureCompleteEvent(structure));
                             progress.setProgressStatus(ConstructionProcess.State.COMPLETE);
                             progress.setCompletedAt(new Timestamp(new Date().getTime()));
-                            progress = ss.save(progress);
+                            ss.save(progress);
                             scm.removeProcess(tasker, jobId);
                         }
                     } else {
                         if(progress.getStatus() != ConstructionProcess.State.REMOVED) {
                              progress.setProgressStatus(ConstructionProcess.State.REMOVED);
-                             structure.setRefundValue(structure.getRefundValue() * SettlerCraft.getSettlerCraft().getRefundPercentage());
+                             progress.setRemovedAt(new Timestamp(new Date().getTime()));
+                             structure.setRefundValue(structure.getRefundValue() * ConfigProvider.getInstance().getRefundPercentage());
                              if(structure.getRefundValue() > 0) {
                                 sm.refund(structure);
                              }

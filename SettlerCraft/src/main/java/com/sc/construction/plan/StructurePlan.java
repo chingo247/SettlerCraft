@@ -47,9 +47,11 @@ public class StructurePlan implements Serializable {
     private String category = "default";
     private String faction = "default";
     private String description;
-    private int startHeight = 0;
-    private double price = 0.0;
-    private boolean hideSignOnComplete;
+    private Integer startHeight = 0;
+    private Double price = 0.0;
+    private Boolean hasSign;
+    private Integer buildMode;
+    private Integer demolisionMode;
     
     @Column(updatable = false)
     private final Long checksum;
@@ -71,21 +73,35 @@ public class StructurePlan implements Serializable {
         this.displayName = displayName;
         this.checksum = Files.getChecksum(schematic, new CRC32());
         this.sign = new StructureLocation(0, 2, 0);
-        this.hideSignOnComplete = false;
+        this.hasSign = true;
     }
-    
-   
+
+    public Integer getBuildMode() {
+        return buildMode;
+    }
+
+    public Integer getDemolisionMode() {
+        return demolisionMode;
+    }
+
+    public void setBuildMode(Integer buildMode) {
+        this.buildMode = buildMode;
+    }
+
+    public void setDemolisionMode(Integer demolisionMode) {
+        this.demolisionMode = demolisionMode;
+    }
     
     public void setSignLocation(int x, int y, int z) {
         this.sign = new StructureLocation(x, y, z);
     }
 
-    public void setHideSignOnComplete(boolean hideSignOnComplete) {
-        this.hideSignOnComplete = hideSignOnComplete;
+    public void setHasSign(boolean hasSign) {
+        this.hasSign = hasSign;
     }
 
-    public boolean isHideSignOnComplete() {
-        return hideSignOnComplete;
+    public boolean hasSign() {
+        return hasSign;
     }
     
     public Vector getSignLocation() {

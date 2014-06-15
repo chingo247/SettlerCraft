@@ -18,7 +18,7 @@ package com.sc.commands;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.construction.async.ConstructionProcess.State;
+import com.sc.construction.asyncworldEdit.ConstructionProcess.State;
 import com.sc.construction.plan.StructurePlanManager;
 import com.sc.construction.structure.QStructure;
 import com.sc.construction.structure.Structure;
@@ -28,8 +28,10 @@ import com.sc.menu.ShopCategoryMenu;
 import com.sc.persistence.AbstractService;
 import com.sc.persistence.HibernateUtil;
 import com.sc.persistence.StructureService;
+import com.sc.plugin.ConfigProvider;
 import com.sc.plugin.PermissionManager;
 import com.sc.plugin.SettlerCraft;
+import com.sc.plugin.SettlerCraftException;
 import com.sc.util.SettlerCraftUtil;
 import java.util.List;
 import java.util.logging.Level;
@@ -62,10 +64,6 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
-        if (!(cs instanceof Player)) {
-            cs.sendMessage("You are not a player!"); // Command is issued from server console
-            return true;
-        }
 
         if (args.length == 0) {
             cs.sendMessage(ChatColor.RED + "Too few arguments");
@@ -74,11 +72,15 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
             Player player = (Player) cs;
             switch (args[0]) {
                 case "menu":
+                    if (!(cs instanceof Player)) {
+                        cs.sendMessage("You are not a player!"); // Command is issued from server console
+                        return true;
+                    }
                     if (!PermissionManager.isAllowed(player, PermissionManager.Perms.OPEN_PLAN_MENU)) {
                         player.sendMessage(ChatColor.RED + "You have no permission to open this menu");
                         return true;
                     }
-                    if (!settlerCraft.isPlanMenuEnabled()) {
+                    if (!ConfigProvider.getInstance().isPlanMenuEnabled()) {
                         cs.sendMessage(ChatColor.RED + "Planmenu is disabled");
                         return true;
                     }
@@ -95,12 +97,16 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         return true;
                     }
                 case "shop":
+                    if (!(cs instanceof Player)) {
+                        cs.sendMessage("You are not a player!"); // Command is issued from server console
+                        return true;
+                    }
                     if (!PermissionManager.isAllowed(player, PermissionManager.Perms.OPEN_PLAN_SHOP)) {
                         player.sendMessage(ChatColor.RED + "You have no permission to open this menu");
                         return true;
                     }
 
-                    if (!settlerCraft.isPlanShopEnabled()) {
+                    if (!ConfigProvider.getInstance().isPlanShopEnabled()) {
                         cs.sendMessage(ChatColor.RED + "Planshop is disabled");
                         return true;
                     }
@@ -114,13 +120,36 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         return openShopMenu(player);
                     } else {
                         cs.sendMessage(ChatColor.RED + "Too many arguments!");
-                        return false;
+                        return true;
                     }
 
                 case "refund":
+                    if (!(cs instanceof Player)) {
+                        if (!player.isOp()) {
+                            player.sendMessage(ChatColor.RED + "You are not OP");
+                            return true;
+                        }
+                    }
                     return refund(player, args);
+                case "reload":
+                    if (!(cs instanceof Player)) {
+                        if (!player.isOp()) {
+                            player.sendMessage(ChatColor.RED + "You are not OP");
+                            return true;
+                        }
+                    }
+                    
+                    try {
+                        ConfigProvider.getInstance().load();
+                        player.sendMessage(ChatColor.GOLD + "[SettlerCraft]:"+ChatColor.RESET+" Config reloaded");
+                    } catch (SettlerCraftException ex) {
+                        Logger.getLogger(SettlerCraftCommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
+                        player.sendMessage(ChatColor.RED + ex.getMessage());
+                    }
+                    
+                    return true;
                 default:
-                    return false;
+                    return true;
             }
         }
     }
@@ -134,7 +163,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
     private boolean openShopMenu(Player player) {
         if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
             player.sendMessage(ChatColor.RED + " Planshop requires Vault");
-            return false;
+            return true;
         }
         ShopCategoryMenu menu = (ShopCategoryMenu) MenuManager.getInstance().getMenu(StructurePlanManager.PLANSHOP);
         menu.onEnter(player);
@@ -153,7 +182,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
             } catch (NumberFormatException nfe) {
                 player.sendMessage(ChatColor.RED + "Invalid index");
                 return true;
-            } 
+            }
             ply = null;
         } else if (args.length == 4) {
             try {
@@ -176,16 +205,16 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
         if (ply == null) {
             structures = getRefundables();
         } else {
-            if(Bukkit.getPlayer(ply) == null) {
+            if (Bukkit.getPlayer(ply) == null) {
                 player.sendMessage(ChatColor.RED + "Player doesn't exist!");
                 return true;
             }
-            
+
             // List from player
             structures = getRefundables(ply);
-            if(structures.isEmpty()) {
-            player.sendMessage(ChatColor.GREEN + ply + ChatColor.RED + " has no tasks that need to be refunded");
-            return true;
+            if (structures.isEmpty()) {
+                player.sendMessage(ChatColor.GREEN + ply + ChatColor.RED + " has no tasks that need to be refunded");
+                return true;
             }
         }
 
@@ -196,10 +225,10 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
             int amountOfRefundables = structures.size();
             String[] message = new String[MAX_LINES];
             int pages = (amountOfRefundables / (MAX_LINES - 1)) + 1;
-             if (index > pages || index <= 0) {
-                player.sendMessage(ChatColor.RED + "Page " + index + " out of " + pages +"...");
+            if (index > pages || index <= 0) {
+                player.sendMessage(ChatColor.RED + "Page " + index + " out of " + pages + "...");
                 return true;
-            } 
+            }
 
             message[0] = "-----------(Page: " + (index) + "/" + ((amountOfRefundables / (MAX_LINES - 1)) + 1) + " Structures: " + amountOfRefundables + ")-----------";
             int line = 1;
@@ -222,22 +251,22 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
             Economy economy = SCVaultEconomyUtil.getInstance().getEconomy();
             if (economy != null) {
                 Player player = Bukkit.getPlayer(structure.getOwner());
-                if(structure.getRefundValue() > 0) {
-                economy.depositPlayer(structure.getOwner(), structure.getRefundValue());
-                if (player != null && player.isOnline() && talk) {
+                if (structure.getRefundValue() > 0) {
+                    economy.depositPlayer(structure.getOwner(), structure.getRefundValue());
+                    if (player != null && player.isOnline() && talk) {
                         player.sendMessage(new String[]{
-                                      "Refunded #" + ChatColor.GOLD + structure.getId() + " "
-                                    + ChatColor.BLUE + structure.getPlan().getDisplayName() + " "
-                                    + ChatColor.GOLD + SettlerCraftUtil.valueString(structure.getRefundValue()),
+                            "Refunded #" + ChatColor.GOLD + structure.getId() + " "
+                            + ChatColor.BLUE + structure.getPlan().getDisplayName() + " "
+                            + ChatColor.GOLD + SettlerCraftUtil.valueString(structure.getRefundValue()),
                             ChatColor.RESET + "Your new balance: " + ChatColor.GOLD + SettlerCraftUtil.valueString(economy.getBalance(player.getName()))
                         });
                     }
                 }
-                if(talk) {
-                    sender.sendMessage("Deposited " + ChatColor.GOLD + SettlerCraftUtil.valueString(structure.getRefundValue()) 
+                if (talk) {
+                    sender.sendMessage("Deposited " + ChatColor.GOLD + SettlerCraftUtil.valueString(structure.getRefundValue())
                             + ChatColor.RESET + " to " + ChatColor.GREEN + structure.getOwner());
                 }
-            } else  {
+            } else {
                 sender.sendMessage(ChatColor.RED + "No economy plugin was found...");
             }
         } else {
@@ -249,7 +278,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
         // Note: only gets the structures with a refundValue > 0
         List<Structure> structures = getRefundables(refunder);
 
-        if(structures.isEmpty()) {
+        if (structures.isEmpty()) {
             sender.sendMessage(ChatColor.RED + "No refundable structures found for " + refunder);
             return;
         }
@@ -266,15 +295,13 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                 session.merge(s.getProgress());
             }
 
-            
             if (sender.isOnline()) {
-                sender.sendMessage("Deposited "+ ChatColor.GOLD + SettlerCraftUtil.valueString(totalRefunded) + ChatColor.RESET + " to " + ChatColor.GREEN + refunder);
+                sender.sendMessage("Deposited " + ChatColor.GOLD + SettlerCraftUtil.valueString(totalRefunded) + ChatColor.RESET + " to " + ChatColor.GREEN + refunder);
             }
             Player player = Bukkit.getPlayer(refunder);
-            if(player != null && player.isOnline()) {
-                sender.sendMessage("You have been refunded "+ ChatColor.GOLD + SettlerCraftUtil.valueString(totalRefunded));
+            if (player != null && player.isOnline()) {
+                sender.sendMessage("You have been refunded " + ChatColor.GOLD + SettlerCraftUtil.valueString(totalRefunded));
             }
-            
 
             tx.commit();
         } catch (HibernateException e) {
@@ -320,26 +347,20 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                 structure.setRefundValue(0d);
                 ss.save(structure);
             }
-        } 
+        }
 
         return true;
     }
 
     private boolean refund(Player player, String[] args) {
-        if (!player.isOp()) {
-            player.sendMessage(ChatColor.RED + "You are not OP");
-            return true;
-        }
-
         if (args.length == 1) {
             player.sendMessage(ChatColor.RED + "Too few arguments!");
             player.sendMessage(new String[]{
                 "Usage: ",
-                CCC + CMD + " list [index] "+ChatColor.RESET+"- List refundable structures of all players",
-                CCC + CMD + " list [index][player] "+ChatColor.RESET+"- List all refundable structures of the player",
-                CCC + CMD + " refund [id] "+ChatColor.RESET+"- refunds the structure to the owner, whether they are auto-removed or not",
-                CCC + CMD + " refund [player] "+ChatColor.RESET+"- refunds all refundable structure of the player that were auto-removed",
-            });
+                CCC + CMD + " list [index] " + ChatColor.RESET + "- List refundable structures of all players",
+                CCC + CMD + " list [index][player] " + ChatColor.RESET + "- List all refundable structures of the player",
+                CCC + CMD + " refund [id] " + ChatColor.RESET + "- refunds the structure to the owner, whether they are auto-removed or not",
+                CCC + CMD + " refund [player] " + ChatColor.RESET + "- refunds all refundable structure of the player that were auto-removed",});
             return true;
         } else if (args.length >= 2 && args.length < 5) {
             if (args[1].equals("list")) {
@@ -351,11 +372,10 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
             player.sendMessage(ChatColor.RED + "Too many arguments");
             player.sendMessage(new String[]{
                 "Usage: ",
-                CCC + CMD + " list [index] "+ChatColor.RESET+"- List refundable structures of all players",
-                CCC + CMD + " list [index][player] "+ChatColor.RESET+"- List all refundable structures of the player",
-                CCC + CMD + " refund [id] "+ChatColor.RESET+"- refunds the structure to the owner, whether they are auto-removed or not",
-                CCC + CMD + " refund [player] "+ChatColor.RESET+"- refunds all refundable structure of the player that were auto-removed",
-            });
+                CCC + CMD + " list [index] " + ChatColor.RESET + "- List refundable structures of all players",
+                CCC + CMD + " list [index][player] " + ChatColor.RESET + "- List all refundable structures of the player",
+                CCC + CMD + " refund [id] " + ChatColor.RESET + "- refunds the structure to the owner, whether they are auto-removed or not",
+                CCC + CMD + " refund [player] " + ChatColor.RESET + "- refunds all refundable structure of the player that were auto-removed",});
             return true;
         }
     }

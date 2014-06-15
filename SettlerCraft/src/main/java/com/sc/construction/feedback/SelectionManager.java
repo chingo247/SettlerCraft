@@ -18,9 +18,9 @@ package com.sc.construction.feedback;
 
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
-import com.sc.construction.structure.SimpleCardinal;
 import com.sc.construction.plan.StructurePlan;
 import com.sc.construction.plan.StructurePlanManager;
+import com.sc.construction.structure.SimpleCardinal;
 import com.sc.plugin.SettlerCraft;
 import com.sc.util.SCWorldEditUtil;
 import com.sc.util.WorldUtil;
@@ -52,11 +52,13 @@ public class SelectionManager {
         private StructurePlan plan;
         private Location pos1;
         private Location pos2;
+        private Player player;
 
-        public CUIStructureSelection(StructurePlan plan, Location target, Location pos2) {
+        public CUIStructureSelection(Player player, StructurePlan plan, Location target, Location pos2) {
             this.plan = plan;
             this.pos1 = target;
             this.pos2 = pos2;
+            this.player = player;
         }
 
     }
@@ -75,7 +77,7 @@ public class SelectionManager {
         private static final int Z_AXIS = 3;
         private static final int END = 4;
 
-        public HoloStructureSelection(Player whoCanSee, Vector pos1, Vector pos2, SimpleCardinal cardinal, StructurePlan plan) {
+        public HoloStructureSelection(Player whoCanSee, Vector pos1, Vector pos2, SimpleCardinal cardinal, StructurePlan plan, boolean reverse) {
             this.pos1 = pos1;
             this.pos2 = pos2;
             this.holos = new Hologram[5];
@@ -93,24 +95,30 @@ public class SelectionManager {
             LOGGER.info(self);
             
             
-            org.bukkit.Location xLoc = WorldUtil.addOffset(self.clone(), cardinal, 2, 1, 0);
+            org.bukkit.Location xLoc;
+            if(!reverse){
+            xLoc = WorldUtil.addOffset(self.clone(), cardinal, 2, 1, 0);
+            } else {
+            xLoc = WorldUtil.addOffset(self.clone(), cardinal, -2, 1, 0);   
+            }
             org.bukkit.Location yLoc = WorldUtil.addOffset(self.clone(), cardinal, 0, 1, 0);
             org.bukkit.Location zLoc = WorldUtil.addOffset(self.clone(), cardinal, 0, 1, 2);
 
             holos[SELF] = HolographicDisplaysAPI.createIndividualHologram(plugin, self, whoCanSee, ChatColor.GREEN + "[X]");
             
             
-
+            
+            
             holos[X_AXIS] = HolographicDisplaysAPI.createIndividualHologram(plugin, xLoc, whoCanSee, 
-                    ChatColor.YELLOW + "X-AXIS" + ChatColor.RESET + "+" + pos2.subtract(pos1).getBlockX()
+                    ChatColor.YELLOW + "X-AXIS" + ChatColor.RESET + "+" + Math.abs(pos2.subtract(pos1).getBlockX())
             );
 
             holos[Y_AXIS] = HolographicDisplaysAPI.createIndividualHologram(plugin, yLoc,whoCanSee, 
-                    ChatColor.YELLOW + "Y-AXIS" + ChatColor.RESET + "+" + pos2.subtract(pos1).getBlockY()
+                    ChatColor.YELLOW + "Y-AXIS" + ChatColor.RESET + "+" + Math.abs(pos2.subtract(pos1).getBlockY())
             );
 
             holos[Z_AXIS] = HolographicDisplaysAPI.createIndividualHologram(plugin, zLoc, whoCanSee, 
-                    ChatColor.YELLOW + "Z-AXIS" + ChatColor.RESET + "+" + pos2.subtract(pos1).getBlockZ()
+                    ChatColor.YELLOW + "Z-AXIS" + ChatColor.RESET + "+" + Math.abs(pos2.subtract(pos1).getBlockZ())
             );
 
             org.bukkit.Location eLoc = new org.bukkit.Location(whoCanSee.getWorld(), pos2.getX(), pos2.getY(), pos2.getZ());
@@ -156,7 +164,7 @@ public class SelectionManager {
     public void CUISelect(Player player, StructurePlan plan, Location target, Location pos2) {
         
         SCWorldEditUtil.select(player, target.getPosition(), pos2.getPosition());
-        cuiSelections.put(player.getUniqueId(), new CUIStructureSelection(plan, target, pos2));
+        cuiSelections.put(player.getUniqueId(), new CUIStructureSelection(player, plan, target, pos2));
     }
 
     public boolean matchesCUISelection(Player player, StructurePlan plan, Location target, Location pos2) {
@@ -165,7 +173,8 @@ public class SelectionManager {
         } else {
             CUIStructureSelection selection = cuiSelections.get(player.getUniqueId());
             return selection.plan.getId().equals(plan.getId())
-                    && target.equals(selection.pos1);
+                    && target.equals(selection.pos1)
+                    && pos2.equals(selection.pos2);
         }
     }
 
@@ -181,16 +190,18 @@ public class SelectionManager {
         }
     }
 
-    public void simpleSelect(Player player, StructurePlan plan, Location target, Location pos2) {
+    public void simpleSelect(Player player, StructurePlan plan, Location target, Location pos2, boolean reverse) {
         SimpleCardinal cardinal = WorldUtil.getCardinal(player);
-        simpleSelections.put(player.getUniqueId(), new HoloStructureSelection(player, target.getPosition(), pos2.getPosition(), cardinal, plan));
+        simpleSelections.put(player.getUniqueId(), new HoloStructureSelection(player, target.getPosition(), pos2.getPosition(), cardinal, plan, reverse));
     }
 
-    public boolean matchesSimple(Player player, StructurePlan plan, Location target) {
+    public boolean matchesSimple(Player player, StructurePlan plan, Location target, Location pos2) {
         if (simpleSelections.get(player.getUniqueId()) != null) {
             HoloStructureSelection selection = simpleSelections.get(player.getUniqueId());
             // is it the same structure and at the same position?
-            return selection.planId.equals(plan.getId()) && selection.pos1.equals(target.getPosition());
+            return selection.planId.equals(plan.getId()) 
+                    && selection.pos1.equals(target.getPosition())
+                    && selection.pos2.equals(pos2.getPosition());
         }
         return false;
     }
@@ -206,5 +217,14 @@ public class SelectionManager {
 
     public boolean hasSimpleSelection(Player player) {
         return simpleSelections.get(player.getUniqueId()) != null;
+    }
+    
+    public void clearAll() {
+        for(HoloStructureSelection s : simpleSelections.values()) {
+            s.clear();
+        }
+        for(CUIStructureSelection s : cuiSelections.values()) {
+            clearCUISelection(s.player, false);
+        }
     }
 }

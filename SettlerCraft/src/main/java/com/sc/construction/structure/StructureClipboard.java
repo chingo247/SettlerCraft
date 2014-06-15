@@ -6,6 +6,7 @@
 package com.sc.construction.structure;
 
 import com.sc.construction.generator.Enclosure;
+import com.sc.plugin.ConfigProvider;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
@@ -14,6 +15,7 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.blocks.BlockType;
+import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -26,6 +28,8 @@ public class StructureClipboard extends CuboidClipboard {
     private boolean isDemolishing = false;
     private final Enclosure enclosure;
     private final CuboidClipboard parent;
+    private Comparator<StructureBlock> buildMode;
+    private Comparator<StructureBlock> demolisionMode;
 
     public StructureClipboard(CuboidClipboard parent) {
         super(parent.getSize());
@@ -38,11 +42,31 @@ public class StructureClipboard extends CuboidClipboard {
     public void setDemolishing(boolean demolishing) {
         this.isDemolishing = demolishing;
     }
-    
+
+    public void setDemolisionMode(int mode) {
+        this.demolisionMode = getMode(mode);
+    }
+
+    public void setBuildMode(int mode) {
+        this.buildMode = getMode(mode);
+    }
+
+    private Comparator<StructureBlock> getMode(int mode) {
+        switch (mode) {
+            case 0:
+                return StructureCompare.PERFORMANCE;
+            case 1:
+                return StructureCompare.COMPROMIS;
+            case 2:
+                return StructureCompare.FANCY;
+            default:
+                throw new AssertionError("Unreachable");
+        }
+    }
+
     public Enclosure getEnclosure() {
         return enclosure;
     }
-
 
     /**
      * Place blocks from the minimum corner using an alternative algorithm that skips blocks that
@@ -56,20 +80,26 @@ public class StructureClipboard extends CuboidClipboard {
     @Override
     public void place(EditSession editSession, Vector pos, boolean noAir) throws MaxChangedBlocksException {
         long start = System.currentTimeMillis();
-        if(isDemolishing) {
+        if (isDemolishing) {
+            if (ConfigProvider.getInstance().isOverridingModes() || demolisionMode == null) {
+                this.demolisionMode = getMode(ConfigProvider.getInstance().getDemolisionMode());
+            }
+            
             placeDemolishing(editSession, pos, noAir);
         } else {
+            if (ConfigProvider.getInstance().isOverridingModes() || buildMode == null) {
+                this.buildMode = getMode(ConfigProvider.getInstance().getBuildMode());
+            }
             placeBuilding(editSession, pos, noAir);
         }
         long end = System.currentTimeMillis();
-        System.out.println("Prepared in: " + (end - start) + "ms");
+        System.out.println("Operation done in: " + (end - start));
     }
 
     private void placeDemolishing(EditSession editSession, Vector pos, boolean noAir) {
+        Queue<StructureBlock> structurequeu = new PriorityQueue<>(demolisionMode.reversed());
         Queue<StructureBlock> enclosureQueue = new PriorityQueue<>();
-
         for (int y = parent.getHeight() - 1; y >= 0; y--) {
-            Queue<StructureBlock> attention = new PriorityQueue<>();
             for (int x = 0; x < parent.getWidth(); x++) {
                 for (int z = 0; z < parent.getLength(); z++) {
                     final BlockVector v = new BlockVector(x, y, z);
@@ -78,20 +108,16 @@ public class StructureClipboard extends CuboidClipboard {
                     if (b == null || (noAir && b.isAir())) {
                         continue;
                     }
-
-                    if (!needsAttention(b)) {
-                        attention.add(new StructureBlock(v, b));
-                        continue;
-                    }
-
-                    demolishBlock(editSession, b, v, pos);
+                    structurequeu.add(new StructureBlock(v, b));
                 }
             }
-            while (attention.peek() != null) {
-                StructureBlock b = attention.poll();
-                demolishBlock(editSession, b.getBlock(), b.getPosition(), pos);
-            }
+
         }
+        while (structurequeu.peek() != null) {
+            StructureBlock b = structurequeu.poll();
+            demolishBlock(editSession, b.getBlock(), b.getPosition(), pos);
+        }
+
         while (enclosureQueue.peek() != null) {
             StructureBlock b = enclosureQueue.poll();
             demolishBlock(editSession, b.getBlock(), b.getPosition(), pos);
@@ -100,40 +126,35 @@ public class StructureClipboard extends CuboidClipboard {
 
     private void placeBuilding(EditSession editSession, Vector pos, boolean noAir) {
         Queue<StructureBlock> enclosureQueue = new PriorityQueue<>();
-
+        Queue<StructureBlock> structurequeu = new PriorityQueue<>(buildMode);
         for (int y = 0; y < parent.getHeight(); y++) {
-            Queue<StructureBlock> blocks = new PriorityQueue<>();
             for (int x = 0; x < parent.getWidth(); x++) {
                 for (int z = 0; z < parent.getLength(); z++) {
                     final BlockVector v = new BlockVector(x, y, z);
-
                     BaseBlock b = parent.getBlock(v);
                     if (b == null || (noAir && b.isAir())) {
                         continue;
                     }
 
-                        if ((b.isAir() || BlockType.canPassThrough(b.getId()))
-                                && y <= Enclosure.START_HEIGHT + enclosure.getHeight()
-                                && y >= Enclosure.START_HEIGHT
-                                && (x == 0 || x == getWidth() - 1
-                                || z == 0 || z == getLength() - 1)) {
-                            enclosureQueue.add(new StructureBlock(v, b));
-                            continue;
-                        }
-
-                    if (needsAttention(b)) {
-                        blocks.add(new StructureBlock(v, b));
+                    if ((b.isAir() || BlockType.canPassThrough(b.getId()))
+                            && y <= Enclosure.START_HEIGHT + enclosure.getHeight()
+                            && y >= Enclosure.START_HEIGHT
+                            && (x == 0 || x == getWidth() - 1
+                            || z == 0 || z == getLength() - 1)) {
+                        enclosureQueue.add(new StructureBlock(v, b));
                         continue;
                     }
-                    buildBlock(editSession, b, v, pos);
+
+                    structurequeu.add(new StructureBlock(v, b));
                 }
             }
-            while (blocks.peek() != null) {
-                StructureBlock b = blocks.poll();
-                buildBlock(editSession, b.getBlock(), b.getPosition(), pos);
-            }
-
         }
+
+        while (structurequeu.peek() != null) {
+            StructureBlock b = structurequeu.poll();
+            buildBlock(editSession, b.getBlock(), b.getPosition(), pos);
+        }
+
         while (enclosureQueue.peek() != null) {
             StructureBlock b = enclosureQueue.poll();
             buildBlock(editSession, b.getBlock(), b.getPosition(), pos);
@@ -153,14 +174,13 @@ public class StructureClipboard extends CuboidClipboard {
         if (b.isAir() && worldBlock.isAir() || worldBlock.getId() == BlockID.BEDROCK) {
             return;
         }
-        
-        
+
         // If we are on the first floor
-        if(blockPos.getBlockY() == 0 && !worldBlock.isAir()) {
-        Vector wUnderPos = blockPos.add(pos).subtract(0, 1, 0);
-        BaseBlock wUnder = session.getBlock(wUnderPos);
-        // replace the block with the block underneath you if it is a natural block
-            if(BlockType.isNaturalTerrainBlock(wUnder)) {
+        if (blockPos.getBlockY() == 0 && !worldBlock.isAir()) {
+            Vector wUnderPos = blockPos.add(pos).subtract(0, 1, 0);
+            BaseBlock wUnder = session.getBlock(wUnderPos);
+            // replace the block with the block underneath you if it is a natural block
+            if (BlockType.isNaturalTerrainBlock(wUnder)) {
                 session.rawSetBlock((blockPos.add(pos)), wUnder);
                 return;
             }

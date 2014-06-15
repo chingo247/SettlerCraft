@@ -79,8 +79,9 @@ public class WorldUtil {
                 throw new AssertionError("unreachable");
         }
     }
+    
 
-    public static com.sk89q.worldedit.Location getPoint2(com.sk89q.worldedit.Location point1, SimpleCardinal direction, Vector size) {
+    public static com.sk89q.worldedit.Location getPoint2Right(com.sk89q.worldedit.Location point1, SimpleCardinal direction, Vector size) {
         switch (direction) {
             case EAST:
                 return point1.add(size.subtract(1, 1, 1));
@@ -93,6 +94,21 @@ public class WorldUtil {
                 return point1.add((size.getBlockZ() - 1), size.getBlockY() - 1, -(size.getBlockX() - 1));
 //                clipboard.rotate2D(270);
 
+            default:
+                throw new AssertionError("unreachable");
+        }
+    }
+    
+    public static com.sk89q.worldedit.Location getPoint2Left(com.sk89q.worldedit.Location point1, SimpleCardinal direction, Vector size) {
+       switch (direction) {
+            case EAST:
+                return point1.add((size.getBlockX() - 1), size.getBlockY() - 1, -(size.getBlockZ() - 1));
+            case SOUTH:
+                return point1.add((size.getBlockZ() - 1), size.getBlockY() - 1, (size.getBlockX() - 1));
+            case WEST:
+                return point1.add(-(size.getBlockX() - 1), size.getBlockY() - 1, (size.getBlockZ() - 1));
+            case NORTH:
+                return point1.add(-(size.getBlockZ() - 1), size.getBlockY() - 1, -(size.getBlockX() - 1));
             default:
                 throw new AssertionError("unreachable");
         }

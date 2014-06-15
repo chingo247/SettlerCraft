@@ -6,8 +6,8 @@
 package com.sc.construction.structure;
 
 import com.google.common.base.Preconditions;
-import com.sc.construction.async.ConstructionEntry;
-import com.sc.construction.async.ConstructionProcess;
+import com.sc.construction.asyncworldEdit.ConstructionEntry;
+import com.sc.construction.asyncworldEdit.ConstructionProcess;
 import com.sc.construction.exception.StructureException;
 import com.sc.persistence.AbstractService;
 import com.sc.persistence.HibernateUtil;
@@ -139,7 +139,7 @@ public class StructureConstructionManager {
     /**
      * Continues construction of a structure.
      *
-     * @param tasker The tasker
+     * @param player The player
      * @param process The process to continue
      * @param force will ignore the task current state, therefore even if the task was marked
      * completed it will try to continue the task
@@ -167,7 +167,7 @@ public class StructureConstructionManager {
         
         StructureService ss = new StructureService();
         process.setJobId(-1);
-        process.setHasPlacedEnclosure(false);
+//        process.setHasPlacedEnclosure(false);
         ss.save(process);
 
         task = new StructureTask(player, structure, process.isDemolishing());

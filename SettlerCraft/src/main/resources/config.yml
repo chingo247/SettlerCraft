@@ -1,0 +1,27 @@
+menus:
+  #The menu for select plans for free
+  planmenu: true
+  #The shop for buy plans (Using Vault)
+  planshop: true
+  
+structure:
+  # Refund percentage when the structure is demolished
+  refund: 0.5
+  # Construction modes 
+  # 0 Performance - Will travel through the structure in Cubes of 16xHeightx16
+  # 1 Compromis - Will travel through the structure in Cubes of 32x32x32
+  # 2 Fancy - Will travel through the structure in Cubes of 32x16x32
+  mode:
+      building: 0
+      demolision: 0
+      # As performance may differ per structure
+      # It's also possible to assign a mode to a structure
+      override: false
+  use-holograms: true
+  default-flags:
+      mob-spawning: deny
+      
+      
+
+      
+  

@@ -1,20 +1,20 @@
 name: SettlerCraft
 main: com.sc.plugin.SettlerCraft
-version: 0.9
+version: 0.9.5
 author: Chingo247
 description: Placing & building of  schematics / structures
-depend: [WorldEdit, AsyncWorldEdit, WorldGuard, HolographicDisplays]
-softdepend: [Vault]
+depend: [WorldEdit, AsyncWorldEdit, WorldGuard]
+softdepend: [Vault, HolographicDisplays]
 
 commands:
     sc:
-        description: Show SettlerCraft Commands
+        description: SettlerCraft Commands
         usage: /sc
     cst:
-        description: Show Construction Commands
+        description: Construction Commands
         usage: /cst
     stt:
-        description: Show Structure Commands
+        description: Structure Commands
         usage: /stt
 
           

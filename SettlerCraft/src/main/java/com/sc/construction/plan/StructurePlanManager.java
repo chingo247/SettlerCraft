@@ -23,7 +23,6 @@ import com.sc.menu.MenuManager;
 import com.sc.menu.MenuSlot;
 import com.sc.menu.ShopCategoryMenu;
 import com.sc.persistence.SchematicService;
-import com.sc.util.SettlerCraftUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
@@ -121,9 +120,7 @@ public class StructurePlanManager {
             Vector v = new BlockVector(schematic.getWidth(), schematic.getHeight(), schematic.getLength());
             MenuSlot slot = new MenuSlot(is, plan.getDisplayName(), MenuSlot.MenuSlotType.ITEM);
             int size = v.getBlockX() * v.getBlockY() * v.getBlockZ();
-            String sizeString = SettlerCraftUtil.valueString(size);
             slot.setData("Size", v.getBlockX() + "x" + v.getBlockY()+ "x" + v.getBlockZ(), ChatColor.GOLD);
-            slot.setData("Blocks", sizeString, ChatColor.GOLD);
             slot.setData("Type", "Plan", ChatColor.GOLD);
             slot.setData("Id", plan.getId(), ChatColor.GOLD);
             planMenu.addItem(slot, plan.getCategory()); //Dont fill in these slots
@@ -161,10 +158,8 @@ public class StructurePlanManager {
             StructureSchematic schematic = service.getSchematic(plan.getSchematicChecksum());
             Vector v = new BlockVector(schematic.getWidth(), schematic.getHeight(), schematic.getLength());
             int size = v.getBlockX() * v.getBlockY() * v.getBlockZ();
-            String sizeString = SettlerCraftUtil.valueString(size);
             slot.setData("Size", v.getBlockX() + "x" + v.getBlockY()+ "x" + v.getBlockZ(), ChatColor.GOLD);
             slot.setData("Type", "Plan", ChatColor.GOLD);
-            slot.setData("Blocks", sizeString, ChatColor.GOLD);
             slot.setData("Id", plan.getId(), ChatColor.GOLD);
             planShop.addItem(slot, plan.getCategory(), plan.getPrice());
         }
@@ -309,8 +304,8 @@ public class StructurePlanManager {
                 }
             }
 
-            if (config.contains("hide-sign-onComplete")) {
-                spv.setHideSignOnComplete(config.getBoolean("hide-sign-onComplete"));
+            if (config.contains("hasSign")) {
+                spv.setHasSign(config.getBoolean("hasSign"));
             }
 
 //            if (config.contains("exits")) {

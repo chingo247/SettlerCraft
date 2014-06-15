@@ -18,7 +18,7 @@ package com.sc.construction.structure;
 
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
-import com.sc.construction.async.ConstructionProcess;
+import com.sc.construction.asyncworldEdit.ConstructionProcess;
 import com.sc.construction.plan.StructurePlan;
 import com.sc.construction.plan.StructureSchematic;
 import com.sc.util.WorldUtil;
@@ -108,12 +108,13 @@ public class Structure implements Serializable {
     Structure(Location target, SimpleCardinal cardinal, StructurePlan plan, StructureSchematic schematic) {
         this.worldLocation = new WorldLocation(target);
         this.cardinal = cardinal;
-        Location pos2 = WorldUtil.getPoint2(target, cardinal, new BlockVector(
+        Location pos2 = WorldUtil.getPoint2Right(target, cardinal, new BlockVector(
                 schematic.getWidth(), 
                 schematic.getHeight(), 
                 schematic.getLength())
         );
         this.dimension = new WorldDimension(target.getWorld(), target.getPosition(), pos2.getPosition());
+        this.worldUUID = Bukkit.getWorld(target.getWorld().getName()).getUID();
     }
 
     /**
@@ -137,7 +138,7 @@ public class Structure implements Serializable {
         this.worldLocation = new WorldLocation(target);
         this.worldUUID = worldLocation.getWorld().getUID();
         this.refundValue = plan.getPrice();
-        Location pos2 = WorldUtil.getPoint2(target, cardinal, new BlockVector(
+        Location pos2 = WorldUtil.getPoint2Right(target, cardinal, new BlockVector(
                 structureschematic.getWidth(), 
                 structureschematic.getHeight(), 
                 structureschematic.getLength())

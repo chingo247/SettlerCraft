@@ -19,8 +19,8 @@ package com.sc.persistence;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateDeleteClause;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.construction.async.ConstructionProcess;
-import com.sc.construction.async.ConstructionProcess.State;
+import com.sc.construction.asyncworldEdit.ConstructionProcess;
+import com.sc.construction.asyncworldEdit.ConstructionProcess.State;
 import com.sc.construction.structure.QStructure;
 import com.sc.construction.structure.Structure;
 import java.util.List;
@@ -176,7 +176,7 @@ public class StructureService extends AbstractService {
         JPQLQuery query = new HibernateQuery(session);
 
         Structure result = query.from(qStructure)
-                .where(qStructure.worldLocation().world.eq(structure.getLocation().getWorld().getName())
+                .where(qStructure.worldUUID.eq(structure.getWorldUUID())
                         .and(qStructure.dimension().maxX.goe(structure.getDimension().getMinX()).and(qStructure.dimension().minX.loe(structure.getDimension().getMaxX())))
                         .and(qStructure.dimension().maxY.goe(structure.getDimension().getMinY()).and(qStructure.dimension().minY.loe(structure.getDimension().getMaxY())))
                         .and(qStructure.dimension().maxZ.goe(structure.getDimension().getMinZ()).and(qStructure.dimension().minZ.loe(structure.getDimension().getMaxZ())))

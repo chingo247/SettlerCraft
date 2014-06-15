@@ -46,25 +46,25 @@ public class StructureSchematic implements Serializable {
     @Column(updatable = false)
     private File schematic;
     
-    private final Integer length;
-    private final Integer height;
-    private final Integer width;
+    private final Integer s_length;
+    private final Integer s_height;
+    private final Integer s_width;
 
     /**
      * JPA Constructor
      */
     protected StructureSchematic() {
-        this.length = null;
-        this.height = null;
-        this.width = null;
+        this.s_length = null;
+        this.s_height = null;
+        this.s_width = null;
     }
 
     StructureSchematic(File schematic, int width, int height, int length) throws IOException {
         this.checkSum = Files.getChecksum(schematic, new CRC32());
         this.schematic = schematic;
-        this.width = width;
-        this.height = height;
-        this.length = length;
+        this.s_width = width;
+        this.s_height = height;
+        this.s_length = length;
     }
 
     public Long getId() {
@@ -80,15 +80,15 @@ public class StructureSchematic implements Serializable {
     }
 
     public Integer getWidth() {
-        return width;
+        return s_width;
     }
 
     public Integer getHeight() {
-        return height;
+        return s_height;
     }
 
     public Integer getLength() {
-        return length;
+        return s_length;
     }
     
 

@@ -14,10 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.construction.async;
+package com.sc.construction.asyncworldEdit;
 
 import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.CuboidClipboard;
+import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -51,7 +52,7 @@ public abstract class SCClipBoardAsyncTask extends BukkitRunnable {
     private final AsyncEditSession editSession;
     private final JobCallback callback;
 
-    public SCClipBoardAsyncTask(final CuboidClipboard clipboard, final AsyncEditSession editSession,
+    public SCClipBoardAsyncTask(final CuboidClipboard clipboard, final EditSession editSession,
             final String player, final String commandName, BlockPlacer blocksPlacer,
             SCBlockPlacerJobEntry job, JobCallback callback) {
         Preconditions.checkNotNull(editSession);
@@ -61,8 +62,10 @@ public abstract class SCClipBoardAsyncTask extends BukkitRunnable {
         this.blockPlacer = blocksPlacer;
         this.job = job;
         this.callback = callback;
-        this.editSession = editSession;
-        this.editSession.addAsync(job);
+        this.editSession = (editSession instanceof AsyncEditSession) ? (AsyncEditSession) editSession : null;
+        if (editSession != null) {
+            this.editSession.addAsync(job);
+        }
     }
 
     @Override

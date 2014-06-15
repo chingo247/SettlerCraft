@@ -16,9 +16,10 @@
  */
 package com.sc.menu;
 
-import com.sc.menu.MenuSlot.MenuSlotType;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import com.sc.menu.MenuSlot.MenuSlotType;
+import com.sc.util.SettlerCraftUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -285,12 +286,10 @@ public class ShopCategoryMenu extends CategoryMenu {
     @Override
     public void onEnter(Player player) {
         MenuManager.getInstance().putVisitor(player);
-//        System.out.println("REMOVE THE CREDIT BONUS!!!!!");
-//        SCVaultEconomyUtil.getInstance().getEconomy().depositPlayer(player.getName(), 100000);
         player.sendMessage(ChatColor.YELLOW + "[" + title + "]: " + ChatColor.RESET + "Hello " + ChatColor.GREEN + player.getName() + ChatColor.RESET + "!");
         double balance = SCVaultEconomyUtil.getInstance().getEconomy().getBalance(player.getName());
         if (balance > 0) {
-            player.sendMessage(ChatColor.YELLOW + "[" + title + "]: " + ChatColor.RESET + " Your balance is " + ChatColor.GOLD + balance);
+            player.sendMessage(ChatColor.YELLOW + "[" + title + "]: " + ChatColor.RESET + " Your balance is " + ChatColor.GOLD + SettlerCraftUtil.valueString(balance));
         } else {
             player.sendMessage(ChatColor.YELLOW + "[" + title + "]: " + ChatColor.RESET + " Your balance is " + ChatColor.RED + balance);
         }

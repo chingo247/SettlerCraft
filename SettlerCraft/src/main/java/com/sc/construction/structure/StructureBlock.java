@@ -55,7 +55,7 @@ public class StructureBlock implements Comparable<StructureBlock> {
         return v;
     }
 
-    private Integer getPriority() {
+    public Integer getPriority() {
         if (isWater(block) || isLava(block))  {
             return PRIORITY_LIQUID;
         }

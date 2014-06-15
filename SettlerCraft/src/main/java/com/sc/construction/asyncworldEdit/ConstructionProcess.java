@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.sc.construction.async;
+package com.sc.construction.asyncworldEdit;
 
 import com.avaje.ebean.validation.NotNull;
 import com.google.common.base.Preconditions;
@@ -73,8 +73,6 @@ public class ConstructionProcess implements Serializable {
     private Timestamp completedAt;
     private Timestamp removedAt;
     private Boolean isDemolishing;
-    private Boolean hasPlacedBlocks = false;
-    private Boolean hasPlacedEnclosure = false;
     private Boolean autoRemoved = false;
     private State progressStatus;
     private Integer jobId = -1;
@@ -117,21 +115,21 @@ public class ConstructionProcess implements Serializable {
         this.jobId = jobId;
     }
 
-    public void setHasPlacedEnclosure(Boolean hasPlacedEnclosure) {
-        this.hasPlacedEnclosure = hasPlacedEnclosure;
-    }
-
-    public Boolean hasPlacedEnclosure() {
-        return hasPlacedEnclosure;
-    }
-
-    public void setHasPlacedBlocks(boolean hasPlacedBlocks) {
-        this.hasPlacedBlocks = hasPlacedBlocks;
-    }
-
-    public boolean hasPlacedBlocks() {
-        return hasPlacedBlocks;
-    }
+//    public void setHasPlacedEnclosure(Boolean hasPlacedEnclosure) {
+//        this.hasPlacedEnclosure = hasPlacedEnclosure;
+//    }
+//
+//    public Boolean hasPlacedEnclosure() {
+//        return hasPlacedEnclosure;
+//    }
+//
+//    public void setHasPlacedBlocks(boolean hasPlacedBlocks) {
+//        this.hasPlacedBlocks = hasPlacedBlocks;
+//    }
+//
+//    public boolean hasPlacedBlocks() {
+//        return hasPlacedBlocks;
+//    }
 
     public Timestamp getCreatedAt() {
         return createdAt;

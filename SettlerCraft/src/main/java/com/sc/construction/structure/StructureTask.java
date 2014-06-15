@@ -5,8 +5,8 @@
  */
 package com.sc.construction.structure;
 
-import com.sc.construction.async.ConstructionStructureCallback;
-import com.sc.construction.async.SCAsyncCuboidClipboard;
+import com.sc.construction.asyncworldEdit.ConstructionStructureCallback;
+import com.sc.construction.asyncworldEdit.SCAsyncCuboidClipboard;
 import com.sc.construction.plan.StructureSchematic;
 import com.sc.construction.sync.SyncBuilder;
 import com.sc.construction.sync.TaskCompleteCallback;
@@ -53,7 +53,6 @@ public class StructureTask extends BukkitRunnable {
     @Override
     public void run() {
         // Get the clipboard
-        long rs = System.currentTimeMillis();
         SchematicService ss = new SchematicService();
         StructureSchematic schematic = ss.getSchematic(structure.getPlan().getSchematicChecksum());
         File schematicFile = schematic.getSchematic();
@@ -63,19 +62,19 @@ public class StructureTask extends BukkitRunnable {
         } catch (IOException | DataException ex) {
             LOG.error(ex);
         }
-        long re = System.currentTimeMillis();
-        System.out.println("Schematic read in " + (re - rs) + "ms");
-
+        final AsyncEditSession structureSession = SCAsyncWorldEditUtil.createAsyncEditSession(tasker.getName(), structure.getLocation().getWorld(), -1);
         // Align the clipboard
-        long as = System.currentTimeMillis();
         StructureManager.getInstance().align(clipboard, structure.getCardinal());
         final StructureClipboard structureClipboard = new StructureClipboard(clipboard);
         structureClipboard.setDemolishing(isDemolishing);
-        long ae = System.currentTimeMillis();
-        System.out.println("Aligned in " + (ae - as));
 
         // If we aren't demolishing place the enclosure
         if (!isDemolishing) {
+            // Has advised mode?
+            if(structure.getPlan().getBuildMode() != null) {
+                structureClipboard.setBuildMode(structure.getPlan().getBuildMode());
+            }
+            
             // Create the enclosure and place it
             final EditSession enclosureSession = new EditSession(structure.getLocation().getWorld(), -1);
             // Set the enclosure, so that it will be replaced with real blocks when finished
@@ -84,23 +83,29 @@ public class StructureTask extends BukkitRunnable {
 
                 @Override
                 public void onComplete() {
-                    doStructure(tasker.getName(), structureClipboard);
+                    doStructure(tasker.getName(), structureClipboard, structureSession);
                 }
             });
         } else { // Otherwise place the structure clipboard, it will handle the removal
-            doStructure(tasker.getName(), structureClipboard);
+            // Has advised mode?
+            if(structure.getPlan().getDemolisionMode()!= null) {
+                structureClipboard.setDemolisionMode(structure.getPlan().getDemolisionMode());
+            }
+            
+            doStructure(tasker.getName(), structureClipboard, structureSession);
         }
 
     }
 
-    private void doStructure(String ply, StructureClipboard clipboard) {
+    private void doStructure(String ply, StructureClipboard clipboard, AsyncEditSession session) {
         // Build the structure onComplete of the enclosure
-        final AsyncEditSession structureSession = SCAsyncWorldEditUtil.createAsyncEditSession(tasker.getName(), structure.getLocation().getWorld(), -1);
-        final ConstructionStructureCallback sCallback = new ConstructionStructureCallback(tasker, structure, structureSession);
-        final SCAsyncCuboidClipboard asyncStructureClipboard = new SCAsyncCuboidClipboard(structureSession.getPlayer(), clipboard);
+        
+        
+        final ConstructionStructureCallback sCallback = new ConstructionStructureCallback(tasker, structure, session);
+        final SCAsyncCuboidClipboard asyncStructureClipboard = new SCAsyncCuboidClipboard(session.getPlayer(), clipboard);
         try {
             // Note: The Clipboard is always drawn from the min position using the place method
-            asyncStructureClipboard.place(structureSession, structure.getDimension().getMin().getPosition(), false, sCallback);
+            asyncStructureClipboard.place(session, structure.getDimension().getMin().getPosition(), false, sCallback);
         } catch (MaxChangedBlocksException ex) { // shouldnt happen
             LOG.error(ex);
         }

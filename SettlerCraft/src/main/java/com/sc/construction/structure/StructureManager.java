@@ -21,8 +21,8 @@ import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.google.common.base.Preconditions;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.construction.async.ConstructionProcess;
-import com.sc.construction.async.ConstructionProcess.State;
+import com.sc.construction.asyncworldEdit.ConstructionProcess;
+import com.sc.construction.asyncworldEdit.ConstructionProcess.State;
 import com.sc.construction.exception.StructureException;
 import com.sc.construction.plan.StructurePlan;
 import com.sc.construction.plan.StructureSchematic;
@@ -30,6 +30,7 @@ import com.sc.menu.SCVaultEconomyUtil;
 import com.sc.persistence.HibernateUtil;
 import com.sc.persistence.SchematicService;
 import com.sc.persistence.StructureService;
+import com.sc.plugin.ConfigProvider;
 import com.sc.plugin.SettlerCraft;
 import com.sc.util.SCAsyncWorldEditUtil;
 import com.sc.util.SCWorldGuardUtil;
@@ -99,14 +100,21 @@ public class StructureManager {
 
     public void init() {
         if (!initialized) {
-            initHolos();
-            initialized = true;
+            if(ConfigProvider.getInstance().useHolograms()) {
+                initHolos();
+                initialized = true;
+            }
         }
     }
 
     public void removeHolo(Long structureId) {
-        holos.get(structureId).delete();
-        holos.remove(structureId);
+        if(ConfigProvider.getInstance().useHolograms()) {
+            Hologram hologram = holos.get(structureId);
+            if(hologram != null) {
+                hologram.delete();
+                holos.remove(structureId);
+            }
+        }
     }
 
     private boolean exceedsLimit(Player player) {
@@ -128,6 +136,10 @@ public class StructureManager {
     }
 
     private void initHolos() {
+        if(!ConfigProvider.getInstance().useHolograms()) {
+            return;
+        }
+        
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QStructure qs = QStructure.structure;
@@ -136,7 +148,9 @@ public class StructureManager {
         Iterator<Structure> sit = structures.iterator();
         while (sit.hasNext()) {
             Structure s = sit.next();
-            holos.put(s.getId(), createStructureHolo(s));
+            if (ConfigProvider.getInstance().useHolograms() && s.getPlan().hasSign()) {
+                holos.put(s.getId(), createStructureHolo(s));
+            }
         }
     }
 
@@ -208,7 +222,9 @@ public class StructureManager {
             Logger.getLogger(StructureManager.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        holos.put(structure.getId(), createStructureHolo(structure));
+        if (ConfigProvider.getInstance().useHolograms() && structure.getPlan().hasSign()) {
+            holos.put(structure.getId(), createStructureHolo(structure));
+        }
 
         return structure;
     }
@@ -258,6 +274,8 @@ public class StructureManager {
         ProtectedCuboidRegion region = new ProtectedCuboidRegion(id, new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
 
         // Set Flag
+        region.setFlags(ConfigProvider.getInstance().getDefaultFlags());
+        
         region.getOwners().addPlayer(player.getName());
         mgr.addRegion(region);
         try {
@@ -402,17 +420,17 @@ public class StructureManager {
         if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
             Economy economy = SCVaultEconomyUtil.getInstance().getEconomy();
             if (economy != null) {
-                    Player player = Bukkit.getPlayer(structure.getOwner());
-                    if (player != null) {
-                        double refundValue = structure.getRefundValue();
-                        economy.depositPlayer(structure.getOwner(), refundValue);
-                        if (player.isOnline()) {
-                            player.sendMessage(new String[]{
-                                "Refunded " + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.GOLD + refundValue,
-                                ChatColor.RESET + "Your new balance: " + ChatColor.GOLD + SettlerCraftUtil.valueString(economy.getBalance(player.getName()))
-                            });
-                        }
+                Player player = Bukkit.getPlayer(structure.getOwner());
+                if (player != null) {
+                    double refundValue = structure.getRefundValue();
+                    economy.depositPlayer(structure.getOwner(), refundValue);
+                    if (player.isOnline()) {
+                        player.sendMessage(new String[]{
+                            "Refunded " + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.GOLD + SettlerCraftUtil.valueString(refundValue),
+                            ChatColor.RESET + "Your new balance: " + ChatColor.GOLD + SettlerCraftUtil.valueString(economy.getBalance(player.getName()))
+                        });
                     }
+                }
             }
         }
     }
