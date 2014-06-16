@@ -11,7 +11,7 @@ import java.util.Comparator;
  *
  * @author Chingo
  */
-public class StructureCompare {
+public class StructureBlockComparators {
     
     public static final Comparator<StructureBlock> FANCY = new Comparator<StructureBlock>() {
         
@@ -92,7 +92,7 @@ public class StructureCompare {
 
     private final Comparator<StructureBlock> comp;
 
-    StructureCompare(Comparator<StructureBlock> comparator) {
+    StructureBlockComparators(Comparator<StructureBlock> comparator) {
         this.comp = comparator;
     }
 

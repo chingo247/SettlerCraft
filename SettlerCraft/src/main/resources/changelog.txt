@@ -1,10 +1,9 @@
 
-1.0 Beta
-
-- New algorithms for placing structure increasing the place speed dramatically
+0.9.8 Alpha
+- Added a new algorithm that increases performance for placing schematics, which comes in three flavours
 - Fixed wrong feedback for trying to do something with a removed structure
-- Refund commands can now be executed from server console
-- HolographicDisplays is now optional and added as soft-dependency
+- Fixed Shift click for NON-worldeditCUI users
+- Added default flag node in Config
 
 0.9.5 Alpha 
 - StructurePlans are loaded async on server startup

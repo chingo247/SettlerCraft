@@ -65,17 +65,23 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
 
+        if (!(cs instanceof Player)) {
+            cs.sendMessage("You are not a player!"); // Command is issued from server console
+            return true;
+        }
+
         if (args.length == 0) {
             cs.sendMessage(ChatColor.RED + "Too few arguments");
             return true;
         } else {
-            Player player = (Player) cs;
+
             switch (args[0]) {
                 case "menu":
                     if (!(cs instanceof Player)) {
                         cs.sendMessage("You are not a player!"); // Command is issued from server console
                         return true;
                     }
+                    Player player = (Player) cs;
                     if (!PermissionManager.isAllowed(player, PermissionManager.Perms.OPEN_PLAN_MENU)) {
                         player.sendMessage(ChatColor.RED + "You have no permission to open this menu");
                         return true;
@@ -101,8 +107,9 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         cs.sendMessage("You are not a player!"); // Command is issued from server console
                         return true;
                     }
-                    if (!PermissionManager.isAllowed(player, PermissionManager.Perms.OPEN_PLAN_SHOP)) {
-                        player.sendMessage(ChatColor.RED + "You have no permission to open this menu");
+                    Player player2 = (Player) cs;
+                    if (!PermissionManager.isAllowed(player2, PermissionManager.Perms.OPEN_PLAN_SHOP)) {
+                        player2.sendMessage(ChatColor.RED + "You have no permission to open this menu");
                         return true;
                     }
 
@@ -117,38 +124,42 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
 
                     // HAS PERMISSION
                     if (args.length == 1) {
-                        return openShopMenu(player);
+                        return openShopMenu(player2);
                     } else {
                         cs.sendMessage(ChatColor.RED + "Too many arguments!");
                         return true;
                     }
 
                 case "refund":
-                    if (!(cs instanceof Player)) {
-                        if (!player.isOp()) {
-                            player.sendMessage(ChatColor.RED + "You are not OP");
+
+                    if (cs instanceof Player) {
+                        Player player3 = (Player) cs;
+                        if (!player3.isOp()) {
+                            player3.sendMessage(ChatColor.RED + "You are not OP");
                             return true;
                         }
                     }
-                    return refund(player, args);
+                    return refund(cs, args);
                 case "reload":
-                    if (!(cs instanceof Player)) {
-                        if (!player.isOp()) {
-                            player.sendMessage(ChatColor.RED + "You are not OP");
+                    if (cs instanceof Player) {
+                        Player player3 = (Player) cs;
+                        if (!player3.isOp()) {
+                            player3.sendMessage(ChatColor.RED + "You are not OP");
                             return true;
                         }
                     }
-                    
+
                     try {
                         ConfigProvider.getInstance().load();
-                        player.sendMessage(ChatColor.GOLD + "[SettlerCraft]:"+ChatColor.RESET+" Config reloaded");
+                        cs.sendMessage(ChatColor.GOLD + "[SettlerCraft]:" + ChatColor.RESET + " Config reloaded");
                     } catch (SettlerCraftException ex) {
                         Logger.getLogger(SettlerCraftCommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
-                        player.sendMessage(ChatColor.RED + ex.getMessage());
+                        cs.sendMessage(ChatColor.RED + ex.getMessage());
                     }
-                    
+
                     return true;
                 default:
+                    cs.sendMessage(ChatColor.RED + "No actions known for: " + args);
                     return true;
             }
         }
@@ -170,7 +181,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
         return true;
     }
 
-    private boolean listRefundables(Player player, String[] args) {
+    private boolean listRefundables(CommandSender player, String[] args) {
         int index;
         String ply;
         if (args.length == 2) {
@@ -246,7 +257,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
 
     }
 
-    private void makeDeposit(Player sender, Structure structure, boolean talk) {
+    private void makeDeposit(CommandSender sender, Structure structure, boolean talk) {
         if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
             Economy economy = SCVaultEconomyUtil.getInstance().getEconomy();
             if (economy != null) {
@@ -274,7 +285,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
         }
     }
 
-    private void refundAll(Player sender, String refunder) {
+    private void refundAll(CommandSender sender, String refunder) {
         // Note: only gets the structures with a refundValue > 0
         List<Structure> structures = getRefundables(refunder);
 
@@ -295,9 +306,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                 session.merge(s.getProgress());
             }
 
-            if (sender.isOnline()) {
-                sender.sendMessage("Deposited " + ChatColor.GOLD + SettlerCraftUtil.valueString(totalRefunded) + ChatColor.RESET + " to " + ChatColor.GREEN + refunder);
-            }
+            sender.sendMessage("Deposited " + ChatColor.GOLD + SettlerCraftUtil.valueString(totalRefunded) + ChatColor.RESET + " to " + ChatColor.GREEN + refunder);
             Player player = Bukkit.getPlayer(refunder);
             if (player != null && player.isOnline()) {
                 sender.sendMessage("You have been refunded " + ChatColor.GOLD + SettlerCraftUtil.valueString(totalRefunded));
@@ -318,7 +327,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
         }
     }
 
-    private boolean refundPlayer(Player sender, String[] args) {
+    private boolean refundPlayer(CommandSender sender, String[] args) {
         if (args.length < 2) {
             sender.sendMessage(ChatColor.RED + "Too few arguments!");
             sender.sendMessage(new String[]{
@@ -352,7 +361,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
         return true;
     }
 
-    private boolean refund(Player player, String[] args) {
+    private boolean refund(CommandSender player, String[] args) {
         if (args.length == 1) {
             player.sendMessage(ChatColor.RED + "Too few arguments!");
             player.sendMessage(new String[]{

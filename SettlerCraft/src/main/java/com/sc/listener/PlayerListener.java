@@ -194,7 +194,8 @@ public class PlayerListener implements Listener {
                     if (canPlace(player, pos1, cardinal, plan, s)) {
 
                         if (player.isSneaking()) {
-                            pos1 = WorldUtil.addOffset(pos1, cardinal, (-(s.getWidth()) - 1), 0, 0);
+                            // Fix? WTF How?
+                            pos1 = WorldUtil.addOffset(pos1, cardinal, (-(s.getLength()- 1) ), 0, 0);
                         }
 
                         if (sm.construct(player, plan, pos1, cardinal) != null) {
@@ -263,7 +264,7 @@ public class PlayerListener implements Listener {
                 if (slm.matchesCUISelection(player, plan, pos1, pos2)) {
                     slm.CUISelect(player, plan, pos1, pos2);
                     if (isSneaking) {
-                        // Fix? How?
+                        // Fix? WTF How?
                         pos1 = WorldUtil.addOffset(pos1, cardinal, (-(s.getLength()- 1) ), 0, 0);
                     }
                     if (sm.construct(player, plan, pos1, cardinal) != null) {

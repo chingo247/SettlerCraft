@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sc.plugin</groupId>
     <artifactId>SettlerCraft</artifactId>
-    <version>0.9.5</version>
+    <version>0.9.8</version>
     <packaging>jar</packaging>
     <repositories>
         <!--Private ThirdParty Repo-->

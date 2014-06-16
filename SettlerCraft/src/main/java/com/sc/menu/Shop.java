@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.sc.menu.shop;
+package com.sc.menu;
 
 import java.util.ArrayList;
 import org.bukkit.inventory.ItemStack;

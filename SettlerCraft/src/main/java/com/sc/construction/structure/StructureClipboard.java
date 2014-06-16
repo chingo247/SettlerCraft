@@ -7,6 +7,7 @@ package com.sc.construction.structure;
 
 import com.sc.construction.generator.Enclosure;
 import com.sc.plugin.ConfigProvider;
+import com.sc.util.SettlerCraftUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
@@ -33,6 +34,7 @@ public class StructureClipboard extends CuboidClipboard {
 
     public StructureClipboard(CuboidClipboard parent) {
         super(parent.getSize());
+        SettlerCraftUtil.count(parent, true);
         this.setOffset(parent.getOffset());
         this.setOrigin(parent.getOrigin());
         this.parent = parent;
@@ -43,22 +45,14 @@ public class StructureClipboard extends CuboidClipboard {
         this.isDemolishing = demolishing;
     }
 
-    public void setDemolisionMode(int mode) {
-        this.demolisionMode = getMode(mode);
-    }
-
-    public void setBuildMode(int mode) {
-        this.buildMode = getMode(mode);
-    }
-
     private Comparator<StructureBlock> getMode(int mode) {
         switch (mode) {
             case 0:
-                return StructureCompare.PERFORMANCE;
+                return StructureBlockComparators.PERFORMANCE;
             case 1:
-                return StructureCompare.COMPROMIS;
+                return StructureBlockComparators.COMPROMIS;
             case 2:
-                return StructureCompare.FANCY;
+                return StructureBlockComparators.FANCY;
             default:
                 throw new AssertionError("Unreachable");
         }
@@ -79,21 +73,13 @@ public class StructureClipboard extends CuboidClipboard {
      */
     @Override
     public void place(EditSession editSession, Vector pos, boolean noAir) throws MaxChangedBlocksException {
-        long start = System.currentTimeMillis();
         if (isDemolishing) {
-            if (ConfigProvider.getInstance().isOverridingModes() || demolisionMode == null) {
-                this.demolisionMode = getMode(ConfigProvider.getInstance().getDemolisionMode());
-            }
-            
+            this.demolisionMode = getMode(ConfigProvider.getInstance().getDemolisionMode());
             placeDemolishing(editSession, pos, noAir);
         } else {
-            if (ConfigProvider.getInstance().isOverridingModes() || buildMode == null) {
-                this.buildMode = getMode(ConfigProvider.getInstance().getBuildMode());
-            }
+             this.buildMode = getMode(ConfigProvider.getInstance().getBuildMode());
             placeBuilding(editSession, pos, noAir);
         }
-        long end = System.currentTimeMillis();
-        System.out.println("Operation done in: " + (end - start));
     }
 
     private void placeDemolishing(EditSession editSession, Vector pos, boolean noAir) {
@@ -127,6 +113,7 @@ public class StructureClipboard extends CuboidClipboard {
     private void placeBuilding(EditSession editSession, Vector pos, boolean noAir) {
         Queue<StructureBlock> enclosureQueue = new PriorityQueue<>();
         Queue<StructureBlock> structurequeu = new PriorityQueue<>(buildMode);
+        long start = System.currentTimeMillis();
         for (int y = 0; y < parent.getHeight(); y++) {
             for (int x = 0; x < parent.getWidth(); x++) {
                 for (int z = 0; z < parent.getLength(); z++) {
@@ -159,6 +146,8 @@ public class StructureClipboard extends CuboidClipboard {
             StructureBlock b = enclosureQueue.poll();
             buildBlock(editSession, b.getBlock(), b.getPosition(), pos);
         }
+        long end = System.currentTimeMillis();
+        System.out.println("in " + (end - start));
     }
 
     private void buildBlock(EditSession session, BaseBlock b, Vector blockPos, Vector pos) {

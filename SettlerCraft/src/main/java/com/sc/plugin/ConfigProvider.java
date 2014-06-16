@@ -35,8 +35,7 @@ public class ConfigProvider {
     private boolean overrideModes = false;
     private HashMap<Flag<?>, Object> defaultFlags;
 
-    private ConfigProvider() {
-    }
+    private ConfigProvider() {}
 
     public static ConfigProvider getInstance() {
         if (instance == null) {
@@ -61,7 +60,6 @@ public class ConfigProvider {
             if(demolisionMode < 0 || demolisionMode > 2) {
                 throw new SettlerCraftException("Invalid demolision node in config");
             }
-            this.overrideModes = config.getBoolean("structure.mode.override");
             this.useHolograms = config.getBoolean("use-holograms");
             this.defaultFlags = getDefaultFlags(config);
             
@@ -71,7 +69,6 @@ public class ConfigProvider {
         Map<String, Object> flags = config.getConfigurationSection("structure.default-flags").getValues(false);
         HashMap<Flag<?>, Object> df = new HashMap<>();
         for(Entry<String,Object> entry : flags.entrySet()) {
-            System.out.println(entry.getKey() + ":" + entry.getValue());
             Flag<?> foundFlag = DefaultFlag.fuzzyMatchFlag(entry.getKey());
             if(foundFlag == null) {
                 throw new SettlerCraftException("Flag '"+entry.getKey()+"' doesn't exist!");

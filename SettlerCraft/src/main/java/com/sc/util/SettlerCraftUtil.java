@@ -71,8 +71,10 @@ public class SettlerCraftUtil {
             if (b.getID().isAir() && noAir) {
                 continue;
             }
+            System.out.println(b.getID() + ":" + b.getAmount());
             count += b.getAmount();
         }
+        System.out.println("Total: " + count);
         return count;
     }
 

@@ -14,12 +14,8 @@ structure:
   mode:
       building: 0
       demolision: 0
-      # As performance may differ per structure
-      # It's also possible to assign a mode to a structure
-      override: false
   use-holograms: true
-  default-flags:
-      mob-spawning: deny
+
       
       
 

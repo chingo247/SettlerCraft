@@ -50,8 +50,6 @@ public class StructurePlan implements Serializable {
     private Integer startHeight = 0;
     private Double price = 0.0;
     private Boolean hasSign;
-    private Integer buildMode;
-    private Integer demolisionMode;
     
     @Column(updatable = false)
     private final Long checksum;
@@ -76,22 +74,6 @@ public class StructurePlan implements Serializable {
         this.hasSign = true;
     }
 
-    public Integer getBuildMode() {
-        return buildMode;
-    }
-
-    public Integer getDemolisionMode() {
-        return demolisionMode;
-    }
-
-    public void setBuildMode(Integer buildMode) {
-        this.buildMode = buildMode;
-    }
-
-    public void setDemolisionMode(Integer demolisionMode) {
-        this.demolisionMode = demolisionMode;
-    }
-    
     public void setSignLocation(int x, int y, int z) {
         this.sign = new StructureLocation(x, y, z);
     }

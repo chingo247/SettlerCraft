@@ -70,10 +70,6 @@ public class StructureTask extends BukkitRunnable {
 
         // If we aren't demolishing place the enclosure
         if (!isDemolishing) {
-            // Has advised mode?
-            if(structure.getPlan().getBuildMode() != null) {
-                structureClipboard.setBuildMode(structure.getPlan().getBuildMode());
-            }
             
             // Create the enclosure and place it
             final EditSession enclosureSession = new EditSession(structure.getLocation().getWorld(), -1);
@@ -87,10 +83,6 @@ public class StructureTask extends BukkitRunnable {
                 }
             });
         } else { // Otherwise place the structure clipboard, it will handle the removal
-            // Has advised mode?
-            if(structure.getPlan().getDemolisionMode()!= null) {
-                structureClipboard.setDemolisionMode(structure.getPlan().getDemolisionMode());
-            }
             
             doStructure(tasker.getName(), structureClipboard, structureSession);
         }

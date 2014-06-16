@@ -65,11 +65,11 @@ public class SettlerCraft extends JavaPlugin {
             return;
         }
 
-//        if (Bukkit.getPluginManager().getPlugin("HolographicDisplays") == null) {
-//            System.out.println("[SettlerCraft]: HolographicDisplays NOT FOUND!!! Disabling...");
-//            this.setEnabled(false);
-//            return;
-//        }
+        if (Bukkit.getPluginManager().getPlugin("HolographicDisplays") == null) {
+            System.out.println("[SettlerCraft]: HolographicDisplays NOT FOUND!!! Disabling...");
+            this.setEnabled(false);
+            return;
+        }
         
        
         
