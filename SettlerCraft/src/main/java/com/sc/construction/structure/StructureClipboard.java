@@ -1,13 +1,23 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2014 Chingo
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.sc.construction.structure;
 
 import com.sc.construction.generator.Enclosure;
 import com.sc.plugin.ConfigProvider;
-import com.sc.util.SettlerCraftUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
@@ -34,7 +44,6 @@ public class StructureClipboard extends CuboidClipboard {
 
     public StructureClipboard(CuboidClipboard parent) {
         super(parent.getSize());
-        SettlerCraftUtil.count(parent, true);
         this.setOffset(parent.getOffset());
         this.setOrigin(parent.getOrigin());
         this.parent = parent;
@@ -113,7 +122,6 @@ public class StructureClipboard extends CuboidClipboard {
     private void placeBuilding(EditSession editSession, Vector pos, boolean noAir) {
         Queue<StructureBlock> enclosureQueue = new PriorityQueue<>();
         Queue<StructureBlock> structurequeu = new PriorityQueue<>(buildMode);
-        long start = System.currentTimeMillis();
         for (int y = 0; y < parent.getHeight(); y++) {
             for (int x = 0; x < parent.getWidth(); x++) {
                 for (int z = 0; z < parent.getLength(); z++) {
@@ -146,8 +154,6 @@ public class StructureClipboard extends CuboidClipboard {
             StructureBlock b = enclosureQueue.poll();
             buildBlock(editSession, b.getBlock(), b.getPosition(), pos);
         }
-        long end = System.currentTimeMillis();
-        System.out.println("in " + (end - start));
     }
 
     private void buildBlock(EditSession session, BaseBlock b, Vector blockPos, Vector pos) {
