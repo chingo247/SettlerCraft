@@ -21,10 +21,12 @@ import com.google.common.base.Preconditions;
 import com.sc.construction.asyncworldEdit.ConstructionProcess;
 import com.sc.construction.plan.StructurePlan;
 import com.sc.construction.plan.StructureSchematic;
+import com.sc.util.SCWorldEditUtil;
 import com.sc.util.WorldUtil;
 import com.sk89q.worldedit.BlockVector;
-import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.util.Location;
+import com.sk89q.worldedit.world.World;
 import java.io.Serializable;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -36,7 +38,6 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.bukkit.Bukkit;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
@@ -105,16 +106,20 @@ public class Structure implements Serializable {
      * @param plan The plan
      * @param schematic The schematic
      */
-    Structure(Location target, SimpleCardinal cardinal, StructurePlan plan, StructureSchematic schematic) {
-        this.worldLocation = new WorldLocation(target);
+    Structure(World world, Vector target, SimpleCardinal cardinal, StructurePlan plan, StructureSchematic schematic) {
+        this.worldLocation = new WorldLocation(new Location(world, target));
         this.cardinal = cardinal;
-        Location pos2 = WorldUtil.getPoint2Right(target, cardinal, new BlockVector(
+        Vector pos2 = WorldUtil.getPoint2Right(target, cardinal, new BlockVector(
                 schematic.getWidth(), 
                 schematic.getHeight(), 
                 schematic.getLength())
         );
-        this.dimension = new WorldDimension(target.getWorld(), target.getPosition(), pos2.getPosition());
-        this.worldUUID = Bukkit.getWorld(target.getWorld().getName()).getUID();
+        this.dimension = new WorldDimension(world, target, pos2);
+        this.worldUUID = Bukkit.getWorld(world.getName()).getUID();
+    }
+    
+    Structure(org.bukkit.World world, Vector target, SimpleCardinal cardinal, StructurePlan plan, StructureSchematic schematic) {
+        this(SCWorldEditUtil.getWorld(world.getName()), target, cardinal, plan, schematic);
     }
 
     /**
@@ -125,7 +130,7 @@ public class Structure implements Serializable {
      * @param plan The plan
      * @param structureschematic
      */
-    Structure(Player owner, Location target, SimpleCardinal cardinal, StructurePlan plan, StructureSchematic structureschematic) {
+    Structure(World world, Player owner, Vector target, SimpleCardinal cardinal, StructurePlan plan, StructureSchematic structureschematic) {
         Preconditions.checkNotNull(plan);
         Preconditions.checkNotNull(target);
         Preconditions.checkNotNull(cardinal);
@@ -135,15 +140,15 @@ public class Structure implements Serializable {
         this.ownerID = owner.getUniqueId();
         this.owner = owner.getName();
         this.cardinal = cardinal;
-        this.worldLocation = new WorldLocation(target);
+        this.worldLocation = new WorldLocation(new Location(world, target));
         this.worldUUID = worldLocation.getWorld().getUID();
         this.refundValue = plan.getPrice();
-        Location pos2 = WorldUtil.getPoint2Right(target, cardinal, new BlockVector(
+        Vector pos2 = WorldUtil.getPoint2Right(target, cardinal, new BlockVector(
                 structureschematic.getWidth(), 
                 structureschematic.getHeight(), 
                 structureschematic.getLength())
         );
-        this.dimension = new WorldDimension(target.getWorld(), target.getPosition(), pos2.getPosition());
+        this.dimension = new WorldDimension(world, target, pos2);
     }
 
     public void setRefundValue(Double refundValue) {
@@ -158,10 +163,10 @@ public class Structure implements Serializable {
         return worldUUID;
     }
     
-    public final World getWorld() {
-        return Bukkit.getWorld(worldUUID);
+    public String getWorld() {
+        return worldLocation.getWorldName();
     }
-    
+   
     public ConstructionProcess getProgress() {
         return progress;
     }
@@ -234,6 +239,10 @@ public class Structure implements Serializable {
     public Location getLocation() {
         return worldLocation.getLocation();
     }
+    
+    public Vector getPosition() {
+        return new BlockVector(worldLocation.getX(), worldLocation.getY(), worldLocation.getZ());
+    }
 
     public WorldDimension getDimension() {
         return dimension;
@@ -244,9 +253,9 @@ public class Structure implements Serializable {
     }
 
     public boolean isOnLot(Location location) {
-        return (location.getPosition().getBlockX() >= dimension.getMinX()&& location.getPosition().getBlockX() <= dimension.getMaxX()
-                && location.getPosition().getBlockY() >= dimension.getMinY()&& location.getPosition().getBlockY() <= dimension.getMaxY()
-                && location.getPosition().getBlockZ() >= dimension.getMinZ()&& location.getPosition().getBlockZ() <= dimension.getMaxZ());
+        return (location.getBlockX() >= dimension.getMinX()&& location.getBlockX() <= dimension.getMaxX()
+                && location.getBlockY() >= dimension.getMinY()&& location.getBlockY() <= dimension.getMaxY()
+                && location.getBlockZ() >= dimension.getMinZ()&& location.getBlockZ() <= dimension.getMaxZ());
     }
     
     /**
@@ -257,24 +266,24 @@ public class Structure implements Serializable {
     public Vector getRelativePosition(Location location) {
         switch(cardinal) {
             case NORTH: return new BlockVector(
-                    location.getPosition().getBlockX() - worldLocation.getX(), 
-                    location.getPosition().getBlockY() - worldLocation.getY(), 
-                    worldLocation.getZ() - location.getPosition().getBlockZ()
+                    location.getBlockX() - worldLocation.getX(), 
+                    location.getBlockY() - worldLocation.getY(), 
+                    worldLocation.getZ() - location.getBlockZ()
             );
             case SOUTH: return new BlockVector(
-                    worldLocation.getX() - location.getPosition().getBlockX(), 
-                    location.getPosition().getBlockY() - worldLocation.getY(), 
-                    location.getPosition().getBlockZ() - worldLocation.getZ()
+                    worldLocation.getX() - location.getBlockX(), 
+                    location.getBlockY() - worldLocation.getY(), 
+                    location.getBlockZ() - worldLocation.getZ()
             );
             case EAST: return new Vector(
-                    location.getPosition().getBlockZ() - worldLocation.getZ(), 
-                    location.getPosition().getBlockY() - worldLocation.getY(), 
-                    location.getPosition().getBlockX() - worldLocation.getX()
+                    location.getBlockZ() - worldLocation.getZ(), 
+                    location.getBlockY() - worldLocation.getY(), 
+                    location.getBlockX() - worldLocation.getX()
             );
             case WEST: return new Vector(
-                    worldLocation.getZ() - location.getPosition().getBlockZ(), 
-                    location.getPosition().getBlockY() - worldLocation.getY(), 
-                    worldLocation.getX() - location.getPosition().getBlockX()
+                    worldLocation.getZ() - location.getBlockZ(), 
+                    location.getBlockY() - worldLocation.getY(), 
+                    worldLocation.getX() - location.getBlockX()
             );
             default: throw new AssertionError("Unreachable");
         }
@@ -286,8 +295,8 @@ public class Structure implements Serializable {
      * @return the location
      */
     public Location getLocation(Vector offset) {
-        Location l = WorldUtil.addOffset(Structure.this.getLocation(), cardinal, offset.getX(), offset.getY(), offset.getZ());
-        return l;
+        Vector p = WorldUtil.addOffset(getPosition(), cardinal, offset.getX(), offset.getY(), offset.getZ());
+        return new Location(SCWorldEditUtil.getWorld(worldLocation.getWorldName()), p);
     }
 
 }

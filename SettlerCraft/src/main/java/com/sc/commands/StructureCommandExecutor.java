@@ -29,8 +29,8 @@ import com.sc.util.SCWorldGuardUtil;
 import com.sc.util.SettlerCraftUtil;
 import com.sk89q.minecraft.util.commands.CommandPermissionsException;
 import com.sk89q.worldedit.BlockVector;
-import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.bukkit.RegionPermissionModel;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -156,9 +156,9 @@ public class StructureCommandExecutor implements CommandExecutor {
             for (int i = startIndex; i < startIndex + (MAX_LINES - 1) && i < structures.size(); i++) {
                 Structure structure = structures.get(i);
                 String l = "#" + ChatColor.GOLD + structure.getId() + " " + ChatColor.BLUE + structure.getPlan().getDisplayName() + ChatColor.RESET
-                        + " " + ChatColor.YELLOW + "X: " + ChatColor.RESET + structure.getLocation().getPosition().getBlockX()
-                        + " " + ChatColor.YELLOW + "Y: " + ChatColor.RESET + structure.getLocation().getPosition().getBlockY()
-                        + " " + ChatColor.YELLOW + "Z: " + ChatColor.RESET + structure.getLocation().getPosition().getBlockZ()
+                        + " " + ChatColor.YELLOW + "X: " + ChatColor.RESET + structure.getLocation().getBlockX()
+                        + " " + ChatColor.YELLOW + "Y: " + ChatColor.RESET + structure.getLocation().getBlockY()
+                        + " " + ChatColor.YELLOW + "Z: " + ChatColor.RESET + structure.getLocation().getBlockZ()
                         + " " + ChatColor.RESET + "Value: " + ChatColor.GOLD + SettlerCraftUtil.valueString(structure.getPlan().getPrice());
                 message[line] = l;
                 line++;
@@ -239,7 +239,7 @@ public class StructureCommandExecutor implements CommandExecutor {
             player.sendMessage(ChatColor.RED + "Too many arguments!");
             return true;
         }
-        Vector pos = structure.getRelativePosition(new Location(SCWorldEditUtil.getLocalWorld(player), new BlockVector(player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ())));
+        Vector pos = structure.getRelativePosition(new Location(SCWorldEditUtil.getWorld(player), new BlockVector(player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ())));
 
         player.sendMessage("#" + ChatColor.GOLD + structure.getId() + " "
                 + ChatColor.BLUE + structure.getPlan().getDisplayName()
@@ -299,7 +299,7 @@ public class StructureCommandExecutor implements CommandExecutor {
     }
 
     private boolean displayFlags(Player player, Structure structure) {
-        World world = structure.getWorld();
+        World world = Bukkit.getWorld(structure.getWorld());
         RegionManager rmgr = SCWorldGuardUtil.getGlobalRegionManager(world);
         ProtectedRegion region = rmgr.getRegion(structure.getStructureRegion());
         if (region == null) {
@@ -341,7 +341,7 @@ public class StructureCommandExecutor implements CommandExecutor {
      */
     private boolean setFlag(Player player, Structure structure, String[] args) {
         // args.length == 4
-        World world = structure.getWorld();
+        World world = Bukkit.getWorld(structure.getWorld());
         
         if(world == null) {
             player.sendMessage(ChatColor.RED + "Structure doesnt have a world anymore...");
@@ -501,7 +501,7 @@ public class StructureCommandExecutor implements CommandExecutor {
     }
 
     private boolean displayOwners(Player player, Structure structure) {
-        World world = structure.getWorld();
+        World world = Bukkit.getWorld(structure.getWorld());
         if(world == null) {
             player.sendMessage(ChatColor.RED + "Structure doesnt have a world anymore...");
             return true;
@@ -543,7 +543,7 @@ public class StructureCommandExecutor implements CommandExecutor {
 
     private boolean addOwner(Player player, Structure structure, String[] args) {
         WorldGuardPlugin plugin = SCWorldGuardUtil.getWorldGuard();
-        World world = structure.getWorld();
+        World world = Bukkit.getWorld(structure.getWorld());
         if(world == null) {
             player.sendMessage(ChatColor.RED + "Structure doesnt have a world anymore...");
             return true;
@@ -616,7 +616,7 @@ public class StructureCommandExecutor implements CommandExecutor {
 
     private boolean removeOwner(Player player, Structure structure, String[] args) {
         WorldGuardPlugin plugin = SCWorldGuardUtil.getWorldGuard();
-        World world = structure.getWorld();
+        World world = Bukkit.getWorld(structure.getWorld());
         if(world == null) {
             player.sendMessage(ChatColor.RED + "Structure doesnt have a world anymore...");
             return true;

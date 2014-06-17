@@ -33,13 +33,14 @@ import com.sc.persistence.StructureService;
 import com.sc.plugin.ConfigProvider;
 import com.sc.plugin.SettlerCraft;
 import com.sc.util.SCAsyncWorldEditUtil;
+import com.sc.util.SCWorldEditUtil;
 import com.sc.util.SCWorldGuardUtil;
 import com.sc.util.SettlerCraftUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.bukkit.RegionPermissionModel;
 import com.sk89q.worldguard.bukkit.WorldConfiguration;
@@ -159,9 +160,9 @@ public class StructureManager {
 
         org.bukkit.Location location = new org.bukkit.Location(
                 Bukkit.getWorld(structure.getLocation().getWorld().getName()),
-                pos.getPosition().getX(),
-                pos.getPosition().getY() + 1,
-                pos.getPosition().getZ()
+                pos.getX(),
+                pos.getY() + 1, // a bit above ground level
+                pos.getZ()
         );
 
         Hologram hologram = HolographicDisplaysAPI.createHologram(plugin, location,
@@ -174,11 +175,12 @@ public class StructureManager {
 
     public CuboidClipboard cloneArea(Structure structure) {
         WorldDimension dimension = structure.getDimension();
-        CuboidRegion region = new CuboidRegion(dimension.getLocalWorld(), dimension.getMin().getPosition(), dimension.getMax().getPosition());
+        CuboidRegion region = new CuboidRegion(dimension.getLocalWorld(), dimension.getMinPosition(), dimension.getMaxPosition());
         Vector min = region.getMinimumPoint();
         Vector max = region.getMaximumPoint();
-        Vector pos = structure.getLocation().getPosition();
-        AsyncEditSession copySession = SCAsyncWorldEditUtil.createAsyncEditSession(structure.getOwner(), structure.getLocation().getWorld(), INFINITE);
+        Vector pos = structure.getPosition();
+        AsyncEditSession copySession = SCAsyncWorldEditUtil.createAsyncEditSession(
+                SCWorldEditUtil.getLocalPlayer(Bukkit.getPlayer(structure.getOwnerUUID())), INFINITE);
 
         CuboidClipboard clipboard = new CuboidClipboard(
                 max.subtract(min).add(Vector.ONE),
@@ -188,7 +190,7 @@ public class StructureManager {
         return clipboard;
     }
 
-    public Structure construct(final Player owner, final StructurePlan plan, final Location location, final SimpleCardinal cardinal) {
+    public Structure construct(final Player owner, final StructurePlan plan, final Vector location, final SimpleCardinal cardinal) {
         if (exceedsLimit(owner)) {
             owner.sendMessage(ChatColor.RED + "Construction queue is full! Wait for the structure(s) to finish");
             return null;
@@ -196,7 +198,9 @@ public class StructureManager {
         SchematicService service = new SchematicService();
         StructureSchematic schematic = service.getSchematic(plan.getSchematicChecksum());
 
-        Structure structure = new Structure(owner, location, cardinal, plan, schematic);
+        
+        
+        Structure structure = new Structure(SCWorldEditUtil.getWorld(owner),owner, location, cardinal, plan, schematic);
         if (overlaps(structure)) {
             owner.sendMessage(ChatColor.RED + " Structure overlaps another structure");
             return null;
@@ -262,8 +266,8 @@ public class StructureManager {
 
         RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
         WorldDimension dim = structure.getDimension();
-        Vector p1 = dim.getMin().getPosition();
-        Vector p2 = dim.getMax().getPosition();
+        Vector p1 = dim.getMinPosition();
+        Vector p2 = dim.getMaxPosition();
         String id = structure.getStructureRegion();
 
         if (regionExists(structure.getDimension().getWorld(), id)) {
@@ -324,7 +328,7 @@ public class StructureManager {
     }
 
     public Set<String> getOwners(Structure structure) {
-        World world = structure.getWorld();
+        World world = Bukkit.getWorld(structure.getWorld());
         Set<String> owners = new HashSet<>();
         if (world == null) {
             return owners;
@@ -341,7 +345,7 @@ public class StructureManager {
     }
 
     public Set<String> getMembers(Structure structure) {
-        World world = structure.getWorld();
+        World world = Bukkit.getWorld(structure.getWorld());
         Set<String> members = new HashSet<>();
         if (world == null) {
             return members;
@@ -383,8 +387,8 @@ public class StructureManager {
         return true;
     }
 
-    public boolean overlaps(StructurePlan plan, Location location, SimpleCardinal cardinal, StructureSchematic schematic) {
-        Structure structure = new Structure(location, cardinal, plan, schematic);
+    public boolean overlaps(com.sk89q.worldedit.world.World world, Vector location, SimpleCardinal cardinal, StructurePlan plan, StructureSchematic schematic) {
+        Structure structure = new Structure(world, location, cardinal, plan, schematic);
         return overlaps(structure);
     }
 
@@ -397,8 +401,8 @@ public class StructureManager {
         LocalPlayer localPlayer = SCWorldGuardUtil.getLocalPlayer(player);
         RegionManager mgr = SCWorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
         WorldDimension dim = structure.getDimension();
-        Vector p1 = dim.getMin().getPosition();
-        Vector p2 = dim.getMax().getPosition();
+        Vector p1 = dim.getMinPosition();
+        Vector p2 = dim.getMaxPosition();
         ProtectedCuboidRegion dummy = new ProtectedCuboidRegion("", new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
         ApplicableRegionSet regions = mgr.getApplicableRegions(dummy);
 
@@ -411,8 +415,8 @@ public class StructureManager {
         return false;
     }
 
-    public boolean overlapsRegion(Player player, StructurePlan plan, Location location, SimpleCardinal cardinal, StructureSchematic schematic) {
-        Structure structure = new Structure(player, location, cardinal, plan, schematic);
+    public boolean overlapsRegion(Player player, World world, Vector pos, SimpleCardinal cardinal, StructurePlan plan, StructureSchematic schematic) {
+        Structure structure = new Structure(world, new BlockVector(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ()), cardinal, plan, schematic);
         return overlapsRegion(player, structure);
     }
 

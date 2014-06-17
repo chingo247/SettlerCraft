@@ -16,13 +16,10 @@
  */
 package com.sc.util;
 
-import com.google.common.base.Preconditions;
 import com.sc.construction.structure.SimpleCardinal;
 import com.sc.construction.structure.WorldDimension;
 import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.Vector;
-import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
@@ -50,22 +47,7 @@ public class WorldUtil {
         }
     }
 
-    public static Location addOffset(Location location, SimpleCardinal direction, double xOffset, double yOffset, double zOffset) {
-        switch (direction) {
-            case EAST:
-                return location.add(zOffset, yOffset, xOffset);
-            case SOUTH:
-                return location.add(-xOffset, yOffset, zOffset);
-            case WEST:
-                return location.add(-zOffset, yOffset, -xOffset);
-            case NORTH:
-                return location.add(xOffset, yOffset, -zOffset);
-            default:
-                throw new AssertionError("unreachable");
-        }
-    }
-
-    public static org.bukkit.Location addOffset(org.bukkit.Location location, SimpleCardinal direction, double xOffset, double yOffset, double zOffset) {
+    public static Vector addOffset(Vector location, SimpleCardinal direction, double xOffset, double yOffset, double zOffset) {
         switch (direction) {
             case EAST:
                 return location.add(zOffset, yOffset, xOffset);
@@ -81,7 +63,7 @@ public class WorldUtil {
     }
     
 
-    public static com.sk89q.worldedit.Location getPoint2Right(com.sk89q.worldedit.Location point1, SimpleCardinal direction, Vector size) {
+    public static Vector getPoint2Right(Vector point1, SimpleCardinal direction, Vector size) {
         switch (direction) {
             case EAST:
                 return point1.add(size.subtract(1, 1, 1));
@@ -99,7 +81,7 @@ public class WorldUtil {
         }
     }
     
-    public static com.sk89q.worldedit.Location getPoint2Left(com.sk89q.worldedit.Location point1, SimpleCardinal direction, Vector size) {
+    public static Vector getPoint2Left(Vector point1, SimpleCardinal direction, Vector size) {
        switch (direction) {
             case EAST:
                 return point1.add((size.getBlockX() - 1), size.getBlockY() - 1, -(size.getBlockZ() - 1));
@@ -114,10 +96,9 @@ public class WorldUtil {
         }
     }
 
-    public static WorldDimension getWorldDimension(com.sk89q.worldedit.Location location, SimpleCardinal direction, CuboidClipboard clipboard) {
-        Location pos2 = addOffset(location, direction, clipboard.getWidth() - 1, clipboard.getHeight() - 1, clipboard.getLength() - 1);
-        World world = Bukkit.getWorld(location.getWorld().getName());
-        return new WorldDimension(world, location.getPosition(), pos2.getPosition());
+    public static WorldDimension getWorldDimension(World world, Vector location, SimpleCardinal direction, CuboidClipboard clipboard) {
+        Vector pos2 = addOffset(location, direction, clipboard.getWidth() - 1, clipboard.getHeight() - 1, clipboard.getLength() - 1);
+        return new WorldDimension(world, location, pos2);
     }
 
     /**
@@ -145,45 +126,7 @@ public class WorldUtil {
         return getCardinal((int) entity.getLocation().getYaw());
     }
 
-    /**
-     * Gets the location that is furthest to target location from given array.
-     *
-     * @param target The target location
-     * @param locations The array of locations
-     * @return The furthest location
-     */
-    public static Location getFurthest(Location target, Location[] locations) {
-        Preconditions.checkArgument(locations.length > 0);
-        Location l = null;
-        for (int i = 0; i < locations.length; i++) {
-            if (l == null) {
-                l = locations[i];
-            } else if (locations[i].getPosition().distance(target.getPosition()) > l.getPosition().distance(target.getPosition())) {
-                l = locations[i];
-            }
-        }
-        return l;
-    }
 
-    /**
-     * Gets the location that is closest to target location from given array.
-     *
-     * @param target The target location
-     * @param locations The array of locations
-     * @return The closest location
-     */
-    public static Location getClosest(Location target, Location[] locations) {
-        Preconditions.checkArgument(locations.length > 0);
-        Location l = null;
-        for (int i = 0; i < locations.length; i++) {
-            if (l == null) {
-                l = locations[i];
-            } else if (locations[i].getPosition().distance(target.getPosition()) < l.getPosition().distance(target.getPosition())) {
-                l = locations[i];
-            }
-        }
-        return l;
-    }
 
 //    /**
 //     * Moves the given entity from the given target structure, the entity will be moved beyond the

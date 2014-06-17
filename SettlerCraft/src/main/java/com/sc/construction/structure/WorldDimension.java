@@ -18,9 +18,8 @@ package com.sc.construction.structure;
 
 import com.avaje.ebean.validation.NotNull;
 import com.sc.util.SCWorldEditUtil;
-import com.sk89q.worldedit.LocalWorld;
-import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.util.Location;
 import java.io.Serializable;
 import javax.persistence.Column;
 import org.bukkit.Bukkit;
@@ -70,7 +69,7 @@ public class WorldDimension implements Serializable {
         this(world.getName(), start, end);
     }
             
-    public WorldDimension(LocalWorld world, Vector start, Vector end)  {
+    public WorldDimension(com.sk89q.worldedit.world.World world, Vector start, Vector end)  {
         this(world.getName(), start, end);
     }       
 
@@ -88,7 +87,7 @@ public class WorldDimension implements Serializable {
         return Bukkit.getWorld(world);
     }
     
-    public LocalWorld getLocalWorld() {
+    public com.sk89q.worldedit.world.World getLocalWorld() {
         return getMin().getWorld();
     }
 
@@ -140,14 +139,20 @@ public class WorldDimension implements Serializable {
         this.maxZ = maxZ;
     }
 
+    public Vector getMinPosition() {
+        return new Vector(minX, minY, minZ);
+    }
     
+    public Vector getMaxPosition() {
+        return new Vector(maxX, maxY, maxZ);
+    }
 
     public Location getMin() {
-        return new Location(SCWorldEditUtil.getLocalWorld(world), new Vector(minX, minY, minZ));
+        return new Location(SCWorldEditUtil.getWorld(world), new Vector(minX, minY, minZ));
     }
 
     public Location getMax() {
-        return new Location(SCWorldEditUtil.getLocalWorld(world), new Vector(maxX, maxY, maxZ));
+        return new Location(SCWorldEditUtil.getWorld(world), new Vector(maxX, maxY, maxZ));
     }
 
 }

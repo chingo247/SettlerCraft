@@ -19,9 +19,8 @@ package com.sc.construction.structure;
 import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
 import com.sc.util.SCWorldEditUtil;
-import com.sk89q.worldedit.LocalWorld;
-import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.util.Location;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -56,9 +55,9 @@ public class WorldLocation implements Serializable {
     }
 
     public WorldLocation(Location location) {
-        this.x = location.getPosition().getBlockX();
-        this.y = location.getPosition().getBlockY();
-        this.z = location.getPosition().getBlockZ();
+        this.x = location.getBlockX();
+        this.y = location.getBlockY();
+        this.z = location.getBlockZ();
         this.world = location.getWorld().getName();
     }
 
@@ -93,18 +92,13 @@ public class WorldLocation implements Serializable {
     public World getWorld() {
         return Bukkit.getWorld(world);
     }
-    
-    public LocalWorld getLocalWorld() {
-        return getLocation().getWorld();
-    }
-    
 
     public void setWorld(String world) {
         this.world = world;
     }
 
     public Location getLocation() {
-        return new Location(SCWorldEditUtil.getLocalWorld(world), new Vector(x, y, z));
+        return new Location(SCWorldEditUtil.getWorld(world), new Vector(x, y, z));
     }
 
 }

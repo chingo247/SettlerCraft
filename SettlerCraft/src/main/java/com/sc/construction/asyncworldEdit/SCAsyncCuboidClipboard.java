@@ -20,6 +20,7 @@ import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
+import java.util.UUID;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.PlayerWrapper;
 import org.primesoft.asyncworldedit.PluginMain;
@@ -39,7 +40,7 @@ public class SCAsyncCuboidClipboard extends ProxyCuboidClipboard {
     /**
      * The player
      */
-    private final String m_player;
+    private final UUID m_player;
 
     /**
      * Player wraper
@@ -66,7 +67,7 @@ public class SCAsyncCuboidClipboard extends ProxyCuboidClipboard {
      */
     private final PluginMain m_plugin;
 
-    public SCAsyncCuboidClipboard(String player, CuboidClipboard parrent) {
+    public SCAsyncCuboidClipboard(UUID player, CuboidClipboard parrent) {
         super(new CuboidClipboardWrapper(player, parrent));
 
         m_plugin = PluginMain.getInstance();

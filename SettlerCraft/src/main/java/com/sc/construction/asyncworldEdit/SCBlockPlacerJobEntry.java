@@ -16,9 +16,9 @@
  */
 package com.sc.construction.asyncworldEdit;
 
+import java.util.UUID;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
-import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
 /**
@@ -27,29 +27,30 @@ import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
  */
 public class SCBlockPlacerJobEntry extends BlockPlacerJobEntry {
 
-    private String player;
+    private UUID player;
 
-    public SCBlockPlacerJobEntry(AsyncEditSession editSession, CancelabeEditSession cEditSession, int jobId, String name) {
-        super(editSession, cEditSession, jobId, name);
-        this.player = editSession.getPlayer();
-    }
+//    public SCBlockPlacerJobEntry(AsyncEditSession editSession, CancelabeEditSession cEditSession, int jobId, String name) {
+//        super(editSession, cEditSession, jobId, name);
+//        this.player = editSession.getPlayer();
+//    }
 
-    public SCBlockPlacerJobEntry(String player, CancelabeEditSession cEditSession, int jobId, String name) {
+    public SCBlockPlacerJobEntry(UUID player, CancelabeEditSession cEditSession, int jobId, String name) {
         super(player, cEditSession, jobId, name);
         this.player = player;
     }
 
-    public SCBlockPlacerJobEntry(String player, int jobId, String name) {
+    public SCBlockPlacerJobEntry(UUID player, int jobId, String name) {
         super(player, jobId, name);
         this.player = player;
     }
 
     @Override
-    public void Process(BlockPlacer bp) {
+    public long Process(BlockPlacer bp) {
+        long start = System.currentTimeMillis();
         switch (getStatus()) {
             case Done:
                 bp.removeJob(player, this);
-                return;
+                return System.currentTimeMillis() - start;
             case PlacingBlocks:
                 setStatus(BlockPlacerJobEntry.JobStatus.Done);
                 bp.removeJob(player, this);
@@ -60,6 +61,7 @@ public class SCBlockPlacerJobEntry extends BlockPlacerJobEntry {
                 setStatus(BlockPlacerJobEntry.JobStatus.PlacingBlocks);
                 break;
         }
+        return System.currentTimeMillis() - start;
     }
 
 }

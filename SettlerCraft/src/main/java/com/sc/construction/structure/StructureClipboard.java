@@ -17,7 +17,6 @@
 package com.sc.construction.structure;
 
 import com.sc.construction.generator.Enclosure;
-import com.sc.plugin.ConfigProvider;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
@@ -34,37 +33,22 @@ import java.util.Queue;
  *
  * @author Chingo
  */
-public class StructureClipboard extends CuboidClipboard {
+public class StructureClipboard extends SmartClipboard {
 
     private boolean isDemolishing = false;
     private final Enclosure enclosure;
-    private final CuboidClipboard parent;
     private Comparator<StructureBlock> buildMode;
     private Comparator<StructureBlock> demolisionMode;
 
-    public StructureClipboard(CuboidClipboard parent) {
-        super(parent.getSize());
-        this.setOffset(parent.getOffset());
-        this.setOrigin(parent.getOrigin());
-        this.parent = parent;
-        this.enclosure = new Enclosure(parent, 1, BlockID.IRON_BARS);
+    public StructureClipboard(CuboidClipboard parent, Comparator<StructureBlock> buildMode, Comparator<StructureBlock> demolisionMode) {
+        super(parent, buildMode);
+        this.enclosure = new Enclosure(parent, 1, BlockID.IRON_BARS); // Default
+        this.buildMode = buildMode;
+        this.demolisionMode = demolisionMode.reversed();
     }
 
     public void setDemolishing(boolean demolishing) {
         this.isDemolishing = demolishing;
-    }
-
-    private Comparator<StructureBlock> getMode(int mode) {
-        switch (mode) {
-            case 0:
-                return StructureBlockComparators.PERFORMANCE;
-            case 1:
-                return StructureBlockComparators.COMPROMIS;
-            case 2:
-                return StructureBlockComparators.FANCY;
-            default:
-                throw new AssertionError("Unreachable");
-        }
     }
 
     public Enclosure getEnclosure() {
@@ -83,10 +67,8 @@ public class StructureClipboard extends CuboidClipboard {
     @Override
     public void place(EditSession editSession, Vector pos, boolean noAir) throws MaxChangedBlocksException {
         if (isDemolishing) {
-            this.demolisionMode = getMode(ConfigProvider.getInstance().getDemolisionMode());
             placeDemolishing(editSession, pos, noAir);
         } else {
-             this.buildMode = getMode(ConfigProvider.getInstance().getBuildMode());
             placeBuilding(editSession, pos, noAir);
         }
     }
@@ -94,12 +76,12 @@ public class StructureClipboard extends CuboidClipboard {
     private void placeDemolishing(EditSession editSession, Vector pos, boolean noAir) {
         Queue<StructureBlock> structurequeu = new PriorityQueue<>(demolisionMode.reversed());
         Queue<StructureBlock> enclosureQueue = new PriorityQueue<>();
-        for (int y = parent.getHeight() - 1; y >= 0; y--) {
-            for (int x = 0; x < parent.getWidth(); x++) {
-                for (int z = 0; z < parent.getLength(); z++) {
+        for (int y = getParent().getHeight() - 1; y >= 0; y--) {
+            for (int x = 0; x < getWidth(); x++) {
+                for (int z = 0; z < getLength(); z++) {
                     final BlockVector v = new BlockVector(x, y, z);
 
-                    BaseBlock b = parent.getBlock(v);
+                    BaseBlock b = getBlock(v);
                     if (b == null || (noAir && b.isAir())) {
                         continue;
                     }
@@ -122,11 +104,11 @@ public class StructureClipboard extends CuboidClipboard {
     private void placeBuilding(EditSession editSession, Vector pos, boolean noAir) {
         Queue<StructureBlock> enclosureQueue = new PriorityQueue<>();
         Queue<StructureBlock> structurequeu = new PriorityQueue<>(buildMode);
-        for (int y = 0; y < parent.getHeight(); y++) {
-            for (int x = 0; x < parent.getWidth(); x++) {
-                for (int z = 0; z < parent.getLength(); z++) {
+        for (int y = 0; y < getHeight(); y++) {
+            for (int x = 0; x < getWidth(); x++) {
+                for (int z = 0; z < getLength(); z++) {
                     final BlockVector v = new BlockVector(x, y, z);
-                    BaseBlock b = parent.getBlock(v);
+                    BaseBlock b = getBlock(v);
                     if (b == null || (noAir && b.isAir())) {
                         continue;
                     }

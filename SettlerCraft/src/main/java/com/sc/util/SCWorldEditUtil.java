@@ -16,19 +16,18 @@
  */
 package com.sc.util;
 
-import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.LocalWorld;
-import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.data.DataException;
-import com.sk89q.worldedit.regions.CuboidRegionSelector;
+import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.schematic.SchematicFormat;
+import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -43,10 +42,6 @@ import org.bukkit.entity.Player;
  * @author Chingo
  */
 public class SCWorldEditUtil {
-
-    public static Location getLocation(org.bukkit.Location location) {
-        return new Location(getLocalWorld(location.getWorld().getName()), new BlockVector(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
-    }
 
     public static CuboidClipboard load(File SchematicFile) throws FileNotFoundException, DataException, IOException {
         SchematicFormat format = SchematicFormat.getFormat(SchematicFile);
@@ -73,28 +68,29 @@ public class SCWorldEditUtil {
         return getWorldEditPlugin().wrapPlayer(player);
     }
 
-    public static LocalWorld getLocalWorld(Player player) {
+    public static World getWorld(Player player) {
         return getLocalPlayer(player).getWorld();
     }
-
-    public static LocalWorld getLocalWorld(String world) {
-        List<LocalWorld> worlds = getWorldEditPlugin().getWorldEdit().getServer().getWorlds();
-        for (LocalWorld lw : worlds) {
-            if (lw.getName().equals(world)) {
-                return lw;
+    
+    public static World getWorld(String world) {
+        List<? extends World> worlds = WorldEdit.getInstance().getServer().getWorlds();
+        for(int i = 0; i < worlds.size(); i++) {
+            World w = worlds.get(i);
+            if(w.getName().equals(world)) {
+                return w;
             }
         }
         return null;
     }
 
     public static void select(Player player, Vector pos1, Vector pos2) {
-        LocalPlayer localPlayer = getLocalPlayer(player);
-        LocalWorld world = localPlayer.getWorld();
+        Actor localPlayer = getLocalPlayer(player);
+        World world = localPlayer.getWorld();
         LocalSession session = getLocalSession(player);
 
 //            Vector pos = getBlockWorldVector(location);
 //            Vector pos2 = pos.add(clipboard.getSize().subtract(1,1,1));
-        session.setRegionSelector(world, new CuboidRegionSelector(world, pos1, pos2));
+        session.setRegionSelector(world, new com.sk89q.worldedit.regions.selector.CuboidRegionSelector(world, pos1, pos2));
         session.getRegionSelector(world).learnChanges();
         session.getRegionSelector(world).explainRegionAdjust(localPlayer, session);
 

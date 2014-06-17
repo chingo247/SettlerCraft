@@ -20,13 +20,14 @@ import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
+import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
+import org.primesoft.asyncworldedit.utils.SessionCanceled;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
-import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
 /**
  * Silent non-standard-talkative version of the original see ClipboardAsyncTask
@@ -46,14 +47,14 @@ public abstract class SCClipBoardAsyncTask extends BukkitRunnable {
     /**
      * The player
      */
-    private final String player;
+    private final UUID player;
     private final BlockPlacer blockPlacer;
     private final SCBlockPlacerJobEntry job;
     private final AsyncEditSession editSession;
     private final JobCallback callback;
 
     public SCClipBoardAsyncTask(final CuboidClipboard clipboard, final EditSession editSession,
-            final String player, final String commandName, BlockPlacer blocksPlacer,
+            final UUID player, final String commandName, BlockPlacer blocksPlacer,
             SCBlockPlacerJobEntry job, JobCallback callback) {
         Preconditions.checkNotNull(editSession);
         this.clipboard = clipboard;
@@ -90,7 +91,7 @@ public abstract class SCClipBoardAsyncTask extends BukkitRunnable {
         } catch (MaxChangedBlocksException ex) {
             Bukkit.getPlayer(player).sendMessage(ChatColor.RED + "Maximum block change limit has been reached");
         } catch (IllegalArgumentException ex) {
-            if (ex.getCause() instanceof CancelabeEditSession.SessionCanceled) {
+            if (ex.getCause() instanceof SessionCanceled) {
 //                PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Job canceled.");
                 if (callback != null) {
                     callback.onJobCanceled(job);

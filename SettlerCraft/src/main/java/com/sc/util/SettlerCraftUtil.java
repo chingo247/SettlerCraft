@@ -7,10 +7,10 @@
 package com.sc.util;
 
 import com.sk89q.worldedit.BlockVector;
-import com.sk89q.worldedit.Countable;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.util.Countable;
 import org.bukkit.Material;
 import org.bukkit.material.Attachable;
 import org.bukkit.material.Crops;

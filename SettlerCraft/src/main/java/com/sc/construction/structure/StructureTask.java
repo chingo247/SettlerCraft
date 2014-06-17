@@ -11,14 +11,18 @@ import com.sc.construction.plan.StructureSchematic;
 import com.sc.construction.sync.SyncBuilder;
 import com.sc.construction.sync.TaskCompleteCallback;
 import com.sc.persistence.SchematicService;
+import com.sc.plugin.ConfigProvider;
 import com.sc.util.SCAsyncWorldEditUtil;
+import com.sc.util.SCWorldEditUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
+import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.data.DataException;
 import com.sk89q.worldedit.schematic.SchematicFormat;
 import java.io.File;
 import java.io.IOException;
+import java.util.Comparator;
 import org.apache.log4j.Logger;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -62,20 +66,26 @@ public class StructureTask extends BukkitRunnable {
         } catch (IOException | DataException ex) {
             LOG.error(ex);
         }
-        final AsyncEditSession structureSession = SCAsyncWorldEditUtil.createAsyncEditSession(tasker.getName(), structure.getLocation().getWorld(), -1);
+        
+        final AsyncEditSession structureSession = SCAsyncWorldEditUtil.createAsyncEditSession(
+                SCWorldEditUtil.getLocalPlayer(tasker), -1);
         // Align the clipboard
         StructureManager.getInstance().align(clipboard, structure.getCardinal());
-        final StructureClipboard structureClipboard = new StructureClipboard(clipboard);
+        Comparator<StructureBlock> bm = StructureBlockComparators.getMode(ConfigProvider.getInstance().getBuildMode());
+        Comparator<StructureBlock> dm = StructureBlockComparators.getMode(ConfigProvider.getInstance().getDemolisionMode());
+        
+        final StructureClipboard structureClipboard = new StructureClipboard(clipboard, bm, dm);
         structureClipboard.setDemolishing(isDemolishing);
 
         // If we aren't demolishing place the enclosure
         if (!isDemolishing) {
             
             // Create the enclosure and place it
-            final EditSession enclosureSession = new EditSession(structure.getLocation().getWorld(), -1);
+            
+            final EditSession enclosureSession = WorldEdit.getInstance().getEditSessionFactory().getEditSession(SCWorldEditUtil.getWorld(structure.getWorld()), ENCLOSURE_PLACE_SPEED);
             // Set the enclosure, so that it will be replaced with real blocks when finished
             // Note: The Clipboard is always drawn from the min position using the place method
-            enclosureTask = SyncBuilder.placeBuffered(enclosureSession, structureClipboard.getEnclosure().getClipboard(), structure.getDimension().getMin().getPosition(), ENCLOSURE_PLACE_SPEED, new TaskCompleteCallback() {
+            enclosureTask = SyncBuilder.placeBuffered(enclosureSession, structureClipboard.getEnclosure().getClipboard(), structure.getDimension().getMinPosition(), ENCLOSURE_PLACE_SPEED, new TaskCompleteCallback() {
 
                 @Override
                 public void onComplete() {
@@ -86,7 +96,6 @@ public class StructureTask extends BukkitRunnable {
             
             doStructure(tasker.getName(), structureClipboard, structureSession);
         }
-
     }
 
     private void doStructure(String ply, StructureClipboard clipboard, AsyncEditSession session) {
@@ -97,7 +106,7 @@ public class StructureTask extends BukkitRunnable {
         final SCAsyncCuboidClipboard asyncStructureClipboard = new SCAsyncCuboidClipboard(session.getPlayer(), clipboard);
         try {
             // Note: The Clipboard is always drawn from the min position using the place method
-            asyncStructureClipboard.place(session, structure.getDimension().getMin().getPosition(), false, sCallback);
+            asyncStructureClipboard.place(session, structure.getDimension().getMinPosition(), false, sCallback);
         } catch (MaxChangedBlocksException ex) { // shouldnt happen
             LOG.error(ex);
         }

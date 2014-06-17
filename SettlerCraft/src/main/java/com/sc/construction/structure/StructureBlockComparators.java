@@ -116,5 +116,18 @@ public class StructureBlockComparators {
         }
 
     }
+    
+    public static Comparator<StructureBlock> getMode(int mode) {
+        switch (mode) {
+            case 0:
+                return StructureBlockComparators.PERFORMANCE;
+            case 1:
+                return StructureBlockComparators.COMPROMIS;
+            case 2:
+                return StructureBlockComparators.FANCY;
+            default:
+                throw new AssertionError("Unreachable");
+        }
+    }
 
 }

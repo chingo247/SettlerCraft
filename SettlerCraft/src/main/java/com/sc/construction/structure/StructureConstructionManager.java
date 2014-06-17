@@ -210,7 +210,7 @@ public class StructureConstructionManager {
             BlockPlacer placer = SCAsyncWorldEditUtil.getBlockPlacer();
             int jobId = process.getJobId();
 
-            String owner = tasker.getName();
+            UUID owner = tasker.getUniqueId();
             placer.cancelJob(owner, jobId);
 
             process.setProgressStatus(ConstructionProcess.State.STOPPED);

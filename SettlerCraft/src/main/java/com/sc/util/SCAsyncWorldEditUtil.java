@@ -16,9 +16,8 @@
  */
 package com.sc.util;
 
-import static com.sc.util.SCWorldEditUtil.getLocalWorld;
-import com.sk89q.worldedit.LocalWorld;
-import org.bukkit.entity.Player;
+import com.sk89q.worldedit.LocalPlayer;
+import com.sk89q.worldedit.WorldEdit;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
@@ -39,15 +38,16 @@ public class SCAsyncWorldEditUtil {
     }
 
     public static AsyncEditSessionFactory getAsyncSessionFactory() {
-        return new AsyncEditSessionFactory(getAsyncWorldEditPlugin());
+        return new AsyncEditSessionFactory(PluginMain.getInstance(), WorldEdit.getInstance().getEventBus());
     }
 
-    public static AsyncEditSession createAsyncEditSession(Player issuer, int maxblocks) {
-        return new AsyncEditSession(getAsyncSessionFactory(), getAsyncWorldEditPlugin(), issuer.getName(), getLocalWorld(issuer), maxblocks);
+//    public static AsyncEditSession createAsyncEditSession(Player issuer, int maxblocks) {
+//        return (AsyncEditSession) getAsyncSessionFactory().getEditSession(SCWorldEditUtil.getWorld(issuer), maxblocks);
+//    }
+    
+    public static AsyncEditSession createAsyncEditSession(LocalPlayer player, int maxblocks) {
+        return (AsyncEditSession) getAsyncSessionFactory().getEditSession(player.getWorld(), maxblocks, player);
     }
 
-    public static AsyncEditSession createAsyncEditSession(String issuer, LocalWorld world, int maxblocks) {
-        return new AsyncEditSession(getAsyncSessionFactory(), getAsyncWorldEditPlugin(), issuer, world, maxblocks);
-    }
 
 }
