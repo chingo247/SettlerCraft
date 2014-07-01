@@ -16,18 +16,12 @@
  */
 package com.sc.construction.structure;
 
-import com.gmail.filoghost.holograms.api.Hologram;
-import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.google.common.base.Preconditions;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.construction.asyncworldEdit.ConstructionProcess;
-import com.sc.construction.asyncworldEdit.ConstructionProcess.State;
 import com.sc.construction.exception.StructureException;
 import com.sc.construction.plan.StructurePlan;
 import com.sc.construction.plan.StructureSchematic;
 import com.sc.menu.SCVaultEconomyUtil;
-import com.sc.persistence.HibernateUtil;
 import com.sc.persistence.SchematicService;
 import com.sc.persistence.StructureService;
 import com.sc.plugin.ConfigProvider;
@@ -40,7 +34,6 @@ import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.bukkit.RegionPermissionModel;
 import com.sk89q.worldguard.bukkit.WorldConfiguration;
@@ -49,13 +42,8 @@ import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,7 +53,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.hibernate.Session;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
@@ -82,13 +69,12 @@ public class StructureManager {
 
     private static final int INFINITE = -1;
 
-    private final Map<Long, Hologram> holos; // Structure id / Holo
     private final Plugin plugin;
     private final org.apache.log4j.Logger LOGGER = org.apache.log4j.Logger.getLogger(StructureManager.class);
-    private boolean initialized = false;
+    
 
     private StructureManager() {
-        this.holos = Collections.synchronizedMap(new HashMap<Long, Hologram>());
+        
         this.plugin = SettlerCraft.getSettlerCraft();
     }
 
@@ -97,25 +83,6 @@ public class StructureManager {
             instance = new StructureManager();
         }
         return instance;
-    }
-
-    public void init() {
-        if (!initialized) {
-            if(ConfigProvider.getInstance().useHolograms()) {
-                initHolos();
-                initialized = true;
-            }
-        }
-    }
-
-    public void removeHolo(Long structureId) {
-        if(ConfigProvider.getInstance().useHolograms()) {
-            Hologram hologram = holos.get(structureId);
-            if(hologram != null) {
-                hologram.delete();
-                holos.remove(structureId);
-            }
-        }
     }
 
     private boolean exceedsLimit(Player player) {
@@ -136,42 +103,9 @@ public class StructureManager {
 
     }
 
-    private void initHolos() {
-        if(!ConfigProvider.getInstance().useHolograms()) {
-            return;
-        }
-        
-        Session session = HibernateUtil.getSession();
-        JPQLQuery query = new HibernateQuery(session);
-        QStructure qs = QStructure.structure;
-        List<Structure> structures = query.from(qs).where(qs.progress().progressStatus.ne(State.REMOVED)).list(qs);
-        session.close();
-        Iterator<Structure> sit = structures.iterator();
-        while (sit.hasNext()) {
-            Structure s = sit.next();
-            if (ConfigProvider.getInstance().useHolograms() && s.getPlan().hasSign()) {
-                holos.put(s.getId(), createStructureHolo(s));
-            }
-        }
-    }
 
-    private Hologram createStructureHolo(Structure structure) {
-        Location pos = structure.getLocation(structure.getPlan().getSignLocation());
 
-        org.bukkit.Location location = new org.bukkit.Location(
-                Bukkit.getWorld(structure.getLocation().getWorld().getName()),
-                pos.getX(),
-                pos.getY() + 1, // a bit above ground level
-                pos.getZ()
-        );
-
-        Hologram hologram = HolographicDisplaysAPI.createHologram(plugin, location,
-                "Id: " + ChatColor.GOLD + structure.getId(),
-                "Plan: " + ChatColor.BLUE + structure.getPlan().getDisplayName(),
-                "Owner: " + ChatColor.GREEN + structure.getOwner()
-        );
-        return hologram;
-    }
+    
 
     public CuboidClipboard cloneArea(Structure structure) {
         WorldDimension dimension = structure.getDimension();
@@ -190,7 +124,7 @@ public class StructureManager {
         return clipboard;
     }
 
-    public Structure construct(final Player owner, final StructurePlan plan, final Vector location, final SimpleCardinal cardinal) {
+    public Structure create(final Player owner, final StructurePlan plan, final Vector location, final SimpleCardinal cardinal) {
         if (exceedsLimit(owner)) {
             owner.sendMessage(ChatColor.RED + "Construction queue is full! Wait for the structure(s) to finish");
             return null;
@@ -198,9 +132,7 @@ public class StructureManager {
         SchematicService service = new SchematicService();
         StructureSchematic schematic = service.getSchematic(plan.getSchematicChecksum());
 
-        
-        
-        Structure structure = new Structure(SCWorldEditUtil.getWorld(owner),owner, location, cardinal, plan, schematic);
+        Structure structure = new Structure(SCWorldEditUtil.getWorld(owner), owner, location, cardinal, plan, schematic);
         if (overlaps(structure)) {
             owner.sendMessage(ChatColor.RED + " Structure overlaps another structure");
             return null;
@@ -219,6 +151,10 @@ public class StructureManager {
             owner.sendMessage(ChatColor.RED + "Failed to claim region for structure");
             return null;
         }
+        
+        if (ConfigProvider.getInstance().useHolograms() && structure.getPlan().hasSign()) {
+           StructureConstructionManager.getInstance().createStructureHolo(structure);
+        }
 
         try {
             StructureConstructionManager.getInstance().continueProcess(owner, progress, true);
@@ -226,9 +162,7 @@ public class StructureManager {
             Logger.getLogger(StructureManager.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        if (ConfigProvider.getInstance().useHolograms() && structure.getPlan().hasSign()) {
-            holos.put(structure.getId(), createStructureHolo(structure));
-        }
+        
 
         return structure;
     }
@@ -279,7 +213,7 @@ public class StructureManager {
 
         // Set Flag
         region.setFlags(ConfigProvider.getInstance().getDefaultFlags());
-        
+
         region.getOwners().addPlayer(player.getName());
         mgr.addRegion(region);
         try {
@@ -439,10 +373,6 @@ public class StructureManager {
         }
     }
 
-    public void shutdown() {
-        for (Hologram holo : holos.values()) {
-            holo.delete();
-        }
-    }
+
 
 }

@@ -10,7 +10,7 @@ import com.sc.commands.SettlerCraftCommandExecutor;
 import com.sc.commands.StructureCommandExecutor;
 import com.sc.construction.feedback.SelectionManager;
 import com.sc.construction.plan.StructurePlanManager;
-import com.sc.construction.structure.StructureManager;
+import com.sc.construction.structure.StructureConstructionManager;
 import com.sc.listener.PlayerListener;
 import com.sc.listener.PluginListener;
 import com.sc.listener.ShopListener;
@@ -37,13 +37,11 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class SettlerCraft extends JavaPlugin {
 
-    
     private static final int INFINITE_BLOCKS = -1;
     private static final Logger LOGGER = Logger.getLogger(SettlerCraft.class);
     private Plugin plugin;
     private static SettlerCraft instance;
     private boolean plansLoaded = false;
-
 
     @Override
     public void onEnable() {
@@ -70,49 +68,39 @@ public class SettlerCraft extends JavaPlugin {
             this.setEnabled(false);
             return;
         }
-        
-       
-        
+
         if (!HSQLServer.getInstance().isRunning()) {
             HSQLServer.getInstance().start();
             System.out.println("[SettlerCraft]: Checking for invalid structures");
             new RestoreService().restore(); // only execute on server start, not on reload!
         }
 
-        loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
-        
-        Bukkit.broadcastMessage(ChatColor.GOLD + "[SettlerCraft]: " + ChatColor.RESET + "Structure plans loaded");
-        StructureManager.getInstance().init();
-
-        Bukkit.getPluginManager().registerEvents(new StructureListener(), this);
-        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
-        Bukkit.getPluginManager().registerEvents(new ShopListener(), this);
-        Bukkit.getPluginManager().registerEvents(new PluginListener(), this);
         try {
             ConfigProvider.getInstance().load();
         } catch (SettlerCraftException ex) {
             java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+        loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
+
+        Bukkit.broadcastMessage(ChatColor.GOLD + "[SettlerCraft]: " + ChatColor.RESET + "Structure plans loaded");
+        StructureConstructionManager.getInstance().init();
+
+        Bukkit.getPluginManager().registerEvents(new StructureListener(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
+        Bukkit.getPluginManager().registerEvents(new ShopListener(), this);
+        Bukkit.getPluginManager().registerEvents(new PluginListener(), this);
+
         getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
         getCommand("cst").setExecutor(new ConstructionCommandExecutor(this));
         getCommand("stt").setExecutor(new StructureCommandExecutor());
-        
+
         printPerms();
     }
-    
-    
-    
 
-    
-    
-    
-    
-    
-
-    private void printPerms () {
+    private void printPerms() {
         File printedFile = new File(SettlerCraft.getSettlerCraft().getDataFolder(), "SettlerCraftPermissions.yml");
-        if(!printedFile.exists()) {
+        if (!printedFile.exists()) {
             try {
                 printedFile.createNewFile();
             } catch (IOException ex) {
@@ -120,31 +108,31 @@ public class SettlerCraft extends JavaPlugin {
             }
         }
         YamlConfiguration config = YamlConfiguration.loadConfiguration(printedFile);
-        
-        for(Perms perm : Perms.values()) {
+
+        for (Perms perm : Perms.values()) {
             Permission p = perm.PERM;
             config.createSection(p.getName());
             config.set(p.getName() + ".default", p.getDefault().toString());
             config.set(p.getName() + ".description", p.getDescription());
         }
-        
+
         try {
             config.save(printedFile);
         } catch (IOException ex) {
             java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }
 
     public static SettlerCraft getSettlerCraft() {
         return (SettlerCraft) Bukkit.getPluginManager().getPlugin("SettlerCraft");
     }
-    
+
     /**
      * Stops all processes
      */
     public void stop() {
-        StructureManager.getInstance().shutdown();
+        StructureConstructionManager.getInstance().shutdown();
         MenuManager.getInstance().clearVisitors();
         SelectionManager.getInstance().clearAll();
     }
@@ -165,9 +153,5 @@ public class SettlerCraft extends JavaPlugin {
         }
         StructurePlanManager.getInstance().load(structureFolder);
     }
-
-    
-
-    
 
 }

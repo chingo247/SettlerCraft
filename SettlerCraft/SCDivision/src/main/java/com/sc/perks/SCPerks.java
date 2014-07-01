@@ -22,6 +22,7 @@ public class SCPerks extends JavaPlugin {
             this.setEnabled(false);
             return;
         }
+        
         Bukkit.getPluginManager().registerEvents(new PerkListener(), this);
     }
     

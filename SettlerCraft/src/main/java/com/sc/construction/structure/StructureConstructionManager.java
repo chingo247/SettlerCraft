@@ -5,21 +5,30 @@
  */
 package com.sc.construction.structure;
 
+import com.gmail.filoghost.holograms.api.Hologram;
+import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.google.common.base.Preconditions;
+import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.construction.asyncworldEdit.ConstructionEntry;
 import com.sc.construction.asyncworldEdit.ConstructionProcess;
 import com.sc.construction.exception.StructureException;
+import static com.sc.construction.structure.StructureManager.STRUCTURE_STATUS_INDEX;
 import com.sc.persistence.AbstractService;
 import com.sc.persistence.HibernateUtil;
 import com.sc.persistence.StructureService;
+import com.sc.plugin.ConfigProvider;
 import com.sc.plugin.SettlerCraft;
 import com.sc.util.SCAsyncWorldEditUtil;
+import com.sk89q.worldedit.util.Location;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -37,12 +46,24 @@ public class StructureConstructionManager {
     private static final int ENCLOSURE_BUFFER_SIZE = 100;
     private final Map<UUID, ConstructionEntry> playerEntries;
     private final Map<Long, StructureTask> structureTasks;
+    private final Map<Long, Hologram> holos; // Structure id / Holo
     private final Plugin plugin = SettlerCraft.getSettlerCraft();
     private static StructureConstructionManager instance;
+    private boolean initialized = false;
 
     private StructureConstructionManager() {
         this.playerEntries = Collections.synchronizedMap(new HashMap<UUID, ConstructionEntry>());
         this.structureTasks = Collections.synchronizedMap(new HashMap<Long, StructureTask>());
+        this.holos = Collections.synchronizedMap(new HashMap<Long, Hologram>());
+    }
+
+    public void init() {
+        if (!initialized) {
+            if (ConfigProvider.getInstance().useHolograms()) {
+                initHolos();
+                initialized = true;
+            }
+        }
     }
 
     /**
@@ -80,9 +101,114 @@ public class StructureConstructionManager {
      */
     public boolean removeProcess(final UUID owner, final Integer jobId) {
         if (playerEntries.get(owner) != null) {
-            return playerEntries.get(owner).remove(jobId) != null;
+            ConstructionProcess process = playerEntries.get(owner).remove(jobId);
+            if (process != null) {
+                updateHolo(process);
+                return true;
+            }
         }
+
         return false;
+    }
+
+    private void initHolos() {
+        if (!ConfigProvider.getInstance().useHolograms()) {
+            return;
+        }
+
+        Session session = HibernateUtil.getSession();
+        JPQLQuery query = new HibernateQuery(session);
+        QStructure qs = QStructure.structure;
+        List<Structure> structures = query.from(qs).where(qs.progress().progressStatus.ne(ConstructionProcess.State.REMOVED)).list(qs);
+        session.close();
+        Iterator<Structure> sit = structures.iterator();
+        while (sit.hasNext()) {
+            Structure s = sit.next();
+            if (ConfigProvider.getInstance().useHolograms() && s.getPlan().hasSign()) {
+                createStructureHolo(s);
+            }
+        }
+    }
+
+    private void updateHolo(final ConstructionProcess progress) {
+        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+
+            @Override
+            public void run() {
+                final Hologram holo = holos.get(progress.getId());
+                ConstructionProcess.State state = progress.getStatus();
+
+                if (holo != null) {
+                    if (state == ConstructionProcess.State.COMPLETE) {
+                        holo.setLine(STRUCTURE_STATUS_INDEX, "");
+                        holo.update();
+                        return;
+
+                    } else if (state == ConstructionProcess.State.REMOVED) {
+                        holos.remove(progress.getId());
+                        holo.delete();
+                        return;
+                    }
+                    String statusString;
+                    switch (state) {
+                        case DEMOLISHING:
+                            statusString = "Status: " + ChatColor.YELLOW;
+                            statusString += state.name();
+                            break;
+                        case BUILDING:
+                            statusString = "Status: " + ChatColor.YELLOW;
+                            statusString += state.name();
+                            break;
+                        case COMPLETE:
+                            statusString = "";
+                            break;
+                        case STOPPED:
+                            statusString = "Status: " + ChatColor.RED;
+                            statusString += state.name();
+                            break;
+                        default:
+                            statusString = "Status: " + ChatColor.WHITE;
+                            statusString += state.name();
+                            break;
+                    }
+
+                    holo.setLine(STRUCTURE_STATUS_INDEX, statusString);
+                    holo.update();
+
+                }
+            }
+        });
+
+    }
+
+    void createStructureHolo(Structure structure) {
+        Location pos = structure.getLocation(structure.getPlan().getSignLocation());
+
+        org.bukkit.Location location = new org.bukkit.Location(
+                Bukkit.getWorld(structure.getLocation().getWorld().getName()),
+                pos.getX(),
+                pos.getY() + 1, // a bit above ground level
+                pos.getZ()
+        );
+
+        Hologram hologram = HolographicDisplaysAPI.createHologram(plugin, location,
+                "Id: " + ChatColor.GOLD + structure.getId(),
+                "Plan: " + ChatColor.BLUE + structure.getPlan().getDisplayName(),
+                "Owner: " + ChatColor.GREEN + structure.getOwner(),
+                "Status: " + structure.getProgress().getStatus()
+        );
+        System.out.println("Holo created: " + structure.getId());
+        holos.put(structure.getId(), hologram);
+    }
+
+    public void removeHolo(Long structureId) {
+        if (ConfigProvider.getInstance().useHolograms()) {
+            Hologram hologram = holos.get(structureId);
+            if (hologram != null) {
+                hologram.delete();
+                holos.remove(structureId);
+            }
+        }
     }
 
     /**
@@ -93,6 +219,7 @@ public class StructureConstructionManager {
      * @return True if process exist and was removed
      */
     public boolean removeProcess(final Player owner, final Integer jobId) {
+
         return removeProcess(owner.getUniqueId(), jobId);
     }
 
@@ -108,6 +235,7 @@ public class StructureConstructionManager {
             playerEntries.put(player.getUniqueId(), new ConstructionEntry(player));
         }
         playerEntries.get(player.getUniqueId()).put(jobId, process);
+        updateHolo(process);
     }
 
     /**
@@ -158,13 +286,13 @@ public class StructureConstructionManager {
         if (force) {
             stopProcess(player, process, force);
         }
-        
+
         // Stop the task if any
         StructureTask task = structureTasks.get(structure.getId());
-        if(task != null) {
+        if (task != null) {
             task.cancel();
         }
-        
+
         StructureService ss = new StructureService();
         process.setJobId(-1);
 //        process.setHasPlacedEnclosure(false);
@@ -195,10 +323,10 @@ public class StructureConstructionManager {
         if (progressStatus == ConstructionProcess.State.COMPLETE || process.getJobId() == -1) {
             return false;
         }
-        
-         // Stop the task if any, processes always have the same id as their structure
+
+        // Stop the task if any, processes always have the same id as their structure
         StructureTask task = structureTasks.get(process.getId());
-        if(task != null) {
+        if (task != null) {
             task.cancel();
         }
 
@@ -230,8 +358,7 @@ public class StructureConstructionManager {
                 session.close();
             }
         }
-        
-        
+
         return true;
     }
 
@@ -252,8 +379,7 @@ public class StructureConstructionManager {
     }
 
     /**
-     * Demolishes a structure
-     * structure was placed
+     * Demolishes a structure structure was placed
      *
      * @param player The demolisher
      * @param structure The target structure
@@ -276,8 +402,7 @@ public class StructureConstructionManager {
     }
 
     /**
-     * Builds a structure
-     * structure was placed
+     * Builds a structure structure was placed
      *
      * @param player The demolisher
      * @param structure The target structure
@@ -298,7 +423,7 @@ public class StructureConstructionManager {
         }
         return false;
     }
-    
+
     public void stopAll() {
         for (ConstructionEntry ce : playerEntries.values()) {
             for (ConstructionProcess process : ce.list()) {
@@ -306,6 +431,12 @@ public class StructureConstructionManager {
                     stopProcess(ce.getOwner(), process, true);
                 }
             }
+        }
+    }
+
+    public void shutdown() {
+        for (Hologram holo : holos.values()) {
+            holo.delete();
         }
     }
 

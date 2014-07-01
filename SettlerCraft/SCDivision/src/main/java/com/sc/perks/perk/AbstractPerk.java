@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.sc.perks;
+package com.sc.perks.perk;
 
 import java.util.Objects;
 
@@ -12,23 +12,36 @@ import java.util.Objects;
  *
  * @author Chingo
  */
-public class Perk {
+public abstract class AbstractPerk {
     
-    private int increase = 1; // Increases when level / increase % increase == 0
-    private int requiredLevel;
+    
+    
+    public enum Group {
+        OWNER,
+        MEMBER,
+        ALL
+    }
+    
+    private int maxLevel = -1;
+    private int requiredLevel = 0;
     private final String name;
-    private Perk requirement;
+    private AbstractPerk requirement;
+    private final Group group;
+    private final String rootNode;
+   
 
-    public Perk(String name) {
+    public AbstractPerk(String roodNode, String name, Group group) {
         this.name = name;
         this.requirement = null;
+        this.group = group;
+        this.rootNode = roodNode;
     }
 
-    public void setRequirement(Perk requirement) {
+    public void setRequirement(AbstractPerk requirement) {
         this.requirement = requirement;
     }
 
-    public Perk getRequirement() {
+    public AbstractPerk getRequirement() {
         return requirement;
     }
 
@@ -59,14 +72,14 @@ public class Perk {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Perk other = (Perk) obj;
+        final AbstractPerk other = (AbstractPerk) obj;
         if (!Objects.equals(this.name, other.name)) {
             return false;
         }
         return true;
     }
     
-    
+    public abstract void levelUp();
     
     
 }

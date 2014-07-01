@@ -60,7 +60,7 @@ public class ConfigProvider {
             if(demolisionMode < 0 || demolisionMode > 2) {
                 throw new SettlerCraftException("Invalid demolision node in config");
             }
-            this.useHolograms = config.getBoolean("use-holograms");
+            this.useHolograms = config.getBoolean("structure.use-holograms");
             this.defaultFlags = getDefaultFlags(config);
             
     }

@@ -59,8 +59,9 @@ public class PerkListener implements Listener {
     
 
     @EventHandler
-    public void onFurnaceBurn(FurnaceBurnEvent fbe) {
+    public void onFurnaceBurn(FurnaceBurnEvent fbe) throws InstantiationException, IllegalAccessException {
         System.out.println(fbe.getBurnTime());
+        System.out.println(fbe.getEventName());
 //        Structure structure = ss.getStructure(fbe.getBlock().getLocation());
 //        if (structure != null) {
 //            fbe.

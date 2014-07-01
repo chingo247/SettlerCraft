@@ -62,6 +62,8 @@ public class ConstructionStructureCallback implements JobCallback {
         progress.setJobId(entry.getJobId());
         progress = ss.save(progress);
         this.jobId = entry.getJobId();
+        
+        // JobID added to ConstructionManager
         scm.putProcess(tasker, jobId, progress);
         entry.addStateChangedListener(new IJobEntryListener() {
 
@@ -92,7 +94,8 @@ public class ConstructionStructureCallback implements JobCallback {
                             Bukkit.getPluginManager().callEvent(new StructureCompleteEvent(structure));
                             progress.setProgressStatus(ConstructionProcess.State.COMPLETE);
                             progress.setCompletedAt(new Timestamp(new Date().getTime()));
-                            ss.save(progress);
+                            progress = ss.save(progress);
+                            scm.putProcess(tasker, jobId, progress);
                             scm.removeProcess(tasker, jobId);
                         }
                     } else {
@@ -105,7 +108,7 @@ public class ConstructionStructureCallback implements JobCallback {
                              }
                              structure.setRefundValue(0d);
                              Bukkit.getPluginManager().callEvent(new StructureRemovedEvent(structure));
-                             sm.removeHolo(structureId);
+                             scm.removeHolo(structureId);
                              sm.removeRegion(structure);
                              scm.removeProcess(tasker, jobId);
                              ss.save(structure);

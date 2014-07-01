@@ -197,7 +197,7 @@ public class PlayerListener implements Listener {
                             pos1 = WorldUtil.addOffset(pos1, cardinal, (-(s.getLength() - 1)), 0, 0);
                         }
 
-                        if (sm.construct(player, plan, pos1, cardinal) != null) {
+                        if (sm.create(player, plan, pos1, cardinal) != null) {
                             slm.clearsSimple(player, false);
                             return true;
                         }
@@ -266,7 +266,7 @@ public class PlayerListener implements Listener {
 //                        // Fix? WTF How?
 //                        pos1 = WorldUtil.addOffset(pos1, cardinal, (-(s.getLength() - 1)), 0, 0);
 //                    }
-//                    if (sm.construct(player, plan, pos1, cardinal) != null) {
+//                    if (sm.create(player, plan, pos1, cardinal) != null) {
 //                        slm.clearCUISelection(player, false);
 //                        return true;
 //                    }
