@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+
+
+<structureplan>
+    <id>DefaultTownCenter</id>
+    <name>Town Center</name>
+    <schematic>TownCenter.schematic</schematic>
+    <description>The Town Center is a vital economic building for all civilizations</description>
+    <culture>default</culture>
+    <faction>default</faction>
+    <start-height>0</start-height>
+    <entities>
+        <structure-displays>
+            <structure-display>
+                <x>0</x>
+                <y>0</y>
+                <z>0</z>
+            </structure-display>
+        </structure-displays>
+        <holograms>
+            <hologram>
+                <lines>
+                    <line>Hello</line>
+                    <line>Welcome!</line>
+                </lines>
+            </hologram>
+        </holograms>
+    </entities>
+    
+</structureplan>

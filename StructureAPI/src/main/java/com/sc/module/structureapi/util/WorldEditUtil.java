@@ -1,0 +1,39 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package com.sc.module.structureapi.util;
+
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
+import com.sk89q.worldedit.world.World;
+import java.util.List;
+
+/**
+ *
+ * @author Chingo
+ */
+public class WorldEditUtil {
+    
+    private WorldEditUtil(){}
+    
+    public static World getWorld(String world) {
+        List<? extends World> worlds = WorldEdit.getInstance().getServer().getWorlds();
+        for(World w : worlds) {
+            if(w.getName().equals(world)) {
+                
+                return w;
+            }
+        }
+        return null;
+    }
+   
+    
+    public static WorldEditPlugin getWorldEditPlugin() {
+        return new WorldEditPlugin();
+    }
+    
+    
+}

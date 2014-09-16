@@ -1,11 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.sc.plugin</groupId>
-    <artifactId>SettlerCraft</artifactId>
-    <version>0.9.8</version>
+    <groupId>com.sc.module</groupId>
+    <artifactId>StructureAPI</artifactId>
+    <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
-    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+    </properties>
+    <build>
+                <plugins>
+            <plugin>
+                <groupId>com.mysema.maven</groupId>
+                <artifactId>apt-maven-plugin</artifactId>
+                <version>1.0.9</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>process</goal> 
+                        </goals>
+                        <configuration>
+                            <outputDirectory>target/generated-sources/java</outputDirectory>
+                            <processor>com.mysema.query.apt.jpa.JPAAnnotationProcessor</processor>
+                            <options>
+                                <querydsl.entityAccessors>true</querydsl.entityAccessors>
+                            </options>          
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
     <repositories>
         <!--Private ThirdParty Repo-->
         <repository>
@@ -23,73 +50,7 @@
             <url>http://repo.bukkit.org/content/groups/public/</url>
         </repository>
     </repositories>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>assemble-all</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-<!--            <plugin>
-                <groupId>com.mysema.maven</groupId>
-                <artifactId>apt-maven-plugin</artifactId>
-                <version>1.0.9</version>
-                <executions>
-                    <execution>
-                        
-                        <goals>
-                            <goal>process</goal>
-                            
-                        </goals>
-                        <configuration>
-                            
-                            <outputDirectory>target/generated-sources/java</outputDirectory>
-                            <processor>com.mysema.query.apt.jpa.JPAAnnotationProcessor</processor>
-                            <options>
-                                <querydsl.entityAccessors>true</querydsl.entityAccessors>
-                            </options>          
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>-->
-        </plugins>
-    </build>
     <dependencies>
-        <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.7.9-CB2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.sk89q</groupId>
-            <artifactId>worldedit</artifactId>  
-            <version>6.0.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
         <!--holographicDisplays-->
         <dependency>
             <groupId>org.holographicdisplay</groupId>
@@ -97,11 +58,24 @@
             <version>1.8.2</version>
             <scope>provided</scope>
         </dependency>
-        <!--Vault-->
+        <!--AsyncWorldEdit-->
         <dependency>
-            <groupId>org.vault</groupId>
-            <artifactId>Vault</artifactId>
-            <version>1.2.31</version>
+            <groupId>com.sc</groupId>
+            <artifactId>asyncworldedit</artifactId>  
+            <version>2.0-RC4</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--AsyncWorldEdit-->
+        <dependency>
+            <groupId>com.sc</groupId>
+            <artifactId>asyncworldedit-injector</artifactId>  
+            <version>2.0-RC4</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>1.6.4-R2.0</version>
             <scope>provided</scope>
         </dependency>
         <!--WorldGuard-->
@@ -111,25 +85,21 @@
             <version>5.9</version>
             <scope>provided</scope>
         </dependency>
-        <!--AsyncWorldEdit-->
+        <!--WorldEdit-->
         <dependency>
-            <groupId>org.SBPrime</groupId>
-            <artifactId>asyncworldedit</artifactId>  
-            <version>2.0</version>
+            <groupId>com.sc</groupId>
+            <artifactId>worldedit</artifactId>  
+            <version>6.0-3301</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Lambaj -->
+        <!--Vault-->
         <dependency>
-            <groupId>com.googlecode.lambdaj</groupId>
-            <artifactId>lambdaj</artifactId>
-            <version>2.3.3</version>
+            <groupId>org.vault</groupId>
+            <artifactId>Vault</artifactId>
+            <version>1.2.31</version>
+            <scope>provided</scope>
         </dependency>
-        <!--CommonsIO Apache-->
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.4</version>
-        </dependency>
+        <!--Hibernate-->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate</artifactId>
@@ -167,6 +137,13 @@
             <version>1.6.1</version>
             <scope>compile</scope>
         </dependency>
+        <!-- XPATH -->
+        <dependency>
+            <groupId>jaxen</groupId>
+            <artifactId>jaxen</artifactId>
+            <version>1.1.6</version>
+        </dependency>
+        
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
@@ -183,13 +160,6 @@
             <groupId>javax.transaction</groupId>
             <artifactId>jta</artifactId>
             <version>1.1</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- jar that contains the HSQLDB driver class  -->
-        <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <version>2.3.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -222,20 +192,16 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!--CommonsIO Apache-->
         <dependency>
-            <groupId>com.sc.module</groupId>
-            <artifactId>StructureAPI</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
         </dependency>
         <dependency>
-            <groupId>com.sc.module</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>MenuAPI</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
-    </properties>
 </project>
