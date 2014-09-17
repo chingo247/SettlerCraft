@@ -5,7 +5,8 @@
  */
 package com.sc.module.structureapi.plan;
 
-import com.sc.module.structureapi.menu.item.CategoryTradeItem;
+import com.sc.module.menuapi.menus.menu.item.CategoryTradeItem;
+import com.sc.module.menuapi.menus.menu.util.ShopUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.data.DataException;
@@ -143,11 +144,11 @@ public class StructurePlanItem  implements CategoryTradeItem {
         ItemMeta meta = stack.getItemMeta();
         meta.setDisplayName(name);
         meta.setLore(Arrays.asList(
-                "Price: " + ChatColor.GOLD + price,
+                "Price: " + ChatColor.GOLD + ShopUtil.valueString(price),
                 "Width: " + ChatColor.GOLD + width, 
                 "Length: " + ChatColor.GOLD + length,
                 "Height: " + ChatColor.GOLD + height,
-                "Blocks: " + ChatColor.GOLD + blocks,
+                "Blocks: " + ChatColor.GOLD + ShopUtil.valueString(blocks),
                 "Id: " + ChatColor.GOLD + id
         ));
         stack.setItemMeta(meta);

@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.sc.module.structureapi.menu.item;
+package com.sc.module.menuapi.menus.menu.item;
 
 import org.bukkit.inventory.ItemStack;
 

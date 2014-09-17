@@ -3,17 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.module.structureapi.menu;
+package com.sc.module.menuapi.menus.menu;
 
 import com.google.common.collect.Maps;
+import com.sc.module.menuapi.menus.menu.item.CategoryTradeItem;
+import com.sc.module.menuapi.menus.menu.item.TradeItem;
+import com.sc.module.menuapi.menus.menu.slots.ActionSlot;
+import com.sc.module.menuapi.menus.menu.slots.CategorySlot;
+import com.sc.module.menuapi.menus.menu.slots.LockedSlot;
+import com.sc.module.menuapi.menus.menu.slots.Slot;
 import com.sc.module.menuapi.menus.menu.util.EconomyUtil;
 import com.sc.module.menuapi.menus.menu.util.ShopUtil;
-import com.sc.module.structureapi.menu.item.CategoryTradeItem;
-import com.sc.module.structureapi.menu.item.TradeItem;
-import com.sc.module.structureapi.menu.slots.ActionSlot;
-import com.sc.module.structureapi.menu.slots.CategorySlot;
-import com.sc.module.structureapi.menu.slots.LockedSlot;
-import com.sc.module.structureapi.menu.slots.Slot;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,13 +26,21 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 
 /**
  *
  * @author Chingo
  */
-public class CategoryMenu {
+public class CategoryMenu implements Listener {
 
     private static final String ACTION_PREVIOUS = "Previous";
     private static final String ACTION_NEXT = "Next";
@@ -49,27 +57,36 @@ public class CategoryMenu {
     private final Map<Integer, Slot> slots;
     private final Map<UUID, Session> sessions;
     private final String title;
+    private final UUID id;
     private final int MENU_SIZE;
-    
+    private final Plugin plugin;
+
     private boolean enabled = false;
 
-    public CategoryMenu(String title, int menusize) {
+    CategoryMenu(String title, int menusize, Plugin plugin) {
         if (menusize < 0) {
             throw new AssertionError("Size of menu must be greater than 0");
         }
+        if (plugin == null) {
+            throw new AssertionError("Null plugin");
+        }
+        this.plugin = plugin;
         this.items = Maps.newHashMap();
         this.slots = Maps.newHashMap();
         this.sessions = Maps.newHashMap();
         this.title = title;
         this.MENU_SIZE = menusize;
+        this.id = UUID.randomUUID();
         putCategorySlot(0, DEFAULT_CATEGORY.getName(), DEFAULT_CATEGORY.getIcon().getType());
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public String getTitle() {
         return title;
     }
-    
-    
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
@@ -78,9 +95,8 @@ public class CategoryMenu {
     public boolean isEnabled() {
         return enabled;
     }
-    
+
     public void addItem(CategoryTradeItem item) {
-        System.out.println("adding: " + item.getName());
         CategorySlot newItemCategory = new CategorySlot(item.getCategory(), Material.AIR);
         Iterator<CategorySlot> it = items.keySet().iterator();
 
@@ -88,16 +104,14 @@ public class CategoryMenu {
             CategorySlot cs = it.next();
             if (cs.getName().equals(newItemCategory.getName()) || cs.hasAlias(newItemCategory.getName())) {
                 items.get(cs).add(item);
-                System.out.println("Added " + item.getName() + " to " + cs.getName());
                 return; //  Found'm!
             }
         }
         // Category wasn't found
         // Add to default Category
-        System.out.println("Added " + item.getName() + " to " + DEFAULT_CATEGORY.getName());
         items.get(DEFAULT_CATEGORY).add(item);
     }
-    
+
     public final void putCategorySlot(int slot, String category, Material icon) {
         this.putCategorySlot(slot, category, icon, new String[]{});
     }
@@ -117,7 +131,7 @@ public class CategoryMenu {
         if (slot < 0 || slot > MENU_SIZE) {
             throw new IndexOutOfBoundsException("Slot is not in range of 0 - " + MENU_SIZE);
         }
-        
+
         CategorySlot c = new CategorySlot(category, icon);
         c.addAliases(aliases);
         // Add Category
@@ -133,12 +147,12 @@ public class CategoryMenu {
 
         slots.put(slot, c);
     }
-    
+
     public void putActionSlot(int slot, String text, Material material) {
         if (slot < 0 || slot > MENU_SIZE) {
             throw new IndexOutOfBoundsException("Slot is not in range of 0 - " + MENU_SIZE);
         }
-        
+
         // Check if slot was inuse by a Category
         Slot s = slots.get(slot);
         if (s instanceof CategorySlot) {
@@ -146,11 +160,10 @@ public class CategoryMenu {
             // Remove this category
             items.remove(cs);
         }
-        
-        slots.put(slot, new ActionSlot(text, material));
-        
-    }
 
+        slots.put(slot, new ActionSlot(text, material));
+
+    }
 
     public void putLocked(int slot) {
         if (slot < 0 || slot > MENU_SIZE) {
@@ -177,34 +190,8 @@ public class CategoryMenu {
         return slots.get(slot) instanceof LockedSlot;
     }
 
-    public void sellItem(Player player, int slot) {
-        Session session = sessions.get(player.getUniqueId());
-        session.items.get(slot);
-    }
 
-    public void onAction(int slot, Player player) {
-        Session session = sessions.get(player.getUniqueId());
-        if (session == null) {
-            return;
-        }
-
-        Slot s = slots.get(slot);
-        if (s instanceof ActionSlot) {
-            ActionSlot as = (ActionSlot) s;
-            switch (as.getAction().toLowerCase()) {
-                case "next":
-                    updateMenu(player, session.currentCategory.getName(), session.page + 1);
-                    break;
-                case "previous":
-                    updateMenu(player, session.currentCategory.getName(), session.page - 1);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
-    protected boolean sell(Player player, TradeItem item) {
+    private boolean sell(Player player, TradeItem item) {
         Economy economy = EconomyUtil.getInstance().getEconomy();
         double price = item.getPrice();
         double balance = economy.getBalance(player.getName());
@@ -219,9 +206,8 @@ public class CategoryMenu {
     }
 
     private void setTemplateSlots(final Inventory inventory, final Player player) {
-        inventory.clear();
+
         final int page = sessions.get(player.getUniqueId()).page;
-        final CategorySlot category = sessions.get(player.getUniqueId()).currentCategory;
 
         for (int i = 0; i < MENU_SIZE; i++) {
             Slot slot = slots.get(i);
@@ -246,15 +232,15 @@ public class CategoryMenu {
                             );
                         }
                     } else if (actionSlot.getAction().equals(ACTION_NEXT)) {
-                        if (hasNext(player, category, page)) {
+                        if (hasNext(player)) {
                             actionSlot.setLore(
-                                    ChatColor.BLUE + "To Page " + ChatColor.GOLD + page + 1 + 1,
-                                    ChatColor.BLUE + "Current Page " + ChatColor.GOLD + page + 1
+                                    ChatColor.BLUE + "To Page " + ChatColor.GOLD + (page + 1 + 1),
+                                    ChatColor.BLUE + "Current Page " + ChatColor.GOLD + (page + 1)
                             );
                         } else {
                             actionSlot.setLore(
                                     ChatColor.BLUE + "To Page " + ChatColor.GOLD + " - ",
-                                    ChatColor.BLUE + "Current Page" + String.valueOf(page + 1)
+                                    ChatColor.BLUE + "Current Page" + (page + 1)
                             );
                         }
                     }
@@ -267,41 +253,61 @@ public class CategoryMenu {
         }
     }
 
-    public void updateMenu(Player player, String category, int page) {
+    private void updateMenu(Player player, String category, int page) {
         if (!hasSession(player.getUniqueId())) {
             return;
         }
+        
 
         // Get the session for this player
-        Inventory inv = sessions.get(player.getUniqueId()).inventory;
-        final int currentPage = sessions.get(player.getUniqueId()).page;
-        final CategorySlot currentCategory = matchCategory(category);
+        Session session = sessions.get(player.getUniqueId());
+        Inventory inv = session.inventory;
+        
+        // Get the new category
+        final CategorySlot newCategory = matchCategory(category);
+        
+        
+        if(newCategory.getName().equals(session.currentCategory.getName()) && page == session.page)  {
+            return; // Nothing changed
+        }
+        
+        // Category has changed, reset page index
+        if(!session.currentCategory.getName().equals(newCategory.getName()) 
+                && page == session.page) {
+            sessions.put(player.getUniqueId(), new Session(0, inv, newCategory));
+        } else {
+            sessions.put(player.getUniqueId(), new Session(page, inv, newCategory));
+        }
 
-        sessions.put(player.getUniqueId(), new Session(currentPage, inv, currentCategory));
+        // Clear previous session and create a new one
+        inv.clear();
+        Session newSession = sessions.get(player.getUniqueId());
 
         // Set ActionSlots & CategorySlots
         setTemplateSlots(inv, player);
 
         // Fill Inventory with items
-        List<TradeItem> tradeItems = fetchItems(player, currentCategory, currentPage);
+        List<TradeItem> tradeItems = fetchItems(player, newCategory, page);
         Iterator<TradeItem> it = tradeItems.iterator();
-        Session session = sessions.get(player.getUniqueId());
+
+        
         for (int i = 0; i < MENU_SIZE && it.hasNext(); i++) {
             if (slots.get(i) == null) {
                 TradeItem ti = it.next();
-                session.items.put(i, ti);
+                newSession.items.put(i, ti);
                 inv.setItem(i, ti.getItemStack());
             }
         }
 
-        // Open Inventory
-        sessions.put(player.getUniqueId(), session);
+        // Update Inventory
+        sessions.put(player.getUniqueId(), newSession);
         sessions.get(player.getUniqueId()).inventory = inv;
         player.updateInventory();
 
     }
 
     public void openMenu(Player player) {
+
         // Guarantee new Session from here
         if (hasSession(player.getUniqueId())) {
             sessions.remove(player.getUniqueId());
@@ -323,13 +329,12 @@ public class CategoryMenu {
 
         Session session = new Session(currentPage, inv, currentCategory);
         sessions.put(player.getUniqueId(), session);
-        
+
         // Set ActionSlots & CategorySlots
         setTemplateSlots(inv, player);
 
         // Fill Inventory with items
         List<TradeItem> tradeItems = fetchItems(player, currentCategory, currentPage);
-        System.out.println("Items in menu: " + tradeItems);
         Iterator<TradeItem> it = tradeItems.iterator();
 
         for (int i = 0; i < MENU_SIZE && it.hasNext(); i++) {
@@ -343,28 +348,32 @@ public class CategoryMenu {
         // Open Inventory
         session.inventory = inv;
         sessions.put(player.getUniqueId(), session);
-       
+
         player.openInventory(inv);
     }
 
-    public void closeMenu(Player player) {
+    public void leave(Player player) {
         if (sessions.containsKey(player.getUniqueId())) {
             sessions.remove(player.getUniqueId());
             player.closeInventory();
         }
     }
-    
+
     public void makeAllLeave() {
-        for(UUID uuid : sessions.keySet()) {
+        for (UUID uuid : sessions.keySet()) {
             Player player = Bukkit.getPlayer(uuid);
-            if(player != null) {
-                closeMenu(player);
+            if (player != null) {
+                leave(player);
             }
         }
     }
 
     public boolean hasSession(UUID session) {
         return sessions.containsKey(session);
+    }
+
+    public boolean hasSession(Player player) {
+        return hasSession(player.getUniqueId());
     }
 
     private int getFreeSlots() {
@@ -374,27 +383,20 @@ public class CategoryMenu {
     private List<TradeItem> fetchItems(Player player, CategorySlot category, int page) {
         int maxItems = getFreeSlots();
 
-        System.out.println("page: " + page);
-        System.out.println("category: " + category.getName());
-        
-        
+
         List<TradeItem> tradeItems;
-        if(!category.equals(DEFAULT_CATEGORY)) {
+        if (!category.equals(DEFAULT_CATEGORY)) {
             tradeItems = items.get(category);
         } else {
-            System.out.println("DEFAULT CATEGORY");
             tradeItems = new ArrayList<>();
-            for(List<TradeItem> tis : items.values()) {
+            for (List<TradeItem> tis : items.values()) {
                 tradeItems.addAll(tis);
             }
-            System.out.println("Items: " + tradeItems.size());
         }
-        
-        
-        int min = page * maxItems;
+
+        int min = Math.min(page * maxItems, tradeItems.size());
         int max = Math.min(min + maxItems, tradeItems.size());
-        
-        System.out.println("Min: " + min + " Max: " + max );
+
 
         List<TradeItem> pageItems = tradeItems.subList(min, max);
         Collections.sort(pageItems, TRADE_ITEM_NAME_COMPARATOR);
@@ -402,8 +404,9 @@ public class CategoryMenu {
         return pageItems;
     }
 
-    private boolean hasNext(Player player, CategorySlot category, int page) {
-        return !fetchItems(player, category, page).isEmpty();
+    private boolean hasNext(Player player) {
+        Session session = sessions.get(player.getUniqueId());
+        return !fetchItems(player, session.currentCategory, session.page + 1).isEmpty();
     }
 
     private boolean hasPrev(Player player) {
@@ -421,7 +424,6 @@ public class CategoryMenu {
         return DEFAULT_CATEGORY;
     }
 
-    
     private class Session {
 
         private CategorySlot currentCategory;
@@ -433,6 +435,95 @@ public class CategoryMenu {
             this.inventory = inventory;
             this.currentCategory = currentCategory;
             this.items = Maps.newHashMap();
+        }
+
+    }
+
+    @EventHandler
+    private void onPlayerLeavesShop(InventoryCloseEvent ice) {
+
+        Player player = (Player) ice.getPlayer();
+
+        // Check wheter this player is visiting a menu
+        if (hasSession(player.getUniqueId())) {
+            // remove player
+            leave(player);
+        }
+    }
+
+    @EventHandler
+    private void onMenuSlotClicked(InventoryClickEvent ice) {
+        if (!enabled) {
+            return;
+        }
+        
+
+        Player player = (Player) ice.getWhoClicked();
+        if (!hasSession(player.getUniqueId())) {
+            return; // Player is not using this menu
+        }
+
+        if (ice.getClick() == ClickType.RIGHT
+                || ice.getClick() == ClickType.SHIFT_RIGHT
+                || ice.getClick() == ClickType.SHIFT_LEFT
+                || ice.getRawSlot() < MENU_SIZE && ice.getRawSlot() >= 0
+                || ice.getClick() == ClickType.DOUBLE_CLICK) {
+//          Cancel the action
+            ice.setCancelled(true);
+        }
+
+        if (ice.getRawSlot() < MENU_SIZE && ice.getRawSlot() >= 0) {
+
+            
+            ItemStack stack = ice.getCurrentItem();
+
+            if (stack != null
+                    && stack.getType() != Material.AIR
+                    && stack.getAmount() > 0) {
+
+                Session session = sessions.get(ice.getWhoClicked().getUniqueId());
+
+                Slot slot = slots.get(ice.getRawSlot());
+                
+                // Slot is item slot
+                if (slot == null) {
+
+                    TradeItem item = session.items.get(ice.getRawSlot());
+                    
+
+                    if (item != null) {
+                        sell(player, item);
+                    } 
+                } else if (slot instanceof ActionSlot) {
+                    ActionSlot as = (ActionSlot) slot;
+                    switch (as.getAction().toLowerCase()) {
+                        case "next":
+                            if(hasNext(player)) {
+                                updateMenu(player, session.currentCategory.getName(), session.page + 1);
+                            }
+                            break;
+                        case "previous":
+                            if (hasPrev(player)) {
+                                updateMenu(player, session.currentCategory.getName(), session.page - 1);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                } else if (slot instanceof CategorySlot) {
+                    CategorySlot cs = (CategorySlot) slot;
+                    updateMenu(player, cs.getName(), session.page);
+                }
+            }
+        }
+
+    }
+
+    @EventHandler
+    private void onReload(PluginDisableEvent disableEvent) {
+        if (this.plugin.getName().equals(disableEvent.getPlugin().getName())) {
+            this.setEnabled(false);
+            this.makeAllLeave();
         }
 
     }

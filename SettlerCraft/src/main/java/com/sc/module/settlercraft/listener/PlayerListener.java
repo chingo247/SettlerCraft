@@ -73,7 +73,7 @@ public class PlayerListener implements Listener {
         }
 
         if (plan == null) {
-            if (!SettlerCraft.getInstance().isLoaded()) {
+            if (!SettlerCraft.getInstance().isPlansLoaded()) {
                 player.sendMessage(ChatColor.RED + "This plan is invalid, please refund it or throw it away");
             } else {
                 player.sendMessage(ChatColor.RED + "Plans aren't loaded yet please wait...");

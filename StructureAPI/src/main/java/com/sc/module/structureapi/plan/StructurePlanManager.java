@@ -77,8 +77,6 @@ public class StructurePlanManager {
         final int THREADS = Runtime.getRuntime().availableProcessors();
         final int total = files.size();
         final AtomicInteger count = new AtomicInteger(0);
-        System.out.println("Processing structureplans...");
-        System.out.println("Total: " + total);
 
         while (fileIterator.hasNext()) {
             final File file = fileIterator.next();
@@ -91,42 +89,15 @@ public class StructurePlanManager {
                     schematics.add(plan.getSchematic());
                     
                     if (count.incrementAndGet() == total) {
-                        System.out.println(count.get() + "/" + total);
-                        System.out.println("Complete");
                         callback.onComplete();
 //                        loadSchematics(schematics, callback);
                         return;
                     }
-                    System.out.println(count.get() + "/" + total);
                 }
             });
         }
     }
     
-//    private void loadSchematics(final Set<File> schematics, final Callback callback) {
-//        Iterator<File> schematicIterator = schematics.iterator();
-//        final AtomicInteger count = new AtomicInteger(0);
-//        final int total = schematics.size();
-//        
-//        while (schematicIterator.hasNext()) {
-//            final File file = schematicIterator.next();
-//            executor.execute(new SchematicTask(file) {
-//
-//                @Override
-//                public void onComplete(Schematic schematic) {
-//
-//                    SchematicManager.getInstance().putSchematic(schematic);
-//                    
-//                    if (count.incrementAndGet() == total) {
-//                        callback.onComplete();
-//                        return;
-//                    }
-//                    System.out.println(count.get() + "/" + total);
-//                }
-//            });
-//        }
-//    }    
-
     private void putStructurePlan(StructurePlan plan) {
         if(plan == null) {
             throw new AssertionError("Plan was null");

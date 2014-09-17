@@ -18,7 +18,6 @@ package com.sc.module.settlercraft.commands;
 
 import com.sc.module.menuapi.menus.menu.util.ShopUtil;
 import com.sc.module.settlercraft.plugin.SettlerCraft;
-import com.sc.module.structureapi.menu.MenuManager;
 import com.sc.module.structureapi.persistence.StructureService;
 import com.sc.module.structureapi.structure.Structure;
 import com.sc.plugin.ConfigProvider;
@@ -83,13 +82,14 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         cs.sendMessage(ChatColor.RED + "Planmenu is disabled");
                         return true;
                     }
-                    if(!MenuManager.getInstance().getMenu(SettlerCraft.PLANSHOP).isEnabled()) {
-                        cs.sendMessage(ChatColor.RED + " planmenu is not enabled");
+                    if(SettlerCraft.getInstance().getPlanMenu() == null || !SettlerCraft.getInstance().getPlanMenu().isEnabled()) {
+                        cs.sendMessage(ChatColor.RED + " Planmenu is not enabled");
+                        return true;
                     }
 
                     // HAS PERMISSION
                     if (args.length == 1) {
-                        MenuManager.getInstance().getMenu(SettlerCraft.PLANSHOP).openMenu(player);
+                        SettlerCraft.getInstance().getPlanMenu().openMenu(player);
                         return true;
                     } else {
                         cs.sendMessage(ChatColor.RED + "Too many arguments!");
@@ -110,10 +110,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         cs.sendMessage(ChatColor.RED + "Planshop is disabled");
                         return true;
                     }
-//                    if (!MenuManager.getInstance().hasMenu(StructurePlanManagerV2.PLAN_MENU)) {
-//                        cs.sendMessage(ChatColor.RED + "Planshop is not loaded yet");
-//                        return true;
-//                    }
+
 
                     // HAS PERMISSION
                     if (args.length == 1) {
@@ -202,7 +199,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
     }
 
 //    private boolean openPlanMenu(Player player) {
-//        ShopCategoryMenu menu = (ShopCategoryMenu) MenuManager.getInstance().getMenu(StructurePlanManagerV2.PLAN_MENU);
+//        ShopCategoryMenu menu = (ShopCategoryMenu) CategoryMenuManager.getInstance().getMenu(StructurePlanManagerV2.PLAN_MENU);
 //        menu.onEnter(player);
 //        return true;
 //    }
@@ -212,7 +209,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
 //            player.sendMessage(ChatColor.RED + " Planshop requires Vault");
 //            return true;
 //        }
-//        ShopCategoryMenu menu = (ShopCategoryMenu) MenuManager.getInstance().getMenu(StructurePlanManagerV2.PLANSHOP);
+//        ShopCategoryMenu menu = (ShopCategoryMenu) CategoryMenuManager.getInstance().getMenu(StructurePlanManagerV2.PLANSHOP);
 //        menu.onEnter(player);
 //        return true;
 //    }

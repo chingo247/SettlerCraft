@@ -5,16 +5,13 @@
  */
 package com.sc.module.settlercraft.plugin;
 
-import com.sc.module.menuapi.menus.menu.exception.DuplicateMenuException;
+import com.sc.module.menuapi.menus.menu.CategoryMenu;
+import com.sc.module.menuapi.menus.menu.MenuAPI;
 import com.sc.module.settlercraft.commands.ConstructionCommandExecutor;
 import com.sc.module.settlercraft.commands.SettlerCraftCommandExecutor;
 import com.sc.module.settlercraft.commands.StructureCommandExecutor;
 import com.sc.module.settlercraft.listener.PlayerListener;
-import com.sc.module.settlercraft.listener.PluginListener;
-import com.sc.module.settlercraft.listener.ShopListener;
 import com.sc.module.settlercraft.listener.StructureListener;
-import com.sc.module.structureapi.menu.CategoryMenu;
-import com.sc.module.structureapi.menu.MenuManager;
 import com.sc.module.structureapi.plan.StructurePlan;
 import com.sc.module.structureapi.plan.StructurePlanItem;
 import com.sc.module.structureapi.plan.StructurePlanManager;
@@ -28,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,7 +37,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.permissions.Permission;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -50,10 +47,11 @@ public class SettlerCraft extends JavaPlugin {
 
     private static final int INFINITE_BLOCKS = -1;
     private static final Logger LOGGER = Logger.getLogger(SettlerCraft.class);
-    private Plugin plugin;
     private static SettlerCraft instance;
     private boolean plansLoaded = false;
-    public static final String PLANSHOP = "Buy & Build";
+    public static final String PLANSHOP_NAME = "Buy & Build";
+    public static final String MSG_PREFIX = ChatColor.GOLD + "[SettlerCraft]: ";
+    private static UUID PLANSHOP;
 
     @Override
     public void onEnable() {
@@ -102,8 +100,6 @@ public class SettlerCraft extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new StructureListener(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
-        Bukkit.getPluginManager().registerEvents(new ShopListener(), this);
-        Bukkit.getPluginManager().registerEvents(new PluginListener(), this);
 
         getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
         getCommand("cst").setExecutor(new ConstructionCommandExecutor(this));
@@ -142,8 +138,12 @@ public class SettlerCraft extends JavaPlugin {
         return instance;
     }
 
-    public boolean isLoaded() {
+    public boolean isPlansLoaded() {
         return plansLoaded;
+    }
+    
+    public CategoryMenu getPlanMenu() {
+        return MenuAPI.getInstance().getMenu(instance, PLANSHOP);
     }
 
     /**
@@ -166,8 +166,7 @@ public class SettlerCraft extends JavaPlugin {
     }
 
     private static void setupPlanMenu() {
-        if (MenuManager.getInstance().getMenu(PLANSHOP) == null) {
-            CategoryMenu planMenu = new CategoryMenu(PLANSHOP, 54);
+            CategoryMenu planMenu = MenuAPI.createMenu(instance, PLANSHOP_NAME, 54);
             planMenu.putCategorySlot(1, "General", Material.WORKBENCH);
             planMenu.putCategorySlot(2, "Industry", Material.ANVIL, "Industrial", "Industries");
             planMenu.putCategorySlot(3, "Housing", Material.BED, "Residence", "Residencial", "Houses", "House");
@@ -180,13 +179,7 @@ public class SettlerCraft extends JavaPlugin {
             planMenu.putActionSlot(17, "Next", Material.COAL_BLOCK);
             planMenu.putLocked(10, 11, 12, 13, 14, 15, 16);
             
-            try {
-                MenuManager.getInstance().register(planMenu);
-            } catch (DuplicateMenuException ex) {
-                java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-        }
+            PLANSHOP = planMenu.getId();
     }
     
     private static void loadPlansIntoMenu() {
@@ -196,10 +189,7 @@ public class SettlerCraft extends JavaPlugin {
         final int total = plans.size();
         final Iterator<StructurePlan> planIterator = plans.iterator();
         final AtomicInteger count = new AtomicInteger(0);
-        final CategoryMenu planMenu = MenuManager.getInstance().getMenu(PLANSHOP);
-
-        System.out.println("Loading plans into shop...");
-        System.out.println("Total: " + total);
+        final CategoryMenu planMenu = getInstance().getPlanMenu();
 
         while (planIterator.hasNext()) {
             final StructurePlan plan = planIterator.next();
@@ -209,15 +199,14 @@ public class SettlerCraft extends JavaPlugin {
                 public void onComplete(StructurePlanItem item) {
 
                     // Add item to planmenu
-                    System.out.println("adding item");
                     planMenu.addItem(item);
                     
                     // Enable planmenu if this was the last item
                     if (count.incrementAndGet() == total) {
                         planMenu.setEnabled(true);
-                        return;
+                        getInstance().plansLoaded = true;
+                        Bukkit.broadcastMessage(MSG_PREFIX + " Plans loaded");
                     }
-                    System.out.println(count.get() + "/" + total);
                 }
             });
         }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.module.structureapi.menu.slots;
+package com.sc.module.menuapi.menus.menu.slots;
 
 import java.util.Arrays;
 import java.util.HashSet;

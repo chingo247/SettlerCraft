@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.sc.module.structureapi.menu.slots;
+package com.sc.module.menuapi.menus.menu.slots;
 
 import java.util.ArrayList;
 import java.util.Arrays;
