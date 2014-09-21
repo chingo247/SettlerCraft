@@ -151,7 +151,7 @@ public class PlanListener implements Listener {
             @Override
             public void onComplete(Structure structure) {
                 if(structure != null) {
-                StructureAPI.build(player, structure);
+                    StructureAPI.build(player, structure);
                 }
             }
         });

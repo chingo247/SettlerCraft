@@ -85,6 +85,7 @@ public class SCJobEntry extends JobEntry {
      * Set the job state
      * @param newStatus 
      */
+    @Override
     public void setStatus(JobStatus newStatus) {
         int newS = newStatus.getSeqNumber();
         int oldS = m_status.getSeqNumber();
@@ -95,6 +96,21 @@ public class SCJobEntry extends JobEntry {
         m_status = newStatus;
         callStateChangedEvents();
     }
+
+    @Override
+    public void addStateChangedListener(IJobEntryListener listener) {
+        if (listener == null) {
+            return;
+        }
+
+        synchronized (m_jobStateChanged) {
+            if (!m_jobStateChanged.contains(listener)) {
+                m_jobStateChanged.add(listener);
+            }
+        }
+    }
+    
+    
         
 
     /**
@@ -141,21 +157,21 @@ public class SCJobEntry extends JobEntry {
     public boolean Process(BlockPlacer bp) {
         final UUID player = m_player;
         
-        System.out.println("Processing status: " + m_status);
-
+        
         switch (m_status) {
             case Done:
                 
                 bp.removeJob(player, this);
                 return true;
             case PlacingBlocks:
-                setStatus(JobEntry.JobStatus.Done);
+                setStatus(JobStatus.Done);
                 bp.removeJob(player, this);
                 break;
             case Initializing:
             case Preparing:
             case Waiting:
-                setStatus(JobEntry.JobStatus.PlacingBlocks);
+                setStatus(JobStatus.PlacingBlocks);
+                
                 break;
         }
 

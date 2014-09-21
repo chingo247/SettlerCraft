@@ -19,9 +19,9 @@ package com.sc.module.structureapi.structure.construction;
 import com.sc.module.structureapi.persistence.ConstructionSiteService;
 import com.sc.module.structureapi.structure.Structure;
 import com.sc.module.structureapi.structure.Structure.State;
+import com.sc.module.structureapi.structure.StructureAPI;
 import com.sc.module.structureapi.structure.StructureHologramManager;
 import com.sc.module.structureapi.structure.construction.asyncworldedit.SCJobEntry;
-import java.util.Date;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.blockPlacer.IJobEntryListener;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
@@ -42,32 +42,27 @@ public class ConstructionBuildingCallback extends ConstructionCallback {
     public void onJobAdded(final SCJobEntry entry) {
         // Set JobId
         final ConstructionManager cm = ConstructionManager.getInstance();
+        final ConstructionSiteService siteService = new ConstructionSiteService();
         cm.getEntry(structure.getId()).setJobId(entry.getJobId());
+        
+        // Update status
+        siteService.setState(structure, State.QUEUED);
+        StructureHologramManager.getInstance().updateHolo(structure);
+        StructureAPI.yellStatus(structure);
+        
+       
+        
 
         // Set state changeListener
         entry.addStateChangedListener(new IJobEntryListener() {
 
             @Override
             public void jobStateChanged(JobEntry bpje) {
-                ConstructionSiteService siteService = new ConstructionSiteService();
                 if (bpje.getStatus() == JobStatus.PlacingBlocks) {
                     siteService.setState(structure, State.BUILDING);
-                    System.out.println("State changed: " + structure.getState());
+                    StructureAPI.yellStatus(structure);
                     StructureHologramManager.getInstance().updateHolo(structure);
-                } else if (bpje.getStatus() == JobStatus.Done) {
-                    // Set state to complete & Create timestamp of completion
-                    siteService.setState(structure, State.COMPLETE);
-                    structure.getLogEntry().setCompletedAt(new Date());
-                    siteService.save(structure);
-
-                    System.out.println("on complete: " + structure.getState());
-
-                    // Update hologram (Uses job ID!)
-                    StructureHologramManager.getInstance().updateHolo(structure);
-
-                    // Reset JobID
-                    cm.getEntry(structure.getId()).setJobId(-1);
-                }
+                } 
             }
         });
     }

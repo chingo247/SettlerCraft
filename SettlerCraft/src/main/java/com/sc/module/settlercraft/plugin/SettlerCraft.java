@@ -12,7 +12,9 @@ import com.sc.module.settlercraft.commands.SettlerCraftCommandExecutor;
 import com.sc.module.settlercraft.commands.StructureCommandExecutor;
 import com.sc.module.settlercraft.listener.PlanListener;
 import com.sc.module.settlercraft.listener.StructureListener;
+import com.sc.module.structureapi.persistence.RestoreService;
 import com.sc.module.structureapi.structure.concurrent.StructurePlanItemTask;
+import com.sc.module.structureapi.structure.construction.ConstructionManager;
 import com.sc.module.structureapi.structure.plan.StructurePlan;
 import com.sc.module.structureapi.structure.plan.StructurePlanItem;
 import com.sc.module.structureapi.structure.plan.StructurePlanManager;
@@ -82,9 +84,11 @@ public class SettlerCraft extends JavaPlugin {
 
         if (!HSQLServer.getInstance().isRunning()) {
             HSQLServer.getInstance().start();
-//            System.out.println("[SettlerCraft]: Checking for invalid structures");
-//            new RestoreService().restore(); // only execute on server start, not on reload!
+            System.out.println("[SettlerCraft]: Checking for invalid structures");
+            new RestoreService().restore(); // only execute on server start, not on reload!
         }
+        
+        
 
         try {
             ConfigProvider.getInstance().load();
@@ -92,12 +96,12 @@ public class SettlerCraft extends JavaPlugin {
             java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+        
         setupPlanMenu();
         loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
-        
-
         Bukkit.broadcastMessage(ChatColor.GOLD + "[SettlerCraft]: " + ChatColor.WHITE + "Structure plans loaded");
-//        StructureConstructionManager.getInstance().init();
+        
+        ConstructionManager.getInstance().init();
 
         Bukkit.getPluginManager().registerEvents(new StructureListener(), this);
         Bukkit.getPluginManager().registerEvents(new PlanListener(), this);
@@ -106,7 +110,7 @@ public class SettlerCraft extends JavaPlugin {
         getCommand("cst").setExecutor(new ConstructionCommandExecutor(this));
         getCommand("stt").setExecutor(new StructureCommandExecutor());
 
-        
+
         
         printPerms();
     }
@@ -154,7 +158,7 @@ public class SettlerCraft extends JavaPlugin {
      *
      * @param structureDirectory The directory to search
      */
-    private static void loadStructures(File structureDirectory) {
+    private void loadStructures(File structureDirectory) {
         File structureFolder = new File(structureDirectory.getAbsolutePath());
         if (!structureFolder.exists()) {
             structureFolder.mkdirs();
@@ -163,12 +167,13 @@ public class SettlerCraft extends JavaPlugin {
 
             @Override
             public void onComplete() {
+                plansLoaded = true;
                 loadPlansIntoMenu();
             }
         });
     }
 
-    private static void setupPlanMenu() {
+    private void setupPlanMenu() {
             CategoryMenu planMenu = MenuAPI.createMenu(instance, PLANSHOP_NAME, 54);
             planMenu.putCategorySlot(1, "General", Material.WORKBENCH);
             planMenu.putCategorySlot(2, "Industry", Material.ANVIL, "Industrial", "Industries");

@@ -172,7 +172,7 @@ public class StructureAPI {
         }
 
         try {
-            ConstructionManager.getInstance().build(uuid, structure);
+            ConstructionManager.getInstance().build(uuid, structure, false);
         } catch (ConstructionException ex) {
             if(player != null) {
                 player.sendMessage(ex.getMessage());
@@ -208,7 +208,7 @@ public class StructureAPI {
         }
 
         try {
-            ConstructionManager.getInstance().demolish(uuid, structure);
+            ConstructionManager.getInstance().demolish(uuid, structure, false);
         } catch (ConstructionException ex) {
             if(player != null) {
                 player.sendMessage(ex.getMessage());
@@ -293,9 +293,9 @@ public class StructureAPI {
             ConstructionManager.getInstance().stop(structure);
 
             if (demolishing) {
-                ConstructionManager.getInstance().demolish(uuid, structure);
+                ConstructionManager.getInstance().demolish(uuid, structure, false);
             } else {
-                ConstructionManager.getInstance().build(uuid, structure);
+                ConstructionManager.getInstance().build(uuid, structure, false);
             }
         } catch (ConstructionException ex) {
             if(player != null) {
@@ -472,7 +472,7 @@ public class StructureAPI {
 
     public static void makeOwner(Player player, Structure structure) {
         StructureService service = new StructureService();
-        PlayerOwnership ownership = new PlayerOwnership(player.getUniqueId(), structure);
+        PlayerOwnership ownership = new PlayerOwnership(player, structure);
         ownership = save(ownership);
         structure.addOwner(ownership);
         service.save(structure);
@@ -488,7 +488,7 @@ public class StructureAPI {
 
     public static void removeOwner(Player player, Structure structure) {
         StructureService service = new StructureService();
-        PlayerOwnership ownership = new PlayerOwnership(player.getUniqueId(), structure);
+        PlayerOwnership ownership = new PlayerOwnership(player, structure);
         structure.removeOwner(ownership);
         service.save(structure);
     }
@@ -499,6 +499,35 @@ public class StructureAPI {
         structure.removeMember(playerMembership);
         service.save(structure);
     }
+    
+    public static void yellStatus(Structure structure) {
+        for(PlayerOwnership ownership : structure.getOwnerships()) {
+            tellStatus(structure, Bukkit.getPlayer(ownership.getUUID()));
+        }
+    }
+    
+    public static void tellStatus(Structure structure, Player player) {
+        if(player == null || !player.isOnline()) {
+            return; // No effect
+        }
+        
+        String statusString;
+        switch(structure.getState()) {
+            case BUILDING: statusString = ChatColor.YELLOW + "BUILDING: " + ChatColor.RESET +  structure; break;
+            case DEMOLISHING: statusString = ChatColor.YELLOW + "DEMOLISHING: " + ChatColor.RESET + structure; break;
+            case COMPLETE:  statusString = "Construction " + ChatColor.GREEN + "COMPLETE" + ChatColor.RESET + ": " + ChatColor.RESET + structure; break;
+            case INITIALIZING: statusString = ChatColor.YELLOW + "INITIALIZING: " + ChatColor.RESET + structure; break;  
+            case LOADING_SCHEMATIC: statusString = ChatColor.YELLOW + "LOADING SCHEMATIC: " + ChatColor.RESET + structure; break;
+            case PLACING_FENCE: statusString = ChatColor.YELLOW + "PLACING FENCE: " + ChatColor.RESET + structure; break;
+            case QUEUED: statusString = ChatColor.YELLOW + "QUEUED: " + ChatColor.RESET + structure; break;
+            case REMOVED: statusString = ChatColor.RED + "REMOVED: " + ChatColor.RESET + structure; break;
+            case STOPPED: statusString = ChatColor.RED + "STOPPED: " + ChatColor.RESET + structure; break;
+            case WAITING: statusString = ChatColor.WHITE + "WAITING: " + ChatColor.RESET + structure; break;
+            default: throw new AssertionError("Unknown state: " + structure.getState());
+        }
+        player.sendMessage(statusString);
+    }
+    
     
     
 }

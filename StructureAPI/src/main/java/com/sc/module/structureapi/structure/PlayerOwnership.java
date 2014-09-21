@@ -13,6 +13,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import org.bukkit.entity.Player;
 
 /**
  *
@@ -25,6 +26,8 @@ public class PlayerOwnership implements Serializable {
     @GeneratedValue
     private Long id;
     private final UUID uuid;
+    private final String name;
+    
     @ManyToOne
     private Structure structure;
     
@@ -35,6 +38,7 @@ public class PlayerOwnership implements Serializable {
      */
     protected PlayerOwnership() {
         this.uuid = null;
+        this.name = null;
     }
     
     /**
@@ -43,14 +47,19 @@ public class PlayerOwnership implements Serializable {
      * @param uuid The uuid of the owner
      * @param player Wheter the owner is a isPlayer or not
      */
-    PlayerOwnership(UUID player, Structure structure) {
+    PlayerOwnership(Player player, Structure structure) {
         this.structure = structure;
-        this.uuid = player;
+        this.uuid = player.getUniqueId();
+        this.name = player.getName();
     }
 
     
     public Long getId() {
         return id;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public UUID getUUID() {

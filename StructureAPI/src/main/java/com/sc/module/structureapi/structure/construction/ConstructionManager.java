@@ -5,10 +5,16 @@
  */
 package com.sc.module.structureapi.structure.construction;
 
+import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.hibernate.HibernateQuery;
+import com.mysema.query.jpa.hibernate.HibernateUpdateClause;
 import com.sc.module.structureapi.persistence.ConstructionSiteService;
+import com.sc.module.structureapi.persistence.HibernateUtil;
+import com.sc.module.structureapi.structure.QStructure;
 import com.sc.module.structureapi.structure.Structure;
 import com.sc.module.structureapi.structure.Structure.State;
-import static com.sc.module.structureapi.structure.Structure.State.BUILDING;
+import com.sc.module.structureapi.structure.StructureAPI;
+import com.sc.module.structureapi.structure.StructureHologramManager;
 import com.sc.module.structureapi.structure.construction.asyncworldedit.SCAsyncCuboidClipboard;
 import com.sc.module.structureapi.structure.construction.generator.ClipboardGenerator;
 import com.sc.module.structureapi.structure.construction.worldedit.ConstructionBuildingClipboard;
@@ -29,15 +35,19 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.data.DataException;
-import com.sk89q.worldedit.world.World;
 import construction.exception.ConstructionException;
 import construction.exception.StructurePlanException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -47,7 +57,11 @@ import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.hibernate.Session;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.blockPlacer.IBlockPlacerListener;
+import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
 
@@ -59,14 +73,70 @@ public class ConstructionManager {
 
     private final Map<Long, ConstructionEntry> constructionEntries = Collections.synchronizedMap(new HashMap<Long, ConstructionEntry>());
     private final Map<Long, Executor> executors = new HashMap<>();
+    private final Executor executor = Executors.newCachedThreadPool();
     private final Plugin plugin = Bukkit.getPluginManager().getPlugin("SettlerCraft");
     private final int FENCE_BLOCK_PLACE_SPEED = 500;
     private final int FENCE_MATERIAL = BlockID.IRON_BARS;
     private static ConstructionManager instance;
+    private boolean initialized = false;
 
-    public synchronized void build(final UUID uuid, final Structure structure) throws StructurePlanException, ConstructionException, IOException {
-        performChecks(structure, State.BUILDING);
-        setEntry(uuid, structure);
+    private ConstructionManager() {
+        final BlockPlacer pb = AsyncWorldEditMain.getInstance().getBlockPlacer();
+        pb.addListener(new IBlockPlacerListener() {
+
+            @Override
+            public void jobAdded(JobEntry je) {
+                // DO NOTHING...
+            }
+
+            @Override
+            public void jobRemoved(final JobEntry je) {
+                Iterator<ConstructionEntry> it = constructionEntries.values().iterator();
+                while (it.hasNext()) {
+                    ConstructionEntry entry = it.next();
+                    
+                    if (je.getPlayer().equals(entry.getPlayer()) && je.getJobId() == entry.getJobId()) {
+                        ConstructionSiteService siteService = new ConstructionSiteService();
+                        // Set state to complete & Create timestamp of completion
+                        Structure structure = entry.getStructure();
+                        siteService.setState(structure, State.COMPLETE);
+                        entry.getStructure().getLogEntry().setCompletedAt(new Date());
+                        siteService.save(structure);
+
+                        // Update Holo
+                        StructureHologramManager.getInstance().updateHolo(structure);
+
+                        // Reset JobID
+                        getEntry(structure.getId()).setJobId(-1);
+
+                        StructureAPI.yellStatus(structure);
+                        
+                        constructionEntries.remove(structure.getId());
+                        break;
+                    }
+                }
+
+            }
+
+        });
+    }
+
+    /**
+     * Builds a structure
+     *
+     * @param uuid The player or UUID to use to issue this task
+     * @param structure The structure
+     * @param force if True the method will skip checks, including the checking if the structure was
+     * removed or the structure is already being build
+     * @throws StructurePlanException
+     * @throws ConstructionException
+     * @throws IOException
+     */
+    public synchronized void build(final UUID uuid, final Structure structure, boolean force) throws StructurePlanException, ConstructionException, IOException {
+        if (!force) {
+            performChecks(structure, State.BUILDING);
+        }
+       
 
         // Queue build task
         getExecutor(structure.getId()).execute(new Runnable() {
@@ -77,6 +147,8 @@ public class ConstructionManager {
                     // Stop current task (if any...)
                     ConstructionManager.getInstance().stopTask(structure);
 
+                    setEntry(uuid, structure);
+                    
                     // Load schematic if absent
                     File sf = structure.getSchematicFile();
                     long checksum = FileUtils.checksumCRC32(sf);
@@ -88,8 +160,8 @@ public class ConstructionManager {
                     Schematic schematic = SchematicManager.getInstance().getSchematic(sf);
                     CuboidClipboard cc = schematic.getClipboard();
                     SchematicUtil.align(cc, structure.getCardinal());
-                    
-                    placeFence(uuid, structure, cc, BlockID.IRON_BARS);
+
+                    placeFence(uuid, structure, cc, FENCE_MATERIAL);
 
                     // Update status
                     ConstructionSiteService css = new ConstructionSiteService();
@@ -120,7 +192,7 @@ public class ConstructionManager {
         }
 
         // Create & Place enclosure
-        final World world = WorldEditUtil.getWorld(structure.getWorldName());
+        final com.sk89q.worldedit.world.World world = WorldEditUtil.getWorld(structure.getWorldName());
         final Vector pos = structure.getDimension().getMinPosition();
 
         AsyncEditSession aes;
@@ -139,9 +211,21 @@ public class ConstructionManager {
         }
     }
 
-    public synchronized void demolish(final UUID uuid, final Structure structure) throws ConstructionException, StructurePlanException {
-        performChecks(structure, State.DEMOLISHING);
-        setEntry(uuid, structure);
+    /**
+     * Demolished a structure
+     *
+     * @param uuid The player or uuid to issue this task
+     * @param structure The structure
+     * @param force Whether to perform checks, if true it will ignore the check that determines if
+     * the structure is removed or that the structure is already being demolished.
+     * @throws ConstructionException
+     * @throws StructurePlanException
+     */
+    public synchronized void demolish(final UUID uuid, final Structure structure, boolean force) throws ConstructionException, StructurePlanException {
+        if (!force) {
+            performChecks(structure, State.DEMOLISHING);
+        }
+       
 
         // Queue build task
         getExecutor(structure.getId()).execute(new Runnable() {
@@ -151,7 +235,9 @@ public class ConstructionManager {
                 try {
                     // Stop current task (if any...)
                     ConstructionManager.getInstance().stopTask(structure);
-
+                    
+                    setEntry(uuid, structure);
+                    
                     // Load schematic if absent
                     File sf = structure.getSchematicFile();
                     long checksum = FileUtils.checksumCRC32(sf);
@@ -168,8 +254,8 @@ public class ConstructionManager {
                     ConstructionEntry entry = constructionEntries.get(structure.getId());
                     entry.setDemolishing(true);
 
-                    // Start building
-                    queueBuildTask(uuid, structure, schematic.getClipboard());
+                    // Start demolision
+                    queueDemolisionTask(uuid, structure, schematic);
 
                 } catch (StructurePlanException | IOException ex) {
                     Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -182,7 +268,7 @@ public class ConstructionManager {
         });
     }
 
-    private void startDemolision(final UUID uuid, final Structure structure, Schematic schematic) {
+    private void queueDemolisionTask(final UUID uuid, final Structure structure, Schematic schematic) {
         // Align schematic
         Cardinal cardinal = structure.getCardinal();
         final ConstructionDemolisionClipboard clipboard = new ConstructionDemolisionClipboard(schematic.getClipboard(), StructureBlockComparators.PERFORMANCE.reversed());
@@ -194,7 +280,7 @@ public class ConstructionManager {
             lPlayer = WorldEditUtil.getLocalPlayer(ply);
         }
 
-        final World world = WorldEditUtil.getWorld(structure.getWorldName());
+        final com.sk89q.worldedit.world.World world = WorldEditUtil.getWorld(structure.getWorldName());
         final Vector pos = structure.getDimension().getMinPosition();
 
         AsyncEditSession aSession;
@@ -214,11 +300,66 @@ public class ConstructionManager {
 
     }
 
+    /**
+     * Gets the instance of the ConstructionManager
+     *
+     * @return The ConstructionManager instance
+     */
     public static ConstructionManager getInstance() {
         if (instance == null) {
             instance = new ConstructionManager();
         }
         return instance;
+    }
+
+    public synchronized void init() {
+        if (!initialized) {
+            initHolos();
+            setStates();
+            initialized = true;
+        }
+    }
+
+    public boolean isInitialized() {
+        return initialized;
+    }
+
+    private void setStates() {
+        Session session = HibernateUtil.getSession();
+        QStructure qs = QStructure.structure;
+        new HibernateUpdateClause(session, qs).where(qs.state.ne(State.COMPLETE).and(qs.state.ne(State.REMOVED)))
+                .set(qs.state, State.STOPPED)
+                .execute();
+        session.close();
+    }
+
+    private void initHolos() {
+        Session session = HibernateUtil.getSession();
+        JPQLQuery query = new HibernateQuery(session);
+        QStructure qs = QStructure.structure;
+        final List<Structure> structures = query.from(qs).where(qs.state.ne(State.REMOVED)).list(qs);
+        session.close();
+        executor.execute(new Runnable() {
+
+            @Override
+            public void run() {
+                Queue<Structure> ss = new LinkedList<>(structures);
+                int batchsize = 100;
+                int count = 0;
+                while (ss.peek() != null) {
+                    if (count == batchsize) {
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        count = 0;
+                    }
+                    StructureHologramManager.getInstance().createHologram(plugin, ss.poll());
+                    count++;
+                }
+            }
+        });
     }
 
     /**
@@ -236,7 +377,7 @@ public class ConstructionManager {
         if (player != null) {
             localPlayer = WorldEditUtil.getLocalPlayer(player);
         }
-        World world = WorldEditUtil.getWorld(structure.getWorldName());
+        com.sk89q.worldedit.world.World world = WorldEditUtil.getWorld(structure.getWorldName());
 
         ThreadSafeEditSession editSession;
         if (localPlayer != null) {
@@ -244,6 +385,7 @@ public class ConstructionManager {
         } else {
             editSession = AsyncWorldEditUtil.getAsyncSessionFactory().getThreadSafeEditSession(world, FENCE_BLOCK_PLACE_SPEED);
         }
+        editSession.setAsyncForced(false);
         PriorityQueue<StructureBlock> queue = new PriorityQueue<>();
         CuboidClipboard clipboard = ClipboardGenerator.createEnclosure(schematic, material);
 
@@ -259,10 +401,11 @@ public class ConstructionManager {
                 }
             }
         }
-        
+
         SchematicUtil.align(clipboard, structure.getCardinal());
 
-        Vector location = structure.getPosition();
+        // Structures are always drawn from the min position
+        Vector location = structure.getDimension().getMinPosition().add(0, 1, 0); // above ground
         int placed = 0;
         while (queue.peek() != null) {
             if (placed == FENCE_BLOCK_PLACE_SPEED) {
@@ -275,18 +418,19 @@ public class ConstructionManager {
             }
             StructureBlock b = queue.poll();
             editSession.rawSetBlock(location.add(b.getPosition()), b.getBlock());
+            editSession.flushQueue();
             placed++;
         }
 
     }
 
-    private synchronized void setEntry(UUID player, Structure site) {
-        ConstructionEntry entry = constructionEntries.get(site.getId());
+    private synchronized void setEntry(UUID player, Structure structure) {
+        ConstructionEntry entry = constructionEntries.get(structure.getId());
         if (entry == null) {
-            entry = new ConstructionEntry(site);
+            entry = new ConstructionEntry(structure);
         }
         entry.setPlayer(player);
-        constructionEntries.put(site.getId(), entry);
+        constructionEntries.put(structure.getId(), entry);
     }
 
     private void performChecks(Structure structure, State desired) throws ConstructionException, StructurePlanException {
@@ -295,24 +439,25 @@ public class ConstructionManager {
             throw new ConstructionException("#" + structure.getId() + " can't be tasked, because it was removed");
         }
 
-        // Structure has already stopped constructing
-        if (structure.getState() == State.COMPLETE) {
-            throw new ConstructionException("#" + structure.getId() + " is already complete");
-        }
-
         switch (desired) {
             case BUILDING:
                 // Structure has already stopped constructing
                 if (structure.getState() == State.BUILDING) {
                     throw new ConstructionException("#" + structure.getId() + " is already being building");
                 }
+                // Structure has already stopped constructing
+                if (structure.getState() == State.COMPLETE) {
+                    throw new ConstructionException("#" + structure.getId() + " is already complete");
+                }
+
                 break;
             case DEMOLISHING:
-                if(structure.getState() == State.DEMOLISHING) {
-                     throw new ConstructionException("#" + structure.getId() + " is already being demolished");
+                if (structure.getState() == State.DEMOLISHING) {
+                    throw new ConstructionException("#" + structure.getId() + " is already being demolished");
                 }
-            break;
-            default:break;
+                break;
+            default:
+                break;
         }
 
         // Check schematic
@@ -324,7 +469,7 @@ public class ConstructionManager {
     }
 
     /**
-     * Stop construction of a structure.
+     * Stops construction of a structure.
      *
      * @param structure The structure
      * @throws construction.exception.ConstructionException
@@ -336,19 +481,23 @@ public class ConstructionManager {
         if (structure.getState() == State.REMOVED) {
             throw new ConstructionException("#" + structure.getId() + " can't be tasked, because it was removed");
         }
-        
+
         // Removed structures can't be tasked
         if (structure.getState() == State.COMPLETE) {
             throw new ConstructionException("Construction for #" + structure.getId() + " can't be stopped, because it is complete");
         }
 
-        // Structure was never tasked
-        if (entry == null) {
-            throw new ConstructionException("#" + structure.getId() + " hasn't been tasked yet");
+
+        if (entry == null || entry.getPlayer() == null) {
+            return;
         }
 
         // Cancel task in AsyncWorldEdit
-        AsyncWorldEditMain.getInstance().getBlockPlacer().cancelJob(entry.getPlayer(), entry.getJobId());
+        BlockPlacer pb = AsyncWorldEditMain.getInstance().getBlockPlacer();
+
+        if (pb.getJob(entry.getPlayer(), entry.getJobId()) != null) {
+            pb.cancelJob(entry.getPlayer(), entry.getJobId());
+        }
 
         // Set new state: STOPPED
         ConstructionSiteService css = new ConstructionSiteService();
@@ -407,7 +556,7 @@ public class ConstructionManager {
     public ConstructionEntry getEntry(Long structureId) {
         return constructionEntries.get(structureId);
     }
-    
+
     public ConstructionEntry getEntry(Structure structure) {
         return getEntry(structure.getId());
     }

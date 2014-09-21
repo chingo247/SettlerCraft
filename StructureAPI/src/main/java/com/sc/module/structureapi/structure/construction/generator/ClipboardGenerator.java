@@ -17,7 +17,7 @@ import com.sk89q.worldedit.blocks.BaseBlock;
 public class ClipboardGenerator {
 
     public static CuboidClipboard createEnclosure(CuboidClipboard structure, int material) {
-        final int height = 2;
+        final int height = 1;
         CuboidClipboard enclosure = new CuboidClipboard(new Vector(structure.getWidth(), height, structure.getLength()));
 
         // Outer ring

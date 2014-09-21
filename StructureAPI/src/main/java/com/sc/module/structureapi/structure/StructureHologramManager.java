@@ -55,7 +55,7 @@ public class StructureHologramManager {
 
                 @Override
                 public void run() {
-                    Hologram hologram = HolographicDisplaysAPI.createHologram(plugin, structure.getLocation(),
+                    Hologram hologram = HolographicDisplaysAPI.createHologram(plugin, structure.getLocation().add(0,2,0),
                             "Id: " + ChatColor.GOLD + structure.getId(),
                             "Plan: " + ChatColor.BLUE + structure.getName(),
                             "Status: " + structure.getState().name()

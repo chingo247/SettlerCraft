@@ -21,16 +21,16 @@ import java.util.Queue;
  */
 public abstract class ConstructionClipboard extends SmartClipboard {
 
-    private final Comparator<StructureBlock> constructionMode;
+    private final Comparator<StructureBlock> CONSTRUCTION_ORDER;
     
-    public ConstructionClipboard(CuboidClipboard parent, Comparator<StructureBlock> comparator) {
+    public ConstructionClipboard(CuboidClipboard parent, Comparator<StructureBlock> constructionOrder) {
         super(parent);
-        this.constructionMode = comparator;
+        this.CONSTRUCTION_ORDER = constructionOrder;
     }
     
     @Override
     public void place(EditSession editSession, Vector pos, boolean noAir) throws MaxChangedBlocksException {
-        Queue<StructureBlock> structurequeu = new PriorityQueue<>(constructionMode);
+        Queue<StructureBlock> structurequeu = new PriorityQueue<>(CONSTRUCTION_ORDER);
         for (int y = 0; y < getHeight(); y++) {
             for (int x = 0; x < getWidth(); x++) {
                 for (int z = 0; z < getLength(); z++) {

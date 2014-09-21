@@ -118,6 +118,7 @@ public class SCAsyncCuboidClipboard extends ProxyCuboidClipboard {
         m_blockPlacer.addJob(m_player, job);
         // MODIFIED START
         callback.onJobAdded(job);
+        System.out.println("Job added");
         
         m_schedule.runTaskAsynchronously(m_plugin, new SCClipboardAsyncTask(cc, session, m_player, "place",
                 m_blockPlacer, job, callback) {

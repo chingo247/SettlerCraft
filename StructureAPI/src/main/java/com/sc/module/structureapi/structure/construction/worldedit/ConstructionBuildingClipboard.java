@@ -9,7 +9,6 @@ import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.blocks.BlockID;
 import java.util.Comparator;
 
 /**
@@ -25,16 +24,18 @@ public class ConstructionBuildingClipboard extends ConstructionClipboard {
         this.constructionMode = comparator;
     }
 
+
+    
+
     @Override
     public void doblock(EditSession session, BaseBlock b, Vector blockPos, Vector pos) {
-        BaseBlock worldBlock = session.getBlock(blockPos.add(pos));
-        if (worldBlock.getId() == b.getId() && worldBlock.getData() == b.getData()) {
-            if(b.getId() == BlockID.IRON_BARS) {
-                System.out.println("TEST: IRON!");
-            }
-            
-            return;
-        }
+//        BaseBlock worldBlock = session.getBlock(blockPos.add(pos));
+//        
+//        if (worldBlock.getId() == b.getId() && worldBlock.getData() == b.getData()) {
+//            
+//            
+//            return;
+//        }
         session.rawSetBlock(blockPos.add(pos), b);
     }
 
