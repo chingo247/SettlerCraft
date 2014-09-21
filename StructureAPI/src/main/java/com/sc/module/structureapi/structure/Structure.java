@@ -17,7 +17,8 @@
 package com.sc.module.structureapi.structure;
 
 import com.google.common.base.Preconditions;
-import com.sc.module.structureapi.plan.Schematic;
+import com.sc.module.structureapi.structure.plan.StructurePlan;
+import com.sc.module.structureapi.structure.schematic.Schematic;
 import static com.sc.module.structureapi.util.SchematicUtil.calculateDimension;
 import com.sc.module.structureapi.util.WorldUtil;
 import com.sc.module.structureapi.world.Cardinal;
@@ -29,6 +30,9 @@ import com.sc.module.structureapi.world.Dimension;
 import com.sc.module.structureapi.world.Location;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
+import construction.exception.StructurePlanException;
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -36,7 +40,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -44,10 +47,10 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
@@ -59,24 +62,63 @@ import org.bukkit.entity.Player;
 @Entity
 public class Structure implements Serializable {
 
+    public enum State {
+        INITIALIZING,
+
+        WAITING,
+        /**
+         * Structure has been issued
+         */
+        QUEUED,
+        /**
+         * Schematic is being loaded
+         */
+        LOADING_SCHEMATIC,
+        /**
+         * Fence is being placed
+         */
+        PLACING_FENCE,
+        /**
+         * Structure is being build
+         */
+        BUILDING,
+        /**
+         * Structure is being demolished
+         */
+        DEMOLISHING,
+        /**
+         * Progress has been completed
+         */
+        COMPLETE,
+        /**
+         * Structure has been removed
+         */
+        REMOVED,
+        /**
+         * Progress has stopped
+         */
+        STOPPED
+    }
+    
+    private State state = State.INITIALIZING;
+
     @Id
     @GeneratedValue
     @Column(name = "SC_STRUCTURE_ID")
     private Long id;
+    
+    @Embedded
+    private StructureLogEntry logEntry;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @PrimaryKeyJoinColumn(name = "SC_STRUCTURE_ID" , referencedColumnName = "CSITE_ID")
-    private ConstructionSite constructionSite;
 
     @OneToMany(fetch = FetchType.EAGER)
     private Set<PlayerOwnership> ownerships;
-    
+
     @OneToMany(fetch = FetchType.EAGER)
     private Set<PlayerMembership> memberships;
 
 //    @Embedded
 //    private StructurePlan plan;
-
     @Embedded
     @Column(updatable = false)
     private Location location;
@@ -92,8 +134,10 @@ public class Structure implements Serializable {
 
     @Nullable
     private String structureRegion;
-    
+
     private String name;
+    
+    
 
     /**
      * JPA Constructor
@@ -116,10 +160,40 @@ public class Structure implements Serializable {
         this.cardinal = cardinal;
         this.location = new Location(world, pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
         this.dimension = calculateDimension(schematic, pos, cardinal);
-        this.constructionSite = new ConstructionSite(this);
         this.memberships = new HashSet<>();
         this.ownerships = new HashSet<>();
-//        this.progress = new StructureProgress();
+        this.logEntry = new StructureLogEntry();
+    }
+
+    public StructureLogEntry getLogEntry() {
+        return logEntry;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    
+    
+    
+
+    public Long getSchematicChecksum() throws IOException, StructurePlanException {
+        long checksum = FileUtils.checksumCRC32(getSchematicFile());
+        return checksum;
+    }
+
+    public StructurePlan getPlan() throws StructurePlanException {
+        File file = new File(getDataFolder(), "Config.xml");
+        StructurePlan plan = StructurePlan.load(file);
+        return plan;
+    }
+
+    public File getSchematicFile() throws StructurePlanException {
+        return getPlan().getSchematic();
     }
 
     public void setName(String name) {
@@ -129,42 +203,39 @@ public class Structure implements Serializable {
     public String getName() {
         return name;
     }
-    
-    
-    
+
+    public File getDataFolder() {
+        return new File(StructureAPI.getDataFolder(), getWorldName() + "//" + id);
+    }
+
     public boolean isOwner(Player player) {
-        PlayerOwnership ownership = new PlayerOwnership(player.getUniqueId(), this);
-        return ownerships.contains(ownership);
+        for (PlayerOwnership pos : ownerships) {
+            if (pos.getUUID().equals(player.getUniqueId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public List<PlayerOwnership> getOwnerships() {
         return new ArrayList<>(ownerships);
     }
-    
-    public ConstructionSite getConstructionSite() {
-        return constructionSite;
-    }
-
 
     boolean addOwner(PlayerOwnership playerOwner) {
         return ownerships.add(playerOwner);
     }
 
-
     boolean removeOwner(PlayerOwnership playerOwner) {
         return ownerships.remove(playerOwner);
     }
-    
+
     boolean addMember(PlayerMembership playerMember) {
         return memberships.add(playerMember);
     }
 
-
     boolean removeMember(PlayerMembership playerMember) {
         return memberships.remove(playerMember);
     }
-
-    
 
     public void setPrice(Double refundValue) {
         this.refundValue = refundValue;
@@ -176,6 +247,7 @@ public class Structure implements Serializable {
 
     /**
      * Gets the world of this structure. Calls location.getWorldName()
+     *
      * @return The world of this structure
      */
     public String getWorldName() {
@@ -198,7 +270,7 @@ public class Structure implements Serializable {
     public UUID getWorldUUID() {
         return location.getWorldUUID();
     }
-    
+
     /**
      * Gets the direction (NORTH|EAST|SOUTH|WEST) of this structure
      *
@@ -268,13 +340,20 @@ public class Structure implements Serializable {
 
     /**
      * Adds the offset to the location of this structure and returns the world location.
-     * 
+     *
      * @param offset The offset
      * @return the location
      */
     public org.bukkit.Location getLocationForOffset(Vector offset) {
         Vector p = WorldUtil.addOffset(getPosition(), cardinal, offset.getX(), offset.getY(), offset.getZ());
         World world = Bukkit.getWorld(getWorldName());
-        return new  org.bukkit.Location(world, p.getBlockX(), p.getBlockY(), p.getBlockZ());
+        return new org.bukkit.Location(world, p.getBlockX(), p.getBlockY(), p.getBlockZ());
     }
+
+    @Override
+    public String toString() {
+        return "#" + ChatColor.GOLD + id + " " + ChatColor.BLUE + name;
+
+    }
+
 }

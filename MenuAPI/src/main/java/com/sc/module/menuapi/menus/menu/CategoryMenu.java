@@ -31,6 +31,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -441,8 +442,18 @@ public class CategoryMenu implements Listener {
 
     @EventHandler
     private void onPlayerLeavesShop(InventoryCloseEvent ice) {
-
         Player player = (Player) ice.getPlayer();
+
+        // Check wheter this player is visiting a menu
+        if (hasSession(player.getUniqueId())) {
+            // remove player
+            leave(player);
+        }
+    }
+    
+    @EventHandler
+    private void onPlayerLogout(PlayerQuitEvent pqe) {
+        Player player = (Player) pqe.getPlayer();
 
         // Check wheter this player is visiting a menu
         if (hasSession(player.getUniqueId())) {
@@ -525,7 +536,6 @@ public class CategoryMenu implements Listener {
             this.setEnabled(false);
             this.makeAllLeave();
         }
-
     }
-
+    
 }

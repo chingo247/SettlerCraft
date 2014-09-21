@@ -6,8 +6,8 @@
 package com.sc.module.structureapi.persistence;
 
 import com.sc.module.structureapi.event.structure.StructureConstructionEvent;
-import com.sc.module.structureapi.structure.ConstructionSite;
-import com.sc.module.structureapi.structure.ConstructionSite.State;
+import com.sc.module.structureapi.structure.Structure;
+import com.sc.module.structureapi.structure.Structure.State;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
@@ -21,13 +21,13 @@ import org.hibernate.Transaction;
  */
 public class ConstructionSiteService {
 
-    public ConstructionSite save(ConstructionSite site) {
+    public Structure save(Structure structure) {
         Session session = null;
         Transaction tx = null;
         try {
             session = HibernateUtil.getSession();
             tx = session.beginTransaction();
-            site = (ConstructionSite) session.merge(site);
+            structure = (Structure) session.merge(structure);
             tx.commit();
         } catch (HibernateException e) {
             try {
@@ -41,16 +41,16 @@ public class ConstructionSiteService {
                 session.close();
             }
         }
-        return site;
+        return structure;
     }
 
-    public ConstructionSite setState(final ConstructionSite site, State newState) {
-        if (site.getState() != newState) {
-            Bukkit.getPluginManager().callEvent(new StructureConstructionEvent(site.getStructure()));
-            site.setState(newState);
-            return save(site);
+    public Structure setState(final Structure structure, State newState) {
+        if (structure.getState() != newState) {
+            Bukkit.getPluginManager().callEvent(new StructureConstructionEvent(structure));
+            structure.setState(newState);
+            return save(structure);
         }
-        return site;
+        return structure;
     }
     
 }

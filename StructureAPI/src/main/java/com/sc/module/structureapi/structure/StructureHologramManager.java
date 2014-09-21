@@ -6,7 +6,8 @@
 package com.sc.module.structureapi.structure;
 
 import com.gmail.filoghost.holograms.api.Hologram;
-import com.sc.module.structureapi.structure.ConstructionSite.State;
+import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
+import com.sc.module.structureapi.structure.Structure.State;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,17 +48,23 @@ public class StructureHologramManager {
         return instance;
     }
 
-    public void createHologram(Plugin plugin, Structure structure) {
-//        if (enabled) {
-//            Location location = structure.getLocationForOffset(structure.getPlan().getSignLocation());
-//
-//            Hologram hologram = HolographicDisplaysAPI.createHologram(plugin, location,
-//                    "Id: " + ChatColor.GOLD + structure.getId(),
-//                    "Plan: " + ChatColor.BLUE + structure.getPlan().getDisplayName(),
-//                    "Status: " + structure.getConstructionSite().getState().name()
-//            );
-//            holograms.put(structure.getId(), hologram);
-//        }
+    public void createHologram(final Plugin plugin, final Structure structure) {
+        if (enabled) {
+            // In case being executed asynchronously
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+
+                @Override
+                public void run() {
+                    Hologram hologram = HolographicDisplaysAPI.createHologram(plugin, structure.getLocation(),
+                            "Id: " + ChatColor.GOLD + structure.getId(),
+                            "Plan: " + ChatColor.BLUE + structure.getName(),
+                            "Status: " + structure.getState().name()
+                    );
+                    holograms.put(structure.getId(), hologram);
+                }
+            });
+
+        }
     }
 
     public void removeHolo(Structure structure) {
@@ -70,18 +77,15 @@ public class StructureHologramManager {
         }
     }
 
-    public void updateHolo(Plugin plugin, final Structure structure) {
+    public void updateHolo(final Structure structure) {
         if (enabled) {
             //FIX For out of sync
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+            Bukkit.getScheduler().scheduleSyncDelayedTask(StructureAPI.getPlugin(), new Runnable() {
 
                 @Override
                 public void run() {
                     final Hologram holo = holograms.get(structure.getId());
-                    System.out.println("Structure: " + structure.getId());
-                    System.out.println("Holo: " + holo);
-                    State state = structure.getConstructionSite().getState();
-                    System.out.println("State: " + structure.getConstructionSite().getState());
+                    State state = structure.getState();
                     if (holo != null) {
                         if (state == State.COMPLETE) {
                             holo.setLine(STRUCTURE_STATUS_INDEX, "");

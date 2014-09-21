@@ -192,7 +192,7 @@ public class ConstructionCommandExecutor implements CommandExecutor {
             player.sendMessage(ChatColor.RED + "Unable to find structure # " + ChatColor.GOLD + id);
             return true;
         }
-        if (StructureAPI.build(PLUGIN, player, structure)) {
+        if (StructureAPI.build(player, structure)) {
             player.sendMessage(ChatColor.RESET + "#" + ChatColor.GOLD + id + ChatColor.BLUE + structure.getName() + " will be build");
         }
 
@@ -230,7 +230,7 @@ public class ConstructionCommandExecutor implements CommandExecutor {
             player.sendMessage(ChatColor.RED + "Unable to find structure #" + id);
             return true;
         }
-        if (StructureAPI.demolish(PLUGIN, player, structure)) {
+        if (StructureAPI.demolish(player, structure)) {
             player.sendMessage(ChatColor.RESET + "#" + ChatColor.GOLD + id + ChatColor.BLUE + structure.getName() + " will be demolished");
         }
         return true;

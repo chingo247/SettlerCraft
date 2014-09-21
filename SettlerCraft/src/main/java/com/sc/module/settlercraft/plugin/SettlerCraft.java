@@ -10,13 +10,13 @@ import com.sc.module.menuapi.menus.menu.MenuAPI;
 import com.sc.module.settlercraft.commands.ConstructionCommandExecutor;
 import com.sc.module.settlercraft.commands.SettlerCraftCommandExecutor;
 import com.sc.module.settlercraft.commands.StructureCommandExecutor;
-import com.sc.module.settlercraft.listener.PlayerListener;
+import com.sc.module.settlercraft.listener.PlanListener;
 import com.sc.module.settlercraft.listener.StructureListener;
-import com.sc.module.structureapi.plan.StructurePlan;
-import com.sc.module.structureapi.plan.StructurePlanItem;
-import com.sc.module.structureapi.plan.StructurePlanManager;
-import com.sc.module.structureapi.plan.StructurePlanManager.Callback;
-import com.sc.module.structureapi.plan.concurrent.StructurePlanItemTask;
+import com.sc.module.structureapi.structure.concurrent.StructurePlanItemTask;
+import com.sc.module.structureapi.structure.plan.StructurePlan;
+import com.sc.module.structureapi.structure.plan.StructurePlanItem;
+import com.sc.module.structureapi.structure.plan.StructurePlanManager;
+import com.sc.module.structureapi.structure.plan.StructurePlanManager.Callback;
 import com.sc.persistence.HSQLServer;
 import com.sc.plugin.ConfigProvider;
 import com.sc.plugin.PermissionManager.Perms;
@@ -94,17 +94,20 @@ public class SettlerCraft extends JavaPlugin {
 
         setupPlanMenu();
         loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
+        
 
-        Bukkit.broadcastMessage(ChatColor.GOLD + "[SettlerCraft]: " + ChatColor.RESET + "Structure plans loaded");
+        Bukkit.broadcastMessage(ChatColor.GOLD + "[SettlerCraft]: " + ChatColor.WHITE + "Structure plans loaded");
 //        StructureConstructionManager.getInstance().init();
 
         Bukkit.getPluginManager().registerEvents(new StructureListener(), this);
-        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
+        Bukkit.getPluginManager().registerEvents(new PlanListener(), this);
 
         getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
         getCommand("cst").setExecutor(new ConstructionCommandExecutor(this));
         getCommand("stt").setExecutor(new StructureCommandExecutor());
 
+        
+        
         printPerms();
     }
 
@@ -183,7 +186,6 @@ public class SettlerCraft extends JavaPlugin {
     }
     
     private static void loadPlansIntoMenu() {
-
         final Executor executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         final List<StructurePlan> plans = StructurePlanManager.getInstance().getPlans();
         final int total = plans.size();

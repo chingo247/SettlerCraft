@@ -23,17 +23,11 @@ import com.sc.module.structureapi.structure.Structure;
 import com.sc.plugin.ConfigProvider;
 import com.sc.plugin.PermissionManager;
 import com.sc.plugin.SettlerCraftException;
-import java.util.Comparator;
 import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -147,49 +141,6 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         cs.sendMessage(ChatColor.RED + ex.getMessage());
                     }
 
-                    return true;
-
-                case "test1":
-                    Player player3 = (Player) cs;
-                    Chunk chunk = player3.getLocation().getChunk();
-                    Comparator<Block> comp = new Comparator<Block>() {
-
-                @Override
-                public int compare(Block o1, Block o2) {
-                    return new Integer(o1.getTypeId()).compareTo(o2.getTypeId());
-                }
-            };
-                    Queue<Block> queue = new PriorityQueue<>(comp);
-                    long start = System.currentTimeMillis();
-                    for (int x = 0; x < 16; x++) {
-                        for (int z = 0; z < 16; z++) {
-                            for (int y = 0; y < 256; y++) {
-                                Block block = chunk.getBlock(x, y, z);
-                                if(block.getType() != Material.ANVIL){
-                                    queue.add(block);
-                                }
-                            }
-                        }
-                    }
-                    
-                    long end = System.currentTimeMillis();
-                    System.out.println("Get in: " + (end - start));
-                    System.out.println(queue.size());
-                    return true;
-                case "test2":
-                    Player player4 = (Player) cs;
-                    Chunk chunk2 = player4.getLocation().getChunk();
-                    long start2 = System.currentTimeMillis();
-                    for (int x = 0; x < 16; x++) {
-                        for (int z = 0; z < 16; z++) {
-                            for (int y = 0; y < 256; y++) {
-                                Block block = chunk2.getBlock(x, y, z);
-                                block.setType(Material.COBBLESTONE);
-                            }
-                        }
-                    }
-                    long end2 = System.currentTimeMillis();
-                    System.out.println("Set in: " + (end2 - start2));
                     return true;
                 default:
                     cs.sendMessage(ChatColor.RED + "No actions known for: " + args);

@@ -19,9 +19,10 @@ package com.sc.module.structureapi.persistence;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateDeleteClause;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.module.structureapi.structure.ConstructionSite.State;
 import com.sc.module.structureapi.structure.QStructure;
 import com.sc.module.structureapi.structure.Structure;
+import com.sc.module.structureapi.structure.Structure.State;
+import com.sc.module.structureapi.world.Dimension;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,7 +43,7 @@ public class StructureService extends AbstractService {
         QStructure qstructure = QStructure.structure;
         Session session = HibernateUtil.getSession();
         Structure cachedStructure = (Structure) session.get(Structure.class, id);
-        if(cachedStructure != null) {
+        if (cachedStructure != null) {
             session.close();
             return cachedStructure;
         }
@@ -51,8 +52,6 @@ public class StructureService extends AbstractService {
         session.close();
         return structure;
     }
-    
-
 
     public List<Structure> getStructures() {
         QStructure structure = QStructure.structure;
@@ -62,7 +61,6 @@ public class StructureService extends AbstractService {
         session.close();
         return structures;
     }
-    
 
 //    public List<Structure> getStructures(UUID owner) {
 //        QStructure structure = QStructure.structure;
@@ -72,7 +70,6 @@ public class StructureService extends AbstractService {
 //        session.close();
 //        return structures;
 //    }
-
     public void delete(Structure structure) {
         Session session = HibernateUtil.getSession();
         QStructure qstructure = QStructure.structure;
@@ -101,8 +98,6 @@ public class StructureService extends AbstractService {
         }
         return structure;
     }
-    
-
 
     /**
      * Determines if given location is on a structure.
@@ -113,13 +108,13 @@ public class StructureService extends AbstractService {
     public boolean isOnStructure(Location location) {
         return getStructure(location) != null;
     }
-    
+
     public Structure getStructure(com.sk89q.worldedit.Location location) {
         World world = Bukkit.getWorld(location.getWorld().getName());
         return getStructure(new Location(
-                world, 
-                location.getPosition().getBlockX(), 
-                location.getPosition().getBlockY(), 
+                world,
+                location.getPosition().getBlockX(),
+                location.getPosition().getBlockY(),
                 location.getPosition().getBlockZ())
         );
     }
@@ -137,13 +132,13 @@ public class StructureService extends AbstractService {
                         .and(qStructure.dimension().maxZ.goe(location.getBlockZ()))
                         .and(qStructure.dimension().minY.loe(location.getBlockY()))
                         .and(qStructure.dimension().maxY.goe(location.getBlockY()))
-                        .and(qStructure.constructionSite().state.ne(State.REMOVED))
+                        .and(qStructure.state.ne(State.REMOVED))
                 ).singleResult(qStructure);
 
         session.close();
         return structure;
     }
-    
+
     public boolean overlaps(Structure structure) {
         return getOverlappingStructure(structure) != null;
     }
@@ -158,11 +153,24 @@ public class StructureService extends AbstractService {
                         .and(qStructure.dimension().maxX.goe(structure.getDimension().getMinX()).and(qStructure.dimension().minX.loe(structure.getDimension().getMaxX())))
                         .and(qStructure.dimension().maxY.goe(structure.getDimension().getMinY()).and(qStructure.dimension().minY.loe(structure.getDimension().getMaxY())))
                         .and(qStructure.dimension().maxZ.goe(structure.getDimension().getMinZ()).and(qStructure.dimension().minZ.loe(structure.getDimension().getMaxZ())))
-                        .and(qStructure.constructionSite().state.ne(State.REMOVED))
+                        .and(qStructure.state.ne(State.REMOVED))
                 ).singleResult(qStructure); // return the first
         session.close();
         return result;
     }
 
-    
+    public List<Structure> getStructuresWithinDimension(World world, Dimension dimension) {
+        QStructure qStructure = QStructure.structure;
+        Session session = HibernateUtil.getSession();
+        JPQLQuery query = new HibernateQuery(session);
+        List<Structure> result = query.from(qStructure)
+                .where(qStructure.location().worldUUID.eq(world.getUID())
+                        .and(qStructure.dimension().maxX.goe(dimension.getMinX()).and(qStructure.dimension().minX.loe(dimension.getMaxX())))
+                        .and(qStructure.dimension().maxY.goe(dimension.getMinY()).and(qStructure.dimension().minY.loe(dimension.getMaxY())))
+                        .and(qStructure.dimension().maxZ.goe(dimension.getMinZ()).and(qStructure.dimension().minZ.loe(dimension.getMaxZ())))
+                        .and(qStructure.state.ne(State.REMOVED))
+                ).list(qStructure);
+        session.close();
+        return result;
+    }
 }

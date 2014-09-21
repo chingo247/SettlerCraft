@@ -17,7 +17,6 @@
 
 package com.sc.module.structureapi.persistence;
 
-import com.sc.module.structureapi.structure.ConstructionSite;
 import com.sc.module.structureapi.structure.PlayerMembership;
 import com.sc.module.structureapi.structure.PlayerOwnership;
 import com.sc.module.structureapi.structure.Structure;
@@ -40,7 +39,6 @@ public class HibernateUtil {
             // config file.
             AnnotationConfiguration configuration = new AnnotationConfiguration();
             configuration.addAnnotatedClass(Structure.class);
-            configuration.addAnnotatedClass(ConstructionSite.class);
             configuration.addAnnotatedClass(PlayerOwnership.class);
             configuration.addAnnotatedClass(PlayerMembership.class);
             sessionFactory = configuration.configure().buildSessionFactory();
