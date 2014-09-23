@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.sc.module.structureapi.structure;
 
 import java.io.Serializable;
@@ -18,11 +17,12 @@ import javax.persistence.Embeddable;
  */
 @Embeddable
 public class StructureLogEntry implements Serializable {
-    
+
     @Column(updatable = false)
     private Timestamp createdAt;
     private Timestamp completedAt;
     private Timestamp removedAt;
+    private Timestamp placedFenceAt;
     private Boolean autoremoved = false;
 
     protected StructureLogEntry() {
@@ -30,16 +30,33 @@ public class StructureLogEntry implements Serializable {
     }
 
     public void setRemovedAt(Date removedAt) {
-        if(removedAt != null) {
-        this.removedAt = new Timestamp(removedAt.getTime());
+        if (removedAt != null) {
+            this.removedAt = new Timestamp(removedAt.getTime());
         } else {
             this.removedAt = null;
         }
     }
 
+    public void setPlacedFenceAt(Date placedFenceAt) {
+        if (placedFenceAt != null) {
+            this.placedFenceAt = new Timestamp(placedFenceAt.getTime());
+        } else {
+            this.placedFenceAt = null;
+        }
+
+    }
+
+    public Timestamp getPlacedFenceAt() {
+        return placedFenceAt;
+    }
+
+    public boolean hasPlacedFence() {
+        return placedFenceAt != null;
+    }
+
     public void setCompletedAt(Date completedAt) {
-        if(completedAt != null) {
-        this.completedAt = new Timestamp(completedAt.getTime());
+        if (completedAt != null) {
+            this.completedAt = new Timestamp(completedAt.getTime());
         } else {
             this.completedAt = null;
         }
@@ -48,7 +65,7 @@ public class StructureLogEntry implements Serializable {
     public Timestamp getCreatedAt() {
         return createdAt;
     }
-    
+
     public void setAutoremoved(Boolean autoremoved) {
         this.autoremoved = autoremoved;
     }
@@ -57,11 +74,4 @@ public class StructureLogEntry implements Serializable {
         return autoremoved;
     }
 
-    
-    
-    
-
-    
-    
-    
 }

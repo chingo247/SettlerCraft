@@ -44,28 +44,28 @@ public class ConstructionBuildingCallback extends ConstructionCallback {
         final ConstructionManager cm = ConstructionManager.getInstance();
         final ConstructionSiteService siteService = new ConstructionSiteService();
         cm.getEntry(structure.getId()).setJobId(entry.getJobId());
-        
+
         // Update status
-        siteService.setState(structure, State.QUEUED);
-        StructureHologramManager.getInstance().updateHolo(structure);
-        StructureAPI.yellStatus(structure);
-        
-       
-        
+        if (structure.getLogEntry().hasPlacedFence()) {
+            siteService.setState(structure, State.QUEUED);
+            StructureHologramManager.getInstance().updateHolo(structure);
+            StructureAPI.yellStatus(structure);
+        }
 
         // Set state changeListener
         entry.addStateChangedListener(new IJobEntryListener() {
 
             @Override
             public void jobStateChanged(JobEntry bpje) {
-                if (bpje.getStatus() == JobStatus.PlacingBlocks) {
+                if (bpje.getStatus() == JobStatus.PlacingBlocks && structure.getLogEntry().hasPlacedFence()) {
                     siteService.setState(structure, State.BUILDING);
                     StructureAPI.yellStatus(structure);
                     StructureHologramManager.getInstance().updateHolo(structure);
-                } 
+                } else {
+                    System.out.println("BPJE: " + bpje.getStatus());
+                }
             }
         });
     }
-
 
 }

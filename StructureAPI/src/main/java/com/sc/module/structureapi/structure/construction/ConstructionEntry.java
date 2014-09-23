@@ -27,11 +27,13 @@ public class ConstructionEntry {
 
 //    private final Map<Long, ConstructionTask> tasks; // ConstructionSiteID - ConstructionTask
     private UUID player;
+    private UUID fenceUUID; // Used to place a fence
     private final Structure structure;
     private int jobId = -1;
     private boolean demolishing = false;
     private int buildmode = 0;
     private int demolishmode = 0;
+    private boolean canceled = false;
 
     ConstructionEntry(Structure structure) {
         this.structure = structure;
@@ -43,6 +45,22 @@ public class ConstructionEntry {
     
     public void setPlayer(UUID player) {
         this.player = player;
+    }
+
+    public UUID getFenceUUID() {
+        return fenceUUID;
+    }
+
+    public void setCanceled(boolean canceled) {
+        this.canceled = canceled;
+    }
+
+    public boolean isCanceled() {
+        return canceled;
+    }
+    
+    public void setFence(UUID uuid) {
+        this.fenceUUID = uuid;
     }
 
     public UUID getPlayer() {

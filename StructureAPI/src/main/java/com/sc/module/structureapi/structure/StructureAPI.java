@@ -8,7 +8,6 @@ package com.sc.module.structureapi.structure;
 import com.sc.module.structureapi.persistence.AbstractService;
 import com.sc.module.structureapi.persistence.HibernateUtil;
 import com.sc.module.structureapi.persistence.StructureService;
-import com.sc.module.structureapi.structure.construction.ConstructionEntry;
 import com.sc.module.structureapi.structure.construction.ConstructionManager;
 import com.sc.module.structureapi.structure.plan.StructurePlan;
 import com.sc.module.structureapi.structure.schematic.Schematic;
@@ -261,54 +260,7 @@ public class StructureAPI {
         return true;
     }
 
-    public static boolean delay(Plugin plugin, Player player, Structure structure) {
-        return delay(plugin, player.getUniqueId(), structure);
-    }
     
-    public static boolean delay(Plugin plugin, UUID uuid, Structure structure) {
-        Player player = Bukkit.getPlayer(uuid);
-            
-        if (structure == null) {
-            throw new AssertionError("Null structure");
-        }
-
-        if (structure.getId() == null) {
-            throw new AssertionError("structure is not a saved instance");
-        }
-
-        if (player != null  && !structure.isOwner(player)) {
-            player.sendMessage(ChatColor.RED + "You have no permission to manage task #" + ChatColor.GOLD + structure.getId());
-            return false;
-        }
-
-        try {
-            long siteId = structure.getId();
-            
-            ConstructionEntry entry = ConstructionManager.getInstance().getEntry(siteId);
-            // Structure was never tasked
-            if (entry == null) {
-                throw new ConstructionException("#" + siteId + " hasn't been tasked yet");
-            }
-            boolean demolishing = entry.isDemolishing();
-            ConstructionManager.getInstance().stop(structure);
-
-            if (demolishing) {
-                ConstructionManager.getInstance().demolish(uuid, structure, false);
-            } else {
-                ConstructionManager.getInstance().build(uuid, structure, false);
-            }
-        } catch (ConstructionException ex) {
-            if(player != null) {
-                player.sendMessage(ex.getMessage());
-            }
-            return false;
-        } catch (StructurePlanException ex) {
-            java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        return true;
-    }
 
     private static void createDataFolder(Structure structure, StructurePlan plan) throws StructureException, IOException {
         final String WORLD = structure.getWorldName();
@@ -522,7 +474,6 @@ public class StructureAPI {
             case QUEUED: statusString = ChatColor.YELLOW + "QUEUED: " + ChatColor.RESET + structure; break;
             case REMOVED: statusString = ChatColor.RED + "REMOVED: " + ChatColor.RESET + structure; break;
             case STOPPED: statusString = ChatColor.RED + "STOPPED: " + ChatColor.RESET + structure; break;
-            case WAITING: statusString = ChatColor.WHITE + "WAITING: " + ChatColor.RESET + structure; break;
             default: throw new AssertionError("Unknown state: " + structure.getState());
         }
         player.sendMessage(statusString);

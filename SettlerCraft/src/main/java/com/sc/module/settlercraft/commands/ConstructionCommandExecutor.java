@@ -155,9 +155,9 @@ public class ConstructionCommandExecutor implements CommandExecutor {
             return true;
         }
 
-        if (StructureAPI.delay(PLUGIN, player, structure)) {
-            player.sendMessage("#" + ChatColor.GOLD + id + ChatColor.BLUE + structure.getName() + ChatColor.RESET + " has been placed at the back of the queue");
-        }
+//        if (StructureAPI.delay(PLUGIN, player, structure)) {
+//            player.sendMessage("#" + ChatColor.GOLD + id + ChatColor.BLUE + structure.getName() + ChatColor.RESET + " has been placed at the back of the queue");
+//        }
         return true;
     }
 

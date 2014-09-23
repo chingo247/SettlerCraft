@@ -65,9 +65,8 @@ public class Structure implements Serializable {
     public enum State {
         INITIALIZING,
 
-        WAITING,
         /**
-         * Structure has been issued
+         * Structure has been added to AsyncWorldEdit's blockplacer's Queue
          */
         QUEUED,
         /**
@@ -352,7 +351,7 @@ public class Structure implements Serializable {
 
     @Override
     public String toString() {
-        return "#" + ChatColor.GOLD + id + " " + ChatColor.BLUE + name;
+        return "#" + ChatColor.GOLD + id + " " + ChatColor.BLUE + name + ChatColor.RESET;
 
     }
 
