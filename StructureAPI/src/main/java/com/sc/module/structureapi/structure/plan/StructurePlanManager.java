@@ -5,7 +5,7 @@
  */
 package com.sc.module.structureapi.structure.plan;
 
-import construction.exception.StructurePlanException;
+import construction.exception.StructureDataException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -156,7 +156,7 @@ public class StructurePlanManager {
                 
                 
                 onComplete(plan);
-            } catch (StructurePlanException ex) {
+            } catch (StructureDataException ex) {
                 Logger.getLogger(StructurePlanManager.class.getName()).log(Level.SEVERE, null, ex);
             }
         }

@@ -21,9 +21,9 @@ package construction.exception;
  *
  * @author Chingo
  */
-public class StructurePlanException extends Exception {
+public class StructureDataException extends Exception {
     
-    public StructurePlanException(String message) {
+    public StructureDataException(String message) {
         super(message);
     }
     

@@ -163,10 +163,10 @@ public class RestoreService {
 
         ProtectedCuboidRegion region = new ProtectedCuboidRegion(id, new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
 
-       
+        PlayerOwnershipService pos = new PlayerOwnershipService();
         
         // Set Owners
-        for(PlayerOwnership owner : structure.getOwnerships()) {
+        for(PlayerOwnership owner : pos.getOwners(structure)) {
             region.getOwners().addPlayer(owner.getName());
         }
         mgr.addRegion(region);

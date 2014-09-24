@@ -30,29 +30,22 @@ import com.sc.module.structureapi.world.Dimension;
 import com.sc.module.structureapi.world.Location;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
-import construction.exception.StructurePlanException;
+import construction.exception.StructureDataException;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
 
 /**
  *
@@ -110,11 +103,13 @@ public class Structure implements Serializable {
     private StructureLogEntry logEntry;
 
 
-    @OneToMany(fetch = FetchType.EAGER)
-    private Set<PlayerOwnership> ownerships;
-
-    @OneToMany(fetch = FetchType.EAGER)
-    private Set<PlayerMembership> memberships;
+//    @OneToMany(fetch = FetchType.EAGER)
+//    @JoinColumn(name = "OWNER_ID", columnDefinition = "STRUCTURE_ID")
+//    private Set<PlayerOwnership> ownerships;
+//
+//    @OneToMany(fetch = FetchType.EAGER)
+//    @JoinColumn(name = "MEMBER_ID", columnDefinition = "STRUCTURE_ID")
+//    private Set<PlayerMembership> memberships;
 
 //    @Embedded
 //    private StructurePlan plan;
@@ -159,8 +154,8 @@ public class Structure implements Serializable {
         this.cardinal = cardinal;
         this.location = new Location(world, pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
         this.dimension = calculateDimension(schematic, pos, cardinal);
-        this.memberships = new HashSet<>();
-        this.ownerships = new HashSet<>();
+//        this.memberships = new HashSet<>();
+//        this.ownerships = new HashSet<>();
         this.logEntry = new StructureLogEntry();
     }
 
@@ -180,18 +175,18 @@ public class Structure implements Serializable {
     
     
 
-    public Long getSchematicChecksum() throws IOException, StructurePlanException {
+    public Long getSchematicChecksum() throws IOException, StructureDataException {
         long checksum = FileUtils.checksumCRC32(getSchematicFile());
         return checksum;
     }
 
-    public StructurePlan getPlan() throws StructurePlanException {
+    public StructurePlan getPlan() throws StructureDataException {
         File file = new File(getDataFolder(), "Config.xml");
         StructurePlan plan = StructurePlan.load(file);
         return plan;
     }
 
-    public File getSchematicFile() throws StructurePlanException {
+    public File getSchematicFile() throws StructureDataException {
         return getPlan().getSchematic();
     }
 
@@ -207,34 +202,34 @@ public class Structure implements Serializable {
         return new File(StructureAPI.getDataFolder(), getWorldName() + "//" + id);
     }
 
-    public boolean isOwner(Player player) {
-        for (PlayerOwnership pos : ownerships) {
-            if (pos.getUUID().equals(player.getUniqueId())) {
-                return true;
-            }
-        }
-        return false;
-    }
+//    public boolean isOwner(Player player) {
+//        for (PlayerOwnership pos : ownerships) {
+//            if (pos.getUUID().equals(player.getUniqueId())) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
-    public List<PlayerOwnership> getOwnerships() {
-        return new ArrayList<>(ownerships);
-    }
-
-    boolean addOwner(PlayerOwnership playerOwner) {
-        return ownerships.add(playerOwner);
-    }
-
-    boolean removeOwner(PlayerOwnership playerOwner) {
-        return ownerships.remove(playerOwner);
-    }
-
-    boolean addMember(PlayerMembership playerMember) {
-        return memberships.add(playerMember);
-    }
-
-    boolean removeMember(PlayerMembership playerMember) {
-        return memberships.remove(playerMember);
-    }
+//    public List<PlayerOwnership> getOwnerships() {
+//        return new ArrayList<>(ownerships);
+//    }
+//
+//    boolean addOwner(PlayerOwnership playerOwner) {
+//        return ownerships.add(playerOwner);
+//    }
+//
+//    boolean removeOwner(PlayerOwnership playerOwner) {
+//        return ownerships.remove(playerOwner);
+//    }
+//
+//    boolean addMember(PlayerMembership playerMember) {
+//        return memberships.add(playerMember);
+//    }
+//
+//    boolean removeMember(PlayerMembership playerMember) {
+//        return memberships.remove(playerMember);
+//    }
 
     public void setPrice(Double refundValue) {
         this.refundValue = refundValue;

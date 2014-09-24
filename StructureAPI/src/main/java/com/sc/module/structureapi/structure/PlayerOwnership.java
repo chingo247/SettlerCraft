@@ -9,10 +9,15 @@ package com.sc.module.structureapi.structure;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import org.bukkit.entity.Player;
 
 /**
@@ -20,15 +25,18 @@ import org.bukkit.entity.Player;
  * @author Chingo
  */
 @Entity
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"PLAYER_ID", "STRUCTURE_ID"})})
 public class PlayerOwnership implements Serializable {
     
     @Id
     @GeneratedValue
     private Long id;
-    private final UUID uuid;
+    @Column(name = "PLAYER_ID")
+    private final UUID player;
     private final String name;
     
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "STRUCURE_ID")       
     private Structure structure;
     
     
@@ -37,7 +45,7 @@ public class PlayerOwnership implements Serializable {
      * JPA Constructor.
      */
     protected PlayerOwnership() {
-        this.uuid = null;
+        this.player = null;
         this.name = null;
     }
     
@@ -49,7 +57,7 @@ public class PlayerOwnership implements Serializable {
      */
     PlayerOwnership(Player player, Structure structure) {
         this.structure = structure;
-        this.uuid = player.getUniqueId();
+        this.player = player.getUniqueId();
         this.name = player.getName();
     }
 
@@ -63,7 +71,7 @@ public class PlayerOwnership implements Serializable {
     }
 
     public UUID getUUID() {
-        return uuid;
+        return player;
     }
  
 
@@ -77,7 +85,7 @@ public class PlayerOwnership implements Serializable {
         }
         final PlayerOwnership other = (PlayerOwnership) obj;
 
-        if (!Objects.equals(this.uuid, other.uuid)) {
+        if (!Objects.equals(this.player, other.player)) {
             return false;
         }
         if (!Objects.equals(this.structure, other.structure)) {
@@ -90,7 +98,7 @@ public class PlayerOwnership implements Serializable {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 29 * hash + Objects.hashCode(this.uuid);
+        hash = 29 * hash + Objects.hashCode(this.player);
         hash = 29 * hash + Objects.hashCode(this.structure);
         return hash;
     }

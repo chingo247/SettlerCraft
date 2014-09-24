@@ -5,8 +5,8 @@
  */
 package com.sc.module.structureapi.structure;
 
-import com.sc.module.structureapi.persistence.AbstractService;
-import com.sc.module.structureapi.persistence.HibernateUtil;
+import com.sc.module.structureapi.persistence.PlayerMembershipService;
+import com.sc.module.structureapi.persistence.PlayerOwnershipService;
 import com.sc.module.structureapi.persistence.StructureService;
 import com.sc.module.structureapi.structure.construction.ConstructionManager;
 import com.sc.module.structureapi.structure.plan.StructurePlan;
@@ -26,8 +26,8 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import construction.exception.ConstructionException;
+import construction.exception.StructureDataException;
 import construction.exception.StructureException;
-import construction.exception.StructurePlanException;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
@@ -39,9 +39,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 /**
  *
@@ -49,14 +46,13 @@ import org.hibernate.Transaction;
  */
 public class StructureAPI {
 
-    
     private static final String PREFIX = "SC_REG_";
     private static final String MAIN_PLUGIN_NAME = "SettlerCraft";
     private static final Plugin MAIN_PLUGIN = Bukkit.getPluginManager().getPlugin(MAIN_PLUGIN_NAME);
 
     private StructureAPI() {
     }
-    
+
     public static Plugin getPlugin() {
         return MAIN_PLUGIN;
     }
@@ -94,7 +90,6 @@ public class StructureAPI {
             java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
             return null;
         }
-        
 
         // Check if structure overlaps another structure
         if (overlaps(schematic, world, pos, cardinal)) {
@@ -114,7 +109,11 @@ public class StructureAPI {
         structure.setStructureRegionId(PREFIX + structure.getId());
         structure = ss.save(structure);
         if (player != null) {
-            makeOwner(player, structure);
+            try {
+                makeOwner(player, structure);
+            } catch (StructureException ex) {
+                java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            }
         }
 
         ProtectedRegion structureRegion = claimGround(player, structure, schematic);
@@ -128,8 +127,6 @@ public class StructureAPI {
 
             return null;
         }
-        
-        
 
         try {
             createDataFolder(structure, plan);
@@ -140,22 +137,22 @@ public class StructureAPI {
             java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
             return null;
         }
-        
+
         StructureHologramManager.getInstance().createHologram(Bukkit.getPluginManager().getPlugin(MAIN_PLUGIN_NAME), structure);
-        
-        
+
         return structure;
     }
 
     /**
      * Builds a structure
+     *
      * @param uuid The uuid to backtrack this construction process
      * @param structure The structure
      * @return true if succesfully started
      */
     public static boolean build(UUID uuid, Structure structure) {
         Player player = Bukkit.getPlayer(uuid);
-        
+
         if (structure == null) {
             throw new AssertionError("Null structure");
         }
@@ -164,35 +161,33 @@ public class StructureAPI {
             throw new AssertionError("structure is not a saved instance");
         }
 
-        
-        if (player != null && !structure.isOwner(player)) {
-                player.sendMessage(ChatColor.RED + "You have don't own this structure");
+        if (player != null && !isOwner(player, structure)) {
+            player.sendMessage(ChatColor.RED + "You have don't own this structure");
             return false;
         }
 
         try {
             ConstructionManager.getInstance().build(uuid, structure, false);
         } catch (ConstructionException ex) {
-            if(player != null) {
+            if (player != null) {
                 player.sendMessage(ex.getMessage());
-            } 
-            
+            }
+
             return false;
-        } catch (StructurePlanException | IOException ex) {
+        } catch (StructureDataException | IOException ex) {
             java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        
-        
+
         return true;
     }
-    
+
     public static boolean build(Player player, Structure structure) {
         return build(player.getUniqueId(), structure);
     }
-    
+
     public static boolean demolish(UUID uuid, Structure structure) {
-         Player player = Bukkit.getPlayer(uuid);
-        
+        Player player = Bukkit.getPlayer(uuid);
+
         if (structure == null) {
             throw new AssertionError("Null structure");
         }
@@ -201,7 +196,7 @@ public class StructureAPI {
             throw new AssertionError("structure is not a saved instance");
         }
 
-        if (player != null && !structure.isOwner(player)) {
+        if (player != null && !isOwner(player, structure)) {
             player.sendMessage(ChatColor.RED + "You have no permission to manage task #" + ChatColor.GOLD + structure.getId());
             return false;
         }
@@ -209,11 +204,11 @@ public class StructureAPI {
         try {
             ConstructionManager.getInstance().demolish(uuid, structure, false);
         } catch (ConstructionException ex) {
-            if(player != null) {
+            if (player != null) {
                 player.sendMessage(ex.getMessage());
             }
             return false;
-        } catch (StructurePlanException ex) {
+        } catch (StructureDataException ex) {
             java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         return true;
@@ -232,7 +227,7 @@ public class StructureAPI {
             throw new AssertionError("structure is not a saved instance");
         }
 
-        if (!structure.isOwner(player)) {
+        if (!isOwner(player, structure)) {
             player.sendMessage(ChatColor.RED + "You have no permission to manage task #" + ChatColor.GOLD + structure.getId());
             return false;
         }
@@ -246,8 +241,30 @@ public class StructureAPI {
         return true;
     }
     
+    public static void makeOwner(Player player, Structure structure) throws StructureException {
+        if(player == null) throw new AssertionError("Null player");
+        if(structure == null) throw new AssertionError("Null structure");
+        PlayerOwnershipService service = new PlayerOwnershipService();
+        
+        if(service.isOwner(player, structure)) {
+            throw new StructureException(ChatColor.RED + "Player: " +player.getName() + " is already owner");
+        }
+        
+        service.save(new PlayerOwnership(player, structure));
+    }
+
+    public static boolean isOwner(Player player, Structure structure) {
+        PlayerOwnershipService ownershipService = new PlayerOwnershipService();
+        return ownershipService.isOwner(player, structure);
+    }
+
+    public static boolean isMember(Player player, Structure structure) {
+        PlayerMembershipService membershipService = new PlayerMembershipService();
+        return membershipService.isMember(player, structure);
+    }
+
     public static boolean stop(Structure structure) throws ConstructionException {
-         if (structure == null) {
+        if (structure == null) {
             throw new AssertionError("Null structure");
         }
 
@@ -256,11 +273,9 @@ public class StructureAPI {
         }
 
         ConstructionManager.getInstance().stop(structure);
-        
+
         return true;
     }
-
-    
 
     private static void createDataFolder(Structure structure, StructurePlan plan) throws StructureException, IOException {
         final String WORLD = structure.getWorldName();
@@ -376,109 +391,51 @@ public class StructureAPI {
         return false;
     }
 
-    private static PlayerOwnership save(PlayerOwnership playerOwnership) {
-        Session session = null;
-        Transaction tx = null;
-        try {
-            session = HibernateUtil.getSession();
-            tx = session.beginTransaction();
-            playerOwnership = (PlayerOwnership) session.merge(playerOwnership);
-            tx.commit();
-        } catch (HibernateException e) {
-            try {
-                tx.rollback();
-            } catch (HibernateException rbe) {
-                java.util.logging.Logger.getLogger(AbstractService.class.getName()).log(java.util.logging.Level.SEVERE, "Couldn’t roll back transaction", rbe);
-            }
-            throw e;
-        } finally {
-            if (session != null) {
-                session.close();
-            }
-        }
-        return playerOwnership;
-    }
-
-    private static PlayerMembership save(PlayerMembership playerMembership) {
-        Session session = null;
-        Transaction tx = null;
-        try {
-            session = HibernateUtil.getSession();
-            tx = session.beginTransaction();
-            playerMembership = (PlayerMembership) session.merge(playerMembership);
-            tx.commit();
-        } catch (HibernateException e) {
-            try {
-                tx.rollback();
-            } catch (HibernateException rbe) {
-                java.util.logging.Logger.getLogger(AbstractService.class.getName()).log(java.util.logging.Level.SEVERE, "Couldn’t roll back transaction", rbe);
-            }
-            throw e;
-        } finally {
-            if (session != null) {
-                session.close();
-            }
-        }
-        return playerMembership;
-    }
-
-    public static void makeOwner(Player player, Structure structure) {
-        StructureService service = new StructureService();
-        PlayerOwnership ownership = new PlayerOwnership(player, structure);
-        ownership = save(ownership);
-        structure.addOwner(ownership);
-        service.save(structure);
-    }
-
-    public static void makeMember(Player player, Structure structure) {
-        StructureService service = new StructureService();
-        PlayerMembership playerMembership = new PlayerMembership(player.getUniqueId(), structure);
-        playerMembership = save(playerMembership);
-        structure.addMember(playerMembership);
-        service.save(structure);
-    }
-
-    public static void removeOwner(Player player, Structure structure) {
-        StructureService service = new StructureService();
-        PlayerOwnership ownership = new PlayerOwnership(player, structure);
-        structure.removeOwner(ownership);
-        service.save(structure);
-    }
-
-    public static void removeMember(Player player, Structure structure) {
-        StructureService service = new StructureService();
-        PlayerMembership playerMembership = new PlayerMembership(player.getUniqueId(), structure);
-        structure.removeMember(playerMembership);
-        service.save(structure);
-    }
-    
     public static void yellStatus(Structure structure) {
-        for(PlayerOwnership ownership : structure.getOwnerships()) {
+        PlayerOwnershipService pos = new PlayerOwnershipService();
+        for (PlayerOwnership ownership : pos.getOwners(structure)) {
             tellStatus(structure, Bukkit.getPlayer(ownership.getUUID()));
         }
     }
-    
+
     public static void tellStatus(Structure structure, Player player) {
-        if(player == null || !player.isOnline()) {
+        if (player == null || !player.isOnline()) {
             return; // No effect
         }
-        
+
         String statusString;
-        switch(structure.getState()) {
-            case BUILDING: statusString = ChatColor.YELLOW + "BUILDING: " + ChatColor.RESET +  structure; break;
-            case DEMOLISHING: statusString = ChatColor.YELLOW + "DEMOLISHING: " + ChatColor.RESET + structure; break;
-            case COMPLETE:  statusString = "Construction " + ChatColor.GREEN + "COMPLETE" + ChatColor.RESET + ": " + ChatColor.RESET + structure; break;
-            case INITIALIZING: statusString = ChatColor.YELLOW + "INITIALIZING: " + ChatColor.RESET + structure; break;  
-            case LOADING_SCHEMATIC: statusString = ChatColor.YELLOW + "LOADING SCHEMATIC: " + ChatColor.RESET + structure; break;
-            case PLACING_FENCE: statusString = ChatColor.YELLOW + "PLACING FENCE: " + ChatColor.RESET + structure; break;
-            case QUEUED: statusString = ChatColor.YELLOW + "QUEUED: " + ChatColor.RESET + structure; break;
-            case REMOVED: statusString = ChatColor.RED + "REMOVED: " + ChatColor.RESET + structure; break;
-            case STOPPED: statusString = ChatColor.RED + "STOPPED: " + ChatColor.RESET + structure; break;
-            default: throw new AssertionError("Unknown state: " + structure.getState());
+        switch (structure.getState()) {
+            case BUILDING:
+                statusString = ChatColor.YELLOW + "BUILDING: " + ChatColor.RESET + structure;
+                break;
+            case DEMOLISHING:
+                statusString = ChatColor.YELLOW + "DEMOLISHING: " + ChatColor.RESET + structure;
+                break;
+            case COMPLETE:
+                statusString = "Construction " + ChatColor.GREEN + "COMPLETE" + ChatColor.RESET + ": " + ChatColor.RESET + structure;
+                break;
+            case INITIALIZING:
+                statusString = ChatColor.YELLOW + "INITIALIZING: " + ChatColor.RESET + structure;
+                break;
+            case LOADING_SCHEMATIC:
+                statusString = ChatColor.YELLOW + "LOADING SCHEMATIC: " + ChatColor.RESET + structure;
+                break;
+            case PLACING_FENCE:
+                statusString = ChatColor.YELLOW + "PLACING FENCE: " + ChatColor.RESET + structure;
+                break;
+            case QUEUED:
+                statusString = ChatColor.YELLOW + "QUEUED: " + ChatColor.RESET + structure;
+                break;
+            case REMOVED:
+                statusString = ChatColor.RED + "REMOVED: " + ChatColor.RESET + structure;
+                break;
+            case STOPPED:
+                statusString = ChatColor.RED + "STOPPED: " + ChatColor.RESET + structure;
+                break;
+            default:
+                throw new AssertionError("Unknown state: " + structure.getState());
         }
         player.sendMessage(statusString);
     }
-    
-    
-    
+
 }

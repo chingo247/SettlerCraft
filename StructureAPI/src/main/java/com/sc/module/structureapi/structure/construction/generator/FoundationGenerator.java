@@ -29,7 +29,7 @@ import com.sk89q.worldedit.blocks.BaseBlock;
 public class FoundationGenerator {
 
     /**
-     * Uses a very simple algorithm to generates a clipboard with a height of 1 block with the
+     * Generates a clipboard with a height of 1 block with the
      * length and with of the given clipboard
      *
      * @param clipboard The clipboard to generate the foundation for (remains untouched)

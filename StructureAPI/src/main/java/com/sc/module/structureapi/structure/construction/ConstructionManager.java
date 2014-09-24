@@ -35,7 +35,7 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.data.DataException;
 import construction.exception.ConstructionException;
-import construction.exception.StructurePlanException;
+import construction.exception.StructureDataException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -108,7 +108,6 @@ public class ConstructionManager {
                         siteService.save(structure);
 
                         constructionEntries.remove(structure.getId());
-                        System.out.println("Removing entry");
 
                         siteService.setState(structure, State.COMPLETE);
                         StructureHologramManager.getInstance().updateHolo(structure);
@@ -130,11 +129,11 @@ public class ConstructionManager {
      * @param structure The structure
      * @param force if True the method will skip checks, including the checking if the structure was
      * removed or the structure is already being build
-     * @throws StructurePlanException
+     * @throws StructureDataException
      * @throws ConstructionException
      * @throws IOException
      */
-    public synchronized void build(final UUID uuid, final Structure structure, final boolean force) throws StructurePlanException, ConstructionException, IOException {
+    public void build(final UUID uuid, final Structure structure, final boolean force) throws StructureDataException, ConstructionException, IOException {
 
         // Queue build task
         getExecutor(structure.getId()).execute(new Runnable() {
@@ -143,15 +142,7 @@ public class ConstructionManager {
             public void run() {
                 try {
                     if (!force) {
-                        if (structure.getState() == State.REMOVED) {
-                            throw new ConstructionException("Can't construct: " + structure + ", structure was removed");
-                        }
-                        if (structure.getState() == State.PLACING_FENCE || structure.getState() == State.BUILDING) {
-                            throw new ConstructionException(structure + " already in progress");
-                        }
-                        if (structure.getState() == State.COMPLETE) {
-                            throw new ConstructionException(structure + " already complete");
-                        }
+                        performChecks(structure, State.BUILDING);
                     }
 
                     // Cancel existing task
@@ -168,23 +159,22 @@ public class ConstructionManager {
                     long checksum = FileUtils.checksumCRC32(sf);
                     ConstructionSiteService css = new ConstructionSiteService();
                     if (!SchematicManager.getInstance().hasSchematic(checksum)) {
-                        System.out.println("Loading schematic");
                         css.setState(structure, State.LOADING_SCHEMATIC);
                         StructureAPI.tellStatus(structure, Bukkit.getPlayer(uuid));
                         SchematicManager.getInstance().load(sf);
                     }
                     Schematic schematic = SchematicManager.getInstance().getSchematic(sf);
 
+                    // PLace a fence
                     placeFence(uuid, structure, schematic.getClipboard());
 
-                    System.out.println("Placing Fence Complete");
 
                     CuboidClipboard cc = schematic.getClipboard();
                     SchematicUtil.align(cc, structure.getCardinal());
 
                     queueBuildTask(uuid, structure, cc, new Vector(0, 0, 0));
 
-                } catch (StructurePlanException ex) {
+                } catch (StructureDataException ex) {
                     tell(uuid, ChatColor.RED + "Invalid structureplan");
                 } catch (DataException ex) {
                     Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -222,7 +212,7 @@ public class ConstructionManager {
         }
         editSession.setAsyncForced(false);
         PriorityQueue<StructureBlock> queue = new PriorityQueue<>();
-        CuboidClipboard clipboard = ClipboardGenerator.createEnclosure(schematic, FENCE_MATERIAL.getId());
+        CuboidClipboard clipboard = ClipboardGenerator.createFence(schematic, FENCE_MATERIAL.getId());
 
         for (int x = 0; x < clipboard.getWidth(); x++) {
             for (int z = 0; z < clipboard.getLength(); z++) {
@@ -330,9 +320,9 @@ public class ConstructionManager {
      * @param force Whether to perform checks, if true it will ignore the check that determines if
      * the structure is removed or that the structure is already being demolished.
      * @throws ConstructionException
-     * @throws StructurePlanException
+     * @throws StructureDataException
      */
-    public synchronized void demolish(final UUID uuid, final Structure structure, final boolean force) throws ConstructionException, StructurePlanException {
+    public synchronized void demolish(final UUID uuid, final Structure structure, final boolean force) throws ConstructionException, StructureDataException {
 
         // Queue build task
         getExecutor(structure.getId()).execute(new Runnable() {
@@ -368,7 +358,7 @@ public class ConstructionManager {
                     // Start demolision
                     queueDemolisionTask(uuid, structure, schematic);
 
-                } catch (StructurePlanException | IOException ex) {
+                } catch (StructureDataException | IOException ex) {
                     Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (DataException ex) {
                     Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -438,6 +428,7 @@ public class ConstructionManager {
     private void setStates() {
         Session session = HibernateUtil.getSession();
         QStructure qs = QStructure.structure;
+        
         new HibernateUpdateClause(session, qs).where(qs.state.ne(State.COMPLETE).and(qs.state.ne(State.REMOVED)))
                 .set(qs.state, State.STOPPED)
                 .execute();
@@ -476,8 +467,8 @@ public class ConstructionManager {
     /**
      * Creates a new entry or resets one if already exists
      *
-     * @param player
-     * @param structure
+     * @param player The player
+     * @param structure The structure
      */
     private synchronized void setEntry(UUID player, Structure structure) {
         ConstructionEntry entry = constructionEntries.get(structure.getId());
@@ -491,7 +482,7 @@ public class ConstructionManager {
         constructionEntries.put(structure.getId(), entry);
     }
 
-    private void performChecks(Structure structure, State desired) throws ConstructionException, StructurePlanException {
+    private void performChecks(Structure structure, State desired) throws ConstructionException, StructureDataException {
         // Removed structures can't be tasked
         if (structure.getState() == State.REMOVED) {
             throw new ConstructionException("#" + structure.getId() + " can't be tasked, because it was removed");
@@ -507,10 +498,6 @@ public class ConstructionManager {
                 if (structure.getState() == State.COMPLETE) {
                     throw new ConstructionException("#" + structure.getId() + " is already complete");
                 }
-                if (structure.getState() == State.PLACING_FENCE) {
-                    throw new ConstructionException("#" + structure.getId() + " is placing a fence and will construct afterwards");
-                }
-
                 break;
             case DEMOLISHING:
                 if (structure.getState() == State.DEMOLISHING) {

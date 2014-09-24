@@ -12,7 +12,7 @@ import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.data.DataException;
 import com.sk89q.worldedit.schematic.SchematicFormat;
 import com.sk89q.worldedit.util.Countable;
-import construction.exception.StructurePlanException;
+import construction.exception.StructureDataException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -56,7 +56,7 @@ public class StructurePlanItem  implements CategoryTradeItem {
         this.blocks = blocks;
     }
 
-    public static StructurePlanItem load(StructurePlan plan) throws IOException, DataException, DocumentException, StructurePlanException {
+    public static StructurePlanItem load(StructurePlan plan) throws IOException, DataException, DocumentException, StructureDataException {
         File cfg = plan.getConfig();
         File sch = plan.getSchematic();
 
@@ -81,16 +81,16 @@ public class StructurePlanItem  implements CategoryTradeItem {
         String faction;
         double price;
         
-        Node idNode = config.selectSingleNode("StructurePlan/Id");
-        Node nameNode = config.selectSingleNode("StructurePlan/Name");
-        Node categoryNode = config.selectSingleNode("StructurePlan/Category");
-        Node factionNode = config.selectSingleNode("StructurePlan/Faction");
-        Node priceNode = config.selectSingleNode("StructurePlan/Price");
+        Node idNode = config.selectSingleNode("StructurePlan/StructureAPI/Configuration/Id");
+        Node nameNode = config.selectSingleNode("StructurePlan/StructureAPI/Configuration/Name");
+        Node categoryNode = config.selectSingleNode("StructurePlan/StructureAPI/Configuration/Category");
+        Node factionNode = config.selectSingleNode("StructurePlan/StructureAPI/Configuration/Faction");
+        Node priceNode = config.selectSingleNode("StructurePlan/StructureAPI/Configuration/Price");
         
-        if(idNode == null) throw new StructurePlanException("missing id node for: " + cfg.getAbsolutePath());
+        if(idNode == null) throw new StructureDataException("missing id node for: " + cfg.getAbsolutePath());
         id = idNode.getText();
         
-        if(nameNode == null) throw new StructurePlanException("Missing name node for: " + cfg.getAbsolutePath());
+        if(nameNode == null) throw new StructureDataException("Missing name node for: " + cfg.getAbsolutePath());
         name = nameNode.getText();
         
         category = categoryNode != null ? categoryNode.getText() : "All";
@@ -99,7 +99,7 @@ public class StructurePlanItem  implements CategoryTradeItem {
         try {
             price = priceNode != null ? Double.parseDouble(priceNode.getText()) : 0d;
         } catch (NumberFormatException nfe) {
-            throw new StructurePlanException("Invalid price value for: " + cfg.getAbsolutePath());
+            throw new StructureDataException("Invalid price value for: " + cfg.getAbsolutePath());
         }
         
         StructurePlanItem item = new StructurePlanItem(id, name, category, faction, price, width, height, length, blocks);

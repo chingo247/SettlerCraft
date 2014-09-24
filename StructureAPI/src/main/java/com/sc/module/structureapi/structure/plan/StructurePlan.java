@@ -5,7 +5,7 @@
  */
 package com.sc.module.structureapi.structure.plan;
 
-import construction.exception.StructurePlanException;
+import construction.exception.StructureDataException;
 import java.io.File;
 import java.util.List;
 import java.util.logging.Level;
@@ -43,24 +43,24 @@ public class StructurePlan {
     }
     
     public String getId() {
-        return getNodeTextValue("StructurePlan/Id");
+        return getNodeTextValue("StructurePlan/StructureAPI/Configuration/Id");
     }
     
     public String getName() {
-        return getNodeTextValue("StructurePlan/Name");
+        return getNodeTextValue("StructurePlan/StructureAPI/Configuration/Name");
     }
     
     public String getCategory() {
-        return getNodeTextValue("StructurePlan/Category");
+        return getNodeTextValue("StructurePlan/StructureAPI/Configuration/Category");
     }
 
     public String getFaction() {
-        return getNodeTextValue("StructurePlan/Faction");
+        return getNodeTextValue("StructurePlan/StructureAPI/Configuration/Faction");
     }
     
     public double getPrice() {
         double value = 0;
-        String textValue = getNodeTextValue("StructurePlan/Price");
+        String textValue = getNodeTextValue("StructurePlan/StructureAPI/Configuration/Price");
         if(textValue != null) {
             try {
                 value = Double.parseDouble(textValue);
@@ -96,7 +96,7 @@ public class StructurePlan {
         return null;
     }
 
-    public static StructurePlan load(File config) throws StructurePlanException {
+    public static StructurePlan load(File config) throws StructureDataException {
         StructurePlan.valdidateConfig(config);
         return new StructurePlan(config);
     }
@@ -118,7 +118,7 @@ public class StructurePlan {
         try {
             d = reader.read(xml);
 
-            String path = d.selectSingleNode("StructurePlan/Schematic").getText();
+            String path = d.selectSingleNode("StructurePlan/StructureAPI/Schematic/Structure").getText();
 
             if (path == null || path.trim().isEmpty()) {
                 return null;
@@ -142,7 +142,7 @@ public class StructurePlan {
         return file;
     }
 
-    private static void valdidateConfig(File xml) throws StructurePlanException {
+    private static void valdidateConfig(File xml) throws StructureDataException {
         
         SAXReader reader = new SAXReader();
         try {
@@ -150,22 +150,22 @@ public class StructurePlan {
             if (isStructurePlan(d)) {
 
                 if (!hasSchematic(xml)) {
-                    throw new StructurePlanException("no schematic was found for " + xml.getAbsolutePath());
+                    throw new StructureDataException("schematic was found for " + xml.getAbsolutePath());
                 }
 
-                Node idNode = d.selectSingleNode("StructurePlan/Id");
+                Node idNode = d.selectSingleNode("StructurePlan/StructureAPI/Configuration/Id");
                 if (idNode == null) {
-                    throw new StructurePlanException("missing 'Id' node");
+                    throw new StructureDataException("missing 'Id' node");
                 }
 
                 String id = idNode.getText();
                 if(id.trim().length() == 0) {
-                    throw new StructurePlanException("'Id' node is empty for " + xml.getAbsolutePath());
+                    throw new StructureDataException("'Id' node is empty for " + xml.getAbsolutePath());
                 }
                 
                 Node nameNode = d.selectSingleNode("StructurePlan/Name");
                 if(nameNode == null) {
-                    throw new StructurePlanException("Missing 'Name' node for " + xml.getAbsolutePath());
+                    throw new StructureDataException("Missing 'Name' node for " + xml.getAbsolutePath());
                 }
                 
             }

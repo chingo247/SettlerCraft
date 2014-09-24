@@ -10,7 +10,7 @@ import com.sc.module.structureapi.structure.plan.StructurePlan;
 import com.sc.module.structureapi.structure.plan.StructurePlanItem;
 import com.sc.module.structureapi.structure.plan.StructurePlanManager;
 import com.sk89q.worldedit.data.DataException;
-import construction.exception.StructurePlanException;
+import construction.exception.StructureDataException;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,7 +33,7 @@ public abstract class StructurePlanItemTask implements Runnable {
             try {
                 StructurePlanItem item = StructurePlanItem.load(plan);
                 onComplete(item);
-            } catch (IOException | DataException | DocumentException | StructurePlanException ex) {
+            } catch (IOException | DataException | DocumentException | StructureDataException ex) {
                 Logger.getLogger(StructurePlanManager.class.getName()).log(Level.SEVERE, null, ex);
             }
         }

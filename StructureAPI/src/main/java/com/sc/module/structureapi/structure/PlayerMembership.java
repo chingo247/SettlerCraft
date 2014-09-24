@@ -3,15 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.sc.module.structureapi.structure;
 
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 /**
@@ -20,15 +21,15 @@ import javax.persistence.ManyToOne;
  */
 @Entity
 public class PlayerMembership implements Serializable {
-    
+
     @Id
     @GeneratedValue
     private Long id;
     private final UUID uuid;
-    @ManyToOne
+    
+    @ManyToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "STRUCURE_ID")
     private Structure structure;
-    
-    
 
     /**
      * JPA Constructor.
@@ -36,9 +37,10 @@ public class PlayerMembership implements Serializable {
     protected PlayerMembership() {
         this.uuid = null;
     }
-    
+
     /**
      * Constructor.
+     *
      * @param name The name of the owner
      * @param uuid The uuid of the owner
      * @param player Wheter the owner is a isPlayer or not
@@ -48,7 +50,6 @@ public class PlayerMembership implements Serializable {
         this.uuid = player;
     }
 
-    
     public Long getId() {
         return id;
     }
@@ -56,7 +57,6 @@ public class PlayerMembership implements Serializable {
     public UUID getUUID() {
         return uuid;
     }
- 
 
     @Override
     public boolean equals(Object obj) {
@@ -85,8 +85,4 @@ public class PlayerMembership implements Serializable {
         return structure;
     }
 
-   
-    
-    
-    
 }
