@@ -135,7 +135,7 @@ public class SelectionManager {
 
     }
 
-    private final Map<UUID, HoloSelection> simpleSelections = Collections.synchronizedMap(new HashMap<UUID, HoloSelection>());
+    private final Map<UUID, HoloSelection> selections = Collections.synchronizedMap(new HashMap<UUID, HoloSelection>());
     private static SelectionManager instance;
 
     private SelectionManager() {
@@ -152,11 +152,11 @@ public class SelectionManager {
 
     public void select(Player player, Schematic schematic, Vector target, Vector pos2, boolean reverse) {
         Cardinal cardinal = WorldUtil.getCardinal(player);
-        simpleSelections.put(player.getUniqueId(), new HoloSelection(player, target, pos2, cardinal, schematic, reverse));
+        selections.put(player.getUniqueId(), new HoloSelection(player, target, pos2, cardinal, schematic, reverse));
     }
 
-    public boolean hasSelection(Player player, Schematic schematic, Vector target, Vector pos2) {
-        HoloSelection selection = simpleSelections.get(player.getUniqueId());
+    public boolean matchesSelection(Player player, Schematic schematic, Vector target, Vector pos2) {
+        HoloSelection selection = selections.get(player.getUniqueId());
         if (selection != null) {
             
             // is it the same structure and at the same position?
@@ -166,15 +166,19 @@ public class SelectionManager {
         }
         return false;
     }
+    
+    public boolean hasSelection(Player player) {
+        return selections.get(player.getUniqueId()) != null;
+    }
 
     public void clear(Player player, boolean talk) {
-        if (simpleSelections.get(player.getUniqueId()) != null) {
-            simpleSelections.get(player.getUniqueId()).clear();
+        if (selections.get(player.getUniqueId()) != null) {
+            selections.get(player.getUniqueId()).clear();
         }
     }
     
     public void clearAll() {
-        for(HoloSelection s : simpleSelections.values()) {
+        for(HoloSelection s : selections.values()) {
             s.clear();
         }
 //        for(CUIStructureSelection s : cuiSelections.values()) {

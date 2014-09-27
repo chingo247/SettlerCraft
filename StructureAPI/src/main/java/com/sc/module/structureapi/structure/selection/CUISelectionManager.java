@@ -42,6 +42,11 @@ public class CUISelectionManager {
             this.player = player;
         }
 
+
+        
+        
+        
+
     }
     
     public static CUISelectionManager getInstance() {
@@ -58,6 +63,8 @@ public class CUISelectionManager {
         LocalSession session = WorldEditUtil.getWorldEditPlugin().getWorldEdit().getSession(ply);
         World world = WorldEditUtil.getWorld(player.getWorld().getName());
 
+        selections.put(player.getUniqueId(), selection);
+        
         session.getRegionSelector(world).selectPrimary(pos1, null);
         session.getRegionSelector(world).selectSecondary(pos2, null);
         session.dispatchCUISelection(ply);
@@ -74,7 +81,8 @@ public class CUISelectionManager {
         selections.remove(player.getUniqueId());
     }
     
-    public boolean hasSelection(Player player, Schematic schematic, Vector pos1, Vector pos2) {
+    
+    public boolean matchesSelection(Player player, Schematic schematic, Vector pos1, Vector pos2) {
         CUISelection selection = selections.get(player.getUniqueId());
         if(selection == null) {
             return false;
@@ -82,5 +90,9 @@ public class CUISelectionManager {
         return selection.pos1.equals(pos1) 
                 && selection.pos2.equals(pos2) 
                 && schematic.getCheckSum() == selection.checksum;
+    }
+    
+    public boolean hasSelection(Player player) {
+        return selections.get(player.getUniqueId()) != null;
     }
 }

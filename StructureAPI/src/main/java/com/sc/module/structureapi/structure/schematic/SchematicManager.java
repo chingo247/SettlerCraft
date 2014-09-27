@@ -5,6 +5,7 @@
  */
 package com.sc.module.structureapi.structure.schematic;
 
+import com.sc.module.structureapi.structure.plan.StructurePlan;
 import com.sk89q.worldedit.data.DataException;
 import java.io.File;
 import java.io.IOException;
@@ -56,6 +57,11 @@ public class SchematicManager {
     
     public boolean hasSchematic(long checksum) {
         return schematics.get(checksum) != null;
+    }
+    
+    public boolean hasSchematic(StructurePlan plan) throws IOException {
+        long checkskum = FileUtils.checksumCRC32(plan.getSchematic());
+        return hasSchematic(checkskum);
     }
     
     public static SchematicManager getInstance() {

@@ -25,13 +25,16 @@ import com.sc.module.structureapi.structure.plan.StructurePlanManager;
 import com.sc.module.structureapi.structure.schematic.Schematic;
 import com.sc.module.structureapi.structure.schematic.SchematicManager;
 import com.sc.module.structureapi.structure.selection.CUISelectionManager;
+import com.sc.module.structureapi.structure.selection.SelectionManager;
 import com.sc.module.structureapi.util.SchematicUtil;
 import com.sc.module.structureapi.util.WorldEditUtil;
 import com.sc.module.structureapi.util.WorldUtil;
 import com.sc.module.structureapi.world.Cardinal;
 import com.sc.module.structureapi.world.Dimension;
 import com.sc.plugin.PermissionManager;
-import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldedit.LocalPlayer;
+import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.data.DataException;
@@ -81,26 +84,42 @@ public class PlanListener implements Listener {
         // Check if plan is valid
         if (plan == null) {
             if (!SettlerCraft.getInstance().isPlansLoaded()) {
-                player.sendMessage(ChatColor.RED + "This plan is invalid, please refund it or throw it away");
+                player.sendMessage(ChatColor.RED + "This plan is invalid... You can refund it at the shop");
             } else {
                 player.sendMessage(ChatColor.RED + "Plans aren't loaded yet please wait...");
             }
             return;
         }
+
+        if (!plan.getSchematic().exists()) {
+            player.sendMessage(new String[]{ChatColor.RED + "Missing schematic... You can refund the plan at the shop"});
+            return;
+        }
         
+        LocalPlayer lp = WorldEditUtil.getLocalPlayer(player);
+        LocalSession ls = WorldEdit.getInstance().getSession(lp);
+
+        if (pie.getClickedBlock() == null || pie.getAction() != Action.LEFT_CLICK_BLOCK /*&& pie.getAction() != Action.RIGHT_CLICK_BLOCK*/) {
+
+            if (ls != null && ls.hasCUISupport() && CUISelectionManager.getInstance().hasSelection(player)) {
+                CUISelectionManager.getInstance().clear(player, true);
+            } else if (SelectionManager.getInstance().hasSelection(player)) {
+                SelectionManager.getInstance().clear(player, true);
+            }
+            return; // Deselected & Done
+        }
+
+        System.out.println("Action: " + pie.getAction());
+
         try {
+            if(!SchematicManager.getInstance().hasSchematic(plan)) {
+                player.sendMessage(ChatColor.YELLOW + "Loading schematic...");
+            }
+            
             Schematic schematic = SchematicManager.getInstance().getSchematic(plan.getSchematic());
-           
             Location l = pie.getClickedBlock().getLocation();
-            
-            Vector start = new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ());
-            Vector end = getPoint2Right(start, WorldUtil.getCardinal(player), schematic.getSize());
-            
-            CUISelectionManager.getInstance().clear(player, true);
-            CUISelectionManager.getInstance().select(player, schematic, start, end);
-            
-            
-            
+            handleCUIPlayer(player, l, plan, schematic);
+
 //        try {
 //            build(player, pie.getClickedBlock(), SchematicManager.getInstance().getSchematic(plan.getSchematic()), plan, pie.getAction(), planstack);
 //        } catch (IOException | DataException ex) {
@@ -115,8 +134,9 @@ public class PlanListener implements Listener {
     }
 
     /**
-     * Used to to get the secondary position when selecting. So that the green square is always at the same
-     * place as the clicked block and the secondary always across.
+     * Used to to get the secondary position when selecting. So that the green square is always at
+     * the same place as the clicked block and the secondary always across.
+     *
      * @param point1
      * @param direction
      * @param size
@@ -141,8 +161,9 @@ public class PlanListener implements Listener {
     }
 
     /**
-     * Used to to get the secondary position when selecting. So that the green square is always at the same
-     * place as the clicked block and the secondary always across.
+     * Used to to get the secondary position when selecting. So that the green square is always at
+     * the same place as the clicked block and the secondary always across.
+     *
      * @param point1
      * @param direction
      * @param size
@@ -202,7 +223,6 @@ public class PlanListener implements Listener {
         }
         com.sk89q.worldedit.world.World world = WorldEditUtil.getWorld(player.getWorld().getName());
         Location l = block.getLocation();
-        EditSession session = WorldEdit.getInstance().getEditSessionFactory().getEditSession(world, -1);
 
         AsyncStructureAPI.getInstance().create(
                 player,
@@ -249,7 +269,7 @@ public class PlanListener implements Listener {
 //                pos2 = WorldUtil.getPoint2Right(pos1, cardinal, new BlockVector(s.getWidth(), s.getHeight(), s.getLength()));
 //            }
 //
-//            if (slm.hasSelection(player, s, pos1, pos2)) {
+//            if (slm.matchesSelection(player, s, pos1, pos2)) {
 //                if (canPlace(player, pos1, cardinal, s)) {
 //
 //                    if (player.isSneaking()) {
@@ -293,6 +313,56 @@ public class PlanListener implements Listener {
 //            }
 //
 //        }
+    }
+
+    private void handleCUIPlayer(final Player player, final Location location, StructurePlan plan, final Schematic schematic) {
+        boolean toLeft = player.isSneaking();
+        LocalPlayer localPlayer = WorldEditUtil.getLocalPlayer(player);
+        LocalSession session = WorldEdit.getInstance().getSession(localPlayer);
+
+        Cardinal cardinal = WorldUtil.getCardinal(player);
+        Vector pos1 = new BlockVector(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        Vector pos2;
+        if (toLeft) {
+            pos2 = getPoint2Left(pos1, cardinal, schematic.getSize());
+        } else {
+            pos2 = getPoint2Right(pos1, cardinal, schematic.getSize());
+        }
+
+        /**
+         * Haven't selected before
+         */
+        if (!session.getRegionSelector(localPlayer.getWorld()).isDefined()) {
+            System.out.println("NEW SELECTION");
+            CUISelectionManager.getInstance().select(player, schematic, pos1, pos2);
+            player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
+            player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
+        } else if (CUISelectionManager.getInstance().matchesSelection(player, schematic, pos1, pos2)) {
+            System.out.println("MATCHES OLD");
+            if (toLeft) {
+                // Fix WTF HOW?!!1?
+                pos1 = WorldUtil.addOffset(pos1, cardinal, (-(schematic.getLength() - 1)), 0, 0);
+            }
+
+            AsyncStructureAPI.getInstance().create(player, plan, player.getWorld(), pos1, cardinal, new AsyncStructureAPI.StructureCallback() {
+
+                @Override
+                public void onComplete(Structure structure) {
+                    CUISelectionManager.getInstance().clear(player, false);
+                    if (structure != null) {
+                        StructureAPI.build(player, structure);
+                    }
+                }
+            });
+        } else {
+            System.out.println("DOESNT MATCH, NEW SELECTION");
+            CUISelectionManager.getInstance().select(player, schematic, pos1, pos2);
+            if (canPlace(player, pos1, cardinal, schematic)) {
+                player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
+                player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
+            }
+        }
+
     }
 
 //    private boolean handleCUIPlayerSelect(Player player, Block block, StructurePlanV2 plan, Action action) throws IncompleteRegionException {

@@ -11,7 +11,6 @@ import com.sc.module.settlercraft.commands.ConstructionCommandExecutor;
 import com.sc.module.settlercraft.commands.SettlerCraftCommandExecutor;
 import com.sc.module.settlercraft.commands.StructureCommandExecutor;
 import com.sc.module.settlercraft.listener.PlanListener;
-import com.sc.module.settlercraft.listener.StructureListener;
 import com.sc.module.structureapi.persistence.RestoreService;
 import com.sc.module.structureapi.structure.concurrent.StructurePlanItemTask;
 import com.sc.module.structureapi.structure.construction.ConstructionManager;
@@ -52,6 +51,7 @@ public class SettlerCraft extends JavaPlugin {
     private static SettlerCraft instance;
     private boolean plansLoaded = false;
     public static final String PLANSHOP_NAME = "Buy & Build";
+    public static final String PLAN_FOLDER = "Structures";
     public static final String MSG_PREFIX = ChatColor.GOLD + "[SettlerCraft]: ";
     private static UUID PLANSHOP;
 
@@ -98,12 +98,11 @@ public class SettlerCraft extends JavaPlugin {
 
         
         setupPlanMenu();
-        loadStructures(FileUtils.getFile(getDataFolder(), "Structures"));
-        Bukkit.broadcastMessage(ChatColor.GOLD + "[SettlerCraft]: " + ChatColor.WHITE + "Structure plans loaded");
+        loadStructures(FileUtils.getFile(getDataFolder(), PLAN_FOLDER));
+        
         
         ConstructionManager.getInstance().init();
 
-        Bukkit.getPluginManager().registerEvents(new StructureListener(), this);
         Bukkit.getPluginManager().registerEvents(new PlanListener(), this);
 
         getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
@@ -168,6 +167,7 @@ public class SettlerCraft extends JavaPlugin {
             @Override
             public void onComplete() {
                 plansLoaded = true;
+                Bukkit.broadcastMessage(ChatColor.GOLD + "[SettlerCraft]: " + ChatColor.WHITE + "Structure plans loaded");
                 loadPlansIntoMenu();
             }
         });
@@ -212,7 +212,6 @@ public class SettlerCraft extends JavaPlugin {
                     if (count.incrementAndGet() == total) {
                         planMenu.setEnabled(true);
                         getInstance().plansLoaded = true;
-                        Bukkit.broadcastMessage(MSG_PREFIX + " Plans loaded");
                     }
                 }
             });
