@@ -118,16 +118,13 @@ public class PlanListener implements Listener {
             
             Schematic schematic = SchematicManager.getInstance().getSchematic(plan.getSchematic());
             Location l = pie.getClickedBlock().getLocation();
-            handleCUIPlayer(player, l, plan, schematic);
+            if(ls.hasCUISupport()) {
+                handleCUIPlayer(player, l, plan, schematic);
+            } else {
+                
+            }
 
-//        try {
-//            build(player, pie.getClickedBlock(), SchematicManager.getInstance().getSchematic(plan.getSchematic()), plan, pie.getAction(), planstack);
-//        } catch (IOException | DataException ex) {
-//            java.util.logging.Logger.getLogger(PlanListener.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-        } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(PlanListener.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (DataException ex) {
+        } catch (IOException | DataException ex) {
             java.util.logging.Logger.getLogger(PlanListener.class.getName()).log(Level.SEVERE, null, ex);
         }
 

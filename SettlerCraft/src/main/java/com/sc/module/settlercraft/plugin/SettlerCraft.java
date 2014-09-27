@@ -51,7 +51,7 @@ public class SettlerCraft extends JavaPlugin {
     private static SettlerCraft instance;
     private boolean plansLoaded = false;
     public static final String PLANSHOP_NAME = "Buy & Build";
-    public static final String PLAN_FOLDER = "Structures";
+    public static final String PLAN_FOLDER = "Plans";
     public static final String MSG_PREFIX = ChatColor.GOLD + "[SettlerCraft]: ";
     private static UUID PLANSHOP;
 

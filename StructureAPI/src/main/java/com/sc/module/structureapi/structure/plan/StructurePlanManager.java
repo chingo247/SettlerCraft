@@ -15,7 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -31,7 +31,7 @@ public class StructurePlanManager {
     public static final String PLANSHOP = "Buy & Build";
     private static StructurePlanManager instance;
     private final Map<String, StructurePlan> plans = new HashMap<>();
-    private final Executor executor;
+    private final ExecutorService executor;
     
 
     /**
@@ -84,16 +84,12 @@ public class StructurePlanManager {
 
                 @Override
                 public void onComplete(StructurePlan plan) {
-                    System.out.println("Plan: " + plan.getConfig().getAbsolutePath());
-                    System.out.println("Schematic: " + plan.getSchematic().getAbsolutePath());
-                    System.out.println("Relative: " + plan.getRelativePath());
                     putStructurePlan(plan);
                     schematics.add(plan.getSchematic());
                     
                     if (count.incrementAndGet() == total) {
                         callback.onComplete();
-//                        loadSchematics(schematics, callback);
-                        return;
+                        executor.shutdown();
                     }
                 }
             });
@@ -105,12 +101,10 @@ public class StructurePlanManager {
             throw new AssertionError("Plan was null");
         }
         
-        String id = plan.getId();
-        if(id == null) {
-            throw new AssertionError("Id was null for " + plan.getConfig().getAbsolutePath());
-        }
+        String path = plan.getRelativePath().substring(0, plan.getRelativePath().length() - 4);
+        System.out.println("PATH: " + path);
         
-        plans.put(id, plan);
+        plans.put(path, plan);
         
     }
     

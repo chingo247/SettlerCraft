@@ -47,10 +47,6 @@ public class StructurePlan {
         return new File(configPath);
     }
     
-    public String getId() {
-        return getNodeTextValue("StructurePlan/Id");
-    }
-    
     public String getName() {
         return getNodeTextValue("StructurePlan/Name");
     }

@@ -16,7 +16,6 @@ import construction.exception.StructureDataException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import javax.persistence.Id;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -33,8 +32,7 @@ import org.dom4j.io.SAXReader;
  */
 public class StructurePlanItem  implements CategoryTradeItem {
 
-    @Id
-    public final String id;
+    public final String path;
     public final String name;
     public final String category;
     public final String faction;
@@ -44,8 +42,8 @@ public class StructurePlanItem  implements CategoryTradeItem {
     public final int length;
     public final int blocks;
 
-    private StructurePlanItem(String id, String name, String category, String faction, double price, int width, int height, int length, int blocks) {
-        this.id = id;
+    private StructurePlanItem(String path, String name, String category, String faction, double price, int width, int height, int length, int blocks) {
+        this.path = path;
         this.name = name;
         this.category = category;
         this.faction = faction;
@@ -74,21 +72,21 @@ public class StructurePlanItem  implements CategoryTradeItem {
 
         SAXReader reader = new SAXReader();
         Document config = reader.read(cfg);
+        
+        
 
-        String id;
+        String path = plan.getRelativePath().substring(0, plan.getRelativePath().length() - 4);
         String name;
         String category;
         String faction;
         double price;
         
-        Node idNode = config.selectSingleNode("StructurePlan/Id");
         Node nameNode = config.selectSingleNode("StructurePlan/Name");
         Node categoryNode = config.selectSingleNode("StructurePlan/Category");
         Node factionNode = config.selectSingleNode("StructurePlan/Faction");
         Node priceNode = config.selectSingleNode("StructurePlan/Price");
         
-        if(idNode == null) throw new StructureDataException("missing id node for: " + cfg.getAbsolutePath());
-        id = idNode.getText();
+        
         
         if(nameNode == null) throw new StructureDataException("Missing name node for: " + cfg.getAbsolutePath());
         name = nameNode.getText();
@@ -102,7 +100,7 @@ public class StructurePlanItem  implements CategoryTradeItem {
             throw new StructureDataException("Invalid price value for: " + cfg.getAbsolutePath());
         }
         
-        StructurePlanItem item = new StructurePlanItem(id, name, category, faction, price, width, height, length, blocks);
+        StructurePlanItem item = new StructurePlanItem(path, name, category, faction, price, width, height, length, blocks);
         return item;
     }
 
@@ -143,7 +141,7 @@ public class StructurePlanItem  implements CategoryTradeItem {
                 "Length: " + ChatColor.GOLD + length,
                 "Height: " + ChatColor.GOLD + height,
                 "Blocks: " + ChatColor.GOLD + ShopUtil.valueString(blocks),
-                "Id: " + ChatColor.GOLD + id,
+                "Path: " + ChatColor.GOLD + path,
                 "Type: " + ChatColor.GOLD + "Plan"
         ));
         stack.setItemMeta(meta);

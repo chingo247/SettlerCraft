@@ -76,9 +76,9 @@ import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
 public class ConstructionManager {
 
     private final Map<Long, ConstructionEntry> constructionEntries = Collections.synchronizedMap(new HashMap<Long, ConstructionEntry>());
-    private final Map<Long, Executor> executors = new HashMap<>();
+//    private final Map<Long, Executor> executors = new HashMap<>();
     private final Executor executor = Executors.newSingleThreadExecutor();
-    private final int FENCE_BLOCK_PLACE_SPEED = 100;
+    private final int FENCE_BLOCK_PLACE_SPEED = 1000;
     private final int TIME_OUT = 500;
     private final Material FENCE_MATERIAL = Material.IRON_FENCE;
     private static ConstructionManager instance;
@@ -136,7 +136,7 @@ public class ConstructionManager {
     public void build(final UUID uuid, final Structure structure, final boolean force) throws StructureDataException, ConstructionException, IOException {
 
         // Queue build task
-        getExecutor(structure.getId()).execute(new Runnable() {
+        executor.execute(new Runnable() {
 
             @Override
             public void run() {
@@ -361,7 +361,7 @@ public class ConstructionManager {
     public synchronized void demolish(final UUID uuid, final Structure structure, final boolean force) throws ConstructionException, StructureDataException {
 
         // Queue build task
-        getExecutor(structure.getId()).execute(new Runnable() {
+        executor.execute(new Runnable() {
 
             @Override
             public void run() {
@@ -644,9 +644,9 @@ public class ConstructionManager {
             throw new ConstructionException("#" + structure.getId() + " hasn't been tasked yet");
         }
 
-        Executor exe = executors.get(structure.getId());
+        
 
-        exe.execute(new Runnable() {
+        executor.execute(new Runnable() {
 
             @Override
             public void run() {
@@ -671,14 +671,14 @@ public class ConstructionManager {
 
     }
 
-    private synchronized Executor getExecutor(long id) {
-        Executor exe = executors.get(id);
-        if (exe == null) {
-            exe = Executors.newSingleThreadExecutor();
-            executors.put(id, exe);
-        }
-        return exe;
-    }
+//    private synchronized Executor getExecutor(long id) {
+//        Executor exe = executors.get(id);
+//        if (exe == null) {
+//            exe = Executors.newSingleThreadExecutor();
+//            executors.put(id, exe);
+//        }
+//        return exe;
+//    }
 
 
     private ConstructionEntry getEntry(Structure structure) {
