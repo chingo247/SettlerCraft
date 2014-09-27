@@ -34,7 +34,7 @@ public class PlayerOwnershipService extends AbstractService<PlayerOwnership> {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QPlayerOwnership qpo = QPlayerOwnership.playerOwnership;
-        boolean isOwner = query.from(qpo).where(qpo.structure().id.eq(structure.getId()).and(qpo.uuid.eq(player.getUniqueId()))).exists();
+        boolean isOwner = query.from(qpo).where(qpo.structure().id.eq(structure.getId()).and(qpo.player.eq(player.getUniqueId()))).exists();
         session.close();
         return isOwner;
     }
@@ -43,7 +43,7 @@ public class PlayerOwnershipService extends AbstractService<PlayerOwnership> {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QPlayerOwnership qpo = QPlayerOwnership.playerOwnership;
-        List<Structure> structures = query.from(qpo).where(qpo.uuid.eq(player.getUniqueId())).list(qpo.structure());
+        List<Structure> structures = query.from(qpo).where(qpo.player.eq(player.getUniqueId())).list(qpo.structure());
         session.close();
         return structures;
     }

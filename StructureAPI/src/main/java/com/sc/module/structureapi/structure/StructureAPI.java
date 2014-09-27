@@ -47,6 +47,7 @@ import org.bukkit.plugin.Plugin;
 public class StructureAPI {
 
     private static final String PREFIX = "SCREG#";
+    private static final String PLAN_FOLDER = "Structures";
     private static final String MAIN_PLUGIN_NAME = "SettlerCraft";
     private static final Plugin MAIN_PLUGIN = Bukkit.getPluginManager().getPlugin(MAIN_PLUGIN_NAME);
 
@@ -55,6 +56,10 @@ public class StructureAPI {
 
     public static Plugin getPlugin() {
         return MAIN_PLUGIN;
+    }
+    
+    public static File getStructurePlanFolder() {
+        return new File(getPlugin().getDataFolder(), PLAN_FOLDER);
     }
 
     /**

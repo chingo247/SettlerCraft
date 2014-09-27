@@ -14,10 +14,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 import org.bukkit.entity.Player;
 
 /**
@@ -25,7 +22,6 @@ import org.bukkit.entity.Player;
  * @author Chingo
  */
 @Entity
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"PLAYER_ID", "STRUCTURE_ID"})})
 public class PlayerOwnership implements Serializable {
     
     @Id
@@ -36,7 +32,6 @@ public class PlayerOwnership implements Serializable {
     private final String name;
     
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "STRUCURE_ID")       
     private Structure structure;
     
     

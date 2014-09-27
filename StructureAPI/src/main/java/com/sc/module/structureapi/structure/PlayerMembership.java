@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -24,10 +25,10 @@ public class PlayerMembership implements Serializable {
     @Id
     @GeneratedValue
     private Long id;
+    @Column(name = "PLAYER_ID")
     private final UUID uuid;
     
     @ManyToOne(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "STRUCURE_ID")
     private Structure structure;
 
     /**

@@ -26,6 +26,7 @@ public class CUISelectionManager {
 
     private final Logger log = Logger.getLogger(CUISelectionManager.class);
     private final Map<UUID, CUISelection> selections = Collections.synchronizedMap(new HashMap<UUID, CUISelection>());
+    private static CUISelectionManager instance;
 
     private class CUISelection {
 
@@ -41,6 +42,13 @@ public class CUISelectionManager {
             this.player = player;
         }
 
+    }
+    
+    public static CUISelectionManager getInstance() {
+        if(instance == null) {
+            instance = new CUISelectionManager();
+        }
+        return instance;
     }
 
     public void select(Player player, Schematic schematic, Vector pos1, Vector pos2) {

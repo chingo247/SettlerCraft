@@ -24,6 +24,7 @@ import com.sc.module.structureapi.structure.plan.StructurePlan;
 import com.sc.module.structureapi.structure.plan.StructurePlanManager;
 import com.sc.module.structureapi.structure.schematic.Schematic;
 import com.sc.module.structureapi.structure.schematic.SchematicManager;
+import com.sc.module.structureapi.structure.selection.CUISelectionManager;
 import com.sc.module.structureapi.util.SchematicUtil;
 import com.sc.module.structureapi.util.WorldEditUtil;
 import com.sc.module.structureapi.util.WorldUtil;
@@ -86,11 +87,28 @@ public class PlanListener implements Listener {
             }
             return;
         }
-
+        
         try {
-            // Loads schematic
-            build(player, pie.getClickedBlock(), SchematicManager.getInstance().getSchematic(plan.getSchematic()), plan, pie.getAction(), planstack);
-        } catch (IOException | DataException ex) {
+            Schematic schematic = SchematicManager.getInstance().getSchematic(plan.getSchematic());
+           
+            Location l = pie.getClickedBlock().getLocation();
+            
+            Vector start = new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ());
+            Vector end = getPoint2Right(start, WorldUtil.getCardinal(player), schematic.getSize());
+            
+            CUISelectionManager.getInstance().clear(player, true);
+            CUISelectionManager.getInstance().select(player, schematic, start, end);
+            
+            
+            
+//        try {
+//            build(player, pie.getClickedBlock(), SchematicManager.getInstance().getSchematic(plan.getSchematic()), plan, pie.getAction(), planstack);
+//        } catch (IOException | DataException ex) {
+//            java.util.logging.Logger.getLogger(PlanListener.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+        } catch (IOException ex) {
+            java.util.logging.Logger.getLogger(PlanListener.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DataException ex) {
             java.util.logging.Logger.getLogger(PlanListener.class.getName()).log(Level.SEVERE, null, ex);
         }
 

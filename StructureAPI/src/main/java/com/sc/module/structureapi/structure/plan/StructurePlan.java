@@ -5,6 +5,7 @@
  */
 package com.sc.module.structureapi.structure.plan;
 
+import com.sc.module.structureapi.structure.StructureAPI;
 import construction.exception.StructureDataException;
 import java.io.File;
 import java.util.List;
@@ -37,30 +38,34 @@ public class StructurePlan {
         return getSchematic(new File(configPath));
     }
     
+    public String getRelativePath() {
+        String basePath = StructureAPI.getStructurePlanFolder().getAbsolutePath();
+        return configPath.substring(basePath.length() + 1);
+    }
     
     public File getConfig() {
         return new File(configPath);
     }
     
     public String getId() {
-        return getNodeTextValue("StructurePlan/StructureAPI/Configuration/Id");
+        return getNodeTextValue("StructurePlan/Id");
     }
     
     public String getName() {
-        return getNodeTextValue("StructurePlan/StructureAPI/Configuration/Name");
+        return getNodeTextValue("StructurePlan/Name");
     }
     
     public String getCategory() {
-        return getNodeTextValue("StructurePlan/StructureAPI/Configuration/Category");
+        return getNodeTextValue("StructurePlan/Category");
     }
 
     public String getFaction() {
-        return getNodeTextValue("StructurePlan/StructureAPI/Configuration/Faction");
+        return getNodeTextValue("StructurePlan/Faction");
     }
     
     public double getPrice() {
         double value = 0;
-        String textValue = getNodeTextValue("StructurePlan/StructureAPI/Configuration/Price");
+        String textValue = getNodeTextValue("StructurePlan/Price");
         if(textValue != null) {
             try {
                 value = Double.parseDouble(textValue);
@@ -118,7 +123,12 @@ public class StructurePlan {
         try {
             d = reader.read(xml);
 
-            String path = d.selectSingleNode("StructurePlan/StructureAPI/Schematic/Structure").getText();
+            Node pathNode = d.selectSingleNode("StructurePlan/Schematic/Structure");
+            if(pathNode == null) {
+                return null;
+            }
+            
+            String path = pathNode.getText();
 
             if (path == null || path.trim().isEmpty()) {
                 return null;
@@ -153,7 +163,7 @@ public class StructurePlan {
                     throw new StructureDataException("schematic was found for " + xml.getAbsolutePath());
                 }
 
-                Node idNode = d.selectSingleNode("StructurePlan/StructureAPI/Configuration/Id");
+                Node idNode = d.selectSingleNode("StructurePlan/Id");
                 if (idNode == null) {
                     throw new StructureDataException("missing 'Id' node");
                 }

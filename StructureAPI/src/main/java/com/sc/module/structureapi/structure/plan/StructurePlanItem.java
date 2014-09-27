@@ -81,11 +81,11 @@ public class StructurePlanItem  implements CategoryTradeItem {
         String faction;
         double price;
         
-        Node idNode = config.selectSingleNode("StructurePlan/StructureAPI/Configuration/Id");
-        Node nameNode = config.selectSingleNode("StructurePlan/StructureAPI/Configuration/Name");
-        Node categoryNode = config.selectSingleNode("StructurePlan/StructureAPI/Configuration/Category");
-        Node factionNode = config.selectSingleNode("StructurePlan/StructureAPI/Configuration/Faction");
-        Node priceNode = config.selectSingleNode("StructurePlan/StructureAPI/Configuration/Price");
+        Node idNode = config.selectSingleNode("StructurePlan/Id");
+        Node nameNode = config.selectSingleNode("StructurePlan/Name");
+        Node categoryNode = config.selectSingleNode("StructurePlan/Category");
+        Node factionNode = config.selectSingleNode("StructurePlan/Faction");
+        Node priceNode = config.selectSingleNode("StructurePlan/Price");
         
         if(idNode == null) throw new StructureDataException("missing id node for: " + cfg.getAbsolutePath());
         id = idNode.getText();

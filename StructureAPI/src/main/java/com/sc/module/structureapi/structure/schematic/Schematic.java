@@ -49,6 +49,10 @@ public class Schematic implements Serializable, Cloneable {
     public long getCheckSum() {
         return checkSum;
     }
+    
+    public Vector getSize() {
+        return clipboard.getSize();
+    }
 
     public CuboidClipboard getClipboard() {
         CuboidClipboard copy = new CuboidClipboard(clipboard.getSize());

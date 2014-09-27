@@ -86,6 +86,7 @@ public class StructurePlanManager {
                 public void onComplete(StructurePlan plan) {
                     System.out.println("Plan: " + plan.getConfig().getAbsolutePath());
                     System.out.println("Schematic: " + plan.getSchematic().getAbsolutePath());
+                    System.out.println("Relative: " + plan.getRelativePath());
                     putStructurePlan(plan);
                     schematics.add(plan.getSchematic());
                     
