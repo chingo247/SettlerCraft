@@ -38,7 +38,7 @@ public class PlayerOwnershipService extends AbstractService<PlayerOwnership> {
         session.close();
         return isOwner;
     }
-    
+
     public List<Structure> getOwnedStructures(Player player) {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
@@ -47,8 +47,8 @@ public class PlayerOwnershipService extends AbstractService<PlayerOwnership> {
         session.close();
         return structures;
     }
-    
-        public List<PlayerOwnership> getOwners(Structure structure) {
+
+    public List<PlayerOwnership> getOwners(Structure structure) {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QPlayerOwnership qpo = QPlayerOwnership.playerOwnership;
@@ -56,7 +56,5 @@ public class PlayerOwnershipService extends AbstractService<PlayerOwnership> {
         session.close();
         return owners;
     }
-    
-    
 
 }

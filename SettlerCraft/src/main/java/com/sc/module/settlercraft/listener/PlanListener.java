@@ -24,19 +24,17 @@ import com.sc.module.structureapi.structure.plan.StructurePlan;
 import com.sc.module.structureapi.structure.plan.StructurePlanManager;
 import com.sc.module.structureapi.structure.schematic.Schematic;
 import com.sc.module.structureapi.structure.schematic.SchematicManager;
+import com.sc.module.structureapi.util.SchematicUtil;
 import com.sc.module.structureapi.util.WorldEditUtil;
 import com.sc.module.structureapi.util.WorldUtil;
 import com.sc.module.structureapi.world.Cardinal;
+import com.sc.module.structureapi.world.Dimension;
 import com.sc.plugin.PermissionManager;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.data.DataException;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.bukkit.ChatColor;
@@ -56,7 +54,6 @@ import org.bukkit.inventory.ItemStack;
 public class PlanListener implements Listener {
 
     private final Logger LOGGER = Logger.getLogger(PlanListener.class);
-    private Set<UUID> structureProcesses = Collections.synchronizedSet(new HashSet());
 
     @EventHandler
     public void onPlayerUsePlan(PlayerInteractEvent pie) {
@@ -99,14 +96,64 @@ public class PlanListener implements Listener {
 
     }
 
+    /**
+     * Used to to get the secondary position when selecting. So that the green square is always at the same
+     * place as the clicked block and the secondary always across.
+     * @param point1
+     * @param direction
+     * @param size
+     * @return point2
+     */
+    private Vector getPoint2Right(Vector point1, Cardinal direction, Vector size) {
+        switch (direction) {
+            case EAST:
+                return point1.add(size.subtract(1, 1, 1));
+            case SOUTH:
+                return point1.add(-(size.getBlockZ() - 1), size.getBlockY() - 1, (size.getBlockX() - 1));
+            case WEST:
+//                clipboard.rotate2D(180);
+                return point1.add(-(size.getBlockX() - 1), size.getBlockY() - 1, -(size.getBlockZ() - 1));
+            case NORTH:
+                return point1.add((size.getBlockZ() - 1), size.getBlockY() - 1, -(size.getBlockX() - 1));
+//                clipboard.rotate2D(270);
+
+            default:
+                throw new AssertionError("unreachable");
+        }
+    }
+
+    /**
+     * Used to to get the secondary position when selecting. So that the green square is always at the same
+     * place as the clicked block and the secondary always across.
+     * @param point1
+     * @param direction
+     * @param size
+     * @return point2
+     */
+    private Vector getPoint2Left(Vector point1, Cardinal direction, Vector size) {
+        switch (direction) {
+            case EAST:
+                return point1.add((size.getBlockX() - 1), size.getBlockY() - 1, -(size.getBlockZ() - 1));
+            case SOUTH:
+                return point1.add((size.getBlockZ() - 1), size.getBlockY() - 1, (size.getBlockX() - 1));
+            case WEST:
+                return point1.add(-(size.getBlockX() - 1), size.getBlockY() - 1, (size.getBlockZ() - 1));
+            case NORTH:
+                return point1.add(-(size.getBlockZ() - 1), size.getBlockY() - 1, -(size.getBlockX() - 1));
+            default:
+                throw new AssertionError("unreachable");
+        }
+    }
+
     private boolean canPlace(Player player, Vector pos, Cardinal cardinal, Schematic schematic) {
         org.bukkit.World world = player.getWorld();
 
-        if (StructureAPI.overlaps(schematic, world, pos, cardinal)) {
+        Dimension dimension = SchematicUtil.calculateDimension(schematic, pos, cardinal);
+
+        if (StructureAPI.overlapsStructures(world, dimension)) {
             player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
             return false;
         }
-
 //        if (!WorldGuardUtil.mayClaim(player)) {
 //            player.sendMessage(ChatColor.RED + " You have no permission to claim regions");
 //            player.sendMessage(ChatColor.RED + " Therefore your are not able to place structures");
@@ -121,7 +168,7 @@ public class PlanListener implements Listener {
 //            player.sendMessage(ChatColor.RED + " Therefore your are not able to place structures");
 //            return false;
 //        }
-        if (StructureAPI.overlapsRegion(player, schematic, world, pos, cardinal)) {
+        if (StructureAPI.overlapsRegion(player, world, dimension)) {
             player.sendMessage(ChatColor.RED + "Structure overlaps a region you don't own");
             return false;
         }
@@ -138,23 +185,22 @@ public class PlanListener implements Listener {
         com.sk89q.worldedit.world.World world = WorldEditUtil.getWorld(player.getWorld().getName());
         Location l = block.getLocation();
         EditSession session = WorldEdit.getInstance().getEditSessionFactory().getEditSession(world, -1);
-        
-        
+
         AsyncStructureAPI.getInstance().create(
-                player, 
-                plan, 
-                player.getWorld(), 
-                new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ()), 
-                WorldUtil.getCardinal(player), 
+                player,
+                plan,
+                player.getWorld(),
+                new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ()),
+                WorldUtil.getCardinal(player),
                 new AsyncStructureAPI.StructureCallback() {
 
-            @Override
-            public void onComplete(Structure structure) {
-                if(structure != null) {
-                    StructureAPI.build(player, structure);
-                }
-            }
-        });
+                    @Override
+                    public void onComplete(Structure structure) {
+                        if (structure != null) {
+                            StructureAPI.build(player, structure);
+                        }
+                    }
+                });
 //        SelectionManager slm = SelectionManager.getInstance();
 //        // Clicked in air
 //        if (block == null

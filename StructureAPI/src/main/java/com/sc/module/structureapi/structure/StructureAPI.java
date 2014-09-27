@@ -12,7 +12,7 @@ import com.sc.module.structureapi.structure.construction.ConstructionManager;
 import com.sc.module.structureapi.structure.plan.StructurePlan;
 import com.sc.module.structureapi.structure.schematic.Schematic;
 import com.sc.module.structureapi.structure.schematic.SchematicManager;
-import static com.sc.module.structureapi.util.SchematicUtil.calculateDimension;
+import com.sc.module.structureapi.util.SchematicUtil;
 import com.sc.module.structureapi.util.WorldGuardUtil;
 import com.sc.module.structureapi.world.Cardinal;
 import com.sc.module.structureapi.world.Dimension;
@@ -46,7 +46,7 @@ import org.bukkit.plugin.Plugin;
  */
 public class StructureAPI {
 
-    private static final String PREFIX = "SC_REG_";
+    private static final String PREFIX = "SCREG#";
     private static final String MAIN_PLUGIN_NAME = "SettlerCraft";
     private static final Plugin MAIN_PLUGIN = Bukkit.getPluginManager().getPlugin(MAIN_PLUGIN_NAME);
 
@@ -73,7 +73,7 @@ public class StructureAPI {
     /**
      * Creates a structure
      *
-     * @param player The player
+     * @param player The player, which will also be added as an owner of the structure
      * @param plan The structureplan
      * @param world The world
      * @param pos The position
@@ -91,8 +91,11 @@ public class StructureAPI {
             return null;
         }
 
-        // Check if structure overlaps another structure
-        if (overlaps(schematic, world, pos, cardinal)) {
+        
+        Dimension dimension = SchematicUtil.calculateDimension(schematic, pos, cardinal);
+        
+        // Check if structure overlapsStructures another structure
+        if (overlapsStructures(world, dimension)) {
             if (player != null) {
                 player.sendMessage(ChatColor.RED + " Structure overlaps another structure");
             }
@@ -116,7 +119,7 @@ public class StructureAPI {
             }
         }
 
-        ProtectedRegion structureRegion = claimGround(player, structure, schematic);
+        ProtectedRegion structureRegion = claimGround(player, structure, dimension);
         if (structureRegion == null) {
             ss.delete(structure);
             if (player != null) {
@@ -145,10 +148,9 @@ public class StructureAPI {
 
     /**
      * Builds a structure
-     *
      * @param uuid The uuid to backtrack this construction process
      * @param structure The structure
-     * @return true if succesfully started
+     * @return true if succesfully started to build
      */
     public static boolean build(UUID uuid, Structure structure) {
         Player player = Bukkit.getPlayer(uuid);
@@ -181,10 +183,22 @@ public class StructureAPI {
         return true;
     }
 
+    /**
+     * Builds a structure
+     * @param player The player that issues the build order
+     * @param structure The structure to build
+     * @return true if succesfully started to build
+     */
     public static boolean build(Player player, Structure structure) {
         return build(player.getUniqueId(), structure);
     }
 
+    /**
+     * Demolishes a structure
+     * @param uuid The uuid to register the construction order (for asyncworldedit's api calls)
+     * @param structure The structure
+     * @return True if succesfully started to demolish the structure
+     */
     public static boolean demolish(UUID uuid, Structure structure) {
         Player player = Bukkit.getPlayer(uuid);
 
@@ -214,10 +228,22 @@ public class StructureAPI {
         return true;
     }
 
+    /**
+     * Demolishes a structure
+     * @param player The player to register the demolision oredr (for asyncwordedit api calls)
+     * @param structure The structure
+     * @return True if succesfully started to build
+     */
     public static boolean demolish(Player player, Structure structure) {
         return demolish(player.getUniqueId(), structure);
     }
 
+    /**
+     * Stops construction of this structure
+     * @param player The player to authorize the stop order
+     * @param structure The structure
+     * @return True if succesfully stopped
+     */
     public static boolean stop(Player player, Structure structure) {
         if (structure == null) {
             throw new AssertionError("Null structure");
@@ -240,30 +266,13 @@ public class StructureAPI {
         }
         return true;
     }
-    
-    public static void makeOwner(Player player, Structure structure) throws StructureException {
-        if(player == null) throw new AssertionError("Null player");
-        if(structure == null) throw new AssertionError("Null structure");
-        PlayerOwnershipService service = new PlayerOwnershipService();
-        
-        if(service.isOwner(player, structure)) {
-            throw new StructureException(ChatColor.RED + "Player: " +player.getName() + " is already owner");
-        }
-        
-        service.save(new PlayerOwnership(player, structure));
-    }
 
-    public static boolean isOwner(Player player, Structure structure) {
-        PlayerOwnershipService ownershipService = new PlayerOwnershipService();
-        return ownershipService.isOwner(player, structure);
-    }
-
-    public static boolean isMember(Player player, Structure structure) {
-        PlayerMembershipService membershipService = new PlayerMembershipService();
-        return membershipService.isMember(player, structure);
-    }
-
-    public static boolean stop(Structure structure) throws ConstructionException {
+    /**
+     * Stops construction of a structure (ignoring authorization)
+     * @param structure The structure
+     * @throws ConstructionException if structure was removed or structure hasn't been tasked to construct
+     */
+    public static void stop(Structure structure) throws ConstructionException {
         if (structure == null) {
             throw new AssertionError("Null structure");
         }
@@ -274,7 +283,50 @@ public class StructureAPI {
 
         ConstructionManager.getInstance().stop(structure);
 
-        return true;
+    }
+
+    public static void makeOwner(Player player, Structure structure) throws StructureException {
+        if (player == null) {
+            throw new AssertionError("Null player");
+        }
+        if (structure == null) {
+            throw new AssertionError("Null structure");
+        }
+        PlayerOwnershipService service = new PlayerOwnershipService();
+
+        if (service.isOwner(player, structure)) {
+            throw new StructureException(ChatColor.RED + "Player: " + player.getName() + " is already owner");
+        }
+
+        service.save(new PlayerOwnership(player, structure));
+    }
+
+    /**
+     * Checks if player is an owner of the structure
+     *
+     * @param player The player to check
+     * @param structure The structure
+     * @return True if player is an owner
+     * @deprecated Use structure.isOwner() instead
+     */
+    @Deprecated
+    public static boolean isOwner(Player player, Structure structure) {
+        PlayerOwnershipService ownershipService = new PlayerOwnershipService();
+        return ownershipService.isOwner(player, structure);
+    }
+
+    /**
+     * Checks if player is a member of this structure
+     *
+     * @param player The player to check
+     * @param structure The structure
+     * @return True if player is an owner
+     * @deprecated Use structure.isMember() instead
+     */
+    @Deprecated
+    public static boolean isMember(Player player, Structure structure) {
+        PlayerMembershipService membershipService = new PlayerMembershipService();
+        return membershipService.isMember(player, structure);
     }
 
     private static void createDataFolder(Structure structure, StructurePlan plan) throws StructureException, IOException {
@@ -293,14 +345,14 @@ public class StructureAPI {
         FileUtils.copyFile(schematic, new File(STRUCTURE_DIR, schematic.getName()));
     }
 
-    public static final File getStructureDataFolder(Structure structure) {
-        return new File(getDataFolder(), structure.getWorldName() + "//" + structure.getId());
-    }
-
     private static Plugin getMainPlugin() {
         return Bukkit.getPluginManager().getPlugin(MAIN_PLUGIN_NAME);
     }
 
+    /**
+     * Gets the datafolder for the StructureAPI or creates them if none exists
+     * @return The datafolder
+     */
     public static final File getDataFolder() {
         File structureDirectory = new File(getMainPlugin().getDataFolder(), "Data//Structures");
         if (!structureDirectory.exists()) {
@@ -309,18 +361,20 @@ public class StructureAPI {
         return structureDirectory;
     }
 
-    private static synchronized ProtectedRegion claimGround(Player player, final Structure structure, Schematic schematic) {
+    private static synchronized ProtectedRegion claimGround(Player player, final Structure structure, Dimension dimension) {
         if (structure.getId() == null) {
             // Sanity check
             throw new AssertionError("Structure id was null, save the structure instance first! (e.g. structure = structureService.save(structure)");
         }
 
         World world = Bukkit.getWorld(structure.getWorldName());
-        Vector pos = structure.getPosition();
-        Cardinal cardinal = structure.getCardinal();
+//        Vector pos = structure.getPosition();
+//        Cardinal cardinal = structure.getCardinal();
+//        
+//        Dimension dimension = SchematicUtil.calculateDimension(schematic, pos, cardinal);
 
         //
-        if (overlapsRegion(player, schematic, world, pos, cardinal)) {
+        if (overlapsRegion(player, world, dimension)) {
             if (player != null) {
                 player.sendMessage(ChatColor.RED + "Structure overlaps an regions owned other players");
             }
@@ -355,23 +409,41 @@ public class StructureAPI {
 
     }
 
-    public static boolean overlaps(Schematic schematic, World world, Vector pos, Cardinal cardinal) {
-        Dimension dimension = calculateDimension(schematic, pos, cardinal);
+    /**
+     * Checks if the given dimension overlaps any structures. 
+     * @param world The world
+     * @param dimension The dimension
+     * @return True if dimension overlaps any structure
+     */
+    public static boolean overlapsStructures(World world, Dimension dimension) {
         StructureService service = new StructureService();
-        return !service.getStructuresWithinDimension(world, dimension).isEmpty();
+        return service.hasStructuresWithin(world, dimension);
     }
 
-    public static boolean overlapsRegion(Schematic schematic, World world, Vector pos, Cardinal cardinal) {
-        return overlapsRegion(null, schematic, world, pos, cardinal);
+    /**
+     * Checks if the dimension overlaps any (WorldGuard) region
+     * @param world The world
+     * @param dimension The dimension
+     * @return True if dimension overlaps any region
+     */
+    public static boolean overlapsRegion(World world, Dimension dimension) {
+        return overlapsRegion(null, world, dimension);
     }
 
-    public static boolean overlapsRegion(Player player, Schematic schematic, World world, Vector pos, Cardinal cardinal) {
+    /**
+     * Checks if the dimension overlaps any region which the target player does is not an owner of.
+     * @param player The player
+     * @param world The world
+     * @param dimension The dimension
+     * @return True if dimensio overlaps any region the player is not an owner of.
+     */
+    public static boolean overlapsRegion(Player player, World world, Dimension dimension) {
         LocalPlayer localPlayer = null;
         if (player != null) {
             localPlayer = WorldGuardUtil.getLocalPlayer(player);
         }
         RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(world.getName()));
-        Dimension dimension = calculateDimension(schematic, pos, cardinal);
+//        Dimension dimension = calculateDimension(schematic, pos, cardinal);
 
         Vector p1 = dimension.getMinPosition();
         Vector p2 = dimension.getMaxPosition();
@@ -391,6 +463,10 @@ public class StructureAPI {
         return false;
     }
 
+    /**
+     * Sends the status of this structure to every online owner of this structure
+     * @param structure The structure
+     */
     public static void yellStatus(Structure structure) {
         PlayerOwnershipService pos = new PlayerOwnershipService();
         for (PlayerOwnership ownership : pos.getOwners(structure)) {
@@ -398,6 +474,11 @@ public class StructureAPI {
         }
     }
 
+    /**
+     * Sends the status of this structure to given player
+     * @param structure The structure
+     * @param player The player to tell
+     */
     public static void tellStatus(Structure structure, Player player) {
         if (player == null || !player.isOnline()) {
             return; // No effect

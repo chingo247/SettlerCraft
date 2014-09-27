@@ -29,13 +29,31 @@ public class SchematicUtil {
     }
 
     public static Dimension calculateDimension(Schematic schematic, Vector pos, Cardinal cardinal) {
-        Vector end = WorldUtil.getPoint2Right(pos, cardinal, new BlockVector(
+        Vector end = getPoint2Right(pos, cardinal, new BlockVector(
                 schematic.getWidth(),
                 schematic.getHeight(),
                 schematic.getLength())
         );
         Dimension dimension = new Dimension(pos, end);
         return dimension;
+    }
+    
+    private static Vector getPoint2Right(Vector point1, Cardinal direction, Vector size) {
+        switch (direction) {
+            case EAST:
+                return point1.add(size.subtract(1, 1, 1));
+            case SOUTH:
+                return point1.add(-(size.getBlockZ() - 1), size.getBlockY() - 1, (size.getBlockX() - 1));
+            case WEST:
+//                clipboard.rotate2D(180);
+                return point1.add(-(size.getBlockX() - 1), size.getBlockY() - 1, -(size.getBlockZ() - 1));
+            case NORTH:
+                return point1.add((size.getBlockZ() - 1), size.getBlockY() - 1, -(size.getBlockX() - 1));
+//                clipboard.rotate2D(270);
+
+            default:
+                throw new AssertionError("unreachable");
+        }
     }
 
 

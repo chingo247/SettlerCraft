@@ -6,12 +6,7 @@
 
 package com.sc.module.structureapi.structure.construction;
 
-import com.sc.module.structureapi.persistence.ConstructionSiteService;
-import com.sc.module.structureapi.structure.Structure;
-import com.sc.module.structureapi.structure.Structure.State;
-import com.sc.module.structureapi.structure.StructureHologramManager;
 import com.sc.module.structureapi.structure.construction.asyncworldedit.SCJobEntry;
-import java.util.UUID;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 
 
@@ -19,27 +14,10 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
  *
  * @author Chingo
  */
-public abstract class ConstructionCallback {
+public interface ConstructionCallback {
     
-    protected final UUID issuer;
-    protected final Structure structure;
+    public void onJobAdded(SCJobEntry entry);
     
-    protected ConstructionCallback(UUID issuer, final Structure structure) {
-        this.issuer = issuer;
-        this.structure = structure;
-    }
-    
-    public abstract void onJobAdded(SCJobEntry entry);
-    
-
-    public void onJobCanceled(JobEntry entry) {
-        ConstructionSiteService siteService = new ConstructionSiteService();
-        siteService.setState(structure, State.STOPPED);
-        // Update Hologram
-        StructureHologramManager.getInstance().updateHolo(structure);
-        
-        ConstructionManager.getInstance().getEntry(structure.getId()).setJobId(-1);
-    }
-    
+    public void onJobCanceled(JobEntry entry);
     
 }

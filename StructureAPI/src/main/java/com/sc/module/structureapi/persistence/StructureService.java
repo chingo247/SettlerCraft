@@ -19,6 +19,7 @@ package com.sc.module.structureapi.persistence;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateDeleteClause;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
+import com.sc.module.structureapi.event.structure.StructureConstructionEvent;
 import com.sc.module.structureapi.structure.QStructure;
 import com.sc.module.structureapi.structure.Structure;
 import com.sc.module.structureapi.structure.Structure.State;
@@ -159,7 +160,7 @@ public class StructureService extends AbstractService {
         return result;
     }
 
-    public List<Structure> getStructuresWithinDimension(World world, Dimension dimension) {
+    public List<Structure> getStructuresWithin(World world, Dimension dimension) {
         QStructure qStructure = QStructure.structure;
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
@@ -172,5 +173,29 @@ public class StructureService extends AbstractService {
                 ).list(qStructure);
         session.close();
         return result;
+    }
+    
+    public boolean hasStructuresWithin(World world, Dimension dimension) {
+        QStructure qStructure = QStructure.structure;
+        Session session = HibernateUtil.getSession();
+        JPQLQuery query = new HibernateQuery(session);
+        boolean result = query.from(qStructure)
+                .where(qStructure.location().worldUUID.eq(world.getUID())
+                        .and(qStructure.dimension().maxX.goe(dimension.getMinX()).and(qStructure.dimension().minX.loe(dimension.getMaxX())))
+                        .and(qStructure.dimension().maxY.goe(dimension.getMinY()).and(qStructure.dimension().minY.loe(dimension.getMaxY())))
+                        .and(qStructure.dimension().maxZ.goe(dimension.getMinZ()).and(qStructure.dimension().minZ.loe(dimension.getMaxZ())))
+                        .and(qStructure.state.ne(State.REMOVED))
+                ).exists();
+        session.close();
+        return result;
+    }
+
+    public Structure setState(final Structure structure, State newState) {
+        if (structure.getState() != newState) {
+            Bukkit.getPluginManager().callEvent(new StructureConstructionEvent(structure));
+            structure.setState(newState);
+            return save(structure);
+        }
+        return structure;
     }
 }

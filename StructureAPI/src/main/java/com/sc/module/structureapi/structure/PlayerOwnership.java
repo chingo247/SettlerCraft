@@ -35,7 +35,7 @@ public class PlayerOwnership implements Serializable {
     private final UUID player;
     private final String name;
     
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "STRUCURE_ID")       
     private Structure structure;
     

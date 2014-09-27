@@ -65,38 +65,7 @@ public class WorldUtil {
     }
     
 
-    public static Vector getPoint2Right(Vector point1, Cardinal direction, Vector size) {
-        switch (direction) {
-            case EAST:
-                return point1.add(size.subtract(1, 1, 1));
-            case SOUTH:
-                return point1.add(-(size.getBlockZ() - 1), size.getBlockY() - 1, (size.getBlockX() - 1));
-            case WEST:
-//                clipboard.rotate2D(180);
-                return point1.add(-(size.getBlockX() - 1), size.getBlockY() - 1, -(size.getBlockZ() - 1));
-            case NORTH:
-                return point1.add((size.getBlockZ() - 1), size.getBlockY() - 1, -(size.getBlockX() - 1));
-//                clipboard.rotate2D(270);
-
-            default:
-                throw new AssertionError("unreachable");
-        }
-    }
     
-    public static Vector getPoint2Left(Vector point1, Cardinal direction, Vector size) {
-       switch (direction) {
-            case EAST:
-                return point1.add((size.getBlockX() - 1), size.getBlockY() - 1, -(size.getBlockZ() - 1));
-            case SOUTH:
-                return point1.add((size.getBlockZ() - 1), size.getBlockY() - 1, (size.getBlockX() - 1));
-            case WEST:
-                return point1.add(-(size.getBlockX() - 1), size.getBlockY() - 1, (size.getBlockZ() - 1));
-            case NORTH:
-                return point1.add(-(size.getBlockZ() - 1), size.getBlockY() - 1, -(size.getBlockX() - 1));
-            default:
-                throw new AssertionError("unreachable");
-        }
-    }
 
     public static Dimension getWorldDimension(World world, Vector location, Cardinal direction, CuboidClipboard clipboard) {
         Vector pos2 = addOffset(location, direction, clipboard.getWidth() - 1, clipboard.getHeight() - 1, clipboard.getLength() - 1);

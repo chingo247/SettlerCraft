@@ -19,13 +19,14 @@ import org.bukkit.plugin.Plugin;
  */
 public class MenuAPI implements Listener {
     
-    private HashMap<Plugin, Map<UUID, CategoryMenu>> menus = new HashMap<>();
+    private final HashMap<Plugin, Map<UUID, CategoryMenu>> menus = new HashMap<>();
     
     private static MenuAPI instance;
     
-    private MenuAPI() {
-        
-    }
+    /**
+     * Private Constructor.
+     */
+    private MenuAPI() {}
     
     public static CategoryMenu createMenu(Plugin plugin, String name, int size) {
         if(plugin == null) {

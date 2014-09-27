@@ -22,7 +22,6 @@ public class StructureLogEntry implements Serializable {
     private Timestamp createdAt;
     private Timestamp completedAt;
     private Timestamp removedAt;
-    private Timestamp placedFenceAt;
     private Boolean autoremoved = false;
 
     protected StructureLogEntry() {
@@ -37,22 +36,6 @@ public class StructureLogEntry implements Serializable {
         }
     }
 
-    public void setPlacedFenceAt(Date placedFenceAt) {
-        if (placedFenceAt != null) {
-            this.placedFenceAt = new Timestamp(placedFenceAt.getTime());
-        } else {
-            this.placedFenceAt = null;
-        }
-
-    }
-
-    public Timestamp getPlacedFenceAt() {
-        return placedFenceAt;
-    }
-
-    public boolean hasPlacedFence() {
-        return placedFenceAt != null;
-    }
 
     public void setCompletedAt(Date completedAt) {
         if (completedAt != null) {

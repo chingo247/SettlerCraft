@@ -12,7 +12,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 /**
@@ -27,8 +26,8 @@ public class PlayerMembership implements Serializable {
     private Long id;
     private final UUID uuid;
     
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "STRUCURE_ID")
+    @ManyToOne(cascade = CascadeType.ALL)
+//    @JoinColumn(name = "STRUCURE_ID")
     private Structure structure;
 
     /**

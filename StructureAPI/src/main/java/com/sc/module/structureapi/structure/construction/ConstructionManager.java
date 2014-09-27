@@ -8,14 +8,15 @@ package com.sc.module.structureapi.structure.construction;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.mysema.query.jpa.hibernate.HibernateUpdateClause;
-import com.sc.module.structureapi.persistence.ConstructionSiteService;
 import com.sc.module.structureapi.persistence.HibernateUtil;
+import com.sc.module.structureapi.persistence.StructureService;
 import com.sc.module.structureapi.structure.QStructure;
 import com.sc.module.structureapi.structure.Structure;
 import com.sc.module.structureapi.structure.Structure.State;
 import com.sc.module.structureapi.structure.StructureAPI;
 import com.sc.module.structureapi.structure.StructureHologramManager;
 import com.sc.module.structureapi.structure.construction.asyncworldedit.SCAsyncCuboidClipboard;
+import com.sc.module.structureapi.structure.construction.asyncworldedit.SCJobEntry;
 import com.sc.module.structureapi.structure.construction.generator.ClipboardGenerator;
 import com.sc.module.structureapi.structure.construction.worldedit.ConstructionBuildingClipboard;
 import com.sc.module.structureapi.structure.construction.worldedit.ConstructionDemolisionClipboard;
@@ -59,11 +60,11 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.hibernate.Session;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.IBlockPlacerListener;
+import org.primesoft.asyncworldedit.blockPlacer.IJobEntryListener;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
@@ -77,7 +78,6 @@ public class ConstructionManager {
     private final Map<Long, ConstructionEntry> constructionEntries = Collections.synchronizedMap(new HashMap<Long, ConstructionEntry>());
     private final Map<Long, Executor> executors = new HashMap<>();
     private final Executor executor = Executors.newSingleThreadExecutor();
-    private final Plugin plugin = Bukkit.getPluginManager().getPlugin("SettlerCraft");
     private final int FENCE_BLOCK_PLACE_SPEED = 100;
     private final int TIME_OUT = 500;
     private final Material FENCE_MATERIAL = Material.IRON_FENCE;
@@ -100,16 +100,16 @@ public class ConstructionManager {
                     ConstructionEntry entry = it.next();
 
                     if (je.getPlayer().equals(entry.getPlayer()) && je.getJobId() == entry.getJobId()) {
-                        ConstructionSiteService siteService = new ConstructionSiteService();
+                        StructureService structureService = new StructureService();
                         // Set state to complete & Create timestamp of completion
                         Structure structure = entry.getStructure();
 
                         structure.getLogEntry().setCompletedAt(new Date());
-                        siteService.save(structure);
+                        structureService.save(structure);
 
                         constructionEntries.remove(structure.getId());
 
-                        siteService.setState(structure, State.COMPLETE);
+                        structureService.setState(structure, State.COMPLETE);
                         StructureHologramManager.getInstance().updateHolo(structure);
                         StructureAPI.yellStatus(structure);
 
@@ -157,9 +157,9 @@ public class ConstructionManager {
                     // Load schematic if absent
                     File sf = structure.getSchematicFile();
                     long checksum = FileUtils.checksumCRC32(sf);
-                    ConstructionSiteService css = new ConstructionSiteService();
+                    StructureService structureService = new StructureService();
                     if (!SchematicManager.getInstance().hasSchematic(checksum)) {
-                        css.setState(structure, State.LOADING_SCHEMATIC);
+                        structureService.setState(structure, State.LOADING_SCHEMATIC);
                         StructureAPI.tellStatus(structure, Bukkit.getPlayer(uuid));
                         SchematicManager.getInstance().load(sf);
                     }
@@ -167,7 +167,6 @@ public class ConstructionManager {
 
                     // PLace a fence
                     placeFence(uuid, structure, schematic.getClipboard());
-
 
                     CuboidClipboard cc = schematic.getClipboard();
                     SchematicUtil.align(cc, structure.getCardinal());
@@ -188,7 +187,7 @@ public class ConstructionManager {
     }
 
     /**
-     * Places a fence, SHOULDNT BE CALLED IN MAIN THREAD
+     * Places a fence
      *
      * @param uuid The uuid for the job
      * @param structure The structure
@@ -238,7 +237,7 @@ public class ConstructionManager {
         while (queue.peek() != null) {
             if (placed == FENCE_BLOCK_PLACE_SPEED) {
                 System.out.println("Flush Queue");
-                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+                Bukkit.getScheduler().scheduleSyncDelayedTask(StructureAPI.getPlugin(), new Runnable() {
 
                     @Override
                     public void run() {
@@ -267,7 +266,7 @@ public class ConstructionManager {
 
         // Flush Queue if not empty
         if (place.peek() != null) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+            Bukkit.getScheduler().scheduleSyncDelayedTask(StructureAPI.getPlugin(), new Runnable() {
 
                 @Override
                 public void run() {
@@ -306,7 +305,44 @@ public class ConstructionManager {
         SCAsyncCuboidClipboard asyncStructureClipboard = new SCAsyncCuboidClipboard(uuid, clipboard);
         try {
             // Note: The Clipboard is always drawn from the min position using the place method
-            asyncStructureClipboard.place(aes, pos, false, new ConstructionBuildingCallback(uuid, structure));
+
+            asyncStructureClipboard.place(aes, pos, false, new ConstructionCallback() {
+
+                @Override
+                public void onJobAdded(SCJobEntry entry) {
+                    // Set JobId
+                    final StructureService structureService = new StructureService();
+                    getEntry(structure).setJobId(entry.getJobId());
+
+                    // Update status
+                    structureService.setState(structure, State.QUEUED);
+                    StructureHologramManager.getInstance().updateHolo(structure);
+                    StructureAPI.yellStatus(structure);
+
+                    // Set state changeListener
+                    entry.addStateChangedListener(new IJobEntryListener() {
+
+                        @Override
+                        public void jobStateChanged(JobEntry bpje) {
+                            if (bpje.getStatus() == JobEntry.JobStatus.PlacingBlocks) {
+                                structureService.setState(structure, State.BUILDING);
+                                StructureAPI.yellStatus(structure);
+                                StructureHologramManager.getInstance().updateHolo(structure);
+                            }
+                        }
+                    });
+                }
+
+                @Override
+                public void onJobCanceled(JobEntry entry) {
+                    StructureService structureService = new StructureService();
+                    structureService.setState(structure, State.STOPPED);
+                    // Update Hologram
+                    StructureHologramManager.getInstance().updateHolo(structure);
+
+                    ConstructionManager.getInstance().getEntry(structure).setJobId(-1);
+                }
+            });
         } catch (MaxChangedBlocksException ex) {
             // shouldnt happen
         }
@@ -350,8 +386,8 @@ public class ConstructionManager {
 //                    placeFence(uuid, site, schematic, BlockID.IRON_BARS);
 
                     // Update status
-                    ConstructionSiteService css = new ConstructionSiteService();
-                    css.setState(structure, State.QUEUED);
+                    StructureService structureService = new StructureService();
+                    structureService.setState(structure, State.QUEUED);
                     ConstructionEntry entry = constructionEntries.get(structure.getId());
                     entry.setDemolishing(true);
 
@@ -394,7 +430,46 @@ public class ConstructionManager {
         SCAsyncCuboidClipboard asyncStructureClipboard = new SCAsyncCuboidClipboard(uuid, clipboard);
         try {
             // Note: The Clipboard is always drawn from the min position using the place method
-            asyncStructureClipboard.place(aSession, pos, false, new ConstructionDemolisionCallback(uuid, structure));
+            asyncStructureClipboard.place(aSession, pos, false, new ConstructionCallback() {
+
+                @Override
+                public void onJobAdded(SCJobEntry entry) {
+                    // Set JobId
+                    getEntry(structure).setJobId(entry.getJobId());
+
+                    // Set state changeListener
+                    entry.addStateChangedListener(new IJobEntryListener() {
+
+                        @Override
+                        public void jobStateChanged(JobEntry bpje) {
+                            StructureService structureService = new StructureService();
+                            if (bpje.getStatus() == JobEntry.JobStatus.PlacingBlocks) {
+                                structureService.setState(structure, State.DEMOLISHING);
+                                StructureHologramManager.getInstance().updateHolo(structure);
+                            } else if (bpje.getStatus() == JobEntry.JobStatus.Done) {
+                                // Set state to complete & Create timestamp of completion
+                                structureService.setState(structure, State.REMOVED);
+                                structure.getLogEntry().setRemovedAt(new Date());
+                                structureService.save(structure);
+                                StructureHologramManager.getInstance().updateHolo(structure);
+
+                                // Reset JobID
+                                getEntry(structure).setJobId(-1);
+                            }
+                        }
+                    });
+                }
+
+                @Override
+                public void onJobCanceled(JobEntry entry) {
+                    StructureService structureService = new StructureService();
+                    structureService.setState(structure, State.STOPPED);
+                    // Update Hologram
+                    StructureHologramManager.getInstance().updateHolo(structure);
+
+                    getEntry(structure).setJobId(-1);
+                }
+            });
         } catch (MaxChangedBlocksException ex) {
             // shouldnt happen
         }
@@ -428,7 +503,7 @@ public class ConstructionManager {
     private void setStates() {
         Session session = HibernateUtil.getSession();
         QStructure qs = QStructure.structure;
-        
+
         new HibernateUpdateClause(session, qs).where(qs.state.ne(State.COMPLETE).and(qs.state.ne(State.REMOVED)))
                 .set(qs.state, State.STOPPED)
                 .execute();
@@ -457,7 +532,7 @@ public class ConstructionManager {
                         }
                         count = 0;
                     }
-                    StructureHologramManager.getInstance().createHologram(plugin, ss.poll());
+                    StructureHologramManager.getInstance().createHologram(StructureAPI.getPlugin(), ss.poll());
                     count++;
                 }
             }
@@ -546,8 +621,8 @@ public class ConstructionManager {
         }
 
         // Set new state: STOPPED
-        ConstructionSiteService css = new ConstructionSiteService();
-        css.setState(structure, State.STOPPED);
+        StructureService structureService = new StructureService();
+        structureService.setState(structure, State.STOPPED);
         StructureAPI.yellStatus(structure);
 
         // Reset data
@@ -584,8 +659,8 @@ public class ConstructionManager {
                 AsyncWorldEditMain.getInstance().getBlockPlacer().cancelJob(entry.getPlayer(), entry.getJobId());
 
                 // Set new state: STOPPED
-                ConstructionSiteService css = new ConstructionSiteService();
-                css.setState(structure, State.STOPPED);
+                StructureService structureService = new StructureService();
+                structureService.setState(structure, State.STOPPED);
 
                 // Reset data
                 constructionEntries.get(structure.getId()).setDemolishing(false);
@@ -605,12 +680,9 @@ public class ConstructionManager {
         return exe;
     }
 
-    ConstructionEntry getEntry(Long structureId) {
-        return constructionEntries.get(structureId);
-    }
 
-    ConstructionEntry getEntry(Structure structure) {
-        return getEntry(structure.getId());
+    private ConstructionEntry getEntry(Structure structure) {
+        return constructionEntries.get(structure.getId());
     }
 
     private void tell(UUID player, String message) {

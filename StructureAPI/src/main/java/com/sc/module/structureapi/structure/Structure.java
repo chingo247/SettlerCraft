@@ -34,18 +34,25 @@ import construction.exception.StructureDataException;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 
 /**
  *
@@ -103,13 +110,13 @@ public class Structure implements Serializable {
     private StructureLogEntry logEntry;
 
 
-//    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 //    @JoinColumn(name = "OWNER_ID", columnDefinition = "STRUCTURE_ID")
-//    private Set<PlayerOwnership> ownerships;
-//
-//    @OneToMany(fetch = FetchType.EAGER)
+    private Set<PlayerOwnership> ownerships;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 //    @JoinColumn(name = "MEMBER_ID", columnDefinition = "STRUCTURE_ID")
-//    private Set<PlayerMembership> memberships;
+    private Set<PlayerMembership> memberships;
 
 //    @Embedded
 //    private StructurePlan plan;
@@ -202,34 +209,35 @@ public class Structure implements Serializable {
         return new File(StructureAPI.getDataFolder(), getWorldName() + "//" + id);
     }
 
-//    public boolean isOwner(Player player) {
-//        for (PlayerOwnership pos : ownerships) {
-//            if (pos.getUUID().equals(player.getUniqueId())) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
+    public boolean isOwner(Player player) {
+        for (PlayerOwnership pos : ownerships) {
+            if (pos.getUUID().equals(player.getUniqueId())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-//    public List<PlayerOwnership> getOwnerships() {
-//        return new ArrayList<>(ownerships);
-//    }
-//
-//    boolean addOwner(PlayerOwnership playerOwner) {
-//        return ownerships.add(playerOwner);
-//    }
-//
-//    boolean removeOwner(PlayerOwnership playerOwner) {
-//        return ownerships.remove(playerOwner);
-//    }
-//
-//    boolean addMember(PlayerMembership playerMember) {
-//        return memberships.add(playerMember);
-//    }
-//
-//    boolean removeMember(PlayerMembership playerMember) {
-//        return memberships.remove(playerMember);
-//    }
+    public List<PlayerOwnership> getOwnerships() {
+        return new ArrayList<>(ownerships);
+    }
+    
+
+    boolean addOwner(PlayerOwnership playerOwner) {
+        return ownerships.add(playerOwner);
+    }
+
+    boolean removeOwner(PlayerOwnership playerOwner) {
+        return ownerships.remove(playerOwner);
+    }
+
+    boolean addMember(PlayerMembership playerMember) {
+        return memberships.add(playerMember);
+    }
+
+    boolean removeMember(PlayerMembership playerMember) {
+        return memberships.remove(playerMember);
+    }
 
     public void setPrice(Double refundValue) {
         this.refundValue = refundValue;
