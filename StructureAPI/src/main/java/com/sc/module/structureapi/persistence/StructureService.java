@@ -19,7 +19,6 @@ package com.sc.module.structureapi.persistence;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateDeleteClause;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.module.structureapi.event.structure.StructureConstructionEvent;
 import com.sc.module.structureapi.structure.QStructure;
 import com.sc.module.structureapi.structure.Structure;
 import com.sc.module.structureapi.structure.Structure.State;
@@ -190,12 +189,5 @@ public class StructureService extends AbstractService {
         return result;
     }
 
-    public Structure setState(final Structure structure, State newState) {
-        if (structure.getState() != newState) {
-            Bukkit.getPluginManager().callEvent(new StructureConstructionEvent(structure));
-            structure.setState(newState);
-            return save(structure);
-        }
-        return structure;
-    }
+
 }

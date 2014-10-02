@@ -49,7 +49,7 @@ public class WorldUtil {
         }
     }
 
-    public static Vector addOffset(Vector location, Cardinal direction, double xOffset, double yOffset, double zOffset) {
+    public static Vector translateLocation(Vector location, Cardinal direction, double xOffset, double yOffset, double zOffset) {
         switch (direction) {
             case EAST:
                 return location.add(zOffset, yOffset, xOffset);
@@ -68,7 +68,7 @@ public class WorldUtil {
     
 
     public static Dimension getWorldDimension(World world, Vector location, Cardinal direction, CuboidClipboard clipboard) {
-        Vector pos2 = addOffset(location, direction, clipboard.getWidth() - 1, clipboard.getHeight() - 1, clipboard.getLength() - 1);
+        Vector pos2 = translateLocation(location, direction, clipboard.getWidth() - 1, clipboard.getHeight() - 1, clipboard.getLength() - 1);
         return new Dimension(location, pos2);
     }
 

@@ -11,7 +11,7 @@
         <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
     <build>
-                <plugins>
+        <plugins>
             <plugin>
                 <groupId>com.mysema.maven</groupId>
                 <artifactId>apt-maven-plugin</artifactId>
@@ -99,6 +99,13 @@
             <version>1.2.31</version>
             <scope>provided</scope>
         </dependency>
+        <!-- HSQLServer -->
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>2.3.2</version>
+            <scope>compile</scope>
+        </dependency>
         <!--Hibernate-->
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -135,7 +142,6 @@
             <groupId>dom4j</groupId>
             <artifactId>dom4j</artifactId>
             <version>1.6.1</version>
-            <scope>compile</scope>
         </dependency>
         <!-- XPATH -->
         <dependency>

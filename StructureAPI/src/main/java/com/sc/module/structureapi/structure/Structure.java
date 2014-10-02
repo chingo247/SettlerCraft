@@ -17,7 +17,6 @@
 package com.sc.module.structureapi.structure;
 
 import com.google.common.base.Preconditions;
-import com.sc.module.structureapi.structure.plan.StructurePlan;
 import com.sc.module.structureapi.structure.schematic.Schematic;
 import static com.sc.module.structureapi.util.SchematicUtil.calculateDimension;
 import com.sc.module.structureapi.util.WorldUtil;
@@ -53,6 +52,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.dom4j.DocumentException;
 
 /**
  *
@@ -63,8 +63,8 @@ import org.bukkit.entity.Player;
 public class Structure implements Serializable {
 
     public enum State {
-        INITIALIZING,
 
+        INITIALIZING,
         /**
          * Structure has been added to AsyncWorldEdit's blockplacer's Queue
          */
@@ -98,17 +98,16 @@ public class Structure implements Serializable {
          */
         STOPPED
     }
-    
+
     private State state = State.INITIALIZING;
 
     @Id
     @GeneratedValue
     @Column(name = "SC_STRUCTURE_ID")
     private Long id;
-    
+
     @Embedded
     private StructureLogEntry logEntry;
-
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 //    @JoinColumn(name = "OWNER_ID", columnDefinition = "STRUCTURE_ID")
@@ -137,8 +136,6 @@ public class Structure implements Serializable {
     private String structureRegion;
 
     private String name;
-    
-    
 
     /**
      * JPA Constructor
@@ -174,27 +171,29 @@ public class Structure implements Serializable {
         return state;
     }
 
-    public void setState(State state) {
+    void setState(State state) {
         this.state = state;
     }
 
-    
-    
-    
-
-    public Long getSchematicChecksum() throws IOException, StructureDataException {
+    public Long getSchematicChecksum() throws IOException, StructureDataException, DocumentException {
         long checksum = FileUtils.checksumCRC32(getSchematicFile());
         return checksum;
     }
 
-    public StructurePlan getPlan() throws StructureDataException {
-        File file = new File(getDataFolder(), "Config.xml");
-        StructurePlan plan = StructurePlan.load(file);
+    public StructurePlan getPlan() throws StructureDataException, DocumentException, IOException {
+        File file = getConfig();
+        StructurePlan plan =  new StructurePlan(file);
+        plan.load();
         return plan;
     }
+    
+    public File getConfig() {
+        return new File(getDataFolder(), "Config.xml");
+    }
 
-    public File getSchematicFile() throws StructureDataException {
-        return getPlan().getSchematic();
+    public File getSchematicFile() throws StructureDataException, DocumentException, IOException  {
+            StructurePlan plan = getPlan();
+            return plan.getSchematic();
     }
 
     public void setName(String name) {
@@ -206,7 +205,7 @@ public class Structure implements Serializable {
     }
 
     public File getDataFolder() {
-        return new File(StructureAPI.getDataFolder(), getWorldName() + "//" + id);
+        return new File(StructureAPI.getDataFolder(), getWorldName() + "//" +  getWorldUUID() + "//"+ id);
     }
 
     public boolean isOwner(Player player) {
@@ -221,7 +220,6 @@ public class Structure implements Serializable {
     public List<PlayerOwnership> getOwnerships() {
         return new ArrayList<>(ownerships);
     }
-    
 
     boolean addOwner(PlayerOwnership playerOwner) {
         return ownerships.add(playerOwner);
@@ -341,15 +339,18 @@ public class Structure implements Serializable {
     }
 
     /**
-     * Adds the offset to the location of this structure and returns the world location.
-     *
+     * Will add the offset to the structure's origin, which is always the front left corner of a structure.
      * @param offset The offset
      * @return the location
      */
-    public org.bukkit.Location getLocationForOffset(Vector offset) {
-        Vector p = WorldUtil.addOffset(getPosition(), cardinal, offset.getX(), offset.getY(), offset.getZ());
+    public org.bukkit.Location translateRelativeLocation(Vector offset) {
+        Vector p = WorldUtil.translateLocation(getPosition(), cardinal, offset.getX(), offset.getY(), offset.getZ());
         World world = Bukkit.getWorld(getWorldName());
         return new org.bukkit.Location(world, p.getBlockX(), p.getBlockY(), p.getBlockZ());
+    }
+    
+    public org.bukkit.Location translateRelativeLocation(double x, double y, double z) {
+        return translateRelativeLocation(new Vector(x, y, z));
     }
 
     @Override

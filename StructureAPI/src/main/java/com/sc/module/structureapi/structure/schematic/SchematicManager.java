@@ -5,7 +5,7 @@
  */
 package com.sc.module.structureapi.structure.schematic;
 
-import com.sc.module.structureapi.structure.plan.StructurePlan;
+import com.sc.module.structureapi.structure.StructurePlan;
 import com.sk89q.worldedit.data.DataException;
 import java.io.File;
 import java.io.IOException;

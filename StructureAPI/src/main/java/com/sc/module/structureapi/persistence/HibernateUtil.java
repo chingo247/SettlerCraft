@@ -33,6 +33,7 @@ public class HibernateUtil {
 
     private static final SessionFactory sessionFactory;
     
+    
     static {
         try {
             // Create the SessionFactory from standard (hibernate.cfg.xml) 
@@ -41,7 +42,8 @@ public class HibernateUtil {
             configuration.addAnnotatedClass(Structure.class);
             configuration.addAnnotatedClass(PlayerOwnership.class);
             configuration.addAnnotatedClass(PlayerMembership.class);
-            sessionFactory = configuration.configure().buildSessionFactory();
+            
+            sessionFactory = configuration.configure("structureapi/hibernate.cfg.xml").buildSessionFactory();
         } catch (Throwable ex) {
             // Log the exception. 
             System.err.println("Initial SessionFactory creation failed." + ex);

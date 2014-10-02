@@ -7,6 +7,8 @@ package com.sc.module.structureapi.structure.plan;
 
 import com.sc.module.menuapi.menus.menu.item.CategoryTradeItem;
 import com.sc.module.menuapi.menus.menu.util.ShopUtil;
+import com.sc.module.structureapi.structure.StructurePlan;
+import com.sc.module.structureapi.structure.dataplans.Nodes;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.data.DataException;
@@ -36,13 +38,14 @@ public class StructurePlanItem  implements CategoryTradeItem {
     public final String name;
     public final String category;
     public final String faction;
+    public final String description;
     public final double price;
     public final int width;
     public final int height;
     public final int length;
     public final int blocks;
 
-    private StructurePlanItem(String path, String name, String category, String faction, double price, int width, int height, int length, int blocks) {
+    private StructurePlanItem(String path, String name, String category, String faction, double price, int width, int height, int length, int blocks, String description) {
         this.path = path;
         this.name = name;
         this.category = category;
@@ -52,10 +55,11 @@ public class StructurePlanItem  implements CategoryTradeItem {
         this.height = height;
         this.length = length;
         this.blocks = blocks;
+        this.description = description;
     }
 
     public static StructurePlanItem load(StructurePlan plan) throws IOException, DataException, DocumentException, StructureDataException {
-        File cfg = plan.getConfig();
+        File cfg = plan.getConfigXML();
         File sch = plan.getSchematic();
 
 
@@ -79,13 +83,15 @@ public class StructurePlanItem  implements CategoryTradeItem {
         String name;
         String category;
         String faction;
+        String description;
         double price;
         
-        Node nameNode = config.selectSingleNode("StructurePlan/Name");
-        Node categoryNode = config.selectSingleNode("StructurePlan/Category");
-        Node factionNode = config.selectSingleNode("StructurePlan/Faction");
-        Node priceNode = config.selectSingleNode("StructurePlan/Price");
         
+        Node nameNode = config.selectSingleNode(Nodes.NAME_NODE);
+        Node categoryNode = config.selectSingleNode(Nodes.CATEGORY_NODE);
+        Node factionNode = config.selectSingleNode(Nodes.FACTION_NODE);
+        Node priceNode = config.selectSingleNode(Nodes.PRICE_NODE);
+        Node descriptionNode = config.selectSingleNode(Nodes.DESCRIPTION_NODE);
         
         
         if(nameNode == null) throw new StructureDataException("Missing name node for: " + cfg.getAbsolutePath());
@@ -100,7 +106,13 @@ public class StructurePlanItem  implements CategoryTradeItem {
             throw new StructureDataException("Invalid price value for: " + cfg.getAbsolutePath());
         }
         
-        StructurePlanItem item = new StructurePlanItem(path, name, category, faction, price, width, height, length, blocks);
+        if(descriptionNode != null) {
+            description = descriptionNode.getText();
+        } else {
+            description = null;
+        }
+        
+        StructurePlanItem item = new StructurePlanItem(path, name, category, faction, price, width, height, length, blocks, description);
         return item;
     }
 
@@ -135,6 +147,7 @@ public class StructurePlanItem  implements CategoryTradeItem {
         ItemStack stack = new ItemStack(Material.PAPER);
         ItemMeta meta = stack.getItemMeta();
         meta.setDisplayName(name);
+        if(description == null) {
         meta.setLore(Arrays.asList(
                 "Price: " + ChatColor.GOLD + ShopUtil.valueString(price),
                 "Width: " + ChatColor.GOLD + width, 
@@ -144,6 +157,17 @@ public class StructurePlanItem  implements CategoryTradeItem {
                 "Path: " + ChatColor.GOLD + path,
                 "Type: " + ChatColor.GOLD + "Plan"
         ));
+        } else {
+            meta.setLore(Arrays.asList(
+                "Description: " + ChatColor.GOLD + description,
+                "Price: " + ChatColor.GOLD + ShopUtil.valueString(price),
+                "Width: " + ChatColor.GOLD + width, 
+                "Length: " + ChatColor.GOLD + length,
+                "Height: " + ChatColor.GOLD + height,
+                "Blocks: " + ChatColor.GOLD + ShopUtil.valueString(blocks),
+                "Path: " + ChatColor.GOLD + path,
+                "Type: " + ChatColor.GOLD + "Plan"));
+        }
         stack.setItemMeta(meta);
         return stack;
     }

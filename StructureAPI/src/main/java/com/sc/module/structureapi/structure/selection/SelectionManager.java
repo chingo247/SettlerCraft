@@ -67,24 +67,24 @@ public class SelectionManager {
 
             Vector self;
             switch(cardinal) {
-                case WEST: self = WorldUtil.addOffset(pos1, cardinal, -0.5, 0, -0.5); break;
-                case SOUTH: self = WorldUtil.addOffset(pos1, cardinal, -0.5, 0, 0.5); break;
-                case NORTH: self = WorldUtil.addOffset(pos1, cardinal, 0.5, 0, -0.5); break;
-                case EAST: self = WorldUtil.addOffset(pos1, cardinal, 0.5, 0, 0.5); break;
+                case WEST: self = WorldUtil.translateLocation(pos1, cardinal, -0.5, 0, -0.5); break;
+                case SOUTH: self = WorldUtil.translateLocation(pos1, cardinal, -0.5, 0, 0.5); break;
+                case NORTH: self = WorldUtil.translateLocation(pos1, cardinal, 0.5, 0, -0.5); break;
+                case EAST: self = WorldUtil.translateLocation(pos1, cardinal, 0.5, 0, 0.5); break;
                 default:return;
             }
-            self = WorldUtil.addOffset(self, cardinal, 0, 1, 0);
+            self = WorldUtil.translateLocation(self, cardinal, 0, 1, 0);
             LOGGER.info(self);
             
             
             Vector xLoc;
             if(!reverse){
-            xLoc = WorldUtil.addOffset(self, cardinal, 2, 1, 0);
+            xLoc = WorldUtil.translateLocation(self, cardinal, 2, 1, 0);
             } else {
-            xLoc = WorldUtil.addOffset(self, cardinal, -2, 1, 0);   
+            xLoc = WorldUtil.translateLocation(self, cardinal, -2, 1, 0);   
             }
-            Vector yLoc = WorldUtil.addOffset(self, cardinal, 0, 1, 0);
-            Vector zLoc = WorldUtil.addOffset(self, cardinal, 0, 1, 2);
+            Vector yLoc = WorldUtil.translateLocation(self, cardinal, 0, 1, 0);
+            Vector zLoc = WorldUtil.translateLocation(self, cardinal, 0, 1, 2);
 
             holos[SELF] = HolographicDisplaysAPI.createIndividualHologram(
                     plugin, 

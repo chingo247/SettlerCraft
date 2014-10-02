@@ -6,7 +6,7 @@
 
 package com.sc.module.structureapi.structure.concurrent;
 
-import com.sc.module.structureapi.structure.plan.StructurePlan;
+import com.sc.module.structureapi.structure.StructurePlan;
 import com.sc.module.structureapi.structure.plan.StructurePlanItem;
 import com.sc.module.structureapi.structure.plan.StructurePlanManager;
 import com.sk89q.worldedit.data.DataException;

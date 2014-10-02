@@ -6,7 +6,6 @@
 
 package com.sc.module.structureapi.structure;
 
-import com.sc.module.structureapi.structure.plan.StructurePlan;
 import com.sc.module.structureapi.world.Cardinal;
 import com.sk89q.worldedit.Vector;
 import java.util.concurrent.Executor;

@@ -5,11 +5,16 @@
  */
 package com.sc.module.structureapi.structure;
 
+import com.mysema.query.jpa.hibernate.HibernateUpdateClause;
+import com.sc.module.structureapi.event.structure.StructureConstructionEvent;
+import com.sc.module.structureapi.listener.PlanListener;
+import com.sc.module.structureapi.persistence.HibernateUtil;
 import com.sc.module.structureapi.persistence.PlayerMembershipService;
 import com.sc.module.structureapi.persistence.PlayerOwnershipService;
 import com.sc.module.structureapi.persistence.StructureService;
-import com.sc.module.structureapi.structure.construction.ConstructionManager;
-import com.sc.module.structureapi.structure.plan.StructurePlan;
+import com.sc.module.structureapi.structure.dataplans.Nodes;
+import com.sc.module.structureapi.structure.dataplans.holograms.StructureHologramManager;
+import com.sc.module.structureapi.structure.dataplans.overview.StructureOverviewManager;
 import com.sc.module.structureapi.structure.schematic.Schematic;
 import com.sc.module.structureapi.structure.schematic.SchematicManager;
 import com.sc.module.structureapi.util.SchematicUtil;
@@ -20,8 +25,12 @@ import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.data.DataException;
 import com.sk89q.worldguard.LocalPlayer;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
+import com.sk89q.worldguard.protection.flags.DefaultFlag;
+import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
@@ -30,6 +39,8 @@ import construction.exception.StructureDataException;
 import construction.exception.StructureException;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Level;
@@ -38,7 +49,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.Plugin;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Node;
+import org.dom4j.io.SAXReader;
+import org.hibernate.Session;
 
 /**
  *
@@ -47,19 +66,51 @@ import org.bukkit.plugin.Plugin;
 public class StructureAPI {
 
     private static final String PREFIX = "SCREG#";
-    private static final String PLAN_FOLDER = "Plans";
     private static final String MAIN_PLUGIN_NAME = "SettlerCraft";
     private static final Plugin MAIN_PLUGIN = Bukkit.getPluginManager().getPlugin(MAIN_PLUGIN_NAME);
+    private final List<StructureListener> structureListeners = new ArrayList<>();
+    private static StructureAPI instance;
+    private boolean initialized = false;
 
     private StructureAPI() {
+        Bukkit.getPluginManager().registerEvents(new PlanListener(), MAIN_PLUGIN);
+    }
+
+    public synchronized void init() {
+        if (!initialized) {
+            setStates();
+            boolean useHolograms = MAIN_PLUGIN.getConfig().getBoolean("structure.use-holograms");
+            Plugin plugin = Bukkit.getPluginManager().getPlugin("HolographicDisplays");
+            if (useHolograms && plugin != null && plugin.isEnabled()) {
+                StructureOverviewManager overviewManager = new StructureOverviewManager();
+                StructureHologramManager hologramManager = new StructureHologramManager();
+
+                structureListeners.add(overviewManager);
+                structureListeners.add(hologramManager);
+
+                overviewManager.init();
+                hologramManager.init();
+            }
+            initialized = true;
+        }
+    }
+
+    private void setStates() {
+        Session session = HibernateUtil.getSession();
+        QStructure qs = QStructure.structure;
+
+        new HibernateUpdateClause(session, qs).where(qs.state.ne(Structure.State.COMPLETE).and(qs.state.ne(Structure.State.REMOVED)))
+                .set(qs.state, Structure.State.STOPPED)
+                .execute();
+        session.close();
     }
 
     public static Plugin getPlugin() {
         return MAIN_PLUGIN;
     }
-    
-    public static File getStructurePlanFolder() {
-        return new File(getPlugin().getDataFolder(), PLAN_FOLDER);
+
+    public void addListener(StructureListener listener) {
+        structureListeners.add(listener);
     }
 
     /**
@@ -96,13 +147,12 @@ public class StructureAPI {
             return null;
         }
 
-        
         Dimension dimension = SchematicUtil.calculateDimension(schematic, pos, cardinal);
-        
+
         // Check if structure overlapsStructures another structure
         if (overlapsStructures(world, dimension)) {
             if (player != null) {
-                player.sendMessage(ChatColor.RED + " Structure overlaps another structure");
+                player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
             }
             return null;
         }
@@ -124,18 +174,6 @@ public class StructureAPI {
             }
         }
 
-        ProtectedRegion structureRegion = claimGround(player, structure, dimension);
-        if (structureRegion == null) {
-            ss.delete(structure);
-            if (player != null) {
-                player.sendMessage(ChatColor.RED + "Failed to claim region for structure");
-            } else {
-                System.out.println("[SettlerCraft]: Failed to claim region for structure");
-            }
-
-            return null;
-        }
-
         try {
             createDataFolder(structure, plan);
         } catch (StructureException | IOException ex) {
@@ -146,13 +184,48 @@ public class StructureAPI {
             return null;
         }
 
-        StructureHologramManager.getInstance().createHologram(Bukkit.getPluginManager().getPlugin(MAIN_PLUGIN_NAME), structure);
+        ProtectedRegion structureRegion = claimGround(player, structure, dimension);
+        if (structureRegion == null) {
+            structure.getDataFolder().delete();
+            ss.delete(structure);
+            if (player != null) {
+                player.sendMessage(ChatColor.RED + "Failed to claim region for structure");
+            } else {
+                System.out.println("[SettlerCraft]: Failed to claim region for structure");
+            }
+
+            return null;
+        }
+
+        for (StructureListener sl : StructureAPI.getInstance().structureListeners) {
+            sl.onCreate(structure);
+        }
 
         return structure;
     }
 
+    public static StructureAPI getInstance() {
+        if (instance == null) {
+            instance = new StructureAPI();
+        }
+
+        return instance;
+    }
+
+    static void setState(final Structure structure, Structure.State newState) {
+        if (structure.getState() != newState) {
+            Bukkit.getPluginManager().callEvent(new StructureConstructionEvent(structure));
+            for (StructureListener listener : getInstance().structureListeners) {
+                listener.onStateChanged(structure, newState);
+            }
+            structure.setState(newState);
+            new StructureService().save(structure);
+        }
+    }
+
     /**
      * Builds a structure
+     *
      * @param uuid The uuid to backtrack this construction process
      * @param structure The structure
      * @return true if succesfully started to build
@@ -190,6 +263,7 @@ public class StructureAPI {
 
     /**
      * Builds a structure
+     *
      * @param player The player that issues the build order
      * @param structure The structure to build
      * @return true if succesfully started to build
@@ -200,6 +274,7 @@ public class StructureAPI {
 
     /**
      * Demolishes a structure
+     *
      * @param uuid The uuid to register the construction order (for asyncworldedit's api calls)
      * @param structure The structure
      * @return True if succesfully started to demolish the structure
@@ -235,6 +310,7 @@ public class StructureAPI {
 
     /**
      * Demolishes a structure
+     *
      * @param player The player to register the demolision oredr (for asyncwordedit api calls)
      * @param structure The structure
      * @return True if succesfully started to build
@@ -245,6 +321,7 @@ public class StructureAPI {
 
     /**
      * Stops construction of this structure
+     *
      * @param player The player to authorize the stop order
      * @param structure The structure
      * @return True if succesfully stopped
@@ -274,8 +351,10 @@ public class StructureAPI {
 
     /**
      * Stops construction of a structure (ignoring authorization)
+     *
      * @param structure The structure
-     * @throws ConstructionException if structure was removed or structure hasn't been tasked to construct
+     * @throws ConstructionException if structure was removed or structure hasn't been tasked to
+     * construct
      */
     public static void stop(Structure structure) throws ConstructionException {
         if (structure == null) {
@@ -338,12 +417,12 @@ public class StructureAPI {
         final String WORLD = structure.getWorldName();
         final long STRUCTURE_ID = structure.getId();
 
-        final File STRUCTURE_DIR = new File(getDataFolder(), WORLD + "//" + STRUCTURE_ID);
+        final File STRUCTURE_DIR = new File(getDataFolder(), WORLD + "//" + structure.getWorldUUID() + "//" + STRUCTURE_ID);
         if (!STRUCTURE_DIR.exists()) {
             STRUCTURE_DIR.mkdirs();
         }
 
-        File config = plan.getConfig();
+        File config = plan.getConfigXML();
         File schematic = plan.getSchematic();
 
         FileUtils.copyFile(config, new File(STRUCTURE_DIR, "Config.xml"));
@@ -356,6 +435,7 @@ public class StructureAPI {
 
     /**
      * Gets the datafolder for the StructureAPI or creates them if none exists
+     *
      * @return The datafolder
      */
     public static final File getDataFolder() {
@@ -373,12 +453,6 @@ public class StructureAPI {
         }
 
         World world = Bukkit.getWorld(structure.getWorldName());
-//        Vector pos = structure.getPosition();
-//        Cardinal cardinal = structure.getCardinal();
-//        
-//        Dimension dimension = SchematicUtil.calculateDimension(schematic, pos, cardinal);
-
-        //
         if (overlapsRegion(player, world, dimension)) {
             if (player != null) {
                 player.sendMessage(ChatColor.RED + "Structure overlaps an regions owned other players");
@@ -399,10 +473,31 @@ public class StructureAPI {
         ProtectedCuboidRegion region = new ProtectedCuboidRegion(id, new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
 
         // Set Flag
+        File config = structure.getConfig();
+        SAXReader reader = new SAXReader();
+        try {
+            Document d = reader.read(config);
+            List<Node> nodes = d.selectNodes(Nodes.WORLDGUARD_FLAG_NODE);
+            for (Node n : nodes) {
+                Flag f = DefaultFlag.fuzzyMatchFlag(n.selectSingleNode("Name").getText());
+                try {
+                    Object v = f.parseInput(WorldGuardPlugin.inst(), Bukkit.getConsoleSender(), n.selectSingleNode("Value").getText());
+                    region.setFlag(f, v);
+                } catch (InvalidFlagFormat ex) {
+                    System.out.println("Error in config File: " + config.getAbsolutePath());
+                    java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+                }
+            }
+
+        } catch (DocumentException ex) {
+            java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+
         // region.setFlags(ConfigProvider.getInstance().getDefaultFlags());
         if (player != null) {
             region.getOwners().addPlayer(player.getName());
         }
+
         mgr.addRegion(region);
         try {
             mgr.save();
@@ -415,7 +510,8 @@ public class StructureAPI {
     }
 
     /**
-     * Checks if the given dimension overlaps any structures. 
+     * Checks if the given dimension overlaps any structures.
+     *
      * @param world The world
      * @param dimension The dimension
      * @return True if dimension overlaps any structure
@@ -427,6 +523,7 @@ public class StructureAPI {
 
     /**
      * Checks if the dimension overlaps any (WorldGuard) region
+     *
      * @param world The world
      * @param dimension The dimension
      * @return True if dimension overlaps any region
@@ -437,6 +534,7 @@ public class StructureAPI {
 
     /**
      * Checks if the dimension overlaps any region which the target player does is not an owner of.
+     *
      * @param player The player
      * @param world The world
      * @param dimension The dimension
@@ -470,6 +568,7 @@ public class StructureAPI {
 
     /**
      * Sends the status of this structure to every online owner of this structure
+     *
      * @param structure The structure
      */
     public static void yellStatus(Structure structure) {
@@ -481,6 +580,7 @@ public class StructureAPI {
 
     /**
      * Sends the status of this structure to given player
+     *
      * @param structure The structure
      * @param player The player to tell
      */
@@ -522,6 +622,17 @@ public class StructureAPI {
                 throw new AssertionError("Unknown state: " + structure.getState());
         }
         player.sendMessage(statusString);
+    }
+    
+    private class PluginListener implements Listener {
+
+        @EventHandler
+        public void onReload(PluginDisableEvent disableEvent) {
+            if (disableEvent.getPlugin().getName().equals(StructureAPI.getPlugin().getName())) {
+                HibernateUtil.getSessionFactory().close();
+            }
+        }
+
     }
 
 }
