@@ -16,13 +16,15 @@
  */
 package com.sc.module.settlercraft.commands;
 
+import com.sc.module.menuapi.menus.menu.CategoryMenu;
 import com.sc.module.menuapi.menus.menu.util.ShopUtil;
 import com.sc.module.settlercraft.plugin.SettlerCraft;
-import com.sc.module.structureapi.persistence.StructureService;
-import com.sc.module.structureapi.structure.Structure;
 import com.sc.plugin.ConfigProvider;
 import com.sc.plugin.PermissionManager;
 import com.sc.plugin.SettlerCraftException;
+import com.sc.structureapi.persistence.StructureService;
+import com.sc.structureapi.structure.StructureAPIModule;
+import com.sc.structureapi.structure.entities.structure.Structure;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -76,14 +78,16 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         cs.sendMessage(ChatColor.RED + "Planmenu is disabled");
                         return true;
                     }
-                    if(SettlerCraft.getInstance().getPlanMenu() == null || !SettlerCraft.getInstance().getPlanMenu().isEnabled()) {
+                    CategoryMenu planmenu = StructureAPIModule.getInstance().getPlanMenu();
+                    
+                    if(planmenu == null || !planmenu.isEnabled()) {
                         cs.sendMessage(ChatColor.RED + " Planmenu is not enabled");
                         return true;
                     }
 
                     // HAS PERMISSION
                     if (args.length == 1) {
-                        SettlerCraft.getInstance().getPlanMenu().openMenu(player);
+                        planmenu.openMenu(player);
                         return true;
                     } else {
                         cs.sendMessage(ChatColor.RED + "Too many arguments!");

@@ -17,9 +17,9 @@
 package com.sc.module.settlercraft.commands;
 
 import com.sc.module.menuapi.menus.menu.util.ShopUtil;
-import com.sc.module.structureapi.persistence.StructureService;
-import com.sc.module.structureapi.structure.Structure;
-import com.sc.module.structureapi.util.WorldEditUtil;
+import com.sc.structureapi.persistence.StructureService;
+import com.sc.structureapi.structure.entities.structure.Structure;
+import com.sc.structureapi.util.WorldEditUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.util.Location;

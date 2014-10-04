@@ -17,9 +17,9 @@ package com.sc.module.settlercraft.commands;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import com.sc.module.settlercraft.plugin.SettlerCraft;
-import com.sc.module.structureapi.persistence.StructureService;
-import com.sc.module.structureapi.structure.Structure;
-import com.sc.module.structureapi.structure.StructureAPI;
+import com.sc.structureapi.persistence.StructureService;
+import com.sc.structureapi.structure.StructureAPI;
+import com.sc.structureapi.structure.entities.structure.Structure;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

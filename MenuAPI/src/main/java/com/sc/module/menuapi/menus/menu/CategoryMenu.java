@@ -368,6 +368,10 @@ public class CategoryMenu implements Listener {
             }
         }
     }
+    
+    public void clearItems() {
+        items.clear();
+    }
 
     public boolean hasSession(UUID session) {
         return sessions.containsKey(session);
