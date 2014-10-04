@@ -140,9 +140,10 @@ public class StructureAPI {
     /**
      * Demolishes a structure
      *
-     * @param player The player to register the demolision oredr (for asyncwordedit api calls)
+     * @param player The player to register the demolision order (for AsyncWorldEdit API calls)
+     * and authorize the order
      * @param structure The structure
-     * @return True if succesfully started to build
+     * @return True if successfully started to build
      */
     public static boolean demolish(Player player, Structure structure) {
         return demolish(player.getUniqueId(), structure);
@@ -153,7 +154,7 @@ public class StructureAPI {
      *
      * @param player The player to authorize the stop order
      * @param structure The structure
-     * @return True if succesfully stopped
+     * @return True if successfully stopped
      */
     public static boolean stop(Player player, Structure structure) {
         if (structure == null) {
@@ -198,7 +199,7 @@ public class StructureAPI {
 
     }
 
-    public void makeOwner(Player player, Structure structure) throws StructureException {
+    public static void makeOwner(Player player, Structure structure) throws StructureException {
         if (player == null) {
             throw new AssertionError("Null player");
         }
@@ -210,12 +211,29 @@ public class StructureAPI {
         if (structure.isOwner(player)) {
             throw new StructureException(ChatColor.RED + "Player: " + player.getName() + " is already owner");
         }
-        structure.addOwner(player);
-
-        service.save(structure);
+        
+         // WorldGuard
+        RegionManager rmgr =  WorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(structure.getWorldName()));
+        ProtectedRegion region = rmgr.getRegion(structure.getStructureRegion());
+        if(region == null) {
+            throw new StructureException(structure + ", doesnt have a region");
+        }
+        
+        LocalPlayer lp = WorldGuardUtil.getLocalPlayer(player);
+        if(!region.getOwners().contains(lp)) {
+            region.getOwners().addPlayer(lp);
+        }
+        try {
+            rmgr.save();
+              // StructureAPI
+            structure.addOwner(player);
+            service.save(structure);
+        } catch (ProtectionDatabaseException ex) {
+            java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
     }
 
-    public void makeMember(Player player, Structure structure) throws StructureException {
+    public static void makeMember(Player player, Structure structure) throws StructureException {
         if (player == null) {
             throw new AssertionError("Null player");
         }
@@ -227,12 +245,31 @@ public class StructureAPI {
         if (structure.isMember(player)) {
             throw new StructureException(ChatColor.RED + "Player: " + player.getName() + " is already owner");
         }
-        structure.addMember(player);
-
-        service.save(structure);
+        
+        // WorldGuard
+        RegionManager rmgr =  WorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(structure.getWorldName()));
+        ProtectedRegion region = rmgr.getRegion(structure.getStructureRegion());
+        if(region == null) {
+            throw new StructureException(structure + ", doesnt have a region");
+        }
+        
+        LocalPlayer lp = WorldGuardUtil.getLocalPlayer(player);
+        if(!region.getMembers().contains(lp)) {
+            region.getMembers().addPlayer(lp);
+        }
+        try {
+            rmgr.save();
+              // StructureAPI
+            structure.addMember(player);
+            service.save(structure);
+        } catch (ProtectionDatabaseException ex) {
+            java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        
+      
     }
 
-    public void removeOwner(Player player, Structure structure) throws StructureException {
+    public static void removeOwner(Player player, Structure structure) throws StructureException {
         if (player == null) {
             throw new AssertionError("Null player");
         }
@@ -244,12 +281,28 @@ public class StructureAPI {
         if (structure.isOwner(player)) {
             throw new StructureException(ChatColor.RED + "Player: " + player.getName() + " is already owner");
         }
-        structure.removeOwner(player);
-
-        service.save(structure);
+         // WorldGuard
+        RegionManager rmgr =  WorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(structure.getWorldName()));
+        ProtectedRegion region = rmgr.getRegion(structure.getStructureRegion());
+        if(region == null) {
+            throw new StructureException(structure + ", doesnt have a region");
+        }
+        
+        LocalPlayer lp = WorldGuardUtil.getLocalPlayer(player);
+        if(!region.getOwners().contains(lp)) {
+            region.getOwners().removePlayer(lp);
+        }
+        try {
+            rmgr.save();
+              // StructureAPI
+            structure.removeOwner(player);
+            service.save(structure);
+        } catch (ProtectionDatabaseException ex) {
+            java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
     }
 
-    public void removeMember(Player player, Structure structure) throws StructureException {
+    public static void removeMember(Player player, Structure structure) throws StructureException {
         if (player == null) {
             throw new AssertionError("Null player");
         }
@@ -261,7 +314,25 @@ public class StructureAPI {
         if (structure.isMember(player)) {
             throw new StructureException(ChatColor.RED + "Player: " + player.getName() + " is already owner");
         }
-        structure.removeMember(player);
+         // WorldGuard
+        RegionManager rmgr =  WorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(structure.getWorldName()));
+        ProtectedRegion region = rmgr.getRegion(structure.getStructureRegion());
+        if(region == null) {
+            throw new StructureException(structure + ", doesnt have a region");
+        }
+        
+        LocalPlayer lp = WorldGuardUtil.getLocalPlayer(player);
+        if(!region.getMembers().contains(lp)) {
+            region.getMembers().removePlayer(lp);
+        }
+        try {
+            rmgr.save();
+              // StructureAPI
+            structure.removeMember(player);
+            service.save(structure);
+        } catch (ProtectionDatabaseException ex) {
+            java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
 
         service.save(structure);
     }
@@ -304,7 +375,7 @@ public class StructureAPI {
                     Object v = f.parseInput(WorldGuardPlugin.inst(), Bukkit.getConsoleSender(), n.selectSingleNode("Value").getText());
                     region.setFlag(f, v);
                 } catch (InvalidFlagFormat ex) {
-                    System.out.println("Error in config File: " + config.getAbsolutePath());
+                    System.out.println("Error in xml file: " + config.getAbsolutePath());
                     java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
                 }
             }
