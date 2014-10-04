@@ -8,7 +8,7 @@ package com.sc.structureapi.persistence;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.structureapi.structure.entities.structure.PlayerMembership;
-import com.sc.structureapi.structure.QPlayerMembership;
+import com.sc.structureapi.structure.entities.structure.QPlayerMembership;
 import com.sc.structureapi.structure.entities.structure.Structure;
 import java.util.List;
 import org.bukkit.entity.Player;

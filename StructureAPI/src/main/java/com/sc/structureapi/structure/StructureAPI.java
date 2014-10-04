@@ -358,7 +358,7 @@ public class StructureAPI {
      * @param player The player
      * @param world The world
      * @param dimension The dimension
-     * @return True if dimensio overlaps any region the player is not an owner of.
+     * @return True if dimension overlaps any region the player is not an owner of.
      */
     public static boolean overlapsRegion(Player player, World world, Dimension dimension) {
         LocalPlayer localPlayer = null;

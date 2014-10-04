@@ -5,9 +5,9 @@
  */
 package com.sc.structureapi.structure.plan;
 
-import com.sc.structureapi.structure.plan.data.Elements;
 import com.sc.structureapi.exception.StructureDataException;
 import com.sc.structureapi.structure.StructureAPIModule;
+import com.sc.structureapi.structure.plan.data.Elements;
 import com.sc.structureapi.structure.schematic.SchematicManager;
 import com.sk89q.worldedit.data.DataException;
 import java.io.File;
@@ -61,7 +61,7 @@ public class StructurePlanManager {
      * Creates the Folders for StructurePlans and SchematicToPlan if they don't exist
      */
     
-    private void init() {
+    public void init() {
         File planFolder = new File(StructureAPIModule.getInstance().getDataFolder(), PLAN_FOLDER);
         if (!planFolder.exists()) {
             planFolder.mkdirs();
@@ -83,7 +83,6 @@ public class StructurePlanManager {
     }
 
     public void load(final Callback callback) {
-        init();
         plans.clear();
 
         String[] extensions = {"xml"};

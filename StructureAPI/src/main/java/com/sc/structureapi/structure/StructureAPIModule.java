@@ -11,6 +11,7 @@ import com.sc.module.menuapi.menus.menu.MenuAPI;
 import com.sc.structureapi.exception.StructureDataException;
 import com.sc.structureapi.listener.PlanListener;
 import com.sc.structureapi.persistence.HibernateUtil;
+import com.sc.structureapi.structure.entities.structure.QStructure;
 import com.sc.structureapi.structure.entities.structure.Structure;
 import com.sc.structureapi.structure.plan.StructurePlan;
 import com.sc.structureapi.structure.plan.StructurePlanItem;
@@ -47,7 +48,6 @@ public class StructureAPIModule implements Listener {
 
     private static final String MODULE_NAME = "StructureAPI";
     private static final String PLANSHOP_NAME = "Buy & Build";
-    private static final String PLAN_FOLDER = "Plans";
     private static final Logger STRUCTURE_API_LOG = Logger.getLogger(MODULE_NAME);
     private final String MAIN_PLUGIN_NAME = "SettlerCraft";
     private final Plugin MAIN_PLUGIN = Bukkit.getPluginManager().getPlugin(MAIN_PLUGIN_NAME);
@@ -74,8 +74,13 @@ public class StructureAPIModule implements Listener {
 
     public void initialize() {
         if (!initialized) {
+            
+            
             // Setup Menu
             setupMenu();
+
+            // Make dirs if needed
+            StructurePlanManager.getInstance().init();
 
             // Generate Plans in 'SchematicToPlan' Folder
             StructurePlanManager.getInstance().generate();
@@ -102,13 +107,10 @@ public class StructureAPIModule implements Listener {
                 overviewManager.init();
                 hologramManager.init();
             }
-            
-            
+
             initialized = true;
         }
     }
-    
-    
 
     /**
      * Loads structures from a directory
@@ -117,10 +119,7 @@ public class StructureAPIModule implements Listener {
      */
     private void loadPlans() {
         loadingplans = true;
-        File structureFolder = StructurePlanManager.getInstance().getPlanFolder();
-        if (!structureFolder.exists()) {
-            structureFolder.mkdirs();
-        }
+
         final long start = System.currentTimeMillis();
         StructurePlanManager.getInstance().load(new StructurePlanManager.Callback() {
 
@@ -142,12 +141,12 @@ public class StructureAPIModule implements Listener {
     /**
      * Reload the plans
      */
-    public synchronized void reload()  {
+    public synchronized void reload() {
         if (!loadingplans) {
             loadingplans = true;
             getPlanMenu().makeAllLeave();
             getPlanMenu().clearItems();
-            
+
             final long start = System.currentTimeMillis();
             StructurePlanManager.getInstance().load(new StructurePlanManager.Callback() {
 
@@ -157,7 +156,7 @@ public class StructureAPIModule implements Listener {
                     loadPlansIntoMenu();
                 }
             });
-        } 
+        }
     }
 
     public boolean isPlansLoaded() {
@@ -167,8 +166,8 @@ public class StructureAPIModule implements Listener {
     public boolean isLoadingplans() {
         return loadingplans;
     }
-    
-        /**
+
+    /**
      * Gets the datafolder for the StructureAPI or creates them if none exists
      *
      * @return The datafolder
@@ -180,7 +179,6 @@ public class StructureAPIModule implements Listener {
         }
         return structureDirectory;
     }
-    
 
     public CategoryMenu getPlanMenu() {
         return MenuAPI.getInstance().getMenu(MAIN_PLUGIN, PLANSHOP);
@@ -269,12 +267,12 @@ public class StructureAPIModule implements Listener {
 
     @EventHandler
     public void shutdown(PluginDisableEvent pde) {
-        if(pde.getPlugin().getName().equals(MAIN_PLUGIN_NAME)) {
-            Bukkit.getConsoleSender().sendMessage(ChatColor.GOLD + MODULE_NAME + ": " +  ChatColor.GRAY +" Shutting down...");
+        if (pde.getPlugin().getName().equals(MAIN_PLUGIN_NAME)) {
+            Bukkit.getConsoleSender().sendMessage(ChatColor.GOLD + MODULE_NAME + ": " + ChatColor.GRAY + " Shutting down...");
             shutdown();
         }
     }
-    
+
     public void shutdown() {
         AsyncStructureAPI.getInstance().shutdown();
         StructurePlanManager.getInstance().shutdown();
@@ -293,5 +291,7 @@ public class StructureAPIModule implements Listener {
     public Logger getLogger() {
         return STRUCTURE_API_LOG;
     }
+
+    
 
 }

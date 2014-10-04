@@ -8,7 +8,6 @@ package com.sc.structureapi.structure.plan;
 import com.sc.structureapi.exception.StructureDataException;
 import com.sc.structureapi.structure.plan.data.Nodes;
 import com.sc.structureapi.structure.plan.data.SettlerCraftElement;
-import com.sc.structureapi.structure.plan.StructurePlanManager;
 import com.sc.structureapi.structure.plan.holograms.StructureHologram;
 import com.sc.structureapi.structure.plan.holograms.StructureHologramLoader;
 import com.sc.structureapi.structure.plan.overview.StructureOverview;

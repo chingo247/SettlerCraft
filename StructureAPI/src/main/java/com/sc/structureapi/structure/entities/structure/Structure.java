@@ -24,7 +24,6 @@ import com.sc.structureapi.persistence.StructureService;
 import com.sc.structureapi.structure.StructureAPI;
 import static com.sc.structureapi.structure.StructureAPI.overlapsStructures;
 import com.sc.structureapi.structure.StructureAPIModule;
-import com.sc.structureapi.structure.plan.StructurePlan;
 import com.sc.structureapi.structure.entities.world.Dimension;
 import com.sc.structureapi.structure.entities.world.Direction;
 import static com.sc.structureapi.structure.entities.world.Direction.EAST;
@@ -32,6 +31,7 @@ import static com.sc.structureapi.structure.entities.world.Direction.NORTH;
 import static com.sc.structureapi.structure.entities.world.Direction.SOUTH;
 import static com.sc.structureapi.structure.entities.world.Direction.WEST;
 import com.sc.structureapi.structure.entities.world.Location;
+import com.sc.structureapi.structure.plan.StructurePlan;
 import com.sc.structureapi.structure.schematic.Schematic;
 import com.sc.structureapi.structure.schematic.SchematicManager;
 import com.sc.structureapi.util.SchematicUtil;
@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -174,7 +175,7 @@ public class Structure implements Serializable {
         this.logEntry = new StructureLog();
     }
 
-     /**
+    /**
      * Creates a structure.
      *
      * @param plan The StructurePlan
@@ -186,8 +187,7 @@ public class Structure implements Serializable {
     public static Structure create(StructurePlan plan, World world, Vector pos, Direction direction) {
         return create(null, plan, world, pos, direction);
     }
-    
-    
+
     /**
      * Creates a structure
      *
@@ -267,7 +267,7 @@ public class Structure implements Serializable {
         return structure;
     }
 
-        /**
+    /**
      * Gets the id of this structure
      *
      * @return The id
@@ -333,7 +333,7 @@ public class Structure implements Serializable {
         }
         return false;
     }
-    
+
     public boolean isMember(Player player) {
         for (PlayerOwnership pos : ownerships) {
             if (pos.getUUID().equals(player.getUniqueId())) {
@@ -352,15 +352,33 @@ public class Structure implements Serializable {
     }
 
     public boolean removeOwner(Player player) {
-        return ownerships.remove(new PlayerOwnership(player, this));
+        Iterator<PlayerOwnership> it = ownerships.iterator();
+        while (it.hasNext()) {
+            PlayerOwnership pm = it.next();
+            if (pm.getUUID().equals(player.getUniqueId())) {
+                it.remove();
+                return true;
+            }
+
+        }
+        return false;
     }
 
-    public boolean addMember(Player playerMember) {
-        return memberships.add(new PlayerMembership(playerMember.getUniqueId(), this));
+    public boolean addMember(Player player) {
+        return memberships.add(new PlayerMembership(player.getUniqueId(), this));
     }
 
     public boolean removeMember(Player playerMember) {
-        return memberships.remove(new PlayerMembership(playerMember.getUniqueId(), this));
+        Iterator<PlayerMembership> it = memberships.iterator();
+        while (it.hasNext()) {
+            PlayerMembership pm = it.next();
+            if (pm.getUUID().equals(playerMember.getUniqueId())) {
+                it.remove();
+                return true;
+            }
+
+        }
+        return false;
     }
 
     public void setPrice(Double refundValue) {
@@ -392,12 +410,12 @@ public class Structure implements Serializable {
     public org.bukkit.Location getLocation() {
         return new org.bukkit.Location(Bukkit.getWorld(location.getWorldName()), location.getX(), location.getY(), location.getZ());
     }
-    
+
     public String getWorldName() {
         return location.getWorldName();
     }
-    
-    public UUID getWorldUUID () {
+
+    public UUID getWorldUUID() {
         return location.getWorldUUID();
     }
 

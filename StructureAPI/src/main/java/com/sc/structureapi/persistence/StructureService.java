@@ -19,7 +19,7 @@ package com.sc.structureapi.persistence;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateDeleteClause;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.structureapi.structure.QStructure;
+import com.sc.structureapi.structure.entities.structure.QStructure;
 import com.sc.structureapi.structure.entities.structure.Structure;
 import com.sc.structureapi.structure.entities.structure.Structure.State;
 import com.sc.structureapi.structure.entities.world.Dimension;
