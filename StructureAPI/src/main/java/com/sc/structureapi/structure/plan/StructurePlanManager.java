@@ -7,6 +7,7 @@ package com.sc.structureapi.structure.plan;
 
 import com.sc.structureapi.exception.StructureDataException;
 import com.sc.structureapi.structure.StructureAPIModule;
+import com.sc.structureapi.structure.entities.structure.Structure;
 import com.sc.structureapi.structure.plan.data.Elements;
 import com.sc.structureapi.structure.schematic.SchematicManager;
 import com.sk89q.worldedit.data.DataException;
@@ -43,7 +44,9 @@ public class StructurePlanManager {
     public static final String SCHEMATIC_PLAN_FOLDER = "SchematicToPlan";
     private static StructurePlanManager instance;
     private final Map<String, StructurePlan> plans = new HashMap<>();
+    private final Map<Long, StructurePlan> structures = new HashMap<>();
     private final ExecutorService executor = Executors.newCachedThreadPool();
+    private boolean loading = false;
 
     /**
      * Gets the instance of this API
@@ -60,14 +63,13 @@ public class StructurePlanManager {
     /**
      * Creates the Folders for StructurePlans and SchematicToPlan if they don't exist
      */
-    
     public void init() {
-        File planFolder = new File(StructureAPIModule.getInstance().getDataFolder(), PLAN_FOLDER);
+        File planFolder = new File(StructureAPIModule.getInstance().getModuleFolder(), PLAN_FOLDER);
         if (!planFolder.exists()) {
             planFolder.mkdirs();
         }
 
-        File schematicToPlanFolder = new File(StructureAPIModule.getInstance().getDataFolder(), SCHEMATIC_PLAN_FOLDER);
+        File schematicToPlanFolder = new File(StructureAPIModule.getInstance().getModuleFolder(), SCHEMATIC_PLAN_FOLDER);
         if (!schematicToPlanFolder.exists()) {
             schematicToPlanFolder.mkdirs();
         }
@@ -79,69 +81,78 @@ public class StructurePlanManager {
      * @return The StructurePlan folder
      */
     public File getPlanFolder() {
-        return new File(StructureAPIModule.getInstance().getDataFolder(), PLAN_FOLDER);
+        return new File(StructureAPIModule.getInstance().getModuleFolder(), PLAN_FOLDER);
+    }
+    
+    public String getRelativePath(File config) {
+        String path = config.getAbsolutePath();
+        String minus = "\\plugins\\SettlerCraft\\StructureAPI\\";
+        path = path.substring(path.indexOf(minus) + minus.length());
+        int length = path.length();
+        path = path.substring(0, length - 4); // minus XML
+        return path;
     }
 
-    public void load(final Callback callback) {
-        plans.clear();
+    public synchronized void load(final Callback callback) {
+        if (!loading) {
+            loading = true;
+            plans.clear();
 
-        String[] extensions = {"xml"};
-        File planFolder = getPlanFolder();
+            String[] extensions = {"xml"};
+            File planFolder = getPlanFolder();
 
-        Iterator<File> it = FileUtils.iterateFiles(planFolder, extensions, true);
-        List<File> files = new LinkedList();
-        while (it.hasNext()) {
-            files.add(it.next());
-        }
+            Iterator<File> it = FileUtils.iterateFiles(planFolder, extensions, true);
+            List<File> files = new LinkedList();
+            while (it.hasNext()) {
+                files.add(it.next());
+            }
 
-        Iterator<File> fileIterator = files.iterator();
-        final int total = files.size();
-        final AtomicInteger count = new AtomicInteger(0);
+            Iterator<File> fileIterator = files.iterator();
+            final int total = files.size();
+            final AtomicInteger count = new AtomicInteger(0);
 
-        while (fileIterator.hasNext()) {
-            final File file = fileIterator.next();
-            executor.execute(new Runnable() {
+            while (fileIterator.hasNext()) {
+                final File file = fileIterator.next();
+                executor.execute(new Runnable() {
 
-                @Override
-                public void run() {
-                    try {
-                        // Load plan
-                        StructurePlan plan = new StructurePlan(file);
-                        plan.load();
+                    @Override
+                    public void run() {
+                        try {
+                            // Load plan
+                            StructurePlan plan = new StructurePlan(file);
+                            plan.load();
 
 //                      Load schematic if not loaded
-                        SchematicManager.getInstance().getSchematic(plan.getSchematic());
-                        put(plan);
-                    } catch (DocumentException | IOException ex) {
-                        Logger.getLogger(StructurePlanManager.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (DataException ex) {
-                        Logger.getLogger(StructurePlanManager.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (StructureDataException ex) {
-                        Logger.getLogger(StructurePlanManager.class.getName()).log(Level.SEVERE, null, ex);
-                    } finally {
-                        count.incrementAndGet();
-                        if (count.get() == total) {
-                            callback.onComplete();
-                            new Thread(new Runnable() {
+                            SchematicManager.getInstance().getSchematic(plan.getSchematic());
+                            putPlan(plan);
+                        } catch (DocumentException | IOException | DataException | StructureDataException ex) {
+                            Logger.getLogger(StructurePlanManager.class.getName()).log(Level.SEVERE, null, ex);
+                        } finally {
+                            count.incrementAndGet();
+                            if (count.get() == total) {
+                                callback.onComplete();
 
-                                @Override
-                                public void run() {
-                                    if (!executor.isShutdown()) {
-                                        executor.shutdownNow();
-                                        try {
-                                            executor.awaitTermination(1000, TimeUnit.MILLISECONDS);
-                                        } catch (InterruptedException ex) {
-                                            java.util.logging.Logger.getLogger(StructurePlanManager.class.getName()).log(Level.SEVERE, null, ex);
+                                new Thread(new Runnable() {
+
+                                    @Override
+                                    public void run() {
+                                        if (!executor.isShutdown()) {
+                                            executor.shutdownNow();
+                                            try {
+                                                executor.awaitTermination(1000, TimeUnit.MILLISECONDS);
+                                            } catch (InterruptedException ex) {
+                                                java.util.logging.Logger.getLogger(StructurePlanManager.class.getName()).log(Level.SEVERE, null, ex);
+                                            }
                                         }
+                                        loading = false;
                                     }
-                                }
-                            }).start();
+                                }).start();
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
         }
-
     }
 
     /**
@@ -150,18 +161,14 @@ public class StructurePlanManager {
     private StructurePlanManager() {
     }
 
-    public void clear() {
-        plans.clear();
-    }
-
     /**
      * Automatically generates structure plans in SchematicToPlan folder
      */
     public void generate() {
         // Scan the folder called 'SchematicToPlan' for schematic files
-        File schematicFolder = new File(StructureAPIModule.getInstance().getDataFolder(), SCHEMATIC_PLAN_FOLDER);
+        File schematicFolder = new File(StructureAPIModule.getInstance().getModuleFolder(), SCHEMATIC_PLAN_FOLDER);
         Iterator<File> it = FileUtils.iterateFiles(schematicFolder, new String[]{"schematic"}, true);
-        
+
         // Generate Plans
         while (it.hasNext()) {
             File schematic = it.next();
@@ -196,21 +203,12 @@ public class StructurePlanManager {
         }
     }
 
-    /**
-     * Automatically generates structure plans in target folder
-     *
-     * @param folder The target directory
-     */
-    public void generate(File folder) {
-        
-    }
-
-    private void put(StructurePlan plan) {
+    private void putPlan(StructurePlan plan) {
         if (plan == null) {
             throw new AssertionError("Plan was null");
         }
 
-        String path = plan.getRelativePath().substring(0, plan.getRelativePath().length() - 4);
+        String path = getRelativePath(plan.getConfigXML());
 
         plans.put(path, plan);
 
@@ -222,8 +220,29 @@ public class StructurePlanManager {
      * @param id The id of the plan
      * @return The structure plan with the corresponding id
      */
-    public StructurePlan get(String id) {
+    public StructurePlan getPlan(String id) {
         return plans.get(id);
+    }
+
+    public StructurePlan getPlan(Structure structure) throws StructureDataException, DocumentException {
+        StructurePlan plan = structures.get(structure.getId());
+        if (plan != null) {
+            return plan;
+        }
+        File config = structure.getConfig();
+        if (config == null) {
+            throw new StructureDataException("Missing 'StructurePlan.xml' for structure: " + structure);
+        }
+        
+        StructurePlan sp = new StructurePlan(config);
+        try {
+            sp.load();
+            structures.put(structure.getId(), plan);
+        } catch (IOException ex) {
+            Logger.getLogger(StructurePlanManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return sp;
+
     }
 
     /**

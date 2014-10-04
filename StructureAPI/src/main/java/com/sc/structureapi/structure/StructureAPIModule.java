@@ -8,9 +8,12 @@ package com.sc.structureapi.structure;
 import com.mysema.query.jpa.hibernate.HibernateUpdateClause;
 import com.sc.module.menuapi.menus.menu.CategoryMenu;
 import com.sc.module.menuapi.menus.menu.MenuAPI;
+import com.sc.structureapi.bukkit.ConfigProvider;
+import com.sc.structureapi.exception.StructureAPIException;
 import com.sc.structureapi.exception.StructureDataException;
 import com.sc.structureapi.listener.PlanListener;
 import com.sc.structureapi.persistence.HibernateUtil;
+import com.sc.structureapi.structure.construction.ConstructionManager;
 import com.sc.structureapi.structure.entities.structure.QStructure;
 import com.sc.structureapi.structure.entities.structure.Structure;
 import com.sc.structureapi.structure.plan.StructurePlan;
@@ -18,9 +21,11 @@ import com.sc.structureapi.structure.plan.StructurePlanItem;
 import com.sc.structureapi.structure.plan.StructurePlanManager;
 import com.sc.structureapi.structure.plan.holograms.StructureHologramManager;
 import com.sc.structureapi.structure.plan.overview.StructureOverviewManager;
+import com.sc.structureapi.util.FileUtil;
 import com.sk89q.worldedit.data.DataException;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -81,6 +86,16 @@ public class StructureAPIModule implements Listener {
 
             // Make dirs if needed
             StructurePlanManager.getInstance().init();
+//            getModuleFolder();
+            getStructureDataFolder(); // Creates module folder and Structure folder
+            writeResources();
+            
+            try {
+                // Load Config
+                ConfigProvider.getInstance().load();
+            } catch (StructureAPIException ex) {
+                Logger.getLogger(StructureAPIModule.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
             // Generate Plans in 'SchematicToPlan' Folder
             StructurePlanManager.getInstance().generate();
@@ -88,8 +103,9 @@ public class StructureAPIModule implements Listener {
             // Load Plans into menu
             loadPlans();
 
-            // Register listener for plans, so that plans can be used
+            // Register listeners
             Bukkit.getPluginManager().registerEvents(new PlanListener(), MAIN_PLUGIN);
+            Bukkit.getPluginManager().registerEvents(ConstructionManager.getInstance(), MAIN_PLUGIN);
 
             // Reset Structure states 
             setStates();
@@ -98,8 +114,8 @@ public class StructureAPIModule implements Listener {
             boolean useHolograms = MAIN_PLUGIN.getConfig().getBoolean("structure.use-holograms");
             Plugin plugin = Bukkit.getPluginManager().getPlugin("HolographicDisplays");
             if (useHolograms && plugin != null && plugin.isEnabled()) {
-                StructureOverviewManager overviewManager = new StructureOverviewManager();
-                StructureHologramManager hologramManager = new StructureHologramManager();
+                StructureOverviewManager overviewManager = StructureOverviewManager.getInstance();
+                StructureHologramManager hologramManager = StructureHologramManager.getInstance();
 
                 Bukkit.getPluginManager().registerEvents(overviewManager, plugin);
                 Bukkit.getPluginManager().registerEvents(hologramManager, plugin);
@@ -107,6 +123,9 @@ public class StructureAPIModule implements Listener {
                 overviewManager.init();
                 hologramManager.init();
             }
+
+            // IMPORTANT STUFF ON RELOAD! SHUTDOWN CONNECTIONS AND END THREADS!
+            Bukkit.getPluginManager().registerEvents(this, MAIN_PLUGIN);
 
             initialized = true;
         }
@@ -173,7 +192,7 @@ public class StructureAPIModule implements Listener {
      * @return The datafolder
      */
     public final File getStructureDataFolder() {
-        File structureDirectory = new File(MAIN_PLUGIN.getDataFolder(), "Data//Structures");
+        File structureDirectory = new File(getModuleFolder(), "Structures");
         if (!structureDirectory.exists()) {
             structureDirectory.mkdirs();
         }
@@ -268,7 +287,7 @@ public class StructureAPIModule implements Listener {
     @EventHandler
     public void shutdown(PluginDisableEvent pde) {
         if (pde.getPlugin().getName().equals(MAIN_PLUGIN_NAME)) {
-            Bukkit.getConsoleSender().sendMessage(ChatColor.GOLD + MODULE_NAME + ": " + ChatColor.GRAY + " Shutting down...");
+            Bukkit.getConsoleSender().sendMessage(ChatColor.GOLD + "[" + MODULE_NAME + "]: " + ChatColor.GRAY + " Shutting down...");
             shutdown();
         }
     }
@@ -279,7 +298,7 @@ public class StructureAPIModule implements Listener {
         HibernateUtil.shutdown();
     }
 
-    public File getDataFolder() {
+    public File getModuleFolder() {
         File dataFolder = new File(MAIN_PLUGIN.getDataFolder(), MODULE_NAME);
         if (!dataFolder.exists()) {
             dataFolder.mkdirs();
@@ -292,6 +311,16 @@ public class StructureAPIModule implements Listener {
         return STRUCTURE_API_LOG;
     }
 
+    private void writeResources() {
+        File config = new File(getModuleFolder(), "config.yml");
+
+        if (!config.exists()) {
+            InputStream i = this.getClass().getClassLoader().getResourceAsStream("structureapi/config.yml");
+            FileUtil.write(i, config);
+        }
+    }
+
+    
     
 
 }

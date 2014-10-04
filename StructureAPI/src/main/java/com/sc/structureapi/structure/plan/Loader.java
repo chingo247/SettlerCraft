@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.sc.structureapi.structure.plan.data;
+package com.sc.structureapi.structure.plan;
 
 import com.sc.structureapi.exception.StructureDataException;
 import java.io.File;

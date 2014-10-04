@@ -7,7 +7,7 @@ package com.sc.structureapi.structure.plan.holograms;
 
 import com.sc.structureapi.exception.StructureDataException;
 import com.sc.structureapi.structure.plan.data.Elements;
-import com.sc.structureapi.structure.plan.data.Loader;
+import com.sc.structureapi.structure.plan.Loader;
 import com.sc.structureapi.structure.plan.data.Nodes;
 import java.util.ArrayList;
 import java.util.List;

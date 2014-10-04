@@ -9,7 +9,7 @@ import com.sc.structureapi.exception.StructureDataException;
 import com.sc.structureapi.structure.plan.StructurePlan;
 import com.sc.structureapi.structure.plan.data.Elements;
 import com.sc.structureapi.structure.plan.data.Nodes;
-import com.sc.structureapi.structure.plan.data.Validator;
+import com.sc.structureapi.structure.plan.Validator;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.flags.Flag;

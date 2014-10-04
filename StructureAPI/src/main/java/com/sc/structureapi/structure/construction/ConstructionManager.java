@@ -5,15 +5,17 @@
  */
 package com.sc.structureapi.structure.construction;
 
+import com.sc.structureapi.bukkit.events.StructureStateChangeEvent;
 import com.sc.structureapi.exception.ConstructionException;
 import com.sc.structureapi.exception.StructureDataException;
 import com.sc.structureapi.persistence.StructureService;
-import com.sc.structureapi.structure.entities.structure.Structure;
-import com.sc.structureapi.structure.entities.structure.Structure.State;
 import com.sc.structureapi.structure.StructureAPI;
 import com.sc.structureapi.structure.StructureAPIModule;
 import com.sc.structureapi.structure.asyncworldedit.SCAsyncCuboidClipboard;
 import com.sc.structureapi.structure.asyncworldedit.SCJobEntry;
+import com.sc.structureapi.structure.entities.structure.Structure;
+import com.sc.structureapi.structure.entities.structure.Structure.State;
+import com.sc.structureapi.structure.entities.world.Direction;
 import com.sc.structureapi.structure.generator.ClipboardGenerator;
 import com.sc.structureapi.structure.schematic.Schematic;
 import com.sc.structureapi.structure.schematic.SchematicManager;
@@ -24,7 +26,6 @@ import com.sc.structureapi.structure.worldedit.StructureBlockComparators;
 import com.sc.structureapi.util.AsyncWorldEditUtil;
 import com.sc.structureapi.util.SchematicUtil;
 import com.sc.structureapi.util.WorldEditUtil;
-import com.sc.structureapi.structure.entities.world.Direction;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.LocalPlayer;
@@ -53,6 +54,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.dom4j.DocumentException;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
@@ -66,7 +69,7 @@ import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
  *
  * @author Chingo
  */
-public class ConstructionManager {
+public class ConstructionManager implements Listener {
 
     private final Map<Long, ConstructionEntry> constructionEntries = Collections.synchronizedMap(new HashMap<Long, ConstructionEntry>());
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -101,7 +104,6 @@ public class ConstructionManager {
                         constructionEntries.remove(structure.getId());
 
                         structure.setState(State.COMPLETE);
-                        StructureAPI.yellStatus(structure);
 
                         break;
                     }
@@ -312,7 +314,6 @@ public class ConstructionManager {
 
                     // Update status
                     structure.setState(State.QUEUED);
-                    StructureAPI.yellStatus(structure);
 
                     // Set state changeListener
                     entry.addStateChangedListener(new IJobEntryListener() {
@@ -321,7 +322,6 @@ public class ConstructionManager {
                         public void jobStateChanged(JobEntry bpje) {
                             if (bpje.getStatus() == JobEntry.JobStatus.PlacingBlocks) {
                                 structure.setState(State.BUILDING);
-                                StructureAPI.yellStatus(structure);
                             }
                         }
                     });
@@ -501,13 +501,13 @@ public class ConstructionManager {
         constructionEntries.put(structure.getId(), entry);
     }
 
-    private void performChecks(Structure structure, State desired) throws ConstructionException, StructureDataException {
+    private void performChecks(Structure structure, State newState) throws ConstructionException, StructureDataException {
         // Removed structures can't be tasked
         if (structure.getState() == State.REMOVED) {
             throw new ConstructionException("#" + structure.getId() + " can't be tasked, because it was removed");
         }
 
-        switch (desired) {
+        switch (newState) {
             case BUILDING:
                 // Structure has already stopped constructing
                 if (structure.getState() == State.BUILDING) {
@@ -576,7 +576,6 @@ public class ConstructionManager {
         StructureService structureService = new StructureService();
         structure.setState(State.STOPPED);
         structureService.save(structure);
-        StructureAPI.yellStatus(structure);
 
         // Reset data
         constructionEntries.get(structure.getId()).setDemolishing(false);
@@ -644,5 +643,10 @@ public class ConstructionManager {
         if (ply != null && ply.isOnline()) {
             ply.sendMessage(message);
         }
+    }
+    
+    @EventHandler
+    public void onStructureStateChange(StructureStateChangeEvent changeEvent) {
+        StructureAPI.yellStatus(changeEvent.getStructure());
     }
 }

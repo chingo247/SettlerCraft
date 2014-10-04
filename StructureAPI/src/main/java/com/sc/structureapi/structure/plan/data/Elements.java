@@ -21,6 +21,7 @@ public class Elements {
     public static final String PRICE = "Price";
     public static final String FACTION = "Faction";
     public static final String CATEGORY = "Category";
+    public static final String DEFAULT_HOLOGRAM = "DefaultHologram";
     public static final String STRUCTURE_OVERVIEW = "StructureOverview";
     public static final String STRUCTURE_OVERVIEWS = "StructureOverviews";
     public static final String STRUCTURE_HOLOGRAM = "StructureHologram";

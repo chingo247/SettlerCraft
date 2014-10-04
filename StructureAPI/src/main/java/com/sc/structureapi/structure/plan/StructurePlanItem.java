@@ -5,10 +5,10 @@
  */
 package com.sc.structureapi.structure.plan;
 
-import com.sc.structureapi.structure.plan.data.Nodes;
 import com.sc.module.menuapi.menus.menu.item.CategoryTradeItem;
 import com.sc.module.menuapi.menus.menu.util.ShopUtil;
 import com.sc.structureapi.exception.StructureDataException;
+import com.sc.structureapi.structure.plan.data.Nodes;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.data.DataException;
@@ -78,7 +78,7 @@ public class StructurePlanItem  implements CategoryTradeItem {
         
         
 
-        String path = plan.getRelativePath().substring(0, plan.getRelativePath().length() - 4);
+        String path = StructurePlanManager.getInstance().getRelativePath(cfg);
         String name;
         String category;
         String faction;

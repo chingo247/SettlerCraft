@@ -6,22 +6,33 @@ package com.sc.structureapi.structure.plan.overview;
  * and open the template in the editor.
  */
 import com.gmail.filoghost.holograms.api.Hologram;
+import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
+import com.sc.structureapi.bukkit.ConfigProvider;
+import com.sc.structureapi.bukkit.events.StructureCreateEvent;
+import com.sc.structureapi.bukkit.events.StructureStateChangeEvent;
+import com.sc.structureapi.exception.StructureDataException;
 import com.sc.structureapi.persistence.HibernateUtil;
-import com.sc.structureapi.structure.entities.structure.Structure;
-import com.sc.structureapi.structure.entities.structure.Structure.State;
 import com.sc.structureapi.structure.StructureAPIModule;
 import com.sc.structureapi.structure.entities.structure.QStructure;
+import com.sc.structureapi.structure.entities.structure.Structure;
+import com.sc.structureapi.structure.entities.structure.Structure.State;
+import com.sc.structureapi.structure.plan.StructurePlan;
+import com.sc.structureapi.structure.plan.StructurePlanManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
+import org.dom4j.DocumentException;
 import org.hibernate.Session;
 
 /**
@@ -30,11 +41,21 @@ import org.hibernate.Session;
  */
 public class StructureOverviewManager implements Listener {
 
-    private static final int STRUCTURE_ID_INDEX = 0;
-    private static final int STRUCTURE_PLAN_INDEX = 1;
+//    private static final int STRUCTURE_ID_INDEX = 0;
+//    private static final int STRUCTURE_NAME_INDEX = 1;
     private static final int STRUCTURE_STATUS_INDEX = 2;
     private static StructureOverviewManager instance;
     private final Map<Long, List<Hologram>> holograms = Collections.synchronizedMap(new HashMap<Long, List<Hologram>>());
+
+    private StructureOverviewManager() {
+    }
+
+    public static StructureOverviewManager getInstance() {
+        if (instance == null) {
+            instance = new StructureOverviewManager();
+        }
+        return instance;
+    }
 
     private synchronized void createHolograms(final Plugin plugin, final Structure structure) {
         // In case being executed asynchronously
@@ -45,38 +66,35 @@ public class StructureOverviewManager implements Listener {
                 if (holograms.get(structure.getId()) == null) {
                     holograms.put(structure.getId(), new ArrayList<Hologram>());
                 }
-//                try {
-//
-//                    Document d = new SAXReader().read(structure.getConfig());
-//                    List<StructureOverview> holograms = new StructureOverviewLoader().load(d);
-//
-//                    for (StructureOverview so : holograms) {
-//                        Hologram hologram = HolographicDisplaysAPI.createHologram(plugin, structure.translateRelativeLocation(sh., y, z),
-//                                ChatColor.GOLD + String.valueOf(structure.getId()),
-//                                ChatColor.BLUE + structure.getName(),
-//                                getStatusString(structure)
-//                        );
-//                    }
-//
-////                        List<Node> nodes = d.selectNodes(Nodes.STRUCTURE_OVERVIEW_NODE);
-////                        for (Node n : nodes) {
-////
-////                            int x = Integer.parseInt(n.selectSingleNode(Elements.X).getText());
-////                            int y = Integer.parseInt(n.selectSingleNode(Elements.Y).getText());
-////                            int z = Integer.parseInt(n.selectSingleNode(Elements.Z).getText());
-////
-////                            Hologram hologram = HolographicDisplaysAPI.createHologram(plugin, structure.translateRelativeLocation(x, y, z),
-////                                    ChatColor.GOLD + String.valueOf(structure.getId()),
-////                                    ChatColor.BLUE + structure.getName(),
-////                                    getStatusString(structure)
-////                            );
-////                            holograms.get(structure.getId()).add(hologram);
-////                        }
-//                } catch (DocumentException ex) {
-//                    Logger.getLogger(StructureOverviewManager.class.getName()).log(Level.SEVERE, null, ex);
-//                } catch (StructureDataException ex) {
-//                    Logger.getLogger(StructureOverviewManager.class.getName()).log(Level.SEVERE, null, ex);
-//                }
+                try {
+                    StructurePlan plan = StructurePlanManager.getInstance().getPlan(structure);
+                    List<StructureOverview> holos = plan.getOverviews();
+                    System.out.println("On Create structure");
+                    System.out.println("Empty: " + holos.isEmpty());
+                    System.out.println("Config: " + ConfigProvider.getInstance().hasDefaultHologramEnabled());
+                    System.out.println("Plan: " + plan.hasDefaultHologramEnabled());
+                    
+                    if (holos.isEmpty() && plan.hasDefaultHologramEnabled() && ConfigProvider.getInstance().hasDefaultHologramEnabled()) {
+                        Hologram hologram = HolographicDisplaysAPI.createHologram(plugin, structure.translateRelativeLocation(0, 2, 0),
+                                ChatColor.GOLD + String.valueOf(structure.getId()),
+                                ChatColor.BLUE + structure.getName(),
+                                getStatusString(structure)
+                        );
+                        holograms.get(structure.getId()).add(hologram);
+
+                    } else {
+                        for (StructureOverview so : holos) {
+                            Hologram hologram = HolographicDisplaysAPI.createHologram(plugin, structure.translateRelativeLocation(so.getX(), so.getY(), so.getZ()),
+                                    ChatColor.GOLD + String.valueOf(structure.getId()),
+                                    ChatColor.BLUE + structure.getName(),
+                                    getStatusString(structure)
+                            );
+                            holograms.get(structure.getId()).add(hologram);
+                        }
+                    }
+                } catch (DocumentException | StructureDataException ex) {
+                    Logger.getLogger(StructureOverviewManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
 
             }
         });
@@ -119,22 +137,15 @@ public class StructureOverviewManager implements Listener {
         return statusString;
     }
 
-    private synchronized void updateHolos(final Structure structure) {
-        //FIX For out of sync
-        Bukkit.getScheduler().scheduleSyncDelayedTask(StructureAPIModule.getInstance().getMainPlugin(), new Runnable() {
+    protected synchronized void updateHolos(final Structure structure) {
+        if (structure.getState() == State.REMOVED) {
+            removeHolos(structure);
+        }
 
-            @Override
-            public void run() {
-                if (structure.getState() == State.REMOVED) {
-                    removeHolos(structure);
-                }
-
-                for (Hologram holo : holograms.get(structure.getId())) {
-                    holo.setLine(STRUCTURE_STATUS_INDEX, getStatusString(structure));
-                    holo.update();
-                }
-            }
-        });
+        for (Hologram holo : holograms.get(structure.getId())) {
+            holo.setLine(STRUCTURE_STATUS_INDEX, getStatusString(structure));
+            holo.update();
+        }
     }
 
     public void init() {
@@ -142,22 +153,21 @@ public class StructureOverviewManager implements Listener {
         JPQLQuery query = new HibernateQuery(session);
         QStructure qs = QStructure.structure;
         final List<Structure> structures = query.from(qs).where(qs.state.ne(Structure.State.REMOVED)).list(qs);
+        session.close();
         for (Structure s : structures) {
-            onCreate(s);
+            createHolograms(StructureAPIModule.getInstance().getMainPlugin(), s);
         }
+
     }
 
-    public void onStateChanged(Structure structure, State newState) {
-        if (newState == State.REMOVED) {
-            removeHolos(structure);
-        } else if (structure.getState() != newState) {
-            updateHolos(structure);
-        }
+    @EventHandler
+    public void onStateChanged(StructureStateChangeEvent stateChangeEvent) {
+        updateHolos(stateChangeEvent.getStructure());
     }
 
-    
-    public void onCreate(Structure structure) {
-        createHolograms(StructureAPIModule.getInstance().getMainPlugin(), structure);
+    @EventHandler
+    public void onCreate(StructureCreateEvent createEvent) {
+        createHolograms(StructureAPIModule.getInstance().getMainPlugin(), createEvent.getStructure());
     }
 
 }

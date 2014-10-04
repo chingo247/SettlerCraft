@@ -26,6 +26,7 @@ public class Nodes {
     public static final String CATEGORY_NODE = STRUCTUREAPI_NODE + "/" + Elements.CATEGORY;
     public static final String FACTION_NODE = STRUCTUREAPI_NODE + "/" + Elements.FACTION;
     public static final String PRICE_NODE = STRUCTUREAPI_NODE + "/" + Elements.PRICE;
+    public static final String DEFAULT_HOLOGRAM_NODE = STRUCTUREAPI_NODE + "/" + Elements.DEFAULT_HOLOGRAM;
 
     // Entities
     public static final String STRUCTURE_OVERVIEWS_NODE = STRUCTUREAPI_NODE + "/" + Elements.STRUCTURE_OVERVIEWS;

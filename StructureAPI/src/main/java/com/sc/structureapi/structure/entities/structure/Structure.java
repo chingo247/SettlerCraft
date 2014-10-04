@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import com.sc.structureapi.bukkit.events.StructureCreateEvent;
 import com.sc.structureapi.bukkit.events.StructureStateChangeEvent;
 import com.sc.structureapi.exception.StructureDataException;
+import com.sc.structureapi.exception.StructureException;
 import com.sc.structureapi.persistence.StructureService;
 import com.sc.structureapi.structure.StructureAPI;
 import static com.sc.structureapi.structure.StructureAPI.overlapsStructures;
@@ -50,6 +51,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -228,7 +231,11 @@ public class Structure implements Serializable {
         structure.setStructureRegionId(PREFIX + structure.getId());
         structure = ss.save(structure);
         if (player != null) {
-            structure.addOwner(player);
+            try {
+                StructureAPI.makeOwner(player, structure);
+            } catch (StructureException ex) {
+                Logger.getLogger(Structure.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
         try {
@@ -240,7 +247,7 @@ public class Structure implements Serializable {
             File config = plan.getConfigXML();
             File schematicFile = plan.getSchematic();
 
-            FileUtils.copyFile(config, new File(STRUCTURE_DIR, "Config.xml"));
+            FileUtils.copyFile(config, new File(STRUCTURE_DIR, "StructurePlan.xml"));
             FileUtils.copyFile(schematicFile, new File(STRUCTURE_DIR, schematicFile.getName()));
         } catch (IOException ex) {
             if (player != null) {
@@ -305,7 +312,7 @@ public class Structure implements Serializable {
     }
 
     public File getConfig() {
-        return new File(getFolder(), "Config.xml");
+        return new File(getFolder(), "StructurePlan.xml");
     }
 
     public File getSchematicFile() throws StructureDataException, DocumentException, IOException {

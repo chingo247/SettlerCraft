@@ -78,7 +78,7 @@ public class PlanListener implements Listener {
 
         // Get plan ID
         String structurePlanId = StructurePlan.getPlanID(planstack);
-        final StructurePlan plan = StructurePlanManager.getInstance().get(structurePlanId);
+        final StructurePlan plan = StructurePlanManager.getInstance().getPlan(structurePlanId);
 
         // Check if plan is valid
         if (plan == null) {
@@ -126,7 +126,7 @@ public class PlanListener implements Listener {
     }
 
     /**
-     * Used to to get the secondary position when selecting. So that the green square is always at
+     * Used to to getPlan the secondary position when selecting. So that the green square is always at
      * the same place as the clicked block and the secondary always across.
      *
      * @param point1
@@ -153,7 +153,7 @@ public class PlanListener implements Listener {
     }
 
     /**
-     * Used to to get the secondary position when selecting. So that the green square is always at
+     * Used to to getPlan the secondary position when selecting. So that the green square is always at
      * the same place as the clicked block and the secondary always across.
      *
      * @param point1
@@ -191,8 +191,8 @@ public class PlanListener implements Listener {
 //            return false;
 //        }
 //        if (!WorldGuardUtil.canClaim(player)) {
-//            WorldConfiguration wcfg = WorldGuardUtil.getWorldGuard().getGlobalStateManager().get(player.getWorld());
-//            RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(player.getWorld());
+//            WorldConfiguration wcfg = WorldGuardUtil.getWorldGuard().getGlobalStateManager().getPlan(player.getWorld());
+//            RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().getPlan(player.getWorld());
 //            int plyMaxRegionCount = wcfg.getMaxRegionCount(player);
 //            int plyCurRegionCount = mgr.getRegionCountOfPlayer(WorldGuardUtil.getLocalPlayer(player));
 //            player.sendMessage(ChatColor.RED + " You have reached your region claim limit (" + plyCurRegionCount + "/" + plyMaxRegionCount + ")");

@@ -6,9 +6,9 @@
 
 package com.sc.structureapi.structure;
 
-import com.sc.structureapi.structure.plan.StructurePlan;
 import com.sc.structureapi.structure.entities.structure.Structure;
 import com.sc.structureapi.structure.entities.world.Direction;
+import com.sc.structureapi.structure.plan.StructurePlan;
 import com.sk89q.worldedit.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -39,6 +39,17 @@ public class AsyncStructureAPI {
             @Override
             public void run() {
                 Structure structure = Structure.create(player, plan, world, location, direction);
+                callback.onComplete(structure);
+            }
+        });
+    }
+    
+    public void create(final StructurePlan plan, final World world, final Vector location, final Direction direction, final StructureCallback callback) {
+        executor.execute(new Runnable() {
+
+            @Override
+            public void run() {
+                Structure structure = Structure.create(plan, world, location, direction);
                 callback.onComplete(structure);
             }
         });

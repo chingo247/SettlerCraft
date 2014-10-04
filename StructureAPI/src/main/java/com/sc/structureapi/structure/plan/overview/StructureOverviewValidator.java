@@ -9,7 +9,7 @@ package com.sc.structureapi.structure.plan.overview;
 import com.sc.structureapi.exception.StructureDataException;
 import com.sc.structureapi.structure.plan.data.Elements;
 import com.sc.structureapi.structure.plan.data.Nodes;
-import com.sc.structureapi.structure.plan.data.Validator;
+import com.sc.structureapi.structure.plan.Validator;
 import java.util.List;
 import org.dom4j.Element;
 import org.dom4j.Node;

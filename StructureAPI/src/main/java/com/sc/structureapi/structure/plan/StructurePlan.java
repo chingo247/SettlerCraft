@@ -5,22 +5,23 @@
  */
 package com.sc.structureapi.structure.plan;
 
+import com.sc.structureapi.bukkit.ConfigProvider;
 import com.sc.structureapi.exception.StructureDataException;
+import com.sc.structureapi.structure.plan.data.Elements;
 import com.sc.structureapi.structure.plan.data.Nodes;
 import com.sc.structureapi.structure.plan.data.SettlerCraftElement;
 import com.sc.structureapi.structure.plan.holograms.StructureHologram;
 import com.sc.structureapi.structure.plan.holograms.StructureHologramLoader;
 import com.sc.structureapi.structure.plan.overview.StructureOverview;
 import com.sc.structureapi.structure.plan.overview.StructureOverviewLoader;
-import com.sk89q.worldguard.protection.flags.Flag;
+import com.sc.structureapi.structure.plan.worldguard.StructureRegionFlag;
+import com.sc.structureapi.structure.plan.worldguard.StructureRegionFlagLoader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -46,11 +47,12 @@ public class StructurePlan {
     private String category = "Default";
     private String faction = "Default";
     private String description = "";
+    private boolean defaultHologram = true;
     private double price = 0.0d;
     private int startHeight;
-    private List<StructureOverview> overviews;
-    private List<StructureHologram> holograms;
-    private List<Flag> flags;
+    private List<StructureOverview> overviews = new ArrayList<>();
+    private List<StructureHologram> holograms = new ArrayList<>();
+    private List<StructureRegionFlag> flags = new ArrayList<>();
 
     private List<File> resources;
 
@@ -170,7 +172,9 @@ public class StructurePlan {
 
         faction = getValue(d, Nodes.FACTION_NODE, "Default");
 
-        description = getValue(d, Nodes.DESCRIPTION_NODE, "Default");
+        description = getValue(d, Nodes.DESCRIPTION_NODE, "-");
+        
+        defaultHologram = getBoolean(d, Nodes.DEFAULT_HOLOGRAM_NODE, ConfigProvider.getInstance().hasDefaultHologramEnabled());
 
         try {
             price = Double.parseDouble(getValue(d, Nodes.PRICE_NODE, "0.0"));
@@ -183,10 +187,34 @@ public class StructurePlan {
         if (d.selectSingleNode(Nodes.HOLOGRAMS_NODE) != null) {
             holograms = new StructureHologramLoader().load(d);
         }
+        if (d.selectSingleNode(Nodes.WORLDGUARD_FLAGS_NODE) != null) {
+            flags = new StructureRegionFlagLoader().load(d);
+        }
 
     }
 
-    private String getValue(Document d, String xPath, String defaultValue) throws StructureDataException {
+    public boolean hasDefaultHologramEnabled() {
+        return defaultHologram;
+    }
+    
+    
+    
+    private boolean getBoolean(Document d, String xPath, boolean defaultValue) throws StructureDataException {
+        Node n = d.selectSingleNode(xPath);
+        if (n == null || n.getText().trim().isEmpty()) {
+            return defaultValue;
+        }
+        if(n.getText().equalsIgnoreCase("true")) {
+            return true;
+        } else if(n.getText().equalsIgnoreCase("false")) {
+            return false;
+        } else {
+            throw new StructureDataException("Invalid value for '" + Elements.DEFAULT_HOLOGRAM + "', expected: 'true' or 'false' but got '"+n.getText()+"'");
+        }
+        
+    }
+
+    private String getValue(Document d, String xPath, String defaultValue) {
         Node n = d.selectSingleNode(xPath);
         if (n == null || n.getText().trim().isEmpty()) {
             return defaultValue;
@@ -208,31 +236,33 @@ public class StructurePlan {
         }
     }
 
-    public static void main(String... args) {
-
-        try {
-            StructurePlan plan = new StructurePlan(new File("E:\\GAMES\\MineCraftServers\\Bukkit 1.7.9\\plugins\\SettlerCraft\\Plans\\Arena\\Colosseum.xml"));
-            plan.load();
-//            plan.append(Nodes.STRUCTURE_OVERVIEWS_NODE, new StructureOverview(0, 2, 0));
-            List<StructureOverview> overviews = new ArrayList<>();
-            overviews.add(new StructureOverview(1, 1, 1));
-            overviews.add(new StructureOverview(1, 2, 1));
-            overviews.add(new StructureOverview(1, 1, 3));
-            plan.set(Nodes.STRUCTURE_OVERVIEWS_NODE, overviews);
-
-            plan.save();
-
-        } catch (DocumentException ex) {
-            Logger.getLogger(StructurePlan.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(StructurePlan.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (StructureDataException ex) {
-            Logger.getLogger(StructurePlan.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(StructurePlan.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
+//    public static void main(String... args) {
+//
+//        try {
+//            StructurePlan plan = new StructurePlan(new File("E:\\GAMES\\MineCraftServers\\Bukkit 1.7.9\\plugins\\SettlerCraft\\StructureAPI\\Plans\\Colosseum.xml"));
+//            
+//            
+//            plan.load();
+////            plan.append(Nodes.STRUCTURE_OVERVIEWS_NODE, new StructureOverview(0, 2, 0));
+//            List<StructureOverview> overviews = new ArrayList<>();
+//            overviews.add(new StructureOverview(1, 1, 1));
+//            overviews.add(new StructureOverview(1, 2, 1));
+//            overviews.add(new StructureOverview(1, 1, 3));
+//            plan.set(Nodes.STRUCTURE_OVERVIEWS_NODE, overviews);
+//
+//            plan.save();
+//
+//        } catch (DocumentException ex) {
+//            Logger.getLogger(StructurePlan.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (FileNotFoundException ex) {
+//            Logger.getLogger(StructurePlan.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (StructureDataException ex) {
+//            Logger.getLogger(StructurePlan.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (IOException ex) {
+//            Logger.getLogger(StructurePlan.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//
+//    }
 
     
 
@@ -288,15 +318,27 @@ public class StructurePlan {
         return startHeight;
     }
 
+    public List<StructureHologram> getHolograms() {
+        return holograms;
+    }
+
+    public List<StructureOverview> getOverviews() {
+        return overviews;
+    }
+
+    public List<StructureRegionFlag> getFlags() {
+        return flags;
+    }
+
+    public List<File> getResources() {
+        return resources;
+    }
+    
     public void setStartHeight(int startHeight) {
         this.startHeight = startHeight;
     }
     
-    public String getRelativePath() {
-        String basePath = StructurePlanManager.getInstance().getPlanFolder().getAbsolutePath();
-        return configXML.getAbsolutePath().substring(basePath.length() + 1);
-    }
-    
+
     
 
     public static boolean isStructurePlan(ItemStack itemStack) {

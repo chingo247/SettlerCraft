@@ -8,7 +8,7 @@ package com.sc.structureapi.structure.plan.worldguard;
 import com.sc.structureapi.exception.StructureDataException;
 import com.sc.structureapi.structure.plan.StructurePlan;
 import com.sc.structureapi.structure.plan.data.Elements;
-import com.sc.structureapi.structure.plan.data.Loader;
+import com.sc.structureapi.structure.plan.Loader;
 import com.sc.structureapi.structure.plan.data.Nodes;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
@@ -34,26 +34,26 @@ public class StructureRegionFlagLoader extends Loader<StructureRegionFlag> {
     }
 
     @Override
-    public List<StructureRegionFlag> load(Element e) throws StructureDataException {
-        if(!e.getName().equals(Elements.REGIONFLAGS)) {
-            throw new AssertionError("Expected element '"+Elements.REGIONFLAGS+"', but got '"+e.getName()+"'");
+    public List<StructureRegionFlag> load(Element regionFlagsElement) throws StructureDataException {
+        if(!regionFlagsElement.getName().equals(Elements.REGIONFLAGS)) {
+            throw new AssertionError("Expected element '"+Elements.REGIONFLAGS+"', but got '"+regionFlagsElement.getName()+"'");
         }
         
-        new StructureRegionFlagValidator().validate(e);
+        new StructureRegionFlagValidator().validate(regionFlagsElement);
         List<StructureRegionFlag> flags = new LinkedList<>();
         
-        Iterator<Node> it = e.selectNodes(Elements.REGIONFLAG).iterator();
+        Iterator<Node> it = regionFlagsElement.selectNodes(Elements.REGIONFLAG).iterator();
         while(it.hasNext()) {
             Node n = it.next();
             
             
-            Flag f = DefaultFlag.fuzzyMatchFlag(e.selectSingleNode(Elements.NAME).getText());
+            Flag f = DefaultFlag.fuzzyMatchFlag(n.selectSingleNode(Elements.NAME).getText());
             if (f == null) {
-                throw new StructureDataException("Flag '" + e.selectSingleNode(Elements.NAME).getText() + "' not recognized");
+                throw new StructureDataException("Flag '" + n.selectSingleNode(Elements.NAME).getText() + "' not recognized");
             }
 
             try {
-                Object v = f.parseInput(WorldGuardPlugin.inst(), Bukkit.getConsoleSender(), e.selectSingleNode(Elements.VALUE).getText());
+                Object v = f.parseInput(WorldGuardPlugin.inst(), Bukkit.getConsoleSender(), n.selectSingleNode(Elements.VALUE).getText());
                 System.out.println("Flag: " + f.getName() + " Value: " + v);
                 StructureRegionFlag regionFlag = new StructureRegionFlag(f, v);
                 flags.add(regionFlag);
@@ -61,12 +61,8 @@ public class StructureRegionFlagLoader extends Loader<StructureRegionFlag> {
             } catch (InvalidFlagFormat ex) {
                 Logger.getLogger(StructurePlan.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
-            
-            
         }
         return flags;
-        
     }
     
 }
