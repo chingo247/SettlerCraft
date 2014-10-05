@@ -18,9 +18,9 @@ package com.sc.module.settlercraft.commands;
 
 import com.sc.module.menuapi.menus.menu.CategoryMenu;
 import com.sc.module.menuapi.menus.menu.util.ShopUtil;
+import com.sc.module.settlercraft.plugin.PermissionManager;
 import com.sc.module.settlercraft.plugin.SettlerCraft;
 import com.sc.plugin.ConfigProvider;
-import com.sc.plugin.PermissionManager;
 import com.sc.plugin.SettlerCraftException;
 import com.sc.structureapi.persistence.StructureService;
 import com.sc.structureapi.structure.StructureAPIModule;

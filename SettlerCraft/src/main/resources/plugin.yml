@@ -1,6 +1,6 @@
 name: SettlerCraft
 main: com.sc.module.settlercraft.plugin.SettlerCraft
-version: 0.9.8
+version: 1.0-RC
 author: Chingo247
 description: Placing & building of  schematics / structures
 depend: [WorldEdit, AsyncWorldEdit, WorldGuard, HolographicDisplays]

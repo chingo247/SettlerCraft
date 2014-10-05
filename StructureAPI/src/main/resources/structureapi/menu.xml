@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+PlanMenu
+
+Categories for the planmenu will be defined here. 
+Note you can only customize the first 2 rows from top. 
+
+FirstRow: [1*][2 ][3 ][4 ][5 ][6 ][7 ][8 ][9 ]
+SecondRow:[10][11][12][13][14][15][16][17][18]
+
+Note slot [1*] is reserved for the 'Default' category, all plans that dont match any specific category 
+which are defined below will automatically be placed under the 'Default' category
+
+Each category has a Material ID of the item to use as icon. 
+Also each category has a Name which will be used as title for the item. Next to a name there are aliases.
+Aliases are not required. When a filter is applied the menu will check which plans have a matching category 
+or if the category of the plans have a match with one of the aliases of a category.
+
+    
+Note: 
+Because '&' is a keyword in XML, ' AND ' will be replaced with '&'
+A list of material id's can be found on the following website: http://minecraft-ids.grahamedgecombe.com/
+-->
+
+<Menu>
+    <SlotRow>
+        <Slot>
+            <MaterialID>58</MaterialID><!-- Crafting Table -->
+            <Category>General</Category>
+        </Slot>
+        <Slot>
+            <MaterialID>145</MaterialID><!-- Anvil -->
+            <Category>Industry</Category>
+            <Aliasses>
+                <Alias>Industrial</Alias>
+                <Alias>Industries</Alias>
+            </Aliasses>
+        </Slot>
+        <Slot>
+            <MaterialID>355</MaterialID><!-- Bed -->
+            <Category>Houses</Category>
+            <Aliasses>
+                <Alias>Residence</Alias>
+                <Alias>Residencial</Alias>
+                <Alias>Houses</Alias>
+                <Alias>House</Alias>
+            </Aliasses>
+        </Slot>
+        <Slot>
+            <MaterialID>266</MaterialID><!-- Gold Ingot -->
+            <Category>Economy</Category>
+            <Aliasses>
+                <Alias>Economical</Alias>
+                <Alias>Shops</Alias>
+                <Alias>Shop</Alias>
+                <Alias>Market</Alias>
+                <Alias>Markets</Alias>
+            </Aliasses>
+        </Slot>
+        <Slot>
+            <MaterialID>406</MaterialID><!-- Quartz -->
+            <Category>Temples</Category>
+            <Aliasses>
+                <Alias>Temple</Alias>
+                <Alias>Church</Alias>
+                <Alias>Sacred</Alias>
+                <Alias>Holy</Alias>
+            </Aliasses>
+        </Slot>
+        <Slot>
+            <MaterialID>98</MaterialID><!-- Stone Bricks -->
+            <Category>Fortifications</Category>
+            <Aliasses>
+                <Alias>Fort</Alias>
+                <Alias>Fortification</Alias>
+                <Alias>Wall</Alias>
+                <Alias>Fortress</Alias>
+                <Alias>Fortresses</Alias>
+                <Alias>Keep</Alias>
+                <Alias>Castle</Alias>
+                <Alias>Castles</Alias>
+                <Alias>Military</Alias>
+            </Aliasses>
+        </Slot>
+        <Slot>
+            <MaterialID>267</MaterialID><!-- Iron Sword -->
+            <Category>Dungeons AND Arenas</Category><!-- Because '&' is a keyword in XML, ' AND ' will be replaced with '&'-->
+            <Aliasses>
+                <Alias>Dungeons</Alias>
+                <Alias>Dungeon</Alias>
+                <Alias>Arena</Alias>
+                <Alias>Arenas</Alias>
+            </Aliasses>
+        </Slot>
+        <Slot>
+            <MaterialID>2264</MaterialID><!-- Disc -->
+            <Category>Misc</Category>
+        </Slot>
+    </SlotRow>
+    <SlotRow>
+        <!-- Room for more categories! (2 ROWS max) -->
+        <Slot></Slot>
+        <Slot></Slot>
+        <Slot></Slot>
+        <Slot></Slot>
+        <Slot></Slot>
+        <Slot></Slot>
+        <Slot></Slot>
+        <Slot></Slot>
+    </SlotRow>     
+</Menu>

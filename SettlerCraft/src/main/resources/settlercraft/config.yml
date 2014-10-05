@@ -1,23 +1,21 @@
 menus:
   #The menu for select plans for free
   planmenu: true
-  #The shop for buy plans (Using Vault)
+  #The shop for buy plans (Requires Vault!)
   planshop: true
   
 structure:
   # Refund percentage when the structure is demolished
-  refund: 0.5
+  # Value between 0 - 1.0
+  refund: 1.0 
   # Construction modes 
   # 0 Performance - Will travel through the structure in Cubes of 16xHeightx16
   # 1 Compromis - Will travel through the structure in Cubes of 32x32x32
-  # 2 Fancy - Will travel through the structure in Cubes of 32x16x32
+  # 2 Fancy - Will travel through the structure in Cubes of 32x16x32 - Looks most natural!
   mode:
       building: 0
       demolision: 0
   use-holograms: true
-
-      
-      
-
-      
-  
+  # Any flag from http://wiki.sk89q.com/wiki/WorldGuard/Regions/Flags to set by default when placing a structure
+  default-flags:
+    mob-spawning: deny

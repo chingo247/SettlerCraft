@@ -129,11 +129,15 @@ public class CategoryMenu implements Listener {
      * @param aliases The aliases for this category
      */
     public final void putCategorySlot(int slot, String category, Material icon, String... aliases) {
+        putCategorySlot(slot, category, icon, new Integer(0).byteValue(), title);
+    }
+    
+    public final void putCategorySlot(int slot, String category, Material icon, byte data, String aliases) {
         if (slot < 0 || slot > MENU_SIZE) {
             throw new IndexOutOfBoundsException("Slot is not in range of 0 - " + MENU_SIZE);
         }
 
-        CategorySlot c = new CategorySlot(category, icon);
+        CategorySlot c = new CategorySlot(category, icon, data);
         c.addAliases(aliases);
         // Add Category
         items.put(c, new ArrayList<TradeItem>());

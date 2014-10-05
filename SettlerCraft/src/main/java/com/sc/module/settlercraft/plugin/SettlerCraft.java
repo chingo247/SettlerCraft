@@ -8,12 +8,15 @@ package com.sc.module.settlercraft.plugin;
 import com.sc.module.settlercraft.commands.ConstructionCommandExecutor;
 import com.sc.module.settlercraft.commands.SettlerCraftCommandExecutor;
 import com.sc.module.settlercraft.commands.StructureCommandExecutor;
+import com.sc.module.settlercraft.plugin.PermissionManager.Perms;
 import com.sc.plugin.ConfigProvider;
-import com.sc.plugin.PermissionManager.Perms;
 import com.sc.plugin.SettlerCraftException;
 import com.sc.structureapi.structure.StructureAPIModule;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
@@ -64,7 +67,8 @@ public class SettlerCraft extends JavaPlugin {
             return;
         }
 
-        
+        // Write Changelog & Config if not exist!
+        writeResources();
         
         
 
@@ -122,7 +126,61 @@ public class SettlerCraft extends JavaPlugin {
 
 
 
-    
+    private void writeResources() {
+        File config = new File(getDataFolder(), "config.yml");
+        File changelog = new File(getDataFolder(), "changelog.txt");
+        
+        
+        if (!config.exists()) {
+            
+            InputStream i = this.getClassLoader().getResourceAsStream("settlercraft/config.yml");
+            System.out.println(i);
+            write(i, config);
+        }
+        if (!changelog.exists()) {
+            InputStream i = this.getClassLoader().getResourceAsStream("settlercraft/changelog.txt");
+            System.out.println(i);
+            write(i, changelog);
+        }
+    }
+
+    private void write(InputStream inputStream, File file) {
+        OutputStream outputStream = null;
+
+        try {
+
+            // write the inputStream to a FileOutputStream
+            outputStream  = new FileOutputStream(file);
+
+            int read = 0;
+            byte[] bytes = new byte[1024];
+
+            while ((read = inputStream.read(bytes)) != -1) {
+                outputStream.write(bytes, 0, read);
+            }
+
+
+        } catch (IOException e) {
+            Logger.getLogger(SettlerCraft.class).error(e.getMessage());
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    Logger.getLogger(SettlerCraft.class).error(e.getMessage());
+                }
+            }
+            if (outputStream != null) {
+                try {
+                    // outputStream.flush();
+                    outputStream.close();
+                } catch (IOException e) {
+                    Logger.getLogger(SettlerCraft.class).error(e.getMessage());
+                }
+
+            }
+        }
+    }
     
 
 

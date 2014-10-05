@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sc.plugin;
+package com.sc.module.settlercraft.plugin;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

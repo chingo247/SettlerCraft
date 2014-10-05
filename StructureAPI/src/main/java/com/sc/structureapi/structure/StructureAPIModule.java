@@ -37,7 +37,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
@@ -52,7 +51,7 @@ import org.hibernate.Session;
 public class StructureAPIModule implements Listener {
 
     private static final String MODULE_NAME = "StructureAPI";
-    private static final String PLANSHOP_NAME = "Buy & Build";
+    
     private static final Logger STRUCTURE_API_LOG = Logger.getLogger(MODULE_NAME);
     private final String MAIN_PLUGIN_NAME = "SettlerCraft";
     private final Plugin MAIN_PLUGIN = Bukkit.getPluginManager().getPlugin(MAIN_PLUGIN_NAME);
@@ -60,6 +59,7 @@ public class StructureAPIModule implements Listener {
     private boolean plansLoaded = false;
     private boolean loadingplans = false;
     private static StructureAPIModule instance;
+    
 
     private static UUID PLANSHOP;
 
@@ -81,8 +81,15 @@ public class StructureAPIModule implements Listener {
         if (!initialized) {
             
             
-            // Setup Menu
-            setupMenu();
+            try {
+                // Setup Menu
+                CategoryMenu menu = PlanMenuLoader.load();
+                PLANSHOP = menu.getId();
+                
+            } catch (DocumentException | StructureAPIException ex) {
+                Logger.getLogger(StructureAPIModule.class.getName()).log(Level.SEVERE, null, ex);
+                return;
+            }
 
             // Make dirs if needed
             StructurePlanManager.getInstance().init();
@@ -203,22 +210,7 @@ public class StructureAPIModule implements Listener {
         return MenuAPI.getInstance().getMenu(MAIN_PLUGIN, PLANSHOP);
     }
 
-    private void setupMenu() {
-        CategoryMenu planMenu = MenuAPI.createMenu(MAIN_PLUGIN, PLANSHOP_NAME, 54);
-        planMenu.putCategorySlot(1, "General", Material.WORKBENCH);
-        planMenu.putCategorySlot(2, "Industry", Material.ANVIL, "Industrial", "Industries");
-        planMenu.putCategorySlot(3, "Housing", Material.BED, "Residence", "Residencial", "Houses", "House");
-        planMenu.putCategorySlot(4, "Economy", Material.GOLD_INGOT, "Economical", "Shops", "Shop", "Market", "Markets");
-        planMenu.putCategorySlot(5, "Temples", Material.QUARTZ, "Temple", "Church", "Sacred", "Holy");
-        planMenu.putCategorySlot(6, "Fortifications", Material.SMOOTH_BRICK, "Fort", "Fortification", "Wall", "Fortress", "Fortresses", "Keep", "Castle", "Castles", "Military");
-        planMenu.putCategorySlot(7, "Dungeons&Arenas", Material.IRON_SWORD);
-        planMenu.putCategorySlot(8, "Misc", Material.BUCKET, "Misc");
-        planMenu.putActionSlot(9, "Previous", Material.COAL_BLOCK);
-        planMenu.putActionSlot(17, "Next", Material.COAL_BLOCK);
-        planMenu.putLocked(10, 11, 12, 13, 14, 15, 16);
 
-        PLANSHOP = planMenu.getId();
-    }
 
     private void loadPlansIntoMenu() {
         final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -319,6 +311,8 @@ public class StructureAPIModule implements Listener {
             FileUtil.write(i, config);
         }
     }
+    
+    
 
     
     

@@ -69,10 +69,6 @@ public class StructureOverviewManager implements Listener {
                 try {
                     StructurePlan plan = StructurePlanManager.getInstance().getPlan(structure);
                     List<StructureOverview> holos = plan.getOverviews();
-                    System.out.println("On Create structure");
-                    System.out.println("Empty: " + holos.isEmpty());
-                    System.out.println("Config: " + ConfigProvider.getInstance().hasDefaultHologramEnabled());
-                    System.out.println("Plan: " + plan.hasDefaultHologramEnabled());
                     
                     if (holos.isEmpty() && plan.hasDefaultHologramEnabled() && ConfigProvider.getInstance().hasDefaultHologramEnabled()) {
                         Hologram hologram = HolographicDisplaysAPI.createHologram(plugin, structure.translateRelativeLocation(0, 2, 0),

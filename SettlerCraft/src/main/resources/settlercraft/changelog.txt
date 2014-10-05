@@ -1,11 +1,23 @@
+1.0 - RC
+- Updated to Bukkit version 1.7.10
+- Added support for WorldEditCUI 1.7.10
+- Updated to AsyncWorldEdit 2.0-RC5
+- Updated to WorldEdit 6.0 Build #3301
+- Updated Vault to 1.7.10
+- Updated Holographic Displays 1.7.10
+- StructurePlans are now defined in XML
+- Schematics are loaded Asynchronously
+- StructureData (Schematic file & Config) are now saved to the filesystem 
+- Simplified Region Id's
+- Fixed issue of Torches placed against air
 
 0.9.8 Alpha
-- Added a new algorithm that increases performance for placing schematics, which comes in three flavours
+- Added a new algorithm that increases performance, which comes in three flavours
 - Fixed wrong feedback for trying to do something with a removed structure
 - Fixed Shift click for NON-worldeditCUI users
 - Added default flag node in Config
 
-0.9.5 Alpha 
+0.9.5
 - StructurePlans are loaded async on server startup
 - Improved performance for placing structures
 - Improved feedback for commands
@@ -24,6 +36,7 @@
 - Added hasSign node for plans
 - HoloSelection should dissapear when the player leaves
 - Loading of schematics during placement is now handled async
+- Added drawing structure to the left when holding shift
 
 
 0.9 Alhpa Release
