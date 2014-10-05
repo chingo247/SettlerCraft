@@ -86,7 +86,6 @@ public class PlanMenuLoader {
                 }
                 category = category.replaceAll(" AND ", "&");
                 
-                
 
                 String[] aliases;
                 if (ali == null) {
@@ -96,6 +95,7 @@ public class PlanMenuLoader {
                     aliases = new String[aliasNodes.size()];
                     for (int j = 0; j < aliasNodes.size(); j++) {
                         String alias = aliasNodes.get(j).getText();
+                        
                         if (alias.isEmpty()) {
                             Element aliasEl = (Element) cat;
                             alias = aliasEl.attributeValue("value");

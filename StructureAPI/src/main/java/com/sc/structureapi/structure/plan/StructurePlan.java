@@ -119,7 +119,7 @@ public class StructurePlan {
                 n = configDoc.selectSingleNode(xPathParent);
             }
             Element e = (Element) n;
-            System.out.println(e);
+//            System.out.println(e);
             e.add(element.asElement());
         }
     }

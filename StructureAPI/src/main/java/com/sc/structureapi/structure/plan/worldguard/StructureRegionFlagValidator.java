@@ -7,9 +7,9 @@ package com.sc.structureapi.structure.plan.worldguard;
 
 import com.sc.structureapi.exception.StructureDataException;
 import com.sc.structureapi.structure.plan.StructurePlan;
+import com.sc.structureapi.structure.plan.Validator;
 import com.sc.structureapi.structure.plan.data.Elements;
 import com.sc.structureapi.structure.plan.data.Nodes;
-import com.sc.structureapi.structure.plan.Validator;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.flags.Flag;
@@ -54,7 +54,7 @@ public class StructureRegionFlagValidator extends Validator {
 
             try {
                 Object v = f.parseInput(WorldGuardPlugin.inst(), Bukkit.getConsoleSender(), e.selectSingleNode("Value").getText());
-                System.out.println("Flag: " + f.getName() + " Value: " + v);
+//                System.out.println("Flag: " + f.getName() + " Value: " + v);
 
             } catch (InvalidFlagFormat ex) {
                 Logger.getLogger(StructurePlan.class.getName()).log(Level.SEVERE, null, ex);

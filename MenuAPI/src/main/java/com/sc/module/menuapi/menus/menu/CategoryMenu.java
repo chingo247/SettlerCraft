@@ -46,12 +46,13 @@ public class CategoryMenu implements Listener {
     private static final String ACTION_PREVIOUS = "Previous";
     private static final String ACTION_NEXT = "Next";
     private static final CategorySlot DEFAULT_CATEGORY = new CategorySlot("All", Material.NETHER_STAR);
-    private static final Comparator<TradeItem> TRADE_ITEM_NAME_COMPARATOR = new Comparator<TradeItem>() {
+    private static final Comparator<TradeItem> ALPHABETICAL = new Comparator<TradeItem>() {
         @Override
         public int compare(TradeItem o1, TradeItem o2) {
             return o1.getName().compareTo(o2.getName());
         }
     };
+    
 
     private final Map<CategorySlot, List<TradeItem>> items;
 
@@ -98,19 +99,8 @@ public class CategoryMenu implements Listener {
     }
 
     public void addItem(CategoryTradeItem item) {
-        CategorySlot newItemCategory = new CategorySlot(item.getCategory(), Material.AIR);
-        Iterator<CategorySlot> it = items.keySet().iterator();
-
-        while (it.hasNext()) {
-            CategorySlot cs = it.next();
-            if (cs.getName().equals(newItemCategory.getName()) || cs.hasAlias(newItemCategory.getName())) {
-                items.get(cs).add(item);
-                return; //  Found'm!
-            }
-        }
-        // Category wasn't found
-        // Add to default Category
-        items.get(DEFAULT_CATEGORY).add(item);
+        CategorySlot s = matchCategory(item.getCategory());
+        items.get(s).add(item);
     }
 
     public final void putCategorySlot(int slot, String category, Material icon) {
@@ -120,7 +110,7 @@ public class CategoryMenu implements Listener {
     /**
      * Adds a category to this menu. If category already exists, entry for this category will be
      * overwritten. All items related to this Category will be removed. If the slot was already
-     * inuse by another category. The slot will be overwrittenand the old category will be removed
+     * inuse by another category. The slot will be overwritten and the old category will be removed
      * as it's no longer available in the menu
      *
      * @param slot The inventory slot
@@ -129,13 +119,14 @@ public class CategoryMenu implements Listener {
      * @param aliases The aliases for this category
      */
     public final void putCategorySlot(int slot, String category, Material icon, String... aliases) {
-        putCategorySlot(slot, category, icon, new Integer(0).byteValue(), title);
+        putCategorySlot(slot, category, icon, new Integer(0).byteValue(), aliases);
     }
     
-    public final void putCategorySlot(int slot, String category, Material icon, byte data, String aliases) {
+    public final void putCategorySlot(int slot, String category, Material icon, byte data, String... aliases) {
         if (slot < 0 || slot > MENU_SIZE) {
             throw new IndexOutOfBoundsException("Slot is not in range of 0 - " + MENU_SIZE);
         }
+        
 
         CategorySlot c = new CategorySlot(category, icon, data);
         c.addAliases(aliases);
@@ -225,18 +216,20 @@ public class CategoryMenu implements Listener {
                     ActionSlot actionSlot = (ActionSlot) slot;
                     if (actionSlot.getAction().equals(ACTION_PREVIOUS)) {
                         if (hasPrev(player)) {
+                            
                             // Only computer scientists count from 0...
                             actionSlot.setLore(
                                     ChatColor.BLUE + "To Page " + ChatColor.GOLD + page,
-                                    ChatColor.BLUE + "Current Page " + ChatColor.GOLD + page + 1
+                                    ChatColor.BLUE + "Current Page " + ChatColor.GOLD + (page + 1)
                             );
                         } else {
                             actionSlot.setLore(
                                     ChatColor.BLUE + "To Page " + ChatColor.GOLD + " - ",
-                                    ChatColor.BLUE + "Current Page" + ChatColor.GOLD + page + 1
+                                    ChatColor.BLUE + "Current Page " + ChatColor.GOLD + (page + 1)
                             );
                         }
                     } else if (actionSlot.getAction().equals(ACTION_NEXT)) {
+                        
                         if (hasNext(player)) {
                             actionSlot.setLore(
                                     ChatColor.BLUE + "To Page " + ChatColor.GOLD + (page + 1 + 1),
@@ -245,7 +238,7 @@ public class CategoryMenu implements Listener {
                         } else {
                             actionSlot.setLore(
                                     ChatColor.BLUE + "To Page " + ChatColor.GOLD + " - ",
-                                    ChatColor.BLUE + "Current Page" + (page + 1)
+                                    ChatColor.BLUE + "Current Page " + ChatColor.GOLD + (page + 1)
                             );
                         }
                     }
@@ -268,6 +261,7 @@ public class CategoryMenu implements Listener {
         Session session = sessions.get(player.getUniqueId());
         Inventory inv = session.inventory;
         
+        
         // Get the new category
         final CategorySlot newCategory = matchCategory(category);
         
@@ -276,12 +270,14 @@ public class CategoryMenu implements Listener {
             return; // Nothing changed
         }
         
+        boolean forFree = session.forFree;
+        
         // Category has changed, reset page index
         if(!session.currentCategory.getName().equals(newCategory.getName()) 
                 && page == session.page) {
-            sessions.put(player.getUniqueId(), new Session(0, inv, newCategory));
+            sessions.put(player.getUniqueId(), new Session(0, inv, newCategory, forFree));
         } else {
-            sessions.put(player.getUniqueId(), new Session(page, inv, newCategory));
+            sessions.put(player.getUniqueId(), new Session(page, inv, newCategory, forFree));
         }
 
         // Clear previous session and create a new one
@@ -299,8 +295,15 @@ public class CategoryMenu implements Listener {
         for (int i = 0; i < MENU_SIZE && it.hasNext(); i++) {
             if (slots.get(i) == null) {
                 TradeItem ti = it.next();
-                newSession.items.put(i, ti);
-                inv.setItem(i, ti.getItemStack());
+                if(session.forFree) {
+                    TradeItem clone = ti.clone();
+                    clone.setPrice(0);
+                    session.items.put(i, clone);
+                    inv.setItem(i, clone.getItemStack());
+                } else {
+                    session.items.put(i, ti);
+                    inv.setItem(i, ti.getItemStack());
+                }
             }
         }
 
@@ -310,13 +313,14 @@ public class CategoryMenu implements Listener {
         player.updateInventory();
 
     }
-
-    public void openMenu(Player player) {
-
+    
+     public void openMenu(Player player, boolean forFree) {
+         
         // Guarantee new Session from here
         if (hasSession(player.getUniqueId())) {
             sessions.remove(player.getUniqueId());
         }
+        
 
         // Notify player's balance
         player.sendMessage(ChatColor.YELLOW + "[" + title + "]: " + ChatColor.RESET + "Hello " + ChatColor.GREEN + player.getName() + ChatColor.RESET + "!");
@@ -326,13 +330,15 @@ public class CategoryMenu implements Listener {
         } else {
             player.sendMessage(ChatColor.YELLOW + "[" + title + "]: " + ChatColor.RESET + " Your balance is " + ChatColor.RED + balance);
         }
+        
+        
 
         // Create a session for this player
         Inventory inv = Bukkit.createInventory(null, MENU_SIZE, title);
         final int currentPage = 0;
         final CategorySlot currentCategory = DEFAULT_CATEGORY;
 
-        Session session = new Session(currentPage, inv, currentCategory);
+        Session session = new Session(currentPage, inv, currentCategory, forFree);
         sessions.put(player.getUniqueId(), session);
 
         // Set ActionSlots & CategorySlots
@@ -345,8 +351,15 @@ public class CategoryMenu implements Listener {
         for (int i = 0; i < MENU_SIZE && it.hasNext(); i++) {
             if (slots.get(i) == null) {
                 TradeItem ti = it.next();
-                session.items.put(i, ti);
-                inv.setItem(i, ti.getItemStack());
+                if(forFree) {
+                    TradeItem clone = ti.clone();
+                    clone.setPrice(0);
+                    session.items.put(i, clone);
+                    inv.setItem(i, clone.getItemStack());
+                } else {
+                    session.items.put(i, ti);
+                    inv.setItem(i, ti.getItemStack());
+                }
             }
         }
 
@@ -355,6 +368,11 @@ public class CategoryMenu implements Listener {
         sessions.put(player.getUniqueId(), session);
 
         player.openInventory(inv);
+     }
+
+    public void openMenu(Player player) {
+        
+        openMenu(player, false);
     }
 
     public void leave(Player player) {
@@ -391,10 +409,12 @@ public class CategoryMenu implements Listener {
 
     private List<TradeItem> fetchItems(Player player, CategorySlot category, int page) {
         int maxItems = getFreeSlots();
-
+        
 
         List<TradeItem> tradeItems;
         if (!category.equals(DEFAULT_CATEGORY)) {
+            
+            
             tradeItems = items.get(category);
         } else {
             tradeItems = new ArrayList<>();
@@ -402,20 +422,28 @@ public class CategoryMenu implements Listener {
                 tradeItems.addAll(tis);
             }
         }
-
+        if(tradeItems == null) {
+            tradeItems = new ArrayList<>(0);
+        }
+        
+        
+        if(!tradeItems.isEmpty()) {
+            Collections.sort(tradeItems, ALPHABETICAL);
+        }
+        
         int min = Math.min(page * maxItems, tradeItems.size());
         int max = Math.min(min + maxItems, tradeItems.size());
-
+        
 
         List<TradeItem> pageItems = tradeItems.subList(min, max);
-        Collections.sort(pageItems, TRADE_ITEM_NAME_COMPARATOR);
+        
 
         return pageItems;
     }
 
     private boolean hasNext(Player player) {
         Session session = sessions.get(player.getUniqueId());
-        return !fetchItems(player, session.currentCategory, session.page + 1).isEmpty();
+        return !(fetchItems(player, session.currentCategory, session.page + 1).isEmpty());
     }
 
     private boolean hasPrev(Player player) {
@@ -439,11 +467,14 @@ public class CategoryMenu implements Listener {
         private Inventory inventory;
         private int page = 0;
         private Map<Integer, TradeItem> items;
+        private boolean forFree = false;
 
-        public Session(int currentPage, Inventory inventory, CategorySlot currentCategory) {
+        public Session(int currentPage, Inventory inventory, CategorySlot currentCategory, boolean forFree) {
             this.inventory = inventory;
             this.currentCategory = currentCategory;
             this.items = Maps.newHashMap();
+            this.page = currentPage;
+            this.forFree = forFree;
         }
 
     }
@@ -543,6 +574,7 @@ public class CategoryMenu implements Listener {
         if (this.plugin.getName().equals(disableEvent.getPlugin().getName())) {
             this.setEnabled(false);
             this.makeAllLeave();
+            this.clearItems();
         }
     }
     

@@ -234,7 +234,7 @@ public class ConstructionManager implements Listener {
         int placed = 0;
         while (queue.peek() != null) {
             if (placed == FENCE_BLOCK_PLACE_SPEED) {
-                System.out.println("Flush Queue");
+//                System.out.println("Flush Queue");
                 Bukkit.getScheduler().scheduleSyncDelayedTask(StructureAPIModule.getInstance().getMainPlugin(), new Runnable() {
 
                     @Override
@@ -249,13 +249,13 @@ public class ConstructionManager implements Listener {
                 });
 
                 try {
-                    System.out.println("Sleep!");
+//                    System.out.println("Sleep!");
                     Thread.sleep(TIME_OUT);
                     placed = 0;
                 } catch (InterruptedException ex) {
                     Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                System.out.println("Continue");
+//                System.out.println("Continue");
             }
 
             place.add(queue.poll());

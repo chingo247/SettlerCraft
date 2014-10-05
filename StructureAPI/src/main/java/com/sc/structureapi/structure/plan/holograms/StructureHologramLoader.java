@@ -6,8 +6,8 @@
 package com.sc.structureapi.structure.plan.holograms;
 
 import com.sc.structureapi.exception.StructureDataException;
-import com.sc.structureapi.structure.plan.data.Elements;
 import com.sc.structureapi.structure.plan.Loader;
+import com.sc.structureapi.structure.plan.data.Elements;
 import com.sc.structureapi.structure.plan.data.Nodes;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ public class StructureHologramLoader extends Loader<StructureHologram> {
             throw new AssertionError("Expected '" + Elements.STRUCTURE_HOLOGRAMS + "' element, but got '" + overviewsElement.getName() + "'");
         }
 
-        System.out.println("Loading");
+//        System.out.println("Loading");
 
         List<StructureHologram> holograms = new ArrayList<>();
         List<Node> hologramNodes = overviewsElement.selectNodes(Elements.STRUCTURE_OVERVIEW);

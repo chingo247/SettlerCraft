@@ -36,11 +36,12 @@ public class SettlerCraft extends JavaPlugin {
     private static SettlerCraft instance;
     private boolean plansLoaded = false;
 
-    public static final String MSG_PREFIX = ChatColor.GOLD + "[SettlerCraft]: ";
+    public static final String MSG_PREFIX = ChatColor.YELLOW + "[SettlerCraft]: ";
 
 
     @Override
     public void onEnable() {
+        
         
         instance = this;
 

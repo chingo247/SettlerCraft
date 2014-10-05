@@ -6,13 +6,15 @@
 package com.sc.structureapi.structure.plan;
 
 import com.sc.module.menuapi.menus.menu.item.CategoryTradeItem;
+import com.sc.module.menuapi.menus.menu.item.TradeItem;
 import com.sc.module.menuapi.menus.menu.util.ShopUtil;
 import com.sc.structureapi.exception.StructureDataException;
 import com.sc.structureapi.structure.plan.data.Nodes;
+import com.sc.structureapi.structure.schematic.Schematic;
+import com.sc.structureapi.structure.schematic.SchematicManager;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.data.DataException;
-import com.sk89q.worldedit.schematic.SchematicFormat;
 import com.sk89q.worldedit.util.Countable;
 import java.io.File;
 import java.io.IOException;
@@ -31,14 +33,14 @@ import org.dom4j.io.SAXReader;
  *
  * @author Chingo
  */
-public class StructurePlanItem  implements CategoryTradeItem {
+public class StructurePlanItem implements CategoryTradeItem {
 
     public final String path;
     public final String name;
     public final String category;
     public final String faction;
     public final String description;
-    public final double price;
+    public double price;
     public final int width;
     public final int height;
     public final int length;
@@ -61,22 +63,21 @@ public class StructurePlanItem  implements CategoryTradeItem {
         File cfg = plan.getConfigXML();
         File sch = plan.getSchematic();
 
-
         int width;
         int height;
         int length;
         int blocks;
 
-        CuboidClipboard clip = SchematicFormat.MCEDIT.load(sch);
-        width = clip.getWidth();
-        length = clip.getLength();
-        height = clip.getHeight();
-        blocks = getBlocks(clip);
+        Schematic schematic = SchematicManager.getInstance().getSchematic(sch);
 
+//        CuboidClipboard clip = SchematicFormat.MCEDIT.load(sch);
+        width = schematic.getWidth();
+        length = schematic.getLength();
+        height = schematic.getHeight();
+        blocks = schematic.getBlocks();
+        
         SAXReader reader = new SAXReader();
         Document config = reader.read(cfg);
-        
-        
 
         String path = StructurePlanManager.getInstance().getRelativePath(cfg);
         String name;
@@ -84,33 +85,33 @@ public class StructurePlanItem  implements CategoryTradeItem {
         String faction;
         String description;
         double price;
-        
-        
+
         Node nameNode = config.selectSingleNode(Nodes.NAME_NODE);
         Node categoryNode = config.selectSingleNode(Nodes.CATEGORY_NODE);
         Node factionNode = config.selectSingleNode(Nodes.FACTION_NODE);
         Node priceNode = config.selectSingleNode(Nodes.PRICE_NODE);
         Node descriptionNode = config.selectSingleNode(Nodes.DESCRIPTION_NODE);
-        
-        
-        if(nameNode == null) throw new StructureDataException("Missing name node for: " + cfg.getAbsolutePath());
+
+        if (nameNode == null) {
+            throw new StructureDataException("Missing name node for: " + cfg.getAbsolutePath());
+        }
         name = nameNode.getText();
-        
+
         category = categoryNode != null ? categoryNode.getText() : "All";
         faction = factionNode != null ? factionNode.getText() : "Default";
-        
+
         try {
             price = priceNode != null ? Double.parseDouble(priceNode.getText()) : 0d;
         } catch (NumberFormatException nfe) {
             throw new StructureDataException("Invalid price value for: " + cfg.getAbsolutePath());
         }
-        
-        if(descriptionNode != null) {
+
+        if (descriptionNode != null) {
             description = descriptionNode.getText();
         } else {
             description = null;
         }
-        
+
         StructurePlanItem item = new StructurePlanItem(path, name, category, faction, price, width, height, length, blocks, description);
         return item;
     }
@@ -142,33 +143,34 @@ public class StructurePlanItem  implements CategoryTradeItem {
     }
 
     @Override
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    @Override
     public ItemStack getItemStack() {
         ItemStack stack = new ItemStack(Material.PAPER);
         ItemMeta meta = stack.getItemMeta();
         meta.setDisplayName(name);
-        if(description == null) {
+
         meta.setLore(Arrays.asList(
-                "Price: " + ChatColor.GOLD + ShopUtil.valueString(price),
-                "Width: " + ChatColor.GOLD + width, 
-                "Length: " + ChatColor.GOLD + length,
-                "Height: " + ChatColor.GOLD + height,
-                "Blocks: " + ChatColor.GOLD + ShopUtil.valueString(blocks),
-                "Path: " + ChatColor.GOLD + path,
-                "Type: " + ChatColor.GOLD + "Plan"
-        ));
-        } else {
-            meta.setLore(Arrays.asList(
-                "Description: " + ChatColor.GOLD + description,
-                "Price: " + ChatColor.GOLD + ShopUtil.valueString(price),
-                "Width: " + ChatColor.GOLD + width, 
+                "Description: " + ((description == null || description.trim().isEmpty()) ? "-" : ChatColor.GOLD + description),
+                "Price: " + (price == 0 ? ChatColor.GOLD + "FREE" : ChatColor.GOLD + ShopUtil.valueString(price)),
+                "Width: " + ChatColor.GOLD + width,
                 "Length: " + ChatColor.GOLD + length,
                 "Height: " + ChatColor.GOLD + height,
                 "Blocks: " + ChatColor.GOLD + ShopUtil.valueString(blocks),
                 "Path: " + ChatColor.GOLD + path,
                 "Type: " + ChatColor.GOLD + "Plan"));
-        }
+
         stack.setItemMeta(meta);
         return stack;
+    }
+
+    @Override
+    public TradeItem clone() {
+        StructurePlanItem item = new StructurePlanItem(path, name, category, faction, price, width, height, length, blocks, description);
+        return item;
     }
 
 }

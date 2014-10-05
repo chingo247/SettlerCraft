@@ -43,8 +43,8 @@ public class CategorySlot extends Slot {
         aliases.add(alias);
     }
 
-    public void addAliases(String... aliases) {
-        this.aliases.addAll(Arrays.asList(aliases));
+    public void addAliases(String... alias) {
+        aliases.addAll(Arrays.asList(alias));
     }
 
     public boolean hasAlias(String alias) {

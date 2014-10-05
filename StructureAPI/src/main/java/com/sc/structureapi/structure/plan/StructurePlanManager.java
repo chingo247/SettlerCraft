@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -23,11 +24,11 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.bukkit.Bukkit;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
@@ -109,7 +110,10 @@ public class StructurePlanManager {
 
             Iterator<File> fileIterator = files.iterator();
             final int total = files.size();
-            final AtomicInteger count = new AtomicInteger(0);
+            final List<File> done = Collections.synchronizedList(new ArrayList<File>());
+            
+//            System.out.println("Total files: " + total);
+            
 
             while (fileIterator.hasNext()) {
                 final File file = fileIterator.next();
@@ -121,6 +125,7 @@ public class StructurePlanManager {
                             // Load plan
                             StructurePlan plan = new StructurePlan(file);
                             plan.load();
+                           
 
 //                      Load schematic if not loaded
                             SchematicManager.getInstance().getSchematic(plan.getSchematic());
@@ -128,10 +133,12 @@ public class StructurePlanManager {
                         } catch (DocumentException | IOException | DataException | StructureDataException ex) {
                             Logger.getLogger(StructurePlanManager.class.getName()).log(Level.SEVERE, null, ex);
                         } finally {
-                            count.incrementAndGet();
-                            if (count.get() == total) {
+                            done.add(file);
+                            int count = done.size();
+//                            System.out.println("Loaded ["+count+"]["+((count*100)/(total))+"%] " + file.getName());
+                            if (count == total) {
                                 callback.onComplete();
-
+//                                System.out.println("on complete: " + total);
                                 new Thread(new Runnable() {
 
                                     @Override
@@ -139,7 +146,7 @@ public class StructurePlanManager {
                                         if (!executor.isShutdown()) {
                                             executor.shutdownNow();
                                             try {
-                                                executor.awaitTermination(1000, TimeUnit.MILLISECONDS);
+                                                executor.awaitTermination(10, TimeUnit.MILLISECONDS);
                                             } catch (InterruptedException ex) {
                                                 java.util.logging.Logger.getLogger(StructurePlanManager.class.getName()).log(Level.SEVERE, null, ex);
                                             }
@@ -169,6 +176,9 @@ public class StructurePlanManager {
         File schematicFolder = new File(StructureAPIModule.getInstance().getModuleFolder(), SCHEMATIC_PLAN_FOLDER);
         Iterator<File> it = FileUtils.iterateFiles(schematicFolder, new String[]{"schematic"}, true);
 
+        int count = 0;
+        long start = System.currentTimeMillis();
+        
         // Generate Plans
         while (it.hasNext()) {
             File schematic = it.next();
@@ -199,8 +209,12 @@ public class StructurePlanManager {
             } catch (IOException | StructureDataException ex) {
                 Logger.getLogger(StructurePlanManager.class.getName()).log(Level.SEVERE, null, ex);
             }
-
+            count++;
         }
+        if(count > 0) {
+        Bukkit.getConsoleSender().sendMessage(StructureAPIModule.MSG_PREFIX + "Generated " + count + " plans in " + (System.currentTimeMillis() - start) + "ms");
+        }
+        
     }
 
     private void putPlan(StructurePlan plan) {

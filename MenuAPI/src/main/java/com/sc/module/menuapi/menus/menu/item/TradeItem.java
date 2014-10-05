@@ -12,14 +12,16 @@ import org.bukkit.inventory.ItemStack;
  *
  * @author Chingo
  */
-public interface TradeItem {
+public interface TradeItem extends Cloneable{
     
     public double getPrice();
+    
+    public void setPrice(double price);
     
     public String getName();
     
     public ItemStack getItemStack();
     
-    
+    public abstract TradeItem clone();
     
 }

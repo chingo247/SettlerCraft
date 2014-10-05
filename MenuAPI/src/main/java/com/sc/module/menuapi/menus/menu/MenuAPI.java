@@ -30,7 +30,7 @@ public class MenuAPI implements Listener {
     
     public static CategoryMenu createMenu(Plugin plugin, String name, int size) {
         if(plugin == null) {
-            throw new AssertionError("Null menu");
+            throw new AssertionError("Null plugin is null");
         }
         
         CategoryMenu menu = new CategoryMenu(name, size, plugin);

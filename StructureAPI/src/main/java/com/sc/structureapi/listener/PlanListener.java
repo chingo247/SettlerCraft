@@ -19,10 +19,10 @@ package com.sc.structureapi.listener;
 import com.sc.structureapi.bukkit.PermissionManager;
 import com.sc.structureapi.structure.AsyncStructureAPI;
 import com.sc.structureapi.structure.StructureAPI;
-import com.sc.structureapi.structure.plan.StructurePlan;
 import com.sc.structureapi.structure.entities.structure.Structure;
 import com.sc.structureapi.structure.entities.world.Dimension;
 import com.sc.structureapi.structure.entities.world.Direction;
+import com.sc.structureapi.structure.plan.StructurePlan;
 import com.sc.structureapi.structure.plan.StructurePlanManager;
 import com.sc.structureapi.structure.schematic.Schematic;
 import com.sc.structureapi.structure.schematic.SchematicManager;
@@ -104,7 +104,6 @@ public class PlanListener implements Listener {
             return; // Deselected & Done
         }
 
-        System.out.println("Action: " + pie.getAction());
 
         try {
             if (!SchematicManager.getInstance().hasSchematic(plan)) {
@@ -325,12 +324,10 @@ public class PlanListener implements Listener {
          * Haven't selected before
          */
         if (!session.getRegionSelector(localPlayer.getWorld()).isDefined()) {
-            System.out.println("NEW SELECTION");
             CUISelectionManager.getInstance().select(player, schematic, pos1, pos2);
             player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
             player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
         } else if (CUISelectionManager.getInstance().matchesSelection(player, schematic, pos1, pos2)) {
-            System.out.println("MATCHES OLD");
             if (toLeft) {
                 // Fix WTF HOW?!!1?
                 pos1 = WorldUtil.translateLocation(pos1, direction, (-(schematic.getLength() - 1)), 0, 0);
@@ -347,7 +344,6 @@ public class PlanListener implements Listener {
                 }
             });
         } else {
-            System.out.println("DOESNT MATCH, NEW SELECTION");
             CUISelectionManager.getInstance().select(player, schematic, pos1, pos2);
             if (canPlace(player, pos1, direction, schematic)) {
                 player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
@@ -375,12 +371,10 @@ public class PlanListener implements Listener {
          * Haven't selected before
          */
         if (!SelectionManager.getInstance().hasSelection(player)) {
-            System.out.println("NEW SELECTION");
             SelectionManager.getInstance().select(player, schematic, pos1, pos2, toLeft);
             player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
             player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
         } else if (SelectionManager.getInstance().matchesSelection(player, schematic, pos1, pos2)) {
-            System.out.println("MATCHES OLD");
             if (toLeft) {
                 // Fix WTF HOW?!!1?
                 pos1 = WorldUtil.translateLocation(pos1, direction, (-(schematic.getLength() - 1)), 0, 0);
@@ -399,7 +393,6 @@ public class PlanListener implements Listener {
                 });
             }
         } else {
-            System.out.println("DOESNT MATCH, NEW SELECTION");
             SelectionManager.getInstance().clear(player, false);
             SelectionManager.getInstance().select(player, schematic, pos1, pos2, toLeft);
             if (canPlace(player, pos1, direction, schematic)) {

@@ -29,10 +29,6 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
@@ -51,15 +47,14 @@ import org.hibernate.Session;
 public class StructureAPIModule implements Listener {
 
     private static final String MODULE_NAME = "StructureAPI";
-    
     private static final Logger STRUCTURE_API_LOG = Logger.getLogger(MODULE_NAME);
-    private final String MAIN_PLUGIN_NAME = "SettlerCraft";
+    private static final String MAIN_PLUGIN_NAME = "SettlerCraft";
+    public static final String MSG_PREFIX = ChatColor.YELLOW + "[" + MAIN_PLUGIN_NAME + "]" + ChatColor.GOLD + "[" + MODULE_NAME + "]: " + ChatColor.RESET;
     private final Plugin MAIN_PLUGIN = Bukkit.getPluginManager().getPlugin(MAIN_PLUGIN_NAME);
     private boolean initialized = false;
     private boolean plansLoaded = false;
     private boolean loadingplans = false;
     private static StructureAPIModule instance;
-    
 
     private static UUID PLANSHOP;
 
@@ -79,13 +74,12 @@ public class StructureAPIModule implements Listener {
 
     public void initialize() {
         if (!initialized) {
-            
-            
+
             try {
                 // Setup Menu
                 CategoryMenu menu = PlanMenuLoader.load();
                 PLANSHOP = menu.getId();
-                
+
             } catch (DocumentException | StructureAPIException ex) {
                 Logger.getLogger(StructureAPIModule.class.getName()).log(Level.SEVERE, null, ex);
                 return;
@@ -96,7 +90,7 @@ public class StructureAPIModule implements Listener {
 //            getModuleFolder();
             getStructureDataFolder(); // Creates module folder and Structure folder
             writeResources();
-            
+
             try {
                 // Load Config
                 ConfigProvider.getInstance().load();
@@ -151,12 +145,10 @@ public class StructureAPIModule implements Listener {
 
             @Override
             public void onComplete() {
-                plansLoaded = true;
-                Bukkit.broadcastMessage(ChatColor.GOLD + "[SettlerCraft]: " + ChatColor.WHITE + "Structure plans loaded");
+                Bukkit.broadcastMessage(MSG_PREFIX + ChatColor.WHITE + "Structure plans loaded");
 
-                long end = System.currentTimeMillis();
-
-                Bukkit.getConsoleSender().sendMessage(ChatColor.GOLD + "[SettlerCraft]: " + ChatColor.GRAY + "Plans loaded in " + (end - start) + "ms");
+                int plans = StructurePlanManager.getInstance().getPlans().size();
+                Bukkit.getConsoleSender().sendMessage(MSG_PREFIX + plans + " plans loaded in " + (System.currentTimeMillis() - start) + "ms");
 
                 loadPlansIntoMenu();
 
@@ -178,7 +170,8 @@ public class StructureAPIModule implements Listener {
 
                 @Override
                 public void onComplete() {
-                    Bukkit.getConsoleSender().sendMessage(ChatColor.GOLD + "[SettlerCraft]: " + ChatColor.GRAY + "Plans loaded in " + (System.currentTimeMillis() - start) + "ms");
+                    int plans = StructurePlanManager.getInstance().getPlans().size();
+                    Bukkit.getConsoleSender().sendMessage(MSG_PREFIX + plans + " plans loaded in " + (System.currentTimeMillis() - start) + "ms");
                     loadPlansIntoMenu();
                 }
             });
@@ -210,60 +203,56 @@ public class StructureAPIModule implements Listener {
         return MenuAPI.getInstance().getMenu(MAIN_PLUGIN, PLANSHOP);
     }
 
-
-
     private void loadPlansIntoMenu() {
-        final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         final List<StructurePlan> plans = StructurePlanManager.getInstance().getPlans();
-        final int total = plans.size();
         final Iterator<StructurePlan> planIterator = plans.iterator();
-        final AtomicInteger count = new AtomicInteger(0);
         final CategoryMenu planMenu = getInstance().getPlanMenu();
+
 
         final long start = System.currentTimeMillis();
 
         while (planIterator.hasNext()) {
             final StructurePlan plan = planIterator.next();
 
-            executor.submit(new Runnable() {
+//            executor.submit(new Runnable() {
+//
+//                @Override
+//                public void run() {
+            try {
+                // Add item to planmenu
+                StructurePlanItem planItem = StructurePlanItem.load(plan);
+                planMenu.addItem(planItem);
+            } catch (IOException | DataException | DocumentException | StructureDataException ex) {
+//                        java.util.logging.Logger.getLogger(StructureAPIModule.class.getName()).log(Level.SEVERE, null, ex);
+//                    } finally {
+                // Enable planmenu if this was the last item
+//                        count.incrementAndGet();
+                
+//                        if (count.intValue() == total) {
 
-                @Override
-                public void run() {
-                    try {
-                        // Add item to planmenu
-                        StructurePlanItem planItem = StructurePlanItem.load(plan);
-                        planMenu.addItem(planItem);
-                    } catch (IOException | DataException | DocumentException | StructureDataException ex) {
-                        java.util.logging.Logger.getLogger(StructureAPIModule.class.getName()).log(Level.SEVERE, null, ex);
-                    } finally {
-                        count.incrementAndGet();
-                        // Enable planmenu if this was the last item
-                        if (count.incrementAndGet() == total) {
-                            planMenu.setEnabled(true);
-                            getInstance().plansLoaded = true;
-                            getInstance().loadingplans = false;
-
-                            Bukkit.getConsoleSender().sendMessage(ChatColor.GOLD + "[SettlerCraft]: " + ChatColor.GRAY + "Items loaded in " + (System.currentTimeMillis() - start) + "ms");
-
-                            new Thread(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    executor.shutdownNow();
-                                    try {
-                                        executor.awaitTermination(1000, TimeUnit.MILLISECONDS);
-                                    } catch (InterruptedException ex) {
-                                        java.util.logging.Logger.getLogger(StructureAPIModule.class.getName()).log(Level.SEVERE, null, ex);
-                                    }
-                                }
-                            }).start();
-
-                        }
-                    }
-                }
-            });
-
+//                new Thread(new Runnable() {
+//
+//                    @Override
+//                    public void run() {
+//                        executor.shutdownNow();
+//                        try {
+//                            executor.awaitTermination(10, TimeUnit.MILLISECONDS);
+//                        } catch (InterruptedException ex) {
+//                            java.util.logging.Logger.getLogger(StructureAPIModule.class.getName()).log(Level.SEVERE, null, ex);
+//                        }
+//                    }
+//                }).start();
+            }
         }
+        planMenu.setEnabled(true);
+        getInstance().plansLoaded = true;
+        getInstance().loadingplans = false;
+
+        Bukkit.getConsoleSender().sendMessage(MSG_PREFIX + "PlanMenu loaded in " + (System.currentTimeMillis() - start) + "ms");
+
+//                }
+//            });
+//        }
     }
 
     private void setStates() {
@@ -311,10 +300,5 @@ public class StructureAPIModule implements Listener {
             FileUtil.write(i, config);
         }
     }
-    
-    
-
-    
-    
 
 }

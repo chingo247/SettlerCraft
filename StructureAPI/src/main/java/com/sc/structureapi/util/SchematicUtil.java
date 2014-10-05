@@ -5,9 +5,9 @@
  */
 package com.sc.structureapi.util;
 
-import com.sc.structureapi.structure.schematic.Schematic;
-import com.sc.structureapi.structure.entities.world.Direction;
 import com.sc.structureapi.structure.entities.world.Dimension;
+import com.sc.structureapi.structure.entities.world.Direction;
+import com.sc.structureapi.structure.schematic.Schematic;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
@@ -103,10 +103,10 @@ public class SchematicUtil {
             if (b.getID().isAir() && noAir) {
                 continue;
             }
-            System.out.println(b.getID() + ":" + b.getAmount());
+//            System.out.println(b.getID() + ":" + b.getAmount());
             count += b.getAmount();
         }
-        System.out.println("Total: " + count);
+//        System.out.println("Total: " + count);
         return count;
     }
 

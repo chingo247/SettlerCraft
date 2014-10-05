@@ -16,6 +16,7 @@
  */
 package com.sc.structureapi.structure.schematic;
 
+import com.sc.structureapi.util.SchematicUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.data.DataException;
@@ -37,17 +38,23 @@ public class Schematic implements Serializable, Cloneable {
     private final int s_height;
     private final int s_width;
     private final CuboidClipboard clipboard;
+    private final int blocks;
 
-    private Schematic(CuboidClipboard clipboard, int width, int height, int length, long checksum) throws IOException {
+    private Schematic(CuboidClipboard clipboard, int width, int height, int length, long checksum, int blocks) throws IOException {
         this.checkSum = checksum;
         this.clipboard = clipboard;
         this.s_width = width;
         this.s_height = height;
         this.s_length = length;
+        this.blocks = blocks;
     }
 
     public long getCheckSum() {
         return checkSum;
+    }
+
+    public int getBlocks() {
+        return blocks;
     }
     
     public Vector getSize() {
@@ -103,7 +110,8 @@ public class Schematic implements Serializable, Cloneable {
     public static Schematic load(File schematic) throws IOException, DataException {
         CuboidClipboard cc = SchematicFormat.MCEDIT.load(schematic);
         long checksum = FileUtils.checksumCRC32(schematic);
-        return new Schematic(cc, cc.getWidth(), cc.getHeight(), cc.getLength(), checksum);
+        int blocks = SchematicUtil.count(cc, true);
+        return new Schematic(cc, cc.getWidth(), cc.getHeight(), cc.getLength(), checksum, blocks);
     }
 
 }

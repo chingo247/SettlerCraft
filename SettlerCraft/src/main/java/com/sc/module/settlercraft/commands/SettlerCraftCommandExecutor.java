@@ -84,10 +84,15 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         cs.sendMessage(ChatColor.RED + " Planmenu is not enabled");
                         return true;
                     }
+                    
+                    if(!StructureAPIModule.getInstance().isPlansLoaded()) {
+                        cs.sendMessage(ChatColor.RED + " Plans are not loaded yet");
+                        return true;
+                    }
 
                     // HAS PERMISSION
                     if (args.length == 1) {
-                        planmenu.openMenu(player);
+                        planmenu.openMenu(player, true);
                         return true;
                     } else {
                         cs.sendMessage(ChatColor.RED + "Too many arguments!");
@@ -106,6 +111,11 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
 
                     if (!ConfigProvider.getInstance().isPlanShopEnabled()) {
                         cs.sendMessage(ChatColor.RED + "Planshop is disabled");
+                        return true;
+                    }
+                    
+                    if(!StructureAPIModule.getInstance().isPlansLoaded()) {
+                        cs.sendMessage(ChatColor.RED + " Plans are not loaded yet");
                         return true;
                     }
 

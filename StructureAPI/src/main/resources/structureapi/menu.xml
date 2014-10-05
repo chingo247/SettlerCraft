@@ -31,46 +31,46 @@ A list of material id's can be found on the following website: http://minecraft-
         <Slot>
             <MaterialID>145</MaterialID><!-- Anvil -->
             <Category>Industry</Category>
-            <Aliasses>
+            <Aliases>
                 <Alias>Industrial</Alias>
                 <Alias>Industries</Alias>
-            </Aliasses>
+            </Aliases>
         </Slot>
         <Slot>
             <MaterialID>355</MaterialID><!-- Bed -->
             <Category>Houses</Category>
-            <Aliasses>
+            <Aliases>
                 <Alias>Residence</Alias>
                 <Alias>Residencial</Alias>
                 <Alias>Houses</Alias>
                 <Alias>House</Alias>
-            </Aliasses>
+            </Aliases>
         </Slot>
         <Slot>
             <MaterialID>266</MaterialID><!-- Gold Ingot -->
             <Category>Economy</Category>
-            <Aliasses>
+            <Aliases>
                 <Alias>Economical</Alias>
                 <Alias>Shops</Alias>
                 <Alias>Shop</Alias>
                 <Alias>Market</Alias>
                 <Alias>Markets</Alias>
-            </Aliasses>
+            </Aliases>
         </Slot>
         <Slot>
             <MaterialID>406</MaterialID><!-- Quartz -->
             <Category>Temples</Category>
-            <Aliasses>
+            <Aliases>
                 <Alias>Temple</Alias>
                 <Alias>Church</Alias>
                 <Alias>Sacred</Alias>
                 <Alias>Holy</Alias>
-            </Aliasses>
+            </Aliases>
         </Slot>
         <Slot>
             <MaterialID>98</MaterialID><!-- Stone Bricks -->
             <Category>Fortifications</Category>
-            <Aliasses>
+            <Aliases>
                 <Alias>Fort</Alias>
                 <Alias>Fortification</Alias>
                 <Alias>Wall</Alias>
@@ -80,17 +80,17 @@ A list of material id's can be found on the following website: http://minecraft-
                 <Alias>Castle</Alias>
                 <Alias>Castles</Alias>
                 <Alias>Military</Alias>
-            </Aliasses>
+            </Aliases>
         </Slot>
         <Slot>
             <MaterialID>267</MaterialID><!-- Iron Sword -->
             <Category>Dungeons AND Arenas</Category><!-- Because '&' is a keyword in XML, ' AND ' will be replaced with '&'-->
-            <Aliasses>
+            <Aliases>
                 <Alias>Dungeons</Alias>
                 <Alias>Dungeon</Alias>
                 <Alias>Arena</Alias>
                 <Alias>Arenas</Alias>
-            </Aliasses>
+            </Aliases>
         </Slot>
         <Slot>
             <MaterialID>2264</MaterialID><!-- Disc -->
