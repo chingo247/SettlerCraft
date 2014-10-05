@@ -11,9 +11,8 @@ import java.util.Objects;
 import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import org.bukkit.entity.Player;
 
@@ -24,13 +23,35 @@ import org.bukkit.entity.Player;
 @Entity
 public class PlayerOwnership implements Serializable {
     
-    @Id
-    @GeneratedValue
-    private Long id;
+    public enum TYPE {
+        /**
+         * May modify parts of the structure
+         */
+        BASIC,
+        /**
+         * May modify parts of the structure
+         * Gets a share when the structure is refunded
+         */
+        SHARED,
+        /*
+         * May modify parts of the structure
+         * Gets a share when the structure is refunded
+         * May assign new owners below his rank
+         * May dismiss owners, by refunding them their share
+         */
+        FULL,
+    }
+    
+    
+    @EmbeddedId
+    private PlayerOwnershipId ownershipId;
+    
     @Column(name = "PLAYER_ID")
     private final UUID player;
     private final String name;
     
+    
+//    @MapsId(value = "ownershipId")
     @ManyToOne(cascade = CascadeType.ALL)
     private Structure structure;
     
@@ -53,12 +74,11 @@ public class PlayerOwnership implements Serializable {
         this.structure = structure;
         this.player = player.getUniqueId();
         this.name = player.getName();
+        this.ownershipId = new PlayerOwnershipId(structure.getId(), player.getUniqueId());
     }
 
     
-    public Long getId() {
-        return id;
-    }
+    
 
     public String getName() {
         return name;

@@ -26,6 +26,7 @@ import com.sc.structureapi.structure.worldedit.StructureBlockComparators;
 import com.sc.structureapi.util.AsyncWorldEditUtil;
 import com.sc.structureapi.util.SchematicUtil;
 import com.sc.structureapi.util.WorldEditUtil;
+import com.sc.structureapi.util.WorldGuardUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.LocalPlayer;
@@ -33,6 +34,8 @@ import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.data.DataException;
+import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
+import com.sk89q.worldguard.protection.managers.RegionManager;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -88,22 +91,26 @@ public class ConstructionManager implements Listener {
             }
 
             @Override
-            public void jobRemoved(final JobEntry je) {
+            public synchronized void jobRemoved(final JobEntry je) {
                 Iterator<ConstructionEntry> it = constructionEntries.values().iterator();
                 while (it.hasNext()) {
                     ConstructionEntry entry = it.next();
 
-                    if (je.getPlayer().equals(entry.getPlayer()) && je.getJobId() == entry.getJobId()) {
+                    if (!entry.isCanceled() && je.getPlayer().equals(entry.getPlayer()) && je.getJobId() == entry.getJobId()) {
+                        System.out.println("On Complete");
                         StructureService structureService = new StructureService();
                         // Set state to complete & Create timestamp of completion
                         Structure structure = entry.getStructure();
 
+                        if(structure.getState() != State.COMPLETE) {
                         structure.getLog().setCompletedAt(new Date());
+                        structure.setState(State.COMPLETE);
                         structureService.save(structure);
 
-                        constructionEntries.remove(structure.getId());
+                            constructionEntries.remove(structure.getId());
 
-                        structure.setState(State.COMPLETE);
+                        }
+                       
 
                         break;
                     }
@@ -152,7 +159,6 @@ public class ConstructionManager implements Listener {
                     StructureService structureService = new StructureService();
                     if (!SchematicManager.getInstance().hasSchematic(checksum)) {
                         structure.setState(State.LOADING_SCHEMATIC);
-                        StructureAPI.tellStatus(structure, Bukkit.getPlayer(uuid));
                         SchematicManager.getInstance().load(sf);
                     }
                     
@@ -312,8 +318,12 @@ public class ConstructionManager implements Listener {
                     final StructureService structureService = new StructureService();
                     getEntry(structure).setJobId(entry.getJobId());
 
+                    System.out.println("Added job");
                     // Update status
-                    structure.setState(State.QUEUED);
+                    if(structure.getState() != State.QUEUED) {
+                        structure.setState(State.QUEUED);
+                    }
+                    structureService.save(structure);
 
                     // Set state changeListener
                     entry.addStateChangedListener(new IJobEntryListener() {
@@ -321,7 +331,11 @@ public class ConstructionManager implements Listener {
                         @Override
                         public void jobStateChanged(JobEntry bpje) {
                             if (bpje.getStatus() == JobEntry.JobStatus.PlacingBlocks) {
-                                structure.setState(State.BUILDING);
+                                 System.out.println("Status change job");
+                                if(structure.getState() != State.BUILDING) {
+                                    structure.setState(State.BUILDING);
+                                }
+                                structureService.save(structure);
                             }
                         }
                     });
@@ -329,9 +343,6 @@ public class ConstructionManager implements Listener {
 
                 @Override
                 public void onJobCanceled(JobEntry entry) {
-                    structure.setState(State.STOPPED);
-                    // Update Hologram
-
                     ConstructionManager.getInstance().getEntry(structure).setJobId(-1);
                 }
             });
@@ -379,7 +390,7 @@ public class ConstructionManager implements Listener {
 
                     // Update status
                     StructureService structureService = new StructureService();
-                    structure.setState(State.QUEUED);
+                    
                     structureService.save(structure);
                     ConstructionEntry entry = constructionEntries.get(structure.getId());
                     entry.setDemolishing(true);
@@ -427,6 +438,9 @@ public class ConstructionManager implements Listener {
                 public void onJobAdded(SCJobEntry entry) {
                     // Set JobId
                     getEntry(structure).setJobId(entry.getJobId());
+                    if(structure.getState() != State.QUEUED) {
+                        structure.setState(State.QUEUED);
+                    }
 
                     // Set state changeListener
                     entry.addStateChangedListener(new IJobEntryListener() {
@@ -439,8 +453,18 @@ public class ConstructionManager implements Listener {
                             } else if (bpje.getStatus() == JobEntry.JobStatus.Done) {
                                 // Set state to complete & Create timestamp of completion
                                 structure.setState(State.REMOVED);
+                                
                                 structure.getLog().setRemovedAt(new Date());
                                 structureService.save(structure);
+                                
+                                
+                                RegionManager rmgr = WorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(structure.getWorldName()));
+                                rmgr.removeRegion(structure.getStructureRegion());
+                                try {
+                                    rmgr.save();
+                                } catch (ProtectionDatabaseException ex) {
+                                    Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
+                                }
 
                                 // Reset JobID
                                 getEntry(structure).setJobId(-1);
@@ -452,11 +476,6 @@ public class ConstructionManager implements Listener {
 
                 @Override
                 public void onJobCanceled(JobEntry entry) {
-                    StructureService structureService = new StructureService();
-                    structure.setState(State.STOPPED);
-                     structureService.save(structure);
-                    // Update Hologram
-
                     getEntry(structure).setJobId(-1);
                 }
             });
@@ -616,9 +635,9 @@ public class ConstructionManager implements Listener {
                 structureService.save(structure);
 
                 // Reset data
-                constructionEntries.get(structure.getId()).setDemolishing(false);
-                constructionEntries.get(structure.getId()).setJobId(-1);
-                constructionEntries.get(structure.getId()).setPlayer(null);
+                getEntry(structure).setDemolishing(false);
+                getEntry(structure).setJobId(-1);
+                getEntry(structure).setPlayer(null);
             }
         });
 
@@ -635,6 +654,10 @@ public class ConstructionManager implements Listener {
 
 
     private ConstructionEntry getEntry(Structure structure) {
+        if(constructionEntries.get(structure.getId()) == null) {
+            constructionEntries.put(structure.getId(), new ConstructionEntry(structure));
+        }
+        
         return constructionEntries.get(structure.getId());
     }
 
@@ -647,6 +670,10 @@ public class ConstructionManager implements Listener {
     
     @EventHandler
     public void onStructureStateChange(StructureStateChangeEvent changeEvent) {
+        if(changeEvent.getStructure().getState() == State.QUEUED) {
+            return;
+        }
+        
         StructureAPI.yellStatus(changeEvent.getStructure());
     }
 }

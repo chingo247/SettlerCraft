@@ -228,15 +228,10 @@ public class Structure implements Serializable {
 
         // Save structure
         StructureService ss = new StructureService();
+        structure = ss.save(structure); // Set ID
         structure.setStructureRegionId(PREFIX + structure.getId());
         structure = ss.save(structure);
-        if (player != null) {
-            try {
-                StructureAPI.makeOwner(player, structure);
-            } catch (StructureException ex) {
-                Logger.getLogger(Structure.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+        
 
         try {
             final File STRUCTURE_DIR = structure.getFolder();
@@ -269,6 +264,14 @@ public class Structure implements Serializable {
 
             return null;
         }
+        if (player != null) {
+            try {
+                StructureAPI.makeOwner(player, structure);
+            } catch (StructureException ex) {
+                Logger.getLogger(Structure.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
 
         Bukkit.getPluginManager().callEvent(new StructureCreateEvent(structure));
         return structure;
@@ -291,7 +294,7 @@ public class Structure implements Serializable {
         return state;
     }
 
-    public void setState(State newState) {
+    public synchronized void setState(State newState) {
         if (this.state != newState) {
             State oldState = state;
             this.state = newState;
@@ -355,7 +358,11 @@ public class Structure implements Serializable {
     }
 
     public boolean addOwner(Player player) {
-        return ownerships.add(new PlayerOwnership(player, this));
+        if(!isOwner(player)) {
+            ownerships.add(new PlayerOwnership(player, this));
+            return true;
+        }
+        return false;
     }
 
     public boolean removeOwner(Player player) {
@@ -372,7 +379,12 @@ public class Structure implements Serializable {
     }
 
     public boolean addMember(Player player) {
-        return memberships.add(new PlayerMembership(player.getUniqueId(), this));
+        if(!isMember(player)) {
+            memberships.add(new PlayerMembership(player, this));
+            return true;
+        }
+        return false;
+        
     }
 
     public boolean removeMember(Player playerMember) {

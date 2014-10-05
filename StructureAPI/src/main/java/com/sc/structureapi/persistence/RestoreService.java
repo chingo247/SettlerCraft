@@ -18,14 +18,17 @@ package com.sc.structureapi.persistence;
 
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
+import com.sc.structureapi.structure.StructureAPIModule;
+import com.sc.structureapi.structure.entities.structure.PlayerMembership;
 import com.sc.structureapi.structure.entities.structure.PlayerOwnership;
 import com.sc.structureapi.structure.entities.structure.QStructure;
 import com.sc.structureapi.structure.entities.structure.Structure;
 import com.sc.structureapi.structure.entities.structure.Structure.State;
-import com.sc.structureapi.util.WorldGuardUtil;
 import com.sc.structureapi.structure.entities.world.Dimension;
+import com.sc.structureapi.util.WorldGuardUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
@@ -53,6 +56,7 @@ public class RestoreService {
 
     public void restore() {
         HashMap<String, Timestamp> worlddata = getWorldData();
+        
         for (Entry<String, Timestamp> entry : worlddata.entrySet()) {
             removeCreatedBefore(entry.getKey(), entry.getValue());
             setRemovedAfter(Bukkit.getWorld(entry.getKey()), entry.getValue());
@@ -68,7 +72,7 @@ public class RestoreService {
         HashMap<String, Timestamp> worldData = new HashMap<>();
         for (World world : Bukkit.getWorlds()) {
             if (isSettlerCraftWorld(world)) {
-                Timestamp t = new Timestamp(world.getWorldFolder().lastModified());
+                Timestamp t = new Timestamp(getDatFile(world.getWorldFolder()).lastModified());
                 worldData.put(world.getName(), t);
             }
         }
@@ -90,7 +94,7 @@ public class RestoreService {
         throw new RuntimeException("World doesnt have a level.dat!");
     }
     /**
-     * Checks wheter this world has structures
+     * Checks whether this world has structures
      *
      * @param world The world
      * @return True if this world has structures
@@ -112,10 +116,13 @@ public class RestoreService {
             tx = session.beginTransaction();
             QStructure qct = QStructure.structure;
             JPQLQuery query = new HibernateQuery(session);
-            List<Structure> structures = query.from(qct).where(qct.logEntry().autoremoved.eq(Boolean.FALSE).and(qct.location().worldUUID.eq(world.getUID())).and(qct.logEntry().completedAt.after(timestamp).or(qct.logEntry().removedAt.after(timestamp)))).list(qct);
+            List<Structure> structures = query.from(qct).where(
+                    qct.logEntry().autoremoved.eq(Boolean.FALSE)
+                            .and(qct.location().worldUUID.eq(world.getUID()))
+                            .and(qct.logEntry().completedAt.after(timestamp).or(qct.logEntry().removedAt.after(timestamp)))).list(qct);
             
             if(!structures.isEmpty()) {
-            System.out.println("[SettlerCraft]: World " + world + " contains " + structures.size() + " that have an invalid status");
+            Bukkit.getConsoleSender().sendMessage(StructureAPIModule.MSG_PREFIX + "World " + world + " contains " + structures.size() + " that have an invalid status");
             Iterator<Structure> it = structures.iterator();
             RegionManager manager = WorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(world.getName()));
             while (it.hasNext()) {
@@ -123,12 +130,18 @@ public class RestoreService {
                 
                 
                 if(!manager.hasRegion(structure.getStructureRegion())) {
-                    System.out.println("Structure #" + structure.getId() + " was removed after last save");
+                    Bukkit.getConsoleSender().sendMessage(StructureAPIModule.MSG_PREFIX + "Structure #" + structure.getId() + " was removed after last save");
                     reclaim(structure);
-                    System.out.println("Reclaimed region: " + structure.getStructureRegion());
+                    Bukkit.getConsoleSender().sendMessage(StructureAPIModule.MSG_PREFIX + "Reclaimed region: " + structure.getStructureRegion());
                 }
-                
-                structure.setState(State.STOPPED);
+               
+                // If structure was completed after world save
+                if(timestamp.getTime() < structure.getLog().getCompletedAt().getTime()) {
+                    structure.setState(State.STOPPED);
+                    structure.getLog().setCompletedAt(null);
+                } else {
+                    structure.setState(State.COMPLETE);
+                }
                 structure.getLog().setRemovedAt(null);
                 session.merge(structure);
             }
@@ -167,8 +180,21 @@ public class RestoreService {
         
         // Set Owners
         for(PlayerOwnership owner : pos.getOwners(structure)) {
-            region.getOwners().addPlayer(owner.getName());
+            LocalPlayer lp = WorldGuardUtil.getLocalPlayer(Bukkit.getPlayer(owner.getUUID()));
+            region.getOwners().addPlayer(lp);
         }
+        
+        PlayerMembershipService pms = new PlayerMembershipService();
+        
+        
+        
+        // Set Owners
+        for(PlayerMembership member : pms.getMembers(structure)) {
+            LocalPlayer lp = WorldGuardUtil.getLocalPlayer(Bukkit.getPlayer(member.getUUID()));
+            region.getMembers().addPlayer(lp);
+        }
+        
+        
         mgr.addRegion(region);
 
         return region;
@@ -187,7 +213,7 @@ public class RestoreService {
                     .and(qct.location().world.eq(world))
                     .and(qct.state.ne(State.REMOVED))).list(qct);
             if (!structures.isEmpty()) {
-                System.out.println("[SettlerCraft]: World '" + world + "' has " + structures.size() + " structures that were placed after the last world save");
+                Bukkit.getConsoleSender().sendMessage(StructureAPIModule.MSG_PREFIX + "World '" + world + "' has " + structures.size() + " structures that were placed after the last world save");
             }
             Iterator<Structure> it = structures.iterator();
             World w = Bukkit.getWorld(world);
@@ -196,7 +222,7 @@ public class RestoreService {
             while (it.hasNext()) {
                 Structure structure = it.next();
                 rmgr.removeRegion(structure.getStructureRegion());
-                System.out.println("[SettlerCraft]: " + structure.getStructureRegion() + " has been removed");
+                Bukkit.getConsoleSender().sendMessage(StructureAPIModule.MSG_PREFIX + "Region: " + structure.getStructureRegion() + " has been removed");
                 structure.setState(State.REMOVED);
                 structure.getLog().setRemovedAt(new Timestamp(removeDate.getTime()));
                 structure.getLog().setAutoremoved(true);

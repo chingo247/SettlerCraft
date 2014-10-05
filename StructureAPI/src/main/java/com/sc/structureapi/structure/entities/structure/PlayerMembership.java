@@ -5,16 +5,15 @@
  */
 package com.sc.structureapi.structure.entities.structure;
 
-import com.sc.structureapi.structure.entities.structure.Structure;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import org.bukkit.entity.Player;
 
 /**
  *
@@ -23,12 +22,15 @@ import javax.persistence.ManyToOne;
 @Entity
 public class PlayerMembership implements Serializable {
 
-    @Id
-    @GeneratedValue
-    private Long id;
+    @EmbeddedId
+    private PlayerMembershipId playerMembershipId;
+    
     @Column(name = "PLAYER_ID")
     private final UUID uuid;
     
+    private String name;
+    
+//    @MapsId(value = "playerMembershipId")
     @ManyToOne(cascade = CascadeType.ALL)
     private Structure structure;
 
@@ -44,16 +46,16 @@ public class PlayerMembership implements Serializable {
      *
      * @param name The name of the owner
      * @param uuid The uuid of the owner
-     * @param player Wheter the owner is a isPlayer or not
+     * @param player Whether the owner is a isPlayer or not
      */
-    PlayerMembership(UUID player, Structure structure) {
+    PlayerMembership(Player player, Structure structure) {
         this.structure = structure;
-        this.uuid = player;
+        this.uuid = player.getUniqueId();
+        this.name = player.getName();
+        this.playerMembershipId = new PlayerMembershipId(structure.getId(), player.getUniqueId());
     }
 
-    public Long getId() {
-        return id;
-    }
+   
 
     public UUID getUUID() {
         return uuid;

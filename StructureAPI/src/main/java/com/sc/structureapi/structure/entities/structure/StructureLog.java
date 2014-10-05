@@ -36,6 +36,16 @@ public class StructureLog implements Serializable {
         }
     }
 
+    public Timestamp getCompletedAt() {
+        return completedAt;
+    }
+
+    public Timestamp getRemovedAt() {
+        return removedAt;
+    }
+    
+    
+
 
     public void setCompletedAt(Date completedAt) {
         if (completedAt != null) {

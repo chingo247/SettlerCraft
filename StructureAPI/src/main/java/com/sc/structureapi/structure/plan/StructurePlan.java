@@ -376,5 +376,30 @@ public class StructurePlan {
         }
         return null;
     }
+    
+    public static double getValue(ItemStack itemStack) {
+        double price = 0;
+        if (isStructurePlan(itemStack)) {
+           
+            List<String> lore = itemStack.getItemMeta().getLore();
+            for (String s : lore) {
+                if (s.contains("Price")) {
+                    s = s.substring(s.indexOf(":") + 1);
+                    s = ChatColor.stripColor(s);
+                    if(s.contains("FREE")) {
+                        return 0;
+                    }
+                    
+                    try {
+                        price = Double.parseDouble(s.trim());
+                    } catch (NumberFormatException nfe) {
+                        return 0;
+                    }
+                    return price;
+                }
+            }
+        }
+        return price;
+    }
 
 }

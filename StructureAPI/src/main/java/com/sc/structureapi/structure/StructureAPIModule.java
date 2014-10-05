@@ -12,7 +12,9 @@ import com.sc.structureapi.bukkit.ConfigProvider;
 import com.sc.structureapi.exception.StructureAPIException;
 import com.sc.structureapi.exception.StructureDataException;
 import com.sc.structureapi.listener.PlanListener;
+import com.sc.structureapi.persistence.HSQLServer;
 import com.sc.structureapi.persistence.HibernateUtil;
+import com.sc.structureapi.persistence.RestoreService;
 import com.sc.structureapi.structure.construction.ConstructionManager;
 import com.sc.structureapi.structure.entities.structure.QStructure;
 import com.sc.structureapi.structure.entities.structure.Structure;
@@ -83,6 +85,13 @@ public class StructureAPIModule implements Listener {
             } catch (DocumentException | StructureAPIException ex) {
                 Logger.getLogger(StructureAPIModule.class.getName()).log(Level.SEVERE, null, ex);
                 return;
+            }
+            
+            HSQLServer hsqls = HSQLServer.getInstance();
+            if(!hsqls.isRunning()) {
+                Bukkit.getConsoleSender().sendMessage(MSG_PREFIX + "Starting HSQL Server");
+                hsqls.start();
+                new RestoreService().restore();
             }
 
             // Make dirs if needed
@@ -296,9 +305,11 @@ public class StructureAPIModule implements Listener {
         File config = new File(getModuleFolder(), "config.yml");
 
         if (!config.exists()) {
-            InputStream i = this.getClass().getClassLoader().getResourceAsStream("structureapi/config.yml");
+            InputStream i = StructureAPIModule.class.getClassLoader().getResourceAsStream("structureapi/config.yml");
             FileUtil.write(i, config);
         }
     }
+    
+   
 
 }

@@ -23,6 +23,7 @@ import com.sc.structureapi.structure.plan.StructurePlanManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -138,10 +139,17 @@ public class StructureOverviewManager implements Listener {
             removeHolos(structure);
         }
 
-        for (Hologram holo : holograms.get(structure.getId())) {
-            holo.setLine(STRUCTURE_STATUS_INDEX, getStatusString(structure));
-            holo.update();
+        List<Hologram> holos = holograms.get(structure.getId());
+        if(holos != null && !holos.isEmpty()) {
+            Iterator<Hologram> hit = holos.iterator();
+            while(hit.hasNext()) {
+                Hologram holo = hit.next();
+                holo.setLine(STRUCTURE_STATUS_INDEX, getStatusString(structure));
+                holo.update();
+            }
         }
+        
+        
     }
 
     public void init() {
