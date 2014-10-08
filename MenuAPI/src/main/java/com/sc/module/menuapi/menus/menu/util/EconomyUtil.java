@@ -19,6 +19,7 @@ package com.sc.module.menuapi.menus.menu.util;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import static org.bukkit.Bukkit.getServer;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
@@ -66,7 +67,7 @@ public class EconomyUtil {
     public EconomyResponse pay(Player player, double amount) {
         EconomyResponse er = economy.withdrawPlayer(player.getName(), amount);
         if(er.transactionSuccess()) {
-            player.sendMessage("[Economy]: your new balance is " + economy.getBalance(player.getName()));
+            player.sendMessage("Your new balance is " + ChatColor.GOLD + economy.getBalance(player.getName()));
         }
         return er;
     }

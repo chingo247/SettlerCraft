@@ -1,10 +1,10 @@
 name: SettlerCraft
-main: com.sc.module.settlercraft.plugin.SettlerCraft
+main: com.chingo247.settlercraft.plugin.SettlerCraft
 version: 1.0-RC
 author: Chingo247
-description: Placing & building of  schematics / structures
-depend: [WorldEdit, AsyncWorldEdit, WorldGuard, HolographicDisplays]
-softdepend: [Vault]
+description: Placing & building of MineCraft Schematics! 
+depend: [WorldEdit, AsyncWorldEdit, WorldGuard]
+softdepend: [Vault, HolographicDisplays]
 
 commands:
     sc:

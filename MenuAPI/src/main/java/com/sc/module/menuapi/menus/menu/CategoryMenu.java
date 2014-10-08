@@ -49,7 +49,7 @@ public class CategoryMenu implements Listener {
     private static final Comparator<TradeItem> ALPHABETICAL = new Comparator<TradeItem>() {
         @Override
         public int compare(TradeItem o1, TradeItem o2) {
-            return o1.getName().compareTo(o2.getName());
+            return o1.getName().toLowerCase().compareTo(o2.getName().toLowerCase());
         }
     };
     
@@ -195,6 +195,8 @@ public class CategoryMenu implements Listener {
         if (price <= balance) {
             player.getInventory().addItem(item.getItemStack());
             economy.withdrawPlayer(player.getName(), price);
+            player.sendMessage("You bought: " + ChatColor.BLUE +item.getName());
+            player.sendMessage("Your new balance is: " + ChatColor.GOLD + economy.getBalance(player.getName()));
             return true;
         }
         // Not enough money

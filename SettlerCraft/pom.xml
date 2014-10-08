@@ -5,7 +5,6 @@
     <artifactId>SettlerCraft</artifactId>
     <version>1.0-RC-1</version>
     <packaging>jar</packaging>
-    
     <repositories>
         <!--Private ThirdParty Repo-->
         <repository>
@@ -53,21 +52,28 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.mysema.maven</groupId>
+                <artifactId>apt-maven-plugin</artifactId>
+                <version>1.0.9</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>process</goal> 
+                        </goals>
+                        <configuration>
+                            <outputDirectory>target/generated-sources/java</outputDirectory>
+                            <processor>com.mysema.query.apt.jpa.JPAAnnotationProcessor</processor>
+                            <options>
+                                <querydsl.entityAccessors>true</querydsl.entityAccessors>
+                            </options>          
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-    <dependencies>
-        <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.7.9-CB2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.sk89q</groupId>
-            <artifactId>worldedit</artifactId>  
-            <version>6.0.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
+     <dependencies>
         <!--holographicDisplays-->
         <dependency>
             <groupId>org.holographicdisplay</groupId>
@@ -75,11 +81,24 @@
             <version>1.8.2</version>
             <scope>provided</scope>
         </dependency>
-        <!--Vault-->
+        <!--AsyncWorldEdit-->
         <dependency>
-            <groupId>org.vault</groupId>
-            <artifactId>Vault</artifactId>
-            <version>1.2.31</version>
+            <groupId>com.thirdparty</groupId>
+            <artifactId>asyncworldedit</artifactId>  
+            <version>2.0-RC5</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--AsyncWorldEdit-->
+        <dependency>
+            <groupId>com.thirdparty</groupId>
+            <artifactId>asyncworldedit-injector</artifactId>  
+            <version>2.0-RC5</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>1.7.9-R0.2</version>
             <scope>provided</scope>
         </dependency>
         <!--WorldGuard-->
@@ -89,23 +108,162 @@
             <version>5.9</version>
             <scope>provided</scope>
         </dependency>
+        <!--WorldEdit-->
+        <dependency>
+            <groupId>com.sc</groupId>
+            <artifactId>worldedit</artifactId>  
+            <version>6.0-3301</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--Vault-->
+        <dependency>
+            <groupId>org.vault</groupId>
+            <artifactId>Vault</artifactId>
+            <version>1.2.31</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- HSQLServer -->
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
             <version>2.3.2</version>
             <scope>compile</scope>
         </dependency>
+        <!--Hibernate-->
         <dependency>
-            <groupId>com.sc.module</groupId>
-            <artifactId>StructureAPI</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate</artifactId>
+            <version>3.2.6.ga</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>cglib</groupId>
+                    <artifactId>cglib</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>asm</groupId>
+                    <artifactId>asm</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.sc.module</groupId>
-            <artifactId>MenuAPI</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.0-api</artifactId>
+            <version>1.0.1.Final</version>
         </dependency>
-    </dependencies>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-annotations</artifactId>
+            <version>3.2.0.cr3</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-collections</artifactId>
+                    <groupId>commons-collections</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>persistence-api</artifactId>
+                    <groupId>javax.persistence</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.1</version>
+            <scope>compile</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        <!-- XPATH -->
+        <dependency>
+            <groupId>jaxen</groupId>
+            <artifactId>jaxen</artifactId>
+            <version>1.1.6</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.6.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>1.2.3</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.transaction</groupId>
+            <artifactId>jta</artifactId>
+            <version>1.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.mysema.querydsl</groupId>
+            <artifactId>querydsl-collections</artifactId>
+            <version>3.3.2</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>ecj</artifactId>
+                    <groupId>org.eclipse.jdt.core.compiler</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>guava</artifactId>
+                    <groupId>com.google.guava</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>      
+        <dependency>
+            <groupId>com.mysema.querydsl</groupId>
+            <artifactId>querydsl-jpa</artifactId>
+            <version>3.3.2</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jsr305</artifactId>
+                    <groupId>com.google.code.findbugs</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>guava</artifactId>
+                    <groupId>com.google.guava</groupId>
+                </exclusion>
+                <exclusion>
+                    <groupId>cglib</groupId>
+                    <artifactId>cglib</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!--CommonsIO Apache-->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib</artifactId>
+            <version>2.2.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>asm</groupId>
+                    <artifactId>asm</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>3.3.1</version>
+        </dependency>
+          <dependency>
+               <groupId>com.sc.module</groupId>
+               <artifactId>MenuAPI</artifactId>
+               <version>1.0-SNAPSHOT</version>
+          </dependency>
+     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.7</maven.compiler.source>
