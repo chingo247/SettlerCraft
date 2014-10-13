@@ -3,13 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.settlercraft.structure.plan.worldguard;
+package com.chingo247.settlercraft.structure.data.worldguard;
 
 import com.chingo247.settlercraft.exception.StructureDataException;
-import com.chingo247.settlercraft.structure.plan.Loader;
+import com.chingo247.settlercraft.structure.data.Loader;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structure.plan.data.Elements;
-import com.chingo247.settlercraft.structure.plan.data.Nodes;
+import com.chingo247.settlercraft.structure.data.Elements;
+import com.chingo247.settlercraft.structure.data.Nodes;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.flags.Flag;

@@ -9,7 +9,7 @@ import com.sc.module.menuapi.menus.menu.item.CategoryTradeItem;
 import com.sc.module.menuapi.menus.menu.item.TradeItem;
 import com.sc.module.menuapi.menus.menu.util.ShopUtil;
 import com.chingo247.settlercraft.exception.StructureDataException;
-import com.chingo247.settlercraft.structure.plan.data.Nodes;
+import com.chingo247.settlercraft.structure.data.Nodes;
 import com.chingo247.settlercraft.structure.schematic.Schematic;
 import com.chingo247.settlercraft.structure.schematic.SchematicManager;
 import com.sk89q.worldedit.CuboidClipboard;

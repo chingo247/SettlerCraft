@@ -17,22 +17,33 @@
 package com.chingo247.settlercraft.bukkit.commands;
 
 import com.chingo247.settlercraft.exception.SettlerCraftException;
+import com.chingo247.settlercraft.persistence.HibernateUtil;
 import com.chingo247.settlercraft.persistence.StructureService;
 import com.chingo247.settlercraft.plugin.ConfigProvider;
 import com.chingo247.settlercraft.plugin.PermissionManager;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
+import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership;
+import com.chingo247.settlercraft.structure.entities.structure.QPlayerOwnership;
+import com.chingo247.settlercraft.structure.entities.structure.QStructure;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
+import com.chingo247.settlercraft.structure.entities.structure.Structure.State;
+import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.module.menuapi.menus.menu.CategoryMenu;
+import com.sc.module.menuapi.menus.menu.util.EconomyUtil;
 import com.sc.module.menuapi.menus.menu.util.ShopUtil;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.hibernate.Session;
 
 /**
  *
@@ -51,11 +62,6 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
-
-        if (!(cs instanceof Player)) {
-            cs.sendMessage("You are not a player!"); // Command is issued from server console
-            return true;
-        }
 
         if (args.length == 0) {
             cs.sendMessage(ChatColor.RED + "Too few arguments");
@@ -78,13 +84,13 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         return true;
                     }
                     CategoryMenu planmenu = SettlerCraft.getInstance().getPlanMenu();
-                    
-                    if(planmenu == null || !planmenu.isEnabled()) {
+
+                    if (planmenu == null || !planmenu.isEnabled()) {
                         cs.sendMessage(ChatColor.RED + " Planmenu is not enabled yet");
                         return true;
                     }
-                    
-                    if(!SettlerCraft.getInstance().isPlansLoaded()) {
+
+                    if (!SettlerCraft.getInstance().isPlansLoaded()) {
                         cs.sendMessage(ChatColor.RED + " Plans are not loaded yet");
                         return true;
                     }
@@ -112,19 +118,18 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         cs.sendMessage(ChatColor.RED + "Planshop is disabled");
                         return true;
                     }
-                    
-                    if(!SettlerCraft.getInstance().isPlansLoaded()) {
+
+                    if (!SettlerCraft.getInstance().isPlansLoaded()) {
                         cs.sendMessage(ChatColor.RED + " Plans are not loaded yet");
                         return true;
                     }
 
                     CategoryMenu planmenu2 = SettlerCraft.getInstance().getPlanMenu();
-                    
-                    if(planmenu2 == null || !planmenu2.isEnabled()) {
+
+                    if (planmenu2 == null || !planmenu2.isEnabled()) {
                         cs.sendMessage(ChatColor.RED + " Planmenu is not enabled yet");
                         return true;
                     }
-                    
 
                     // HAS PERMISSION
                     if (args.length == 1) {
@@ -134,9 +139,11 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         cs.sendMessage(ChatColor.RED + "Too many arguments!");
                         return true;
                     }
+                case "list":
+                    listRefundables(cs, args);
+                    return true;
 
                 case "refund":
-
                     if (cs instanceof Player) {
                         Player player3 = (Player) cs;
                         if (!player3.isOp()) {
@@ -144,6 +151,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                             return true;
                         }
                     }
+
                     return refund(cs, args);
                 case "reload":
                     if (cs instanceof Player) {
@@ -152,86 +160,93 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                             player3.sendMessage(ChatColor.RED + "You are not OP");
                             return true;
                         }
+
+                    }
+                    // Check if should reload plans
+                    if (args.length == 1 && args[0].equals("plans")) {
+                        if (SettlerCraft.getInstance().reloadPlans()) {
+                            Bukkit.broadcastMessage(SettlerCraft.MSG_PREFIX + "Reloading plans...");
+                        } else {
+                            cs.sendMessage(SettlerCraft.MSG_PREFIX + "Plans are already being reloaded...");
+                        }
+                        return true;
                     }
 
-                    try {
-                        ConfigProvider.getInstance().load();
-                        cs.sendMessage(ChatColor.GOLD + "[SettlerCraft]:" + ChatColor.RESET + " Config reloaded");
-                    } catch (SettlerCraftException ex) {
-                        Logger.getLogger(SettlerCraftCommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
-                        cs.sendMessage(ChatColor.RED + ex.getMessage());
+                    if (args.length == 1 && args[0].equals("config")) {
+                        try {
+                            ConfigProvider.getInstance().load();
+                            cs.sendMessage(ChatColor.GOLD + "[SettlerCraft]:" + ChatColor.RESET + " Config reloaded");
+                        } catch (SettlerCraftException ex) {
+                            Logger.getLogger(SettlerCraftCommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
+                            cs.sendMessage(ChatColor.RED + ex.getMessage());
+                        }
+                        return true;
                     }
-
-                    return true;
-                default:
                     String action = "";
-                    for(String s : args) {
+                    for (String s : args) {
                         action += s + " ";
                     }
                     cs.sendMessage(ChatColor.RED + "No actions known for: " + action);
+                    return true;
+
+                default:
+                    String actionLast = "";
+                    for (String s : args) {
+                        actionLast += s + " ";
+                    }
+                    cs.sendMessage(ChatColor.RED + "No actions known for: " + actionLast);
                     return true;
             }
         }
     }
 
-
-    private boolean listRefundables(CommandSender player, String[] args) {
+    private boolean listRefundables(CommandSender sender, String[] args) {
         int index;
-        String ply;
+        String ply = null;
         if (args.length == 2) {
             index = 1;
-            ply = null;
         } else if (args.length == 3) {
             try {
                 index = Integer.parseInt(args[2]);
             } catch (NumberFormatException nfe) {
-                player.sendMessage(ChatColor.RED + "Invalid index");
+                sender.sendMessage("Invalid index");
+                sender.sendMessage("Usage: " + CCC + CMD + "refund list [index] - List all refundable structures of all players");
                 return true;
             }
-            ply = null;
         } else if (args.length == 4) {
             try {
                 index = Integer.parseInt(args[2]);
             } catch (NumberFormatException nfe) {
-                player.sendMessage(ChatColor.RED + "No valid index");
+                sender.sendMessage("Invalid index");
+                sender.sendMessage("Usage: " + CCC + CMD + "refund list [index][player] - List all refundable structures of a player");
                 return true;
             }
-            ply = args[3];
         } else {
-            player.sendMessage(ChatColor.RED + "Too many arguments!");
-            player.sendMessage(new String[]{
+            sender.sendMessage(ChatColor.RED + "Too many arguments!");
+            sender.sendMessage(new String[]{
                 "Usage: ",
-                CCC + CMD + " list [index] - List all refundable structures of all players",
-                CCC + CMD + " list [index][player] - List all refundable structures of a player",});
+                CCC + CMD + "refund list [index] - List all refundable structures of all players",
+                CCC + CMD + "refund list [index][player] - List all refundable structures of a player",});
             return true;
         }
         List<Structure> structures;
         // List all
-        if (ply == null) {
-            structures = getRefundables();
+        if(ply != null) {
+            Player player = Bukkit.getPlayer(ply.trim());
+            structures = getRefundables(player);
         } else {
-            if (Bukkit.getPlayer(ply) == null) {
-                player.sendMessage(ChatColor.RED + "Player doesn't exist!");
-                return true;
-            }
-
-            // List from player
-            structures = getRefundables(ply);
-            if (structures.isEmpty()) {
-                player.sendMessage(ChatColor.GREEN + ply + ChatColor.RED + " has no tasks that need to be refunded");
-                return true;
-            }
+            structures = getRefundables();
         }
 
         if (structures.isEmpty()) {
-            player.sendMessage(ChatColor.RED + "There are currently no tasks that need to be refunded");
+            sender.sendMessage(ChatColor.RED + "There are currently no structures that need to be refunded");
             return true;
         } else {
             int amountOfRefundables = structures.size();
             String[] message = new String[MAX_LINES];
             int pages = (amountOfRefundables / (MAX_LINES - 1)) + 1;
             if (index > pages || index <= 0) {
-                player.sendMessage(ChatColor.RED + "Page " + index + " out of " + pages + "...");
+                sender.sendMessage(ChatColor.RED + "Page " + index + " out of " + pages + "...");
                 return true;
             }
 
@@ -245,153 +260,141 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                 message[line] = l;
                 line++;
             }
-            player.sendMessage(message);
+            sender.sendMessage(message);
             return true;
         }
 
     }
 
+    private void refundAll(CommandSender sender) {
+        // Note: only gets the structures with a refundValue > 0
+        List<Structure> structures = getRefundables();
+
+        if (structures.isEmpty()) {
+            sender.sendMessage(ChatColor.RED + "No refundable structures found");
+            return;
+        }
+        
+        if(Bukkit.getPluginManager().getPlugin("Vault") == null) {
+            sender.sendMessage(ChatColor.RED + "Vault was not found...");
+            return;
+        }
+        
+        if(EconomyUtil.getInstance().getEconomy() == null) {
+            sender.sendMessage(ChatColor.RED + "No economy plugin was found...");
+            return;
+        }
+
+        for (Structure s : structures) {
+            makeDeposit(sender, s, false);
+        }
+
+    }
+    
+    private void refund(CommandSender sender, Structure structure) {
+        
+        if(Bukkit.getPluginManager().getPlugin("Vault") == null) {
+            sender.sendMessage(ChatColor.RED + "Vault was not found...");
+            return;
+        }
+        
+        if(EconomyUtil.getInstance().getEconomy() == null) {
+            sender.sendMessage(ChatColor.RED + "No economy plugin was found...");
+            return;
+        }
+
+        makeDeposit(sender, structure, true);
+        
+
+    }
+    
+
     private void makeDeposit(CommandSender sender, Structure structure, boolean talk) {
-//        if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
-//            Economy economy = SCVaultEconomyUtil.getInstance().getEconomy();
-//            if (economy != null) {
-//                Player player = Bukkit.getPlayer(structure.getOwner());
-//                if (structure.getRefundValue() > 0) {
-//                    economy.depositPlayer(structure.getOwner(), structure.getRefundValue());
-//                    if (player != null && player.isOnline() && talk) {
-//                        player.sendMessage(new String[]{
-//                            "Refunded #" + ChatColor.GOLD + structure.getId() + " "
-//                            + ChatColor.BLUE + structure.getPlan().getDisplayName() + " "
-//                            + ChatColor.GOLD + SettlerCraftUtil.valueString(structure.getRefundValue()),
-//                            ChatColor.RESET + "Your new balance: " + ChatColor.GOLD + SettlerCraftUtil.valueString(economy.getBalance(player.getName()))
-//                        });
-//                    }
-//                }
-//                if (talk) {
-//                    sender.sendMessage("Deposited " + ChatColor.GOLD + SettlerCraftUtil.valueString(structure.getRefundValue())
-//                            + ChatColor.RESET + " to " + ChatColor.GREEN + structure.getOwner());
-//                }
-//            } else {
-//                sender.sendMessage(ChatColor.RED + "No economy plugin was found...");
-//            }
-//        } else {
-//            sender.sendMessage(ChatColor.RED + "Vault not found...");
-//        }
+           
+                Set<PlayerOwnership> ownerships = structure.getOwnerships(PlayerOwnership.Type.FULL);
+                if (structure.getRefundValue() > 0) {
+                    double refunding = Math.floor(structure.getRefundValue() / ownerships.size());
+
+                    for (PlayerOwnership po : ownerships) {
+                        Player player = Bukkit.getPlayer(po.getPlayerUUID());
+                        if (player != null) {
+                            Economy economy = EconomyUtil.getInstance().getEconomy();
+                            economy.depositPlayer(player.getName(), refunding);
+                            if (player.isOnline()) {
+                                player.sendMessage(new String[]{
+                                    "Refunded #" + ChatColor.GOLD + structure.getId() + " "
+                                    + ChatColor.BLUE + structure.getName() + " "
+                                    + ChatColor.GOLD + ShopUtil.valueString(structure.getRefundValue()),
+                                    ChatColor.RESET + "Your new balance: " + ChatColor.GOLD + ShopUtil.valueString(economy.getBalance(player.getName()))
+                                });
+                            }
+                        }
+                    }
+                    structure.setRefundValue(0d);
+                    new StructureService().save(structure);
+                }
+                if (talk) {
+                    sender.sendMessage("Deposited " + ChatColor.GOLD + ShopUtil.valueString(Math.floor(structure.getRefundValue() / structure.getOwnerships(PlayerOwnership.Type.FULL).size())) + ChatColor.RESET + " to all owners");
+                }
+            
+        
     }
 
-    private void refundAll(CommandSender sender, String refunder) {
-//        // Note: only gets the structures with a refundValue > 0
-//        List<Structure> structures = getRefundables(refunder);
-//
-//        if (structures.isEmpty()) {
-//            sender.sendMessage(ChatColor.RED + "No refundable structures found for " + refunder);
-//            return;
-//        }
-//        Session session = null;
-//        Transaction tx = null;
-//        try {
-//            session = HibernateUtil.getSession();
-//            tx = session.beginTransaction();
-//            double totalRefunded = 0;
-//            for (Structure s : structures) {
-//                makeDeposit(sender, s, false);
-//                totalRefunded += s.getRefundValue();
-//                s.setPrice(0d);
-//                session.merge(s.getProgress());
-//            }
-//
-//            sender.sendMessage("Deposited " + ChatColor.GOLD + SettlerCraftUtil.valueString(totalRefunded) + ChatColor.RESET + " to " + ChatColor.GREEN + refunder);
-//            Player player = Bukkit.getPlayer(refunder);
-//            if (player != null && player.isOnline()) {
-//                sender.sendMessage("You have been refunded " + ChatColor.GOLD + SettlerCraftUtil.valueString(totalRefunded));
-//            }
-//
-//            tx.commit();
-//        } catch (HibernateException e) {
-//            try {
-//                tx.rollback();
-//            } catch (HibernateException rbe) {
-//                Logger.getLogger(AbstractService.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
-//            }
-//            throw e;
-//        } finally {
-//            if (session != null) {
-//                session.close();
-//            }
-//        }
-    }
-
-    private boolean refundPlayer(CommandSender sender, String[] args) {
-        if (args.length < 2) {
+    private boolean refund(CommandSender sender, String[] args) {
+        if (args.length == 1) {
             sender.sendMessage(ChatColor.RED + "Too few arguments!");
             sender.sendMessage(new String[]{
                 "Usage: ",
-                CCC + CMD + " refund [id] - refund the structure",
-                CCC + CMD + " refund [player] - refund all refundable structures of the player that were autoremoved"
+                CCC + CMD + " refund list [index] " + ChatColor.RESET + "- List refundable structures of all players",
+                CCC + CMD + " refund [id] " + ChatColor.RESET + "- refunds the structure to the owners",
+                CCC + CMD + " refund all " + ChatColor.RESET + "- refunds all structures that were \"autoremoved\""
             });
             return true;
-        } else if (args.length == 2) {
-            Long id;
-            try {
-                id = Long.parseLong(args[1]);
-
-            } catch (NumberFormatException nfe) {
-                String refunder = args[1];
-                refundAll(sender, refunder);
-                return true;
-            }
-            StructureService ss = new StructureService();
-            Structure structure = ss.getStructure(id);
-            if (structure == null) {
-                sender.sendMessage(ChatColor.RED + " Structure #" + ChatColor.GOLD + id + ChatColor.RED + " doesn't exist");
-                return true;
-            } else {
-                makeDeposit(sender, structure, true); // auto talks
-                structure.setPrice(0d);
-                ss.save(structure);
-            }
-        }
-
-        return true;
-    }
-
-    private boolean refund(CommandSender player, String[] args) {
-        if (args.length == 1) {
-            player.sendMessage(ChatColor.RED + "Too few arguments!");
-            player.sendMessage(new String[]{
-                "Usage: ",
-                CCC + CMD + " list [index] " + ChatColor.RESET + "- List refundable structures of all players",
-                CCC + CMD + " list [index][player] " + ChatColor.RESET + "- List all refundable structures of the player",
-                CCC + CMD + " refund [id] " + ChatColor.RESET + "- refunds the structure to the owner, whether they are auto-removed or not",
-                CCC + CMD + " refund [player] " + ChatColor.RESET + "- refunds all refundable structure of the player that were auto-removed",});
-            return true;
         } else if (args.length >= 2 && args.length < 5) {
-            if (args[1].equals("list")) {
-                return listRefundables(player, args);
+            if (args[1].equalsIgnoreCase("list")) {
+                return listRefundables(sender, args);
+            } else if(args[1].equalsIgnoreCase("all")){
+                refundAll(sender);
+                return true;
             } else {
-                return refundPlayer(player, args);
+                long sid;
+                try {
+                    sid = Integer.parseInt(args[1]);
+                } catch (NumberFormatException nfe) {
+                    sender.sendMessage(ChatColor.RED + "Invalid id");
+                    return true;
+                }
+                StructureService service = new StructureService();
+                Structure structure = service.getStructure(sid);
+                if(structure == null) {
+                    sender.sendMessage(ChatColor.RED + "No structure found with id #" + sid + "...");
+                    return true;
+                }
+                
+                if(structure.getState() != Structure.State.REMOVED) {
+                    sender.sendMessage(ChatColor.RED + "Structure isn't removed...");
+                    return true;
+                }
+                
+                if(!structure.getLog().isAutoremoved()) {
+                    sender.sendMessage(ChatColor.RED + "This structure can not be refunded...");
+                    return true;
+                }
+                refund(sender, structure);
+                return true;
             }
         } else {
-            player.sendMessage(ChatColor.RED + "Too many arguments");
-            player.sendMessage(new String[]{
+            sender.sendMessage(ChatColor.RED + "Too many arguments");
+            sender.sendMessage(new String[]{
                 "Usage: ",
-                CCC + CMD + " list [index] " + ChatColor.RESET + "- List refundable structures of all players",
-                CCC + CMD + " list [index][player] " + ChatColor.RESET + "- List all refundable structures of the player",
-                CCC + CMD + " refund [id] " + ChatColor.RESET + "- refunds the structure to the owner, whether they are auto-removed or not",
-                CCC + CMD + " refund [player] " + ChatColor.RESET + "- refunds all refundable structure of the player that were auto-removed",});
+                CCC + CMD + " refund list [index] " + ChatColor.RESET + "- List refundable structures of all players",
+                CCC + CMD + " refund [id] " + ChatColor.RESET + "- refunds the structure to the owners",
+                CCC + CMD + " refund all " + ChatColor.RESET + "- refunds all structures that were \"autoremoved\""
+            });
             return true;
         }
     }
 
-//    private String toPriceString(double value) {
-//        if (value < 1000) {
-//            return String.valueOf(value);
-//        } else if (value < 1E6) {
-//            return String.valueOf(Math.round(value / 1E3)) + "K";
-//        } else {
-//            return String.valueOf(Math.round(value / 1E6)) + "M";
-//        }
-//    }
     /**
      * Gets all the tasks that have been removed, but haven't been refunded (requires vault to
      * refund)
@@ -399,39 +402,54 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
      * @return A list of unrefunded tasks
      */
     public List<Structure> getRefundables() {
-//        Session session = HibernateUtil.getSession();
-//        JPQLQuery query = new HibernateQuery(session);
-//        QStructure qs = QStructure.structure;
-//        List<Structure> structures = query.from(qs).orderBy(qs.progress().removedAt.desc())
-//                .where(
-//                        qs.progress().progressStatus.eq(State.REMOVED)
-//                        .and(qs.refundValue.gt(0))
-//                        .and(qs.progress().autoRemoved.eq(Boolean.TRUE)))
-//                .list(qs);
-//        session.close();
-        return null;
+        Session session = HibernateUtil.getSession();
+        JPQLQuery query = new HibernateQuery(session);
+        QStructure qs = QStructure.structure;
+
+        List<Structure> structures = query.from(qs).orderBy(qs.logEntry().removedAt.desc())
+                .where(
+                        qs.state.eq(State.REMOVED)
+                        .and(qs.refundValue.gt(0))
+                        .and(qs.logEntry().autoremoved.eq(Boolean.TRUE))
+                ).list(qs);
+        session.close();
+        return structures;
     }
 
-    /**
-     * Gets all the tasks that have been removed, but haven't been refunded (requires vault to
-     * refund) from speficied owner
-     *
-     * @param owner The owner
-     * @return A list of unrefunded tasks
-     */
-    public List<Structure> getRefundables(String owner) {
-//        Session session = HibernateUtil.getSession();
-//        JPQLQuery query = new HibernateQuery(session);
-//        QStructure qs = QStructure.structure;
-//        List<Structure> structures = query.from(qs).orderBy(qs.progress().removedAt.desc())
-//                .where(
-//                        qs.progress().progressStatus.eq(State.REMOVED)
-//                        .and(qs.owner.eq(owner))
-//                        .and(qs.refundValue.gt(0))
-//                        .and(qs.progress().autoRemoved.eq(Boolean.TRUE))
-//                ).list(qs);
-//        session.close();
-        return null;
+    public List<Structure> getRefundables(Player player) {
+        Session session = HibernateUtil.getSession();
+        JPQLQuery query = new HibernateQuery(session);
+        QPlayerOwnership qpo = QPlayerOwnership.playerOwnership;
+
+        List<Structure> structures = query.from(qpo).orderBy(qpo.structure().logEntry().removedAt.desc())
+                .where(
+                        qpo.structure().state.eq(State.REMOVED)
+                        .and(qpo.structure().refundValue.gt(0))
+                        .and(qpo.structure().logEntry().autoremoved.eq(Boolean.TRUE))
+                ).list(qpo.structure());
+        session.close();
+        return structures;
     }
 
+//    /**
+//     * Gets all the tasks that have been removed, but haven't been refunded (requires vault to
+//     * refund) from speficied owner
+//     *
+//     * @param owner The owner
+//     * @return A list of unrefunded tasks
+//     */
+//    public List<Structure> getRefundables(UUID owner) {
+//        Session session = HibernateUtil.getSession();
+//        JPQLQuery query = new HibernateQuery(session);
+//        QPlayerOwnership qpo = QPlayerOwnership.playerOwnership;
+//        List<Structure> structures = query.from(qpo).orderBy(qpo.structure().logEntry().removedAt.desc())
+//                .where(
+//                        qpo.structure().state.eq(State.REMOVED)
+//                        .and(qpo.player.eq(owner))
+//                        .and(qpo.structure().refundValue.gt(0))
+//                        .and(qpo.structure().logEntry().autoremoved.eq(Boolean.TRUE))
+//                ).list(qpo.structure());
+//        session.close();
+//        return structures;
+//    }
 }

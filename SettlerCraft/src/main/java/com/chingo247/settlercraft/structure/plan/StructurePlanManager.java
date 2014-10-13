@@ -7,8 +7,8 @@ package com.chingo247.settlercraft.structure.plan;
 
 import com.chingo247.settlercraft.exception.StructureDataException;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
+import com.chingo247.settlercraft.structure.data.Elements;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
-import com.chingo247.settlercraft.structure.plan.data.Elements;
 import com.chingo247.settlercraft.structure.schematic.SchematicManager;
 import com.sk89q.worldedit.data.DataException;
 import java.io.File;
@@ -180,9 +180,8 @@ public class StructurePlanManager {
 
             Document d = DocumentHelper.createDocument();
             d.addElement(Elements.ROOT)
-                    .addElement(Elements.STRUCTUREAPI)
+                    .addElement(Elements.SETTLERCRAFT)
                     .addElement(Elements.SCHEMATIC)
-                    .addElement(Elements.STRUCTURE)
                     .setText(schematic.getName());
 
             File plan = new File(schematic.getParent(), FilenameUtils.getBaseName(schematic.getName()) + ".xml");

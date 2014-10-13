@@ -7,15 +7,15 @@ package com.chingo247.settlercraft.structure.plan;
 
 import com.chingo247.settlercraft.exception.StructureDataException;
 import com.chingo247.settlercraft.plugin.ConfigProvider;
-import com.chingo247.settlercraft.structure.plan.data.Elements;
-import com.chingo247.settlercraft.structure.plan.data.Nodes;
-import com.chingo247.settlercraft.structure.plan.data.SettlerCraftElement;
-import com.chingo247.settlercraft.structure.plan.holograms.StructureHologram;
-import com.chingo247.settlercraft.structure.plan.holograms.StructureHologramLoader;
-import com.chingo247.settlercraft.structure.plan.overview.StructureOverview;
-import com.chingo247.settlercraft.structure.plan.overview.StructureOverviewLoader;
-import com.chingo247.settlercraft.structure.plan.worldguard.StructureRegionFlag;
-import com.chingo247.settlercraft.structure.plan.worldguard.StructureRegionFlagLoader;
+import com.chingo247.settlercraft.structure.data.Elements;
+import com.chingo247.settlercraft.structure.data.Nodes;
+import com.chingo247.settlercraft.structure.data.SettlerCraftElement;
+import com.chingo247.settlercraft.structure.data.holograms.StructureHologram;
+import com.chingo247.settlercraft.structure.data.holograms.StructureHologramLoader;
+import com.chingo247.settlercraft.structure.data.overview.StructureOverview;
+import com.chingo247.settlercraft.structure.data.overview.StructureOverviewLoader;
+import com.chingo247.settlercraft.structure.data.worldguard.StructureRegionFlag;
+import com.chingo247.settlercraft.structure.data.worldguard.StructureRegionFlagLoader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -72,7 +72,7 @@ public class StructurePlan {
             set(Nodes.DESCRIPTION_NODE, description);
             set(Nodes.FACTION_NODE, faction);
             set(Nodes.PRICE_NODE, price);
-            set(Nodes.STRUCTURE_SCHEMATIC_NODE, schematic.getName());
+            set(Nodes.SCHEMATIC_NODE, schematic.getName());
 
             writer.write(configDoc);
 
@@ -223,7 +223,7 @@ public class StructurePlan {
     }
 
     private void handleSchematic(Document d) throws StructureDataException, FileNotFoundException {
-        Node schematicNode = d.selectSingleNode(Nodes.STRUCTURE_SCHEMATIC_NODE);
+        Node schematicNode = d.selectSingleNode(Nodes.SCHEMATIC_NODE);
         if (schematicNode == null) {
             throw new StructureDataException("Missing  Structure Schematic in " + configXML.getAbsolutePath());
         }

@@ -24,6 +24,7 @@ import com.chingo247.settlercraft.persistence.StructureService;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.StructureAPI;
 import static com.chingo247.settlercraft.structure.StructureAPI.overlapsStructures;
+import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership.Type;
 import com.chingo247.settlercraft.structure.entities.world.Dimension;
 import com.chingo247.settlercraft.structure.entities.world.Direction;
 import static com.chingo247.settlercraft.structure.entities.world.Direction.EAST;
@@ -45,10 +46,8 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -224,7 +223,7 @@ public class Structure implements Serializable {
         // Create structure
         Structure structure = new Structure(world, pos, direction, schematic);
         structure.setName(plan.getName() == null ? "Structure #" + structure.getId() : plan.getName());
-        structure.setPrice(plan.getPrice());
+        structure.setRefundValue(plan.getPrice());
 
         // Save structure
         StructureService ss = new StructureService();
@@ -266,7 +265,7 @@ public class Structure implements Serializable {
         }
         if (player != null) {
             try {
-                StructureAPI.makeOwner(player, structure);
+                StructureAPI.makeOwner(player, Type.FULL , structure);
             } catch (StructureException ex) {
                 Logger.getLogger(Structure.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -276,6 +275,8 @@ public class Structure implements Serializable {
         Bukkit.getPluginManager().callEvent(new StructureCreateEvent(structure));
         return structure;
     }
+    
+    
 
     /**
      * Gets the id of this structure
@@ -288,6 +289,28 @@ public class Structure implements Serializable {
 
     public StructureLog getLog() {
         return logEntry;
+    }
+
+    public void setRefundValue(Double refundValue) {
+        this.refundValue = refundValue;
+    }
+    
+    public Set<PlayerOwnership> getOwnerships() {
+        return getOwnerships(null);
+    }
+    
+    public Set<PlayerOwnership> getOwnerships(Type type) {
+        if(type == null) {
+            return new HashSet<>(ownerships);
+        } else {
+            Set<PlayerOwnership> owners = new HashSet<>();
+            for(PlayerOwnership ownership : ownerships) {
+                if(ownership.getOwnerType() == type) {
+                    owners.add(ownership);
+                }
+            }
+            return owners;
+        }
     }
 
     public State getState() {
@@ -336,30 +359,37 @@ public class Structure implements Serializable {
     }
 
     public boolean isOwner(Player player) {
+        return isOwner(player, null);
+    }
+    
+    public boolean isOwner(Player player, Type type) {
         for (PlayerOwnership pos : ownerships) {
-            if (pos.getUUID().equals(player.getUniqueId())) {
+            if(type == null && pos.getPlayerUUID().equals(player.getUniqueId())) {
+                return true;
+            }
+            
+            if (pos.getOwnerType() == type && pos.getPlayerUUID().equals(player.getUniqueId())) {
                 return true;
             }
         }
         return false;
     }
+    
 
     public boolean isMember(Player player) {
         for (PlayerOwnership pos : ownerships) {
-            if (pos.getUUID().equals(player.getUniqueId())) {
+            if (pos.getPlayerUUID().equals(player.getUniqueId())) {
                 return true;
             }
         }
         return false;
     }
 
-    public List<PlayerOwnership> getOwnerships() {
-        return new ArrayList<>(ownerships);
-    }
 
-    public boolean addOwner(Player player) {
+
+    public boolean addOwner(Player player, Type ownerType) {
         if(!isOwner(player)) {
-            ownerships.add(new PlayerOwnership(player, this));
+            ownerships.add(new PlayerOwnership(player, this, ownerType));
             return true;
         }
         return false;
@@ -369,7 +399,7 @@ public class Structure implements Serializable {
         Iterator<PlayerOwnership> it = ownerships.iterator();
         while (it.hasNext()) {
             PlayerOwnership pm = it.next();
-            if (pm.getUUID().equals(player.getUniqueId())) {
+            if (pm.getPlayerUUID().equals(player.getUniqueId())) {
                 it.remove();
                 return true;
             }
@@ -398,10 +428,6 @@ public class Structure implements Serializable {
 
         }
         return false;
-    }
-
-    public void setPrice(Double refundValue) {
-        this.refundValue = refundValue;
     }
 
     public Double getRefundValue() {
@@ -456,7 +482,7 @@ public class Structure implements Serializable {
      * @param location The location
      * @return the relative position from this structure
      */
-    public Vector getRelativePosition(com.sk89q.worldedit.util.Location location) {
+    public Vector getRelativePosition(Vector location) {
         switch (direction) {
             case NORTH:
                 return new BlockVector(
@@ -508,6 +534,10 @@ public class Structure implements Serializable {
     public String toString() {
         return "#" + ChatColor.GOLD + id + " " + ChatColor.BLUE + name + ChatColor.RESET;
 
+    }
+    
+    public String stringValue() {
+        return "#"+ id + " " + name;
     }
 
 }

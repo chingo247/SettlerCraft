@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.settlercraft.structure.plan.worldguard;
+package com.chingo247.settlercraft.structure.data.worldguard;
 
-import com.chingo247.settlercraft.structure.plan.data.Elements;
-import com.chingo247.settlercraft.structure.plan.data.SettlerCraftElement;
+import com.chingo247.settlercraft.structure.data.Elements;
+import com.chingo247.settlercraft.structure.data.SettlerCraftElement;
 import com.sk89q.worldguard.protection.flags.Flag;
 import org.dom4j.Element;
 import org.dom4j.tree.BaseElement;

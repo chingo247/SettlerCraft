@@ -62,12 +62,14 @@ import org.bukkit.inventory.ItemStack;
  */
 public class PlanListener implements Listener {
 
+   
+    
     private final Logger LOGGER = Logger.getLogger(PlanListener.class);
 
     @EventHandler
     public void onPlayerUsePlan(PlayerInteractEvent pie) {
         // Check if plan
-        ItemStack planstack = pie.getItem();
+        final ItemStack planstack = pie.getItem();
         if (!StructurePlan.isStructurePlan(planstack)) {
             return;
         }
@@ -97,7 +99,7 @@ public class PlanListener implements Listener {
             value *= planstack.getAmount();
             player.getInventory().remove(planstack);
             player.sendMessage(new String[]{ChatColor.RED + "This plan's data is missing...", SettlerCraft.MSG_PREFIX + "Refunded: " + ChatColor.GOLD + value});
-            EconomyUtil.getInstance().pay(player, value);
+            EconomyUtil.getInstance().pay(player.getUniqueId(), value);
             return;
         }
 
@@ -107,7 +109,7 @@ public class PlanListener implements Listener {
             value *= planstack.getAmount();
             player.getInventory().remove(planstack);
             player.sendMessage(new String[]{ChatColor.RED + "This plan's schematic is missing...", SettlerCraft.MSG_PREFIX + "Refunded: "+ ChatColor.GOLD + value});
-            EconomyUtil.getInstance().pay(player, value);
+            EconomyUtil.getInstance().pay(player.getUniqueId(), value);
             return;
         }
 
@@ -128,18 +130,28 @@ public class PlanListener implements Listener {
         try {
             Schematic schematic = SchematicManager.getInstance().getSchematic(plan.getSchematic());
             Location l = pie.getClickedBlock().getLocation();
+            
+            // CUI Select
             if(ls.hasCUISupport()) {
-                handleCUIPlayer(player, l, plan, schematic);
+                handleCUIPlayer(player, l, plan, schematic, planstack);
             } else if(Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null) {
-                handleHoloPlayer(player, l, plan, schematic);
+            // Hologram Select
+                handleHoloPlayer(player, l, plan, schematic, planstack);
             } else {
+            // No Selection
                 Vector pos = new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ());
+                
                 
                 AsyncStructureAPI.getInstance().create(player, plan, player.getWorld(), pos, WorldUtil.getDirection(player), new AsyncStructureAPI.StructureCallback() {
 
                     @Override
                     public void onComplete(Structure structure) {
-                        StructureAPI.build(player, structure);
+                        if(structure != null) {
+                            ItemStack clone = planstack.clone();
+                            clone.setAmount(1);
+                            player.getInventory().remove(clone);
+                            StructureAPI.build(player, structure);
+                        }
                     }
                 });
             }
@@ -220,7 +232,7 @@ public class PlanListener implements Listener {
 
 
 
-    private void handleCUIPlayer(final Player player, final Location location, StructurePlan plan, final Schematic schematic) {
+    private void handleCUIPlayer(final Player player, final Location location, StructurePlan plan, final Schematic schematic, final ItemStack planstack) {
         boolean toLeft = player.isSneaking();
         LocalPlayer localPlayer = WorldEditUtil.getLocalPlayer(player);
         LocalSession session = WorldEdit.getInstance().getSession(localPlayer);
@@ -253,6 +265,9 @@ public class PlanListener implements Listener {
                 public void onComplete(Structure structure) {
                     CUISelectionManager.getInstance().clear(player, false);
                     if (structure != null) {
+                        ItemStack clone = planstack.clone();
+                        clone.setAmount(1);
+                        player.getInventory().remove(clone);
                         StructureAPI.build(player, structure);
                     }
                 }
@@ -267,7 +282,7 @@ public class PlanListener implements Listener {
 
     }
 
-    private void handleHoloPlayer(final Player player, Location l, StructurePlan plan, Schematic schematic) {
+    private void handleHoloPlayer(final Player player, Location l, StructurePlan plan, Schematic schematic, final ItemStack planstack) {
         boolean toLeft = player.isSneaking();
         LocalPlayer localPlayer = WorldEditUtil.getLocalPlayer(player);
 
@@ -300,6 +315,9 @@ public class PlanListener implements Listener {
                     public void onComplete(Structure structure) {
                         SelectionManager.getInstance().clear(player, false);
                         if (structure != null) {
+                            ItemStack clone = planstack.clone();
+                            clone.setAmount(1);
+                            player.getInventory().remove(clone);
                             StructureAPI.build(player, structure);
                         }
                     }

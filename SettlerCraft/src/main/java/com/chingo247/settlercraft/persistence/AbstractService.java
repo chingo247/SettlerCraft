@@ -40,7 +40,7 @@ public abstract class AbstractService<T> {
         this.entityManager = entityManager;
     }
     
-    public T save(T t) {
+    protected T save(T t) {
         Session session = null;
         Transaction tx = null;
         try {
@@ -63,7 +63,7 @@ public abstract class AbstractService<T> {
         return t;
     }
 
-    public void delete(T t) {
+    protected void delete(T t) {
         Session session = HibernateUtil.getSession();
         session.delete(t);
         session.close();

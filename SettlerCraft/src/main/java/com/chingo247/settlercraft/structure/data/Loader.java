@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.chingo247.settlercraft.structure.plan;
+package com.chingo247.settlercraft.structure.data;
 
 import com.chingo247.settlercraft.exception.StructureDataException;
 import java.io.File;

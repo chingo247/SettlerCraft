@@ -12,9 +12,10 @@ import com.chingo247.settlercraft.persistence.PlayerOwnershipService;
 import com.chingo247.settlercraft.persistence.StructureService;
 import com.chingo247.settlercraft.structure.construction.ConstructionManager;
 import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership;
+import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership.Type;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
 import com.chingo247.settlercraft.structure.entities.world.Dimension;
-import com.chingo247.settlercraft.structure.plan.data.Nodes;
+import com.chingo247.settlercraft.structure.data.Nodes;
 import com.chingo247.settlercraft.util.WorldGuardUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
@@ -57,6 +58,7 @@ public class StructureAPI {
      *
      * @param uuid The uuid to backtrack this construction process
      * @param structure The structure
+     * @param force
      * @return true if succesfully started to build
      */
     public static boolean build(UUID uuid, Structure structure) {
@@ -79,7 +81,7 @@ public class StructureAPI {
             ConstructionManager.getInstance().build(uuid, structure, false);
         } catch (ConstructionException ex) {
             if (player != null) {
-                player.sendMessage(ex.getMessage());
+                player.sendMessage(ChatColor.RED + ex.getMessage());
             }
 
             return false;
@@ -95,6 +97,7 @@ public class StructureAPI {
      *
      * @param player The player that issues the build order
      * @param structure The structure to build
+     * @param force
      * @return true if succesfully started to build
      */
     public static boolean build(Player player, Structure structure) {
@@ -199,7 +202,7 @@ public class StructureAPI {
 
     }
 
-    public static void makeOwner(Player player, Structure structure) throws StructureException {
+    public static void makeOwner(Player player, Type type, Structure structure) throws StructureException {
         if (player == null) {
             throw new AssertionError("Null player");
         }
@@ -209,14 +212,14 @@ public class StructureAPI {
         StructureService service = new StructureService();
 
         if (structure.isOwner(player)) {
-            throw new StructureException(ChatColor.RED + "Player: " + player.getName() + " is already owner");
+            throw new StructureException("Player: " + player.getName() + " is already owner");
         }
         
          // WorldGuard
         RegionManager rmgr =  WorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(structure.getWorldName()));
         ProtectedRegion region = rmgr.getRegion(structure.getStructureRegion());
         if(region == null) {
-            throw new StructureException(structure + ", doesnt have a region");
+            throw new StructureException(structure.stringValue() + ", doesnt have a region");
         }
         
         LocalPlayer lp = WorldGuardUtil.getLocalPlayer(player);
@@ -226,7 +229,7 @@ public class StructureAPI {
         try {
             rmgr.save();
               // StructureAPI
-            structure.addOwner(player);
+            structure.addOwner(player, type);
             service.save(structure);
         } catch (ProtectionDatabaseException ex) {
             java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
@@ -243,14 +246,14 @@ public class StructureAPI {
         StructureService service = new StructureService();
 
         if (structure.isMember(player)) {
-            throw new StructureException(ChatColor.RED + "Player: " + player.getName() + " is already owner");
+            throw new StructureException("Player: " + player.getName() + " is already owner");
         }
         
         // WorldGuard
         RegionManager rmgr =  WorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(structure.getWorldName()));
         ProtectedRegion region = rmgr.getRegion(structure.getStructureRegion());
         if(region == null) {
-            throw new StructureException(structure + ", doesnt have a region");
+            throw new StructureException(structure.stringValue() + ", doesnt have a region");
         }
         
         LocalPlayer lp = WorldGuardUtil.getLocalPlayer(player);
@@ -279,13 +282,13 @@ public class StructureAPI {
         StructureService service = new StructureService();
 
         if (structure.isOwner(player)) {
-            throw new StructureException(ChatColor.RED + "Player: " + player.getName() + " is already owner");
+            throw new StructureException("Player: " + player.getName() + " is already owner");
         }
          // WorldGuard
         RegionManager rmgr =  WorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(structure.getWorldName()));
         ProtectedRegion region = rmgr.getRegion(structure.getStructureRegion());
         if(region == null) {
-            throw new StructureException(structure + ", doesnt have a region");
+            throw new StructureException(structure.stringValue() + ", doesnt have a region");
         }
         
         LocalPlayer lp = WorldGuardUtil.getLocalPlayer(player);
@@ -465,7 +468,7 @@ public class StructureAPI {
     public static void yellStatus(Structure structure) {
         PlayerOwnershipService pos = new PlayerOwnershipService();
         for (PlayerOwnership ownership : pos.getOwners(structure)) {
-            tellStatus(structure, Bukkit.getPlayer(ownership.getUUID()));
+            tellStatus(structure, Bukkit.getPlayer(ownership.getPlayerUUID()));
         }
     }
 

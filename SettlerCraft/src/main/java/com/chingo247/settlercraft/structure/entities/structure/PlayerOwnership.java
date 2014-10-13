@@ -23,16 +23,11 @@ import org.bukkit.entity.Player;
 @Entity
 public class PlayerOwnership implements Serializable {
     
-    public enum TYPE {
+    public enum Type {
         /**
-         * May modify parts of the structure
+         * May modify parts of the structure (Added to worldguard region)
          */
         BASIC,
-        /**
-         * May modify parts of the structure
-         * Gets a share when the structure is refunded
-         */
-        SHARED,
         /*
          * May modify parts of the structure
          * Gets a share when the structure is refunded
@@ -55,8 +50,8 @@ public class PlayerOwnership implements Serializable {
     @ManyToOne(cascade = CascadeType.ALL)
     private Structure structure;
     
+    private Type ownerType;
     
-
     /**
      * JPA Constructor.
      */
@@ -70,21 +65,23 @@ public class PlayerOwnership implements Serializable {
      * @param structure The structure
      * @param player Whether the owner is a isPlayer or not
      */
-    PlayerOwnership(Player player, Structure structure) {
+    PlayerOwnership(Player player, Structure structure, Type ownerType) {
         this.structure = structure;
         this.player = player.getUniqueId();
         this.name = player.getName();
         this.ownershipId = new PlayerOwnershipId(structure.getId(), player.getUniqueId());
+        this.ownerType = ownerType;
     }
 
-    
-    
+    public Type getOwnerType() {
+        return ownerType;
+    }
 
     public String getName() {
         return name;
     }
 
-    public UUID getUUID() {
+    public UUID getPlayerUUID() {
         return player;
     }
  

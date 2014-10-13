@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.chingo247.settlercraft.structure.plan.data;
+package com.chingo247.settlercraft.structure.data;
 
 /**
  *
@@ -14,7 +14,7 @@ public class Elements {
     private Elements(){}
     
     public static final String ROOT = "StructurePlan";
-    public static final String STRUCTUREAPI = "StructureAPI";
+    public static final String SETTLERCRAFT = "SettlerCraft";
     public static final String NAME = "Name";
     public static final String VALUE = "Value";
     public static final String DESCRIPTION = "Description";
@@ -28,7 +28,6 @@ public class Elements {
     public static final String STRUCTURE_HOLOGRAMS = "StructureHolograms";
     public static final String RESOURCES = "Resources";
     public static final String RESOURCE = "Resource";
-    public static final String STRUCTURE = "Structure";
     public static final String SCHEMATIC = "Schematic";
     public static final String WORLDGUARD = "WorldGuard";
     public static final String REGIONFLAGS = "RegionFlags";

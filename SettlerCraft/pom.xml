@@ -76,9 +76,9 @@
      <dependencies>
         <!--holographicDisplays-->
         <dependency>
-            <groupId>org.holographicdisplay</groupId>
-            <artifactId>holographicdisplay</artifactId>
-            <version>1.8.2</version>
+            <groupId>com.thirdparty</groupId>
+            <artifactId>holographic-displays</artifactId>
+            <version>1.8.7</version>
             <scope>provided</scope>
         </dependency>
         <!--AsyncWorldEdit-->
@@ -117,9 +117,9 @@
         </dependency>
         <!--Vault-->
         <dependency>
-            <groupId>org.vault</groupId>
-            <artifactId>Vault</artifactId>
-            <version>1.2.31</version>
+            <groupId>com.thirdparty</groupId>
+            <artifactId>vault</artifactId>
+            <version>1.4.1</version>
             <scope>provided</scope>
         </dependency>
         <!-- HSQLServer -->

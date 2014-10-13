@@ -16,20 +16,30 @@
  */
 package com.chingo247.settlercraft.bukkit.commands;
 
-import com.sc.module.menuapi.menus.menu.util.ShopUtil;
+import com.chingo247.settlercraft.exception.SettlerCraftException;
+import com.chingo247.settlercraft.exception.StructureException;
+import com.chingo247.settlercraft.persistence.HibernateUtil;
 import com.chingo247.settlercraft.persistence.StructureService;
+import com.chingo247.settlercraft.structure.StructureAPI;
+import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership;
+import com.chingo247.settlercraft.structure.entities.structure.QPlayerOwnership;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
-import com.chingo247.settlercraft.util.WorldEditUtil;
-import com.sk89q.worldedit.BlockVector;
+import com.chingo247.settlercraft.structure.entities.structure.Structure.State;
+import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.hibernate.HibernateQuery;
+import com.sc.module.menuapi.menus.menu.util.ShopUtil;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.util.Location;
+import java.util.Comparator;
 import java.util.List;
+import java.util.TreeSet;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.hibernate.Session;
 
 /**
  *
@@ -43,53 +53,97 @@ public class StructureCommandExecutor implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
-        if(! (cs instanceof Player)) {
-            cs.sendMessage("You are not a player!"); // Command is issued from server console
-            return true;
-        }
+        
         
         if (args.length == 0) {
             cs.sendMessage(ChatColor.RED + "Too few arguments");
             return true;
         }
         String arg = args[0];
-        Player player = (Player) cs;
+       
         switch (arg) {
             case "info":
-                return displayInfo(player, args);
+                return displayInfo(cs, args);
             case "list":
-                return displayStructures(player, args);
+                return displayStructures(cs, args);
             case "pos":
-                return getPos(player, args);
+                if(cs instanceof Player) {
+                    return getPos((Player)cs, args);
+                } else {
+                    cs.sendMessage(ChatColor.RED + "You need to be a player!");
+                    return true;
+                }
+            case "owner":
+                if(args.length > 4) {
+                    cs.sendMessage(ChatColor.RED + "Too many arguments!");
+                    return true;
+                }
+                
+                // stt owner [id] add [player]
+                if(args.length == 4 && args[2].equalsIgnoreCase("add")) {
+                    addOwner(cs, args);
+                    
+                // stt owner [id] remove [player]
+                } else if(args.length == 4 && args[2].equalsIgnoreCase("remove")) {
+                    removeOwner(cs, args);
+                    
+                // stt owner [id] list
+                } else if (args.length == 3 && args[2].equalsIgnoreCase("list")) {
+                    displayOwners(cs, args);
+                } else {
+                    String actionLast = "";
+                    for (String s : args) {
+                        actionLast += s + " ";
+                    }
+                    cs.sendMessage(ChatColor.RED + "No actions known for: " + actionLast);
+                    return true;
+                }
+                
+                
+                
+                
+                
+                    
+                        
+                
 //            case "flag":
 //                return flag(player, args);
 //            case "owner":
 //                return owner(player,args);
 
             default:
-                player.sendMessage(ChatColor.RED + "No actions known for: " + arg);
+                String actionLast = "";
+                    for (String s : args) {
+                        actionLast += s + " ";
+                    }
+                    cs.sendMessage(ChatColor.RED + "No actions known for: " + actionLast);
                 return true;
         }
     }
 
-    private boolean displayStructures(Player player, String[] args) {
+    private boolean displayStructures(CommandSender sender, String[] args) {
         List<Structure> structures;
         
-        // Who are do we want?
+        // Who's structures do we want?
         if (args.length < 3) { // =>> ME!
-            structures = listStructures(player);
+            if(sender instanceof Player) {
+                structures = getStructures((Player)sender);
+            } else {
+                sender.sendMessage(ChatColor.RED + "No player name was provided!");
+                return true;
+            }
         } else if (args.length == 3) { // 2 || 3
             String playerName = args[2];
             Player ply = Bukkit.getPlayer(playerName);
             if (ply == null) {
-                player.sendMessage(ChatColor.RED + "Player doesn't exist!");
+                sender.sendMessage(ChatColor.RED + "Player doesn't exist!");
                 return true;
             } else {
-                structures = listStructures(ply);
+                structures = getStructures(ply);
             }
         } else {
-            player.sendMessage(ChatColor.RED + "Too many arguments!");
-            player.sendMessage(new String[]{
+            sender.sendMessage(ChatColor.RED + "Too many arguments!");
+            sender.sendMessage(new String[]{
                 "Usage:",
                 CCC + CMD + " list " + ChatColor.RESET + " - Display a list of your structure at index 1",
                 CCC + CMD + " list [index] " + ChatColor.RESET + " - Display a list of your structures at given index",
@@ -102,7 +156,7 @@ public class StructureCommandExecutor implements CommandExecutor {
         int amountOfStructures = structures.size();
         if (amountOfStructures == 0) {
             // Nothing to display...
-            player.sendMessage(ChatColor.RED + "No structures found...");
+            sender.sendMessage(ChatColor.RED + "No structures found...");
             return true;
         } else {
             // Now get the index
@@ -114,14 +168,14 @@ public class StructureCommandExecutor implements CommandExecutor {
                 try {
                     index = Integer.parseInt(args[1]);
                 } catch (NumberFormatException nfe) {
-                  player.sendMessage(ChatColor.RED + "Invalid index");
+                  sender.sendMessage(ChatColor.RED + "Invalid index");
                   return true;
                 }
             } 
             String[] message = new String[MAX_LINES];
             int pages = (amountOfStructures / (MAX_LINES - 1)) + 1;
              if (index > pages || index <= 0) {
-                player.sendMessage(ChatColor.RED + "Page " + index + " out of " + pages +"...");
+                sender.sendMessage(ChatColor.RED + "Page " + index + " out of " + pages +"...");
                 return true;
             } 
             
@@ -139,21 +193,21 @@ public class StructureCommandExecutor implements CommandExecutor {
                 message[line] = l;
                 line++;
             }
-            player.sendMessage(message);
+            sender.sendMessage(message);
         }
         return true;
     }
 
-    private List<Structure> listStructures(Player player) {
-//        Session session = HibernateUtil.getSession();
-//        JPQLQuery query = new HibernateQuery(session);
-//        QStructure qs = QStructure.structure;
-//        List<Structure> structures = query.from(qs).where(qs.owner.eq(player.getName()).and(qs.progress().progressStatus.ne(State.REMOVED))).list(qs);
-//        session.close();
-        return null;
+    private List<Structure> getStructures(Player player) {
+        Session session = HibernateUtil.getSession();
+        JPQLQuery query = new HibernateQuery(session);
+        QPlayerOwnership qpo = QPlayerOwnership.playerOwnership;
+        List<Structure> structures = query.from(qpo).where(qpo.player.eq(player.getUniqueId()).and(qpo.structure().state.ne(State.REMOVED))).list(qpo.structure());
+        session.close();
+        return structures;
     }
 
-    private boolean displayInfo(Player player, String[] args) {
+    private boolean displayInfo(CommandSender sender, String[] args) {
         StructureService service = new StructureService();
         Structure structure;
 
@@ -162,27 +216,69 @@ public class StructureCommandExecutor implements CommandExecutor {
             try {
                 id = Long.parseLong(args[1]);
             } catch (NumberFormatException nfe) {
-                player.sendMessage(ChatColor.RED + "Invalid id");
+                sender.sendMessage(ChatColor.RED + "Invalid id");
                 return true;
             }
             structure = service.getStructure(id);
-        } else if (args.length == 1) {
+            if(structure == null) {
+                sender.sendMessage(ChatColor.RED + "No structure found with id #" + id);
+                return true;
+            }
+        } else if (args.length == 1 && (sender instanceof Player)) {
+            Player player = (Player) sender;
             structure = service.getStructure(player.getLocation());
             if (structure == null) {
-                player.sendMessage(ChatColor.RED + " Currently not within a structure");
+                sender.sendMessage(ChatColor.RED + " Currently not within a structure");
                 return true;
             }
         } else {
-            player.sendMessage(ChatColor.RED + "Too many arguments!");
+            sender.sendMessage(ChatColor.RED + "Too many arguments!");
             return true;
         }
 
         String valueString = ShopUtil.valueString(structure.getRefundValue());
 
-        player.sendMessage("#" + ChatColor.GOLD + structure.getId() + " "
+        sender.sendMessage("#" + ChatColor.GOLD + structure.getId() + " "
                 + ChatColor.BLUE + structure.getName()+ ChatColor.RESET
-                + " Value: " + ChatColor.GOLD + valueString);
+                + " Value: " + ChatColor.GOLD + valueString + ChatColor.WHITE + " State: " + statusString(structure.getState()));
         return true;
+    }
+    
+    public String statusString(State state) {
+        String statusString;
+      
+        switch (state) {
+            case BUILDING:
+                statusString = ChatColor.YELLOW + "BUILDING: ";
+                break;
+            case DEMOLISHING:
+                statusString = ChatColor.YELLOW + "DEMOLISHING: ";
+                break;
+            case COMPLETE:
+                statusString = "Construction " + ChatColor.GREEN + "COMPLETE";
+                break;
+            case INITIALIZING:
+                statusString = ChatColor.YELLOW + "INITIALIZING: " + ChatColor.RESET;
+                break;
+            case LOADING_SCHEMATIC:
+                statusString = ChatColor.YELLOW + "LOADING SCHEMATIC: " + ChatColor.RESET;
+                break;
+            case PLACING_FENCE:
+                statusString = ChatColor.YELLOW + "PLACING FENCE: " + ChatColor.RESET;
+                break;
+            case QUEUED:
+                statusString = ChatColor.YELLOW + "QUEUED: " + ChatColor.RESET ;
+                break;
+            case REMOVED:
+                statusString = ChatColor.RED + "REMOVED: " + ChatColor.RESET;
+                break;
+            case STOPPED:
+                statusString = ChatColor.RED + "STOPPED: " + ChatColor.RESET ;
+                break;
+            default:
+                statusString = state.name();
+        }
+        return statusString;
     }
 
     private boolean getPos(Player player, String[] args) {
@@ -214,7 +310,8 @@ public class StructureCommandExecutor implements CommandExecutor {
             player.sendMessage(ChatColor.RED + "Too many arguments!");
             return true;
         }
-        Vector pos = structure.getRelativePosition(new Location(WorldEditUtil.getWorld(player.getWorld().getName()), new BlockVector(player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ())));
+        Location loc = player.getLocation();
+        Vector pos = structure.getRelativePosition(new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
 
         player.sendMessage("#" + ChatColor.GOLD + structure.getId() + " "
                 + ChatColor.BLUE + structure.getName()
@@ -226,421 +323,143 @@ public class StructureCommandExecutor implements CommandExecutor {
 
         return true;
     }
+
+    private Structure getStructureFromString(CommandSender sender, String structureId) throws SettlerCraftException {
+        Long id;
+        try {
+            id = Long.parseLong(structureId);
+        } catch (NumberFormatException nfe){
+            throw new SettlerCraftException("Invalid id");
+        }
+        Structure structure = new StructureService().getStructure(id);
+        if(structure == null) {
+            throw new SettlerCraftException("No structure found for id #" + id);
+        }
+        return structure;
+    }
 //
-//    private boolean flag(Player player, String[] args) {
-//        /**
-//         * /stt flag [id] /stt flag [id] add [flag] /stt flag [id] remove [flag]
-//         */
-//        StructureService ss = new StructureService();
-//        Structure structure;
-//        if (args.length == 1) {
-//            player.sendMessage(ChatColor.RED + "Too few arguments");
-//            return true;
-//        } else if (args.length >= 2) {
-//            Long id;
-//            try {
-//                id = Long.parseLong(args[1]);
-//            } catch (NumberFormatException nfe) {
-//                player.sendMessage(ChatColor.RED + "Invalid structure id");
-//                return true;
-//            }
-//            structure = ss.getStructure(id);
-//            if (structure == null) {
-//                player.sendMessage(ChatColor.RED + "Structure with #" + ChatColor.GOLD + id + " " + ChatColor.RED + " not found");
-//                return true;
-//            }
-//            if (args.length == 2) {
-//                return displayFlags(player, structure);
-//            } else if (args.length == 5 || args.length == 4) {
-//                return setFlag(player, structure, args);
-//            }
-//
-//        }
-//        // Error clause
-//        if (args.length < 5) {
-//            player.sendMessage(ChatColor.RED + "Too few arguments");
-//        } else {
-//            player.sendMessage(ChatColor.RED + "Too many arguments");
-//        }
-//
-//        player.sendMessage(new String[]{
-//            ChatColor.RED + "Usage: ",
-//            ChatColor.RED + "/stt flag [id]",
-//            ChatColor.RED + "/stt flag [id] add [flag][value]",
-//            ChatColor.RED + "/stt flag [id] remove [flag]"
-//        });
-//        return true;
-//
-//    }
-//
-//    private boolean displayFlags(Player player, Structure structure) {
-//        World world = Bukkit.getWorld(structure.getWorldName());
-//        RegionManager rmgr = WorldGuardUtil.getGlobalRegionManager(world);
-//        ProtectedRegion region = rmgr.getRegion(structure.getStructureRegion());
-//        if (region == null) {
-//            player.sendMessage(ChatColor.RED + "#" + ChatColor.GOLD + structure.getId()
-//                    + " " + ChatColor.BLUE + structure.getName()
-//                    + " " + ChatColor.RED + "doesnt have a region!"
-//            );
-//            return true;
-//        } else {
-//            Map<Flag<?>, Object> flags = region.getFlags();
-//            String fs = "";
-//            if(flags.isEmpty()) {
-//                fs += ChatColor.RED + "(none)";
-//            } else {
-//            int count = 0;
-//            for (Flag f : flags.keySet()) {
-//                fs += ChatColor.YELLOW + f.getName() + ": " + ChatColor.RESET + flags.get(f);
-//                count++;
-//                if (count < flags.size()) {
-//                    fs += ", ";
-//                }
-//            }
-//            }
-//
-//            player.sendMessage(new String[]{
-//                "Id: " + ChatColor.GOLD + structure.getId() + ChatColor.RESET +  "Plan: " + ChatColor.BLUE + structure.getName(),
-//                "Flags: " + fs
-//            });
-//            return true;
-//        }
-//    }
-//
-//    /**
-//     * Sets flags, contains snippets of worldguards code
-//     * @param player The player
-//     * @param structure The structure
-//     * @param args The arguments...
-//     * @return 
-//     */
-//    private boolean setFlag(Player player, Structure structure, String[] args) {
-//        // args.length == 4
-//        World world = Bukkit.getWorld(structure.getWorldName());
-//        
-//        if(world == null) {
-//            player.sendMessage(ChatColor.RED + "Structure doesnt have a world anymore...");
-//            return true;
-//        }
-//        
-//        String flagName = args[3];
-//        if(args.length == 4 && args[2].equals("add")) {
-//            player.sendMessage(ChatColor.RED + "Too few arguments!");
-//            return true;
-//        }
-//        
-//        RegionPermissionModel permModel = WorldGuardUtil.getRegionPermissionModel(player);
-//        RegionManager rmgr = WorldGuardUtil.getGlobalRegionManager(world);
-//        ProtectedRegion region = rmgr.getRegion(structure.getStructureRegion());
-//        if(region == null) {
-//            player.sendMessage(ChatColor.RED + "#" 
-//                    + ChatColor.GOLD + structure.getId() + " "
-//                    + ChatColor.BLUE + structure.getName() + " "
-//                    + ChatColor.RED + "doesn't have a region!"
-//            );
-//            return true;
-//        }
-//        
-//        if(!permModel.maySetFlag(region)) {
-//            player.sendMessage(ChatColor.RED + "You dont have the permission to do that!");
-//            return true;
-//        }
-//        
-//        Flag<?> foundFlag = DefaultFlag.fuzzyMatchFlag(flagName);
-//        
-//        // We didn't find the flag, so let's print a list of flags that the user
-//        // can use, and do nothing afterwards
-//        if (foundFlag == null) {
-//            StringBuilder list = new StringBuilder();
-//
-//            // Need to build a list
-//            for (Flag<?> flag : DefaultFlag.getFlags()) {
-//                // Can the user set this flag?
-//                if (!permModel.maySetFlag(region, flag)) {
-//                    continue;
-//                }
-//
-//                if (list.length() > 0) {
-//                    list.append(", ");
-//                }
-//                
-//                list.append(flag.getName());
-//            }
-//
-//            player.sendMessage(ChatColor.RED + "Unknown flag specified: " + flagName);
-//            player.sendMessage(ChatColor.RED + "Available flags: " + list);
-//            
-//            return true;
-//        }
-//        
-//        if (!permModel.maySetFlag(region, foundFlag)) {
-//            player.sendMessage(ChatColor.RED + "You dont have the permission to set this flag!");
-//            return true;
-//        }
-//        
-//        
-//        if(args[2].equals("add")) {
-//            String flagValue = args[4];
-//            // Set the flag if [value] was given even if [-g group] was given as well
-//            try {
-//                setFlag(region, foundFlag, player, flagValue);
-//            } catch (InvalidFlagFormat e) {
-//                player.sendMessage(e.getMessage());
-//            }
-//
-//            player.sendMessage(ChatColor.YELLOW
-//                    + "Region flag " + foundFlag.getName() + " set on #" + ChatColor.GOLD + 
-//                    structure.getId() + " " + ChatColor.BLUE + structure.getName() + ChatColor.YELLOW + "' to '" + flagValue + "'.");
-//            return true;
-//        } else if (args[2].equals("remove")) {
-//            // Clear the flag only if neither [value] nor [-g group] was given
-//            region.setFlag(foundFlag, null);
-//
-//            // Also clear the associated group flag if one exists
-//            RegionGroupFlag groupFlag = foundFlag.getRegionGroupFlag();
-//            if (groupFlag != null) {
-//                region.setFlag(groupFlag, null);
-//            }
-//
-//            player.sendMessage(ChatColor.YELLOW
-//                    + "Region flag " + foundFlag.getName() + " removed from #" +
-//                    ChatColor.GOLD + structure.getId() + " " + ChatColor.BLUE + structure.getName() + ChatColor.YELLOW + "'. (Any groups were also removed.)");
-//        } else {
-//            player.sendMessage(new String[]{
-//                ChatColor.RED + "Usage: ",
-//                ChatColor.RED + "/stt flag [id] remove [flag]",
-//                ChatColor.RED + "/stt flag [id] add [flag][value]"
-//            });
-//        }
-//        
-//        return true;
-//    }
-//    
-//     /**
-//     * WorldGuard Utility method to set a flag.
-//     * 
-//     * @param region the region
-//     * @param flag the flag
-//     * @param sender the sender
-//     * @param value the value
-//     * @throws InvalidFlagFormat thrown if the value is invalid
-//     */
-//    private static <V> void setFlag(ProtectedRegion region,
-//            Flag<V> flag, CommandSender sender, String value)
-//                    throws InvalidFlagFormat {
-//        region.setFlag(flag, flag.parseInput(WorldGuardPlugin.inst(), sender, value));
-//    }
-//
-//    private boolean owner(Player player, String[] args) {
-//        /**
-//         * /stt owner [id]
-//         * /stt owner [id] add [playerName]
-//         * /stt owner [id] remove [playerName]
-//         */
-//        if(args.length < 2 || args.length == 3) {
-//            player.sendMessage(ChatColor.RED + "Too few arguments");
-//            return true;
-//        }
-//        
-//        Long id;
-//        try {
-//            id = Long.parseLong(args[1]);
-//        } catch(NumberFormatException nfe) {
-//            player.sendMessage(ChatColor.RED + "Invalid structure id");
-//            return true;
-//        }
-//        
-//        StructureService service = new StructureService();
-//        Structure structure = service.getStructure(id);
-//        
-//        if(structure == null) {
-//            player.sendMessage(ChatColor.RED + "Structure not found...");
-//            return true;
-//        }
-//        
-//        if(args.length == 2) {
-//            return displayOwners(player, structure);
-//        } else if(args.length == 4) {
-//            if(args[2].equals("add")) {
-//            return addOwner(player, structure, args);
-//            } else if(args[2].equals("remove")) {
-//                return removeOwner(player, structure, args);
-//            } else {
-//                player.sendMessage(ChatColor.RED + "Invalid argument '" + args[2] + "'");
-//                return true;
-//            }
-//        } else {
-//            player.sendMessage(ChatColor.RED + "Too many arguments!");
-//            return true;
-//        }
-//    }
-//
-//    private boolean displayOwners(Player player, Structure structure) {
-////        World world = Bukkit.getWorldName(structure.getWorldName());
-////        if(world == null) {
-////            player.sendMessage(ChatColor.RED + "Structure doesnt have a world anymore...");
-////            return true;
-////        }
-////        
-////        RegionManager rmgr = WorldGuardUtil.getGlobalRegionManager(world);
-////        ProtectedRegion region = rmgr.getRegion(structure.getStructureRegion());
-////        if(region == null) {
-////            player.sendMessage(ChatColor.RED + "#" 
-////                    + ChatColor.GOLD + structure.getId() + " "
-////                    + ChatColor.BLUE + structure.getPlan().getDisplayName() + " "
-////                    + ChatColor.RED + "doesn't have a region!"
-////            );
-////            return true;
-////        }
-////        
-////        Set<String> players = StructureManager.getInstance().getOwners(structure);
-////        String owners = "";
-////        if(players.isEmpty()) {
-////            owners = ChatColor.RED + "(none)";
-////        } else {
-////            int count = 0;
-////            for(String ply : players) {
-////                owners += ply;
-////                count++;
-////                if(count < players.size()) {
-////                    owners += ",";
-////                }
-////            }
-////        }
-////        
-////        
-////        player.sendMessage(new String[]{
-////                "Id: " + ChatColor.GOLD + structure.getId() + ChatColor.RESET +  "Plan: " + ChatColor.BLUE + structure.getPlan().getDisplayName(),
-////                "Owners: " + owners
-////        });
-//        return true;
-//    }
-//
-//    private boolean addOwner(Player player, Structure structure, String[] args) {
-//        WorldGuardPlugin plugin = WorldGuardUtil.getWorldGuard();
-//        World world = Bukkit.getWorld(structure.getWorldName());
-//        if(world == null) {
-//            player.sendMessage(ChatColor.RED + "Structure doesnt have a world anymore...");
-//            return true;
-//        }
-//        
-//        RegionManager rmgr = WorldGuardUtil.getGlobalRegionManager(world);
-//        ProtectedRegion region = rmgr.getRegion(structure.getStructureRegion());
-//        if(region == null) {
-//            player.sendMessage(ChatColor.RED + "#" 
-//                    + ChatColor.GOLD + structure.getId() + " "
-//                    + ChatColor.BLUE + structure.getName() + " "
-//                    + ChatColor.RED + "doesn't have a region!"
-//            );
-//            return true;
-//        }
-//        
-//        
-//        String ply = args[3];
-//        Boolean flag = region.getFlag(DefaultFlag.BUYABLE);
-//        
-//        String id = structure.getStructureRegion();
-//        LocalPlayer localPlayer = WorldGuardUtil.getLocalPlayer(player);
-//        DefaultDomain owners = region.getOwners();
-//        if (localPlayer != null) {
-//            if (flag != null && flag && owners != null && owners.size() == 0) {
-//                try {
-//                    if (!plugin.hasPermission(player, "worldguard.region.unlimited")) {
-//                        int maxRegionCount = plugin.getGlobalStateManager().get(world).getMaxRegionCount(player);
-//                        if (maxRegionCount >= 0 && rmgr.getRegionCountOfPlayer(localPlayer)
-//                                >= maxRegionCount) {
-//                            player.sendMessage("You already own the maximum allowed amount of regions.");
-//                        }
-//                    }
-//                    plugin.checkPermission(player, "worldguard.region.addowner.unclaimed." + id.toLowerCase());
-//                } catch (CommandPermissionsException ex) {
-//                    player.sendMessage(ChatColor.RED + "You dont have the permission");
-//                    return true;
-//                }
-//            } else {
-//                try {
-//                if (region.isOwner(localPlayer)) {
-//                    plugin.checkPermission(player, "worldguard.region.addowner.own." + id.toLowerCase());
-//                } else if (region.isMember(localPlayer)) {
-//                    plugin.checkPermission(player, "worldguard.region.addowner.member." + id.toLowerCase());
-//                } else {
-//                    plugin.checkPermission(player, "worldguard.region.addowner." + id.toLowerCase());
-//                }
-//                } catch(CommandPermissionsException ex) {
-//                    player.sendMessage(ChatColor.RED + "You dont have the permission");
-//                    return true;
-//                }
-//                
-//            }
-//        }
-//        
-//        RegionDBUtil.addToDomain(region.getOwners(), new String[]{ply}, 0);
-//
-//        player.sendMessage(ChatColor.YELLOW
-//                +  "Region #" + ChatColor.GOLD + structure.getId() + " "+ ChatColor.BLUE + structure.getName() + ChatColor.YELLOW  + " updated.");
-//
-//        try {
-//            rmgr.save();
-//        } catch (ProtectionDatabaseException e) {
-//            player.sendMessage("Failed to write regions: "+ e.getMessage());
-//        }
-//        
-//        return true;
-//        
-//    }
-//
-//    private boolean removeOwner(Player player, Structure structure, String[] args) {
-//        WorldGuardPlugin plugin = WorldGuardUtil.getWorldGuard();
-//        World world = Bukkit.getWorld(structure.getWorldName());
-//        if(world == null) {
-//            player.sendMessage(ChatColor.RED + "Structure doesnt have a world anymore...");
-//            return true;
-//        }
-//        
-//        RegionManager rmgr = WorldGuardUtil.getGlobalRegionManager(world);
-//        ProtectedRegion region = rmgr.getRegion(structure.getStructureRegion());
-//        if(region == null) {
-//            player.sendMessage(ChatColor.RED + "#" 
-//                    + ChatColor.GOLD + structure.getId() + " "
-//                    + ChatColor.BLUE + structure.getName() + " "
-//                    + ChatColor.RED + "doesn't have a region!"
-//            );
-//            return true;
-//        }
-//        
-//        
-//        String ply = args[3];
-//        Player p = Bukkit.getPlayer(ply);
-//        if(p == null) {
-//            player.sendMessage(ChatColor.RED + "Player " + ply + " doesn't exist");
-//            return true;
-//        }
-//        String id = structure.getStructureRegion();
-//        LocalPlayer localPlayer = WorldGuardUtil.getLocalPlayer(player);
-//        
-//        if (localPlayer != null) {
-//            try {
-//            if (region.isOwner(localPlayer)) {
-//                plugin.checkPermission(player, "worldguard.region.removeowner.own." + id.toLowerCase());
-//            } else if (region.isMember(localPlayer)) {
-//                plugin.checkPermission(player, "worldguard.region.removeowner.member." + id.toLowerCase());
-//            } else {
-//                plugin.checkPermission(player, "worldguard.region.removeowner." + id.toLowerCase());
-//            }
-//            } catch (CommandPermissionsException ex) {
-//                player.sendMessage(ChatColor.RED + "You don't have the permission");
-//            }
-//        }
-//
-//        player.sendMessage(ChatColor.YELLOW
-//                + "Region #" + ChatColor.GOLD + structure.getId() + " "+ ChatColor.BLUE + structure.getName() + ChatColor.YELLOW  + " updated.");
-//        RegionDBUtil.removeFromDomain(region.getOwners(), new String[]{ply}, 0);
-//        try {
-//            rmgr.save();
-//        } catch (ProtectionDatabaseException e) {
-//            player.sendMessage("Failed to write regions: "
-//                    + e.getMessage());
-//        }
-//        return true;
-//    }
+    private boolean displayOwners(CommandSender sender, String[] args) {
+        
+        Comparator<PlayerOwnership> ownerComp = new Comparator<PlayerOwnership>() {
+
+            @Override
+            public int compare(PlayerOwnership o1, PlayerOwnership o2) {
+                return new Integer(o2.getOwnerType().ordinal()).compareTo(o1.getOwnerType().ordinal());
+            }
+        };
+        Structure structure;
+        try {
+            structure = getStructureFromString(sender, args[1]);
+        } catch (SettlerCraftException ex) {
+            sender.sendMessage(ChatColor.RED + ex.getMessage());
+            return true;
+        }
+        
+        
+        
+        TreeSet<PlayerOwnership> owners = new TreeSet<>(ownerComp);
+        
+        owners.addAll(structure.getOwnerships());
+        
+        
+        
+        String ownersString = "";
+        if(owners.isEmpty()) {
+            ownersString = ChatColor.RED + "(none)";
+        } else {
+            int count = 0;
+            for(PlayerOwnership ply : owners) {
+                if(ply.getOwnerType() == PlayerOwnership.Type.FULL) {
+                    ownersString += ChatColor.GOLD + ply.getName();
+                } else {
+                    ownersString += ChatColor.GREEN + ply.getName();
+                }
+                ownersString += ply;
+                count++;
+                if(count < owners.size()) {
+                    ownersString += ",";
+                }
+            }
+        }
+        
+        
+        sender.sendMessage(new String[]{
+                structure.toString(),
+                ChatColor.WHITE + "Owners: " + ownersString
+        });
+        return true;
+    }
+
+    private boolean addOwner(CommandSender sender, String[] args) {
+       
+        Structure structure;
+        try {
+            structure = getStructureFromString(sender, args[1]);
+        } catch (SettlerCraftException ex) {
+            sender.sendMessage(ChatColor.RED + ChatColor.stripColor(ex.getMessage()));
+            return true;
+        }
+        
+         // Command is executed by a player, permission?
+        if(sender instanceof Player) {
+            Player player = (Player) sender;
+            if(!structure.isOwner(player, PlayerOwnership.Type.FULL)) {
+                sender.sendMessage(ChatColor.RED + "You need to have FULL ownership to add/remove other owners");
+                return true;
+            }
+            
+        }
+        
+        Player player = Bukkit.getPlayer(args[3]);
+        if(player == null) {
+            sender.sendMessage(ChatColor.RED + "Player '"+args[3]+"' doesn't exist!");
+            return true;
+        }
+        try {
+            StructureAPI.makeOwner(player, PlayerOwnership.Type.BASIC, structure);
+        } catch (StructureException ex) {
+            sender.sendMessage(ChatColor.RED + ChatColor.stripColor(ex.getMessage()));
+        }
+        
+        
+        
+        
+        return true;
+        
+    }
+
+    private boolean removeOwner(CommandSender sender, String[] args) {
+       
+        
+        Structure structure;
+        try {
+            structure = getStructureFromString(sender, args[1]);
+        } catch (SettlerCraftException ex) {
+            sender.sendMessage(ChatColor.RED + ex.getMessage());
+            return true;
+        }
+        
+         // Command is executed by a player, permission?
+        if(sender instanceof Player) {
+            Player player = (Player) sender;
+            if(!structure.isOwner(player, PlayerOwnership.Type.FULL)) {
+                sender.sendMessage(ChatColor.RED + "You need to have FULL ownership to add/remove other owners");
+                return true;
+            }
+            
+        }
+        
+        Player player = Bukkit.getPlayer(args[3]);
+        if(player == null) {
+            sender.sendMessage(ChatColor.RED + "Player '"+args[3]+"' doesn't exist!");
+            return true;
+        }
+        try {
+            StructureAPI.removeOwner(player, structure);
+        } catch (StructureException ex) {
+            sender.sendMessage(ChatColor.RED + ex.getMessage());
+        }
+        
+        return true;
+    }
 }

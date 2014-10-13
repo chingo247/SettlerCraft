@@ -13,6 +13,7 @@ import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.StructureAPI;
 import com.chingo247.settlercraft.structure.asyncworldedit.SCAsyncCuboidClipboard;
 import com.chingo247.settlercraft.structure.asyncworldedit.SCJobEntry;
+import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
 import com.chingo247.settlercraft.structure.entities.structure.Structure.State;
 import com.chingo247.settlercraft.structure.entities.world.Direction;
@@ -27,6 +28,7 @@ import com.chingo247.settlercraft.util.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.util.SchematicUtil;
 import com.chingo247.settlercraft.util.WorldEditUtil;
 import com.chingo247.settlercraft.util.WorldGuardUtil;
+import com.sc.module.menuapi.menus.menu.util.EconomyUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.LocalPlayer;
@@ -45,6 +47,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -72,7 +75,7 @@ import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
  *
  * @author Chingo
  */
-public class ConstructionManager implements Listener {
+public class ConstructionManager {
 
     private final Map<Long, ConstructionEntry> constructionEntries = Collections.synchronizedMap(new HashMap<Long, ConstructionEntry>());
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -83,6 +86,7 @@ public class ConstructionManager implements Listener {
 
     private ConstructionManager() {
         final BlockPlacer pb = AsyncWorldEditMain.getInstance().getBlockPlacer();
+        Bukkit.getPluginManager().registerEvents(new StructureListener(), SettlerCraft.getInstance());
         pb.addListener(new IBlockPlacerListener() {
 
             @Override
@@ -102,15 +106,23 @@ public class ConstructionManager implements Listener {
                         // Set state to complete & Create timestamp of completion
                         Structure structure = entry.getStructure();
 
-                        if(structure.getState() != State.COMPLETE) {
-                        structure.getLog().setCompletedAt(new Date());
-                        structure.setState(State.COMPLETE);
-                        structureService.save(structure);
+                        System.out.println("State: " + structure.getState());
+                        System.out.println("IsDemoishing: " + entry.isDemolishing());
 
+                        if (structure.getState() != State.COMPLETE && !entry.isDemolishing()) {
+                            structure.getLog().setCompletedAt(new Date());
+                            structure.setState(State.COMPLETE);
+                            structureService.save(structure);
                             constructionEntries.remove(structure.getId());
-
                         }
-                       
+
+                        if (structure.getState() != State.REMOVED && entry.isDemolishing()) {
+                            structure.getLog().setRemovedAt(new Date());
+                            refund(structure);
+                            structure.setState(State.REMOVED);
+                            structureService.save(structure);
+                            constructionEntries.remove(structure.getId());
+                        }
 
                         break;
                     }
@@ -156,12 +168,11 @@ public class ConstructionManager implements Listener {
                     // Load schematic if absent
                     File sf = structure.getSchematicFile();
                     long checksum = FileUtils.checksumCRC32(sf);
-                    StructureService structureService = new StructureService();
                     if (!SchematicManager.getInstance().hasSchematic(checksum)) {
                         structure.setState(State.LOADING_SCHEMATIC);
                         SchematicManager.getInstance().load(sf);
                     }
-                    
+
                     // Get clipboard
                     // Align it!
                     Schematic schematic = SchematicManager.getInstance().getSchematic(sf);
@@ -171,20 +182,14 @@ public class ConstructionManager implements Listener {
                     // Place a fence
                     placeFence(uuid, structure, cc);
 
-                    
-
                     queueBuildTask(uuid, structure, cc, new Vector(0, 0, 0));
 
                 } catch (StructureDataException ex) {
                     tell(uuid, ChatColor.RED + "Invalid structureplan");
-                } catch (DataException ex) {
+                } catch (DataException | IOException | DocumentException ex) {
                     Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (ConstructionException ex) {
                     tell(uuid, ChatColor.RED + ex.getMessage());
-                } catch (IOException ex) {
-                    Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (DocumentException ex) {
-                    Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         });
@@ -320,7 +325,7 @@ public class ConstructionManager implements Listener {
 
                     System.out.println("Added job");
                     // Update status
-                    if(structure.getState() != State.QUEUED) {
+                    if (structure.getState() != State.QUEUED) {
                         structure.setState(State.QUEUED);
                     }
                     structureService.save(structure);
@@ -331,8 +336,8 @@ public class ConstructionManager implements Listener {
                         @Override
                         public void jobStateChanged(JobEntry bpje) {
                             if (bpje.getStatus() == JobEntry.JobStatus.PlacingBlocks) {
-                                 System.out.println("Status change job");
-                                if(structure.getState() != State.BUILDING) {
+                                System.out.println("Status change job");
+                                if (structure.getState() != State.BUILDING) {
                                     structure.setState(State.BUILDING);
                                 }
                                 structureService.save(structure);
@@ -361,7 +366,7 @@ public class ConstructionManager implements Listener {
      * @throws ConstructionException
      * @throws StructureDataException
      */
-    public synchronized void demolish(final UUID uuid, final Structure structure, final boolean force) throws ConstructionException, StructureDataException {
+    public void demolish(final UUID uuid, final Structure structure, final boolean force) throws ConstructionException, StructureDataException {
 
         // Queue build task
         executor.execute(new Runnable() {
@@ -390,7 +395,7 @@ public class ConstructionManager implements Listener {
 
                     // Update status
                     StructureService structureService = new StructureService();
-                    
+
                     structureService.save(structure);
                     ConstructionEntry entry = constructionEntries.get(structure.getId());
                     entry.setDemolishing(true);
@@ -401,7 +406,7 @@ public class ConstructionManager implements Listener {
                 } catch (StructureDataException | IOException | DataException | DocumentException ex) {
                     Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (ConstructionException ex) {
-                    tell(uuid, ex.getMessage());
+                    tell(uuid, ChatColor.RED + ex.getMessage());
                 }
             }
         });
@@ -438,7 +443,7 @@ public class ConstructionManager implements Listener {
                 public void onJobAdded(SCJobEntry entry) {
                     // Set JobId
                     getEntry(structure).setJobId(entry.getJobId());
-                    if(structure.getState() != State.QUEUED) {
+                    if (structure.getState() != State.QUEUED) {
                         structure.setState(State.QUEUED);
                     }
 
@@ -453,11 +458,10 @@ public class ConstructionManager implements Listener {
                             } else if (bpje.getStatus() == JobEntry.JobStatus.Done) {
                                 // Set state to complete & Create timestamp of completion
                                 structure.setState(State.REMOVED);
-                                
+
                                 structure.getLog().setRemovedAt(new Date());
                                 structureService.save(structure);
-                                
-                                
+
                                 RegionManager rmgr = WorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(structure.getWorldName()));
                                 rmgr.removeRegion(structure.getStructureRegion());
                                 try {
@@ -497,11 +501,6 @@ public class ConstructionManager implements Listener {
         return instance;
     }
 
-   
-    
-
-
-
     /**
      * Creates a new entry or resets one if already exists
      *
@@ -530,7 +529,7 @@ public class ConstructionManager implements Listener {
             case BUILDING:
                 // Structure has already stopped constructing
                 if (structure.getState() == State.BUILDING) {
-                    throw new ConstructionException("#" + structure.getId() + " is already being building");
+                    throw new ConstructionException("#" + structure.getId() + " is already being build");
                 }
                 // Structure has already completed construction
                 if (structure.getState() == State.COMPLETE) {
@@ -551,14 +550,13 @@ public class ConstructionManager implements Listener {
         try {
             schematic = structure.getSchematicFile();
             if (!schematic.exists()) {
-            throw new ConstructionException("Missing schematic file!");
+                throw new ConstructionException("Missing schematic file!");
             }
         } catch (DocumentException ex) {
             Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
 
     }
 
@@ -568,13 +566,7 @@ public class ConstructionManager implements Listener {
      * @param structure The structure
      * @throws construction.exception.ConstructionException
      */
-    private synchronized void stopTask(Structure structure) throws ConstructionException {
-        ConstructionEntry entry = constructionEntries.get(structure.getId());
-
-        if (entry == null) {
-            return;
-        }
-
+    private void stopTask(final Structure structure) throws ConstructionException {
         // Removed structures can't be tasked
         if (structure.getState() == State.REMOVED) {
             throw new ConstructionException("#" + structure.getId() + " can't be tasked, because it was removed");
@@ -585,24 +577,36 @@ public class ConstructionManager implements Listener {
             throw new ConstructionException("Construction for #" + structure.getId() + " can't be stopped, because it is complete");
         }
 
-        // Cancel task in AsyncWorldEdit
-        BlockPlacer pb = AsyncWorldEditMain.getInstance().getBlockPlacer();
-        if (entry.getPlayer() != null && pb.getJob(entry.getPlayer(), entry.getJobId()) != null) {
-            pb.cancelJob(entry.getPlayer(), entry.getJobId());
-        }
+        executor.submit(new Runnable() {
 
-        // Set new state: STOPPED
-        StructureService structureService = new StructureService();
-        structure.setState(State.STOPPED);
-        structureService.save(structure);
+            @Override
+            public void run() {
+                ConstructionEntry entry = constructionEntries.get(structure.getId());
+                if (entry == null) {
+                    return;
+                }
 
-        // Reset data
-        constructionEntries.get(structure.getId()).setDemolishing(false);
-        constructionEntries.get(structure.getId()).setJobId(-1);
-        constructionEntries.get(structure.getId()).setPlayer(null);
+                // Cancel task in AsyncWorldEdit
+                BlockPlacer pb = AsyncWorldEditMain.getInstance().getBlockPlacer();
+                if (entry.getPlayer() != null && pb.getJob(entry.getPlayer(), entry.getJobId()) != null) {
+                    pb.cancelJob(entry.getPlayer(), entry.getJobId());
+                }
+
+                // Set new state: STOPPED
+                StructureService structureService = new StructureService();
+                structure.setState(State.STOPPED);
+                structureService.save(structure);
+
+                // Reset data
+                constructionEntries.get(structure.getId()).setDemolishing(false);
+                constructionEntries.get(structure.getId()).setJobId(-1);
+                constructionEntries.get(structure.getId()).setPlayer(null);
+            }
+        });
+
     }
 
-    public synchronized void stop(final Structure structure) throws ConstructionException {
+    public void stop(final Structure structure) throws ConstructionException {
         final ConstructionEntry entry = constructionEntries.get(structure.getId());
 
         // Removed structures can't be tasked
@@ -614,8 +618,6 @@ public class ConstructionManager implements Listener {
         if (entry == null) {
             throw new ConstructionException("#" + structure.getId() + " hasn't been tasked yet");
         }
-
-        
 
         executor.execute(new Runnable() {
 
@@ -651,13 +653,11 @@ public class ConstructionManager implements Listener {
 //        }
 //        return exe;
 //    }
-
-
     private ConstructionEntry getEntry(Structure structure) {
-        if(constructionEntries.get(structure.getId()) == null) {
+        if (constructionEntries.get(structure.getId()) == null) {
             constructionEntries.put(structure.getId(), new ConstructionEntry(structure));
         }
-        
+
         return constructionEntries.get(structure.getId());
     }
 
@@ -667,13 +667,33 @@ public class ConstructionManager implements Listener {
             ply.sendMessage(message);
         }
     }
-    
-    @EventHandler
-    public void onStructureStateChange(StructureStateChangeEvent changeEvent) {
-        if(changeEvent.getStructure().getState() == State.QUEUED) {
-            return;
+
+    private void refund(Structure structure) {
+        double value = structure.getRefundValue();
+        if (value > 0) {
+            Set<PlayerOwnership> ownerships = structure.getOwnerships(PlayerOwnership.Type.FULL);
+            int owners = ownerships.size();
+            double pricePerOwner = Math.floor(value / owners);
+            for (PlayerOwnership po : ownerships) {
+                Player player = Bukkit.getPlayer(po.getPlayerUUID());
+                EconomyUtil.getInstance().pay(player.getUniqueId(), pricePerOwner);
+            }
+            structure.setRefundValue(0d);
+            new StructureService().save(structure);
         }
-        
-        StructureAPI.yellStatus(changeEvent.getStructure());
+    }
+
+    private class StructureListener implements Listener {
+
+        @EventHandler
+        public void onStructureStateChange(StructureStateChangeEvent changeEvent) {
+            if (changeEvent.getStructure().getState() == State.QUEUED) {
+                return;
+            }
+
+            System.out.println("State changed! " + changeEvent.getStructure().getState());
+            StructureAPI.yellStatus(changeEvent.getStructure());
+        }
+
     }
 }

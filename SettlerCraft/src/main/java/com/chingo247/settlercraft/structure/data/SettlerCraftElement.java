@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.chingo247.settlercraft.structure.plan.data;
+package com.chingo247.settlercraft.structure.data;
 
 import org.dom4j.Element;
 

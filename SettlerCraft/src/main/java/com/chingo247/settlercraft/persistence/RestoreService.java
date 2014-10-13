@@ -180,7 +180,7 @@ public class RestoreService {
         
         // Set Owners
         for(PlayerOwnership owner : pos.getOwners(structure)) {
-            LocalPlayer lp = WorldGuardUtil.getLocalPlayer(Bukkit.getPlayer(owner.getUUID()));
+            LocalPlayer lp = WorldGuardUtil.getLocalPlayer(Bukkit.getPlayer(owner.getPlayerUUID()));
             region.getOwners().addPlayer(lp);
         }
         

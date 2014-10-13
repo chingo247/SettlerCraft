@@ -1,4 +1,4 @@
-package com.chingo247.settlercraft.structure.plan.overview;
+package com.chingo247.settlercraft.structure.data.overview;
 
 /*
  * To change this license header, choose License Headers in Project Properties.

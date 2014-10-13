@@ -16,8 +16,8 @@ package com.chingo247.settlercraft.bukkit.commands;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.persistence.StructureService;
+import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.StructureAPI;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
 import org.bukkit.ChatColor;
@@ -193,7 +193,7 @@ public class ConstructionCommandExecutor implements CommandExecutor {
             return true;
         }
         if (StructureAPI.build(player, structure)) {
-            player.sendMessage(ChatColor.RESET + "#" + ChatColor.GOLD + id + ChatColor.BLUE + structure.getName() + " will be build");
+            player.sendMessage(ChatColor.RESET + "#" + ChatColor.GOLD + id + " " + ChatColor.BLUE + structure.getName() + " will be build");
         }
 
         return true;

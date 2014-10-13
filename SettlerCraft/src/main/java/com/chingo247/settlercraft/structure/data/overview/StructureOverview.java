@@ -4,10 +4,10 @@
  * and open the template in the editor.
  */
 
-package com.chingo247.settlercraft.structure.plan.overview;
+package com.chingo247.settlercraft.structure.data.overview;
 
-import com.chingo247.settlercraft.structure.plan.data.Elements;
-import com.chingo247.settlercraft.structure.plan.data.SettlerCraftElement;
+import com.chingo247.settlercraft.structure.data.Elements;
+import com.chingo247.settlercraft.structure.data.SettlerCraftElement;
 import org.dom4j.Element;
 import org.dom4j.tree.BaseElement;
 

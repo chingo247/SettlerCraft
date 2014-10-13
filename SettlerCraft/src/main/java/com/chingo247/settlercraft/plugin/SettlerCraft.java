@@ -18,13 +18,13 @@ import com.chingo247.settlercraft.persistence.HibernateUtil;
 import com.chingo247.settlercraft.persistence.RestoreService;
 import com.chingo247.settlercraft.plugin.PermissionManager.Perms;
 import com.chingo247.settlercraft.structure.PlanMenuLoader;
+import com.chingo247.settlercraft.structure.data.holograms.StructureHologramManager;
+import com.chingo247.settlercraft.structure.data.overview.StructureOverviewManager;
 import com.chingo247.settlercraft.structure.entities.structure.QStructure;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.plan.StructurePlanItem;
 import com.chingo247.settlercraft.structure.plan.StructurePlanManager;
-import com.chingo247.settlercraft.structure.plan.holograms.StructureHologramManager;
-import com.chingo247.settlercraft.structure.plan.overview.StructureOverviewManager;
 import com.mysema.query.jpa.hibernate.HibernateUpdateClause;
 import com.sc.module.menuapi.menus.menu.CategoryMenu;
 import com.sc.module.menuapi.menus.menu.MenuAPI;
@@ -91,6 +91,7 @@ public class SettlerCraft extends JavaPlugin {
         try {
             // Setup Menu
             CategoryMenu menu = PlanMenuLoader.load();
+            
             PLANSHOP = menu.getId();
 
         } catch (DocumentException | StructureAPIException ex) {
@@ -110,6 +111,9 @@ public class SettlerCraft extends JavaPlugin {
 
         // Init StructurePlanManager
         StructurePlanManager.getInstance().init();
+        StructurePlanManager.getInstance().generate();
+        
+        
         reloadPlans();
         
 
@@ -203,12 +207,10 @@ public class SettlerCraft extends JavaPlugin {
         if (!config.exists()) {
 
             InputStream i = this.getClassLoader().getResourceAsStream("com/chingo247/settlercraft/resources/config.yml");
-            System.out.println(i);
             write(i, config);
         }
         if (!changelog.exists()) {
             InputStream i = this.getClassLoader().getResourceAsStream("com/chingo247/settlercraft/resources/changelog.txt");
-            System.out.println(i);
             write(i, changelog);
         }
     }
@@ -256,11 +258,12 @@ public class SettlerCraft extends JavaPlugin {
 
     /**
      * Reload the plans
+     *  
      */
-    public void reloadPlans() {
+    public boolean reloadPlans() {
         synchronized (this) {
             if (loadingplans) {
-                return;
+                return false;
             }
         }
 
@@ -278,7 +281,7 @@ public class SettlerCraft extends JavaPlugin {
                 loadPlansIntoMenu();
             }
         });
-
+        return true;
     }
 
     private void loadPlansIntoMenu() {

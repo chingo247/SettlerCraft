@@ -24,8 +24,8 @@ public class HSQLServer {
 
     private final String HOST = "localhost";
     private final int PORT = 9001;
-    private final String DATABASE = "StructureAPI";
-    private final String PATH = "plugins//SettlerCraft//StructureAPI//Database//" + DATABASE;
+    private final String DATABASE = "SettlerCraft";
+    private final String PATH = "plugins//SettlerCraft//Database//" + DATABASE;
     private static HSQLServer instance;
     private final Server server;
 

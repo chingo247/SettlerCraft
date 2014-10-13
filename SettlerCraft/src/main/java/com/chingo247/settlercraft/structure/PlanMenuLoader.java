@@ -29,11 +29,11 @@ public class PlanMenuLoader {
     private static final String PLANSHOP_NAME = "Buy & Build";
     private static final String RESOURCE_FOLDER = "com/chingo247/settlercraft/resources";
     private static final File PLUGIN_FOLDER = SettlerCraft.getInstance().getDataFolder();
-    
 
     /**
-     * Loads the planmenu from the menu.xml. If menu.xml doesn't exist, the menu.xml from the jar will
-     * be written to the filesystem.
+     * Loads the planmenu from the menu.xml. If menu.xml doesn't exist, the menu.xml from the jar
+     * will be written to the filesystem.
+     *
      * @return The CategoryMenu for the PlanMenu
      * @throws DocumentException When XML is invalid
      * @throws StructureAPIException When XML contains invalid data
@@ -64,7 +64,11 @@ public class PlanMenuLoader {
                 throw new StructureAPIException(" 'SlotRow#" + (row + 2) + "' has max 9 slots to customize");
             }
             int count = 0;
+
             for (Node categorySlotNode : slotNodes) {
+
+                
+                
                 if (!categorySlotNode.hasContent()) {
                     count++;
                     continue;
@@ -96,7 +100,6 @@ public class PlanMenuLoader {
                     throw new StructureAPIException("Empty 'Category' element in 'SlotRow#" + (row + 1) + "' and 'Slot#" + (count + 1) + "'");
                 }
                 category = category.replaceAll(" AND ", "&");
-                
 
                 String[] aliases;
                 if (ali == null) {
@@ -106,13 +109,13 @@ public class PlanMenuLoader {
                     aliases = new String[aliasNodes.size()];
                     for (int j = 0; j < aliasNodes.size(); j++) {
                         String alias = aliasNodes.get(j).getText();
-                        
+
                         if (alias.isEmpty()) {
                             Element aliasEl = (Element) cat;
                             alias = aliasEl.attributeValue("value");
                         }
                         if (alias.trim().isEmpty()) {
-                            throw new StructureAPIException("Empty 'Alias' element in  'SlotRow#" + (row + 1) + "' and 'Slot#" + (count + 1) + "' and 'Alias#"+(j+1)+"'");
+                            throw new StructureAPIException("Empty 'Alias' element in  'SlotRow#" + (row + 1) + "' and 'Slot#" + (count + 1) + "' and 'Alias#" + (j + 1) + "'");
                         }
 
                         aliases[j] = aliasNodes.get(j).getText();
@@ -122,31 +125,35 @@ public class PlanMenuLoader {
                 if (row == 0) {
                     slot += 1; // slot 0 is reserved...
                 } else {
+                    
                     hasRow2 = true;
                 }
-                
-                
-//                if(mdt == null) {
-                    menu.putCategorySlot(slot, category, Material.getMaterial(id), aliases);
-//                } else {
-//                    Integer t = null;
-//                    try {
-//                        t = Integer.parseInt(mdt.getText());
-//                    } catch (NumberFormatException nfe) {
-//                       throw new StructureAPIException("Invalid number 'MaterialData' element in 'SlotRow#" + (row + 1) + "' and 'Slot#" + (count + 1) + "'"); 
-//                    }
-//                    menu.putCategorySlot(slot, category, Material.getMaterial(id), t.byteValue(), category);
-//                }
+
+                System.out.println("slot: " + slot + " : " + category);
+                System.out.println("Material: " + Material.getMaterial(id));
+                menu.putCategorySlot((row * 9) + slot , category, Material.getMaterial(id), aliases);
 
                 count++;
             }
-
+            // fill remaining
+            if(count < 8 && row == 0) {
+                for(int i = count; i < 8; i++) {
+                    System.out.println("ROW: " + row + ", SLOT:" + i);
+                    menu.putLocked(i);
+                }
+                
+            } else if(row > 0 && count < 9) {
+                for(int i = count; i < 9; i++) {
+                    System.out.println("ROW: " + row + ", SLOT:" + i);
+                    menu.putLocked((row * 9) + i);
+                }
+            }
         }
 
         if (hasRow2) {
-            menu.putLocked(17, 18, 19, 20, 21, 22, 23);
-            menu.putActionSlot(16, "Previous", Material.COAL_BLOCK);
-            menu.putActionSlot(24, "Next", Material.COAL_BLOCK);
+            menu.putLocked(19, 20, 21, 22, 23, 24, 25);
+            menu.putActionSlot(18, "Previous", Material.COAL_BLOCK);
+            menu.putActionSlot(26, "Next", Material.COAL_BLOCK);
         } else {
             menu.putLocked(10, 11, 12, 13, 14, 15, 16);
             menu.putActionSlot(9, "Previous", Material.COAL_BLOCK);

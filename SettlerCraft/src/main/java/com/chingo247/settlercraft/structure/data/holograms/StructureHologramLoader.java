@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.settlercraft.structure.plan.holograms;
+package com.chingo247.settlercraft.structure.data.holograms;
 
 import com.chingo247.settlercraft.exception.StructureDataException;
-import com.chingo247.settlercraft.structure.plan.Loader;
-import com.chingo247.settlercraft.structure.plan.data.Elements;
-import com.chingo247.settlercraft.structure.plan.data.Nodes;
+import com.chingo247.settlercraft.structure.data.Loader;
+import com.chingo247.settlercraft.structure.data.Elements;
+import com.chingo247.settlercraft.structure.data.Nodes;
 import java.util.ArrayList;
 import java.util.List;
 import org.dom4j.Element;
