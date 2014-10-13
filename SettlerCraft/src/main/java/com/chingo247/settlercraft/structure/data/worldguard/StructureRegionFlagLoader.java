@@ -65,7 +65,6 @@ public class StructureRegionFlagLoader extends Loader<StructureRegionFlag> {
 
             try {
                 Object v = f.parseInput(WorldGuardPlugin.inst(), Bukkit.getConsoleSender(), n.selectSingleNode(Elements.VALUE).getText());
-//                System.out.println("Flag: " + f.getName() + " Value: " + v);
                 StructureRegionFlag regionFlag = new StructureRegionFlag(f, v);
                 flags.add(regionFlag);
 

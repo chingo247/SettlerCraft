@@ -21,7 +21,7 @@ structure:
       # Whether to use a default hologram when no holograms are provided
       # Won't override when plan explicitly says NO Hologram
       # Default location of the hologram is (0, 0, 0)
-      defaultHologram: true
+      default-hologram: true
       
   # Any flag from http://wiki.sk89q.com/wiki/WorldGuard/Regions/Flags to set by default when placing a structure
   default-flags:

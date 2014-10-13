@@ -36,34 +36,33 @@ public class StructureHologramLoader extends Loader<StructureHologram> {
     }
     
     @Override
-    public List<StructureHologram> load(Element overviewsElement) throws StructureDataException {
-        if (overviewsElement == null) {
+    public List<StructureHologram> load(Element hologramsElement) throws StructureDataException {
+        if (hologramsElement == null) {
             throw new AssertionError("Overviews element was null");
         }
 
-        if (!overviewsElement.getName().equals(Elements.STRUCTURE_HOLOGRAMS)) {
-            throw new AssertionError("Expected '" + Elements.STRUCTURE_HOLOGRAMS + "' element, but got '" + overviewsElement.getName() + "'");
+        if (!hologramsElement.getName().equals(Elements.STRUCTURE_HOLOGRAMS)) {
+            throw new AssertionError("Expected '" + Elements.STRUCTURE_HOLOGRAMS + "' element, but got '" + hologramsElement.getName() + "'");
         }
 
-//        System.out.println("Loading");
 
         List<StructureHologram> holograms = new ArrayList<>();
-        List<Node> hologramNodes = overviewsElement.selectNodes(Elements.STRUCTURE_OVERVIEW);
+        List<Node> hologramNodes = hologramsElement.selectNodes(Elements.STRUCTURE_HOLOGRAM);
         int count = 0;
 
         for (Node hologramNode : hologramNodes) {
             
-            Node xNode = hologramNode.selectSingleNode("x");
-            Node yNode = hologramNode.selectSingleNode("y");
-            Node zNode = hologramNode.selectSingleNode("z");
+            Node xNode = hologramNode.selectSingleNode(Elements.X);
+            Node yNode = hologramNode.selectSingleNode(Elements.Y);
+            Node zNode = hologramNode.selectSingleNode(Elements.Z);
             if (xNode == null) {
-                throw new StructureDataException("Missing 'x' node for 'StructureOverview#" + count + "'");
+                throw new StructureDataException("Missing 'X' node for 'StructureOverview#" + count + "'");
             }
             if (yNode == null) {
-                throw new StructureDataException("Missing 'y' node for 'StructureOverview#" + count + "'");
+                throw new StructureDataException("Missing 'Y' node for 'StructureOverview#" + count + "'");
             }
             if (zNode == null) {
-                throw new StructureDataException("Missing 'z' node for 'StructureOverview#" + count + "'");
+                throw new StructureDataException("Missing 'Z' node for 'StructureOverview#" + count + "'");
             }
 
             try {

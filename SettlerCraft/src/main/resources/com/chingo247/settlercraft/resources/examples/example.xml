@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<StructurePlan>
+  <SettlerCraft>
+    <Schematic>Example.schematic</Schematic>
+    <Name>Example</Name>
+    <Category>Default</Category>
+    <Description>-</Description>
+    <Faction>Default</Faction>
+    <Price>0.0</Price>
+	<StructureHolograms>
+		<StructureHologram>
+			<X>4</X>
+			<Y>2</Y>
+			<Z>6</Z>
+			<Lines>
+				<Line>Welcome!</Line>
+			</Lines>
+		</StructureHologram>
+		<StructureHologram>
+			<X>6</X>
+			<Y>3</Y>
+			<Z>6</Z>
+			<Lines>
+				<Line>Awesome Right!</Line>
+			</Lines>
+		</StructureHologram>
+		<StructureHologram>
+			<X>3</X>
+			<Y>3</Y>
+			<Z>6</Z>
+			<Lines>
+				<Line>Awesome Left!</Line>
+			</Lines>
+		</StructureHologram>
+	</StructureHolograms>
+	<StructureOverviews>
+		<StructureOverview>
+			<X>-2</X>
+			<Y>2</Y>
+			<Z>5</Z>
+		</StructureOverview>
+		<StructureOverview>
+			<X>10</X>
+			<Y>2</Y>
+			<Z>3</Z>	
+		</StructureOverview>
+	</StructureOverviews>
+	<WorldGuard>
+		<RegionFlags>
+			<RegionFlag>
+				<Name>mob-spawning</Name>
+				<Value>deny</Value>
+			</RegionFlag>
+			<RegionFlag>
+				<Name>greeting</Name>
+				<Value>Welcome in Example!</Value>
+			</RegionFlag>
+			<RegionFlag>
+				<Name>farewell</Name>
+				<Value>Farewell Example :'(</Value>
+			</RegionFlag>
+		</RegionFlags>
+	</WorldGuard>
+  </SettlerCraft>
+</StructurePlan>

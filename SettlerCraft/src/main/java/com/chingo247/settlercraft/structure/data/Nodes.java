@@ -35,7 +35,6 @@ public class Nodes {
     public static final String CATEGORY_NODE = SETTLERCRAFT_NODE + "/" + Elements.CATEGORY;
     public static final String FACTION_NODE = SETTLERCRAFT_NODE + "/" + Elements.FACTION;
     public static final String PRICE_NODE = SETTLERCRAFT_NODE + "/" + Elements.PRICE;
-    public static final String DEFAULT_HOLOGRAM_NODE = SETTLERCRAFT_NODE + "/" + Elements.DEFAULT_HOLOGRAM;
 
     // Entities
     public static final String STRUCTURE_OVERVIEWS_NODE = SETTLERCRAFT_NODE + "/" + Elements.STRUCTURE_OVERVIEWS;

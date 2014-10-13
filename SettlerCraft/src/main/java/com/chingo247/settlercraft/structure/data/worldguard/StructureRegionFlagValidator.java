@@ -65,7 +65,6 @@ public class StructureRegionFlagValidator extends Validator {
 
             try {
                 Object v = f.parseInput(WorldGuardPlugin.inst(), Bukkit.getConsoleSender(), e.selectSingleNode("Value").getText());
-//                System.out.println("Flag: " + f.getName() + " Value: " + v);
 
             } catch (InvalidFlagFormat ex) {
                 Logger.getLogger(StructurePlan.class.getName()).log(Level.SEVERE, null, ex);

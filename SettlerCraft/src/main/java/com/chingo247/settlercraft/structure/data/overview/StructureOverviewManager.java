@@ -85,7 +85,7 @@ public class StructureOverviewManager implements Listener {
                     StructurePlan plan = StructurePlanManager.getInstance().getPlan(structure);
                     List<StructureOverview> holos = plan.getOverviews();
                     
-                    if (holos.isEmpty() && plan.hasDefaultHologramEnabled() && ConfigProvider.getInstance().useHolograms()) {
+                    if (holos.isEmpty()  && ConfigProvider.getInstance().useHolograms()) {
                         Hologram hologram = HolographicDisplaysAPI.createHologram(plugin, structure.translateRelativeLocation(0, 2, 0),
                                 ChatColor.GOLD + String.valueOf(structure.getId()),
                                 ChatColor.BLUE + structure.getName(),

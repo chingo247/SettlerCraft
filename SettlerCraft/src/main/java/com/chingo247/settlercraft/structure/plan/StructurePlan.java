@@ -18,8 +18,6 @@
 package com.chingo247.settlercraft.structure.plan;
 
 import com.chingo247.settlercraft.exception.StructureDataException;
-import com.chingo247.settlercraft.plugin.ConfigProvider;
-import com.chingo247.settlercraft.structure.data.Elements;
 import com.chingo247.settlercraft.structure.data.Nodes;
 import com.chingo247.settlercraft.structure.data.SettlerCraftElement;
 import com.chingo247.settlercraft.structure.data.holograms.StructureHologram;
@@ -59,7 +57,6 @@ public class StructurePlan {
     private String category = "Default";
     private String faction = "Default";
     private String description = "";
-    private boolean defaultHologram = true;
     private double price = 0.0d;
     private int startHeight;
     private List<StructureOverview> overviews = new ArrayList<>();
@@ -186,7 +183,6 @@ public class StructurePlan {
 
         description = getValue(d, Nodes.DESCRIPTION_NODE, "-");
         
-        defaultHologram = getBoolean(d, Nodes.DEFAULT_HOLOGRAM_NODE, ConfigProvider.getInstance().useHolograms());
 
         try {
             price = Double.parseDouble(getValue(d, Nodes.PRICE_NODE, "0.0"));
@@ -205,10 +201,6 @@ public class StructurePlan {
 
     }
 
-    public boolean hasDefaultHologramEnabled() {
-        return defaultHologram;
-    }
-    
     
     
     private boolean getBoolean(Document d, String xPath, boolean defaultValue) throws StructureDataException {
@@ -221,7 +213,7 @@ public class StructurePlan {
         } else if(n.getText().equalsIgnoreCase("false")) {
             return false;
         } else {
-            throw new StructureDataException("Invalid value for '" + Elements.DEFAULT_HOLOGRAM + "', expected: 'true' or 'false' but got '"+n.getText()+"'");
+            throw new StructureDataException("Invalid value for '" + n.getName() + "', expected: 'true' or 'false' but got '"+n.getText()+"'");
         }
         
     }
