@@ -31,18 +31,18 @@ import org.apache.commons.io.FileUtils;
  *
  * @author Chingo
  */
-public class Schematic implements Serializable, Cloneable {
+public class Schematic implements Serializable {
 
     private final long checkSum;
     private final int s_length;
     private final int s_height;
     private final int s_width;
-    private final CuboidClipboard clipboard;
     private final int blocks;
+    private final File schematic;
 
-    private Schematic(CuboidClipboard clipboard, int width, int height, int length, long checksum, int blocks) throws IOException {
+    private Schematic(File schematic, int width, int height, int length, long checksum, int blocks) throws IOException {
         this.checkSum = checksum;
-        this.clipboard = clipboard;
+        this.schematic = schematic;
         this.s_width = width;
         this.s_height = height;
         this.s_length = length;
@@ -58,19 +58,11 @@ public class Schematic implements Serializable, Cloneable {
     }
     
     public Vector getSize() {
-        return clipboard.getSize();
+        return new Vector(s_width, s_height, s_length);
     }
 
-    public CuboidClipboard getClipboard() {
-        CuboidClipboard copy = new CuboidClipboard(clipboard.getSize());
-        for (int x = 0; x < copy.getWidth(); x++) {
-            for (int y = 0; y < copy.getHeight(); y++) {
-                for (int z = 0; z < copy.getLength(); z++) {
-                    copy.setBlock(new Vector(x, y, z), clipboard.getBlock(new Vector(x, y, z)));
-                }
-            }
-        }
-        return copy;
+    public CuboidClipboard getClipboard() throws IOException, DataException {
+        return SchematicFormat.MCEDIT.load(schematic);
     }
 
     public Integer getWidth() {
@@ -111,7 +103,9 @@ public class Schematic implements Serializable, Cloneable {
         CuboidClipboard cc = SchematicFormat.MCEDIT.load(schematic);
         long checksum = FileUtils.checksumCRC32(schematic);
         int blocks = SchematicUtil.count(cc, true);
-        return new Schematic(cc, cc.getWidth(), cc.getHeight(), cc.getLength(), checksum, blocks);
+        return new Schematic(schematic, cc.getWidth(), cc.getHeight(), cc.getLength(), checksum, blocks);
     }
+    
+   
 
 }

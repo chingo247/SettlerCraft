@@ -85,14 +85,14 @@
         <dependency>
             <groupId>com.thirdparty</groupId>
             <artifactId>asyncworldedit</artifactId>  
-            <version>2.0-RC5</version>
+            <version>2.0.0</version>
             <scope>provided</scope>
         </dependency>
         <!--AsyncWorldEdit-->
         <dependency>
             <groupId>com.thirdparty</groupId>
             <artifactId>asyncworldedit-injector</artifactId>  
-            <version>2.0-RC5</version>
+            <version>2.0.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -110,9 +110,9 @@
         </dependency>
         <!--WorldEdit-->
         <dependency>
-            <groupId>com.sc</groupId>
+            <groupId>com.thirdparty</groupId>
             <artifactId>worldedit</artifactId>  
-            <version>6.0-3301</version>
+            <version>6.0-3308</version>
             <scope>provided</scope>
         </dependency>
         <!--Vault-->

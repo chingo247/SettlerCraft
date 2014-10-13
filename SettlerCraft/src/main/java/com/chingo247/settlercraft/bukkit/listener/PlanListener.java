@@ -67,9 +67,9 @@ public class PlanListener implements Listener {
     private final Logger LOGGER = Logger.getLogger(PlanListener.class);
 
     @EventHandler
-    public void onPlayerUsePlan(PlayerInteractEvent pie) {
+    public void onPlayerUsePlan(final PlayerInteractEvent pie) {
         // Check if plan
-        final ItemStack planstack = pie.getItem();
+        ItemStack planstack = pie.getItem();
         if (!StructurePlan.isStructurePlan(planstack)) {
             return;
         }
@@ -98,6 +98,7 @@ public class PlanListener implements Listener {
             double value = StructurePlan.getValue(planstack);
             value *= planstack.getAmount();
             player.getInventory().remove(planstack);
+            player.updateInventory();
             player.sendMessage(new String[]{ChatColor.RED + "This plan's data is missing...", SettlerCraft.MSG_PREFIX + "Refunded: " + ChatColor.GOLD + value});
             EconomyUtil.getInstance().pay(player.getUniqueId(), value);
             return;
@@ -108,11 +109,14 @@ public class PlanListener implements Listener {
             double value = StructurePlan.getValue(planstack);
             value *= planstack.getAmount();
             player.getInventory().remove(planstack);
+            player.updateInventory();
             player.sendMessage(new String[]{ChatColor.RED + "This plan's schematic is missing...", SettlerCraft.MSG_PREFIX + "Refunded: "+ ChatColor.GOLD + value});
             EconomyUtil.getInstance().pay(player.getUniqueId(), value);
             return;
         }
 
+        
+        
         LocalPlayer lp = WorldEditUtil.getLocalPlayer(player);
         LocalSession ls = WorldEdit.getInstance().getSession(lp);
 
@@ -147,9 +151,11 @@ public class PlanListener implements Listener {
                     @Override
                     public void onComplete(Structure structure) {
                         if(structure != null) {
-                            ItemStack clone = planstack.clone();
+                            ItemStack clone = pie.getItem().clone();
                             clone.setAmount(1);
                             player.getInventory().remove(clone);
+                            
+                            player.updateInventory();
                             StructureAPI.build(player, structure);
                         }
                     }
@@ -178,12 +184,9 @@ public class PlanListener implements Listener {
             case SOUTH:
                 return point1.add(-(size.getBlockZ() - 1), size.getBlockY() - 1, (size.getBlockX() - 1));
             case WEST:
-//                clipboard.rotate2D(180);
                 return point1.add(-(size.getBlockX() - 1), size.getBlockY() - 1, -(size.getBlockZ() - 1));
             case NORTH:
                 return point1.add((size.getBlockZ() - 1), size.getBlockY() - 1, -(size.getBlockX() - 1));
-//                clipboard.rotate2D(270);
-
             default:
                 throw new AssertionError("unreachable");
         }
@@ -257,6 +260,11 @@ public class PlanListener implements Listener {
             if (toLeft) {
                 // Fix WTF HOW?!!1?
                 pos1 = WorldUtil.translateLocation(pos1, direction, (-(schematic.getLength() - 1)), 0, 0);
+                System.out.println("Pos: X:" + pos1.getBlockX() + " Y:" + pos1.getBlockY() + " Z:" + pos1.getBlockZ());
+            }
+            
+            if(!canPlace(player, pos1, direction, schematic)) {
+                return;
             }
 
             AsyncStructureAPI.getInstance().create(player, plan, player.getWorld(), pos1, direction, new AsyncStructureAPI.StructureCallback() {
@@ -268,6 +276,7 @@ public class PlanListener implements Listener {
                         ItemStack clone = planstack.clone();
                         clone.setAmount(1);
                         player.getInventory().remove(clone);
+                        player.updateInventory();
                         StructureAPI.build(player, structure);
                     }
                 }
@@ -284,7 +293,6 @@ public class PlanListener implements Listener {
 
     private void handleHoloPlayer(final Player player, Location l, StructurePlan plan, Schematic schematic, final ItemStack planstack) {
         boolean toLeft = player.isSneaking();
-        LocalPlayer localPlayer = WorldEditUtil.getLocalPlayer(player);
 
         Direction direction = WorldUtil.getDirection(player);
         Vector pos1 = new BlockVector(l.getBlockX(), l.getBlockY(), l.getBlockZ());
@@ -308,7 +316,7 @@ public class PlanListener implements Listener {
                 pos1 = WorldUtil.translateLocation(pos1, direction, (-(schematic.getLength() - 1)), 0, 0);
             }
 
-            if (canPlace(player, pos2, direction, schematic)) {
+            if (canPlace(player, pos1, direction, schematic)) {
                 AsyncStructureAPI.getInstance().create(player, plan, player.getWorld(), pos1, direction, new AsyncStructureAPI.StructureCallback() {
 
                     @Override

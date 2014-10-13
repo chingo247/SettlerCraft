@@ -129,8 +129,6 @@ public class PlanMenuLoader {
                     hasRow2 = true;
                 }
 
-                System.out.println("slot: " + slot + " : " + category);
-                System.out.println("Material: " + Material.getMaterial(id));
                 menu.putCategorySlot((row * 9) + slot , category, Material.getMaterial(id), aliases);
 
                 count++;
@@ -138,13 +136,11 @@ public class PlanMenuLoader {
             // fill remaining
             if(count < 8 && row == 0) {
                 for(int i = count; i < 8; i++) {
-                    System.out.println("ROW: " + row + ", SLOT:" + i);
                     menu.putLocked(i);
                 }
                 
             } else if(row > 0 && count < 9) {
                 for(int i = count; i < 9; i++) {
-                    System.out.println("ROW: " + row + ", SLOT:" + i);
                     menu.putLocked((row * 9) + i);
                 }
             }

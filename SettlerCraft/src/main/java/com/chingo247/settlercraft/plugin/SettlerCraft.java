@@ -43,7 +43,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.permissions.Permission;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dom4j.DocumentException;
 import org.hibernate.Session;
@@ -129,14 +128,13 @@ public class SettlerCraft extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PluginListener(), this);
         Bukkit.getPluginManager().registerEvents(new PlanListener(), this);
 
-        boolean useHolograms = getConfig().getBoolean("structure.use-holograms");
-        Plugin plugin = Bukkit.getPluginManager().getPlugin("HolographicDisplays");
-        if (useHolograms && plugin != null && plugin.isEnabled()) {
+        boolean useHolograms = getConfig().getBoolean("structure.holograms.defaultHologram");
+        if (useHolograms && Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null) {
             StructureOverviewManager overviewManager = StructureOverviewManager.getInstance();
             StructureHologramManager hologramManager = StructureHologramManager.getInstance();
 
-            Bukkit.getPluginManager().registerEvents(overviewManager, plugin);
-            Bukkit.getPluginManager().registerEvents(hologramManager, plugin);
+            Bukkit.getPluginManager().registerEvents(overviewManager, instance);
+            Bukkit.getPluginManager().registerEvents(hologramManager, instance);
 
             overviewManager.init();
             hologramManager.init();

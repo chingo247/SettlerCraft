@@ -131,7 +131,6 @@ public class CategoryMenu implements Listener {
         Slot s = slots.get(slot);
         if (s instanceof CategorySlot) {
             CategorySlot cs = (CategorySlot) s;
-            System.out.println("Remove for category " + cs.getName());
             // Overwrite this one
             items.remove(cs);
         }
@@ -152,7 +151,6 @@ public class CategoryMenu implements Listener {
         Slot s = slots.get(slot);
         if (s instanceof CategorySlot) {
             CategorySlot cs = (CategorySlot) s;
-            System.out.println("Remove for actionslot " + cs.getName());
             // Remove this category
             items.remove(cs);
         }
@@ -170,7 +168,6 @@ public class CategoryMenu implements Listener {
         Slot s = slots.get(slot);
         if (s instanceof CategorySlot) {
             CategorySlot cs = (CategorySlot) s;
-            System.out.println("Remove for locked" + cs.getName());
             // Remove this category
             items.remove(cs);
         }
@@ -509,8 +506,8 @@ public class CategoryMenu implements Listener {
         if (!enabled) {
             return;
         }
-        System.out.println("clicked: " + ice.getRawSlot());
 
+        
         Player player = (Player) ice.getWhoClicked();
         if (!hasSession(player.getUniqueId())) {
             return; // Player is not using this menu

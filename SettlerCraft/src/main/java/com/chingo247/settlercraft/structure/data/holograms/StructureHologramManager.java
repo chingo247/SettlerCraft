@@ -30,6 +30,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.Plugin;
 import org.dom4j.DocumentException;
 import org.hibernate.Session;
@@ -119,6 +120,17 @@ public class StructureHologramManager implements Listener {
     @EventHandler
     protected void onCreate(StructureCreateEvent createEvent) {
         createHolograms(createEvent.getStructure());
+    }
+    
+    @EventHandler
+    public void shutdown(PluginDisableEvent pde) {
+        if (pde.getPlugin().getName().equals(SettlerCraft.getInstance().getName())) {
+            for(List<Hologram> hologramList : holograms.values()) {
+                for(Hologram h : hologramList) {
+                    h.delete();
+                }
+            }
+        }
     }
 
 }

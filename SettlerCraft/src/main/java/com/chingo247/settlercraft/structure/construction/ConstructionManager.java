@@ -11,7 +11,7 @@ import com.chingo247.settlercraft.exception.StructureDataException;
 import com.chingo247.settlercraft.persistence.StructureService;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.StructureAPI;
-import com.chingo247.settlercraft.structure.asyncworldedit.SCAsyncCuboidClipboard;
+import com.chingo247.settlercraft.structure.asyncworldedit.SCAsyncClipboard;
 import com.chingo247.settlercraft.structure.asyncworldedit.SCJobEntry;
 import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
@@ -64,6 +64,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.dom4j.DocumentException;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.IBlockPlacerListener;
 import org.primesoft.asyncworldedit.blockPlacer.IJobEntryListener;
@@ -99,24 +100,21 @@ public class ConstructionManager {
                 Iterator<ConstructionEntry> it = constructionEntries.values().iterator();
                 while (it.hasNext()) {
                     ConstructionEntry entry = it.next();
-
-                    if (!entry.isCanceled() && je.getPlayer().equals(entry.getPlayer()) && je.getJobId() == entry.getJobId()) {
-                        System.out.println("On Complete");
+                    
+                    
+                    if (!entry.isCanceled() && je.getPlayer().getUUID().equals(entry.getPlayer()) && je.getJobId() == entry.getJobId()) {
                         StructureService structureService = new StructureService();
-                        // Set state to complete & Create timestamp of completion
+                      
                         Structure structure = entry.getStructure();
 
-                        System.out.println("State: " + structure.getState());
-                        System.out.println("IsDemoishing: " + entry.isDemolishing());
-
+                          // Set state to Complete & set CompletedAt timestamp
                         if (structure.getState() != State.COMPLETE && !entry.isDemolishing()) {
                             structure.getLog().setCompletedAt(new Date());
                             structure.setState(State.COMPLETE);
                             structureService.save(structure);
                             constructionEntries.remove(structure.getId());
-                        }
-
-                        if (structure.getState() != State.REMOVED && entry.isDemolishing()) {
+                        // Set state to Demolishing & set RemovedAt timestamp
+                        } else if (structure.getState() != State.REMOVED && entry.isDemolishing()) {
                             structure.getLog().setRemovedAt(new Date());
                             refund(structure);
                             structure.setState(State.REMOVED);
@@ -159,7 +157,8 @@ public class ConstructionManager {
                     // Cancel existing task
                     ConstructionEntry entry = constructionEntries.get(structure.getId());
                     if (entry != null && entry.getJobId() != -1 && entry.getPlayer() != null) {
-                        AsyncWorldEditMain.getInstance().getBlockPlacer().cancelJob(entry.getPlayer(), entry.getJobId());
+                        PlayerEntry plyEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(entry.getPlayer());
+                        AsyncWorldEditMain.getInstance().getBlockPlacer().cancelJob(plyEntry, entry.getJobId());
                     }
                     setEntry(uuid, structure);
                     entry = constructionEntries.get(structure.getId()); // NEVER NULL
@@ -235,7 +234,7 @@ public class ConstructionManager {
             }
         }
 
-        SchematicUtil.align(clipboard, structure.getDirection());
+//        SchematicUtil.align(clipboard, structure.getDirection());
         final World w = Bukkit.getWorld(world.getName());
         final Queue<StructureBlock> place = new PriorityQueue<>();
         // Structures are always drawn from the min position
@@ -245,7 +244,6 @@ public class ConstructionManager {
         int placed = 0;
         while (queue.peek() != null) {
             if (placed == FENCE_BLOCK_PLACE_SPEED) {
-//                System.out.println("Flush Queue");
                 Bukkit.getScheduler().scheduleSyncDelayedTask(SettlerCraft.getInstance(), new Runnable() {
 
                     @Override
@@ -260,13 +258,11 @@ public class ConstructionManager {
                 });
 
                 try {
-//                    System.out.println("Sleep!");
                     Thread.sleep(TIME_OUT);
                     placed = 0;
                 } catch (InterruptedException ex) {
                     Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
-//                System.out.println("Continue");
             }
 
             place.add(queue.poll());
@@ -311,10 +307,10 @@ public class ConstructionManager {
             aes = (AsyncEditSession) AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(world, -1, lPlayer);
         }
 
-        SCAsyncCuboidClipboard asyncStructureClipboard = new SCAsyncCuboidClipboard(uuid, clipboard);
-        try {
+        PlayerEntry plyEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(uuid);
+        SCAsyncClipboard asyncStructureClipboard = new SCAsyncClipboard(plyEntry, clipboard);
             // Note: The Clipboard is always drawn from the min position using the place method
-
+        try {
             asyncStructureClipboard.place(aes, pos, false, new ConstructionCallback() {
 
                 @Override
@@ -323,7 +319,6 @@ public class ConstructionManager {
                     final StructureService structureService = new StructureService();
                     getEntry(structure).setJobId(entry.getJobId());
 
-                    System.out.println("Added job");
                     // Update status
                     if (structure.getState() != State.QUEUED) {
                         structure.setState(State.QUEUED);
@@ -336,7 +331,6 @@ public class ConstructionManager {
                         @Override
                         public void jobStateChanged(JobEntry bpje) {
                             if (bpje.getStatus() == JobEntry.JobStatus.PlacingBlocks) {
-                                System.out.println("Status change job");
                                 if (structure.getState() != State.BUILDING) {
                                     structure.setState(State.BUILDING);
                                 }
@@ -352,8 +346,9 @@ public class ConstructionManager {
                 }
             });
         } catch (MaxChangedBlocksException ex) {
-            // shouldnt happen
+            Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
     }
 
     /**
@@ -412,7 +407,7 @@ public class ConstructionManager {
         });
     }
 
-    private void queueDemolisionTask(final UUID uuid, final Structure structure, Schematic schematic) {
+    private void queueDemolisionTask(final UUID uuid, final Structure structure, Schematic schematic) throws IOException, DataException {
         // Align schematic
         Direction direction = structure.getDirection();
         final DemolisionClipboard clipboard = new DemolisionClipboard(schematic.getClipboard(), StructureBlockComparators.PERFORMANCE.reversed());
@@ -434,7 +429,8 @@ public class ConstructionManager {
             aSession = (AsyncEditSession) AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(world, -1, lPlayer);
         }
 
-        SCAsyncCuboidClipboard asyncStructureClipboard = new SCAsyncCuboidClipboard(uuid, clipboard);
+        PlayerEntry plyEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(uuid);
+        SCAsyncClipboard asyncStructureClipboard = new SCAsyncClipboard(plyEntry, clipboard);
         try {
             // Note: The Clipboard is always drawn from the min position using the place method
             asyncStructureClipboard.place(aSession, pos, false, new ConstructionCallback() {
@@ -484,7 +480,7 @@ public class ConstructionManager {
                 }
             });
         } catch (MaxChangedBlocksException ex) {
-            // shouldnt happen
+            Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
@@ -552,9 +548,7 @@ public class ConstructionManager {
             if (!schematic.exists()) {
                 throw new ConstructionException("Missing schematic file!");
             }
-        } catch (DocumentException ex) {
-            Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+        } catch (DocumentException | IOException ex) {
             Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -588,8 +582,9 @@ public class ConstructionManager {
 
                 // Cancel task in AsyncWorldEdit
                 BlockPlacer pb = AsyncWorldEditMain.getInstance().getBlockPlacer();
-                if (entry.getPlayer() != null && pb.getJob(entry.getPlayer(), entry.getJobId()) != null) {
-                    pb.cancelJob(entry.getPlayer(), entry.getJobId());
+                PlayerEntry plyEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(entry.getPlayer());
+                if (entry.getPlayer() != null && pb.getJob(plyEntry, entry.getJobId()) != null) {
+                    pb.cancelJob(plyEntry, entry.getJobId());
                 }
 
                 // Set new state: STOPPED
@@ -629,7 +624,8 @@ public class ConstructionManager {
                 }
 
                 // Cancel task in AsyncWorldEdit
-                AsyncWorldEditMain.getInstance().getBlockPlacer().cancelJob(entry.getPlayer(), entry.getJobId());
+                PlayerEntry plyEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(entry.getPlayer());
+                AsyncWorldEditMain.getInstance().getBlockPlacer().cancelJob(plyEntry, entry.getJobId());
 
                 // Set new state: STOPPED
                 StructureService structureService = new StructureService();
@@ -645,14 +641,6 @@ public class ConstructionManager {
 
     }
 
-//    private synchronized Executor getExecutor(long id) {
-//        Executor exe = executors.get(id);
-//        if (exe == null) {
-//            exe = Executors.newSingleThreadExecutor();
-//            executors.put(id, exe);
-//        }
-//        return exe;
-//    }
     private ConstructionEntry getEntry(Structure structure) {
         if (constructionEntries.get(structure.getId()) == null) {
             constructionEntries.put(structure.getId(), new ConstructionEntry(structure));
@@ -691,7 +679,6 @@ public class ConstructionManager {
                 return;
             }
 
-            System.out.println("State changed! " + changeEvent.getStructure().getState());
             StructureAPI.yellStatus(changeEvent.getStructure());
         }
 

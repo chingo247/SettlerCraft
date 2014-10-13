@@ -67,18 +67,6 @@ public class StructureBlock implements Comparable<StructureBlock> {
     }
 
     public Integer getPriority() {
-//        Byte data = new Integer(block.getId()).byteValue();
-//        if(MaterialUtil.isDirectional(Material.getMaterial(block.getId()), data)) {
-////            System.out.println("Directional: " + Material.getMaterial(block.getId()));
-//            return 0;
-//        }
-//        
-//        if(MaterialUtil.isAttachable(Material.getMaterial(block.getId()), data)) {
-////            System.out.println("Attachable: " + Material.getMaterial(block.getId()));
-//            return 0;
-//        }
-        
-        
         if (isWater(block) || isLava(block))  {
             return PRIORITY_LIQUID;
         }

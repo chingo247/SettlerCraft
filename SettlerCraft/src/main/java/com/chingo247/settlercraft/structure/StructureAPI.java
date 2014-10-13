@@ -10,12 +10,14 @@ import com.chingo247.settlercraft.exception.StructureDataException;
 import com.chingo247.settlercraft.exception.StructureException;
 import com.chingo247.settlercraft.persistence.PlayerOwnershipService;
 import com.chingo247.settlercraft.persistence.StructureService;
+import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.construction.ConstructionManager;
+import com.chingo247.settlercraft.structure.data.Nodes;
 import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership;
 import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership.Type;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
+import com.chingo247.settlercraft.structure.entities.structure.Structure.State;
 import com.chingo247.settlercraft.structure.entities.world.Dimension;
-import com.chingo247.settlercraft.structure.data.Nodes;
 import com.chingo247.settlercraft.util.WorldGuardUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
@@ -484,38 +486,39 @@ public class StructureAPI {
         }
 
         String statusString;
-        switch (structure.getState()) {
+        State state = structure.getState();
+        switch (state) {
             case BUILDING:
-                statusString = ChatColor.YELLOW + "BUILDING: " + ChatColor.RESET + structure;
+                statusString = ChatColor.GOLD + "BUILDING " + structure;
                 break;
             case DEMOLISHING:
-                statusString = ChatColor.YELLOW + "DEMOLISHING: " + ChatColor.RESET + structure;
+                statusString = ChatColor.GOLD + "DEMOLISHING " + structure;
                 break;
             case COMPLETE:
-                statusString = "Construction " + ChatColor.GREEN + "COMPLETE" + ChatColor.RESET + ": " + ChatColor.RESET + structure;
+                statusString = ChatColor.GREEN + "COMPLETE "  + structure;
                 break;
             case INITIALIZING:
-                statusString = ChatColor.YELLOW + "INITIALIZING: " + ChatColor.RESET + structure;
+                statusString = ChatColor.DARK_PURPLE + "INITIALIZING " + structure;
                 break;
             case LOADING_SCHEMATIC:
-                statusString = ChatColor.YELLOW + "LOADING SCHEMATIC: " + ChatColor.RESET + structure;
+                statusString = ChatColor.DARK_PURPLE + "LOADING SCHEMATIC " + structure;
                 break;
             case PLACING_FENCE:
-                statusString = ChatColor.YELLOW + "PLACING FENCE: " + ChatColor.RESET + structure;
+                statusString = ChatColor.DARK_PURPLE + "PLACING FENCE " + structure;
                 break;
             case QUEUED:
-                statusString = ChatColor.YELLOW + "QUEUED: " + ChatColor.RESET + structure;
+                statusString = ChatColor.DARK_PURPLE + "QUEUED " + structure ;
                 break;
             case REMOVED:
-                statusString = ChatColor.RED + "REMOVED: " + ChatColor.RESET + structure;
+                statusString = ChatColor.RED + "REMOVED " + structure;
                 break;
             case STOPPED:
-                statusString = ChatColor.RED + "STOPPED: " + ChatColor.RESET + structure;
+                statusString = ChatColor.RED + "STOPPED " + structure;
                 break;
             default:
-                throw new AssertionError("Unknown state: " + structure.getState());
+                statusString = state.name();
         }
-        player.sendMessage(statusString);
+        player.sendMessage(SettlerCraft.MSG_PREFIX + statusString);
     }
 
 }

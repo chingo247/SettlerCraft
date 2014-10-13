@@ -82,14 +82,15 @@ public class StructureCommandExecutor implements CommandExecutor {
                 // stt owner [id] add [player]
                 if(args.length == 4 && args[2].equalsIgnoreCase("add")) {
                     addOwner(cs, args);
-                    
+                    return true;
                 // stt owner [id] remove [player]
                 } else if(args.length == 4 && args[2].equalsIgnoreCase("remove")) {
                     removeOwner(cs, args);
-                    
+                    return true;
                 // stt owner [id] list
                 } else if (args.length == 3 && args[2].equalsIgnoreCase("list")) {
                     displayOwners(cs, args);
+                    return true;
                 } else {
                     String actionLast = "";
                     for (String s : args) {
@@ -249,31 +250,31 @@ public class StructureCommandExecutor implements CommandExecutor {
       
         switch (state) {
             case BUILDING:
-                statusString = ChatColor.YELLOW + "BUILDING: ";
+                statusString = ChatColor.GOLD + "BUILDING " + ChatColor.RESET;
                 break;
             case DEMOLISHING:
-                statusString = ChatColor.YELLOW + "DEMOLISHING: ";
+                statusString = ChatColor.GOLD + "DEMOLISHING " + ChatColor.RESET;
                 break;
             case COMPLETE:
-                statusString = "Construction " + ChatColor.GREEN + "COMPLETE";
+                statusString = ChatColor.GREEN + "COMPLETE"  + ChatColor.RESET;
                 break;
             case INITIALIZING:
-                statusString = ChatColor.YELLOW + "INITIALIZING: " + ChatColor.RESET;
+                statusString = ChatColor.DARK_PURPLE + "INITIALIZING " + ChatColor.RESET;
                 break;
             case LOADING_SCHEMATIC:
-                statusString = ChatColor.YELLOW + "LOADING SCHEMATIC: " + ChatColor.RESET;
+                statusString = ChatColor.DARK_PURPLE + "LOADING SCHEMATIC " + ChatColor.RESET;
                 break;
             case PLACING_FENCE:
-                statusString = ChatColor.YELLOW + "PLACING FENCE: " + ChatColor.RESET;
+                statusString = ChatColor.DARK_PURPLE + "PLACING FENCE " + ChatColor.RESET;
                 break;
             case QUEUED:
-                statusString = ChatColor.YELLOW + "QUEUED: " + ChatColor.RESET ;
+                statusString = ChatColor.DARK_PURPLE + "QUEUED " + ChatColor.RESET ;
                 break;
             case REMOVED:
-                statusString = ChatColor.RED + "REMOVED: " + ChatColor.RESET;
+                statusString = ChatColor.RED + "REMOVED " + ChatColor.RESET;
                 break;
             case STOPPED:
-                statusString = ChatColor.RED + "STOPPED: " + ChatColor.RESET ;
+                statusString = ChatColor.RED + "STOPPED " + ChatColor.RESET ;
                 break;
             default:
                 statusString = state.name();
@@ -315,7 +316,7 @@ public class StructureCommandExecutor implements CommandExecutor {
 
         player.sendMessage("#" + ChatColor.GOLD + structure.getId() + " "
                 + ChatColor.BLUE + structure.getName()
-                + ChatColor.RESET + ": relative position is "
+                + ChatColor.RESET + ": "
                 + ChatColor.YELLOW + "x:" + ChatColor.RESET + pos.getBlockX() + " "
                 + ChatColor.YELLOW + "y:" + ChatColor.RESET + pos.getBlockY() + " "
                 + ChatColor.YELLOW + "z:" + ChatColor.RESET + pos.getBlockZ()
@@ -374,7 +375,7 @@ public class StructureCommandExecutor implements CommandExecutor {
                 } else {
                     ownersString += ChatColor.GREEN + ply.getName();
                 }
-                ownersString += ply;
+                
                 count++;
                 if(count < owners.size()) {
                     ownersString += ",";

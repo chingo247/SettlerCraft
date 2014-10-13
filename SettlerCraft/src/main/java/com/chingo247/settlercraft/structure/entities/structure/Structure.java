@@ -486,27 +486,27 @@ public class Structure implements Serializable {
         switch (direction) {
             case NORTH:
                 return new BlockVector(
-                        location.getBlockX() - location.getX(),
-                        location.getBlockY() - location.getY(),
-                        location.getZ() - location.getBlockZ()
+                        location.getBlockX() - this.getLocation().getX(),
+                        location.getBlockY() - this.getLocation().getY(),
+                        this.getLocation().getZ() - location.getBlockZ()
                 );
             case SOUTH:
                 return new BlockVector(
-                        location.getX() - location.getBlockX(),
-                        location.getBlockY() - location.getY(),
-                        location.getBlockZ() - location.getZ()
+                        this.getLocation().getX() - location.getBlockX(),
+                        location.getBlockY() - this.getLocation().getY(),
+                        location.getBlockZ() - this.getLocation().getZ()
                 );
             case EAST:
                 return new Vector(
-                        location.getBlockZ() - location.getZ(),
-                        location.getBlockY() - location.getY(),
-                        location.getBlockX() - location.getX()
+                        location.getBlockZ() - this.getLocation().getZ(),
+                        location.getBlockY() - this.getLocation().getY(),
+                        location.getBlockX() - this.getLocation().getX()
                 );
             case WEST:
                 return new Vector(
-                        location.getZ() - location.getBlockZ(),
-                        location.getBlockY() - location.getY(),
-                        location.getX() - location.getBlockX()
+                        this.getLocation().getZ() - location.getBlockZ(),
+                        location.getBlockY() - this.getLocation().getY(),
+                        this.getLocation().getX() - location.getBlockX()
                 );
             default:
                 throw new AssertionError("Unreachable");
@@ -532,7 +532,7 @@ public class Structure implements Serializable {
 
     @Override
     public String toString() {
-        return "#" + ChatColor.GOLD + id + " " + ChatColor.BLUE + name + ChatColor.RESET;
+        return ChatColor.RESET + "#" + ChatColor.GOLD + id + " " + ChatColor.BLUE + name + ChatColor.RESET;
 
     }
     

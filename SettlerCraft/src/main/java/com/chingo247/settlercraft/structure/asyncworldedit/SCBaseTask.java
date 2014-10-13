@@ -1,56 +1,64 @@
 /*
- * The MIT License
+ * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
+ * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) AsyncWorldEdit contributors
  *
- * Copyright 2014 SBPrime.
+ * All rights reserved.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted free of charge provided that the following 
+ * conditions are met:
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer. 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution,
+ * 3. Redistributions of source code, with or without modification, in any form 
+ *    other then free of charge is not allowed,
+ * 4. Redistributions in binary form in any form other then free of charge is 
+ *    not allowed.
+ * 5. Any derived work based on or containing parts of this software must reproduce 
+ *    the above copyright notice, this list of conditions and the following 
+ *    disclaimer in the documentation and/or other materials provided with the 
+ *    derived work.
+ * 6. The original author of the software is allowed to change the license 
+ *    terms or the entire license of the software as he sees fit.
+ * 7. The original author of the software is allowed to sublicense the software 
+ *    or its parts using any license terms he sees fit.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package com.chingo247.settlercraft.structure.asyncworldedit;
 
 import com.chingo247.settlercraft.structure.construction.ConstructionCallback;
-import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.history.change.BlockChange;
-import com.sk89q.worldedit.history.change.Change;
-import com.sk89q.worldedit.history.changeset.ChangeSet;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.UUID;
-import org.bukkit.ChatColor;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.configuration.PermissionGroup;
+import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
-import org.primesoft.asyncworldedit.worldedit.history.InjectedArrayListHistory;
 
 /**
  *
- * @author SBPrime
+ * @author Chingo
  */
 public abstract class SCBaseTask extends BukkitRunnable {
-
-    /**
+     /**
      * Command name
      */
     protected final String m_command;
@@ -58,7 +66,7 @@ public abstract class SCBaseTask extends BukkitRunnable {
     /**
      * The player
      */
-    protected final UUID m_player;
+    protected final PlayerEntry m_player;
 
     /**
      * Cancelable edit session
@@ -69,7 +77,6 @@ public abstract class SCBaseTask extends BukkitRunnable {
      * Thread safe edit session
      */
     protected final ThreadSafeEditSession m_safeEditSession;
-    
 
     /**
      * The edit session
@@ -80,33 +87,38 @@ public abstract class SCBaseTask extends BukkitRunnable {
      * The blocks placer
      */
     protected final BlockPlacer m_blockPlacer;
-    
-    protected final ConstructionCallback m_callback;
 
     /**
      * Job instance
      */
-    protected final SCJobEntry m_job;
+    protected final JobEntry m_job;
 
-    public SCBaseTask(final EditSession editSession, final UUID player,
+    /**
+     * The permission group
+     */
+    protected final PermissionGroup m_group;
+    
+    protected final ConstructionCallback m_callback;
+
+    public SCBaseTask(final EditSession editSession, final PlayerEntry player,
             final String commandName, BlockPlacer blocksPlacer, SCJobEntry job, ConstructionCallback callback) {
 
         m_editSession = editSession;
         m_cancelableEditSession = (editSession instanceof CancelabeEditSession) ? (CancelabeEditSession) editSession : null;
-        
+
         m_player = player;
+        m_group = m_player.getPermissionGroup();
         m_command = commandName;
         m_blockPlacer = blocksPlacer;
         m_job = job;
         m_callback = callback;
-        
 
         if (m_cancelableEditSession != null) {
             m_safeEditSession = m_cancelableEditSession.getParent();
         } else {
             m_safeEditSession = (editSession instanceof ThreadSafeEditSession) ? (ThreadSafeEditSession) editSession : null;
         }
-        
+
         if (m_safeEditSession != null) {
             m_safeEditSession.addAsync(job);
         }
@@ -115,12 +127,20 @@ public abstract class SCBaseTask extends BukkitRunnable {
     @Override
     public void run() {
         Object result = null;
+
+        if (m_job.getStatus() == JobEntry.JobStatus.Canceled) {
+            return;
+        }
+
+        m_job.setStatus(JobEntry.JobStatus.Preparing);
+//        if (m_group.isTalkative()) {
+//            m_player.say(MessageType.BLOCK_PLACER_RUN.format(m_command));
+//        }
+        m_blockPlacer.addTasks(m_player, m_job);
+
         try {
-            m_job.setStatus(JobEntry.JobStatus.Preparing);
-            
-            m_blockPlacer.addTasks(m_player, m_job);
-            
-            if (m_cancelableEditSession == null || !m_cancelableEditSession.isCanceled()) {
+            if ((m_cancelableEditSession == null || !m_cancelableEditSession.isCanceled())
+                    && (m_job.getStatus() != JobEntry.JobStatus.Canceled)) {
                 result = doRun();
             }
 
@@ -138,7 +158,7 @@ public abstract class SCBaseTask extends BukkitRunnable {
             m_blockPlacer.addTasks(m_player, m_job);
             doPostRun(result);
         } catch (MaxChangedBlocksException ex) {
-            AsyncWorldEditMain.say(m_player, ChatColor.RED + "Maximum block change limit.");
+            m_player.say(MessageType.BLOCK_PLACER_MAX_CHANGED.format());
         } catch (IllegalArgumentException ex) {
             if (ex.getCause() instanceof SessionCanceled) {
                 m_callback.onJobCanceled(m_job);
@@ -147,74 +167,18 @@ public abstract class SCBaseTask extends BukkitRunnable {
         postProcess();
 
         m_job.taskDone();
-        
         if (m_cancelableEditSession != null) {
             ThreadSafeEditSession parent = m_cancelableEditSession.getParent();
-            copyChangeSet(m_cancelableEditSession, parent);
             parent.removeAsync(m_job);
         } else if (m_safeEditSession != null) {
             m_safeEditSession.removeAsync(m_job);
-        }        
-    }
-
-    /**
-     * Copy changed items to parent edit session This works best when change set
-     * is set to ArrayListHistory
-     *
-     * @param destination
-     */
-    private void copyChangeSet(EditSession source, EditSession destination) {
-        ChangeSet csSource = source.getChangeSet();
-        ChangeSet csDestination = destination.getChangeSet();
-
-        if (csSource.size() == 0) {
-            return;
-        }
-
-        if ((csSource instanceof InjectedArrayListHistory)) {
-            for (Iterator<Change> it = csSource.forwardIterator(); it.hasNext();) {
-                csDestination.add(it.next());
-            }
-            return;
-        }
-
-        AsyncWorldEditMain.log("Warning: ChangeSet is not set to ArrayListHistory, rebuilding...");
-        HashMap<BlockVector, BaseBlock> oldBlocks = new HashMap<BlockVector, BaseBlock>();
-
-        for (Iterator<Change> it = csSource.backwardIterator(); it.hasNext();) {
-            Change chg = it.next();
-            if (chg instanceof BlockChange) {
-                BlockChange bchg = (BlockChange) chg;
-                BlockVector pos = bchg.getPosition();
-                BaseBlock oldBlock = bchg.getPrevious();
-
-                if (oldBlocks.containsKey(pos)) {
-                    oldBlocks.remove(pos);
-                }
-                oldBlocks.put(pos, oldBlock);
-            }
-        }
-
-        for (Iterator<Change> it = csSource.forwardIterator(); it.hasNext();) {
-            Change chg = it.next();
-            if (chg instanceof BlockChange) {
-                BlockChange bchg = (BlockChange) chg;
-                BlockVector pos = bchg.getPosition();
-                BaseBlock block = bchg.getCurrent();
-                BaseBlock oldBlock = oldBlocks.get(pos);
-
-                if (oldBlock != null) {
-                    csDestination.add(new BlockChange(pos, oldBlock, block));
-                }
-            } else {
-                csDestination.add(chg);
-            }
         }
     }
 
     protected abstract Object doRun() throws MaxChangedBlocksException;
 
     protected abstract void doPostRun(Object result);
-    
-    protected void postProcess() {}
+
+    protected void postProcess() {
+    }
 }

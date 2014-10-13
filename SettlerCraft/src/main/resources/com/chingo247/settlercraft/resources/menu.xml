@@ -5,8 +5,8 @@ PlanMenu
 Categories for the planmenu will be defined here. 
 Note you can only customize the first 2 rows from top. 
 
-FirstRow: [1*][2 ][3 ][4 ][5 ][6 ][7 ][8 ][9 ]
-SecondRow:[10][11][12][13][14][15][16][17][18]
+FirstRow: [0*][1 ][2 ][3 ][4 ][5 ][6 ][7 ][8 ]
+SecondRow:[9 ][10][11][12][13][14][15][16][17]
 
 Note slot [1*] is reserved for the 'Default' category, all plans that dont match any specific category 
 which are defined below will automatically be placed under the 'Default' category
@@ -99,6 +99,7 @@ A list of material id's can be found on the following website: http://minecraft-
     </SlotRow>
     <SlotRow>
         <!-- Room for more categories! (2 ROWS max) -->
+        <Slot></Slot>
         <Slot></Slot>
         <Slot></Slot>
         <Slot></Slot>
