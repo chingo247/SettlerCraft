@@ -8,6 +8,7 @@ package com.chingo247.settlercraft.plugin;
 import com.chingo247.settlercraft.bukkit.commands.ConstructionCommandExecutor;
 import com.chingo247.settlercraft.bukkit.commands.SettlerCraftCommandExecutor;
 import com.chingo247.settlercraft.bukkit.commands.StructureCommandExecutor;
+import com.chingo247.settlercraft.bukkit.listener.FenceListener;
 import com.chingo247.settlercraft.bukkit.listener.PlanListener;
 import com.chingo247.settlercraft.bukkit.listener.PluginListener;
 import com.chingo247.settlercraft.exception.SettlerCraftException;
@@ -127,6 +128,7 @@ public class SettlerCraft extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new PluginListener(), this);
         Bukkit.getPluginManager().registerEvents(new PlanListener(), this);
+        Bukkit.getPluginManager().registerEvents(new FenceListener(), this);
 
         boolean useHolograms = getConfig().getBoolean("structure.holograms.defaultHologram");
         if (useHolograms && Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null) {
