@@ -29,6 +29,7 @@ import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldguard.LocalPlayer;
+import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
@@ -72,7 +73,7 @@ public class RestoreService {
         HashMap<String, Timestamp> worldData = new HashMap<>();
         for (World world : Bukkit.getWorlds()) {
             if (isSettlerCraftWorld(world)) {
-                Timestamp t = new Timestamp(getDatFile(world.getWorldFolder()).lastModified());
+                Timestamp t = new Timestamp(world.getWorldFolder().lastModified());
                 worldData.put(world.getName(), t);
             }
         }
@@ -175,12 +176,14 @@ public class RestoreService {
         String id = structure.getStructureRegion();
 
         ProtectedCuboidRegion region = new ProtectedCuboidRegion(id, new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
+        region.setOwners(new DefaultDomain());
 
         PlayerOwnershipService pos = new PlayerOwnershipService();
         
         // Set Owners
         for(PlayerOwnership owner : pos.getOwners(structure)) {
             LocalPlayer lp = WorldGuardUtil.getLocalPlayer(Bukkit.getPlayer(owner.getPlayerUUID()));
+            
             region.getOwners().addPlayer(lp);
         }
         

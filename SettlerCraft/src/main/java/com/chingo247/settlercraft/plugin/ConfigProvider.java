@@ -1,7 +1,18 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2014 Chingo
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.chingo247.settlercraft.plugin;
 
@@ -33,7 +44,7 @@ public class ConfigProvider {
     private int demolisionMode = 0;
     private boolean useHolograms = false;
     private boolean defaultHolograms = false;
-    private HashMap<Flag<?>, Object> defaultFlags;
+    private HashMap<Flag, Object> defaultFlags;
     private final File file = new File(SettlerCraft.getInstance().getDataFolder(), "config.yml");
 
 
@@ -71,11 +82,11 @@ public class ConfigProvider {
 
     }
     
-    private HashMap<Flag<?>, Object> getDefaultFlags(FileConfiguration config) throws SettlerCraftException {
+    private HashMap<Flag, Object> getDefaultFlags(FileConfiguration config) throws SettlerCraftException {
         Map<String, Object> flags = config.getConfigurationSection("structure.default-flags").getValues(false);
-        HashMap<Flag<?>, Object> df = new HashMap<>();
+        HashMap<Flag, Object> df = new HashMap<>();
         for (Map.Entry<String, Object> entry : flags.entrySet()) {
-            Flag<?> foundFlag = DefaultFlag.fuzzyMatchFlag(entry.getKey());
+            Flag foundFlag = DefaultFlag.fuzzyMatchFlag(entry.getKey());
             if (foundFlag == null) {
                 throw new SettlerCraftException("Error in SettlerCraft config.yml: Flag '" + entry.getKey() + "' doesn't exist!");
             } else {
@@ -101,7 +112,7 @@ public class ConfigProvider {
         return shopEnabled;
     }
     
-    public HashMap<Flag<?>, Object> getDefaultFlags() {
+    public HashMap<Flag, Object> getDefaultFlags() {
         return defaultFlags;
     }
 

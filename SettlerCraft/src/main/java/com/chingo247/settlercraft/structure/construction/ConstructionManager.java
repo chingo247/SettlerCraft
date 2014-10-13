@@ -1,7 +1,18 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2014 Chingo
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.chingo247.settlercraft.structure.construction;
 
@@ -155,11 +166,15 @@ public class ConstructionManager {
                     }
 
                     // Cancel existing task
-                    ConstructionEntry entry = constructionEntries.get(structure.getId());
-                    if (entry != null && entry.getJobId() != -1 && entry.getPlayer() != null) {
+                    ConstructionEntry entry = getEntry(structure);
+                    entry.setCanceled(true);
+
+                    // Cancel task in AsyncWorldEdit
+                    if(entry.getJobId() != -1 ) {
                         PlayerEntry plyEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(entry.getPlayer());
                         AsyncWorldEditMain.getInstance().getBlockPlacer().cancelJob(plyEntry, entry.getJobId());
                     }
+
                     setEntry(uuid, structure);
                     entry = constructionEntries.get(structure.getId()); // NEVER NULL
                     entry.setDemolishing(false);
@@ -372,9 +387,15 @@ public class ConstructionManager {
                     if (!force) {
                         performChecks(structure, State.DEMOLISHING);
                     }
+                    
+                    ConstructionEntry entry = getEntry(structure);
+                    entry.setCanceled(true);
 
-                    // Stop current task (if any...)
-                    ConstructionManager.getInstance().stopTask(structure);
+                    // Cancel task in AsyncWorldEdit
+                    if(entry.getJobId() != -1 ) {
+                        PlayerEntry plyEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(entry.getPlayer());
+                        AsyncWorldEditMain.getInstance().getBlockPlacer().cancelJob(plyEntry, entry.getJobId());
+                    }
 
                     setEntry(uuid, structure);
 
@@ -392,7 +413,6 @@ public class ConstructionManager {
                     StructureService structureService = new StructureService();
 
                     structureService.save(structure);
-                    ConstructionEntry entry = constructionEntries.get(structure.getId());
                     entry.setDemolishing(true);
 
                     // Start demolision
@@ -554,52 +574,52 @@ public class ConstructionManager {
 
     }
 
-    /**
-     * Stops construction of a structure.
-     *
-     * @param structure The structure
-     * @throws construction.exception.ConstructionException
-     */
-    private void stopTask(final Structure structure) throws ConstructionException {
-        // Removed structures can't be tasked
-        if (structure.getState() == State.REMOVED) {
-            throw new ConstructionException("#" + structure.getId() + " can't be tasked, because it was removed");
-        }
-
-        // Removed structures can't be tasked
-        if (structure.getState() == State.COMPLETE) {
-            throw new ConstructionException("Construction for #" + structure.getId() + " can't be stopped, because it is complete");
-        }
-
-        executor.submit(new Runnable() {
-
-            @Override
-            public void run() {
-                ConstructionEntry entry = constructionEntries.get(structure.getId());
-                if (entry == null) {
-                    return;
-                }
-
-                // Cancel task in AsyncWorldEdit
-                BlockPlacer pb = AsyncWorldEditMain.getInstance().getBlockPlacer();
-                PlayerEntry plyEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(entry.getPlayer());
-                if (entry.getPlayer() != null && pb.getJob(plyEntry, entry.getJobId()) != null) {
-                    pb.cancelJob(plyEntry, entry.getJobId());
-                }
-
-                // Set new state: STOPPED
-                StructureService structureService = new StructureService();
-                structure.setState(State.STOPPED);
-                structureService.save(structure);
-
-                // Reset data
-                constructionEntries.get(structure.getId()).setDemolishing(false);
-                constructionEntries.get(structure.getId()).setJobId(-1);
-                constructionEntries.get(structure.getId()).setPlayer(null);
-            }
-        });
-
-    }
+//    /**
+//     * Stops construction of a structure.
+//     *
+//     * @param structure The structure
+//     * @throws construction.exception.ConstructionException
+//     */
+//    private void stopTask(final Structure structure) throws ConstructionException {
+//        // Removed structures can't be tasked
+//        if (structure.getState() == State.REMOVED) {
+//            throw new ConstructionException("#" + structure.getId() + " can't be tasked, because it was removed");
+//        }
+//
+//        // Removed structures can't be tasked
+//        if (structure.getState() == State.COMPLETE) {
+//            throw new ConstructionException("Construction for #" + structure.getId() + " can't be stopped, because it is complete");
+//        }
+//
+//        executor.submit(new Runnable() {
+//
+//            @Override
+//            public void run() {
+//                ConstructionEntry entry = constructionEntries.get(structure.getId());
+//                if (entry == null) {
+//                    return;
+//                }
+//
+//                // Cancel task in AsyncWorldEdit
+//                BlockPlacer pb = AsyncWorldEditMain.getInstance().getBlockPlacer();
+//                PlayerEntry plyEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(entry.getPlayer());
+//                if (entry.getPlayer() != null && pb.getJob(plyEntry, entry.getJobId()) != null) {
+//                    pb.cancelJob(plyEntry, entry.getJobId());
+//                }
+//
+//                // Set new state: STOPPED
+//                StructureService structureService = new StructureService();
+//                structure.setState(State.STOPPED);
+//                structureService.save(structure);
+//
+//                // Reset data
+//                constructionEntries.get(structure.getId()).setDemolishing(false);
+//                constructionEntries.get(structure.getId()).setJobId(-1);
+//                constructionEntries.get(structure.getId()).setPlayer(null);
+//            }
+//        });
+//
+//    }
 
     public void stop(final Structure structure) throws ConstructionException {
         final ConstructionEntry entry = constructionEntries.get(structure.getId());
@@ -618,10 +638,7 @@ public class ConstructionManager {
 
             @Override
             public void run() {
-                if (structure.getState() == State.PLACING_FENCE) {
-                    entry.setCanceled(true);
-                    return;
-                }
+                entry.setCanceled(true);
 
                 // Cancel task in AsyncWorldEdit
                 PlayerEntry plyEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(entry.getPlayer());

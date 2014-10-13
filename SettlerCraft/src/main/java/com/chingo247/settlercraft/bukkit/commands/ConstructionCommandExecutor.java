@@ -50,12 +50,9 @@ public class ConstructionCommandExecutor implements CommandExecutor {
         if (args.length == 0) {
             cs.sendMessage(ChatColor.RED + "Too few arguments");
             cs.sendMessage(new String[]{
-                CCC + CMD + " list [index]",
-                CCC + CMD + " halt [id]",
-                CCC + CMD + " postpone [id]",
-                CCC + CMD + " continue [id]",
-                CCC + CMD + " demolish [id]",
-                CCC + CMD + " build [id]",});
+                CCC + CMD + " cancel [id]",
+                CCC + CMD + " build [id]",
+                CCC + CMD + " demolish [id]"});
             return true;
         }
         String arg = args[0];
@@ -63,8 +60,6 @@ public class ConstructionCommandExecutor implements CommandExecutor {
         switch (arg) {
             case "cancel":
                 return cancelTask(player, args);
-            case "delay":
-                return delayTask(player, args);
             case "build":
                 return build(player, args);
             case "demolish":
@@ -73,7 +68,6 @@ public class ConstructionCommandExecutor implements CommandExecutor {
                 player.sendMessage(ChatColor.RED + "No actions known for: " + arg);
                 cs.sendMessage(new String[]{
                     CCC + CMD + " cancel [id]",
-                    CCC + CMD + " delay [id]",
                     CCC + CMD + " build [id]",
                     CCC + CMD + " demolish [id]"
                 });
@@ -115,49 +109,11 @@ public class ConstructionCommandExecutor implements CommandExecutor {
         }
 
         if (StructureAPI.stop(player, structure)) {
-            player.sendMessage("#" + ChatColor.GOLD + id + " " + ChatColor.BLUE + structure.getName() + " has been canceled");
+            player.sendMessage("#" + ChatColor.GOLD + id + " " + ChatColor.BLUE + structure.getName()  + ChatColor.RESET + " has been canceled");
         } else {
             player.sendMessage(ChatColor.RED + "Failed to cancel #" + ChatColor.GOLD + id + " " + ChatColor.BLUE + structure.getName());
         }
 
-        return true;
-    }
-
-    private boolean delayTask(Player player, String[] args) {
-        if (args.length > 2) {
-            player.sendMessage(ChatColor.RED + "Too many arguments");
-            player.sendMessage(new String[]{
-                "Usage: ",
-                CCC + CMD + " delay [id]"
-            });
-            return true;
-        } else if (args.length < 2) {
-            player.sendMessage(ChatColor.RED + "Too few arguments");
-            player.sendMessage(new String[]{
-                "Usage: ",
-                CCC + CMD + " delay [id]"
-            });
-            return true;
-        }
-        Long id;
-        try {
-            id = Long.parseLong(args[1]);
-        } catch (NumberFormatException nfe) {
-            player.sendMessage(ChatColor.RED + "No valid id");
-            return true;
-        }
-
-        StructureService ss = new StructureService();
-        Structure structure = ss.getStructure(id);
-
-        if (structure == null) {
-            player.sendMessage(ChatColor.RED + "Unable to find structure #" + ChatColor.GOLD + id);
-            return true;
-        }
-
-//        if (StructureAPI.delay(PLUGIN, player, structure)) {
-//            player.sendMessage("#" + ChatColor.GOLD + id + ChatColor.BLUE + structure.getName() + ChatColor.RESET + " has been placed at the back of the queue");
-//        }
         return true;
     }
 
@@ -193,7 +149,7 @@ public class ConstructionCommandExecutor implements CommandExecutor {
             return true;
         }
         if (StructureAPI.build(player, structure)) {
-            player.sendMessage(ChatColor.RESET + "#" + ChatColor.GOLD + id + " " + ChatColor.BLUE + structure.getName() + " will be build");
+            player.sendMessage(ChatColor.RESET + "#" + ChatColor.GOLD + id + " " + ChatColor.BLUE + structure.getName() + ChatColor.RESET + " will be build");
         }
 
         return true;

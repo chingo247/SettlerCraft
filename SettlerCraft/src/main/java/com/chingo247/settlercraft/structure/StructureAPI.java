@@ -1,8 +1,20 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2014 Chingo
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package com.chingo247.settlercraft.structure;
 
 import com.chingo247.settlercraft.exception.ConstructionException;
@@ -10,6 +22,7 @@ import com.chingo247.settlercraft.exception.StructureDataException;
 import com.chingo247.settlercraft.exception.StructureException;
 import com.chingo247.settlercraft.persistence.PlayerOwnershipService;
 import com.chingo247.settlercraft.persistence.StructureService;
+import com.chingo247.settlercraft.plugin.ConfigProvider;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.construction.ConstructionManager;
 import com.chingo247.settlercraft.structure.data.Nodes;
@@ -34,6 +47,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.UUID;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -60,7 +74,6 @@ public class StructureAPI {
      *
      * @param uuid The uuid to backtrack this construction process
      * @param structure The structure
-     * @param force
      * @return true if succesfully started to build
      */
     public static boolean build(UUID uuid, Structure structure) {
@@ -74,8 +87,8 @@ public class StructureAPI {
             throw new AssertionError("structure is not a saved instance");
         }
 
-        if (player != null && !structure.isOwner(player)) {
-            player.sendMessage(ChatColor.RED + "You have don't own this structure");
+        if (player != null && !player.isOp()  && !structure.isOwner(player, Type.FULL)) {
+            player.sendMessage(ChatColor.RED + "You don't have FULL ownership of this structure");
             return false;
         }
 
@@ -99,7 +112,6 @@ public class StructureAPI {
      *
      * @param player The player that issues the build order
      * @param structure The structure to build
-     * @param force
      * @return true if succesfully started to build
      */
     public static boolean build(Player player, Structure structure) {
@@ -124,8 +136,8 @@ public class StructureAPI {
             throw new AssertionError("structure is not a saved instance");
         }
 
-        if (player != null && !structure.isOwner(player)) {
-            player.sendMessage(ChatColor.RED + "You have no permission to manage task #" + ChatColor.GOLD + structure.getId());
+        if (player != null && !player.isOp()  && !structure.isOwner(player, Type.FULL)) {
+            player.sendMessage(ChatColor.RED + "You don't have FULL ownership of this structure");
             return false;
         }
 
@@ -170,8 +182,8 @@ public class StructureAPI {
             throw new AssertionError("structure is not a saved instance");
         }
 
-        if (!structure.isOwner(player)) {
-            player.sendMessage(ChatColor.RED + "You have no permission to manage task #" + ChatColor.GOLD + structure.getId());
+        if (!player.isOp() && !structure.isOwner(player, Type.FULL)) {
+            player.sendMessage(ChatColor.RED + "You don't have FULL ownership of this structure");
             return false;
         }
 
@@ -387,6 +399,12 @@ public class StructureAPI {
 
         } catch (DocumentException ex) {
             java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        
+        // Override by config
+        for(Entry<Flag, Object> e : ConfigProvider.getInstance().getDefaultFlags().entrySet()) {
+            
+            region.setFlag(e.getKey(), e.getValue());
         }
 
         // region.setFlags(ConfigProvider.getInstance().getDefaultFlags());

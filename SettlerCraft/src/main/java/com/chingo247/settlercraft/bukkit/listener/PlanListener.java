@@ -260,7 +260,6 @@ public class PlanListener implements Listener {
             if (toLeft) {
                 // Fix WTF HOW?!!1?
                 pos1 = WorldUtil.translateLocation(pos1, direction, (-(schematic.getLength() - 1)), 0, 0);
-                System.out.println("Pos: X:" + pos1.getBlockX() + " Y:" + pos1.getBlockY() + " Z:" + pos1.getBlockZ());
             }
             
             if(!canPlace(player, pos1, direction, schematic)) {
