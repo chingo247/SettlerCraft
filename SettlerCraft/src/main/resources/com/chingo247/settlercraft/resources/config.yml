@@ -8,7 +8,7 @@ structure:
   # Refund percentage when the structure is demolished
   # Value between 0 - 1.0
   refund: 1.0 
-  # Construction modes 
+  # Construction modes (Just try them out)
   # 0 Performance - Will travel through the structure in Cubes of 16xHeightx16
   # 1 Compromis - Will travel through the structure in Cubes of 32x32x32
   # 2 Fancy - Will travel through the structure in Cubes of 32x16x32 - Looks most natural!

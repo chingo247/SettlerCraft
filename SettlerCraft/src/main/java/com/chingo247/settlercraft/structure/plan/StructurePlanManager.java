@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Chingo
+ * Copyright (C) 2014 Chingo247
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ public class StructurePlanManager {
     private static StructurePlanManager instance;
     private final Map<String, StructurePlan> plans = new HashMap<>();
     private final Map<Long, StructurePlan> structures = new HashMap<>();
-    private final ExecutorService executor = Executors.newCachedThreadPool();
+    private ExecutorService executor = Executors.newCachedThreadPool();
     private boolean loading = false;
 
     /**
@@ -121,7 +121,7 @@ public class StructurePlanManager {
             final List<File> done = Collections.synchronizedList(new ArrayList<File>());
             
 //            System.out.println("Total files: " + total);
-            
+            executor = Executors.newCachedThreadPool();
 
             while (fileIterator.hasNext()) {
                 final File file = fileIterator.next();

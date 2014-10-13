@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Chingo
+ * Copyright (C) 2014 Chingo247
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,6 +90,12 @@ public class SettlerCraft extends JavaPlugin {
 
         if (Bukkit.getPluginManager().getPlugin("WorldGuard") == null) {
             System.out.println("[SettlerCraft]: WorldGuard NOT FOUND!!! Disabling...");
+            this.setEnabled(false);
+            return;
+        }
+        
+        if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
+            System.out.println("[SettlerCraft]: Vault NOT FOUND!!! Disabling...");
             this.setEnabled(false);
             return;
         }
@@ -214,6 +220,7 @@ public class SettlerCraft extends JavaPlugin {
     private void writeResources() {
         File config = new File(getDataFolder(), "config.yml");
         File changelog = new File(getDataFolder(), "changelog.txt");
+        File license = new File(getDataFolder(), "license.txt");
 
         if (!config.exists()) {
 
@@ -223,6 +230,11 @@ public class SettlerCraft extends JavaPlugin {
         if (!changelog.exists()) {
             InputStream i = this.getClassLoader().getResourceAsStream("com/chingo247/settlercraft/resources/changelog.txt");
             write(i, changelog);
+        }
+        
+        if(!license.exists()) {
+            InputStream i = this.getClassLoader().getResourceAsStream("com/chingo247/settlercraft/resources/license.txt");
+            write(i, license);
         }
     }
 

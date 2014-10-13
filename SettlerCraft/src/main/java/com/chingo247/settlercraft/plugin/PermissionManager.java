@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Chingo
+ * Copyright (C) 2014 Chingo247
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ public class PermissionManager {
     public enum Perms {
 
         OPEN_PLAN_MENU(new Permission(prefix + "user.menu.planmenu", "open the plan menu to select plans for free", PermissionDefault.TRUE)),
-        OPEN_PLAN_SHOP(new Permission(prefix + "user.menu.planshop", "open the plan shop to buy plans",PermissionDefault.TRUE)),
+        OPEN_PLAN_SHOP(new Permission(prefix + "user.menu.planshop", "open the plan shop to buy plans", PermissionDefault.TRUE)),
         STRUCTURE_PLACE(new Permission(prefix + "user.structure.place", "placing structures", PermissionDefault.TRUE));
 
         final Permission PERM;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Chingo
+ * Copyright (C) 2014 Chingo247
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -197,6 +197,10 @@ public class CategoryMenu implements Listener {
     }
 
 
+    private void give(Player player, TradeItem item) {
+        player.getInventory().addItem(item.getItemStack());
+    }
+    
     private boolean sell(Player player, TradeItem item) {
         Economy economy = EconomyUtil.getInstance().getEconomy();
         double price = item.getPrice();
@@ -301,7 +305,6 @@ public class CategoryMenu implements Listener {
         // Fill Inventory with items
         List<TradeItem> tradeItems = fetchItems(category, page);
         Iterator<TradeItem> it = tradeItems.iterator();
-        System.out.println("TradeItems: " + tradeItems.size());
 
         
         for (int i = 0; i < MENU_SIZE && it.hasNext(); i++) {
@@ -559,7 +562,11 @@ public class CategoryMenu implements Listener {
                     TradeItem item = session.sessionItems.get(ice.getRawSlot());
 
                     if (item != null) {
-                        sell(player, item);
+                        if(Bukkit.getPluginManager().getPlugin("Vault") != null) {
+                            sell(player, item);
+                        } else {
+                            give(player, item);
+                        }
                     } 
                 } else if (slot instanceof ActionSlot) {
                     ActionSlot as = (ActionSlot) slot;

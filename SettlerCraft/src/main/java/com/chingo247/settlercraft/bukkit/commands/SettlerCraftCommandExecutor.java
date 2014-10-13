@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Chingo
+ * Copyright (C) 2014 Chingo247
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,6 +113,10 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         player2.sendMessage(ChatColor.RED + "You have no permission to open this menu");
                         return true;
                     }
+                    
+                    if(EconomyUtil.getInstance().getEconomy() == null) {
+                         cs.sendMessage(ChatColor.RED + "This command requires an Economy plugin");
+                    }
 
                     if (!ConfigProvider.getInstance().isPlanShopEnabled()) {
                         cs.sendMessage(ChatColor.RED + "Planshop is disabled");
@@ -163,7 +167,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
 
                     }
                     // Check if should reload plans
-                    if (args.length == 1 && args[0].equals("plans")) {
+                    if (args.length == 2 && args[1].equals("plans")) {
                         if (SettlerCraft.getInstance().reloadPlans()) {
                             Bukkit.broadcastMessage(SettlerCraft.MSG_PREFIX + "Reloading plans...");
                         } else {
@@ -172,10 +176,10 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         return true;
                     }
 
-                    if (args.length == 1 && args[0].equals("config")) {
+                    if (args.length == 2 && args[1].equals("config")) {
                         try {
                             ConfigProvider.getInstance().load();
-                            cs.sendMessage(ChatColor.GOLD + "[SettlerCraft]:" + ChatColor.RESET + " Config reloaded");
+                            cs.sendMessage(SettlerCraft.MSG_PREFIX + "Config reloaded");
                         } catch (SettlerCraftException ex) {
                             Logger.getLogger(SettlerCraftCommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
                             cs.sendMessage(ChatColor.RED + ex.getMessage());

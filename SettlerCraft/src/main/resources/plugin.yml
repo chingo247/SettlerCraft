@@ -3,8 +3,8 @@ main: com.chingo247.settlercraft.plugin.SettlerCraft
 version: 1.0-RC
 author: Chingo247
 description: Placing & building of MineCraft Schematics! 
-depend: [WorldEdit, AsyncWorldEdit, WorldGuard]
-softdepend: [Vault, HolographicDisplays]
+depend: [WorldEdit, AsyncWorldEdit, WorldGuard, Vault]
+softdepend: [HolographicDisplays]
 
 commands:
     sc:
