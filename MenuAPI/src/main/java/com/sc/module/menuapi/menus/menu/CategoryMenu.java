@@ -119,30 +119,29 @@ public class CategoryMenu implements Listener {
      * @param aliases The aliases for this category
      */
     public final void putCategorySlot(int slot, String category, Material icon, String... aliases) {
-        putCategorySlot(slot, category, icon, new Integer(0).byteValue(), aliases);
-    }
-    
-    public final void putCategorySlot(int slot, String category, Material icon, byte data, String... aliases) {
         if (slot < 0 || slot > MENU_SIZE) {
             throw new IndexOutOfBoundsException("Slot is not in range of 0 - " + MENU_SIZE);
         }
-        
 
-        CategorySlot c = new CategorySlot(category, icon, data);
+        CategorySlot c = new CategorySlot(category.trim(), icon);
         c.addAliases(aliases);
-        // Add Category
-        items.put(c, new ArrayList<TradeItem>());
+        
 
         // Check if slot was inuse by another Category
         Slot s = slots.get(slot);
         if (s instanceof CategorySlot) {
             CategorySlot cs = (CategorySlot) s;
-            // Remove this category
+            System.out.println("Remove for category " + cs.getName());
+            // Overwrite this one
             items.remove(cs);
         }
-
+        
+        // Add Category
+        items.put(c, new ArrayList<TradeItem>());
         slots.put(slot, c);
     }
+    
+  
 
     public void putActionSlot(int slot, String text, Material material) {
         if (slot < 0 || slot > MENU_SIZE) {
@@ -153,6 +152,7 @@ public class CategoryMenu implements Listener {
         Slot s = slots.get(slot);
         if (s instanceof CategorySlot) {
             CategorySlot cs = (CategorySlot) s;
+            System.out.println("Remove for actionslot " + cs.getName());
             // Remove this category
             items.remove(cs);
         }
@@ -170,6 +170,7 @@ public class CategoryMenu implements Listener {
         Slot s = slots.get(slot);
         if (s instanceof CategorySlot) {
             CategorySlot cs = (CategorySlot) s;
+            System.out.println("Remove for locked" + cs.getName());
             // Remove this category
             items.remove(cs);
         }
@@ -265,21 +266,20 @@ public class CategoryMenu implements Listener {
         
         
         // Get the new category
-        final CategorySlot newCategory = matchCategory(category);
         
+        final CategorySlot newCategory = matchCategory(category);
         
         if(newCategory.getName().equals(session.currentCategory.getName()) && page == session.page)  {
             return; // Nothing changed
         }
         
-        boolean forFree = session.forFree;
         
         // Category has changed, reset page index
         if(!session.currentCategory.getName().equals(newCategory.getName()) 
                 && page == session.page) {
-            sessions.put(player.getUniqueId(), new Session(0, inv, newCategory, forFree));
+            sessions.put(player.getUniqueId(), new Session(0, inv, newCategory, session.forFree));
         } else {
-            sessions.put(player.getUniqueId(), new Session(page, inv, newCategory, forFree));
+            sessions.put(player.getUniqueId(), new Session(page, inv, newCategory, session.forFree));
         }
 
         // Clear previous session and create a new one
@@ -290,7 +290,7 @@ public class CategoryMenu implements Listener {
         setTemplateSlots(inv, player);
 
         // Fill Inventory with items
-        List<TradeItem> tradeItems = fetchItems(player, newCategory, page);
+        List<TradeItem> tradeItems = fetchItems(newCategory, page);
         Iterator<TradeItem> it = tradeItems.iterator();
 
         
@@ -300,10 +300,10 @@ public class CategoryMenu implements Listener {
                 if(session.forFree) {
                     TradeItem clone = ti.clone();
                     clone.setPrice(0);
-                    session.items.put(i, clone);
+                    session.sessionItems.put(i, clone);
                     inv.setItem(i, clone.getItemStack());
                 } else {
-                    session.items.put(i, ti);
+                    session.sessionItems.put(i, ti);
                     inv.setItem(i, ti.getItemStack());
                 }
             }
@@ -347,7 +347,7 @@ public class CategoryMenu implements Listener {
         setTemplateSlots(inv, player);
 
         // Fill Inventory with items
-        List<TradeItem> tradeItems = fetchItems(player, currentCategory, currentPage);
+        List<TradeItem> tradeItems = fetchItems(currentCategory, currentPage);
         Iterator<TradeItem> it = tradeItems.iterator();
 
         for (int i = 0; i < MENU_SIZE && it.hasNext(); i++) {
@@ -356,10 +356,10 @@ public class CategoryMenu implements Listener {
                 if(forFree) {
                     TradeItem clone = ti.clone();
                     clone.setPrice(0);
-                    session.items.put(i, clone);
+                    session.sessionItems.put(i, clone);
                     inv.setItem(i, clone.getItemStack());
                 } else {
-                    session.items.put(i, ti);
+                    session.sessionItems.put(i, ti);
                     inv.setItem(i, ti.getItemStack());
                 }
             }
@@ -394,7 +394,9 @@ public class CategoryMenu implements Listener {
     }
     
     public void clearItems() {
-        items.clear();
+        for(List<TradeItem> tis : items.values()) {
+            tis.clear();
+        }
     }
 
     public boolean hasSession(UUID session) {
@@ -409,14 +411,12 @@ public class CategoryMenu implements Listener {
         return MENU_SIZE - slots.size();
     }
 
-    private List<TradeItem> fetchItems(Player player, CategorySlot category, int page) {
+    protected List<TradeItem> fetchItems(CategorySlot category, int page) {
         int maxItems = getFreeSlots();
         
 
         List<TradeItem> tradeItems;
         if (!category.equals(DEFAULT_CATEGORY)) {
-            
-            
             tradeItems = items.get(category);
         } else {
             tradeItems = new ArrayList<>();
@@ -445,7 +445,7 @@ public class CategoryMenu implements Listener {
 
     private boolean hasNext(Player player) {
         Session session = sessions.get(player.getUniqueId());
-        return !(fetchItems(player, session.currentCategory, session.page + 1).isEmpty());
+        return !(fetchItems(session.currentCategory, session.page + 1).isEmpty());
     }
 
     private boolean hasPrev(Player player) {
@@ -454,9 +454,10 @@ public class CategoryMenu implements Listener {
 
     private CategorySlot matchCategory(String category) {
         Iterator<CategorySlot> it = items.keySet().iterator();
+        
         while (it.hasNext()) {
             CategorySlot cs = it.next();
-            if (cs.getName().equals(category) || cs.hasAlias(category)) {
+            if (cs.getName().equalsIgnoreCase(category) || cs.hasAlias(category)) {
                 return cs;
             }
         }
@@ -468,13 +469,13 @@ public class CategoryMenu implements Listener {
         private CategorySlot currentCategory;
         private Inventory inventory;
         private int page = 0;
-        private Map<Integer, TradeItem> items;
+        private Map<Integer, TradeItem> sessionItems;
         private boolean forFree = false;
 
         public Session(int currentPage, Inventory inventory, CategorySlot currentCategory, boolean forFree) {
             this.inventory = inventory;
             this.currentCategory = currentCategory;
-            this.items = Maps.newHashMap();
+            this.sessionItems = Maps.newHashMap();
             this.page = currentPage;
             this.forFree = forFree;
         }
@@ -508,7 +509,7 @@ public class CategoryMenu implements Listener {
         if (!enabled) {
             return;
         }
-        
+        System.out.println("clicked: " + ice.getRawSlot());
 
         Player player = (Player) ice.getWhoClicked();
         if (!hasSession(player.getUniqueId())) {
@@ -540,7 +541,7 @@ public class CategoryMenu implements Listener {
                 // Slot is item slot
                 if (slot == null) {
 
-                    TradeItem item = session.items.get(ice.getRawSlot());
+                    TradeItem item = session.sessionItems.get(ice.getRawSlot());
                     
 
                     if (item != null) {

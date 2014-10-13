@@ -32,9 +32,9 @@
         </dependency>
         <!--Vault-->
         <dependency>
-            <groupId>org.vault</groupId>
-            <artifactId>Vault</artifactId>
-            <version>1.2.31</version>
+            <groupId>com.thirdparty</groupId>
+            <artifactId>vault</artifactId>
+            <version>1.4.1</version>
             <scope>provided</scope>
         </dependency>
      </dependencies>

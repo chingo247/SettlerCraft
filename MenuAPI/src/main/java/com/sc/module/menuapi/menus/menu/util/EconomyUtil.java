@@ -16,10 +16,13 @@
  */
 package com.sc.module.menuapi.menus.menu.util;
 
+import java.util.UUID;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
+import org.bukkit.Bukkit;
 import static org.bukkit.Bukkit.getServer;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
@@ -64,10 +67,18 @@ public class EconomyUtil {
 
     
     
-    public EconomyResponse pay(Player player, double amount) {
-        EconomyResponse er = economy.withdrawPlayer(player.getName(), amount);
+    public EconomyResponse pay(UUID player, double amount) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(player);
+        
+        
+        EconomyResponse er = economy.withdrawPlayer(op, amount);
+        
+        
         if(er.transactionSuccess()) {
-            player.sendMessage("Your new balance is " + ChatColor.GOLD + economy.getBalance(player.getName()));
+            Player ply = Bukkit.getPlayer(player);
+            if(ply.isOnline()) {
+                ply.sendMessage("Your new balance is " + ChatColor.GOLD + economy.getBalance(op));
+            }
         }
         return er;
     }
