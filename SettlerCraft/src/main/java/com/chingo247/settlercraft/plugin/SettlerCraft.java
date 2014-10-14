@@ -100,16 +100,22 @@ public class SettlerCraft extends JavaPlugin {
             return;
         }
 
+         // Write Changelog & Config if not exist!
+        StructurePlanManager.getInstance().createDirs();
 
         try {
             // Setup Menu
             CategoryMenu menu = PlanMenuLoader.load();
-            
             PLANSHOP = menu.getId();
-
         } catch (DocumentException | StructureAPIException ex) {
             java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
             return;
+        }
+        
+        try {
+            ConfigProvider.getInstance().load();
+        } catch (SettlerCraftException ex) {
+            java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         // Init HSQL Server
@@ -123,21 +129,16 @@ public class SettlerCraft extends JavaPlugin {
         resetStates();
 
         // Init StructurePlanManager
-        StructurePlanManager.getInstance().init();
+        
         StructurePlanManager.getInstance().generate();
         
         
         reloadPlans();
         
 
-        // Write Changelog & Config if not exist!
-        writeResources();
+       
 
-        try {
-            ConfigProvider.getInstance().load();
-        } catch (SettlerCraftException ex) {
-            java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        
 
         Bukkit.getPluginManager().registerEvents(new PluginListener(), this);
         Bukkit.getPluginManager().registerEvents(new PlanListener(), this);
@@ -213,46 +214,54 @@ public class SettlerCraft extends JavaPlugin {
         return loadingplans;
     }
 
-    private void writeResources() {
-        File config = new File(getDataFolder(), "config.yml");
-        File changelog = new File(getDataFolder(), "changelog.txt");
-        File license = new File(getDataFolder(), "license.txt");
-        File exampleSchematic = new File(getDataFolder(), "/Examples/Example.schematic");
-        File exampleXML = new File(getDataFolder(), "/Examples/Example.xml");
-
-        if (!config.exists()) {
-
-            InputStream i = this.getClassLoader().getResourceAsStream("com/chingo247/settlercraft/resources/config.yml");
-            write(i, config);
-        }
-        if (!changelog.exists()) {
-            InputStream i = this.getClassLoader().getResourceAsStream("com/chingo247/settlercraft/resources/changelog.txt");
-            write(i, changelog);
-        }
-        
-        if(!license.exists()) {
-            InputStream i = this.getClassLoader().getResourceAsStream("com/chingo247/settlercraft/resources/license.txt");
-            write(i, license);
-        }
-        
-        if(!exampleSchematic.exists()) {
-            File folder = new File(getDataFolder(), "/Examples");
-            if(!folder.exists()) {
-                folder.mkdirs();
-            }
-            
-            InputStream i = this.getClassLoader().getResourceAsStream("com/chingo247/settlercraft/resources/examples/example.schematic");
-            write(i, exampleSchematic);
-        }
-        if(!exampleXML.exists()) {
-            File folder = new File(getDataFolder(), "/Examples");
-            if(!folder.exists()) {
-                folder.mkdirs();
-            }
-            InputStream i = this.getClassLoader().getResourceAsStream("com/chingo247/settlercraft/resources/examples/example.xml");
-            write(i, exampleXML);
-        }
-    }
+//    private void writeResources() {
+//        File config = new File(getDataFolder(), "config.yml");
+//        File changelog = new File(getDataFolder(), "changelog.txt");
+//        File license = new File(getDataFolder(), "license.txt");
+//        File exampleSchematic = new File(getDataFolder(), "/Examples/Example.schematic");
+//        File exampleXML = new File(getDataFolder(), "/Examples/Example.xml");
+//
+//        
+//        if (!config.exists()) {
+//            System.out.println("Writing config");
+//            InputStream i = this.getClassLoader().getResourceAsStream("com/chingo247/settlercraft/resources/config.yml");
+//            write(i, config);
+//        }
+//        
+//        if (!changelog.exists()) {
+//            
+//            InputStream i = this.getClassLoader().getResourceAsStream("com/chingo247/settlercraft/resources/changelog.txt");
+//            write(i, changelog);
+//        }
+//        
+//        
+//        if(!license.exists()) {
+//            System.out.println("Writing changelog");
+//            InputStream i = this.getClassLoader().getResourceAsStream("com/chingo247/settlercraft/resources/license.txt");
+//            write(i, license);
+//        }
+//        
+//        
+//        if(!exampleSchematic.exists()) {
+//            System.out.println("Examples");
+//            File folder = new File(getDataFolder(), "/Examples");
+//            if(!folder.exists()) {
+//                folder.mkdirs();
+//            }
+//            
+//            InputStream i = this.getClassLoader().getResourceAsStream("com/chingo247/settlercraft/resources/examples/example.schematic");
+//            write(i, exampleSchematic);
+//        }
+//        if(!exampleXML.exists()) {
+//            System.out.println("Examples");
+//            File folder = new File(getDataFolder(), "/Examples");
+//            if(!folder.exists()) {
+//                folder.mkdirs();
+//            }
+//            InputStream i = this.getClassLoader().getResourceAsStream("com/chingo247/settlercraft/resources/examples/example.xml");
+//            write(i, exampleXML);
+//        }
+//    }
 
     private void write(InputStream inputStream, File file) {
         OutputStream outputStream = null;
