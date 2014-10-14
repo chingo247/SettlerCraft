@@ -1,4 +1,4 @@
-package com.chingo247.settlercraft.structure.generator;
+package com.chingo247.settlercraft.structure.construction.generator;
 
 ///*
 // * Copyright (C) 2014 Chingo247

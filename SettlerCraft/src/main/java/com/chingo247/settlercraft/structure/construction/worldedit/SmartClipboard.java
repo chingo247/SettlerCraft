@@ -1,4 +1,4 @@
-package com.chingo247.settlercraft.structure.worldedit;
+package com.chingo247.settlercraft.structure.construction.worldedit;
 
 /*
  * Copyright (C) 2014 Chingo247

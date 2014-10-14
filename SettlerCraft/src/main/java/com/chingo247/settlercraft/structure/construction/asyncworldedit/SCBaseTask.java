@@ -38,7 +38,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.chingo247.settlercraft.structure.asyncworldedit;
+package com.chingo247.settlercraft.structure.construction.asyncworldedit;
 
 import com.chingo247.settlercraft.structure.construction.ConstructionCallback;
 import com.sk89q.worldedit.EditSession;

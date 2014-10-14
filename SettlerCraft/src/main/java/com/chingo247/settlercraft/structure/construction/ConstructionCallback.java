@@ -16,7 +16,7 @@
  */
 package com.chingo247.settlercraft.structure.construction;
 
-import com.chingo247.settlercraft.structure.asyncworldedit.SCJobEntry;
+import com.chingo247.settlercraft.structure.construction.asyncworldedit.SCJobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 
 

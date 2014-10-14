@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.chingo247.settlercraft.structure.worldedit;
+package com.chingo247.settlercraft.structure.construction.worldedit;
 
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
