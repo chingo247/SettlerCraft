@@ -100,9 +100,6 @@ public class SettlerCraft extends JavaPlugin {
             return;
         }
 
-        // Write Changelog & Config if not exist!
-        StructurePlanManager.getInstance().createDirs();
-        writeResources();
 
         try {
             // Setup Menu
@@ -125,14 +122,16 @@ public class SettlerCraft extends JavaPlugin {
 
         resetStates();
 
-        
+        // Init StructurePlanManager
+        StructurePlanManager.getInstance().init();
         StructurePlanManager.getInstance().generate();
         
         
         reloadPlans();
         
 
-        
+        // Write Changelog & Config if not exist!
+        writeResources();
 
         try {
             ConfigProvider.getInstance().load();
