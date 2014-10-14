@@ -75,7 +75,7 @@ public class StructurePlanManager {
     /**
      * Creates the Folders for StructurePlans and SchematicToPlan if they don't exist
      */
-    public void init() {
+    public void createDirs() {
         if (!PLAN_FOLDER.exists()) {
             PLAN_FOLDER.mkdirs();
         }
