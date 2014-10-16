@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Chingo247
+ * Copyright (C) 2014 Chingo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,20 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structure.construction;
+package com.chingo247.settlercraft.structure.plan.document;
 
-import com.chingo247.settlercraft.structure.construction.asyncworldedit.SCJobEntry;
-import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
-
+import com.chingo247.settlercraft.structure.entities.structure.Structure;
+import java.io.File;
+import org.dom4j.DocumentException;
 
 /**
  *
  * @author Chingo
  */
-public interface ConstructionCallback {
+public class StructureDocument extends PlanDocument {
     
-    public void onJobAdded(SCJobEntry entry);
+    private final Structure structure;
+
+    public StructureDocument(Structure structure, File docFile) throws DocumentException {
+        super(docFile);
+        this.structure = structure;
+    }
+
+    public Structure getStructure() {
+        return structure;
+    }
     
-    public void onJobCanceled(JobEntry entry);
+    
+    
+    
+    
     
 }

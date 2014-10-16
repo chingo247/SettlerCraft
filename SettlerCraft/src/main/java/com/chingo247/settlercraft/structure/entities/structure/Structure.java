@@ -32,9 +32,11 @@ import static com.chingo247.settlercraft.structure.entities.world.Direction.NORT
 import static com.chingo247.settlercraft.structure.entities.world.Direction.SOUTH;
 import static com.chingo247.settlercraft.structure.entities.world.Direction.WEST;
 import com.chingo247.settlercraft.structure.entities.world.Location;
-import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structure.schematic.Schematic;
-import com.chingo247.settlercraft.structure.schematic.SchematicManager;
+import com.chingo247.settlercraft.structure.plan.SchematicManager;
+import com.chingo247.settlercraft.structure.plan.SettlerCraftPlan;
+import com.chingo247.settlercraft.structure.plan.SettlerCraftPlanManager;
+import com.chingo247.settlercraft.structure.plan.data.schematic.Schematic;
+import com.chingo247.settlercraft.structure.plan.document.PlanDocumentManager;
 import com.chingo247.settlercraft.util.SchematicUtil;
 import static com.chingo247.settlercraft.util.SchematicUtil.calculateDimension;
 import com.chingo247.settlercraft.util.WorldUtil;
@@ -186,7 +188,7 @@ public class Structure implements Serializable {
      * @param direction The direction / direction
      * @return The structure that was placed
      */
-    public static Structure create(StructurePlan plan, World world, Vector pos, Direction direction) {
+    public static Structure create(SettlerCraftPlan plan, World world, Vector pos, Direction direction) {
         return create(null, plan, world, pos, direction);
     }
 
@@ -200,11 +202,11 @@ public class Structure implements Serializable {
      * @param direction The direction / direction
      * @return The structure that was placed
      */
-    public static Structure create(Player player, StructurePlan plan, World world, Vector pos, Direction direction) {
+    public static Structure create(Player player, SettlerCraftPlan plan, World world, Vector pos, Direction direction) {
         // Retrieve schematic
         Schematic schematic;
         try {
-            schematic = SchematicManager.getInstance().getSchematic(plan.getSchematic());
+            schematic = SchematicManager.getInstance().getSmartSchematic(plan.getSchematic());
         } catch (DataException | IOException ex) {
             java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
             return null;
@@ -238,7 +240,7 @@ public class Structure implements Serializable {
                 STRUCTURE_DIR.mkdirs();
             }
 
-            File config = plan.getConfigXML();
+            File config = plan.getConfig();
             File schematicFile = plan.getSchematic();
 
             FileUtils.copyFile(config, new File(STRUCTURE_DIR, "StructurePlan.xml"));
@@ -271,6 +273,7 @@ public class Structure implements Serializable {
             }
         }
         
+        PlanDocumentManager.getInstance().register(structure);
 
         Bukkit.getPluginManager().callEvent(new StructureCreateEvent(structure));
         return structure;
@@ -330,20 +333,16 @@ public class Structure implements Serializable {
         return checksum;
     }
 
-    public StructurePlan getPlan() throws StructureDataException, DocumentException, IOException {
-        File file = getConfig();
-        StructurePlan plan = new StructurePlan(file);
-        plan.load();
-        return plan;
+    public SettlerCraftPlan getPlan() throws StructureDataException, DocumentException {
+        return SettlerCraftPlanManager.getInstance().getPlan(this);
     }
 
     public File getConfig() {
         return new File(getFolder(), "StructurePlan.xml");
     }
 
-    public File getSchematicFile() throws StructureDataException, DocumentException, IOException {
-        StructurePlan plan = getPlan();
-        return plan.getSchematic();
+    public File getSchematicFile() throws StructureDataException, DocumentException {
+        return getPlan().getSchematic();
     }
 
     public void setName(String name) {

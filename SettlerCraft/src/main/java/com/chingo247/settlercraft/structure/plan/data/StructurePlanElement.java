@@ -14,20 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structure.construction;
 
-import com.chingo247.settlercraft.structure.construction.asyncworldedit.SCJobEntry;
-import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+package com.chingo247.settlercraft.structure.plan.data;
 
+import org.dom4j.Element;
 
 /**
  *
  * @author Chingo
  */
-public interface ConstructionCallback {
+public interface StructurePlanElement {
     
-    public void onJobAdded(SCJobEntry entry);
+    public Element asElement();
     
-    public void onJobCanceled(JobEntry entry);
     
 }
