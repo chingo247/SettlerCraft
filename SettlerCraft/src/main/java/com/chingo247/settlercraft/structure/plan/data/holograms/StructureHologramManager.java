@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structure.data.holograms;
+package com.chingo247.settlercraft.structure.plan.data.holograms;
 
 import com.chingo247.settlercraft.bukkit.events.StructureCreateEvent;
 import com.chingo247.settlercraft.bukkit.events.StructureStateChangeEvent;
@@ -23,8 +23,8 @@ import com.chingo247.settlercraft.persistence.HibernateUtil;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.entities.structure.QStructure;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
-import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structure.plan.StructurePlanManager;
+import com.chingo247.settlercraft.structure.plan.SettlerCraftPlan;
+import com.chingo247.settlercraft.structure.plan.SettlerCraftPlanManager;
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.mysema.query.jpa.JPQLQuery;
@@ -83,6 +83,7 @@ public class StructureHologramManager implements Listener {
     private void createHolograms(final Structure structure) {
         final Plugin plugin = SettlerCraft.getInstance();
         
+        // FIX: Crashed the server when not performed sync delayed as this method could be called from a different thread
         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
 
             @Override
@@ -92,7 +93,7 @@ public class StructureHologramManager implements Listener {
                 }
 
                 try {
-                    StructurePlan plan = StructurePlanManager.getInstance().getPlan(structure);
+                    SettlerCraftPlan plan = SettlerCraftPlanManager.getInstance().getPlan(structure);
                     List<StructureHologram> holos = plan.getHolograms();
                     for (StructureHologram sh : holos) {
                         Location location = structure.translateRelativeLocation(new Vector(sh.x, sh.y, sh.z));

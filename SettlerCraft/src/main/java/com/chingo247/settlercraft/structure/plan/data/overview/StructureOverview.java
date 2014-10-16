@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.chingo247.settlercraft.structure.data.overview;
+package com.chingo247.settlercraft.structure.plan.data.overview;
 
-import com.chingo247.settlercraft.structure.data.Elements;
-import com.chingo247.settlercraft.structure.data.SettlerCraftElement;
+import com.chingo247.settlercraft.structure.plan.data.Elements;
+import com.chingo247.settlercraft.structure.plan.data.StructurePlanElement;
 import org.dom4j.Element;
 import org.dom4j.tree.BaseElement;
 
@@ -26,7 +26,7 @@ import org.dom4j.tree.BaseElement;
  *
  * @author Chingo
  */
-public class StructureOverview implements SettlerCraftElement{
+public class StructureOverview implements StructurePlanElement{
     
     private int x;
     private int y;

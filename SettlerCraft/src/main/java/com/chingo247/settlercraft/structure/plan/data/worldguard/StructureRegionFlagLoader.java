@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structure.data.worldguard;
+package com.chingo247.settlercraft.structure.plan.data.worldguard;
 
 import com.chingo247.settlercraft.exception.StructureDataException;
-import com.chingo247.settlercraft.structure.data.Elements;
-import com.chingo247.settlercraft.structure.data.Loader;
-import com.chingo247.settlercraft.structure.data.Nodes;
+import com.chingo247.settlercraft.structure.plan.data.Elements;
+import com.chingo247.settlercraft.structure.plan.data.Loader;
+import com.chingo247.settlercraft.structure.plan.data.Nodes;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;

@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structure.data.worldguard;
+package com.chingo247.settlercraft.structure.plan.data.worldguard;
 
-import com.chingo247.settlercraft.structure.data.Elements;
-import com.chingo247.settlercraft.structure.data.SettlerCraftElement;
+import com.chingo247.settlercraft.structure.plan.data.Elements;
+import com.chingo247.settlercraft.structure.plan.data.StructurePlanElement;
 import com.sk89q.worldguard.protection.flags.Flag;
 import org.dom4j.Element;
 import org.dom4j.tree.BaseElement;
@@ -26,7 +26,7 @@ import org.dom4j.tree.BaseElement;
  *
  * @author Chingo
  */
-public class StructureRegionFlag <T> implements SettlerCraftElement {
+public class StructureRegionFlag <T> implements StructurePlanElement {
     
     private final Flag flag;
     private final T value;

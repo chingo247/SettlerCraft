@@ -15,16 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.chingo247.settlercraft.structure;
+package com.chingo247.settlercraft.structure.plan;
 
 import com.chingo247.settlercraft.exception.StructureAPIException;
+import com.chingo247.settlercraft.exception.StructureDataException;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.util.FileUtil;
 import com.sc.module.menuapi.menus.menu.CategoryMenu;
 import com.sc.module.menuapi.menus.menu.MenuAPI;
+import com.sk89q.worldedit.data.DataException;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.List;
+import org.apache.log4j.Logger;
 import org.bukkit.Material;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -36,24 +41,41 @@ import org.dom4j.io.SAXReader;
  *
  * @author Chingo
  */
-public class PlanMenuLoader {
+public class PlanMenuManager {
 
     private static final String PLANSHOP_NAME = "Buy & Build";
     private static final String RESOURCE_FOLDER = "com/chingo247/settlercraft/resources";
     private static final File PLUGIN_FOLDER = SettlerCraft.getInstance().getDataFolder();
+    private CategoryMenu planMenu;
+    private final Logger LOGGER = Logger.getLogger(PlanMenuManager.class);
+    private boolean loadingPlans = false;
+    private static PlanMenuManager instance;
+    
+    private PlanMenuManager() {}
+    
+    public CategoryMenu getMenu() {
+        return planMenu;
+    }
+    
+    public static PlanMenuManager getInstance() {
+        if(instance == null) {
+            instance = new PlanMenuManager();
+        }
+        return instance;
+    }
+    
 
     /**
      * Loads the planmenu from the menu.xml. If menu.xml doesn't exist, the menu.xml from the jar
      * will be written to the filesystem.
      *
-     * @return The CategoryMenu for the PlanMenu
      * @throws DocumentException When XML is invalid
      * @throws StructureAPIException When XML contains invalid data
      */
-    public static CategoryMenu load() throws DocumentException, StructureAPIException {
+    public final void init() throws DocumentException, StructureAPIException {
         File file = new File(PLUGIN_FOLDER, "menu.xml");
         if (!file.exists()) {
-            InputStream input = PlanMenuLoader.class.getClassLoader().getResourceAsStream(RESOURCE_FOLDER + "/menu.xml");
+            InputStream input = PlanMenuManager.class.getClassLoader().getResourceAsStream(RESOURCE_FOLDER + "/menu.xml");
             FileUtil.write(input, file);
         }
 
@@ -63,7 +85,7 @@ public class PlanMenuLoader {
             throw new StructureAPIException("Max rows is 2 for menu.xml");
         }
 
-        CategoryMenu menu = MenuAPI.createMenu(SettlerCraft.getInstance(), PLANSHOP_NAME, 54);
+        planMenu = MenuAPI.createMenu(SettlerCraft.getInstance(), PLANSHOP_NAME, 54);
         boolean hasRow2 = false;
 
         for (int row = 0; row < rows.size(); row++) {
@@ -141,49 +163,65 @@ public class PlanMenuLoader {
                     hasRow2 = true;
                 }
 
-                menu.putCategorySlot((row * 9) + slot , category, Material.getMaterial(id), aliases);
+                planMenu.putCategorySlot((row * 9) + slot , category, Material.getMaterial(id), aliases);
 
                 count++;
             }
             // fill remaining
             if(count < 8 && row == 0) {
                 for(int i = count; i < 8; i++) {
-                    menu.putLocked(i);
+                    planMenu.putLocked(i);
                 }
                 
             } else if(row > 0 && count < 9) {
                 for(int i = count; i < 9; i++) {
-                    menu.putLocked((row * 9) + i);
+                    planMenu.putLocked((row * 9) + i);
                 }
             }
         }
 
         if (hasRow2) {
-            menu.putLocked(19, 20, 21, 22, 23, 24, 25);
-            menu.putActionSlot(18, "Previous", Material.COAL_BLOCK);
-            menu.putActionSlot(26, "Next", Material.COAL_BLOCK);
+            planMenu.putLocked(19, 20, 21, 22, 23, 24, 25);
+            planMenu.putActionSlot(18, "Previous", Material.COAL_BLOCK);
+            planMenu.putActionSlot(26, "Next", Material.COAL_BLOCK);
         } else {
-            menu.putLocked(10, 11, 12, 13, 14, 15, 16);
-            menu.putActionSlot(9, "Previous", Material.COAL_BLOCK);
-            menu.putActionSlot(17, "Next", Material.COAL_BLOCK);
+            planMenu.putLocked(10, 11, 12, 13, 14, 15, 16);
+            planMenu.putActionSlot(9, "Previous", Material.COAL_BLOCK);
+            planMenu.putActionSlot(17, "Next", Material.COAL_BLOCK);
         }
 
-        return menu;
     }
+    
+    public void loadPlans() {
+        synchronized(this) {
+            if(loadingPlans) {
+                return;
+            } else {
+                loadingPlans = true;
+                planMenu.setEnabled(false);
+            }
+        }
+        
+        
+        final List<SettlerCraftPlan> plans = SettlerCraftPlanManager.getInstance().getPlans();
+        final Iterator<SettlerCraftPlan> planIterator = plans.iterator();
 
-//        private void setupMenu() {
-//        CategoryMenu planMenu = MenuAPI.createMenu(MAIN_PLUGIN, PLANSHOP_NAME, 54);
-//        planMenu.putCategorySlot(1, "General", Material.WORKBENCH);
-//        planMenu.putCategorySlot(2, "Industry", Material.ANVIL, "Industrial", "Industries");
-//        planMenu.putCategorySlot(3, "Housing", Material.BED, "Residence", "Residencial", "Houses", "House");
-//        planMenu.putCategorySlot(4, "Economy", Material.GOLD_INGOT, "Economical", "Shops", "Shop", "Market", "Markets");
-//        planMenu.putCategorySlot(5, "Temples", Material.QUARTZ, "Temple", "Church", "Sacred", "Holy");
-//        planMenu.putCategorySlot(6, "Fortifications", Material.SMOOTH_BRICK, "Fort", "Fortification", "Wall", "Fortress", "Fortresses", "Keep", "Castle", "Castles", "Military");
-//        planMenu.putCategorySlot(7, "Dungeons&Arenas", Material.IRON_SWORD);
-//        planMenu.putCategorySlot(8, "Misc", Material.BUCKET, "Misc");
-//        planMenu.putActionSlot(9, "Previous", Material.COAL_BLOCK);
-//        planMenu.putActionSlot(17, "Next", Material.COAL_BLOCK);
-//        planMenu.putLocked(10, 11, 12, 13, 14, 15, 16);
-//        PLANSHOP = planMenu.getId();
-//    }
+        planMenu.clearItems();
+
+        while (planIterator.hasNext()) {
+            final SettlerCraftPlan plan = planIterator.next();
+
+            try {
+                // Add item to planmenu
+                StructurePlanItem planItem = StructurePlanItem.load(plan);
+                planMenu.addItem(planItem);
+            } catch (IOException | DataException | DocumentException | StructureDataException ex) {
+                LOGGER.error(ex.getMessage());
+            }
+        }
+        
+        planMenu.setEnabled(true);
+        loadingPlans = false;
+    }
+    
 }

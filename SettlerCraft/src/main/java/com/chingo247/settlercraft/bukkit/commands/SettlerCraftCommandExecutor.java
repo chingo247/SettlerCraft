@@ -84,16 +84,16 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         return true;
                     }
                     CategoryMenu planmenu = SettlerCraft.getInstance().getPlanMenu();
-
-                    if (planmenu == null || !planmenu.isEnabled()) {
-                        cs.sendMessage(ChatColor.RED + " Planmenu is not enabled yet");
+                    if(planmenu == null) {
+                        cs.sendMessage(ChatColor.RED + " Planmenu is initialized yet, please wait...");
                         return true;
                     }
 
-                    if (!SettlerCraft.getInstance().isPlansLoaded()) {
-                        cs.sendMessage(ChatColor.RED + " Plans are not loaded yet");
+                    if (!planmenu.isEnabled()) {
+                        cs.sendMessage(ChatColor.RED + " Planmenu is not ready yet, please wait");
                         return true;
                     }
+
 
                     // HAS PERMISSION
                     if (args.length == 1) {
@@ -123,15 +123,17 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                         return true;
                     }
 
-                    if (!SettlerCraft.getInstance().isPlansLoaded()) {
-                        cs.sendMessage(ChatColor.RED + " Plans are not loaded yet");
-                        return true;
-                    }
+                 
 
                     CategoryMenu planmenu2 = SettlerCraft.getInstance().getPlanMenu();
 
-                    if (planmenu2 == null || !planmenu2.isEnabled()) {
-                        cs.sendMessage(ChatColor.RED + " Planmenu is not enabled yet");
+                    if(planmenu2 == null) {
+                        cs.sendMessage(ChatColor.RED + " Planmenu is initialized yet, please wait...");
+                        return true;
+                    }
+
+                    if (!planmenu2.isEnabled()) {
+                        cs.sendMessage(ChatColor.RED + " Planmenu is not ready yet, please wait");
                         return true;
                     }
 
@@ -167,16 +169,13 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
 
                     }
                     // Check if should reload plans
-                    if (args.length == 2 && args[1].equals("plans")) {
-                        if (SettlerCraft.getInstance().reloadPlans()) {
-                            Bukkit.broadcastMessage(SettlerCraft.MSG_PREFIX + "Reloading plans...");
-                        } else {
-                            cs.sendMessage(SettlerCraft.MSG_PREFIX + "Plans are already being reloaded...");
-                        }
+                    if (args.length == 2 && args[1].equalsIgnoreCase("plans")) {
+                        //TODO FIX PLANS
+//                        SettlerCraft.getInstance().reloadPlans();
                         return true;
                     }
 
-                    if (args.length == 2 && args[1].equals("config")) {
+                    if (args.length == 2 && args[1].equalsIgnoreCase("config")) {
                         try {
                             ConfigProvider.getInstance().load();
                             cs.sendMessage(SettlerCraft.MSG_PREFIX + "Config reloaded");

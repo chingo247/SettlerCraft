@@ -18,27 +18,18 @@
 package com.chingo247.settlercraft.structure.plan;
 
 import com.chingo247.settlercraft.exception.StructureDataException;
-import com.chingo247.settlercraft.structure.data.Nodes;
-import com.chingo247.settlercraft.structure.schematic.Schematic;
-import com.chingo247.settlercraft.structure.schematic.SchematicManager;
+import com.chingo247.settlercraft.structure.plan.data.schematic.SchematicData;
 import com.sc.module.menuapi.menus.menu.item.CategoryTradeItem;
 import com.sc.module.menuapi.menus.menu.item.TradeItem;
 import com.sc.module.menuapi.menus.menu.util.ShopUtil;
-import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.data.DataException;
-import com.sk89q.worldedit.util.Countable;
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.dom4j.Document;
 import org.dom4j.DocumentException;
-import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
 
 /**
  * Represents a StructurePlanItem
@@ -71,73 +62,30 @@ public class StructurePlanItem implements CategoryTradeItem {
         this.description = description;
     }
 
-    public static StructurePlanItem load(StructurePlan plan) throws IOException, DataException, DocumentException, StructureDataException {
-        File cfg = plan.getConfigXML();
-        File sch = plan.getSchematic();
-
-        int width;
-        int height;
-        int length;
-        int blocks;
-
-        Schematic schematic = SchematicManager.getInstance().getSchematic(sch);
-
-//        CuboidClipboard clip = SchematicFormat.MCEDIT.load(sch);
-        width = schematic.getWidth();
-        length = schematic.getLength();
-        height = schematic.getHeight();
-        blocks = schematic.getBlocks();
+    public static StructurePlanItem load(SettlerCraftPlan plan) throws IOException, DataException, DocumentException, StructureDataException {
         
-        SAXReader reader = new SAXReader();
-        Document config = reader.read(cfg);
-
-        String path = StructurePlanManager.getInstance().getRelativePath(cfg);
-        String name;
-        String category;
-        String faction;
-        String description;
-        double price;
-
-        Node nameNode = config.selectSingleNode(Nodes.NAME_NODE);
-        Node categoryNode = config.selectSingleNode(Nodes.CATEGORY_NODE);
-        Node factionNode = config.selectSingleNode(Nodes.FACTION_NODE);
-        Node priceNode = config.selectSingleNode(Nodes.PRICE_NODE);
-        Node descriptionNode = config.selectSingleNode(Nodes.DESCRIPTION_NODE);
-
-        if (nameNode == null) {
-            throw new StructureDataException("Missing name node for: " + cfg.getAbsolutePath());
-        }
-        name = nameNode.getText();
-
-        category = categoryNode != null ? categoryNode.getText() : "All";
-        faction = factionNode != null ? factionNode.getText() : "Default";
-
-        try {
-            price = priceNode != null ? Double.parseDouble(priceNode.getText()) : 0d;
-        } catch (NumberFormatException nfe) {
-            throw new StructureDataException("Invalid price value for: " + cfg.getAbsolutePath());
+        SchematicData data = SchematicManager.getInstance().getData(plan.getChecksum());
+        if(data == null) {
+            throw new AssertionError("SchematicData was null");
         }
 
-        if (descriptionNode != null) {
-            description = descriptionNode.getText();
-        } else {
-            description = null;
-        }
+        int width = data.getWidth();
+        int height = data.getHeight();
+        int length = data.getLength();
+        int blocks = data.getHeight();
+        String path = plan.getRelativePath();
+        String name = plan.getName();
+        String category = plan.getCategory();
+        String faction = plan.getFaction();
+        String description = plan.getDescription();
+        double price = plan.getPrice();
+
+        
 
         StructurePlanItem item = new StructurePlanItem(path, name, category, faction, price, width, height, length, blocks, description);
         return item;
     }
 
-    private static int getBlocks(CuboidClipboard clip) {
-        int blocks = 0;
-
-        for (Countable<Integer> b : clip.getBlockDistribution()) {
-            if (b.getID() != BlockID.AIR) {
-                blocks += b.getAmount();
-            }
-        }
-        return blocks;
-    }
 
     @Override
     public String getCategory() {
@@ -181,8 +129,7 @@ public class StructurePlanItem implements CategoryTradeItem {
 
     @Override
     public TradeItem clone() {
-        StructurePlanItem item = new StructurePlanItem(path, name, category, faction, price, width, height, length, blocks, description);
-        return item;
+        return new StructurePlanItem(path, name, category, faction, price, width, height, length, blocks, description);
     }
 
 }

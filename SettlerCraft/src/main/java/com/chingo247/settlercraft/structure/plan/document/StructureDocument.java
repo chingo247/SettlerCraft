@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Chingo247
+ * Copyright (C) 2014 Chingo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,26 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structure.data.holograms;
+package com.chingo247.settlercraft.structure.plan.document;
+
+import com.chingo247.settlercraft.structure.entities.structure.Structure;
+import java.io.File;
+import org.dom4j.DocumentException;
 
 /**
  *
  * @author Chingo
  */
-public class StructureHologram {
+public class StructureDocument extends PlanDocument {
+    
+    private final Structure structure;
 
-    int x;
-    int y;
-    int z;
-    String[] text;
-
-    StructureHologram(int x, int y, int z, String[] lines) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.text = lines;
+    public StructureDocument(Structure structure, File docFile) throws DocumentException {
+        super(docFile);
+        this.structure = structure;
     }
 
+    public Structure getStructure() {
+        return structure;
+    }
     
-
+    
+    
+    
+    
+    
 }

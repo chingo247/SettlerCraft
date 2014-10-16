@@ -27,10 +27,12 @@ import static com.chingo247.settlercraft.structure.entities.world.Direction.EAST
 import static com.chingo247.settlercraft.structure.entities.world.Direction.NORTH;
 import static com.chingo247.settlercraft.structure.entities.world.Direction.SOUTH;
 import static com.chingo247.settlercraft.structure.entities.world.Direction.WEST;
+import com.chingo247.settlercraft.structure.plan.PlanMenuManager;
+import com.chingo247.settlercraft.structure.plan.SchematicManager;
+import com.chingo247.settlercraft.structure.plan.SettlerCraftPlan;
+import com.chingo247.settlercraft.structure.plan.SettlerCraftPlanManager;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structure.plan.StructurePlanManager;
-import com.chingo247.settlercraft.structure.schematic.Schematic;
-import com.chingo247.settlercraft.structure.schematic.SchematicManager;
+import com.chingo247.settlercraft.structure.plan.data.schematic.Schematic;
 import com.chingo247.settlercraft.structure.selection.CUISelectionManager;
 import com.chingo247.settlercraft.structure.selection.SelectionManager;
 import com.chingo247.settlercraft.util.SchematicUtil;
@@ -84,14 +86,14 @@ public class PlanListener implements Listener {
         // Cancel default action as it would damage/remove a block
         pie.setCancelled(true);
         
-        if(!SettlerCraft.getInstance().isPlansLoaded()) {
+        if(!PlanMenuManager.getInstance().getMenu().isEnabled()) {
             player.sendMessage(ChatColor.RED + "Plans are not loaded yet... please wait...");
             return;
         }
 
         // Get plan ID
         String structurePlanId = StructurePlan.getPlanID(planstack);
-        final StructurePlan plan = StructurePlanManager.getInstance().getPlan(structurePlanId);
+        final SettlerCraftPlan plan = SettlerCraftPlanManager.getInstance().getPlan(structurePlanId);
 
         // Check if plan is valid
         if (plan == null) {
@@ -132,7 +134,7 @@ public class PlanListener implements Listener {
 
 
         try {
-            Schematic schematic = SchematicManager.getInstance().getSchematic(plan.getSchematic());
+            Schematic schematic = SchematicManager.getInstance().getSmartSchematic(plan.getSchematic());
             Location l = pie.getClickedBlock().getLocation();
             
             // CUI Select
@@ -235,7 +237,7 @@ public class PlanListener implements Listener {
 
 
 
-    private void handleCUIPlayer(final Player player, final Location location, StructurePlan plan, final Schematic schematic, final ItemStack planstack) {
+    private void handleCUIPlayer(final Player player, final Location location, SettlerCraftPlan plan, final Schematic schematic, final ItemStack planstack) {
         boolean toLeft = player.isSneaking();
         LocalPlayer localPlayer = WorldEditUtil.getLocalPlayer(player);
         LocalSession session = WorldEdit.getInstance().getSession(localPlayer);
@@ -290,7 +292,7 @@ public class PlanListener implements Listener {
 
     }
 
-    private void handleHoloPlayer(final Player player, Location l, StructurePlan plan, Schematic schematic, final ItemStack planstack) {
+    private void handleHoloPlayer(final Player player, Location l, SettlerCraftPlan plan, Schematic schematic, final ItemStack planstack) {
         boolean toLeft = player.isSneaking();
 
         Direction direction = WorldUtil.getDirection(player);

@@ -24,17 +24,17 @@ import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.StructureAPI;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.SCAsyncClipboard;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.SCJobEntry;
-import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership;
-import com.chingo247.settlercraft.structure.entities.structure.Structure;
-import com.chingo247.settlercraft.structure.entities.structure.Structure.State;
-import com.chingo247.settlercraft.structure.entities.world.Direction;
 import com.chingo247.settlercraft.structure.construction.generator.ClipboardGenerator;
-import com.chingo247.settlercraft.structure.schematic.Schematic;
-import com.chingo247.settlercraft.structure.schematic.SchematicManager;
 import com.chingo247.settlercraft.structure.construction.worldedit.ConstructionClipboard;
 import com.chingo247.settlercraft.structure.construction.worldedit.DemolisionClipboard;
 import com.chingo247.settlercraft.structure.construction.worldedit.StructureBlock;
 import com.chingo247.settlercraft.structure.construction.worldedit.StructureBlockComparators;
+import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership;
+import com.chingo247.settlercraft.structure.entities.structure.Structure;
+import com.chingo247.settlercraft.structure.entities.structure.Structure.State;
+import com.chingo247.settlercraft.structure.entities.world.Direction;
+import com.chingo247.settlercraft.structure.plan.SchematicManager;
+import com.chingo247.settlercraft.structure.plan.data.schematic.Schematic;
 import com.chingo247.settlercraft.util.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.util.SchematicUtil;
 import com.chingo247.settlercraft.util.WorldEditUtil;
@@ -189,7 +189,7 @@ public class ConstructionManager {
 
                     // Get clipboard
                     // Align it!
-                    Schematic schematic = SchematicManager.getInstance().getSchematic(sf);
+                    Schematic schematic = SchematicManager.getInstance().getSmartSchematic(sf);
                     CuboidClipboard cc = schematic.getClipboard();
                     SchematicUtil.align(cc, structure.getDirection());
 
@@ -406,7 +406,7 @@ public class ConstructionManager {
                         SchematicManager.getInstance().load(sf);
                     }
 
-                    Schematic schematic = SchematicManager.getInstance().getSchematic(sf);
+                    Schematic schematic = SchematicManager.getInstance().getSmartSchematic(sf);
 //                    placeFence(uuid, site, schematic, BlockID.IRON_BARS);
 
                     // Update status
@@ -568,9 +568,10 @@ public class ConstructionManager {
             if (!schematic.exists()) {
                 throw new ConstructionException("Missing schematic file!");
             }
-        } catch (DocumentException | IOException ex) {
+        } catch (DocumentException ex) {
             Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
         }
+            
 
     }
 
