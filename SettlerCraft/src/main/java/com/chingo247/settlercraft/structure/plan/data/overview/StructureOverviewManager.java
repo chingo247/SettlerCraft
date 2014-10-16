@@ -1,4 +1,4 @@
-package com.chingo247.settlercraft.structure.data.overview;
+package com.chingo247.settlercraft.structure.plan.data.overview;
 
 /*
  * Copyright (C) 2014 Chingo247
@@ -25,8 +25,8 @@ import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.entities.structure.QStructure;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
 import com.chingo247.settlercraft.structure.entities.structure.Structure.State;
-import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structure.plan.StructurePlanManager;
+import com.chingo247.settlercraft.structure.plan.SettlerCraftPlan;
+import com.chingo247.settlercraft.structure.plan.SettlerCraftPlanManager;
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.mysema.query.jpa.JPQLQuery;
@@ -82,7 +82,7 @@ public class StructureOverviewManager implements Listener {
                     holograms.put(structure.getId(), new ArrayList<Hologram>());
                 }
                 try {
-                    StructurePlan plan = StructurePlanManager.getInstance().getPlan(structure);
+                    SettlerCraftPlan plan = SettlerCraftPlanManager.getInstance().getPlan(structure);
                     List<StructureOverview> holos = plan.getOverviews();
                     
                     if (holos.isEmpty()  && ConfigProvider.getInstance().useHolograms()) {

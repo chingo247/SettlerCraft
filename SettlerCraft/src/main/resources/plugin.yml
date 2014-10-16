@@ -1,8 +1,8 @@
 name: SettlerCraft
 main: com.chingo247.settlercraft.plugin.SettlerCraft
-version: 1.0-RC
+version: 1.1.0
 author: Chingo247
-description: Placing & building of MineCraft Schematics! 
+description: Build & Interact with Structures!
 depend: [WorldEdit, AsyncWorldEdit, WorldGuard, Vault]
 softdepend: [HolographicDisplays]
 

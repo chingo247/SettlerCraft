@@ -20,7 +20,7 @@ package com.chingo247.settlercraft.structure;
 
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
 import com.chingo247.settlercraft.structure.entities.world.Direction;
-import com.chingo247.settlercraft.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structure.plan.SettlerCraftPlan;
 import com.sk89q.worldedit.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,7 +45,7 @@ public class AsyncStructureAPI {
     
     private AsyncStructureAPI() {}
     
-    public void create(final Player player, final StructurePlan plan, final World world, final Vector location, final Direction direction, final StructureCallback callback) {
+    public void create(final Player player, final SettlerCraftPlan plan, final World world, final Vector location, final Direction direction, final StructureCallback callback) {
         executor.execute(new Runnable() {
 
             @Override
@@ -56,7 +56,7 @@ public class AsyncStructureAPI {
         });
     }
     
-    public void create(final StructurePlan plan, final World world, final Vector location, final Direction direction, final StructureCallback callback) {
+    public void create(final SettlerCraftPlan plan, final World world, final Vector location, final Direction direction, final StructureCallback callback) {
         executor.execute(new Runnable() {
 
             @Override

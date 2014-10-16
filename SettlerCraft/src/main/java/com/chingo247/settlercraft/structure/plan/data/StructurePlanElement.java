@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.chingo247.settlercraft.structure.data;
+package com.chingo247.settlercraft.structure.plan.data;
 
 import org.dom4j.Element;
 
@@ -23,7 +23,7 @@ import org.dom4j.Element;
  *
  * @author Chingo
  */
-public interface SettlerCraftElement {
+public interface StructurePlanElement {
     
     public Element asElement();
     

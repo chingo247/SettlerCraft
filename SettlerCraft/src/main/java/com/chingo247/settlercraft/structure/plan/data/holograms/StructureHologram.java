@@ -14,12 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structure.data;
+package com.chingo247.settlercraft.structure.plan.data.holograms;
 
 /**
  *
  * @author Chingo
  */
-public class SettlerCraftData {
+public class StructureHologram {
+
+    int x;
+    int y;
+    int z;
+    String[] text;
+
+    StructureHologram(int x, int y, int z, String[] lines) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.text = lines;
+    }
+
     
+
 }

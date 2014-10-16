@@ -19,7 +19,7 @@ package com.chingo247.settlercraft.structure.selection;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
-import com.chingo247.settlercraft.structure.schematic.Schematic;
+import com.chingo247.settlercraft.structure.plan.data.schematic.Schematic;
 import com.chingo247.settlercraft.util.WorldUtil;
 import com.chingo247.settlercraft.structure.entities.world.Direction;
 import static com.chingo247.settlercraft.structure.entities.world.Direction.EAST;

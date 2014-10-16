@@ -25,7 +25,7 @@ import com.chingo247.settlercraft.persistence.StructureService;
 import com.chingo247.settlercraft.plugin.ConfigProvider;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.construction.ConstructionManager;
-import com.chingo247.settlercraft.structure.data.Nodes;
+import com.chingo247.settlercraft.structure.plan.data.Nodes;
 import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership;
 import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership.Type;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;

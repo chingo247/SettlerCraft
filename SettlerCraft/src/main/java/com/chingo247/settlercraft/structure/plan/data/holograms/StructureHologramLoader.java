@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structure.data.holograms;
+package com.chingo247.settlercraft.structure.plan.data.holograms;
 
 import com.chingo247.settlercraft.exception.StructureDataException;
-import com.chingo247.settlercraft.structure.data.Elements;
-import com.chingo247.settlercraft.structure.data.Loader;
-import com.chingo247.settlercraft.structure.data.Nodes;
+import com.chingo247.settlercraft.structure.plan.data.Elements;
+import com.chingo247.settlercraft.structure.plan.data.Loader;
+import com.chingo247.settlercraft.structure.plan.data.Nodes;
 import java.util.ArrayList;
 import java.util.List;
 import org.dom4j.Element;

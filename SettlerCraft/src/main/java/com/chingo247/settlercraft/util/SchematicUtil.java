@@ -19,7 +19,7 @@ package com.chingo247.settlercraft.util;
 
 import com.chingo247.settlercraft.structure.entities.world.Dimension;
 import com.chingo247.settlercraft.structure.entities.world.Direction;
-import com.chingo247.settlercraft.structure.schematic.Schematic;
+import com.chingo247.settlercraft.structure.plan.data.schematic.Schematic;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;

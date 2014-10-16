@@ -18,21 +18,16 @@
 package com.chingo247.settlercraft.structure.plan;
 
 import com.chingo247.settlercraft.exception.StructureDataException;
-import com.chingo247.settlercraft.structure.data.Nodes;
-import com.chingo247.settlercraft.structure.data.SettlerCraftElement;
-import com.chingo247.settlercraft.structure.data.holograms.StructureHologram;
-import com.chingo247.settlercraft.structure.data.holograms.StructureHologramLoader;
-import com.chingo247.settlercraft.structure.data.overview.StructureOverview;
-import com.chingo247.settlercraft.structure.data.overview.StructureOverviewLoader;
-import com.chingo247.settlercraft.structure.data.worldguard.StructureRegionFlag;
-import com.chingo247.settlercraft.structure.data.worldguard.StructureRegionFlagLoader;
+import com.chingo247.settlercraft.structure.plan.data.Nodes;
+import com.chingo247.settlercraft.structure.plan.data.StructurePlanElement;
+import com.chingo247.settlercraft.structure.plan.data.holograms.StructureHologram;
+import com.chingo247.settlercraft.structure.plan.data.overview.StructureOverview;
+import com.chingo247.settlercraft.structure.plan.data.worldguard.StructureRegionFlag;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.io.FilenameUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -110,17 +105,17 @@ public class StructurePlan {
         }
     }
 
-    public void set(String xPathParent, List<? extends SettlerCraftElement> elements) throws IOException {
+    public void set(String xPathParent, List<? extends StructurePlanElement> elements) throws IOException {
 
         synchronized (configDoc) {
             remove(xPathParent);
-            for (SettlerCraftElement e : elements) {
+            for (StructurePlanElement e : elements) {
                 append(xPathParent, e);
             }
         }
     }
 
-    public void append(String xPathParent, SettlerCraftElement element) throws IOException {
+    public void append(String xPathParent, StructurePlanElement element) throws IOException {
         synchronized (configDoc) {
             Node n = configDoc.selectSingleNode(xPathParent);
             if (n == null) {
@@ -169,37 +164,7 @@ public class StructurePlan {
 //        writer.close();
     }
 
-    public void load() throws DocumentException, StructureDataException, IOException {
-        Document d;
-        synchronized (configXML) {
-            d = new SAXReader().read(configXML);
-        }
-        handleSchematic(d);
-        name = getValue(d, Nodes.NAME_NODE, FilenameUtils.getBaseName(schematic.getName()));
-
-        category = getValue(d, Nodes.CATEGORY_NODE, "Default");
-
-        faction = getValue(d, Nodes.FACTION_NODE, "Default");
-
-        description = getValue(d, Nodes.DESCRIPTION_NODE, "-");
-        
-
-        try {
-            price = Double.parseDouble(getValue(d, Nodes.PRICE_NODE, "0.0"));
-        } catch (NumberFormatException nfe) {
-            throw new StructureDataException("Value of 'Price' must be a number in " + configXML.getAbsolutePath());
-        }
-        if (d.selectSingleNode(Nodes.STRUCTURE_OVERVIEWS_NODE) != null) {
-            overviews = new StructureOverviewLoader().load(d);
-        }
-        if (d.selectSingleNode(Nodes.HOLOGRAMS_NODE) != null) {
-            holograms = new StructureHologramLoader().load(d);
-        }
-        if (d.selectSingleNode(Nodes.WORLDGUARD_FLAGS_NODE) != null) {
-            flags = new StructureRegionFlagLoader().load(d);
-        }
-
-    }
+   
 
     
     
@@ -226,19 +191,7 @@ public class StructurePlan {
         return n.getText();
     }
 
-    private void handleSchematic(Document d) throws StructureDataException, FileNotFoundException {
-        Node schematicNode = d.selectSingleNode(Nodes.SCHEMATIC_NODE);
-        if (schematicNode == null) {
-            throw new StructureDataException("Missing  Structure Schematic in " + configXML.getAbsolutePath());
-        }
 
-        File s = new File(configXML.getParent(), schematicNode.getText());
-        if (s.exists()) {
-            schematic = s;
-        } else {
-            throw new FileNotFoundException("Couldn't resolve path for " + s.getAbsolutePath() + " for config:  " + configXML.getAbsolutePath());
-        }
-    }
 
 //    public static void main(String... args) {
 //
@@ -272,10 +225,6 @@ public class StructurePlan {
 
     public File getSchematic() {
         return schematic;
-    }
-
-    public void setSchematic(File schematic) {
-        this.schematic = schematic;
     }
 
     public String getName() {

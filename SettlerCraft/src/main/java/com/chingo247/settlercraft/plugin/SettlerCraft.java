@@ -24,31 +24,25 @@ import com.chingo247.settlercraft.bukkit.listener.PlanListener;
 import com.chingo247.settlercraft.bukkit.listener.PluginListener;
 import com.chingo247.settlercraft.exception.SettlerCraftException;
 import com.chingo247.settlercraft.exception.StructureAPIException;
-import com.chingo247.settlercraft.exception.StructureDataException;
 import com.chingo247.settlercraft.persistence.HSQLServer;
 import com.chingo247.settlercraft.persistence.HibernateUtil;
 import com.chingo247.settlercraft.persistence.RestoreService;
 import com.chingo247.settlercraft.plugin.PermissionManager.Perms;
-import com.chingo247.settlercraft.structure.PlanMenuLoader;
-import com.chingo247.settlercraft.structure.data.holograms.StructureHologramManager;
-import com.chingo247.settlercraft.structure.data.overview.StructureOverviewManager;
 import com.chingo247.settlercraft.structure.entities.structure.QStructure;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
-import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structure.plan.StructurePlanItem;
-import com.chingo247.settlercraft.structure.plan.StructurePlanManager;
+import com.chingo247.settlercraft.structure.plan.PlanMenuManager;
+import com.chingo247.settlercraft.structure.plan.SettlerCraftManager;
+import com.chingo247.settlercraft.structure.plan.SettlerCraftPlanManager;
+import com.chingo247.settlercraft.structure.plan.data.holograms.StructureHologramManager;
+import com.chingo247.settlercraft.structure.plan.data.overview.StructureOverviewManager;
+import com.chingo247.settlercraft.structure.plan.document.PlanDocumentManager;
 import com.mysema.query.jpa.hibernate.HibernateUpdateClause;
 import com.sc.module.menuapi.menus.menu.CategoryMenu;
-import com.sc.module.menuapi.menus.menu.MenuAPI;
-import com.sk89q.worldedit.data.DataException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
@@ -67,9 +61,6 @@ public class SettlerCraft extends JavaPlugin {
 
     private static final Logger LOGGER = Logger.getLogger(SettlerCraft.class);
     private static SettlerCraft instance;
-    private boolean plansLoaded = false;
-    private boolean loadingplans = false;
-    private static UUID PLANSHOP;
 
     public static final String MSG_PREFIX = ChatColor.YELLOW + "[SettlerCraft]: " + ChatColor.RESET;
 
@@ -101,17 +92,7 @@ public class SettlerCraft extends JavaPlugin {
         }
 
 
-        try {
-            // Setup Menu
-            CategoryMenu menu = PlanMenuLoader.load();
-            
-            PLANSHOP = menu.getId();
-
-        } catch (DocumentException | StructureAPIException ex) {
-            java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
-            return;
-        }
-
+        
         // Init HSQL Server
         HSQLServer hsqls = HSQLServer.getInstance();
         if (!hsqls.isRunning()) {
@@ -121,17 +102,25 @@ public class SettlerCraft extends JavaPlugin {
         }
 
         resetStates();
+        
+        // Load plan menu from XML
+        try {
+            PlanMenuManager.getInstance().init();
+        } catch (DocumentException | StructureAPIException ex) {
+            java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
-        // Init StructurePlanManager
-        StructurePlanManager.getInstance().init();
-        StructurePlanManager.getInstance().generate();
+
+        // Init SettlerCraftPlanManager
+        SettlerCraftPlanManager.getInstance().init();
+//        SettlerCraftPlanManager.getInstance().generate();
         
-        
-        reloadPlans();
+        PlanDocumentManager.getInstance().load();
+        print("Initializing...");
+        SettlerCraftManager.getInstance().initialize();
+        print("Done!");
         
 
-        // Write Changelog & Config if not exist!
-        writeResources();
 
         try {
             ConfigProvider.getInstance().load();
@@ -205,54 +194,7 @@ public class SettlerCraft extends JavaPlugin {
         return instance;
     }
 
-    public boolean isPlansLoaded() {
-        return plansLoaded;
-    }
 
-    public boolean isLoadingplans() {
-        return loadingplans;
-    }
-
-    private void writeResources() {
-        File config = new File(getDataFolder(), "config.yml");
-        File changelog = new File(getDataFolder(), "changelog.txt");
-        File license = new File(getDataFolder(), "license.txt");
-        File exampleSchematic = new File(getDataFolder(), "/Examples/Example.schematic");
-        File exampleXML = new File(getDataFolder(), "/Examples/Example.xml");
-
-        if (!config.exists()) {
-
-            InputStream i = this.getClassLoader().getResourceAsStream("com/chingo247/settlercraft/resources/config.yml");
-            write(i, config);
-        }
-        if (!changelog.exists()) {
-            InputStream i = this.getClassLoader().getResourceAsStream("com/chingo247/settlercraft/resources/changelog.txt");
-            write(i, changelog);
-        }
-        
-        if(!license.exists()) {
-            InputStream i = this.getClassLoader().getResourceAsStream("com/chingo247/settlercraft/resources/license.txt");
-            write(i, license);
-        }
-        
-        if(!exampleSchematic.exists()) {
-            File folder = new File(getDataFolder(), "/Examples");
-            if(!folder.exists()) {
-                folder.mkdirs();
-            }
-            
-            InputStream i = this.getClassLoader().getResourceAsStream("com/chingo247/settlercraft/resources/examples/example.schematic");
-            write(i, exampleSchematic);
-        }
-        if(!exampleXML.exists()) {
-            File folder = new File(getDataFolder(), "/Examples");
-            if(!folder.exists()) {
-                folder.mkdirs();
-            }
-            InputStream i = this.getClassLoader().getResourceAsStream("com/chingo247/settlercraft/resources/examples/example.xml");
-            write(i, exampleXML);
-        }
-    }
 
     private void write(InputStream inputStream, File file) {
         OutputStream outputStream = null;
@@ -292,60 +234,9 @@ public class SettlerCraft extends JavaPlugin {
     }
 
     public CategoryMenu getPlanMenu() {
-        return MenuAPI.getInstance().getMenu(this, PLANSHOP);
+        return PlanMenuManager.getInstance().getMenu();
     }
 
-    /**
-     * Reload the plans
-     *  
-     */
-    public boolean reloadPlans() {
-        synchronized (this) {
-            if (loadingplans) {
-                return false;
-            }
-        }
-
-        loadingplans = true;
-        getPlanMenu().makeAllLeave();
-        getPlanMenu().clearItems();
-
-        final long start = System.currentTimeMillis();
-        StructurePlanManager.getInstance().load(new StructurePlanManager.Callback() {
-
-            @Override
-            public void onComplete() {
-                int plans = StructurePlanManager.getInstance().getPlans().size();
-                Bukkit.getConsoleSender().sendMessage(MSG_PREFIX + plans + " plans loaded in " + (System.currentTimeMillis() - start) + "ms");
-                loadPlansIntoMenu();
-            }
-        });
-        return true;
-    }
-
-    private void loadPlansIntoMenu() {
-        final List<StructurePlan> plans = StructurePlanManager.getInstance().getPlans();
-        final Iterator<StructurePlan> planIterator = plans.iterator();
-        final CategoryMenu planMenu = getInstance().getPlanMenu();
-
-        final long start = System.currentTimeMillis();
-
-        while (planIterator.hasNext()) {
-            final StructurePlan plan = planIterator.next();
-
-            try {
-                // Add item to planmenu
-                StructurePlanItem planItem = StructurePlanItem.load(plan);
-                planMenu.addItem(planItem);
-            } catch (IOException | DataException | DocumentException | StructureDataException ex) {
-                LOGGER.error(ex.getMessage());
-            }
-        }
-        planMenu.setEnabled(true);
-        getInstance().plansLoaded = true;
-        getInstance().loadingplans = false;
-        Bukkit.getConsoleSender().sendMessage(MSG_PREFIX + "PlanMenu loaded in " + (System.currentTimeMillis() - start) + "ms");
-    }
 
     private void resetStates() {
         Session session = HibernateUtil.getSession();
