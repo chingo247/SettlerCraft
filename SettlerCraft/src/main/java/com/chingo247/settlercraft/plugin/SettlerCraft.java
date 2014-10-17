@@ -65,7 +65,7 @@ public class SettlerCraft extends JavaPlugin {
 
     private static final Logger LOGGER = Logger.getLogger(SettlerCraft.class);
     private static SettlerCraft instance;
-    private final ThreadPoolExecutor executor = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 30L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+    private final ThreadPoolExecutor GLOBAL_THREADPOOL = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 30L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
    
 
     public static final String MSG_PREFIX = ChatColor.YELLOW + "[SettlerCraft]: " + ChatColor.RESET;
@@ -160,7 +160,7 @@ public class SettlerCraft extends JavaPlugin {
     }
     
     public ExecutorService getExecutorService() {
-        return executor;
+        return GLOBAL_THREADPOOL;
     }
 
     /**

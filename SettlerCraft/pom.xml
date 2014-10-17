@@ -74,6 +74,13 @@
         </plugins>
     </build>
      <dependencies>
+         <!--Bukkit-->
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>1.7.9-R0.2</version>
+            <scope>provided</scope>
+        </dependency>
         <!--holographicDisplays-->
         <dependency>
             <groupId>com.thirdparty</groupId>
@@ -88,17 +95,18 @@
             <version>2.0.0</version>
             <scope>provided</scope>
         </dependency>
-        <!--AsyncWorldEdit-->
+        <!--AsyncWorldEdi-Injector-->
         <dependency>
             <groupId>com.thirdparty</groupId>
             <artifactId>asyncworldedit-injector</artifactId>  
             <version>2.0.0</version>
             <scope>provided</scope>
         </dependency>
+        <!--AsyncWorldEdit-->
         <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.7.9-R0.2</version>
+            <groupId>com.thirdparty</groupId>
+            <artifactId>blockshub</artifactId>  
+            <version>0.5</version>
             <scope>provided</scope>
         </dependency>
         <!--WorldGuard-->
@@ -145,6 +153,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!--Hibernate Dependencies-->
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>
             <artifactId>hibernate-jpa-2.0-api</artifactId>
@@ -171,19 +180,6 @@
             <version>1.1.1</version>
             <scope>compile</scope>
         </dependency>
-        
-        <dependency>
-            <groupId>dom4j</groupId>
-            <artifactId>dom4j</artifactId>
-            <version>1.6.1</version>
-        </dependency>
-        <!-- XPATH -->
-        <dependency>
-            <groupId>jaxen</groupId>
-            <artifactId>jaxen</artifactId>
-            <version>1.1.6</version>
-        </dependency>
-        
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
@@ -203,6 +199,22 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib</artifactId>
+            <version>2.2.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>asm</groupId>
+                    <artifactId>asm</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>3.3.1</version>
+        </dependency>
+        <dependency>
             <groupId>com.mysema.querydsl</groupId>
             <artifactId>querydsl-collections</artifactId>
             <version>3.3.2</version>
@@ -216,7 +228,8 @@
                     <groupId>com.google.guava</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>      
+        </dependency> 
+        <!--QueryDSL-->     
         <dependency>
             <groupId>com.mysema.querydsl</groupId>
             <artifactId>querydsl-jpa</artifactId>
@@ -236,28 +249,25 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!--Dom4j-->
+        <dependency>
+            <groupId>dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        <!-- XPATH -->
+        <dependency>
+            <groupId>jaxen</groupId>
+            <artifactId>jaxen</artifactId>
+            <version>1.1.6</version>
+        </dependency>
         <!--CommonsIO Apache-->
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
         </dependency>
-        <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib</artifactId>
-            <version>2.2.2</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>asm</groupId>
-                    <artifactId>asm</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>asm</groupId>
-            <artifactId>asm</artifactId>
-            <version>3.3.1</version>
-        </dependency>
+        
           <dependency>
                <groupId>com.sc.module</groupId>
                <artifactId>MenuAPI</artifactId>
