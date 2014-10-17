@@ -11,7 +11,6 @@ import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -76,47 +75,8 @@ public class KeyPool<T> {
         }
     }
 
-    public void shutdown() {
-        if (!executor.isShutdown()) {
-            executor.shutdown();
-        }
+    public ExecutorService getExecutorService() {
+        return executor;
     }
 
-    public boolean isShutdown() {
-        return executor.isShutdown();
-    }
-
-    public boolean isTerminated() {
-        return executor.isTerminated();
-    }
-
-    public void awaitTermination(long timeout, TimeUnit timeUnit) throws InterruptedException {
-        executor.awaitTermination(timeout, timeUnit);
-    }
-
-//    public static void main(String... args) {
-//        KeyPool<String> keyPool = new KeyPool<>(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
-//
-//        for (int j = 0; j < 3; j++) {
-//            final int tasker = j;
-//            for (int i = 0; i < 5; i++) {
-//                final int count = i;
-//                keyPool.execute("TASKER # "+ tasker +" ", new Runnable() {
-//
-//                    @Override
-//                    public void run() {
-//                        try {
-//                            long random = Math.round(5000 * Math.random());
-//                            Thread.sleep(random);
-//                            System.out.println("TASKER # "+ tasker +" " + count + " done in " + random);
-//                        } catch (InterruptedException ex) {
-//                            Logger.getLogger(KeyPool.class.getName()).log(Level.SEVERE, null, ex);
-//                        }
-//                    }
-//                });
-//
-//            }
-//        }
-//
-//    }
 }

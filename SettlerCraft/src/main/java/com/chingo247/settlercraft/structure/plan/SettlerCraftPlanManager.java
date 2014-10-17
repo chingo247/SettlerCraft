@@ -32,9 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.dom4j.DocumentException;
@@ -50,7 +48,7 @@ public class SettlerCraftPlanManager {
     private static SettlerCraftPlanManager instance;
     private final Map<String, SettlerCraftPlan> plans = new HashMap<>();
     private final Map<Long, SettlerCraftPlan> structures = Collections.synchronizedMap(new HashMap<Long, SettlerCraftPlan>());
-    private ExecutorService executor;
+    private final ExecutorService executor = SettlerCraft.getInstance().getExecutorService();
 
     /**
      * Gets the instance of this API
@@ -81,10 +79,8 @@ public class SettlerCraftPlanManager {
      * @param planDocuments 
      */
     void load(List<PlanDocument> planDocuments) {
-        shutdown();
         this.plans.clear();
         
-        executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         
         List<Future> tasks = new LinkedList<>();
         for(final PlanDocument pd : planDocuments) {
@@ -115,11 +111,6 @@ public class SettlerCraftPlanManager {
             }
         }
         
-        try {
-            executor.awaitTermination(10, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(SettlerCraftPlanManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
     
     synchronized void update(StructureDocument d) {
@@ -197,11 +188,5 @@ public class SettlerCraftPlanManager {
         return new ArrayList<>(plans.values());
     }
 
-    
-    public void shutdown() {
-        if (executor != null && !executor.isShutdown()) {
-            executor.shutdownNow();
-        }
-    }
 
 }

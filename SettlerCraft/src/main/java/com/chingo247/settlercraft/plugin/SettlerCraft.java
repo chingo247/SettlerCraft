@@ -70,7 +70,7 @@ public class SettlerCraft extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-
+        
         if (Bukkit.getPluginManager().getPlugin("WorldEdit") == null) {
             System.out.println("[SettlerCraft]: WorldEdit NOT FOUND!!! Disabling...");
             this.setEnabled(false);

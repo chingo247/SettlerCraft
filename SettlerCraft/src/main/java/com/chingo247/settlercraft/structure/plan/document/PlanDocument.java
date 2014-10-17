@@ -66,6 +66,15 @@ public class PlanDocument {
         PlanDocumentManager.getInstance().save(this);
     }
     
+    public String getRelativePath() {
+        String path = documentFile.getAbsolutePath();
+        String minus = "\\plugins\\SettlerCraft\\";
+        path = path.substring(path.indexOf(minus) + minus.length());
+        int length = path.length();
+        path = path.substring(0, length - 4); // minus XML
+        return path;
+    }
+    
     protected void savePluginElement(PluginElement element) {
         Element e = (Element) document.getRootElement().selectSingleNode(element.pluginName);
         e.clearContent();

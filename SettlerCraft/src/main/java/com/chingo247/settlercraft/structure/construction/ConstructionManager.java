@@ -36,6 +36,7 @@ import com.chingo247.settlercraft.structure.entities.world.Direction;
 import com.chingo247.settlercraft.structure.plan.SchematicManager;
 import com.chingo247.settlercraft.structure.plan.data.schematic.Schematic;
 import com.chingo247.settlercraft.util.AsyncWorldEditUtil;
+import com.chingo247.settlercraft.util.KeyPool;
 import com.chingo247.settlercraft.util.SchematicUtil;
 import com.chingo247.settlercraft.util.WorldEditUtil;
 import com.chingo247.settlercraft.util.WorldGuardUtil;
@@ -60,8 +61,6 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
@@ -90,9 +89,9 @@ import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
 public class ConstructionManager {
 
     private final Map<Long, ConstructionEntry> constructionEntries = Collections.synchronizedMap(new HashMap<Long, ConstructionEntry>());
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final KeyPool<Long> executor = new KeyPool(SettlerCraft.getInstance().getExecutorService());
     private final int FENCE_BLOCK_PLACE_SPEED = 1000;
-    private final int TIME_OUT = 500;
+    private final int INTERVAL = 500;
     private final Material FENCE_MATERIAL = Material.IRON_FENCE;
     private static ConstructionManager instance;
 
@@ -156,7 +155,7 @@ public class ConstructionManager {
     public void build(final UUID uuid, final Structure structure, final boolean force) throws StructureDataException, ConstructionException, IOException {
 
         // Queue build task
-        executor.execute(new Runnable() {
+        executor.execute(structure.getId(),new Runnable() {
 
             @Override
             public void run() {
@@ -273,11 +272,11 @@ public class ConstructionManager {
                 });
 
                 try {
-                    Thread.sleep(TIME_OUT);
+                    Thread.sleep(INTERVAL);
                     placed = 0;
                 } catch (InterruptedException ex) {
                     Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                } 
             }
 
             place.add(queue.poll());
@@ -379,7 +378,7 @@ public class ConstructionManager {
     public void demolish(final UUID uuid, final Structure structure, final boolean force) throws ConstructionException, StructureDataException {
 
         // Queue build task
-        executor.execute(new Runnable() {
+        executor.execute(structure.getId(), new Runnable() {
 
             @Override
             public void run() {
@@ -635,7 +634,7 @@ public class ConstructionManager {
             throw new ConstructionException("#" + structure.getId() + " hasn't been tasked yet");
         }
 
-        executor.execute(new Runnable() {
+        executor.execute(structure.getId(), new Runnable() {
 
             @Override
             public void run() {
