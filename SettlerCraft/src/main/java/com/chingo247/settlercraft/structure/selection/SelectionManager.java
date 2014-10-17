@@ -17,21 +17,22 @@
 package com.chingo247.settlercraft.structure.selection;
 
 import com.chingo247.settlercraft.plugin.SettlerCraft;
-import com.gmail.filoghost.holograms.api.Hologram;
-import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
-import com.chingo247.settlercraft.structure.plan.data.schematic.Schematic;
-import com.chingo247.settlercraft.util.WorldUtil;
 import com.chingo247.settlercraft.structure.entities.world.Direction;
 import static com.chingo247.settlercraft.structure.entities.world.Direction.EAST;
 import static com.chingo247.settlercraft.structure.entities.world.Direction.NORTH;
 import static com.chingo247.settlercraft.structure.entities.world.Direction.SOUTH;
 import static com.chingo247.settlercraft.structure.entities.world.Direction.WEST;
+import com.chingo247.settlercraft.structure.plan.data.schematic.Schematic;
+import com.chingo247.settlercraft.util.WorldUtil;
+import com.gmail.filoghost.holograms.api.Hologram;
+import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.sk89q.worldedit.Vector;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.log4j.Logger;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -59,78 +60,90 @@ public class SelectionManager {
         private static final int Z_AXIS = 3;
         private static final int END = 4;
 
-        public HoloSelection(Player whoCanSee, Vector pos1, Vector pos2, Direction direction, Schematic schematic, boolean reverse) {
+        public HoloSelection(final Player whoCanSee, final Vector pos1, final Vector pos2, Direction direction, Schematic schematic, boolean reverse) {
             this.pos1 = pos1;
             this.pos2 = pos2;
             this.holos = new Hologram[5];
             this.checksum = schematic.getCheckSum();
 
-            Vector self;
-            switch(direction) {
-                case WEST: self = WorldUtil.translateLocation(pos1, direction, -0.5, 0, -0.5); break;
-                case SOUTH: self = WorldUtil.translateLocation(pos1, direction, -0.5, 0, 0.5); break;
-                case NORTH: self = WorldUtil.translateLocation(pos1, direction, 0.5, 0, -0.5); break;
-                case EAST: self = WorldUtil.translateLocation(pos1, direction, 0.5, 0, 0.5); break;
-                default:return;
+            final Vector self;
+            switch (direction) {
+                case WEST:
+                    self = WorldUtil.translateLocation(pos1, direction, -0.5, 1, -0.5);
+                    break;
+                case SOUTH:
+                    self = WorldUtil.translateLocation(pos1, direction, -0.5, 1, 0.5);
+                    break;
+                case NORTH:
+                    self = WorldUtil.translateLocation(pos1, direction, 0.5, 1, -0.5);
+                    break;
+                case EAST:
+                    self = WorldUtil.translateLocation(pos1, direction, 0.5, 1, 0.5);
+                    break;
+                default:
+                    return;
             }
-            self = WorldUtil.translateLocation(self, direction, 0, 1, 0);
-            LOGGER.info(self);
-            
-            
-            Vector xLoc;
-            if(!reverse){
-            xLoc = WorldUtil.translateLocation(self, direction, 2, 1, 0);
+
+            final Vector xLoc;
+            if (!reverse) {
+                xLoc = WorldUtil.translateLocation(self, direction, 2, 1, 0);
             } else {
-            xLoc = WorldUtil.translateLocation(self, direction, -2, 1, 0);   
+                xLoc = WorldUtil.translateLocation(self, direction, -2, 1, 0);
             }
-            Vector yLoc = WorldUtil.translateLocation(self, direction, 0, 1, 0);
-            Vector zLoc = WorldUtil.translateLocation(self, direction, 0, 1, 2);
+            final Vector yLoc = WorldUtil.translateLocation(self, direction, 0, 1, 0);
+            final Vector zLoc = WorldUtil.translateLocation(self, direction, 0, 1, 2);
 
-            holos[SELF] = HolographicDisplaysAPI.createIndividualHologram(
-                    plugin, 
-                    new org.bukkit.Location(whoCanSee.getWorld(), self.getBlockX(), self.getBlockY(), self.getBlockZ()),
-                    whoCanSee, ChatColor.GREEN + "[X]");
-            
-            holos[X_AXIS] = HolographicDisplaysAPI.createIndividualHologram(
-                    plugin, 
-                    new org.bukkit.Location(whoCanSee.getWorld(), xLoc.getBlockX(), xLoc.getBlockY(), xLoc.getBlockZ()),
-                    whoCanSee, 
-                    ChatColor.YELLOW + "X-AXIS" + ChatColor.RESET + "+" + Math.abs(pos2.subtract(pos1).getBlockX())
-            );
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
 
-            holos[Y_AXIS] = HolographicDisplaysAPI.createIndividualHologram(plugin, 
-                    new org.bukkit.Location(whoCanSee.getWorld(), yLoc.getBlockX(), yLoc.getBlockY(), yLoc.getBlockZ()),
-                    whoCanSee, 
-                    ChatColor.YELLOW + "Y-AXIS" + ChatColor.RESET + "+" + Math.abs(pos2.subtract(pos1).getBlockY())
-            );
+                @Override
+                public void run() {
+                    holos[SELF] = HolographicDisplaysAPI.createIndividualHologram(
+                            plugin,
+                            new org.bukkit.Location(whoCanSee.getWorld(), self.getBlockX(), self.getBlockY(), self.getBlockZ()),
+                            whoCanSee, ChatColor.GREEN + "[X]");
 
-            holos[Z_AXIS] = HolographicDisplaysAPI.createIndividualHologram(
-                    plugin, 
-                    new org.bukkit.Location(whoCanSee.getWorld(), zLoc.getBlockX(), zLoc.getBlockY(), zLoc.getBlockZ()), 
-                    whoCanSee, 
-                    ChatColor.YELLOW + "Z-AXIS" + ChatColor.RESET + "+" + Math.abs(pos2.subtract(pos1).getBlockZ())
-            );
+                    holos[X_AXIS] = HolographicDisplaysAPI.createIndividualHologram(
+                            plugin,
+                            new org.bukkit.Location(whoCanSee.getWorld(), xLoc.getBlockX(), xLoc.getBlockY(), xLoc.getBlockZ()),
+                            whoCanSee,
+                            ChatColor.YELLOW + "X-AXIS" + ChatColor.RESET + "+" + Math.abs(pos2.subtract(pos1).getBlockX())
+                    );
 
-            org.bukkit.Location eLoc = new org.bukkit.Location(whoCanSee.getWorld(), pos2.getX(), pos2.getY(), pos2.getZ());
-            holos[END] = HolographicDisplaysAPI.createIndividualHologram(plugin, eLoc, whoCanSee,
-                    ChatColor.RED + "[X]"
-            );
+                    holos[Y_AXIS] = HolographicDisplaysAPI.createIndividualHologram(plugin,
+                            new org.bukkit.Location(whoCanSee.getWorld(), yLoc.getBlockX(), yLoc.getBlockY(), yLoc.getBlockZ()),
+                            whoCanSee,
+                            ChatColor.YELLOW + "Y-AXIS" + ChatColor.RESET + "+" + Math.abs(pos2.subtract(pos1).getBlockY())
+                    );
 
+                    holos[Z_AXIS] = HolographicDisplaysAPI.createIndividualHologram(
+                            plugin,
+                            new org.bukkit.Location(whoCanSee.getWorld(), zLoc.getBlockX(), zLoc.getBlockY(), zLoc.getBlockZ()),
+                            whoCanSee,
+                            ChatColor.YELLOW + "Z-AXIS" + ChatColor.RESET + "+" + Math.abs(pos2.subtract(pos1).getBlockZ())
+                    );
 
-        }
+                    org.bukkit.Location eLoc = new org.bukkit.Location(whoCanSee.getWorld(), pos2.getX(), pos2.getY(), pos2.getZ());
+                    holos[END] = HolographicDisplaysAPI.createIndividualHologram(plugin, eLoc, whoCanSee,
+                            ChatColor.RED + "[X]"
+                    );
+                }
+            });
 
-        private void update() {
-            for (Hologram holo : holos) {
-                holo.update();
-            }
         }
 
         private void clear() {
-            for (Hologram holo : holos) {
-                if(!holo.isDeleted()) {
-                    holo.delete();
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+
+                @Override
+                public void run() {
+                    for (Hologram holo : holos) {
+                        if (!holo.isDeleted()) {
+                            holo.delete();
+                        }
+                    }
                 }
-            }
+            });
+
         }
 
     }
@@ -148,8 +161,6 @@ public class SelectionManager {
         return instance;
     }
 
-
-
     public void select(Player player, Schematic schematic, Vector target, Vector pos2, boolean reverse) {
         Direction direction = WorldUtil.getDirection(player);
         selections.put(player.getUniqueId(), new HoloSelection(player, target, pos2, direction, schematic, reverse));
@@ -158,7 +169,7 @@ public class SelectionManager {
     public boolean matchesSelection(Player player, Schematic schematic, Vector target, Vector pos2) {
         HoloSelection selection = selections.get(player.getUniqueId());
         if (selection != null) {
-            
+
             // is it the same structure and at the same position?
             return selection.checksum == schematic.getCheckSum()
                     && selection.pos1.equals(target)
@@ -166,7 +177,7 @@ public class SelectionManager {
         }
         return false;
     }
-    
+
     public boolean hasSelection(Player player) {
         return selections.get(player.getUniqueId()) != null;
     }
@@ -176,9 +187,9 @@ public class SelectionManager {
             selections.get(player.getUniqueId()).clear();
         }
     }
-    
+
     public void clearAll() {
-        for(HoloSelection s : selections.values()) {
+        for (HoloSelection s : selections.values()) {
             s.clear();
         }
 //        for(CUIStructureSelection s : cuiSelections.values()) {

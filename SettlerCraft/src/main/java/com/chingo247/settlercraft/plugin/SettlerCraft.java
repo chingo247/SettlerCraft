@@ -43,6 +43,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
@@ -61,6 +63,7 @@ public class SettlerCraft extends JavaPlugin {
 
     private static final Logger LOGGER = Logger.getLogger(SettlerCraft.class);
     private static SettlerCraft instance;
+    private final ExecutorService executor = Executors.newCachedThreadPool();
 
     public static final String MSG_PREFIX = ChatColor.YELLOW + "[SettlerCraft]: " + ChatColor.RESET;
 
@@ -101,6 +104,7 @@ public class SettlerCraft extends JavaPlugin {
             new RestoreService().restore();
         }
 
+        
         resetStates();
         
         // Load plan menu from XML
@@ -114,7 +118,7 @@ public class SettlerCraft extends JavaPlugin {
         // Init SettlerCraftPlanManager
         SettlerCraftPlanManager.getInstance().init();
 //        SettlerCraftPlanManager.getInstance().generate();
-        
+        print("Loading plans");
         PlanDocumentManager.getInstance().load();
         print("Initializing...");
         SettlerCraftManager.getInstance().initialize();
@@ -149,6 +153,10 @@ public class SettlerCraft extends JavaPlugin {
         getCommand("stt").setExecutor(new StructureCommandExecutor());
 
         printPerms();
+    }
+    
+    public ExecutorService getExecutorService() {
+        return executor;
     }
 
     /**

@@ -37,8 +37,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
@@ -63,9 +61,6 @@ public class PlanDocumentManager {
     private final Map<String, PlanDocument> planDocuments = Collections.synchronizedMap(new HashMap<String, PlanDocument>());
     private final Map<Long, StructureDocument> structureDocuments = Collections.synchronizedMap(new HashMap<Long, StructureDocument>());
 
-    private final Lock planDocumentsLock = new ReentrantLock();
-    private final Lock structureDocumentsLock = new ReentrantLock();
-
     private ExecutorService executor;
 
     private final ExecutorService planService = Executors.newSingleThreadExecutor();
@@ -83,23 +78,13 @@ public class PlanDocumentManager {
     }
 
     public Map<String, PlanDocument> getPlanDocuments() {
-        try {
-            planDocumentsLock.lock();
-            Map<String, PlanDocument> plans = new HashMap<>(planDocuments);
-            return plans;
-        } finally {
-            planDocumentsLock.unlock();
-        }
+        Map<String, PlanDocument> plans = new HashMap<>(planDocuments);
+        return plans;
     }
 
     public Map<Long, StructureDocument> getStructureDocuments() {
-        try {
-            structureDocumentsLock.lock();
-            Map<Long, StructureDocument> plans = new HashMap<>(structureDocuments);
-            return plans;
-        } finally {
-            structureDocumentsLock.unlock();
-        }
+        Map<Long, StructureDocument> plans = new HashMap<>(structureDocuments);
+        return plans;
     }
 
     public void register(Structure structure) {
@@ -110,7 +95,7 @@ public class PlanDocumentManager {
 
                 List<Element> elements = d.document.getRootElement().elements();
 
-                        // Form plan document
+                // Form plan document
                 for (Element pluginElement : elements) {
                     d.putPluginElement(pluginElement.getName(), pluginElement);
                 }
@@ -224,18 +209,9 @@ public class PlanDocumentManager {
      * Loads all planDocuments & structureDocuments Multi-Core. Number of cores used is defined by
      * the number of cores available using Runtime.getRuntime.availableProcessors()
      */
-    public void load() {
-        try {
-            planDocumentsLock.lock();
-            structureDocumentsLock.lock();
-            // Loaded within on enable
-            loadPlanDocuments();
-            loadStructureDocuments();
-        } finally {
-            planDocumentsLock.unlock();
-            structureDocumentsLock.unlock();
-        }
-
+    public synchronized void load() {
+        loadPlanDocuments();
+        loadStructureDocuments();
     }
 
     /**
