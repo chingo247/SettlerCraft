@@ -36,7 +36,7 @@ import com.chingo247.settlercraft.structure.selection.CUISelectionManager;
 import com.chingo247.settlercraft.structure.selection.SelectionManager;
 import com.chingo247.settlercraft.util.KeyPool;
 import com.chingo247.settlercraft.util.SchematicUtil;
-import com.chingo247.settlercraft.util.WorldEditUtil;
+import com.chingo247.settlercraft.structure.construction.worldedit.WorldEditUtil;
 import com.chingo247.settlercraft.util.WorldUtil;
 import com.sc.module.menuapi.menus.menu.util.EconomyUtil;
 import com.sk89q.worldedit.BlockVector;

@@ -19,6 +19,8 @@ package com.chingo247.settlercraft.persistence;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.hsqldb.HsqlException;
 import org.hsqldb.server.Server;
@@ -59,13 +61,22 @@ public class HSQLServer {
     }
 
     public boolean isRunning() {
-        
-        try(Socket socket = new Socket(HOST, PORT)) {
+        Socket socket = null;
+        try {
+            socket = new Socket(HOST, PORT);
             Bukkit.getConsoleSender().sendMessage(SettlerCraft.MSG_PREFIX + "HSQL Server already running");        
             return true;
         } catch(IOException | HsqlException ex) {
             Bukkit.getConsoleSender().sendMessage(SettlerCraft.MSG_PREFIX + "HSQL Server not running, startng it on port " + PORT);        
             return false;
+        } finally {
+            if(socket != null) {
+                try {
+                    socket.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(HSQLServer.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
     }
 

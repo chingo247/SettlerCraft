@@ -21,6 +21,7 @@ import com.chingo247.settlercraft.exception.StructureException;
 import com.chingo247.settlercraft.persistence.HibernateUtil;
 import com.chingo247.settlercraft.persistence.StructureService;
 import com.chingo247.settlercraft.structure.StructureAPI;
+import com.chingo247.settlercraft.structure.construction.restore.RollbackService;
 import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership;
 import com.chingo247.settlercraft.structure.entities.structure.QPlayerOwnership;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
@@ -50,6 +51,7 @@ public class StructureCommandExecutor implements CommandExecutor {
     private static final int MAX_LINES = 10;
     private static final String CMD = "/stt";
     private final ChatColor CCC = ChatColor.DARK_PURPLE;
+    private final RollbackService service = new RollbackService();
 
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
@@ -73,6 +75,10 @@ public class StructureCommandExecutor implements CommandExecutor {
                     cs.sendMessage(ChatColor.RED + "You need to be a player!");
                     return true;
                 }
+            case "rollback": 
+                rollback(cs, args);
+                return true;
+            
             case "owner":
                 if(args.length > 4) {
                     cs.sendMessage(ChatColor.RED + "Too many arguments!");
@@ -120,6 +126,27 @@ public class StructureCommandExecutor implements CommandExecutor {
                     cs.sendMessage(ChatColor.RED + "No actions known for: " + actionLast);
                 return true;
         }
+    }
+    
+    
+    private void rollback(CommandSender cs, String[] args) {
+        if(args.length < 2) {
+            cs.sendMessage(ChatColor.RED + "Too few arguments!");
+        } else if (args.length > 2) {
+            cs.sendMessage(ChatColor.RED + "Too many arguments");
+        }
+        
+        long structureId;
+        try {
+            structureId = Long.parseLong(args[1]);
+        } catch (NumberFormatException nfe) {
+            cs.sendMessage("Invalid id, '"+args[1]+"'");
+            return;
+        }
+        StructureService ss = new StructureService();
+        Structure structure = ss.getStructure(structureId);
+        service.rollback(structure.getLocation().getWorld(), structure.getDimension());
+        
     }
 
     private boolean displayStructures(CommandSender sender, String[] args) {

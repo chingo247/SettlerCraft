@@ -88,6 +88,13 @@
             <version>1.8.7</version>
             <scope>provided</scope>
         </dependency>
+        <!--Logblock-->
+        <dependency>
+            <groupId>com.thirdparty</groupId>
+            <artifactId>logblock</artifactId>  
+            <version>1.80</version>
+            <scope>provided</scope>
+        </dependency>
         <!--AsyncWorldEdit-->
         <dependency>
             <groupId>com.thirdparty</groupId>

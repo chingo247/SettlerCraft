@@ -47,7 +47,7 @@ public class PlanDocument {
     }
 
     void removePluginElement(String plugin, Element e) {
-        this.elements.remove(plugin, new PluginElement(plugin, this, e));
+        this.elements.remove(plugin);
     }
     
     public File getDocumentFile() {

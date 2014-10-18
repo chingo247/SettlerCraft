@@ -77,7 +77,7 @@ public class SmartClipboard extends CuboidClipboard {
      */
     @Override
     public void place(EditSession editSession, Vector pos, boolean noAir) throws MaxChangedBlocksException {
-        Queue<StructureBlock> structurequeu = new PriorityQueue<>(buildMode);
+        Queue<StructureBlock> structurequeu = new PriorityQueue<>(10, buildMode);
         for (int y = 0; y < parent.getHeight(); y++) {
             for (int x = 0; x < parent.getWidth(); x++) {
                 for (int z = 0; z < parent.getLength(); z++) {

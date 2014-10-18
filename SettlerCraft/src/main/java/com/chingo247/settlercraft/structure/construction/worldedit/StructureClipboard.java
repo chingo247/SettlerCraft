@@ -42,7 +42,7 @@ public abstract class StructureClipboard extends SmartClipboard {
     
     @Override
     public void place(EditSession editSession, Vector pos, boolean noAir) throws MaxChangedBlocksException {
-        Queue<StructureBlock> structurequeu = new PriorityQueue<>(CONSTRUCTION_ORDER);
+        Queue<StructureBlock> structurequeu = new PriorityQueue<>(10, CONSTRUCTION_ORDER);
         for (int y = 0; y < getHeight(); y++) {
             for (int x = 0; x < getWidth(); x++) {
                 for (int z = 0; z < getLength(); z++) {

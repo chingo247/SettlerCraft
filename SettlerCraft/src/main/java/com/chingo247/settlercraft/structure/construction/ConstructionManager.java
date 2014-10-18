@@ -22,6 +22,7 @@ import com.chingo247.settlercraft.exception.StructureDataException;
 import com.chingo247.settlercraft.persistence.StructureService;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.StructureAPI;
+import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.SCAsyncClipboard;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.SCJobEntry;
 import com.chingo247.settlercraft.structure.construction.generator.ClipboardGenerator;
@@ -29,16 +30,15 @@ import com.chingo247.settlercraft.structure.construction.worldedit.ConstructionC
 import com.chingo247.settlercraft.structure.construction.worldedit.DemolisionClipboard;
 import com.chingo247.settlercraft.structure.construction.worldedit.StructureBlock;
 import com.chingo247.settlercraft.structure.construction.worldedit.StructureBlockComparators;
+import com.chingo247.settlercraft.structure.construction.worldedit.WorldEditUtil;
 import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
 import com.chingo247.settlercraft.structure.entities.structure.Structure.State;
 import com.chingo247.settlercraft.structure.entities.world.Direction;
 import com.chingo247.settlercraft.structure.plan.SchematicManager;
 import com.chingo247.settlercraft.structure.plan.data.schematic.Schematic;
-import com.chingo247.settlercraft.util.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.util.KeyPool;
 import com.chingo247.settlercraft.util.SchematicUtil;
-import com.chingo247.settlercraft.util.WorldEditUtil;
 import com.chingo247.settlercraft.util.WorldGuardUtil;
 import com.sc.module.menuapi.menus.menu.util.EconomyUtil;
 import com.sk89q.worldedit.BlockVector;
@@ -429,7 +429,7 @@ public class ConstructionManager {
     private void queueDemolisionTask(final UUID uuid, final Structure structure, Schematic schematic) throws IOException, DataException {
         // Align schematic
         Direction direction = structure.getDirection();
-        final DemolisionClipboard clipboard = new DemolisionClipboard(schematic.getClipboard(), StructureBlockComparators.PERFORMANCE.reversed());
+        final DemolisionClipboard clipboard = new DemolisionClipboard(schematic.getClipboard(), Collections.reverseOrder(StructureBlockComparators.PERFORMANCE));
         SchematicUtil.align(clipboard, direction);
 
         Player ply = Bukkit.getPlayer(uuid);

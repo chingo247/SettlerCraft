@@ -19,7 +19,7 @@ package com.chingo247.settlercraft.structure.construction.worldedit;
 import java.util.Comparator;
 
 /**
- *
+ * Static Factory class for StructureBlock Comparators
  * @author Chingo
  */
 public class StructureBlockComparators {
