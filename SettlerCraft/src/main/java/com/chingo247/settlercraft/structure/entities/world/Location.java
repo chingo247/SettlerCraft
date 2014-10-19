@@ -46,7 +46,6 @@ public class Location implements Serializable {
 
     @NotEmpty
     @NotNull
-    @Column(name = "loc_world")
     protected String world;
     
     @Column(updatable = false)

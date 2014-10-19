@@ -16,7 +16,7 @@
  */
 package com.chingo247.settlercraft.structure.construction;
 
-import com.chingo247.settlercraft.bukkit.events.StructureStateChangeEvent;
+import com.chingo247.settlercraft.events.StructureStateChangeEvent;
 import com.chingo247.settlercraft.exception.ConstructionException;
 import com.chingo247.settlercraft.exception.StructureDataException;
 import com.chingo247.settlercraft.persistence.StructureService;

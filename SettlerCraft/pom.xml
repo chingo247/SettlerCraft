@@ -109,7 +109,7 @@
             <version>2.0.0</version>
             <scope>provided</scope>
         </dependency>
-        <!--AsyncWorldEdit-->
+        <!--Blockshub-->
         <dependency>
             <groupId>com.thirdparty</groupId>
             <artifactId>blockshub</artifactId>  

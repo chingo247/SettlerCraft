@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.bukkit.listener;
+package com.chingo247.settlercraft.listener;
 
 import com.chingo247.settlercraft.persistence.StructureService;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
@@ -28,7 +28,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 
 /**
- *
  * @author Chingo
  */
 public class FenceListener implements Listener {

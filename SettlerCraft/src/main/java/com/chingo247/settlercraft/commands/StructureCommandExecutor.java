@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.bukkit.commands;
+package com.chingo247.settlercraft.commands;
 
 import com.chingo247.settlercraft.exception.SettlerCraftException;
 import com.chingo247.settlercraft.exception.StructureException;
@@ -75,10 +75,7 @@ public class StructureCommandExecutor implements CommandExecutor {
                     cs.sendMessage(ChatColor.RED + "You need to be a player!");
                     return true;
                 }
-            case "rollback": 
-                rollback(cs, args);
-                return true;
-            
+        
             case "owner":
                 if(args.length > 4) {
                     cs.sendMessage(ChatColor.RED + "Too many arguments!");
@@ -128,26 +125,6 @@ public class StructureCommandExecutor implements CommandExecutor {
         }
     }
     
-    
-    private void rollback(CommandSender cs, String[] args) {
-        if(args.length < 2) {
-            cs.sendMessage(ChatColor.RED + "Too few arguments!");
-        } else if (args.length > 2) {
-            cs.sendMessage(ChatColor.RED + "Too many arguments");
-        }
-        
-        long structureId;
-        try {
-            structureId = Long.parseLong(args[1]);
-        } catch (NumberFormatException nfe) {
-            cs.sendMessage("Invalid id, '"+args[1]+"'");
-            return;
-        }
-        StructureService ss = new StructureService();
-        Structure structure = ss.getStructure(structureId);
-        service.rollback(structure.getLocation().getWorld(), structure.getDimension());
-        
-    }
 
     private boolean displayStructures(CommandSender sender, String[] args) {
         List<Structure> structures;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Chingo247
+ * Copyright (C) 2014 Chingo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,28 +14,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.chingo247.settlercraft.exception;
 
-package com.chingo247.settlercraft.bukkit.events;
-
-import com.chingo247.settlercraft.structure.entities.structure.Structure;
-import com.chingo247.settlercraft.structure.entities.structure.Structure.State;
+import org.bukkit.ChatColor;
 
 /**
- * Called after the structure has changed state
+ * Thrown when a command was not successfully executed
  * @author Chingo
  */
-public class StructureStateChangeEvent extends StructureEvent {
+public class CommandException extends Exception {
     
-    private final State oldState;
+    private final String[] playerMessage;
 
-    public StructureStateChangeEvent(Structure structure, State oldState) {
-        super(structure);
-        this.oldState = oldState;
+    public CommandException(String... message) {
+        playerMessage = message;
     }
 
-    public State getOldState() {
-        return oldState;
+    public String[] getPlayerErrorMessage() {
+        for(int i = 0; i < playerMessage.length; i++) {
+            playerMessage[i] = ChatColor.RED + playerMessage[i];
+        }
+        
+        return playerMessage;
     }
+    
+    
     
     
 }

@@ -2,14 +2,46 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sc.module</groupId>
-    <artifactId>TownAPI</artifactId>
+    <artifactId>SettlerCraftTownAPI</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
+    <repositories>
+        <!--Private ThirdParty Repo-->
+        <repository>
+            <id>Nexus</id>
+            <url>http://localhost:8088/nexus/content/repositories/thirdparty/</url>
+        </repository>
+        <!--WorldEdit Repo-->
+        <repository>
+            <id>WorldEdit</id>
+            <url>http://maven.sk89q.com/repo</url>
+        </repository>
+        <!--Bukkit Repo-->
+        <repository>
+            <id>bukkit-repo</id>
+            <url>http://repo.bukkit.org/content/groups/public/</url>
+        </repository>
+    </repositories>
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>StructureAPI</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.sc.plugin</groupId>
+            <artifactId>SettlerCraft</artifactId>
+            <version>1.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--Bukkit-->
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>1.7.9-R0.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--WorldEdit-->
+        <dependency>
+            <groupId>com.thirdparty</groupId>
+            <artifactId>worldedit</artifactId>  
+            <version>6.0-3308</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <properties>
@@ -17,4 +49,5 @@
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
+    
 </project>

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.bukkit.events;
+package com.chingo247.settlercraft.events;
 
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
 

@@ -1,4 +1,4 @@
-package com.chingo247.settlercraft.bukkit.commands;
+package com.chingo247.settlercraft.commands;
 
 /*
  * Copyright (C) 2014 Chingo247
@@ -17,7 +17,6 @@ package com.chingo247.settlercraft.bukkit.commands;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import com.chingo247.settlercraft.persistence.StructureService;
-import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.StructureAPI;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
 import org.bukkit.ChatColor;
@@ -32,13 +31,9 @@ import org.bukkit.entity.Player;
  */
 public class ConstructionCommandExecutor implements CommandExecutor {
 
-    private final SettlerCraft PLUGIN;
     private static final String CMD = "/cst";
     private final ChatColor CCC = ChatColor.DARK_PURPLE;
 
-    public ConstructionCommandExecutor(SettlerCraft settlerCraft) {
-        this.PLUGIN = settlerCraft;
-    }
 
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String label, String[] args) {
@@ -55,6 +50,8 @@ public class ConstructionCommandExecutor implements CommandExecutor {
                 CCC + CMD + " demolish [id]"});
             return true;
         }
+        
+        
         String arg = args[0];
         Player player = (Player) cs;
         switch (arg) {
@@ -192,86 +189,4 @@ public class ConstructionCommandExecutor implements CommandExecutor {
         return true;
     }
     
-//    /**
-//     * Displays a list of all tasks that haven't been marked as removed
-//     *
-//     * @param player The player
-//     * @param args The arguments
-//     * @return
-//     */
-//    private boolean listTasks(Player player, String[] args) {
-//        final List<ConstructionTask> tasks = SCM.getEntry(player.getUniqueId()).getTasks();
-//        if (tasks == null) {
-//            player.sendMessage(ChatColor.RED + "No structures in progress...");
-//            return true;
-//        }
-//
-//        int amountOfTasks = tasks.size();
-//
-//        int index;
-//        if (args.length == 1) {
-//            index = 1;
-//        } else if (args.length == 2) {
-//            try {
-//                index = Integer.parseInt(args[1]);
-//                if (index < 1) {
-//                    player.sendMessage(ChatColor.RED + "Page index has to be greater than 1");
-//                    return true;
-//                }
-//
-//            } catch (NumberFormatException nfe) {
-//                player.sendMessage(ChatColor.RED + "Invalid index");
-//                return true;
-//            }
-//        } else {
-//            player.sendMessage(ChatColor.RED + "Too many arguments");
-//            player.sendMessage(new String[]{
-//                "Usage:",
-//                CCC + CMD + " list",
-//                CCC + CMD + " list [index]"
-//            });
-//            return true;
-//        }
-//
-//        String[] message = new String[MAX_LINES];
-//        int pages = (amountOfTasks / (MAX_LINES - 1)) + 1;
-//        if (index > pages || index <= 0) {
-//            player.sendMessage(ChatColor.RED + "Page " + index + " out of " + pages + "...");
-//            return true;
-//        }
-//
-//        message[0] = "---------Page(" + (index) + "/" + ((amountOfTasks / (MAX_LINES - 1)) + 1) + " Total: " + amountOfTasks + ")---------";
-//        int lineIndex = 1;
-//        int startIndex = (index - 1) * (MAX_LINES - 1);
-//        for (int i = startIndex; i < startIndex + (MAX_LINES - 1) && i < tasks.size(); i++) {
-//            ConstructionTask task = tasks.get(i);
-//            String line = "#" + ChatColor.GOLD + task.getConstructionSite().getId()
-//                    + " " + ChatColor.BLUE + task.getConstructionSite().getStructure().getPlan().getDisplayName();
-//                    
-//            State state = task.getConstructionSite().getState();
-//
-//            switch (state) {
-//                case DEMOLISHING:
-//                case BUILDING:
-//                    line += ChatColor.YELLOW;
-//                    break;
-//                case COMPLETE:
-//                    line += ChatColor.GREEN;
-//                    break;
-//                case STOPPED:
-//                    line += ChatColor.RED;
-//                    break;
-//                default:
-//                    line += ChatColor.WHITE;
-//                    break;
-//            }
-//            line += " " + state.name();
-//            message[lineIndex] = line;
-//            lineIndex++;
-//        }
-//        player.sendMessage(message);
-//        return true;
-//    }
-
-
 }

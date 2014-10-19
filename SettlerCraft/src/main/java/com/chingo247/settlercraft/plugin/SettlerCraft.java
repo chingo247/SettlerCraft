@@ -16,14 +16,14 @@
  */
 package com.chingo247.settlercraft.plugin;
 
-import com.chingo247.settlercraft.bukkit.commands.ConstructionCommandExecutor;
-import com.chingo247.settlercraft.bukkit.commands.SettlerCraftCommandExecutor;
-import com.chingo247.settlercraft.bukkit.commands.StructureCommandExecutor;
-import com.chingo247.settlercraft.bukkit.listener.FenceListener;
-import com.chingo247.settlercraft.bukkit.listener.PlanListener;
-import com.chingo247.settlercraft.bukkit.listener.PluginListener;
+import com.chingo247.settlercraft.commands.ConstructionCommandExecutor;
+import com.chingo247.settlercraft.commands.SettlerCraftCommandExecutor;
+import com.chingo247.settlercraft.commands.StructureCommandExecutor;
 import com.chingo247.settlercraft.exception.SettlerCraftException;
 import com.chingo247.settlercraft.exception.StructureAPIException;
+import com.chingo247.settlercraft.listener.FenceListener;
+import com.chingo247.settlercraft.listener.PlanListener;
+import com.chingo247.settlercraft.listener.PluginListener;
 import com.chingo247.settlercraft.persistence.HSQLServer;
 import com.chingo247.settlercraft.persistence.HibernateUtil;
 import com.chingo247.settlercraft.persistence.RestoreService;
@@ -152,8 +152,8 @@ public class SettlerCraft extends JavaPlugin {
             hologramManager.init();
         }
 
-        getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
-        getCommand("cst").setExecutor(new ConstructionCommandExecutor(this));
+        getCommand("sc").setExecutor(new SettlerCraftCommandExecutor());
+        getCommand("cst").setExecutor(new ConstructionCommandExecutor());
         getCommand("stt").setExecutor(new StructureCommandExecutor());
 
         printPerms();
@@ -162,6 +162,8 @@ public class SettlerCraft extends JavaPlugin {
     public ExecutorService getExecutorService() {
         return GLOBAL_THREADPOOL;
     }
+    
+    
 
     /**
      * Gets the datafolder for the StructureAPI or creates them if none exists

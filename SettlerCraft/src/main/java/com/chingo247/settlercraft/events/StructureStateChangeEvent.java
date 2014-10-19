@@ -14,37 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.bukkit.events;
+
+package com.chingo247.settlercraft.events;
 
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
+import com.chingo247.settlercraft.structure.entities.structure.Structure.State;
 
 /**
- *
+ * Called after the structure has changed state
  * @author Chingo
  */
-public class StructureEvent extends Event {
+public class StructureStateChangeEvent extends StructureEvent {
+    
+    private final State oldState;
 
-    private final Structure structure;
-
-    public StructureEvent(Structure structure) {
-        this.structure = structure;
+    public StructureStateChangeEvent(Structure structure, State oldState) {
+        super(structure);
+        this.oldState = oldState;
     }
 
-    public Structure getStructure() {
-        return structure;
+    public State getOldState() {
+        return oldState;
     }
-
-    private static final HandlerList handlers = new HandlerList();
-
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
-
+    
+    
 }

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.bukkit.listener;
+package com.chingo247.settlercraft.listener;
 
 import com.chingo247.settlercraft.persistence.HibernateUtil;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
