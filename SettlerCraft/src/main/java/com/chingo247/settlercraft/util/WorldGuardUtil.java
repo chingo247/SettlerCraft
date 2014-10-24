@@ -18,9 +18,10 @@ package com.chingo247.settlercraft.util;
 
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldguard.LocalPlayer;
-import com.sk89q.worldguard.bukkit.RegionPermissionModel;
+import com.sk89q.worldguard.bukkit.WGBukkit;
 import com.sk89q.worldguard.bukkit.WorldConfiguration;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.bukkit.permission.RegionPermissionModel;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import org.bukkit.World;
@@ -62,7 +63,7 @@ public class WorldGuardUtil {
     }
 
     public static RegionManager getRegionManager(World world) {
-        return getWorldGuard().getRegionManager(world);
+        return WGBukkit.getRegionManager(world);
     }
 
     public static RegionPermissionModel getRegionPermissionModel(Player player) {
@@ -109,5 +110,7 @@ public class WorldGuardUtil {
         }
         return true;
     }
+    
+   
 
 }

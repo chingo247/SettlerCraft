@@ -31,8 +31,8 @@ import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.domains.DefaultDomain;
-import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
 import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.managers.storage.StorageException;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import java.io.File;
 import java.io.IOException;
@@ -169,7 +169,7 @@ public class RestoreService {
                 java.util.logging.Logger.getLogger(AbstractService.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
             }
             throw e;
-        } catch (ProtectionDatabaseException ex) {
+        } catch (StorageException ex) {
             Logger.getLogger(RestoreService.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             if (session != null) {
@@ -181,7 +181,7 @@ public class RestoreService {
     private synchronized void reclaim(Structure structure) {
         World world = Bukkit.getWorld(structure.getLocation().getWorld().getUID());
         if(world == null) return;
-        RegionManager mgr = WorldGuardUtil.getWorldGuard().getRegionManager(world);
+        RegionManager mgr = WorldGuardUtil.getRegionManager(world);
         if(mgr == null) return;
         
         
@@ -214,7 +214,7 @@ public class RestoreService {
         
         try {
             mgr.save();
-        } catch (ProtectionDatabaseException ex) {
+        } catch (StorageException ex) {
             Logger.getLogger(RestoreService.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -255,13 +255,15 @@ public class RestoreService {
             try {
                 rmgr.save();
                 tx.commit();
-            } catch (ProtectionDatabaseException ex) {
+            } catch (StorageException ex) {
                 Logger.getLogger(RestoreService.class.getName()).log(Level.SEVERE, null, ex);
             }
 
         } catch (HibernateException e) {
             try {
-                tx.rollback();
+                if(tx != null) {
+                    tx.rollback();
+                }
             } catch (HibernateException rbe) {
                 java.util.logging.Logger.getLogger(AbstractService.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
             }

@@ -152,9 +152,11 @@ public class PlanListener implements Listener {
                         // No Selection
                         Vector pos = new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ());
 
+                        
                         if (canPlace(player, pos, WorldUtil.getDirection(player), schematic)) {
                             Structure structure = Structure.create(player, plan, player.getWorld(), pos, WorldUtil.getDirection(player));
 
+                            
                             if (structure != null) {
                                 ItemStack clone = pie.getItem().clone();
                                 clone.setAmount(1);
@@ -232,10 +234,15 @@ public class PlanListener implements Listener {
             return false;
         }
 
+//        System.out.println("Before overlaps");
+        
         if (StructureAPI.overlapsRegion(player, world, dimension)) {
             player.sendMessage(ChatColor.RED + "Structure overlaps a region you don't own");
             return false;
         }
+        
+//        System.out.println("After overlaps");
+        
         return true;
     }
 
@@ -266,9 +273,13 @@ public class PlanListener implements Listener {
                 pos1 = WorldUtil.translateLocation(pos1, direction, (-(schematic.getLength() - 1)), 0, 0);
             }
 
+            
             if (canPlace(player, pos1, direction, schematic)) {
+                
 
                 Structure structure = Structure.create(player, plan, player.getWorld(), pos1, WorldUtil.getDirection(player));
+                
+                
                 CUISelectionManager.getInstance().clear(player, false);
                 if (structure != null) {
                     ItemStack clone = planstack.clone();
@@ -277,7 +288,7 @@ public class PlanListener implements Listener {
                     player.updateInventory();
                     StructureAPI.build(player, structure);
                 }
-            }
+            } 
 
         } else {
             CUISelectionManager.getInstance().select(player, schematic, pos1, pos2);

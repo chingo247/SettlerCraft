@@ -37,11 +37,11 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
-import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
 import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.managers.storage.StorageException;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.io.File;
@@ -245,7 +245,7 @@ public class StructureAPI {
               // StructureAPI
             structure.addOwner(player, type);
             service.save(structure);
-        } catch (ProtectionDatabaseException ex) {
+        } catch (StorageException ex) {
             java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
     }
@@ -279,7 +279,7 @@ public class StructureAPI {
               // StructureAPI
             structure.addMember(player);
             service.save(structure);
-        } catch (ProtectionDatabaseException ex) {
+        } catch (StorageException ex) {
             java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         
@@ -314,7 +314,7 @@ public class StructureAPI {
               // StructureAPI
             structure.removeOwner(player);
             service.save(structure);
-        } catch (ProtectionDatabaseException ex) {
+        } catch (StorageException ex) {
             java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
     }
@@ -347,7 +347,7 @@ public class StructureAPI {
               // StructureAPI
             structure.removeMember(player);
             service.save(structure);
-        } catch (ProtectionDatabaseException ex) {
+        } catch (StorageException ex) {
             java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
 
@@ -359,6 +359,7 @@ public class StructureAPI {
             // Sanity check
             throw new AssertionError("Structure id was null, save the structure instance first! (e.g. structure = structureService.save(structure)");
         }
+        
 
         Dimension dimension = structure.getDimension();
         World world = Bukkit.getWorld(structure.getWorldName());
@@ -369,10 +370,14 @@ public class StructureAPI {
             return null;
         }
 
-        RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(structure.getLocation().getWorld().getName()));
+        
+        RegionManager mgr = WorldGuardUtil.getRegionManager(world);
+        
+        
         Vector p1 = dimension.getMinPosition();
         Vector p2 = dimension.getMaxPosition();
         String id = structure.getStructureRegion();
+        
 
         if (WorldGuardUtil.regionExists(world, id)) {
             mgr.removeRegion(id);
@@ -380,6 +385,7 @@ public class StructureAPI {
 
         ProtectedCuboidRegion region = new ProtectedCuboidRegion(id, new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
 
+        
         // Set Flag
         File config = structure.getConfig();
         SAXReader reader = new SAXReader();
@@ -392,7 +398,6 @@ public class StructureAPI {
                     Object v = f.parseInput(WorldGuardPlugin.inst(), Bukkit.getConsoleSender(), n.selectSingleNode("Value").getText());
                     region.setFlag(f, v);
                 } catch (InvalidFlagFormat ex) {
-                    System.out.println("Error in xml file: " + config.getAbsolutePath());
                     java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
                 }
             }
@@ -403,19 +408,18 @@ public class StructureAPI {
         
         // Override by config
         for(Entry<Flag, Object> e : ConfigProvider.getInstance().getDefaultFlags().entrySet()) {
-            
             region.setFlag(e.getKey(), e.getValue());
         }
 
         // region.setFlags(ConfigProvider.getInstance().getDefaultFlags());
         if (player != null) {
-            region.getOwners().addPlayer(player.getName());
+            region.getOwners().addPlayer(player.getName()); 
         }
 
         mgr.addRegion(region);
         try {
             mgr.save();
-        } catch (ProtectionDatabaseException ex) {
+        } catch (StorageException ex) {
             Logger.getLogger(StructureAPI.class.getName()).log(Level.ERROR, null, ex);
         }
 
@@ -447,7 +451,7 @@ public class StructureAPI {
     }
 
     /**
-     * Checks if the dimension overlaps any region which the target player does is not an owner of.
+     * Checks if the dimension overlaps any region which the target player does is not an own
      *
      * @param player The player
      * @param world The world
@@ -459,12 +463,12 @@ public class StructureAPI {
         if (player != null) {
             localPlayer = WorldGuardUtil.getLocalPlayer(player);
         }
-        RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(Bukkit.getWorld(world.getName()));
-//        Dimension dimension = calculateDimension(schematic, pos, direction);
+        
+        RegionManager mgr = WorldGuardUtil.getRegionManager(world);
 
         Vector p1 = dimension.getMinPosition();
         Vector p2 = dimension.getMaxPosition();
-        ProtectedCuboidRegion dummy = new ProtectedCuboidRegion("", new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
+        ProtectedCuboidRegion dummy = new ProtectedCuboidRegion("DUMMY", new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
         ApplicableRegionSet regions = mgr.getApplicableRegions(dummy);
 
         // Check if this region getOverlapping any other region
@@ -477,6 +481,7 @@ public class StructureAPI {
                 return true;
             }
         }
+        
         return false;
     }
 

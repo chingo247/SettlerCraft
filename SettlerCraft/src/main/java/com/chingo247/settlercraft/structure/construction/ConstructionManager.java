@@ -48,8 +48,8 @@ import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.data.DataException;
-import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
 import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.managers.storage.StorageException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -481,7 +481,7 @@ public class ConstructionManager {
                                 rmgr.removeRegion(structure.getStructureRegion());
                                 try {
                                     rmgr.save();
-                                } catch (ProtectionDatabaseException ex) {
+                                } catch (StorageException ex) {
                                     Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
                                 }
 
