@@ -20,7 +20,7 @@ import com.chingo247.settlercraft.events.StructureCreateEvent;
 import com.chingo247.settlercraft.events.StructureStateChangeEvent;
 import com.chingo247.settlercraft.exception.StructureDataException;
 import com.chingo247.settlercraft.exception.StructureException;
-import com.chingo247.settlercraft.persistence.StructureService;
+import com.chingo247.settlercraft.persistence.service.StructureService;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.StructureAPI;
 import static com.chingo247.settlercraft.structure.StructureAPI.overlapsStructures;

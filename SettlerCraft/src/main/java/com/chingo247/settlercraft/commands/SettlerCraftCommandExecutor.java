@@ -17,8 +17,8 @@
 package com.chingo247.settlercraft.commands;
 
 import com.chingo247.settlercraft.exception.CommandException;
-import com.chingo247.settlercraft.persistence.HibernateUtil;
-import com.chingo247.settlercraft.persistence.StructureService;
+import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.persistence.service.StructureService;
 import com.chingo247.settlercraft.plugin.ConfigProvider;
 import com.chingo247.settlercraft.plugin.PermissionManager;
 import com.chingo247.settlercraft.plugin.SettlerCraft;

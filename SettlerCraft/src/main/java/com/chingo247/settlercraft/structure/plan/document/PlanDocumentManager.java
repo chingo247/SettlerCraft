@@ -16,7 +16,7 @@
  */
 package com.chingo247.settlercraft.structure.plan.document;
 
-import com.chingo247.settlercraft.persistence.HibernateUtil;
+import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.entities.structure.QStructure;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;

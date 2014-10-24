@@ -20,7 +20,7 @@ package com.chingo247.settlercraft.exception;
  *
  * @author Chingo
  */
-public class ConstructionException extends Exception {
+public class ConstructionException extends StructureException {
 
     public ConstructionException(String message) {
         super(message);

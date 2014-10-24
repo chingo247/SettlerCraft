@@ -16,7 +16,7 @@ package com.chingo247.settlercraft.commands;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import com.chingo247.settlercraft.persistence.StructureService;
+import com.chingo247.settlercraft.persistence.service.StructureService;
 import com.chingo247.settlercraft.structure.StructureAPI;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
 import org.bukkit.ChatColor;

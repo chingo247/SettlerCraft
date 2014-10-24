@@ -20,17 +20,17 @@ package com.chingo247.settlercraft.structure;
 import com.chingo247.settlercraft.exception.ConstructionException;
 import com.chingo247.settlercraft.exception.StructureDataException;
 import com.chingo247.settlercraft.exception.StructureException;
-import com.chingo247.settlercraft.persistence.PlayerOwnershipService;
-import com.chingo247.settlercraft.persistence.StructureService;
+import com.chingo247.settlercraft.persistence.service.PlayerOwnershipService;
+import com.chingo247.settlercraft.persistence.service.StructureService;
 import com.chingo247.settlercraft.plugin.ConfigProvider;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.construction.ConstructionManager;
-import com.chingo247.settlercraft.structure.plan.data.Nodes;
 import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership;
 import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership.Type;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
 import com.chingo247.settlercraft.structure.entities.structure.Structure.State;
 import com.chingo247.settlercraft.structure.entities.world.Dimension;
+import com.chingo247.settlercraft.structure.plan.data.Nodes;
 import com.chingo247.settlercraft.util.WorldGuardUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
@@ -230,7 +230,7 @@ public class StructureAPI {
         }
         
          // WorldGuard
-        RegionManager rmgr =  WorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(structure.getWorldName()));
+        RegionManager rmgr =  WorldGuardUtil.getRegionManager(Bukkit.getWorld(structure.getWorldName()));
         ProtectedRegion region = rmgr.getRegion(structure.getStructureRegion());
         if(region == null) {
             throw new StructureException(structure.stringValue() + ", doesnt have a region");
@@ -264,7 +264,7 @@ public class StructureAPI {
         }
         
         // WorldGuard
-        RegionManager rmgr =  WorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(structure.getWorldName()));
+        RegionManager rmgr =  WorldGuardUtil.getRegionManager(Bukkit.getWorld(structure.getWorldName()));
         ProtectedRegion region = rmgr.getRegion(structure.getStructureRegion());
         if(region == null) {
             throw new StructureException(structure.stringValue() + ", doesnt have a region");
@@ -299,7 +299,7 @@ public class StructureAPI {
             throw new StructureException("Player: " + player.getName() + " is already owner");
         }
          // WorldGuard
-        RegionManager rmgr =  WorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(structure.getWorldName()));
+        RegionManager rmgr =  WorldGuardUtil.getRegionManager(Bukkit.getWorld(structure.getWorldName()));
         ProtectedRegion region = rmgr.getRegion(structure.getStructureRegion());
         if(region == null) {
             throw new StructureException(structure.stringValue() + ", doesnt have a region");
@@ -332,7 +332,7 @@ public class StructureAPI {
             throw new StructureException(ChatColor.RED + "Player: " + player.getName() + " is already owner");
         }
          // WorldGuard
-        RegionManager rmgr =  WorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(structure.getWorldName()));
+        RegionManager rmgr =  WorldGuardUtil.getRegionManager(Bukkit.getWorld(structure.getWorldName()));
         ProtectedRegion region = rmgr.getRegion(structure.getStructureRegion());
         if(region == null) {
             throw new StructureException(structure + ", doesnt have a region");

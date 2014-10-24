@@ -18,10 +18,9 @@ package com.chingo247.settlercraft.commands;
 
 import com.chingo247.settlercraft.exception.SettlerCraftException;
 import com.chingo247.settlercraft.exception.StructureException;
-import com.chingo247.settlercraft.persistence.HibernateUtil;
-import com.chingo247.settlercraft.persistence.StructureService;
+import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.persistence.service.StructureService;
 import com.chingo247.settlercraft.structure.StructureAPI;
-import com.chingo247.settlercraft.structure.construction.restore.RollbackService;
 import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership;
 import com.chingo247.settlercraft.structure.entities.structure.QPlayerOwnership;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
@@ -51,7 +50,6 @@ public class StructureCommandExecutor implements CommandExecutor {
     private static final int MAX_LINES = 10;
     private static final String CMD = "/stt";
     private final ChatColor CCC = ChatColor.DARK_PURPLE;
-    private final RollbackService service = new RollbackService();
 
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {

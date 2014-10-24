@@ -19,7 +19,7 @@ package com.chingo247.settlercraft.structure.construction;
 import com.chingo247.settlercraft.events.StructureStateChangeEvent;
 import com.chingo247.settlercraft.exception.ConstructionException;
 import com.chingo247.settlercraft.exception.StructureDataException;
-import com.chingo247.settlercraft.persistence.StructureService;
+import com.chingo247.settlercraft.persistence.service.StructureService;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.StructureAPI;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncWorldEditUtil;
@@ -477,7 +477,7 @@ public class ConstructionManager {
                                 structure.getLog().setRemovedAt(new Date());
                                 structureService.save(structure);
 
-                                RegionManager rmgr = WorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(structure.getWorldName()));
+                                RegionManager rmgr = WorldGuardUtil.getRegionManager(Bukkit.getWorld(structure.getWorldName()));
                                 rmgr.removeRegion(structure.getStructureRegion());
                                 try {
                                     rmgr.save();

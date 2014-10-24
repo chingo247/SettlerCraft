@@ -21,6 +21,7 @@ import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
 import com.chingo247.settlercraft.structure.plan.document.PlanDataAPI;
 import com.chingo247.settlercraft.structure.plan.document.PlanDocument;
+import com.chingo247.settlercraft.structure.plan.document.PlanDocumentManager;
 import com.chingo247.settlercraft.structure.plan.document.StructureDocument;
 import java.io.File;
 import java.io.IOException;
@@ -163,6 +164,10 @@ public class SettlerCraftPlanManager {
 
         plan = null;
         StructureDocument d = PlanDataAPI.getStructureDocument(structure);
+        if(d == null) {
+            PlanDocumentManager.getInstance().register(structure);
+            d = PlanDataAPI.getStructureDocument(structure);
+        }
         
         
         try {

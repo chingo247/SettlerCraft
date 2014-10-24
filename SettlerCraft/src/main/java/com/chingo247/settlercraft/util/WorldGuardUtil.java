@@ -44,7 +44,7 @@ public class WorldGuardUtil {
     }
 
     public static boolean hasRegion(World world, String id) {
-        return getGlobalRegionManager(world).hasRegion(id);
+        return getRegionManager(world).hasRegion(id);
     }
 
     public static WorldConfiguration getWorldConfiguration(World world) {
@@ -58,11 +58,11 @@ public class WorldGuardUtil {
     public static boolean hasReachedMaxRegionCount(World world, Player player) {
         int maxRegionCount = getWorldConfiguration(world).getMaxRegionCount(player);
         return maxRegionCount >= 0
-                && getGlobalRegionManager(world).getRegionCountOfPlayer(getLocalPlayer(player)) >= maxRegionCount;
+                && getRegionManager(world).getRegionCountOfPlayer(getLocalPlayer(player)) >= maxRegionCount;
     }
 
-    public static RegionManager getGlobalRegionManager(World world) {
-        return getWorldGuard().getGlobalRegionManager().get(world);
+    public static RegionManager getRegionManager(World world) {
+        return getWorldGuard().getRegionManager(world);
     }
 
     public static RegionPermissionModel getRegionPermissionModel(Player player) {
@@ -76,7 +76,7 @@ public class WorldGuardUtil {
      * @return True if regions exists, otherwise false.
      */
     public static boolean regionExists(World world, String id) {
-        return getGlobalRegionManager(world).hasRegion(id);
+        return getRegionManager(world).hasRegion(id);
     }
     
     public static boolean mayClaim(Player player) {
@@ -84,10 +84,19 @@ public class WorldGuardUtil {
         return permissionModel.mayClaim();
     }
     
-    public static boolean canClaim(Player player) {
+    /**
+     * Checks whether the player can claim a region within a world
+     * @param player The player
+     * @param world The world
+     * @return True if player can claim, false if region count was exceeded or when there is no region manager for the specified world
+     */
+    public static boolean canClaim(Player player, World world) {
         WorldConfiguration wcfg = WorldGuardUtil.getWorldGuard().getGlobalStateManager().get(player.getWorld());
         RegionPermissionModel permissionModel = WorldGuardUtil.getRegionPermissionModel(player);
-        RegionManager mgr = WorldGuardUtil.getWorldGuard().getGlobalRegionManager().get(player.getWorld());
+        RegionManager mgr = WorldGuardUtil.getWorldGuard().getRegionManager(world);
+        if(mgr == null) {
+            return false;
+        }
 
         // Check whether the player has created too many regions
         if (!permissionModel.mayClaimRegionsUnbounded()) {

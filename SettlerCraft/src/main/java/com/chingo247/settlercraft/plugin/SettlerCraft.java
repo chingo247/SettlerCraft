@@ -24,9 +24,8 @@ import com.chingo247.settlercraft.exception.StructureAPIException;
 import com.chingo247.settlercraft.listener.FenceListener;
 import com.chingo247.settlercraft.listener.PlanListener;
 import com.chingo247.settlercraft.listener.PluginListener;
-import com.chingo247.settlercraft.persistence.HSQLServer;
-import com.chingo247.settlercraft.persistence.HibernateUtil;
-import com.chingo247.settlercraft.persistence.RestoreService;
+import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.persistence.service.RestoreService;
 import com.chingo247.settlercraft.plugin.PermissionManager.Perms;
 import com.chingo247.settlercraft.structure.entities.structure.QStructure;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
@@ -37,6 +36,7 @@ import com.chingo247.settlercraft.structure.plan.data.holograms.StructureHologra
 import com.chingo247.settlercraft.structure.plan.data.overview.StructureOverviewManager;
 import com.chingo247.settlercraft.structure.plan.document.PlanDocumentManager;
 import com.mysema.query.jpa.hibernate.HibernateUpdateClause;
+import com.sc.module.databasetests.hsqldb.HSQLServer;
 import com.sc.module.menuapi.menus.menu.CategoryMenu;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -66,7 +66,6 @@ public class SettlerCraft extends JavaPlugin {
     private static final Logger LOGGER = Logger.getLogger(SettlerCraft.class);
     private static SettlerCraft instance;
     private final ThreadPoolExecutor GLOBAL_THREADPOOL = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 30L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-   
 
     public static final String MSG_PREFIX = ChatColor.YELLOW + "[SettlerCraft]: " + ChatColor.RESET;
 
@@ -99,16 +98,16 @@ public class SettlerCraft extends JavaPlugin {
         }
 
 
-        
-        // Init HSQL Server
-        HSQLServer hsqls = HSQLServer.getInstance();
-        if (!hsqls.isRunning()) {
+//        
+//        // Init HSQL Server
+        HSQLServer hSQLServer = HSQLServer.getInstance();
+        if (!hSQLServer.isRunning()) {
             Bukkit.getConsoleSender().sendMessage(MSG_PREFIX + "Starting HSQL Server");
-            hsqls.start();
-            new RestoreService().restore();
+            hSQLServer.start();
         }
-
         
+        RestoreService restoreService = new RestoreService();
+        restoreService.restore();
         resetStates();
         
         // Load plan menu from XML
@@ -163,7 +162,7 @@ public class SettlerCraft extends JavaPlugin {
         return GLOBAL_THREADPOOL;
     }
     
-    
+
 
     /**
      * Gets the datafolder for the StructureAPI or creates them if none exists
