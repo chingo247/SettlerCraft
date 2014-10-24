@@ -16,11 +16,12 @@
  */
 package com.chingo247.settlercraft.structure.plan.document;
 
-import com.chingo247.settlercraft.persistence.HibernateUtil;
+import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.entities.structure.QStructure;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
 import com.chingo247.settlercraft.structure.plan.data.Elements;
+import com.chingo247.settlercraft.util.KeyPool;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import java.io.File;
@@ -34,11 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
@@ -63,12 +60,10 @@ public class PlanDocumentManager {
     private final Map<String, PlanDocument> planDocuments = Collections.synchronizedMap(new HashMap<String, PlanDocument>());
     private final Map<Long, StructureDocument> structureDocuments = Collections.synchronizedMap(new HashMap<Long, StructureDocument>());
 
-    private final Lock planDocumentsLock = new ReentrantLock();
-    private final Lock structureDocumentsLock = new ReentrantLock();
+//    private ExecutorService executor;
+    private final KeyPool planDocumentPool = new KeyPool(SettlerCraft.getInstance().getExecutorService());
+    private final ExecutorService executor = SettlerCraft.getInstance().getExecutorService();
 
-    private ExecutorService executor;
-
-    private final ExecutorService planService = Executors.newSingleThreadExecutor();
 
     private static PlanDocumentManager instance;
 
@@ -83,23 +78,13 @@ public class PlanDocumentManager {
     }
 
     public Map<String, PlanDocument> getPlanDocuments() {
-        try {
-            planDocumentsLock.lock();
-            Map<String, PlanDocument> plans = new HashMap<>(planDocuments);
-            return plans;
-        } finally {
-            planDocumentsLock.unlock();
-        }
+        Map<String, PlanDocument> plans = new HashMap<>(planDocuments);
+        return plans;
     }
 
     public Map<Long, StructureDocument> getStructureDocuments() {
-        try {
-            structureDocumentsLock.lock();
-            Map<Long, StructureDocument> plans = new HashMap<>(structureDocuments);
-            return plans;
-        } finally {
-            structureDocumentsLock.unlock();
-        }
+        Map<Long, StructureDocument> plans = new HashMap<>(structureDocuments);
+        return plans;
     }
 
     public void register(Structure structure) {
@@ -110,7 +95,7 @@ public class PlanDocumentManager {
 
                 List<Element> elements = d.document.getRootElement().elements();
 
-                        // Form plan document
+                // Form plan document
                 for (Element pluginElement : elements) {
                     d.putPluginElement(pluginElement.getName(), pluginElement);
                 }
@@ -123,7 +108,7 @@ public class PlanDocumentManager {
     }
 
     public void save(final PlanDocument d) {
-        planService.execute(new Runnable() {
+        planDocumentPool.execute(d.getRelativePath(), new Runnable() {
 
             @Override
             public void run() {
@@ -149,7 +134,7 @@ public class PlanDocumentManager {
     }
 
     void save(final PluginElement element) {
-        planService.execute(new Runnable() {
+        planDocumentPool.execute(element.root.getRelativePath(), new Runnable() {
 
             @Override
             public void run() {
@@ -224,29 +209,18 @@ public class PlanDocumentManager {
      * Loads all planDocuments & structureDocuments Multi-Core. Number of cores used is defined by
      * the number of cores available using Runtime.getRuntime.availableProcessors()
      */
-    public void load() {
-        try {
-            planDocumentsLock.lock();
-            structureDocumentsLock.lock();
-            // Loaded within on enable
-            loadPlanDocuments();
-            loadStructureDocuments();
-        } finally {
-            planDocumentsLock.unlock();
-            structureDocumentsLock.unlock();
-        }
-
+    public synchronized void load() {
+        loadPlanDocuments();
+        loadStructureDocuments();
     }
 
     /**
      * Loads all StructurePlans under the 'Plans' folder
      */
     private void loadPlanDocuments() {
-        shutdown();
 
         // Go throug all XML files inside the 'Plans' folder
         Iterator<File> it = FileUtils.iterateFiles(PLANS_FOLDER, new String[]{"xml"}, true);
-        executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         final List<Future> tasks = new LinkedList<>();
         while (it.hasNext()) {
             final File planDocFile = it.next();
@@ -288,12 +262,6 @@ public class PlanDocumentManager {
                 }
             }
         }
-        try {
-            executor.awaitTermination(10, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(PlanDocumentManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
     }
 
     /**
@@ -306,10 +274,6 @@ public class PlanDocumentManager {
         QStructure qs = QStructure.structure;
         List<Structure> structures = query.from(qs).where(qs.state.ne(Structure.State.REMOVED)).list(qs);
         session.close();
-
-        shutdown();
-
-        executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         final List<Future> tasks = new LinkedList<>();
 
@@ -353,21 +317,12 @@ public class PlanDocumentManager {
                 }
             }
         }
-        try {
-            executor.awaitTermination(10, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(PlanDocumentManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     private boolean isStructurePlan(Document d) {
         return d.getRootElement().getName().equals(Elements.ROOT);
     }
 
-    public void shutdown() {
-        if (executor != null && !executor.isShutdown()) {
-            executor.shutdown();
-        }
-    }
+    
 
 }

@@ -16,11 +16,11 @@
  */
 package com.chingo247.settlercraft.structure.entities.structure;
 
-import com.chingo247.settlercraft.bukkit.events.StructureCreateEvent;
-import com.chingo247.settlercraft.bukkit.events.StructureStateChangeEvent;
+import com.chingo247.settlercraft.events.StructureCreateEvent;
+import com.chingo247.settlercraft.events.StructureStateChangeEvent;
 import com.chingo247.settlercraft.exception.StructureDataException;
 import com.chingo247.settlercraft.exception.StructureException;
-import com.chingo247.settlercraft.persistence.StructureService;
+import com.chingo247.settlercraft.persistence.service.StructureService;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.StructureAPI;
 import static com.chingo247.settlercraft.structure.StructureAPI.overlapsStructures;
@@ -78,7 +78,7 @@ import org.dom4j.DocumentException;
 @Entity
 public class Structure implements Serializable {
 
-    private static final String PREFIX = "SCREG#";
+    private static final String PREFIX = "SCREG-";
 
     public enum State {
 
@@ -212,6 +212,7 @@ public class Structure implements Serializable {
             return null;
         }
 
+        
         Dimension dimension = SchematicUtil.calculateDimension(schematic, pos, direction);
 
         // Check if structure overlapsStructures another structure
@@ -252,6 +253,7 @@ public class Structure implements Serializable {
             java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
             return null;
         }
+        
 
         ProtectedRegion structureRegion = StructureAPI.claimGround(player, structure);
         if (structureRegion == null) {
@@ -265,6 +267,7 @@ public class Structure implements Serializable {
 
             return null;
         }
+        
         if (player != null) {
             try {
                 StructureAPI.makeOwner(player, Type.FULL , structure);
@@ -273,7 +276,9 @@ public class Structure implements Serializable {
             }
         }
         
+        
         PlanDocumentManager.getInstance().register(structure);
+        
 
         Bukkit.getPluginManager().callEvent(new StructureCreateEvent(structure));
         return structure;

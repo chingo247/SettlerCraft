@@ -16,17 +16,16 @@
  */
 package com.chingo247.settlercraft.plugin;
 
-import com.chingo247.settlercraft.bukkit.commands.ConstructionCommandExecutor;
-import com.chingo247.settlercraft.bukkit.commands.SettlerCraftCommandExecutor;
-import com.chingo247.settlercraft.bukkit.commands.StructureCommandExecutor;
-import com.chingo247.settlercraft.bukkit.listener.FenceListener;
-import com.chingo247.settlercraft.bukkit.listener.PlanListener;
-import com.chingo247.settlercraft.bukkit.listener.PluginListener;
+import com.chingo247.settlercraft.commands.ConstructionCommandExecutor;
+import com.chingo247.settlercraft.commands.SettlerCraftCommandExecutor;
+import com.chingo247.settlercraft.commands.StructureCommandExecutor;
 import com.chingo247.settlercraft.exception.SettlerCraftException;
 import com.chingo247.settlercraft.exception.StructureAPIException;
-import com.chingo247.settlercraft.persistence.HSQLServer;
-import com.chingo247.settlercraft.persistence.HibernateUtil;
-import com.chingo247.settlercraft.persistence.RestoreService;
+import com.chingo247.settlercraft.listener.FenceListener;
+import com.chingo247.settlercraft.listener.PlanListener;
+import com.chingo247.settlercraft.listener.PluginListener;
+import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.persistence.service.RestoreService;
 import com.chingo247.settlercraft.plugin.PermissionManager.Perms;
 import com.chingo247.settlercraft.structure.entities.structure.QStructure;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
@@ -37,12 +36,17 @@ import com.chingo247.settlercraft.structure.plan.data.holograms.StructureHologra
 import com.chingo247.settlercraft.structure.plan.data.overview.StructureOverviewManager;
 import com.chingo247.settlercraft.structure.plan.document.PlanDocumentManager;
 import com.mysema.query.jpa.hibernate.HibernateUpdateClause;
+import com.sc.module.databasetests.hsqldb.HSQLServer;
 import com.sc.module.menuapi.menus.menu.CategoryMenu;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
@@ -61,13 +65,15 @@ public class SettlerCraft extends JavaPlugin {
 
     private static final Logger LOGGER = Logger.getLogger(SettlerCraft.class);
     private static SettlerCraft instance;
+    private final ThreadPoolExecutor GLOBAL_THREADPOOL = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 30L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
     public static final String MSG_PREFIX = ChatColor.YELLOW + "[SettlerCraft]: " + ChatColor.RESET;
 
     @Override
     public void onEnable() {
         instance = this;
-
+        
+        
         if (Bukkit.getPluginManager().getPlugin("WorldEdit") == null) {
             System.out.println("[SettlerCraft]: WorldEdit NOT FOUND!!! Disabling...");
             this.setEnabled(false);
@@ -92,15 +98,16 @@ public class SettlerCraft extends JavaPlugin {
         }
 
 
-        
-        // Init HSQL Server
-        HSQLServer hsqls = HSQLServer.getInstance();
-        if (!hsqls.isRunning()) {
+//        
+//        // Init HSQL Server
+        HSQLServer hSQLServer = HSQLServer.getInstance();
+        if (!hSQLServer.isRunning()) {
             Bukkit.getConsoleSender().sendMessage(MSG_PREFIX + "Starting HSQL Server");
-            hsqls.start();
-            new RestoreService().restore();
+            hSQLServer.start();
         }
-
+        
+        RestoreService restoreService = new RestoreService();
+        restoreService.restore();
         resetStates();
         
         // Load plan menu from XML
@@ -114,7 +121,7 @@ public class SettlerCraft extends JavaPlugin {
         // Init SettlerCraftPlanManager
         SettlerCraftPlanManager.getInstance().init();
 //        SettlerCraftPlanManager.getInstance().generate();
-        
+        print("Loading plans");
         PlanDocumentManager.getInstance().load();
         print("Initializing...");
         SettlerCraftManager.getInstance().initialize();
@@ -144,12 +151,18 @@ public class SettlerCraft extends JavaPlugin {
             hologramManager.init();
         }
 
-        getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
-        getCommand("cst").setExecutor(new ConstructionCommandExecutor(this));
+        getCommand("sc").setExecutor(new SettlerCraftCommandExecutor());
+        getCommand("cst").setExecutor(new ConstructionCommandExecutor());
         getCommand("stt").setExecutor(new StructureCommandExecutor());
 
         printPerms();
     }
+    
+    public ExecutorService getExecutorService() {
+        return GLOBAL_THREADPOOL;
+    }
+    
+
 
     /**
      * Gets the datafolder for the StructureAPI or creates them if none exists

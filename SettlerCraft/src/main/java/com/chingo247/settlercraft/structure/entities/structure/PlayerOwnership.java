@@ -19,7 +19,6 @@
 package com.chingo247.settlercraft.structure.entities.structure;
 
 import java.io.Serializable;
-import java.util.Objects;
 import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -96,7 +95,16 @@ public class PlayerOwnership implements Serializable {
     public UUID getPlayerUUID() {
         return player;
     }
- 
+
+    
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 71 * hash + (this.player != null ? this.player.hashCode() : 0);
+        hash = 71 * hash + (this.structure != null ? this.structure.hashCode() : 0);
+        return hash;
+    }
 
     @Override
     public boolean equals(Object obj) {
@@ -107,24 +115,19 @@ public class PlayerOwnership implements Serializable {
             return false;
         }
         final PlayerOwnership other = (PlayerOwnership) obj;
-
-        if (!Objects.equals(this.player, other.player)) {
+        if (this.player != other.player && (this.player == null || !this.player.equals(other.player))) {
             return false;
         }
-        if (!Objects.equals(this.structure, other.structure)) {
+        if (this.structure != other.structure && (this.structure == null || !this.structure.equals(other.structure))) {
             return false;
         }
-        
         return true;
     }
+ 
 
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 29 * hash + Objects.hashCode(this.player);
-        hash = 29 * hash + Objects.hashCode(this.structure);
-        return hash;
-    }
+    
+
+    
 
     public Structure getStructure() {
         return structure;

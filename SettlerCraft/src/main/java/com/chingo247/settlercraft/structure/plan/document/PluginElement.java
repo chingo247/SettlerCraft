@@ -19,7 +19,6 @@ package com.chingo247.settlercraft.structure.plan.document;
 import com.chingo247.settlercraft.structure.plan.data.StructurePlanElement;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.tree.BaseElement;
@@ -184,15 +183,18 @@ public final class PluginElement {
         }
     }
 
+    
+    
+    
     @Override
-    public final int hashCode() {
-        int hash = 7;
-        hash = 59 * hash + Objects.hashCode(this.pluginName);
+    public int hashCode() {
+        int hash = 5;
+        hash = 59 * hash + (this.pluginName != null ? this.pluginName.hashCode() : 0);
         return hash;
     }
 
     @Override
-    public final boolean equals(Object obj) {
+    public boolean equals(Object obj) {
         if (obj == null) {
             return false;
         }
@@ -200,10 +202,12 @@ public final class PluginElement {
             return false;
         }
         final PluginElement other = (PluginElement) obj;
-        if (!Objects.equals(this.pluginName, other.pluginName)) {
+        if ((this.pluginName == null) ? (other.pluginName != null) : !this.pluginName.equals(other.pluginName)) {
             return false;
         }
         return true;
     }
+
+    
 
 }

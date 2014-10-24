@@ -21,7 +21,7 @@ package com.chingo247.settlercraft.exception;
  *
  * @author Chingo
  */
-public class StructureDataException extends Exception {
+public class StructureDataException extends StructureException {
     
     public StructureDataException(String message) {
         super(message);

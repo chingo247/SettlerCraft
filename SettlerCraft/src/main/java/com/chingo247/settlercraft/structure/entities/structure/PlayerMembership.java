@@ -18,7 +18,6 @@
 package com.chingo247.settlercraft.structure.entities.structure;
 
 import java.io.Serializable;
-import java.util.Objects;
 import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -73,6 +72,15 @@ public class PlayerMembership implements Serializable {
         return uuid;
     }
 
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 29 * hash + (this.uuid != null ? this.uuid.hashCode() : 0);
+        hash = 29 * hash + (this.structure != null ? this.structure.hashCode() : 0);
+        return hash;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -82,19 +90,17 @@ public class PlayerMembership implements Serializable {
             return false;
         }
         final PlayerMembership other = (PlayerMembership) obj;
-
-        if (!Objects.equals(this.uuid, other.uuid)) {
+        if (this.uuid != other.uuid && (this.uuid == null || !this.uuid.equals(other.uuid))) {
+            return false;
+        }
+        if (this.structure != other.structure && (this.structure == null || !this.structure.equals(other.structure))) {
             return false;
         }
         return true;
     }
 
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 29 * hash + Objects.hashCode(this.uuid);
-        return hash;
-    }
+    
+   
 
     public Structure getStructure() {
         return structure;

@@ -16,10 +16,10 @@ package com.chingo247.settlercraft.structure.plan.data.overview;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import com.chingo247.settlercraft.bukkit.events.StructureCreateEvent;
-import com.chingo247.settlercraft.bukkit.events.StructureStateChangeEvent;
+import com.chingo247.settlercraft.events.StructureCreateEvent;
+import com.chingo247.settlercraft.events.StructureStateChangeEvent;
 import com.chingo247.settlercraft.exception.StructureDataException;
-import com.chingo247.settlercraft.persistence.HibernateUtil;
+import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.plugin.ConfigProvider;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.entities.structure.QStructure;

@@ -29,11 +29,9 @@ import java.util.Comparator;
  */
 public class ConstructionClipboard extends StructureClipboard {
 
-    private final Comparator<StructureBlock> constructionMode;
     
     public ConstructionClipboard(CuboidClipboard parent, Comparator<StructureBlock> comparator) {
         super(parent, comparator);
-        this.constructionMode = comparator;
     }
 
 
@@ -41,10 +39,6 @@ public class ConstructionClipboard extends StructureClipboard {
 
     @Override
     public void doblock(EditSession session, BaseBlock b, Vector blockPos, Vector pos) {
-        BaseBlock worldBlock = session.getBlock(blockPos.add(pos));
-        if (worldBlock.getId() == b.getId() && worldBlock.getData() == b.getData()) {
-            return;
-        }
         session.rawSetBlock(blockPos.add(pos), b);
     }
 

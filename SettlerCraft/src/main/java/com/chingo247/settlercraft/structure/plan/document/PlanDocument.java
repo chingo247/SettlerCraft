@@ -47,7 +47,7 @@ public class PlanDocument {
     }
 
     void removePluginElement(String plugin, Element e) {
-        this.elements.remove(plugin, new PluginElement(plugin, this, e));
+        this.elements.remove(plugin);
     }
     
     public File getDocumentFile() {
@@ -64,6 +64,15 @@ public class PlanDocument {
     
     public void save() {
         PlanDocumentManager.getInstance().save(this);
+    }
+    
+    public String getRelativePath() {
+        String path = documentFile.getAbsolutePath();
+        String minus = "\\plugins\\SettlerCraft\\";
+        path = path.substring(path.indexOf(minus) + minus.length());
+        int length = path.length();
+        path = path.substring(0, length - 4); // minus XML
+        return path;
     }
     
     protected void savePluginElement(PluginElement element) {

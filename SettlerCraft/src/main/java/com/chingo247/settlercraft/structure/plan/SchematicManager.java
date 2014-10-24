@@ -17,8 +17,9 @@
 
 package com.chingo247.settlercraft.structure.plan;
 
-import com.chingo247.settlercraft.persistence.AbstractService;
-import com.chingo247.settlercraft.persistence.HibernateUtil;
+import com.chingo247.settlercraft.persistence.service.AbstractService;
+import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.plan.data.schematic.QSchematicData;
 import com.chingo247.settlercraft.structure.plan.data.schematic.Schematic;
 import com.chingo247.settlercraft.structure.plan.data.schematic.SchematicData;
@@ -37,9 +38,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
@@ -55,7 +54,7 @@ public class SchematicManager {
     
     private final Map<Long, Schematic> schematics = Collections.synchronizedMap(new HashMap<Long, Schematic>());
     private static SchematicManager instance;
-    private ExecutorService executor;
+    private final ExecutorService executor = SettlerCraft.getInstance().getExecutorService();
     
     private SchematicManager() {}
     
@@ -157,8 +156,7 @@ public class SchematicManager {
     
     
     private void save(final List<File> schematics) {
-        shutdown();
-        executor = Executors.newCachedThreadPool();
+        
         final List<SchematicData> data = new LinkedList<>();
         List<Future> tasks = new LinkedList<>();
         
@@ -185,12 +183,6 @@ public class SchematicManager {
                     f.cancel(true);
                 }
             }
-        }
-        
-        try {
-            executor.awaitTermination(10, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(SchematicManager.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         Session session = null;
@@ -236,12 +228,7 @@ public class SchematicManager {
     }
     
     
-    
-    public void shutdown() {
-        if(executor != null && !executor.isShutdown()) {
-            executor.shutdown();
-        }
-    }
+ 
     
     
     

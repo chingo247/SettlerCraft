@@ -24,7 +24,6 @@ import com.sk89q.worldedit.schematic.SchematicFormat;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Objects;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -77,10 +76,12 @@ public class Schematic implements Serializable {
         return s_length;
     }
 
+    
+
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 47 * hash + Objects.hashCode(this.checkSum);
+        int hash = 7;
+        hash = 79 * hash + (int) (this.checkSum ^ (this.checkSum >>> 32));
         return hash;
     }
 
@@ -93,11 +94,13 @@ public class Schematic implements Serializable {
             return false;
         }
         final Schematic other = (Schematic) obj;
-        if (!Objects.equals(this.checkSum, other.checkSum)) {
+        if (this.checkSum != other.checkSum) {
             return false;
         }
         return true;
     }
+
+    
 
     public static Schematic load(File schematic) throws IOException, DataException {
         CuboidClipboard cc = SchematicFormat.MCEDIT.load(schematic);

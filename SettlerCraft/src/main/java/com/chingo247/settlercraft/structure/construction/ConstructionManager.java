@@ -16,12 +16,13 @@
  */
 package com.chingo247.settlercraft.structure.construction;
 
-import com.chingo247.settlercraft.bukkit.events.StructureStateChangeEvent;
+import com.chingo247.settlercraft.events.StructureStateChangeEvent;
 import com.chingo247.settlercraft.exception.ConstructionException;
 import com.chingo247.settlercraft.exception.StructureDataException;
-import com.chingo247.settlercraft.persistence.StructureService;
+import com.chingo247.settlercraft.persistence.service.StructureService;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.structure.StructureAPI;
+import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.SCAsyncClipboard;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.SCJobEntry;
 import com.chingo247.settlercraft.structure.construction.generator.ClipboardGenerator;
@@ -29,15 +30,15 @@ import com.chingo247.settlercraft.structure.construction.worldedit.ConstructionC
 import com.chingo247.settlercraft.structure.construction.worldedit.DemolisionClipboard;
 import com.chingo247.settlercraft.structure.construction.worldedit.StructureBlock;
 import com.chingo247.settlercraft.structure.construction.worldedit.StructureBlockComparators;
+import com.chingo247.settlercraft.structure.construction.worldedit.WorldEditUtil;
 import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership;
 import com.chingo247.settlercraft.structure.entities.structure.Structure;
 import com.chingo247.settlercraft.structure.entities.structure.Structure.State;
 import com.chingo247.settlercraft.structure.entities.world.Direction;
 import com.chingo247.settlercraft.structure.plan.SchematicManager;
 import com.chingo247.settlercraft.structure.plan.data.schematic.Schematic;
-import com.chingo247.settlercraft.util.AsyncWorldEditUtil;
+import com.chingo247.settlercraft.util.KeyPool;
 import com.chingo247.settlercraft.util.SchematicUtil;
-import com.chingo247.settlercraft.util.WorldEditUtil;
 import com.chingo247.settlercraft.util.WorldGuardUtil;
 import com.sc.module.menuapi.menus.menu.util.EconomyUtil;
 import com.sk89q.worldedit.BlockVector;
@@ -47,8 +48,8 @@ import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.data.DataException;
-import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
 import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.managers.storage.StorageException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -60,8 +61,6 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
@@ -90,9 +89,9 @@ import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
 public class ConstructionManager {
 
     private final Map<Long, ConstructionEntry> constructionEntries = Collections.synchronizedMap(new HashMap<Long, ConstructionEntry>());
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final KeyPool<Long> executor = new KeyPool(SettlerCraft.getInstance().getExecutorService());
     private final int FENCE_BLOCK_PLACE_SPEED = 1000;
-    private final int TIME_OUT = 500;
+    private final int INTERVAL = 500;
     private final Material FENCE_MATERIAL = Material.IRON_FENCE;
     private static ConstructionManager instance;
 
@@ -156,7 +155,7 @@ public class ConstructionManager {
     public void build(final UUID uuid, final Structure structure, final boolean force) throws StructureDataException, ConstructionException, IOException {
 
         // Queue build task
-        executor.execute(new Runnable() {
+        executor.execute(structure.getId(),new Runnable() {
 
             @Override
             public void run() {
@@ -273,11 +272,11 @@ public class ConstructionManager {
                 });
 
                 try {
-                    Thread.sleep(TIME_OUT);
+                    Thread.sleep(INTERVAL);
                     placed = 0;
                 } catch (InterruptedException ex) {
                     Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                } 
             }
 
             place.add(queue.poll());
@@ -379,7 +378,7 @@ public class ConstructionManager {
     public void demolish(final UUID uuid, final Structure structure, final boolean force) throws ConstructionException, StructureDataException {
 
         // Queue build task
-        executor.execute(new Runnable() {
+        executor.execute(structure.getId(), new Runnable() {
 
             @Override
             public void run() {
@@ -430,7 +429,7 @@ public class ConstructionManager {
     private void queueDemolisionTask(final UUID uuid, final Structure structure, Schematic schematic) throws IOException, DataException {
         // Align schematic
         Direction direction = structure.getDirection();
-        final DemolisionClipboard clipboard = new DemolisionClipboard(schematic.getClipboard(), StructureBlockComparators.PERFORMANCE.reversed());
+        final DemolisionClipboard clipboard = new DemolisionClipboard(schematic.getClipboard(), Collections.reverseOrder(StructureBlockComparators.PERFORMANCE));
         SchematicUtil.align(clipboard, direction);
 
         Player ply = Bukkit.getPlayer(uuid);
@@ -478,11 +477,11 @@ public class ConstructionManager {
                                 structure.getLog().setRemovedAt(new Date());
                                 structureService.save(structure);
 
-                                RegionManager rmgr = WorldGuardUtil.getGlobalRegionManager(Bukkit.getWorld(structure.getWorldName()));
+                                RegionManager rmgr = WorldGuardUtil.getRegionManager(Bukkit.getWorld(structure.getWorldName()));
                                 rmgr.removeRegion(structure.getStructureRegion());
                                 try {
                                     rmgr.save();
-                                } catch (ProtectionDatabaseException ex) {
+                                } catch (StorageException ex) {
                                     Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
                                 }
 
@@ -635,7 +634,7 @@ public class ConstructionManager {
             throw new ConstructionException("#" + structure.getId() + " hasn't been tasked yet");
         }
 
-        executor.execute(new Runnable() {
+        executor.execute(structure.getId(), new Runnable() {
 
             @Override
             public void run() {
