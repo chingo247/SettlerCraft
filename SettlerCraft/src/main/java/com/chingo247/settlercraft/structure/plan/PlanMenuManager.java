@@ -17,10 +17,11 @@
 
 package com.chingo247.settlercraft.structure.plan;
 
-import com.chingo247.settlercraft.exception.StructureAPIException;
-import com.chingo247.settlercraft.exception.StructureDataException;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
 import com.chingo247.settlercraft.util.FileUtil;
+import com.chingo247.structureapi.exception.StructureAPIException;
+import com.chingo247.structureapi.exception.StructureDataException;
+import com.chingo247.structureapi.plan.StructurePlan;
 import com.sc.module.menuapi.menus.menu.CategoryMenu;
 import com.sc.module.menuapi.menus.menu.MenuAPI;
 import com.sk89q.worldedit.data.DataException;
@@ -49,25 +50,21 @@ public class PlanMenuManager {
     private CategoryMenu planMenu;
     private final Logger LOGGER = Logger.getLogger(PlanMenuManager.class);
     private boolean loadingPlans = false;
-    private static PlanMenuManager instance;
+    private final SettlerCraft setterCraft;
     
-    private PlanMenuManager() {}
-    
-    public CategoryMenu getMenu() {
+    public PlanMenuManager(SettlerCraft settlerCraft) {
+        this.setterCraft = settlerCraft;
+    }
+
+    public CategoryMenu getPlanMenu() {
         return planMenu;
     }
-    
-    public static PlanMenuManager getInstance() {
-        if(instance == null) {
-            instance = new PlanMenuManager();
-        }
-        return instance;
-    }
-    
 
+    
+    
     /**
-     * Loads the planmenu from the menu.xml. If menu.xml doesn't exist, the menu.xml from the jar
-     * will be written to the filesystem.
+     * Loads the PlanMenu from the menu.xml. If menu.xml doesn't exist, the menu.xml from the jar
+     * will be written to the FileSystem.
      *
      * @throws DocumentException When XML is invalid
      * @throws StructureAPIException When XML contains invalid data
@@ -203,17 +200,17 @@ public class PlanMenuManager {
         }
         
         
-        final List<SettlerCraftPlan> plans = SettlerCraftPlanManager.getInstance().getPlans();
-        final Iterator<SettlerCraftPlan> planIterator = plans.iterator();
+        final List<StructurePlan> plans = setterCraft.getStructureAPI().getStructurePlanManager().getPlans();
+        final Iterator<StructurePlan> planIterator = plans.iterator();
 
         planMenu.clearItems();
 
         while (planIterator.hasNext()) {
-            final SettlerCraftPlan plan = planIterator.next();
+            final StructurePlan plan = planIterator.next();
 
             try {
                 // Add item to planmenu
-                StructurePlanItem planItem = StructurePlanItem.load(plan);
+                StructurePlanItem planItem = StructurePlanItem.load(setterCraft.getStructureAPI().getSchematicManager(), plan);
                 planMenu.addItem(planItem);
             } catch (IOException | DataException | DocumentException | StructureDataException ex) {
                 LOGGER.error(ex.getMessage());

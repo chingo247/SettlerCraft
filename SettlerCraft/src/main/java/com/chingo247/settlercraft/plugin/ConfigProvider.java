@@ -36,7 +36,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
  */
 public class ConfigProvider {
 
-    private static ConfigProvider instance;
     private boolean menuEnabled = false;
     private boolean shopEnabled = false;
     private double refundPercentage;
@@ -46,17 +45,7 @@ public class ConfigProvider {
     private boolean defaultHolograms = false;
     private HashMap<Flag, Object> defaultFlags;
     private final File file = new File(SettlerCraft.getInstance().getDataFolder(), "config.yml");
-
-
-    private ConfigProvider() {
-    }
-
-    public static ConfigProvider getInstance() {
-        if (instance == null) {
-            instance = new ConfigProvider();
-        }
-        return instance;
-    }
+    
 
     public void load() throws SettlerCraftException {
         final FileConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -78,8 +67,10 @@ public class ConfigProvider {
         this.useHolograms = config.getBoolean("structure.holograms.enabled");
         this.defaultHolograms = config.getBoolean("structure.holograms.default-hologram");
         this.defaultFlags = getDefaultFlags(config);
-        
+    }
 
+    public boolean isDefaultHolograms() {
+        return defaultHolograms;
     }
     
     private HashMap<Flag, Object> getDefaultFlags(FileConfiguration config) throws SettlerCraftException {

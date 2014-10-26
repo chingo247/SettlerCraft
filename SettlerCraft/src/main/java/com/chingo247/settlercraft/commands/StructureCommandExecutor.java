@@ -17,14 +17,23 @@
 package com.chingo247.settlercraft.commands;
 
 import com.chingo247.settlercraft.exception.SettlerCraftException;
-import com.chingo247.settlercraft.exception.StructureException;
-import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
-import com.chingo247.settlercraft.persistence.service.StructureService;
-import com.chingo247.settlercraft.structure.StructureAPI;
-import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership;
-import com.chingo247.settlercraft.structure.entities.structure.QPlayerOwnership;
-import com.chingo247.settlercraft.structure.entities.structure.Structure;
-import com.chingo247.settlercraft.structure.entities.structure.Structure.State;
+import com.chingo247.structureapi.PlayerOwnership;
+import com.chingo247.structureapi.QPlayerOwnership;
+import com.chingo247.structureapi.Structure;
+import com.chingo247.structureapi.Structure.State;
+import static com.chingo247.structureapi.Structure.State.BUILDING;
+import static com.chingo247.structureapi.Structure.State.COMPLETE;
+import static com.chingo247.structureapi.Structure.State.DEMOLISHING;
+import static com.chingo247.structureapi.Structure.State.INITIALIZING;
+import static com.chingo247.structureapi.Structure.State.LOADING_SCHEMATIC;
+import static com.chingo247.structureapi.Structure.State.PLACING_FENCE;
+import static com.chingo247.structureapi.Structure.State.QUEUED;
+import static com.chingo247.structureapi.Structure.State.REMOVED;
+import static com.chingo247.structureapi.Structure.State.STOPPED;
+import com.chingo247.structureapi.StructureAPI;
+import com.chingo247.structureapi.exception.StructureException;
+import com.chingo247.structureapi.persistence.hibernate.HibernateUtil;
+import com.chingo247.structureapi.persistence.service.StructureService;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.module.menuapi.menus.menu.util.ShopUtil;
@@ -50,6 +59,14 @@ public class StructureCommandExecutor implements CommandExecutor {
     private static final int MAX_LINES = 10;
     private static final String CMD = "/stt";
     private final ChatColor CCC = ChatColor.DARK_PURPLE;
+    
+    private final StructureAPI structureAPI;
+
+    public StructureCommandExecutor(StructureAPI structureAPI) {
+        this.structureAPI = structureAPI;
+    }
+    
+    
 
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
@@ -419,7 +436,7 @@ public class StructureCommandExecutor implements CommandExecutor {
             return true;
         }
         try {
-            StructureAPI.makeOwner(player, PlayerOwnership.Type.BASIC, structure);
+            structureAPI.makeOwner(player, PlayerOwnership.Type.BASIC, structure);
         } catch (StructureException ex) {
             sender.sendMessage(ChatColor.RED + ChatColor.stripColor(ex.getMessage()));
         }
@@ -458,7 +475,7 @@ public class StructureCommandExecutor implements CommandExecutor {
             return true;
         }
         try {
-            StructureAPI.removeOwner(player, structure);
+            structureAPI.removeOwner(player, structure);
         } catch (StructureException ex) {
             sender.sendMessage(ChatColor.RED + ex.getMessage());
         }

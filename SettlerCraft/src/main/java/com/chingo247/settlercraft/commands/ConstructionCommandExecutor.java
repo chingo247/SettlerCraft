@@ -16,9 +16,9 @@ package com.chingo247.settlercraft.commands;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import com.chingo247.settlercraft.persistence.service.StructureService;
-import com.chingo247.settlercraft.structure.StructureAPI;
-import com.chingo247.settlercraft.structure.entities.structure.Structure;
+import com.chingo247.structureapi.Structure;
+import com.chingo247.structureapi.StructureAPI;
+import com.chingo247.structureapi.persistence.service.StructureService;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -33,6 +33,13 @@ public class ConstructionCommandExecutor implements CommandExecutor {
 
     private static final String CMD = "/cst";
     private final ChatColor CCC = ChatColor.DARK_PURPLE;
+    private final StructureAPI structureAPI;
+
+    public ConstructionCommandExecutor(StructureAPI structureAPI) {
+        this.structureAPI = structureAPI;
+    }
+    
+    
 
 
     @Override
@@ -105,7 +112,7 @@ public class ConstructionCommandExecutor implements CommandExecutor {
             return true;
         }
 
-        if (StructureAPI.stop(player, structure)) {
+        if (structureAPI.stop(player, structure)) {
             player.sendMessage("#" + ChatColor.GOLD + id + " " + ChatColor.BLUE + structure.getName()  + ChatColor.RESET + " has been canceled");
         } else {
             player.sendMessage(ChatColor.RED + "Failed to cancel #" + ChatColor.GOLD + id + " " + ChatColor.BLUE + structure.getName());
@@ -145,7 +152,7 @@ public class ConstructionCommandExecutor implements CommandExecutor {
             player.sendMessage(ChatColor.RED + "Unable to find structure # " + ChatColor.GOLD + id);
             return true;
         }
-        if (StructureAPI.build(player, structure)) {
+        if (structureAPI.build(player, structure)) {
             player.sendMessage(ChatColor.RESET + "#" + ChatColor.GOLD + id + " " + ChatColor.BLUE + structure.getName() + ChatColor.RESET + " will be build");
         }
 
@@ -183,7 +190,7 @@ public class ConstructionCommandExecutor implements CommandExecutor {
             player.sendMessage(ChatColor.RED + "Unable to find structure #" + id);
             return true;
         }
-        if (StructureAPI.demolish(player, structure)) {
+        if (structureAPI.demolish(player, structure)) {
             player.sendMessage(ChatColor.RESET + "#" + ChatColor.GOLD + id + ChatColor.BLUE + structure.getName() + " will be demolished");
         }
         return true;

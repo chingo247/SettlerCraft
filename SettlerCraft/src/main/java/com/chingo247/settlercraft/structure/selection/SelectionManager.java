@@ -17,13 +17,9 @@
 package com.chingo247.settlercraft.structure.selection;
 
 import com.chingo247.settlercraft.plugin.SettlerCraft;
-import com.chingo247.settlercraft.structure.entities.world.Direction;
-import static com.chingo247.settlercraft.structure.entities.world.Direction.EAST;
-import static com.chingo247.settlercraft.structure.entities.world.Direction.NORTH;
-import static com.chingo247.settlercraft.structure.entities.world.Direction.SOUTH;
-import static com.chingo247.settlercraft.structure.entities.world.Direction.WEST;
-import com.chingo247.settlercraft.structure.plan.data.schematic.Schematic;
-import com.chingo247.settlercraft.util.WorldUtil;
+import com.chingo247.structureapi.Direction;
+import com.chingo247.structureapi.plan.schematic.Schematic;
+import com.chingo247.structureapi.util.WorldUtil;
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.sk89q.worldedit.Vector;

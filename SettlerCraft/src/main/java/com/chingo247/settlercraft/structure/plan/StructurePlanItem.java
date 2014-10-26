@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2014 Chingo247
  *
@@ -17,8 +18,10 @@
 
 package com.chingo247.settlercraft.structure.plan;
 
-import com.chingo247.settlercraft.exception.StructureDataException;
-import com.chingo247.settlercraft.structure.plan.data.schematic.SchematicData;
+import com.chingo247.structureapi.SchematicData;
+import com.chingo247.structureapi.exception.StructureDataException;
+import com.chingo247.structureapi.plan.StructurePlan;
+import com.chingo247.structureapi.plan.schematic.SchematicManager;
 import com.sc.module.menuapi.menus.menu.item.CategoryTradeItem;
 import com.sc.module.menuapi.menus.menu.item.TradeItem;
 import com.sc.module.menuapi.menus.menu.util.ShopUtil;
@@ -41,7 +44,6 @@ public class StructurePlanItem implements CategoryTradeItem {
     public final String path;
     public final String name;
     public final String category;
-    public final String faction;
     public final String description;
     public double price;
     public final int width;
@@ -49,11 +51,10 @@ public class StructurePlanItem implements CategoryTradeItem {
     public final int length;
     public final int blocks;
 
-    private StructurePlanItem(String path, String name, String category, String faction, double price, int width, int height, int length, int blocks, String description) {
+    private StructurePlanItem(String path, String name, String category, double price, int width, int height, int length, int blocks, String description) {
         this.path = path;
         this.name = name;
         this.category = category;
-        this.faction = faction;
         this.price = price;
         this.width = width;
         this.height = height;
@@ -62,9 +63,9 @@ public class StructurePlanItem implements CategoryTradeItem {
         this.description = description;
     }
 
-    public static StructurePlanItem load(SettlerCraftPlan plan) throws IOException, DataException, DocumentException, StructureDataException {
+    public static StructurePlanItem load(SchematicManager schematicManager, StructurePlan plan) throws IOException, DataException, DocumentException, StructureDataException {
         
-        SchematicData data = SchematicManager.getInstance().getData(plan.getChecksum());
+        SchematicData data = schematicManager.getData(plan.getChecksum());
         if(data == null) {
             throw new AssertionError("SchematicData was null");
         }
@@ -72,17 +73,16 @@ public class StructurePlanItem implements CategoryTradeItem {
         int width = data.getWidth();
         int height = data.getHeight();
         int length = data.getLength();
-        int blocks = data.getHeight();
+        int blocks = data.getBlocks();
         String path = plan.getRelativePath();
         String name = plan.getName();
         String category = plan.getCategory();
-        String faction = plan.getFaction();
         String description = plan.getDescription();
         double price = plan.getPrice();
 
         
 
-        StructurePlanItem item = new StructurePlanItem(path, name, category, faction, price, width, height, length, blocks, description);
+        StructurePlanItem item = new StructurePlanItem(path, name, category, price, width, height, length, blocks, description);
         return item;
     }
 
@@ -129,7 +129,7 @@ public class StructurePlanItem implements CategoryTradeItem {
 
     @Override
     public TradeItem clone() {
-        return new StructurePlanItem(path, name, category, faction, price, width, height, length, blocks, description);
+        return new StructurePlanItem(path, name, category, price, width, height, length, blocks, description);
     }
 
 }

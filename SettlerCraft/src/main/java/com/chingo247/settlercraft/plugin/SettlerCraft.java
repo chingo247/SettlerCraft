@@ -20,29 +20,23 @@ import com.chingo247.settlercraft.commands.ConstructionCommandExecutor;
 import com.chingo247.settlercraft.commands.SettlerCraftCommandExecutor;
 import com.chingo247.settlercraft.commands.StructureCommandExecutor;
 import com.chingo247.settlercraft.exception.SettlerCraftException;
-import com.chingo247.settlercraft.exception.StructureAPIException;
 import com.chingo247.settlercraft.listener.FenceListener;
 import com.chingo247.settlercraft.listener.PlanListener;
 import com.chingo247.settlercraft.listener.PluginListener;
-import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
-import com.chingo247.settlercraft.persistence.service.RestoreService;
 import com.chingo247.settlercraft.plugin.PermissionManager.Perms;
-import com.chingo247.settlercraft.structure.entities.structure.QStructure;
-import com.chingo247.settlercraft.structure.entities.structure.Structure;
+import com.chingo247.settlercraft.structure.SettlerCraftStructureAPI;
 import com.chingo247.settlercraft.structure.plan.PlanMenuManager;
-import com.chingo247.settlercraft.structure.plan.SettlerCraftManager;
-import com.chingo247.settlercraft.structure.plan.SettlerCraftPlanManager;
-import com.chingo247.settlercraft.structure.plan.data.holograms.StructureHologramManager;
-import com.chingo247.settlercraft.structure.plan.data.overview.StructureOverviewManager;
-import com.chingo247.settlercraft.structure.plan.document.PlanDocumentManager;
+import com.chingo247.structureapi.QStructure;
+import com.chingo247.structureapi.Structure;
+import com.chingo247.structureapi.StructureAPI;
+import com.chingo247.structureapi.exception.StructureAPIException;
+import com.chingo247.structureapi.persistence.hibernate.HibernateUtil;
+import com.chingo247.structureapi.persistence.hsql.HSQLServer;
+import com.chingo247.structureapi.persistence.service.RestoreService;
 import com.mysema.query.jpa.hibernate.HibernateUpdateClause;
-import com.sc.module.databasetests.hsqldb.HSQLServer;
 import com.sc.module.menuapi.menus.menu.CategoryMenu;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -66,13 +60,17 @@ public class SettlerCraft extends JavaPlugin {
     private static final Logger LOGGER = Logger.getLogger(SettlerCraft.class);
     private static SettlerCraft instance;
     private final ThreadPoolExecutor GLOBAL_THREADPOOL = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 30L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-
+    private ConfigProvider configProvider;
     public static final String MSG_PREFIX = ChatColor.YELLOW + "[SettlerCraft]: " + ChatColor.RESET;
+    private SettlerCraftStructureAPI structureAPI;
+    private PlanMenuManager planMenuManager;
 
     @Override
     public void onEnable() {
         instance = this;
-        
+        planMenuManager = new PlanMenuManager(this);
+        configProvider = new ConfigProvider();
+        structureAPI = SettlerCraftStructureAPI.getInstance(this);
         
         if (Bukkit.getPluginManager().getPlugin("WorldEdit") == null) {
             System.out.println("[SettlerCraft]: WorldEdit NOT FOUND!!! Disabling...");
@@ -96,71 +94,75 @@ public class SettlerCraft extends JavaPlugin {
             this.setEnabled(false);
             return;
         }
-
-
-//        
-//        // Init HSQL Server
+        
+        try {
+            configProvider.load();
+        } catch (SettlerCraftException ex) {
+            java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
+            this.setEnabled(false);
+            return;
+        }
+        
+        // Init HSQL Server
         HSQLServer hSQLServer = HSQLServer.getInstance();
         if (!hSQLServer.isRunning()) {
             Bukkit.getConsoleSender().sendMessage(MSG_PREFIX + "Starting HSQL Server");
             hSQLServer.start();
         }
         
-        RestoreService restoreService = new RestoreService();
+        
+        
+        RestoreService restoreService = new RestoreService(structureAPI);
         restoreService.restore();
         resetStates();
         
+        structureAPI.initialize();
+        
         // Load plan menu from XML
         try {
-            PlanMenuManager.getInstance().init();
+            planMenuManager.init();
         } catch (DocumentException | StructureAPIException ex) {
             java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
+            this.setEnabled(false);
+            return;
         }
-
-
-        // Init SettlerCraftPlanManager
-        SettlerCraftPlanManager.getInstance().init();
-//        SettlerCraftPlanManager.getInstance().generate();
-        print("Loading plans");
-        PlanDocumentManager.getInstance().load();
-        print("Initializing...");
-        SettlerCraftManager.getInstance().initialize();
-        print("Done!");
         
-
-
-        try {
-            ConfigProvider.getInstance().load();
-        } catch (SettlerCraftException ex) {
-            java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        planMenuManager.loadPlans();
+       
 
         Bukkit.getPluginManager().registerEvents(new PluginListener(), this);
-        Bukkit.getPluginManager().registerEvents(new PlanListener(), this);
+        Bukkit.getPluginManager().registerEvents(new PlanListener(this), this);
         Bukkit.getPluginManager().registerEvents(new FenceListener(), this);
 
         boolean useHolograms = getConfig().getBoolean("structure.holograms.enabled");
         if (useHolograms && Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null) {
-            StructureOverviewManager overviewManager = StructureOverviewManager.getInstance();
-            StructureHologramManager hologramManager = StructureHologramManager.getInstance();
+            Bukkit.getPluginManager().registerEvents(structureAPI.getStructureHologramManager(), instance);
+            Bukkit.getPluginManager().registerEvents(structureAPI.getStructureOverviewManager(), instance);
 
-            Bukkit.getPluginManager().registerEvents(overviewManager, instance);
-            Bukkit.getPluginManager().registerEvents(hologramManager, instance);
-
-            overviewManager.init();
-            hologramManager.init();
+            structureAPI.getStructureHologramManager().init();
+            structureAPI.getStructureOverviewManager().init();
         }
 
-        getCommand("sc").setExecutor(new SettlerCraftCommandExecutor());
-        getCommand("cst").setExecutor(new ConstructionCommandExecutor());
-        getCommand("stt").setExecutor(new StructureCommandExecutor());
+        getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
+        getCommand("cst").setExecutor(new ConstructionCommandExecutor(structureAPI));
+        getCommand("stt").setExecutor(new StructureCommandExecutor(structureAPI));
 
         printPerms();
+        StructureAPI.print("Done!");
     }
     
     public ExecutorService getExecutorService() {
         return GLOBAL_THREADPOOL;
     }
+    
+    public ConfigProvider getConfigProvider() {
+        return configProvider;
+    }
+
+    public StructureAPI getStructureAPI() {
+        return structureAPI;
+    }
+    
     
 
 
@@ -207,47 +209,8 @@ public class SettlerCraft extends JavaPlugin {
         return instance;
     }
 
-
-
-    private void write(InputStream inputStream, File file) {
-        OutputStream outputStream = null;
-
-        try {
-
-            // write the inputStream to a FileOutputStream
-            outputStream = new FileOutputStream(file);
-
-            int read = 0;
-            byte[] bytes = new byte[1024];
-
-            while ((read = inputStream.read(bytes)) != -1) {
-                outputStream.write(bytes, 0, read);
-            }
-
-        } catch (IOException e) {
-            Logger.getLogger(SettlerCraft.class).error(e.getMessage());
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    Logger.getLogger(SettlerCraft.class).error(e.getMessage());
-                }
-            }
-            if (outputStream != null) {
-                try {
-                    // outputStream.flush();
-                    outputStream.close();
-                } catch (IOException e) {
-                    Logger.getLogger(SettlerCraft.class).error(e.getMessage());
-                }
-
-            }
-        }
-    }
-
     public CategoryMenu getPlanMenu() {
-        return PlanMenuManager.getInstance().getMenu();
+        return planMenuManager.getPlanMenu();
     }
 
 

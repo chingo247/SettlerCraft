@@ -18,26 +18,18 @@ package com.chingo247.settlercraft.listener;
 
 import com.chingo247.settlercraft.plugin.PermissionManager;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
-import com.chingo247.settlercraft.structure.StructureAPI;
-import com.chingo247.settlercraft.structure.construction.worldedit.WorldEditUtil;
-import com.chingo247.settlercraft.structure.entities.structure.Structure;
-import com.chingo247.settlercraft.structure.entities.world.Dimension;
-import com.chingo247.settlercraft.structure.entities.world.Direction;
-import static com.chingo247.settlercraft.structure.entities.world.Direction.EAST;
-import static com.chingo247.settlercraft.structure.entities.world.Direction.NORTH;
-import static com.chingo247.settlercraft.structure.entities.world.Direction.SOUTH;
-import static com.chingo247.settlercraft.structure.entities.world.Direction.WEST;
-import com.chingo247.settlercraft.structure.plan.PlanMenuManager;
-import com.chingo247.settlercraft.structure.plan.SchematicManager;
-import com.chingo247.settlercraft.structure.plan.SettlerCraftPlan;
-import com.chingo247.settlercraft.structure.plan.SettlerCraftPlanManager;
-import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structure.plan.data.schematic.Schematic;
 import com.chingo247.settlercraft.structure.selection.CUISelectionManager;
 import com.chingo247.settlercraft.structure.selection.SelectionManager;
-import com.chingo247.settlercraft.util.KeyPool;
-import com.chingo247.settlercraft.util.SchematicUtil;
-import com.chingo247.settlercraft.util.WorldUtil;
+import com.chingo247.structureapi.Dimension;
+import com.chingo247.structureapi.Direction;
+import com.chingo247.structureapi.Structure;
+import com.chingo247.structureapi.StructureAPI;
+import com.chingo247.structureapi.construction.worldedit.WorldEditUtil;
+import com.chingo247.structureapi.plan.StructurePlan;
+import com.chingo247.structureapi.plan.schematic.Schematic;
+import com.chingo247.structureapi.util.KeyPool;
+import com.chingo247.structureapi.util.SchematicUtil;
+import com.chingo247.structureapi.util.WorldUtil;
 import com.sc.module.menuapi.menus.menu.util.EconomyUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.LocalPlayer;
@@ -48,7 +40,6 @@ import com.sk89q.worldedit.data.DataException;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.logging.Level;
-import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -65,9 +56,16 @@ import org.bukkit.inventory.ItemStack;
  */
 public class PlanListener implements Listener {
 
-    private final Logger LOGGER = Logger.getLogger(PlanListener.class);
-
     private final KeyPool<UUID> keyPool = new KeyPool(SettlerCraft.getInstance().getExecutorService());
+    private final SettlerCraft settlerCraft;
+    private final StructureAPI structureAPI;
+    
+    public PlanListener(SettlerCraft settlerCraft) {
+        this.settlerCraft = settlerCraft;
+        this.structureAPI = settlerCraft.getStructureAPI();
+    }
+    
+    
 
     @EventHandler
     public void onPlayerUsePlan(final PlayerInteractEvent pie) {
@@ -87,14 +85,14 @@ public class PlanListener implements Listener {
         // Cancel default action as it would damage/remove a block
         pie.setCancelled(true);
 
-        if (!PlanMenuManager.getInstance().getMenu().isEnabled()) {
+        if (!settlerCraft.getPlanMenu().isEnabled()) {
             player.sendMessage(ChatColor.RED + "Plans are not loaded yet... please wait...");
             return;
         }
 
         // Get plan ID
         String structurePlanId = StructurePlan.getPlanID(planstack);
-        final SettlerCraftPlan plan = SettlerCraftPlanManager.getInstance().getPlan(structurePlanId);
+        final StructurePlan plan = settlerCraft.getStructureAPI().getStructurePlanManager().getPlan(structurePlanId);
 
         // Check if plan is valid
         if (plan == null) {
@@ -136,10 +134,10 @@ public class PlanListener implements Listener {
             @Override
             public void run() {
                 try {
-                    if (SchematicManager.getInstance().getSchematic(plan.getChecksum()) == null) {
+                    if (!structureAPI.getSchematicManager().hasSchematic(plan.getChecksum())) {
                         player.sendMessage(SettlerCraft.MSG_PREFIX + "Loading schematic...");
                     }
-                    Schematic schematic = SchematicManager.getInstance().getSmartSchematic(plan.getSchematic());
+                    Schematic schematic = structureAPI.getSchematicManager().load(plan.getSchematic());
                     Location l = pie.getClickedBlock().getLocation();
 
                     // CUI Select
@@ -154,7 +152,7 @@ public class PlanListener implements Listener {
 
                         
                         if (canPlace(player, pos, WorldUtil.getDirection(player), schematic)) {
-                            Structure structure = Structure.create(player, plan, player.getWorld(), pos, WorldUtil.getDirection(player));
+                            Structure structure = structureAPI.create(player, plan, player.getWorld(), pos, WorldUtil.getDirection(player));
 
                             
                             if (structure != null) {
@@ -163,7 +161,7 @@ public class PlanListener implements Listener {
                                 player.getInventory().remove(clone);
 
                                 player.updateInventory();
-                                StructureAPI.build(player, structure);
+                                structureAPI.build(player, structure);
                             }
                         }
                     }
@@ -226,27 +224,29 @@ public class PlanListener implements Listener {
 
     private boolean canPlace(Player player, Vector pos, Direction direction, Schematic schematic) {
         org.bukkit.World world = player.getWorld();
-
+        System.out.println("In canPlace()...");
         Dimension dimension = SchematicUtil.calculateDimension(schematic, pos, direction);
 
-        if (StructureAPI.overlapsStructures(world, dimension)) {
+        System.out.println("Overlap structures?");
+        if (structureAPI.overlapsStructures(world, dimension)) {
             player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
             return false;
         }
 
 //        System.out.println("Before overlaps");
-        
-        if (StructureAPI.overlapsRegion(player, world, dimension)) {
+        System.out.println("Overlap regions?");
+        if (structureAPI.overlapsRegion(player, world, dimension)) {
             player.sendMessage(ChatColor.RED + "Structure overlaps a region you don't own");
             return false;
         }
         
+        System.out.println("Return canPlace true");
 //        System.out.println("After overlaps");
         
         return true;
     }
 
-    private void handleCUIPlayer(final Player player, final Location location, SettlerCraftPlan plan, final Schematic schematic, final ItemStack planstack) {
+    private void handleCUIPlayer(final Player player, final Location location, StructurePlan plan, final Schematic schematic, final ItemStack planstack) {
         boolean toLeft = player.isSneaking();
         LocalPlayer localPlayer = WorldEditUtil.getLocalPlayer(player);
         LocalSession session = WorldEdit.getInstance().getSession(localPlayer);
@@ -267,18 +267,21 @@ public class PlanListener implements Listener {
             CUISelectionManager.getInstance().select(player, schematic, pos1, pos2);
             player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
             player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
+            System.out.println("First Time!");
         } else if (CUISelectionManager.getInstance().matchesSelection(player, schematic, pos1, pos2)) {
             if (toLeft) {
                 // Fix WTF HOW?!!1?
                 pos1 = WorldUtil.translateLocation(pos1, direction, (-(schematic.getLength() - 1)), 0, 0);
             }
-
+            
+            System.out.println("Can place?");
             
             if (canPlace(player, pos1, direction, schematic)) {
-                
+                System.out.println("YES I CAN");
 
-                Structure structure = Structure.create(player, plan, player.getWorld(), pos1, WorldUtil.getDirection(player));
-                
+                System.out.println("Creating structure");
+                Structure structure = structureAPI.create(player, plan, player.getWorld(), pos1, WorldUtil.getDirection(player));
+                System.out.println("Created: " + structure);
                 
                 CUISelectionManager.getInstance().clear(player, false);
                 if (structure != null) {
@@ -286,7 +289,7 @@ public class PlanListener implements Listener {
                     clone.setAmount(1);
                     player.getInventory().remove(clone);
                     player.updateInventory();
-                    StructureAPI.build(player, structure);
+                    structureAPI.build(player, structure);
                 }
             } 
 
@@ -300,7 +303,7 @@ public class PlanListener implements Listener {
 
     }
 
-    private void handleHoloPlayer(final Player player, Location l, SettlerCraftPlan plan, Schematic schematic, final ItemStack planstack) {
+    private void handleHoloPlayer(final Player player, Location l, StructurePlan plan, Schematic schematic, final ItemStack planstack) {
         boolean toLeft = player.isSneaking();
 
         Direction direction = WorldUtil.getDirection(player);
@@ -327,13 +330,13 @@ public class PlanListener implements Listener {
 
             if (canPlace(player, pos1, direction, schematic)) {
 
-                Structure structure = Structure.create(player, plan, player.getWorld(), pos1, WorldUtil.getDirection(player));
+                Structure structure = structureAPI.create(player, plan, player.getWorld(), pos1, WorldUtil.getDirection(player));
                 SelectionManager.getInstance().clear(player, false);
                 if (structure != null) {
                     ItemStack clone = planstack.clone();
                     clone.setAmount(1);
                     player.getInventory().remove(clone);
-                    StructureAPI.build(player, structure);
+                    structureAPI.build(player, structure);
                 }
             }
         } else {

@@ -16,7 +16,7 @@
  */
 package com.chingo247.settlercraft.listener;
 
-import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
+import com.chingo247.structureapi.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;

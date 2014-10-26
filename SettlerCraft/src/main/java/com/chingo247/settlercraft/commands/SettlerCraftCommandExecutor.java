@@ -17,16 +17,15 @@
 package com.chingo247.settlercraft.commands;
 
 import com.chingo247.settlercraft.exception.CommandException;
-import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
-import com.chingo247.settlercraft.persistence.service.StructureService;
-import com.chingo247.settlercraft.plugin.ConfigProvider;
 import com.chingo247.settlercraft.plugin.PermissionManager;
 import com.chingo247.settlercraft.plugin.SettlerCraft;
-import com.chingo247.settlercraft.structure.entities.structure.PlayerOwnership;
-import com.chingo247.settlercraft.structure.entities.structure.QPlayerOwnership;
-import com.chingo247.settlercraft.structure.entities.structure.QStructure;
-import com.chingo247.settlercraft.structure.entities.structure.Structure;
-import com.chingo247.settlercraft.structure.entities.structure.Structure.State;
+import com.chingo247.structureapi.PlayerOwnership;
+import com.chingo247.structureapi.QPlayerOwnership;
+import com.chingo247.structureapi.QStructure;
+import com.chingo247.structureapi.Structure;
+import com.chingo247.structureapi.Structure.State;
+import com.chingo247.structureapi.persistence.hibernate.HibernateUtil;
+import com.chingo247.structureapi.persistence.service.StructureService;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.module.menuapi.menus.menu.CategoryMenu;
@@ -50,6 +49,11 @@ import org.hibernate.Session;
 public class SettlerCraftCommandExecutor implements CommandExecutor {
 
     private static final int MAX_LINES = 10;
+    private final SettlerCraft settlerCraft;
+    
+    public SettlerCraftCommandExecutor(SettlerCraft settlerCraft) {
+        this.settlerCraft = settlerCraft;
+    }
 
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
@@ -96,7 +100,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
             throw new CommandException("You are not a player!");
         }
 
-        if (!ConfigProvider.getInstance().isPlanMenuEnabled()) {
+        if (!settlerCraft.getConfigProvider().isPlanMenuEnabled()) {
             throw new CommandException("Planmenu is disabled");
         }
 
@@ -125,7 +129,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
             throw new CommandException("You are not a player!");
         }
 
-        if (!ConfigProvider.getInstance().isPlanShopEnabled()) {
+        if (!settlerCraft.getConfigProvider().isPlanShopEnabled()) {
             throw new CommandException("Planshop is disabled");
         }
 
