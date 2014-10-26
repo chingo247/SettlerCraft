@@ -21,7 +21,6 @@ import com.chingo247.structureapi.plan.holograms.StructureHologramManager;
 import com.chingo247.structureapi.plan.overview.StructureOverviewManager;
 import com.chingo247.structureapi.plan.schematic.Schematic;
 import com.chingo247.structureapi.plan.schematic.SchematicManager;
-import com.chingo247.structureapi.plan.worldguard.StructureRegionFlag;
 import com.chingo247.structureapi.util.SchematicUtil;
 import com.chingo247.structureapi.util.WorldGuardUtil;
 import com.sk89q.worldedit.BlockVector;
@@ -66,6 +65,7 @@ public abstract class StructureAPI {
     private final ConstructionManager constructionManager;
     private final PlanDocumentGenerator planGenerator;
     private final Plugin plugin;
+//    private final RollbackService rollbackService;
 
     public StructureAPI(Plugin plugin, ExecutorService executor) {
         this.plugin = plugin;
@@ -77,6 +77,12 @@ public abstract class StructureAPI {
         this.planGenerator = new PlanDocumentGenerator(this);
         this.structureHologramManager = new StructureHologramManager(this);
         this.structureOverviewManager = new StructureOverviewManager(this);
+//        Plugin mPrism = Bukkit.getPluginManager().getPlugin("Prism");
+//        if(mPrism != null) {
+//            this.rollbackService = new PrismRollbackService((Prism) mPrism);
+//        } else {
+//            this.rollbackService = null;
+//        }
     }
 
     public Plugin getPlugin() {
@@ -141,7 +147,7 @@ public abstract class StructureAPI {
      * @param world The world
      * @param pos The position
      * @param direction The direction / direction
-     * @return The structure that was placed
+     * @return The structure or null if failed to claim the ground
      */
     public Structure create(StructurePlan plan, World world, Vector pos, Direction direction) {
         return create(null, plan, world, pos, direction);
@@ -155,11 +161,10 @@ public abstract class StructureAPI {
      * @param world The world
      * @param pos The position
      * @param direction The direction / direction
-     * @return The structure that was placed
+     * @return The structure or null if failed to claim the ground
      */
     public Structure create(Player player, StructurePlan plan, World world, Vector pos, Direction direction) {
         // Retrieve schematic
-        System.out.println("Retrieving schematic");
         Schematic schematic;
         try {
             schematic = schematicManager.load(plan.getSchematic());
@@ -168,11 +173,9 @@ public abstract class StructureAPI {
             return null;
         }
 
-        System.out.println("Calculating dimension");
         Dimension dimension = SchematicUtil.calculateDimension(schematic, pos, direction);
 
         // Check if structure overlapsStructures another structure
-        System.out.println("Check overlap structures");
         if (overlapsStructures(world, dimension)) {
             if (player != null) {
                 player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
@@ -180,7 +183,6 @@ public abstract class StructureAPI {
             return null;
         }
 
-        System.out.println("Creating structure");
         
         // Create structure
         Structure structure = new Structure(world, pos, direction, schematic);
@@ -191,15 +193,11 @@ public abstract class StructureAPI {
         StructureService ss = new StructureService();
         structure = ss.save(structure); // Set ID
         
-        System.out.println("Saving structure...");
         
         structure.setStructureRegionId(PREFIX + structure.getId());
-        System.out.println("Setting region id: " + structure.getStructureRegion());
         
         structure = ss.save(structure);
-        System.out.println("Saving structure......");
 
-        System.out.println("Creating dirs...");
         try {
             final File STRUCTURE_DIR = getFolder(structure);
             if (!STRUCTURE_DIR.exists()) {
@@ -219,12 +217,9 @@ public abstract class StructureAPI {
             return null;
         }
         
-        System.out.println("Registering structuredocuments...");
         structureDocumentManager.register(structure);
         
-        System.out.println("Moved files...");
 
-        System.out.println("Claiming ground...");
         ProtectedRegion structureRegion = claimGround(player, structure);
         if (structureRegion == null) {
             getFolder(structure).delete();
@@ -239,7 +234,6 @@ public abstract class StructureAPI {
         }
 
         
-        System.out.println("Make owner");
         if (player != null) {
             try {
                 makeOwner(player, PlayerOwnership.Type.FULL, structure);
@@ -380,6 +374,17 @@ public abstract class StructureAPI {
         }
         return true;
     }
+    
+//    public void rollback(final Structure structure) {
+//        Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+//
+//            @Override
+//            public void run() {
+//                rollbackService.rollback(structure);
+//            }
+//        });
+//        
+//    }
 
     /**
      * Adds the player as owner to this structure
@@ -566,7 +571,6 @@ public abstract class StructureAPI {
 
         Dimension dimension = structure.getDimension();
         World world = Bukkit.getWorld(structure.getWorldName());
-        System.out.println("Check overlap regions");
         if (overlapsRegion(player, world, dimension)) {
             if (player != null) {
                 player.sendMessage(ChatColor.RED + "Structure overlaps an regions owned other players");
@@ -574,39 +578,29 @@ public abstract class StructureAPI {
             return null;
         }
 
-        System.out.println("Get region manager");
         RegionManager mgr = WorldGuardUtil.getRegionManager(world);
 
         Vector p1 = dimension.getMinPosition();
         Vector p2 = dimension.getMaxPosition();
         String id = structure.getStructureRegion();
 
-        System.out.println("Checking region");
         if (WorldGuardUtil.regionExists(world, id)) {
             mgr.removeRegion(id);
         }
 
-        System.out.println("Creating region");
         ProtectedCuboidRegion region = new ProtectedCuboidRegion(id, new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
 
-        System.out.println("Region created");
         // Set Flag
-        StructurePlan plan;
-        System.out.println("Setting flags...");
-        try {
-            System.out.println("Getting plan...");
-            plan = structurePlanManager.getPlan(structure);
-            System.out.println("Got plan: " + plan.getName());
-            System.out.println("Region Flags: " + plan.getRegionFlags());
-            for (StructureRegionFlag flag : plan.getRegionFlags()) {
-                System.out.println("Set Flag: " + flag.getFlag().getName() + " to " + flag.getValue());
-                region.setFlag(flag.getFlag(), flag.getValue());
-            }
-        } catch (StructureDataException | IOException ex) {
-            java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
+//        StructurePlan plan;
+//        try {
+//            plan = structurePlanManager.getPlan(structure);
+//            for (StructureRegionFlag flag : plan.getRegionFlags()) {
+//                region.setFlag(flag.getFlag(), flag.getValue());
+//            }
+//        } catch (StructureDataException | IOException ex) {
+//            java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        }
 
-        System.out.println("Setting config flags...");
         
 //        region.setFlags(getDefaultFlags());
         
@@ -615,20 +609,17 @@ public abstract class StructureAPI {
 //        }
         
 
-        System.out.println("adding player to region");
         
         // region.setFlags(ConfigProvider.getInstance().getDefaultFlags());
         if (player != null) {
             region.getOwners().addPlayer(player.getName());
         }
-        System.out.println("Saving region");
         mgr.addRegion(region);
         try {
             mgr.save();
         } catch (StorageException ex) {
             Logger.getLogger(StructureAPI.class.getName()).log(Level.ERROR, null, ex);
         }
-        System.out.println("Region saved");
 
         return region;
 

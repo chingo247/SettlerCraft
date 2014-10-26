@@ -224,23 +224,19 @@ public class PlanListener implements Listener {
 
     private boolean canPlace(Player player, Vector pos, Direction direction, Schematic schematic) {
         org.bukkit.World world = player.getWorld();
-        System.out.println("In canPlace()...");
         Dimension dimension = SchematicUtil.calculateDimension(schematic, pos, direction);
 
-        System.out.println("Overlap structures?");
         if (structureAPI.overlapsStructures(world, dimension)) {
             player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
             return false;
         }
 
 //        System.out.println("Before overlaps");
-        System.out.println("Overlap regions?");
         if (structureAPI.overlapsRegion(player, world, dimension)) {
             player.sendMessage(ChatColor.RED + "Structure overlaps a region you don't own");
             return false;
         }
         
-        System.out.println("Return canPlace true");
 //        System.out.println("After overlaps");
         
         return true;
@@ -267,21 +263,16 @@ public class PlanListener implements Listener {
             CUISelectionManager.getInstance().select(player, schematic, pos1, pos2);
             player.sendMessage(ChatColor.YELLOW + "Left-Click " + ChatColor.RESET + " in the " + ChatColor.GREEN + " green " + ChatColor.RESET + "square to " + ChatColor.YELLOW + "confirm");
             player.sendMessage(ChatColor.YELLOW + "Right-Click " + ChatColor.RESET + "to" + ChatColor.YELLOW + " deselect");
-            System.out.println("First Time!");
         } else if (CUISelectionManager.getInstance().matchesSelection(player, schematic, pos1, pos2)) {
             if (toLeft) {
                 // Fix WTF HOW?!!1?
                 pos1 = WorldUtil.translateLocation(pos1, direction, (-(schematic.getLength() - 1)), 0, 0);
             }
             
-            System.out.println("Can place?");
             
             if (canPlace(player, pos1, direction, schematic)) {
-                System.out.println("YES I CAN");
 
-                System.out.println("Creating structure");
                 Structure structure = structureAPI.create(player, plan, player.getWorld(), pos1, WorldUtil.getDirection(player));
-                System.out.println("Created: " + structure);
                 
                 CUISelectionManager.getInstance().clear(player, false);
                 if (structure != null) {

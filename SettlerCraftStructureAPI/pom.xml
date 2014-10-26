@@ -49,19 +49,11 @@
     
     <dependencies>
         <!-- Bukkit Dependencies -->
-        
         <!--Bukkit-->
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
             <version>1.7.9-R0.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <!--holographicDisplays-->
-        <dependency>
-            <groupId>com.thirdparty</groupId>
-            <artifactId>holographic-displays</artifactId>
-            <version>1.8.7</version>
             <scope>provided</scope>
         </dependency>
         <!--AsyncWorldEdit-->
@@ -90,6 +82,36 @@
             <groupId>com.thirdparty</groupId>
             <artifactId>worldedit</artifactId>  
             <version>6.0-3308</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Blockshub -->
+        <dependency>
+            <groupId>com.thirdparty</groupId>
+            <artifactId>blockshub</artifactId>
+            <version>0.5</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Logblocks -->
+        <dependency>
+            <groupId>com.thirdparty</groupId>
+            <artifactId>logblock</artifactId>
+            <version>1.80</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Prism -->
+        <dependency>
+            <groupId>com.thirdparty</groupId>
+            <artifactId>prism</artifactId>
+            <version>2.0.4</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        
+        <!--holographicDisplays-->
+        <dependency>
+            <groupId>com.thirdparty</groupId>
+            <artifactId>holographic-displays</artifactId>
+            <version>1.8.7</version>
             <scope>provided</scope>
         </dependency>
         
