@@ -53,7 +53,7 @@ public class StructureDocumentManager extends AbstractDocumentManager<Long, Stru
 
                 // Form plan document
                 for (Element pluginElement : elements) {
-                    d.putPluginElement(pluginElement.getName(), pluginElement);
+                    d.putPluginElement(pluginElement.getName(), new StructureDocumentPluginElement(pluginElement.getName(), d, pluginElement));
                 }
 
                 put(structure.getId(), d);
@@ -96,7 +96,7 @@ public class StructureDocumentManager extends AbstractDocumentManager<Long, Stru
                         // Form plan document
                         StructureDocument structureDocument = new StructureDocument(StructureDocumentManager.this, structure, structureDocFile);
                         for (Element pluginElement : elements) {
-                            structureDocument.putPluginElement(pluginElement.getName(), pluginElement);
+                            structureDocument.putPluginElement(pluginElement.getName(), new StructureDocumentPluginElement(pluginElement.getName(), structureDocument, pluginElement));
                         }
                         // Save the document
                         put(structure.getId(), structureDocument);

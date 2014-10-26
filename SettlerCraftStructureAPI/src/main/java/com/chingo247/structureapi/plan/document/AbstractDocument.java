@@ -23,15 +23,15 @@ public abstract class AbstractDocument<T extends DocumentPluginElement> {
     
     protected Document document;
     protected File documentFile;
-    protected final Map<String, DocumentPluginElement> elements = new HashMap<>();
+    protected final Map<String, T> elements = new HashMap<>();
 
     AbstractDocument(File documentFile) throws DocumentException {
         this.documentFile = documentFile;
         this.document = new SAXReader().read(documentFile);
     }
     
-    void putPluginElement(String plugin, Element e) {
-        this.elements.put(plugin, new DocumentPluginElement(plugin, this, e));
+    void putPluginElement(String plugin, T e) {
+        this.elements.put(plugin, e);
     }
 
     void removePluginElement(String plugin, Element e) {
@@ -46,7 +46,7 @@ public abstract class AbstractDocument<T extends DocumentPluginElement> {
         return elements.get(plugin.getName()) != null;
     }
 
-    public DocumentPluginElement getPluginElement(Plugin plugin) {
+    public T getPluginElement(Plugin plugin) {
         return elements.get(plugin.getName());
     }
     

@@ -32,6 +32,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
 import org.dom4j.io.XMLWriter;
 
 /**
@@ -40,18 +41,16 @@ import org.dom4j.io.XMLWriter;
  */
 public class PlanDocumentGenerator {
     
-    private final File SCHEMATIC_TO_PLAN_FOLDER;
     private final StructureAPI structureAPI;
     
-    
     public PlanDocumentGenerator(StructureAPI structureAPI) {
-        this.SCHEMATIC_TO_PLAN_FOLDER = structureAPI.getSchematicToPlanFolder();
         this.structureAPI = structureAPI;
     }
     
     public void generate(File targetFolder) {
         // Scan the folder called 'SchematicToPlan' for schematic files
-        Iterator<File> it = FileUtils.iterateFiles(SCHEMATIC_TO_PLAN_FOLDER, new String[]{"schematic"}, true);
+        Iterator<File> it = FileUtils.iterateFiles(targetFolder, new String[]{"schematic"}, true);
+        System.out.println("Files: " + targetFolder.listFiles().length);
 
         int count = 0;
         long start = System.currentTimeMillis();
@@ -70,6 +69,7 @@ public class PlanDocumentGenerator {
             File plan = new File(schematic.getParent(), FilenameUtils.getBaseName(schematic.getName()) + ".xml");
 
             try {
+                
                 XMLWriter writer = new XMLWriter(new FileWriter(plan));
                 writer.write(d);
                 writer.close();
@@ -77,9 +77,10 @@ public class PlanDocumentGenerator {
                 
                 StructurePlan sp = new StructurePlan();
                 PlanDocument pd = new PlanDocument(structureAPI.getPlanDocumentManager(), plan);
+                pd.putPluginElement("SettlerCraft", new PlanDocumentPluginElement("SettlerCraft", pd,(Element) d.selectSingleNode("StructurePlan/SettlerCraft")));
                 sp.load(pd);
                
-                if (sp.getCategory().equals("Default") && !schematic.getParentFile().getName().equals(SCHEMATIC_TO_PLAN_FOLDER.getName())) {
+                if (sp.getCategory().equals("Default") && !schematic.getParentFile().getName().equals(targetFolder.getName())) {
                     sp.setCategory(schematic.getParentFile().getName());
                 }
 

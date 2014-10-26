@@ -89,7 +89,7 @@ public abstract class AbstractDocumentManager<K,V extends AbstractDocument> {
                 try {
                     File d = element.root.documentFile;
                     writer = new XMLWriter(new FileWriter(d), format);
-                    writer.write(element.pluginElement);
+                    writer.write(element.pluginElement.getDocument());
                 } catch (IOException ex) {
                     Logger.getLogger(PlanDocumentManager.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {

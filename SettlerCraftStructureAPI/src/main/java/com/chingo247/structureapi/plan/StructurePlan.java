@@ -35,9 +35,9 @@ import org.dom4j.Node;
  *
  * @author Chingo
  */
-public class StructurePlan {
+public class StructurePlan  {
     
-    private File config;
+    private File xmlFile;
     private File schematic;
     private long checksum;
     private String name;
@@ -57,21 +57,22 @@ public class StructurePlan {
         pluginElement.save();
     }
 
-    public void load(AbstractDocument planDocument) throws StructureDataException, IOException {
-        config = planDocument.getDocumentFile();
-        pluginElement = planDocument.getPluginElement(Bukkit.getPluginManager().getPlugin("SettlerCraft"));
+    public void load(AbstractDocument document) throws StructureDataException, IOException {
+        xmlFile = document.getDocumentFile();
+        pluginElement =  document.getPluginElement(Bukkit.getPluginManager().getPlugin("SettlerCraft"));
+        
         Element scElement = pluginElement.getAsElement();
         
         Node schematicNode = scElement.selectSingleNode(Nodes.SCHEMATIC_NODE);
         if (schematicNode == null) {
-            throw new StructureDataException("Missing  Structure Schematic in " + planDocument.getDocumentFile().getAbsolutePath());
+            throw new StructureDataException("Missing  Structure Schematic in " + document.getDocumentFile().getAbsolutePath());
         }
 
-        File s = new File(planDocument.getDocumentFile().getParent(), schematicNode.getText());
+        File s = new File(document.getDocumentFile().getParent(), schematicNode.getText());
         if (s.exists()) {
             schematic = s;
         } else {
-            throw new FileNotFoundException("Couldn't resolve path for " + s.getAbsolutePath() + " for config:  " + planDocument.getDocumentFile().getAbsolutePath());
+            throw new FileNotFoundException("Couldn't resolve path for " + s.getAbsolutePath() + " for config:  " + document.getDocumentFile().getAbsolutePath());
         }
         
         checksum = FileUtils.checksumCRC32(s);
@@ -93,7 +94,7 @@ public class StructurePlan {
         try {
         price = pluginElement.getDoubleValue(Nodes.PRICE_NODE);
         } catch(NumberFormatException nfe) {
-            throw new StructureDataException("Value of 'Price' must be a number, error generated in " + planDocument.getDocumentFile().getAbsolutePath());
+            throw new StructureDataException("Value of 'Price' must be a number, error generated in " + document.getDocumentFile().getAbsolutePath());
         }
         if(price == null) {
             price = 0.0;
@@ -123,7 +124,7 @@ public class StructurePlan {
     }
 
     public File getConfig() {
-        return config;
+        return xmlFile;
     }
 
     public File getSchematic() {

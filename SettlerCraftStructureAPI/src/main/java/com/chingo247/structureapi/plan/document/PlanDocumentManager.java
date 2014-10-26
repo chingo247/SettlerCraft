@@ -80,7 +80,7 @@ public class PlanDocumentManager extends AbstractDocumentManager<String, PlanDoc
                         // Form plan document
                         PlanDocument planDocument = new PlanDocument(PlanDocumentManager.this, planDocFile);
                         for (Element pluginElement : elements) {
-                            planDocument.putPluginElement(pluginElement.getName(), pluginElement);
+                            planDocument.putPluginElement(pluginElement.getName(), new PlanDocumentPluginElement(pluginElement.getName(), planDocument, pluginElement));
                         }
                         // Save the document
                         PlanDocumentManager.this.put(planDocument.getRelativePath(), planDocument);

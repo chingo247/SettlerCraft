@@ -46,7 +46,7 @@ public class StructureDocument extends AbstractDocument<StructureDocumentPluginE
 
     @Override
     protected void save(StructureDocumentPluginElement element) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        documentManager.save(element);
     }
     
     
