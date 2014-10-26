@@ -4,7 +4,7 @@ version: 1.0-RC4
 author: Chingo247
 description: Build & Interact with Structures!
 depend: [WorldEdit, AsyncWorldEdit, WorldGuard, Vault]
-softdepend: [HolographicDisplays]
+softdepend: [HolographicDisplays, Prism]
 
 commands:
     sc:

@@ -83,9 +83,7 @@ public class StructurePlanManager {
     }
     
     public StructurePlan getPlan(Structure structure) throws StructureDataException, IOException {
-        System.out.println("Retrieving plan");
         StructurePlan plan = structures.get(structure.getId());
-        System.out.println("Plan: " + plan);
         
         if(plan == null) {
             StructureDocument d = structureAPI.getStructureDocumentManager().getDocument(structure.getId());
@@ -97,7 +95,6 @@ public class StructurePlanManager {
     }
     
     public void updatePlan(StructureDocument d) {
-        System.out.println("Updating plan...");
         StructurePlan plan = new StructurePlan();
         try {
             plan.load(d);

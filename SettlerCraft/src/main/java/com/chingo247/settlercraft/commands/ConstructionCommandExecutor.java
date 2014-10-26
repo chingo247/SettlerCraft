@@ -68,6 +68,8 @@ public class ConstructionCommandExecutor implements CommandExecutor {
                 return build(player, args);
             case "demolish":
                 return demolish(player, args);
+//            case "rollback":
+//                return rollback(player, args);
             default:
                 player.sendMessage(ChatColor.RED + "No actions known for: " + arg);
                 cs.sendMessage(new String[]{
@@ -195,5 +197,42 @@ public class ConstructionCommandExecutor implements CommandExecutor {
         }
         return true;
     }
+
+//    private boolean rollback(Player player, String[] args) {
+//       if (args.length > 2) {
+//            player.sendMessage(ChatColor.RED + "Too many arguments");
+//            player.sendMessage(new String[]{
+//                "Usage: ",
+//                CCC + CMD + " rollback [id]"
+//            });
+//            return true;
+//        } else if (args.length < 2) {
+//            player.sendMessage(ChatColor.RED + "Too few arguments");
+//            player.sendMessage(new String[]{
+//                "Usage: ",
+//                CCC + CMD + " rollback [id]"
+//            });
+//            return true;
+//        }
+//        Long id;
+//        try {
+//            id = Long.parseLong(args[1]);
+//        } catch (NumberFormatException nfe) {
+//            player.sendMessage(ChatColor.RED + "No valid id");
+//            return true;
+//        }
+//
+//        StructureService ss = new StructureService();
+//        Structure structure = ss.getStructure(id);
+//
+//        if (structure == null) {
+//            player.sendMessage(ChatColor.RED + "Unable to find structure # " + ChatColor.GOLD + id);
+//            return true;
+//        }
+//        structureAPI.rollback(structure);
+//        
+//
+//        return true;
+//    }
     
 }
