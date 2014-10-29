@@ -22,9 +22,10 @@ import com.chingo247.settlercraft.structure.selection.CUISelectionManager;
 import com.chingo247.settlercraft.structure.selection.SelectionManager;
 import com.chingo247.structureapi.Dimension;
 import com.chingo247.structureapi.Direction;
+import com.chingo247.structureapi.IStructureAPI;
 import com.chingo247.structureapi.Structure;
-import com.chingo247.structureapi.StructureAPI;
 import com.chingo247.structureapi.construction.worldedit.WorldEditUtil;
+import com.chingo247.structureapi.exception.StructureException;
 import com.chingo247.structureapi.plan.StructurePlan;
 import com.chingo247.structureapi.plan.schematic.Schematic;
 import com.chingo247.structureapi.util.KeyPool;
@@ -40,6 +41,7 @@ import com.sk89q.worldedit.data.DataException;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -58,14 +60,12 @@ public class PlanListener implements Listener {
 
     private final KeyPool<UUID> keyPool = new KeyPool(SettlerCraft.getInstance().getExecutorService());
     private final SettlerCraft settlerCraft;
-    private final StructureAPI structureAPI;
-    
+    private final IStructureAPI structureAPI;
+
     public PlanListener(SettlerCraft settlerCraft) {
         this.settlerCraft = settlerCraft;
         this.structureAPI = settlerCraft.getStructureAPI();
     }
-    
-    
 
     @EventHandler
     public void onPlayerUsePlan(final PlayerInteractEvent pie) {
@@ -150,18 +150,17 @@ public class PlanListener implements Listener {
                         // No Selection
                         Vector pos = new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ());
 
-                        
                         if (canPlace(player, pos, WorldUtil.getDirection(player), schematic)) {
-                            Structure structure = structureAPI.create(player, plan, player.getWorld(), pos, WorldUtil.getDirection(player));
-
-                            
-                            if (structure != null) {
+                            Structure structure;
+                            try {
+                                structure = structureAPI.create(player, plan, player.getWorld(), pos, WorldUtil.getDirection(player));
                                 ItemStack clone = pie.getItem().clone();
                                 clone.setAmount(1);
                                 player.getInventory().remove(clone);
-
                                 player.updateInventory();
-                                structureAPI.build(player, structure);
+                                structureAPI.build(player, structure, false);
+                            } catch (StructureException ex) {
+                                player.sendMessage(ex.getMessage());
                             }
                         }
                     }
@@ -236,9 +235,8 @@ public class PlanListener implements Listener {
             player.sendMessage(ChatColor.RED + "Structure overlaps a region you don't own");
             return false;
         }
-        
+
 //        System.out.println("After overlaps");
-        
         return true;
     }
 
@@ -268,21 +266,26 @@ public class PlanListener implements Listener {
                 // Fix WTF HOW?!!1?
                 pos1 = WorldUtil.translateLocation(pos1, direction, (-(schematic.getLength() - 1)), 0, 0);
             }
-            
-            
+
             if (canPlace(player, pos1, direction, schematic)) {
 
-                Structure structure = structureAPI.create(player, plan, player.getWorld(), pos1, WorldUtil.getDirection(player));
-                
-                CUISelectionManager.getInstance().clear(player, false);
-                if (structure != null) {
-                    ItemStack clone = planstack.clone();
-                    clone.setAmount(1);
-                    player.getInventory().remove(clone);
-                    player.updateInventory();
-                    structureAPI.build(player, structure);
+                Structure structure;
+                try {
+                    structure = structureAPI.create(player, plan, player.getWorld(), pos1, WorldUtil.getDirection(player));
+                    if (structure != null) {
+                        ItemStack clone = planstack.clone();
+                        clone.setAmount(1);
+                        player.getInventory().remove(clone);
+                        player.updateInventory();
+                        structureAPI.build(player, structure, false);
+                    }
+                } catch (StructureException ex) {
+                    Logger.getLogger(PlanListener.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            } 
+
+                CUISelectionManager.getInstance().clear(player, false);
+
+            }
 
         } else {
             CUISelectionManager.getInstance().select(player, schematic, pos1, pos2);
@@ -321,14 +324,20 @@ public class PlanListener implements Listener {
 
             if (canPlace(player, pos1, direction, schematic)) {
 
-                Structure structure = structureAPI.create(player, plan, player.getWorld(), pos1, WorldUtil.getDirection(player));
-                SelectionManager.getInstance().clear(player, false);
-                if (structure != null) {
-                    ItemStack clone = planstack.clone();
-                    clone.setAmount(1);
-                    player.getInventory().remove(clone);
-                    structureAPI.build(player, structure);
+                Structure structure;
+                try {
+                    structure = structureAPI.create(player, plan, player.getWorld(), pos1, WorldUtil.getDirection(player));
+                    if (structure != null) {
+                        ItemStack clone = planstack.clone();
+                        clone.setAmount(1);
+                        player.getInventory().remove(clone);
+                        structureAPI.build(player, structure, false);
+                    }
+                } catch (StructureException ex) {
+                    Logger.getLogger(PlanListener.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                SelectionManager.getInstance().clear(player, false);
+
             }
         } else {
             SelectionManager.getInstance().clear(player, false);

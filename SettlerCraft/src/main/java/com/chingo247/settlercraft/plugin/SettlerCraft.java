@@ -26,13 +26,14 @@ import com.chingo247.settlercraft.listener.PluginListener;
 import com.chingo247.settlercraft.plugin.PermissionManager.Perms;
 import com.chingo247.settlercraft.structure.SettlerCraftStructureAPI;
 import com.chingo247.settlercraft.structure.plan.PlanMenuManager;
+import com.chingo247.structureapi.IStructureAPI;
 import com.chingo247.structureapi.QStructure;
 import com.chingo247.structureapi.Structure;
 import com.chingo247.structureapi.StructureAPI;
 import com.chingo247.structureapi.exception.StructureAPIException;
 import com.chingo247.structureapi.persistence.hibernate.HibernateUtil;
 import com.chingo247.structureapi.persistence.hsql.HSQLServer;
-import com.chingo247.structureapi.persistence.service.RestoreService;
+import com.chingo247.structureapi.persistence.service.ValidationService;
 import com.mysema.query.jpa.hibernate.HibernateUpdateClause;
 import com.sc.module.menuapi.menus.menu.CategoryMenu;
 import java.io.File;
@@ -56,7 +57,6 @@ import org.hibernate.Session;
  * @author Chingo
  */
 public class SettlerCraft extends JavaPlugin {
-
     private static final Logger LOGGER = Logger.getLogger(SettlerCraft.class);
     private static SettlerCraft instance;
     private final ThreadPoolExecutor GLOBAL_THREADPOOL = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 30L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
@@ -103,6 +103,8 @@ public class SettlerCraft extends JavaPlugin {
             return;
         }
         
+        
+        
         // Init HSQL Server
         HSQLServer hSQLServer = HSQLServer.getInstance();
         if (!hSQLServer.isRunning()) {
@@ -112,8 +114,8 @@ public class SettlerCraft extends JavaPlugin {
         
         
         
-        RestoreService restoreService = new RestoreService(structureAPI);
-        restoreService.restore();
+        ValidationService restoreService = new ValidationService(structureAPI);
+        restoreService.validate();
         resetStates();
         
         structureAPI.initialize();
@@ -136,19 +138,17 @@ public class SettlerCraft extends JavaPlugin {
 
         boolean useHolograms = getConfig().getBoolean("structure.holograms.enabled");
         if (useHolograms && Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null) {
-            Bukkit.getPluginManager().registerEvents(structureAPI.getStructureHologramManager(), instance);
-            Bukkit.getPluginManager().registerEvents(structureAPI.getStructureOverviewManager(), instance);
-
-            structureAPI.getStructureHologramManager().init();
-            structureAPI.getStructureOverviewManager().init();
+            
         }
 
         getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
         getCommand("cst").setExecutor(new ConstructionCommandExecutor(structureAPI));
         getCommand("stt").setExecutor(new StructureCommandExecutor(structureAPI));
+        
 
         printPerms();
         StructureAPI.print("Done!");
+        
     }
     
     public ExecutorService getExecutorService() {
@@ -159,7 +159,7 @@ public class SettlerCraft extends JavaPlugin {
         return configProvider;
     }
 
-    public StructureAPI getStructureAPI() {
+    public IStructureAPI getStructureAPI() {
         return structureAPI;
     }
     

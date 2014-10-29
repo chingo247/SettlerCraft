@@ -20,7 +20,7 @@ import org.bukkit.util.Vector;
  *
  * @author Chingo
  */
-public class PrismRollbackService implements RollbackService {
+public class PrismRollbackService implements IRollbackService {
     
     private final Prism prism;
 

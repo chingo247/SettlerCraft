@@ -14,20 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.exception;
+package com.chingo247.structureapi.construction;
 
 /**
  *
  * @author Chingo
  */
-public class StructureAPIException extends Exception{
+class ConstructionOptions {
     
-    public StructureAPIException(String message) {
-        super(message);
+    private Pattern buildPattern = Pattern.createCompromisePattern();
+
+    public ConstructionOptions() {
     }
 
+     /**
+     * Sets the pattern in which blocks are placed
+     * @param buildPattern The pattern.
+     * 
+     * Use the Pattern factory methods to retrieve an instance of Pattern.
+     * for example {@link Pattern#createPerformancePattern()}
+     */
+    public void setPattern(Pattern buildPattern) {
+        this.buildPattern = buildPattern;
+    }
     
-    
-    
+     public Pattern getBuildPattern() {
+        return buildPattern;
+    }
     
 }

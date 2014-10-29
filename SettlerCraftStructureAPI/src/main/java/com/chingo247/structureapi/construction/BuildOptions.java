@@ -14,20 +14,49 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.exception;
+package com.chingo247.structureapi.construction;
 
 /**
  *
  * @author Chingo
  */
-public class StructureAPIException extends Exception{
-    
-    public StructureAPIException(String message) {
-        super(message);
-    }
+public class BuildOptions extends ConstructionOptions {
 
     
+    private boolean noAir;
+    private boolean placeFence ;
+
+    
+    public BuildOptions(boolean noAir) {
+        this(noAir, true);
+        
+    }
+    
+    public BuildOptions(boolean noAir, boolean placeFence) {
+        this.noAir = noAir;
+        this.placeFence = placeFence;
+    }
+
+    public boolean isNoAir() {
+        return noAir;
+    }
+
+    public void setNoAir(boolean noAir) {
+        this.noAir = noAir;
+    }
+
+    public boolean isPlaceFence() {
+        return placeFence;
+    }
+
+    public void setPlaceFence(boolean placeFence) {
+        this.placeFence = placeFence;
+    }
     
     
     
+    
+    
+   
+
 }

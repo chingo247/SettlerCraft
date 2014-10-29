@@ -63,14 +63,6 @@ public class StructureService extends AbstractService {
         return structures;
     }
 
-//    public List<Structure> getStructures(UUID owner) {
-//        QStructure structure = QStructure.structure;
-//        Session session = HibernateUtil.getSession();
-//        JPQLQuery query = new HibernateQuery(session);
-//        List<Structure> structures = query.from(structure).where(structure.owner.eq(owner)).list(structure);
-//        session.close();
-//        return structures;
-//    }
     public void delete(Structure structure) {
         Session session = HibernateUtil.getSession();
         QStructure qstructure = QStructure.structure;

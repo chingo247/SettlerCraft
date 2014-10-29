@@ -30,7 +30,6 @@ import com.chingo247.structureapi.construction.generator.ClipboardGenerator;
 import com.chingo247.structureapi.construction.worldedit.ConstructionClipboard;
 import com.chingo247.structureapi.construction.worldedit.DemolisionClipboard;
 import com.chingo247.structureapi.construction.worldedit.StructureBlock;
-import com.chingo247.structureapi.construction.worldedit.StructureBlockComparators;
 import com.chingo247.structureapi.construction.worldedit.WorldEditUtil;
 import com.chingo247.structureapi.event.StructureStateChangeEvent;
 import com.chingo247.structureapi.exception.ConstructionException;
@@ -145,13 +144,14 @@ public class ConstructionManager {
      *
      * @param uuid The player or UUID to use to issue this task
      * @param structure The structure
+     * @param options The buildOptions
      * @param force if True the method will skip checks, including the checking if the structure was
      * removed or the structure is already being build
      * @throws StructureDataException
      * @throws ConstructionException
      * @throws IOException
      */
-    public void build(final UUID uuid, final Structure structure, final boolean force) throws StructureDataException, ConstructionException, IOException {
+    public void build(final UUID uuid, final Structure structure, final BuildOptions options, final boolean force) throws StructureDataException, ConstructionException, IOException {
 
         // Queue build task
         executor.execute(structure.getId(),new Runnable() {
@@ -192,9 +192,11 @@ public class ConstructionManager {
                     SchematicUtil.align(cc, structure.getDirection());
 
                     // Place a fence
-                    placeFence(uuid, structure, cc);
+                    if(options.isPlaceFence()) {
+                        placeFence(uuid, structure, cc);
+                    }
 
-                    queueBuildTask(uuid, structure, cc, new Vector(0, 0, 0));
+                    queueBuildTask(uuid, structure, cc, options);
 
                 } catch (StructureDataException ex) {
                     tell(uuid, ChatColor.RED + "Invalid structureplan");
@@ -300,8 +302,8 @@ public class ConstructionManager {
 
     }
 
-    private void queueBuildTask(final UUID uuid, final Structure structure, CuboidClipboard schematic, Vector offset) {
-        final ConstructionClipboard clipboard = new ConstructionClipboard(schematic, StructureBlockComparators.PERFORMANCE);
+    private void queueBuildTask(final UUID uuid, final Structure structure, CuboidClipboard schematic, final BuildOptions options) {
+        final ConstructionClipboard clipboard = new ConstructionClipboard(schematic, options.getBuildPattern().getComparator());
         Player ply = Bukkit.getPlayer(uuid);
         LocalPlayer lPlayer = null;
         if (ply != null) {
@@ -310,7 +312,7 @@ public class ConstructionManager {
 
         // Create & Place enclosure
         final com.sk89q.worldedit.world.World world = WorldEditUtil.getWorld(structure.getWorldName());
-        final Vector pos = structure.getDimension().getMinPosition().add(offset);
+        final Vector pos = structure.getDimension().getMinPosition();
 
         AsyncEditSession aes;
 
@@ -324,7 +326,7 @@ public class ConstructionManager {
         SCAsyncClipboard asyncStructureClipboard = new SCAsyncClipboard(plyEntry, clipboard);
             // Note: The Clipboard is always drawn from the min position using the place method
         try {
-            asyncStructureClipboard.place(aes, pos, false, new ConstructionCallback() {
+            asyncStructureClipboard.place(aes, pos, options.isNoAir(), new IConstructionCallback() {
 
                 @Override
                 public void onJobAdded(SCJobEntry entry) {
@@ -355,7 +357,9 @@ public class ConstructionManager {
 
                 @Override
                 public void onJobCanceled(JobEntry entry) {
-                    ConstructionManager.this.getEntry(structure).setJobId(-1);
+                    ConstructionEntry constructionEntry = ConstructionManager.this.getEntry(structure);
+                    constructionEntry.setJobId(-1);
+                    constructionEntry.setCanceled(true);
                 }
             });
         } catch (MaxChangedBlocksException ex) {
@@ -369,12 +373,13 @@ public class ConstructionManager {
      *
      * @param uuid The player or uuid to issue this task
      * @param structure The structure
+     * @param options The demolition Options
      * @param force Whether to perform checks, if true it will ignore the check that determines if
      * the structure is removed or that the structure is already being demolished.
      * @throws ConstructionException
      * @throws StructureDataException
      */
-    public void demolish(final UUID uuid, final Structure structure, final boolean force) throws ConstructionException, StructureDataException {
+    public void demolish(final UUID uuid, final Structure structure, final DemolitionOptions options, final boolean force) throws ConstructionException, StructureDataException {
 
         // Queue build task
         executor.execute(structure.getId(), new Runnable() {
@@ -412,7 +417,7 @@ public class ConstructionManager {
                     entry.setDemolishing(true);
 
                     // Start demolision
-                    queueDemolisionTask(uuid, structure, schematic);
+                    queueDemolisionTask(uuid, structure, schematic, options);
 
                 } catch (StructureDataException | IOException | DataException ex) {
                     Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -423,10 +428,10 @@ public class ConstructionManager {
         });
     }
 
-    private void queueDemolisionTask(final UUID uuid, final Structure structure, Schematic schematic) throws IOException, DataException {
+    private void queueDemolisionTask(final UUID uuid, final Structure structure, Schematic schematic, DemolitionOptions options) throws IOException, DataException {
         // Align schematic
         Direction direction = structure.getDirection();
-        final DemolisionClipboard clipboard = new DemolisionClipboard(schematic.getClipboard(), Collections.reverseOrder(StructureBlockComparators.PERFORMANCE));
+        final DemolisionClipboard clipboard = new DemolisionClipboard(schematic.getClipboard(), options.getBuildPattern().getComparator().reversed());
         SchematicUtil.align(clipboard, direction);
 
         Player ply = Bukkit.getPlayer(uuid);
@@ -449,7 +454,7 @@ public class ConstructionManager {
         SCAsyncClipboard asyncStructureClipboard = new SCAsyncClipboard(plyEntry, clipboard);
         try {
             // Note: The Clipboard is always drawn from the min position using the place method
-            asyncStructureClipboard.place(aSession, pos, false, new ConstructionCallback() {
+            asyncStructureClipboard.place(aSession, pos, false, new IConstructionCallback() {
 
                 @Override
                 public void onJobAdded(SCJobEntry entry) {
@@ -492,7 +497,9 @@ public class ConstructionManager {
 
                 @Override
                 public void onJobCanceled(JobEntry entry) {
-                    getEntry(structure).setJobId(-1);
+                    ConstructionEntry constructionEntry = ConstructionManager.this.getEntry(structure);
+                    constructionEntry.setJobId(-1);
+                    constructionEntry.setCanceled(true);
                 }
             });
         } catch (MaxChangedBlocksException ex) {

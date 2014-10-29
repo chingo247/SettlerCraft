@@ -18,7 +18,7 @@
 package com.chingo247.structureapi.plan.overview;
 
 import com.chingo247.structureapi.util.Elements;
-import com.chingo247.structureapi.plan.StructurePlanElement;
+import com.chingo247.structureapi.plan.IStructurePlanElement;
 import org.dom4j.Element;
 import org.dom4j.tree.BaseElement;
 
@@ -26,7 +26,7 @@ import org.dom4j.tree.BaseElement;
  *
  * @author Chingo
  */
-public class StructureOverview implements StructurePlanElement{
+public class StructureOverview implements IStructurePlanElement{
     
     private int x;
     private int y;

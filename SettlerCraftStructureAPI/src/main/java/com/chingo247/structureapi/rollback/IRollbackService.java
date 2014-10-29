@@ -11,7 +11,7 @@ import com.chingo247.structureapi.Structure;
  *
  * @author Chingo
  */
-public interface RollbackService {
+public interface IRollbackService {
     
     public static String WORLD_EDIT_ACTION = "worldedit";
     

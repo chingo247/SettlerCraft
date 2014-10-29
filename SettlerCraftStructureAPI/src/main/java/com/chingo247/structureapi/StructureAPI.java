@@ -5,7 +5,11 @@
  */
 package com.chingo247.structureapi;
 
+import com.chingo247.structureapi.construction.BuildOptions;
 import com.chingo247.structureapi.construction.ConstructionManager;
+import com.chingo247.structureapi.construction.DemolitionOptions;
+import com.chingo247.structureapi.construction.Pattern;
+import com.chingo247.structureapi.construction.Pattern.Mode;
 import com.chingo247.structureapi.event.StructureCreateEvent;
 import com.chingo247.structureapi.exception.ConstructionException;
 import com.chingo247.structureapi.exception.StructureDataException;
@@ -14,6 +18,7 @@ import com.chingo247.structureapi.persistence.service.PlayerOwnershipService;
 import com.chingo247.structureapi.persistence.service.StructureService;
 import com.chingo247.structureapi.plan.StructurePlan;
 import com.chingo247.structureapi.plan.StructurePlanManager;
+import com.chingo247.structureapi.plan.document.PlanDocument;
 import com.chingo247.structureapi.plan.document.PlanDocumentGenerator;
 import com.chingo247.structureapi.plan.document.PlanDocumentManager;
 import com.chingo247.structureapi.plan.document.StructureDocumentManager;
@@ -36,6 +41,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import org.apache.commons.io.FileUtils;
@@ -51,7 +57,7 @@ import org.bukkit.plugin.Plugin;
  * Provides 
  * @author Chingo
  */
-public abstract class StructureAPI {
+public abstract class StructureAPI implements IStructureAPI {
 
     private static final String MSG_PREFIX = ChatColor.YELLOW + "[SettlerCraft]: " + ChatColor.RESET;
     private static final String PREFIX = "SCREG-";
@@ -84,47 +90,86 @@ public abstract class StructureAPI {
 //            this.rollbackService = null;
 //        }
     }
+    
+    public void initialize() {
+        // Make dirs if needed
+        getSchematicToPlanFolder().mkdirs();
+        getPlanDataFolder().mkdirs();
+        getStructureDataFolder().mkdirs();
+        
+        // Generate plans
+        getPlanDocumentGenerator().generate(getSchematicToPlanFolder());
+        
+        // Load plan documents
+        long start = System.currentTimeMillis();
+        getPlanDocumentManager().loadDocuments();
+        StructureAPI.print("Loaded " + String.valueOf(getPlanDocumentManager().getDocuments().size()) + " PlanDocuments in " + (System.currentTimeMillis() - start));
+        
+        // Load structure documents
+        start = System.currentTimeMillis();
+        getStructureDocumentManager().loadDocuments();
+        StructureAPI.print("Loaded " + String.valueOf(getStructureDocumentManager().getDocuments().size()) + " StructureDocuments in " + (System.currentTimeMillis() - start));
+        
+        // Load StructurePlans
+        start = System.currentTimeMillis();
+        List<PlanDocument> planDocs = getPlanDocumentManager().getDocuments();
+        getStructurePlanManager().load(planDocs);
+        StructureAPI.print("Loaded " + String.valueOf(getStructurePlanManager().getPlans().size()) + " StructurePlans in " + (System.currentTimeMillis() - start));
+        
+        // Load schematics - Add schematic-data to Database
+        StructureAPI.print("Loading schematic data...");
+        getSchematicManager().load();
+        
+        if(useHolograms() && Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null) {
+            Bukkit.getPluginManager().registerEvents(structureHologramManager, getPlugin());
+            Bukkit.getPluginManager().registerEvents(structureOverviewManager, getPlugin());
+
+            structureHologramManager.init();
+            structureOverviewManager.init();
+        }
+        
+    }
 
     public Plugin getPlugin() {
         return plugin;
     }
-    
+
+    @Override
     public PlanDocumentGenerator getPlanDocumentGenerator() {
         return planGenerator;
     }
 
+    @Override
     public StructurePlanManager getStructurePlanManager() {
         return structurePlanManager;
     }
 
+    @Override
     public PlanDocumentManager getPlanDocumentManager() {
         return planDocumentManager;
     }
 
+    @Override
     public StructureDocumentManager getStructureDocumentManager() {
         return structureDocumentManager;
     }
 
-    public StructureHologramManager getStructureHologramManager() {
-        return structureHologramManager;
-    }
-
-    public StructureOverviewManager getStructureOverviewManager() {
-        return structureOverviewManager;
-    }
-    
+    @Override
     public SchematicManager getSchematicManager() {
         return schematicManager;
     }
     
+    @Override
     public File getFolder(Structure structure) {
         return new File(getStructureDataFolder(), structure.getWorldName() + "//" + structure.getId());
     }
     
+    @Override
     public File getStructurePlanFile(Structure structure) {
         return new File(getFolder(structure), "StructurePlan.xml");
     }
 
+    @Override
     public Schematic getSchematic(Structure structure) throws StructureDataException, IOException, DataException {
         if (structure.getChecksum() == null) {
             StructurePlan plan = structurePlanManager.getPlan(structure);
@@ -136,34 +181,19 @@ public abstract class StructureAPI {
         return schematicManager.load(plan.getSchematic());
     }
 
+    @Override
     public StructureService getStructureService() {
         return new StructureService();
     }
 
-    /**
-     * Creates a structure.
-     *
-     * @param plan The StructurePlan
-     * @param world The world
-     * @param pos The position
-     * @param direction The direction / direction
-     * @return The structure or null if failed to claim the ground
-     */
-    public Structure create(StructurePlan plan, World world, Vector pos, Direction direction) {
+
+    @Override
+    public Structure create(StructurePlan plan, World world, Vector pos, Direction direction) throws StructureException {
         return create(null, plan, world, pos, direction);
     }
 
-    /**
-     * Creates a structure
-     *
-     * @param player The player, which will also be added as an owner of the structure
-     * @param plan The StructurePlan
-     * @param world The world
-     * @param pos The position
-     * @param direction The direction / direction
-     * @return The structure or null if failed to claim the ground
-     */
-    public Structure create(Player player, StructurePlan plan, World world, Vector pos, Direction direction) {
+    @Override
+    public Structure create(Player player, StructurePlan plan, World world, Vector pos, Direction direction) throws StructureException {
         // Retrieve schematic
         Schematic schematic;
         try {
@@ -174,15 +204,17 @@ public abstract class StructureAPI {
         }
 
         Dimension dimension = SchematicUtil.calculateDimension(schematic, pos, direction);
-
+        
+        if(dimension.getMinY() < 0) {
+            throw new StructureException("Can't place structures below y:0");
+        } else if(dimension.getMaxY() > world.getMaxHeight()) {
+            throw new StructureException("Can't place structurs above " + world.getMaxHeight() + " (World max height)");
+        }
+        
         // Check if structure overlapsStructures another structure
         if (overlapsStructures(world, dimension)) {
-            if (player != null) {
-                player.sendMessage(ChatColor.RED + "Structure overlaps another structure");
-            }
-            return null;
+            throw new StructureException("Structure overlaps another structure");
         }
-
         
         // Create structure
         Structure structure = new Structure(world, pos, direction, schematic);
@@ -196,7 +228,7 @@ public abstract class StructureAPI {
         
         structure.setStructureRegionId(PREFIX + structure.getId());
         
-        structure = ss.save(structure);
+        
 
         try {
             final File STRUCTURE_DIR = getFolder(structure);
@@ -210,11 +242,9 @@ public abstract class StructureAPI {
             FileUtils.copyFile(config, new File(STRUCTURE_DIR, "StructurePlan.xml"));
             FileUtils.copyFile(schematicFile, new File(STRUCTURE_DIR, schematicFile.getName()));
         } catch (IOException ex) {
-            if (player != null) {
-                player.sendMessage(ChatColor.RED + "Couldn't copy data for structure");
-            }
+            
             java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-            return null;
+            throw new StructureDataException(ChatColor.RED + "Couldn't copy data for structure");
         }
         
         structureDocumentManager.register(structure);
@@ -224,13 +254,7 @@ public abstract class StructureAPI {
         if (structureRegion == null) {
             getFolder(structure).delete();
             ss.delete(structure);
-            if (player != null) {
-                player.sendMessage(ChatColor.RED + "Failed to claim region for structure");
-            } else {
-                System.out.println("[SettlerCraft]: Failed to claim region for structure");
-            }
-
-            return null;
+            throw new StructureException("Failed to claim region for structure");
         }
 
         
@@ -241,21 +265,16 @@ public abstract class StructureAPI {
                 java.util.logging.Logger.getLogger(Structure.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
             }
         }
-
-        
+        structure.setState(Structure.State.CREATED);
+        structure = ss.save(structure);
 
         Bukkit.getPluginManager().callEvent(new StructureCreateEvent(structure));
         return structure;
     }
+    
 
-    /**
-     * Starts construction of a structure
-     *
-     * @param uuid The UUID to backtrack this construction process
-     * @param structure The structure
-     * @return true if successfully started to build
-     */
-    public boolean build(UUID uuid, Structure structure) {
+    @Override
+    public boolean build(UUID uuid, Structure structure, BuildOptions options, boolean force) {
         Player player = Bukkit.getPlayer(uuid);
 
         if (structure == null) {
@@ -272,7 +291,7 @@ public abstract class StructureAPI {
         }
 
         try {
-            constructionManager.build(uuid, structure, false);
+            constructionManager.build(uuid, structure, options, force);
         } catch (ConstructionException ex) {
             if (player != null) {
                 player.sendMessage(ChatColor.RED + ex.getMessage());
@@ -286,25 +305,23 @@ public abstract class StructureAPI {
         return true;
     }
 
-    /**
-     * Starts construction of a structure
-     *
-     * @param player The player that issues the build order
-     * @param structure The structure to build
-     * @return true if successfully started to build
-     */
-    public boolean build(Player player, Structure structure) {
-        return build(player.getUniqueId(), structure);
+
+    @Override
+    public boolean build(UUID uuid, Structure structure, boolean force) {
+        BuildOptions options = new BuildOptions(false);
+        options.setPattern(Pattern.getPattern(Mode.getMode(getBuildMode())));
+        return build(uuid, structure, options, force);
     }
 
-    /**
-     * Starts demolishment of a structure
-     *
-     * @param uuid The UUID to register the construction order (for AsyncWorldEdit's API calls)
-     * @param structure The structure
-     * @return True if successfully started to demolish the structure
-     */
-    public boolean demolish(UUID uuid, Structure structure) {
+
+    @Override
+    public boolean build(Player player, Structure structure, boolean force) {
+        return build(player.getUniqueId(), structure, force);
+    }
+
+
+    @Override
+    public boolean demolish(UUID uuid, Structure structure, DemolitionOptions options, boolean force) {
         Player player = Bukkit.getPlayer(uuid);
 
         if (structure == null) {
@@ -321,37 +338,39 @@ public abstract class StructureAPI {
         }
 
         try {
-            constructionManager.demolish(uuid, structure, false);
+            constructionManager.demolish(uuid, structure, options, force);
         } catch (ConstructionException ex) {
             if (player != null) {
-                player.sendMessage(ex.getMessage());
+                player.sendMessage(ChatColor.RED + ex.getMessage());
             }
+
             return false;
         } catch (StructureDataException ex) {
+            if(player != null) {
+                player.sendMessage(ChatColor.RED + "Something went wrong...");
+            }
             java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+
         return true;
     }
+    
 
-    /**
-     * Starts demolishment of a structure
-     *
-     * @param player The player to register the demolition order (for AsyncWorldEdit API calls) and
-     * authorise the order
-     * @param structure The structure
-     * @return True if successfully started to build
-     */
-    public boolean demolish(Player player, Structure structure) {
-        return demolish(player.getUniqueId(), structure);
+    @Override
+    public boolean demolish(UUID uuid, Structure structure, boolean force) {
+        DemolitionOptions options = new DemolitionOptions();
+        options.setPattern(Pattern.getPattern(Mode.getMode(getDemolisionMode())));
+        return demolish(uuid, structure, options, true);
     }
 
-    /**
-     * Stops construction/demolishment of this structure
-     *
-     * @param player The player to authorise the stop order
-     * @param structure The structure
-     * @return True if successfully stopped
-     */
+
+    @Override
+    public boolean demolish(Player player, Structure structure, boolean force) {
+        return demolish(player.getUniqueId(), structure, force);
+    }
+
+
+    @Override
     public boolean stop(Player player, Structure structure) {
         if (structure == null) {
             throw new AssertionError("Null structure");
@@ -375,26 +394,9 @@ public abstract class StructureAPI {
         return true;
     }
     
-//    public void rollback(final Structure structure) {
-//        Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
-//
-//            @Override
-//            public void run() {
-//                rollbackService.rollback(structure);
-//            }
-//        });
-//        
-//    }
 
-    /**
-     * Adds the player as owner to this structure
-     *
-     * @param player The player
-     * @param type The owner type
-     * @param structure The structure to add the player to
-     * @throws StructureException if player already owns this structure or structure doesn't have a
-     * region
-     */
+
+    @Override
     public void makeOwner(Player player, PlayerOwnership.Type type, Structure structure) throws StructureException {
         if (player == null) {
             throw new AssertionError("Null player");
@@ -429,13 +431,8 @@ public abstract class StructureAPI {
         }
     }
 
-    /**
-     * Adds the player as member to this structure
-     *
-     * @param player The player to add
-     * @param structure The structure to add the player to
-     * @throws StructureException if player already is a member or Structure doesn't have a region
-     */
+
+    @Override
     public void makeMember(Player player, Structure structure) throws StructureException {
         if (player == null) {
             throw new AssertionError("Null player");
@@ -471,14 +468,8 @@ public abstract class StructureAPI {
 
     }
 
-    /**
-     * Removes an owner of this structure
-     *
-     * @param player The player to remove
-     * @param structure The structure
-     * @return if player was successfully removed
-     * @throws StructureException When structure doesn't have a region
-     */
+
+    @Override
     public boolean removeOwner(Player player, Structure structure) throws StructureException {
         if (player == null) {
             throw new AssertionError("Null player");
@@ -513,14 +504,8 @@ public abstract class StructureAPI {
         return true;
     }
 
-    /**
-     * Removes a member of this structure
-     *
-     * @param player The player to remove
-     * @param structure The structure
-     * @return if player was successfully removed
-     * @throws StructureException When structure doesn't have a region
-     */
+
+    @Override
     public boolean removeMember(Player player, Structure structure) throws StructureException {
         if (player == null) {
             throw new AssertionError("Null player");
@@ -625,13 +610,8 @@ public abstract class StructureAPI {
 
     }
 
-    /**
-     * Checks if the given dimension overlaps any structures.
-     *
-     * @param world The world
-     * @param dimension The dimension
-     * @return True if dimension overlaps any structure
-     */
+    
+    @Override
     public boolean overlapsStructures(World world, Dimension dimension) {
         StructureService service = new StructureService();
         return service.hasStructuresWithin(world, dimension);
@@ -644,6 +624,7 @@ public abstract class StructureAPI {
      * @param dimension The dimension
      * @return True if dimension overlaps any region
      */
+    @Override
     public boolean overlapsRegion(World world, Dimension dimension) {
         return overlapsRegion(null, world, dimension);
     }
@@ -656,6 +637,7 @@ public abstract class StructureAPI {
      * @param dimension The dimension
      * @return True if dimension overlaps any region the player is not an owner of.
      */
+    @Override
     public boolean overlapsRegion(Player player, World world, Dimension dimension) {
         LocalPlayer localPlayer = null;
         if (player != null) {
@@ -749,20 +731,28 @@ public abstract class StructureAPI {
         Bukkit.getConsoleSender().sendMessage(message);
     }
 
+    @Override
     public abstract HashMap<Flag, Object> getDefaultFlags();
 
+    @Override
     public abstract int getBuildMode();
 
+    @Override
     public abstract int getDemolisionMode();
 
+    @Override
     public abstract boolean useHolograms();
 
+    @Override
     public abstract double getRefundPercentage();
 
+    @Override
     public abstract File getStructureDataFolder();
 
+    @Override
     public abstract File getPlanDataFolder();
     
+    @Override
     public abstract File getSchematicToPlanFolder();
     
     

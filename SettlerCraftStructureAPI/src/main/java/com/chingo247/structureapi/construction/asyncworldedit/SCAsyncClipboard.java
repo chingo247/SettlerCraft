@@ -40,7 +40,7 @@
  */
 package com.chingo247.structureapi.construction.asyncworldedit;
 
-import com.chingo247.structureapi.construction.ConstructionCallback;
+import com.chingo247.structureapi.construction.IConstructionCallback;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
@@ -99,7 +99,7 @@ public class SCAsyncClipboard extends ProxyCuboidClipboard {
     }
 
     public void place(final EditSession editSession, final Vector pos,
-            final boolean noAir, ConstructionCallback callback)
+            final boolean noAir, IConstructionCallback callback)
             throws MaxChangedBlocksException {
         
 

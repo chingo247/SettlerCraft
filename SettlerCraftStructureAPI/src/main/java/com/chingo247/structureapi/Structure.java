@@ -91,7 +91,11 @@ public class Structure implements Serializable {
         /**
          * Progress has stopped
          */
-        STOPPED
+        STOPPED,
+        /**
+         * If StructureAPI#createStructure() was successful
+         */
+        CREATED
     }
 
     @Column(name = "Status")

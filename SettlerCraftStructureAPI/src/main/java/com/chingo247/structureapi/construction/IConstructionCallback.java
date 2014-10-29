@@ -24,7 +24,7 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
  *
  * @author Chingo
  */
-public interface ConstructionCallback {
+public interface IConstructionCallback {
     
     public void onJobAdded(SCJobEntry entry);
     

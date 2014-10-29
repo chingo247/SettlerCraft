@@ -40,7 +40,7 @@
  */
 package com.chingo247.structureapi.construction.asyncworldedit;
 
-import com.chingo247.structureapi.construction.ConstructionCallback;
+import com.chingo247.structureapi.construction.IConstructionCallback;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
@@ -70,7 +70,7 @@ public abstract class SCAsyncClipboardTask extends SCBaseTask {
      * @param callback
      */
     public SCAsyncClipboardTask(final CuboidClipboard clipboard, final EditSession editSession,
-            final PlayerEntry player, final String commandName, BlockPlacer blocksPlacer, SCJobEntry job, ConstructionCallback callback) {
+            final PlayerEntry player, final String commandName, BlockPlacer blocksPlacer, SCJobEntry job, IConstructionCallback callback) {
         super(editSession, player, commandName, blocksPlacer, job, callback);
 
         m_clipboard = clipboard;

@@ -5,7 +5,7 @@
  */
 package com.chingo247.structureapi.plan.document;
 
-import com.chingo247.structureapi.plan.StructurePlanElement;
+import com.chingo247.structureapi.plan.IStructurePlanElement;
 import java.util.LinkedList;
 import java.util.List;
 import org.dom4j.Element;
@@ -109,7 +109,7 @@ public class DocumentPluginElement<T extends AbstractDocument> {
     
     
 
-    public void setList(String listName, List<StructurePlanElement> elements) {
+    public void setList(String listName, List<IStructurePlanElement> elements) {
         // Get the list Element
         Element e = (Element) pluginElement.selectSingleNode(listName);
         
@@ -129,7 +129,7 @@ public class DocumentPluginElement<T extends AbstractDocument> {
 
         //
         List<Element> toElements = new LinkedList<>();
-        for (StructurePlanElement se : elements) {
+        for (IStructurePlanElement se : elements) {
             toElements.add(se.asElement());
         }
         e.setContent(toElements);
@@ -155,7 +155,7 @@ public class DocumentPluginElement<T extends AbstractDocument> {
         e.setText(String.valueOf(value));
     }
     
-    public void setElement(String name, StructurePlanElement sce) {
+    public void setElement(String name, IStructurePlanElement sce) {
         // Get the list Element
         Element e = (Element) pluginElement.selectSingleNode(name);
         

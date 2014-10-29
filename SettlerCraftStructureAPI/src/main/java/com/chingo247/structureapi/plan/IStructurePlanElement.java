@@ -14,20 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.exception;
+
+package com.chingo247.structureapi.plan;
+
+import org.dom4j.Element;
 
 /**
  *
  * @author Chingo
  */
-public class StructureAPIException extends Exception{
+public interface IStructurePlanElement {
     
-    public StructureAPIException(String message) {
-        super(message);
-    }
-
-    
-    
+    public Element asElement();
     
     
 }

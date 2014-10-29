@@ -16,6 +16,9 @@ commands:
     stt:
         description: Structure Commands
         usage: /stt
+    sctest:
+        description: Test Commands
+        usage: /sctest
 
           
         

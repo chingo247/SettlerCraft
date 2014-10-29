@@ -26,6 +26,7 @@ import com.chingo247.structureapi.StructureAPI;
 import com.chingo247.structureapi.persistence.hibernate.HibernateUtil;
 import com.chingo247.structureapi.util.WorldGuardUtil;
 import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.hibernate.HibernateDeleteClause;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
@@ -55,15 +56,18 @@ import org.hibernate.Transaction;
  *
  * @author Chingo
  */
-public class RestoreService {
+public class ValidationService {
 
     private final StructureAPI structureAPI;
     
-    public RestoreService(StructureAPI structureAPI) {
+    public ValidationService(StructureAPI structureAPI) {
         this.structureAPI = structureAPI;
     }
+    
+    
 
-    public void restore() {
+    public void validate() {
+        deleteInvalidState();
         HashMap<String, Timestamp> worlddata = getWorldData();
 
         for (Entry<String, Timestamp> entry : worlddata.entrySet()) {
@@ -71,6 +75,14 @@ public class RestoreService {
             setRemovedAfter(Bukkit.getWorld(entry.getKey()), entry.getValue());
         }
     }
+    
+    private void deleteInvalidState() {
+        Session session = HibernateUtil.getSession();
+        QStructure structure = QStructure.structure;
+        new HibernateDeleteClause(session, structure).where(structure.state.eq(State.INITIALIZING)).execute();
+        session.close();
+    }
+    
 
     /**
      * Gets the world data for all worlds that have/had structure tasks assigned within them
@@ -176,7 +188,7 @@ public class RestoreService {
             }
             throw e;
         } catch (StorageException ex) {
-            Logger.getLogger(RestoreService.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ValidationService.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             if (session != null) {
                 session.close();
@@ -221,7 +233,7 @@ public class RestoreService {
         try {
             mgr.save();
         } catch (StorageException ex) {
-            Logger.getLogger(RestoreService.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ValidationService.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
@@ -262,7 +274,7 @@ public class RestoreService {
                 rmgr.save();
                 tx.commit();
             } catch (StorageException ex) {
-                Logger.getLogger(RestoreService.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ValidationService.class.getName()).log(Level.SEVERE, null, ex);
             }
 
         } catch (HibernateException e) {
@@ -301,5 +313,8 @@ public class RestoreService {
         return true;
 
     }
+    
+   
+    
 
 }

@@ -16,7 +16,7 @@
  */
 package com.chingo247.structureapi.plan.worldguard;
 
-import com.chingo247.structureapi.plan.StructurePlanElement;
+import com.chingo247.structureapi.plan.IStructurePlanElement;
 import com.chingo247.structureapi.util.Elements;
 import com.sk89q.worldguard.protection.flags.Flag;
 import org.dom4j.Element;
@@ -27,7 +27,7 @@ import org.dom4j.tree.BaseElement;
  * @author Chingo
  * @param <T>
  */
-public class StructureRegionFlag <T> implements StructurePlanElement {
+public class StructureRegionFlag <T> implements IStructurePlanElement {
     
     private final Flag flag;
     private final T value;

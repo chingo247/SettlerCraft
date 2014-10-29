@@ -40,7 +40,7 @@
  */
 package com.chingo247.structureapi.construction.asyncworldedit;
 
-import com.chingo247.structureapi.construction.ConstructionCallback;
+import com.chingo247.structureapi.construction.IConstructionCallback;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -98,10 +98,10 @@ public abstract class SCBaseTask extends BukkitRunnable {
      */
     protected final PermissionGroup m_group;
     
-    protected final ConstructionCallback m_callback;
+    protected final IConstructionCallback m_callback;
 
     public SCBaseTask(final EditSession editSession, final PlayerEntry player,
-            final String commandName, BlockPlacer blocksPlacer, SCJobEntry job, ConstructionCallback callback) {
+            final String commandName, BlockPlacer blocksPlacer, SCJobEntry job, IConstructionCallback callback) {
 
         m_editSession = editSession;
         m_cancelableEditSession = (editSession instanceof CancelabeEditSession) ? (CancelabeEditSession) editSession : null;
