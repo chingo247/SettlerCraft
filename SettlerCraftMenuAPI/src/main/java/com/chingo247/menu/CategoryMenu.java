@@ -17,7 +17,6 @@
 
 package com.chingo247.menu;
 
-import com.google.common.collect.Maps;
 import com.chingo247.menu.item.CategoryTradeItem;
 import com.chingo247.menu.item.TradeItem;
 import com.chingo247.menu.slots.ActionSlot;
@@ -26,6 +25,7 @@ import com.chingo247.menu.slots.LockedSlot;
 import com.chingo247.menu.slots.Slot;
 import com.chingo247.menu.util.EconomyUtil;
 import com.chingo247.menu.util.ShopUtil;
+import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -122,7 +122,7 @@ public class CategoryMenu implements Listener {
     /**
      * Adds a category to this menu. If category already exists, entry for this category will be
      * overwritten. All items related to this Category will be removed. If the slot was already
-     * inuse by another category. The slot will be overwritten and the old category will be removed
+     * in use by another category. The slot will be overwritten and the old category will be removed
      * as it's no longer available in the menu
      *
      * @param slot The inventory slot
