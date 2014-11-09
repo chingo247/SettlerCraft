@@ -16,23 +16,22 @@
  */
 package com.chingo247.settlercraft.bukkit;
 
+import com.chingo247.settlercraft.bukkit.PermissionManager.Perms;
 import com.chingo247.settlercraft.bukkit.commands.ConstructionCommandExecutor;
 import com.chingo247.settlercraft.bukkit.commands.SettlerCraftCommandExecutor;
 import com.chingo247.settlercraft.bukkit.commands.StructureCommandExecutor;
-import com.chingo247.settlercraft.main.exception.SettlerCraftException;
 import com.chingo247.settlercraft.bukkit.listener.FenceListener;
 import com.chingo247.settlercraft.bukkit.listener.PlanListener;
 import com.chingo247.settlercraft.bukkit.listener.PluginListener;
 import com.chingo247.settlercraft.main.HSQLServer;
-import com.chingo247.settlercraft.bukkit.PermissionManager.Perms;
+import com.chingo247.settlercraft.main.exception.SettlerCraftException;
+import com.chingo247.settlercraft.main.exception.StructureAPIException;
+import com.chingo247.settlercraft.main.persistence.HibernateUtil;
+import com.chingo247.settlercraft.main.persistence.ValidationService;
+import com.chingo247.settlercraft.main.structure.QStructure;
+import com.chingo247.settlercraft.main.structure.Structure;
 import com.chingo247.settlercraft.main.structure.plan.PlanMenuManager;
-import com.chingo247.structureapi.IStructureAPI;
-import com.chingo247.structureapi.QStructure;
-import com.chingo247.structureapi.Structure;
-import com.chingo247.structureapi.StructureAPI;
-import com.chingo247.structureapi.exception.StructureAPIException;
-import com.chingo247.structureapi.persistence.hibernate.HibernateUtil;
-import com.chingo247.structureapi.persistence.service.ValidationService;
+import com.chingo247.xcore.platforms.bukkit.BukkitPlatform;
 import com.mysema.query.jpa.hibernate.HibernateUpdateClause;
 import com.sc.module.menuapi.menus.menu.CategoryMenu;
 import java.io.File;
@@ -61,15 +60,15 @@ public class SettlerCraftPlugin extends JavaPlugin {
     private final ThreadPoolExecutor GLOBAL_THREADPOOL = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 30L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     private ConfigProvider configProvider;
     public static final String MSG_PREFIX = ChatColor.YELLOW + "[SettlerCraft]: " + ChatColor.RESET;
-    private BukkitSettlerCraftStructureAPI structureAPI;
+    private BukkitStructureAPI structureAPI;
     private PlanMenuManager planMenuManager;
 
     @Override
     public void onEnable() {
         instance = this;
-        planMenuManager = new PlanMenuManager(this);
-        configProvider = new ConfigProvider();
-        structureAPI = BukkitSettlerCraftStructureAPI.getInstance(this);
+        this.planMenuManager = new PlanMenuManager(this);
+        this.configProvider = new ConfigProvider();
+        this.structureAPI = new BukkitStructureAPI(this, GLOBAL_THREADPOOL, new BukkitPlatform(getServer()));
         
         if (Bukkit.getPluginManager().getPlugin("WorldEdit") == null) {
             System.out.println("[SettlerCraft]: WorldEdit NOT FOUND!!! Disabling...");
@@ -111,9 +110,7 @@ public class SettlerCraftPlugin extends JavaPlugin {
             hSQLServer.start();
         }
         
-        
-        
-        ValidationService restoreService = new ValidationService(structureAPI);
+        ValidationService restoreService = new BukkitValidationService(structureAPI);
         restoreService.validate();
         resetStates();
         
@@ -139,7 +136,7 @@ public class SettlerCraftPlugin extends JavaPlugin {
         getCommand("stt").setExecutor(new StructureCommandExecutor(structureAPI));
 
         printPerms();
-        StructureAPI.print("Done!");
+        structureAPI.print("Done!");
         
     }
     
@@ -151,7 +148,7 @@ public class SettlerCraftPlugin extends JavaPlugin {
         return configProvider;
     }
 
-    public IStructureAPI getStructureAPI() {
+    public BukkitStructureAPI getStructureAPI() {
         return structureAPI;
     }
     

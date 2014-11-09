@@ -1,5 +1,5 @@
 name: SettlerCraft
-main: com.chingo247.settlercraft.plugin.SettlerCraft
+main: com.chingo247.settlercraft.bukkit.SettlerCraftPlugin
 version: 1.0-RC4
 author: Chingo247
 description: Build & Interact with Structures!

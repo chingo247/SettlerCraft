@@ -16,27 +16,28 @@
  */
 package com.chingo247.settlercraft.bukkit.commands;
 
+import com.chingo247.settlercraft.bukkit.BukkitStructureAPI;
+import com.chingo247.settlercraft.bukkit.WorldEditUtil;
 import com.chingo247.settlercraft.main.exception.SettlerCraftException;
-import com.chingo247.structureapi.PlayerOwnership;
-import com.chingo247.structureapi.QPlayerOwnership;
-import com.chingo247.structureapi.Structure;
-import com.chingo247.structureapi.Structure.State;
-import static com.chingo247.structureapi.Structure.State.BUILDING;
-import static com.chingo247.structureapi.Structure.State.COMPLETE;
-import static com.chingo247.structureapi.Structure.State.DEMOLISHING;
-import static com.chingo247.structureapi.Structure.State.INITIALIZING;
-import static com.chingo247.structureapi.Structure.State.LOADING_SCHEMATIC;
-import static com.chingo247.structureapi.Structure.State.PLACING_FENCE;
-import static com.chingo247.structureapi.Structure.State.QUEUED;
-import static com.chingo247.structureapi.Structure.State.REMOVED;
-import static com.chingo247.structureapi.Structure.State.STOPPED;
-import com.chingo247.structureapi.StructureAPI;
-import com.chingo247.structureapi.exception.StructureException;
-import com.chingo247.structureapi.persistence.hibernate.HibernateUtil;
-import com.chingo247.structureapi.persistence.service.StructureService;
+import com.chingo247.settlercraft.main.persistence.HibernateUtil;
+import com.chingo247.settlercraft.main.persistence.StructureDAO;
+import com.chingo247.settlercraft.main.structure.PlayerOwnership;
+import com.chingo247.settlercraft.main.structure.QPlayerOwnership;
+import com.chingo247.settlercraft.main.structure.Structure;
+import com.chingo247.settlercraft.main.structure.Structure.State;
+import static com.chingo247.settlercraft.main.structure.Structure.State.BUILDING;
+import static com.chingo247.settlercraft.main.structure.Structure.State.COMPLETE;
+import static com.chingo247.settlercraft.main.structure.Structure.State.DEMOLISHING;
+import static com.chingo247.settlercraft.main.structure.Structure.State.INITIALIZING;
+import static com.chingo247.settlercraft.main.structure.Structure.State.LOADING_SCHEMATIC;
+import static com.chingo247.settlercraft.main.structure.Structure.State.PLACING_FENCE;
+import static com.chingo247.settlercraft.main.structure.Structure.State.QUEUED;
+import static com.chingo247.settlercraft.main.structure.Structure.State.REMOVED;
+import static com.chingo247.settlercraft.main.structure.Structure.State.STOPPED;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.module.menuapi.menus.menu.util.ShopUtil;
+import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.Vector;
 import java.util.Comparator;
 import java.util.List;
@@ -59,10 +60,10 @@ public class StructureCommandExecutor implements CommandExecutor {
     private static final int MAX_LINES = 10;
     private static final String CMD = "/stt";
     private final ChatColor CCC = ChatColor.DARK_PURPLE;
-    
-    private final StructureAPI structureAPI;
+    private final BukkitStructureAPI structureAPI;
+    private final StructureDAO structureDAO = new StructureDAO();
 
-    public StructureCommandExecutor(StructureAPI structureAPI) {
+    public StructureCommandExecutor(BukkitStructureAPI structureAPI) {
         this.structureAPI = structureAPI;
     }
     
@@ -228,7 +229,6 @@ public class StructureCommandExecutor implements CommandExecutor {
     }
 
     private boolean displayInfo(CommandSender sender, String[] args) {
-        StructureService service = new StructureService();
         Structure structure;
 
         if (args.length == 2) {
@@ -239,14 +239,17 @@ public class StructureCommandExecutor implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED + "Invalid id");
                 return true;
             }
-            structure = service.getStructure(id);
+            structure = structureDAO.find(id);
             if(structure == null) {
                 sender.sendMessage(ChatColor.RED + "No structure found with id #" + id);
                 return true;
             }
         } else if (args.length == 1 && (sender instanceof Player)) {
             Player player = (Player) sender;
-            structure = service.getStructure(player.getLocation());
+            
+            LocalPlayer lp = WorldEditUtil.wrapPlayer(player);
+            
+            structure = structureDAO.getStructure(CMD, MAX_LINES, MAX_LINES, MAX_LINES);
             if (structure == null) {
                 sender.sendMessage(ChatColor.RED + " Currently not within a structure");
                 return true;
@@ -302,10 +305,10 @@ public class StructureCommandExecutor implements CommandExecutor {
     }
 
     private boolean getPos(Player player, String[] args) {
-        StructureService service = new StructureService();
         Structure structure;
         if (args.length == 1) {
-            structure = service.getStructure(player.getLocation());
+            Location l = player.getLocation();
+            structure = structureDAO.getStructure(l.getWorld().getName(), l.getBlockX(), l.getBlockY(), l.getBlockZ());
             if (structure == null) {
                 player.sendMessage(new String[]{
                     ChatColor.RED + "Currently not within a structure",
@@ -321,7 +324,7 @@ public class StructureCommandExecutor implements CommandExecutor {
                 player.sendMessage("No valid id");
                 return true;
             }
-            structure = service.getStructure(id);
+            structure = structureDAO.find(id);
             if (structure == null) {
                 player.sendMessage(ChatColor.RED + "No structure found with id: " + id);
                 return true;
@@ -351,7 +354,7 @@ public class StructureCommandExecutor implements CommandExecutor {
         } catch (NumberFormatException nfe){
             throw new SettlerCraftException("Invalid id");
         }
-        Structure structure = new StructureService().getStructure(id);
+        Structure structure = structureDAO.find(id);
         if(structure == null) {
             throw new SettlerCraftException("No structure found for id #" + id);
         }
@@ -423,7 +426,7 @@ public class StructureCommandExecutor implements CommandExecutor {
          // Command is executed by a player, permission?
         if(sender instanceof Player) {
             Player player = (Player) sender;
-            if(!structure.isOwner(player, PlayerOwnership.Type.FULL)) {
+            if(!structure.isOwner(WorldEditUtil.wrapPlayer(player), PlayerOwnership.Type.FULL)) {
                 sender.sendMessage(ChatColor.RED + "You need to have FULL ownership to add/remove other owners");
                 return true;
             }
@@ -435,11 +438,9 @@ public class StructureCommandExecutor implements CommandExecutor {
             sender.sendMessage(ChatColor.RED + "Player '"+args[3]+"' doesn't exist!");
             return true;
         }
-        try {
-            structureAPI.makeOwner(player, PlayerOwnership.Type.BASIC, structure);
-        } catch (StructureException ex) {
-            sender.sendMessage(ChatColor.RED + ChatColor.stripColor(ex.getMessage()));
-        }
+        
+        structureAPI.makeOwner(player, PlayerOwnership.Type.BASIC, structure);
+         
         
         
         
@@ -462,7 +463,7 @@ public class StructureCommandExecutor implements CommandExecutor {
          // Command is executed by a player, permission?
         if(sender instanceof Player) {
             Player player = (Player) sender;
-            if(!structure.isOwner(player, PlayerOwnership.Type.FULL)) {
+            if(!structure.isOwner(WorldEditUtil.wrapPlayer(player), PlayerOwnership.Type.FULL)) {
                 sender.sendMessage(ChatColor.RED + "You need to have FULL ownership to add/remove other owners");
                 return true;
             }
@@ -474,11 +475,8 @@ public class StructureCommandExecutor implements CommandExecutor {
             sender.sendMessage(ChatColor.RED + "Player '"+args[3]+"' doesn't exist!");
             return true;
         }
-        try {
             structureAPI.removeOwner(player, structure);
-        } catch (StructureException ex) {
-            sender.sendMessage(ChatColor.RED + ex.getMessage());
-        }
+        
         
         return true;
     }

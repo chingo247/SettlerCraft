@@ -17,7 +17,9 @@
 package com.chingo247.settlercraft.bukkit.listener;
 
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
-import com.chingo247.structureapi.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.main.event.EventManager;
+import com.chingo247.settlercraft.main.event.SettlerCraftDisableEvent;
+import com.chingo247.settlercraft.main.persistence.HibernateUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -28,13 +30,15 @@ import org.bukkit.event.server.PluginDisableEvent;
  * @author Chingo
  */
 public class PluginListener implements Listener {
+    
+    
 
     @EventHandler
     public void shutdown(PluginDisableEvent pde) {
         if (pde.getPlugin().getName().equals(SettlerCraftPlugin.getInstance().getName())) {
             Bukkit.getConsoleSender().sendMessage(SettlerCraftPlugin.MSG_PREFIX + " Shutting down...");
             SettlerCraftPlugin.getInstance().getExecutorService().shutdown();
-            
+            EventManager.getInstance().getEventBus().post(new SettlerCraftDisableEvent());
             
             
             HibernateUtil.shutdown();

@@ -18,10 +18,9 @@
 
 package com.chingo247.settlercraft.main.structure.plan;
 
-import com.chingo247.structureapi.SchematicData;
-import com.chingo247.structureapi.exception.StructureDataException;
-import com.chingo247.structureapi.plan.StructurePlan;
-import com.chingo247.structureapi.plan.schematic.SchematicManager;
+
+import com.chingo247.settlercraft.main.exception.StructureDataException;
+import com.chingo247.settlercraft.main.structure.SchematicData;
 import com.sc.module.menuapi.menus.menu.item.CategoryTradeItem;
 import com.sc.module.menuapi.menus.menu.item.TradeItem;
 import com.sc.module.menuapi.menus.menu.util.ShopUtil;
@@ -63,9 +62,11 @@ public class StructurePlanItem implements CategoryTradeItem {
         this.description = description;
     }
 
-    public static StructurePlanItem load(SchematicManager schematicManager, StructurePlan plan) throws IOException, DataException, DocumentException, StructureDataException {
+    public static StructurePlanItem load(SchematicData data, StructurePlan plan) throws IOException, DataException, DocumentException, StructureDataException {
         
-        SchematicData data = schematicManager.getData(plan.getChecksum());
+        
+        
+        
         if(data == null) {
             throw new AssertionError("SchematicData was null");
         }

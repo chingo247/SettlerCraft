@@ -16,7 +16,7 @@
  */
 package com.chingo247.settlercraft.bukkit;
 
-import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
+import com.chingo247.settlercraft.main.IConfigProvider;
 import com.chingo247.settlercraft.main.exception.SettlerCraftException;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
@@ -35,7 +35,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
  *
  * @author Chingo
  */
-public class ConfigProvider {
+public class ConfigProvider implements IConfigProvider {
 
     private boolean menuEnabled = false;
     private boolean shopEnabled = false;
@@ -106,7 +106,7 @@ public class ConfigProvider {
         return shopEnabled;
     }
     
-    public HashMap<Flag, Object> getDefaultFlags() {
+    public HashMap<Flag, Object> getDefaultRegionFlags() {
         return defaultFlags;
     }
 
@@ -127,5 +127,10 @@ public class ConfigProvider {
         return refundPercentage;
     }
 
+    public boolean useDefaultHolograms() {
+        return defaultHolograms;
+    }
+
+    
  
 }

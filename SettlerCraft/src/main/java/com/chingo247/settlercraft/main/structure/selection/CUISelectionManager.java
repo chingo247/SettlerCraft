@@ -17,8 +17,8 @@
 
 package com.chingo247.settlercraft.main.structure.selection;
 
-import com.chingo247.structureapi.construction.worldedit.WorldEditUtil;
-import com.chingo247.structureapi.plan.schematic.Schematic;
+import com.chingo247.settlercraft.bukkit.WorldEditUtil;
+import com.chingo247.settlercraft.main.structure.SchematicData;
 import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.Vector;
@@ -47,8 +47,8 @@ public class CUISelectionManager {
         private final Vector pos2;
         private final Player player;
 
-        public CUISelection(Player player, Schematic schematic, Vector target, Vector pos2) {
-            this.checksum = schematic.getCheckSum();
+        public CUISelection(Player player, SchematicData schematic, Vector target, Vector pos2) {
+            this.checksum = schematic.getChecksum();
             this.pos1 = target;
             this.pos2 = pos2;
             this.player = player;
@@ -68,9 +68,9 @@ public class CUISelectionManager {
         return instance;
     }
 
-    public void select(Player player, Schematic schematic, Vector pos1, Vector pos2) {
+    public void select(Player player, SchematicData schematic, Vector pos1, Vector pos2) {
         CUISelection selection = new CUISelection(player, schematic, pos1, pos2);
-        LocalPlayer ply = WorldEditUtil.getLocalPlayer(player);
+        LocalPlayer ply = WorldEditUtil.wrapPlayer(player);
 
         LocalSession session = WorldEditUtil.getWorldEditPlugin().getWorldEdit().getSession(ply);
         World world = WorldEditUtil.getWorld(player.getWorld().getName());
@@ -83,7 +83,7 @@ public class CUISelectionManager {
     }
 
     public void clear(Player player, boolean talk) {
-        LocalPlayer ply = WorldEditUtil.getLocalPlayer(player);
+        LocalPlayer ply = WorldEditUtil.wrapPlayer(player);
         LocalSession session = WorldEditUtil.getWorldEditPlugin().getWorldEdit().getSession(ply);
         World world = WorldEditUtil.getWorld(player.getWorld().getName());
         if (session.getRegionSelector(world).isDefined()) {
@@ -94,14 +94,14 @@ public class CUISelectionManager {
     }
     
     
-    public boolean matchesSelection(Player player, Schematic schematic, Vector pos1, Vector pos2) {
+    public boolean matchesSelection(Player player, SchematicData schematic, Vector pos1, Vector pos2) {
         CUISelection selection = selections.get(player.getUniqueId());
         if(selection == null) {
             return false;
         }
         return selection.pos1.equals(pos1) 
                 && selection.pos2.equals(pos2) 
-                && schematic.getCheckSum() == selection.checksum;
+                && schematic.getChecksum() == selection.checksum;
     }
     
     public boolean hasSelection(Player player) {

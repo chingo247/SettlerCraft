@@ -33,10 +33,7 @@ import org.hsqldb.server.Server;
  *
  * @author Chingo
  */
-/**
- *
- * @author Chingo
- */
+
 public class HSQLServer {
 
     private final String HOST = "localhost";
@@ -53,9 +50,6 @@ public class HSQLServer {
         final FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
         PORT = config.getInt("hsql.port");
 
-        System.out.println("Port: " + PORT);
-        
-        
         server = new Server();
         server.setSilent(true);
         server.setAddress(HOST);

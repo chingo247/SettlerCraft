@@ -16,9 +16,9 @@
  */
 package com.chingo247.settlercraft.bukkit.listener;
 
-import com.chingo247.structureapi.Dimension;
-import com.chingo247.structureapi.Structure;
-import com.chingo247.structureapi.persistence.service.StructureService;
+import com.chingo247.settlercraft.main.persistence.StructureDAO;
+import com.chingo247.settlercraft.main.structure.Structure;
+import com.chingo247.settlercraft.main.world.Dimension;
 import com.sk89q.worldedit.Vector;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -31,29 +31,27 @@ import org.bukkit.event.block.BlockBreakEvent;
  * @author Chingo
  */
 public class FenceListener implements Listener {
-    
-    private final StructureService service = new StructureService();
-    
+
+    private final StructureDAO structureDAO = new StructureDAO();
+
     @EventHandler
     public void onFenceBreak(BlockBreakEvent bbe) {
-        if(bbe.getBlock().getType() == Material.IRON_FENCE) {
-            Structure structure = service.getStructure(bbe.getBlock().getLocation());
-            if(structure != null && structure.getState() != Structure.State.COMPLETE) {
-                Location l = bbe.getBlock().getLocation();
+        if (bbe.getBlock().getType() == Material.IRON_FENCE) {
+            Location l = bbe.getBlock().getLocation();
+            Structure structure = structureDAO.getStructure(l.getWorld().getName(), l.getBlockX(), l.getBlockY(), l.getBlockZ());
+            if (structure != null && structure.getState() != Structure.State.COMPLETE) {
                 Vector v = structure.getRelativePosition(new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ()));
                 Dimension dim = structure.getDimension();
-                
-                if(v.getBlockY() == 1 && (l.getBlockX() == dim.getMinX() || l.getBlockX() == dim.getMaxX() || l.getBlockZ() == dim.getMinZ() || l.getBlockZ() == dim.getMaxZ())) {
-                    if(bbe.getPlayer() != null) {
+
+                if (v.getBlockY() == 1 && (l.getBlockX() == dim.getMinX() || l.getBlockX() == dim.getMaxX() || l.getBlockZ() == dim.getMinZ() || l.getBlockZ() == dim.getMaxZ())) {
+                    if (bbe.getPlayer() != null) {
                         bbe.getPlayer().sendMessage(ChatColor.RED + "Can't destroy fence....");
                     }
                     bbe.setCancelled(true);
                 }
-                
             }
         }
-        
-        
+
     }
-    
+
 }

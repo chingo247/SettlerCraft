@@ -16,9 +16,11 @@ package com.chingo247.settlercraft.bukkit.commands;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import com.chingo247.structureapi.Structure;
-import com.chingo247.structureapi.StructureAPI;
-import com.chingo247.structureapi.persistence.service.StructureService;
+import com.chingo247.settlercraft.bukkit.BukkitStructureAPI;
+import com.chingo247.settlercraft.main.persistence.StructureDAO;
+import com.chingo247.settlercraft.main.structure.Structure;
+import com.chingo247.settlercraft.main.structure.construction.BuildOptions;
+import com.chingo247.settlercraft.main.structure.construction.DemolitionOptions;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -33,9 +35,10 @@ public class ConstructionCommandExecutor implements CommandExecutor {
 
     private static final String CMD = "/cst";
     private final ChatColor CCC = ChatColor.DARK_PURPLE;
-    private final StructureAPI structureAPI;
+    private final BukkitStructureAPI structureAPI;
+    private final StructureDAO structureDAO = new StructureDAO();
 
-    public ConstructionCommandExecutor(StructureAPI structureAPI) {
+    public ConstructionCommandExecutor(BukkitStructureAPI structureAPI) {
         this.structureAPI = structureAPI;
     }
     
@@ -106,8 +109,8 @@ public class ConstructionCommandExecutor implements CommandExecutor {
             return true;
         }
 
-        StructureService ss = new StructureService();
-        Structure structure = ss.getStructure(id);
+        
+        Structure structure = structureDAO.find(id);
 
         if (structure == null) {
             player.sendMessage(ChatColor.RED + "Unable to find structure #" + ChatColor.GOLD + id);
@@ -147,14 +150,13 @@ public class ConstructionCommandExecutor implements CommandExecutor {
             return true;
         }
 
-        StructureService ss = new StructureService();
-        Structure structure = ss.getStructure(id);
+        Structure structure = structureDAO.find(id);
 
         if (structure == null) {
             player.sendMessage(ChatColor.RED + "Unable to find structure # " + ChatColor.GOLD + id);
             return true;
         }
-        if (structureAPI.build(player, structure, false)) {
+        if (structureAPI.build(player, structure, new BuildOptions(false), false)) {
             player.sendMessage(ChatColor.RESET + "#" + ChatColor.GOLD + id + " " + ChatColor.BLUE + structure.getName() + ChatColor.RESET + " will be build");
         }
 
@@ -185,14 +187,13 @@ public class ConstructionCommandExecutor implements CommandExecutor {
             return true;
         }
         
-        StructureService ss = new StructureService();
-        Structure structure = ss.getStructure(id);
+        Structure structure = structureDAO.find(id);
         
         if (structure == null) {
             player.sendMessage(ChatColor.RED + "Unable to find structure #" + id);
             return true;
         }
-        if (structureAPI.demolish(player, structure, false)) {
+        if (structureAPI.demolish(player, structure, new DemolitionOptions(), false)) {
             player.sendMessage(ChatColor.RESET + "#" + ChatColor.GOLD + id + ChatColor.BLUE + structure.getName() + " will be demolished");
         }
         return true;

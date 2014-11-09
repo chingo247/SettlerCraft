@@ -16,16 +16,16 @@
  */
 package com.chingo247.settlercraft.bukkit.commands;
 
-import com.chingo247.settlercraft.main.exception.CommandException;
 import com.chingo247.settlercraft.bukkit.PermissionManager;
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
-import com.chingo247.structureapi.PlayerOwnership;
-import com.chingo247.structureapi.QPlayerOwnership;
-import com.chingo247.structureapi.QStructure;
-import com.chingo247.structureapi.Structure;
-import com.chingo247.structureapi.Structure.State;
-import com.chingo247.structureapi.persistence.hibernate.HibernateUtil;
-import com.chingo247.structureapi.persistence.service.StructureService;
+import com.chingo247.settlercraft.main.exception.CommandException;
+import com.chingo247.settlercraft.main.persistence.HibernateUtil;
+import com.chingo247.settlercraft.main.persistence.StructureDAO;
+import com.chingo247.settlercraft.main.structure.PlayerOwnership;
+import com.chingo247.settlercraft.main.structure.QPlayerOwnership;
+import com.chingo247.settlercraft.main.structure.QStructure;
+import com.chingo247.settlercraft.main.structure.Structure;
+import com.chingo247.settlercraft.main.structure.Structure.State;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sc.module.menuapi.menus.menu.CategoryMenu;
@@ -50,6 +50,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
 
     private static final int MAX_LINES = 10;
     private final SettlerCraftPlugin settlerCraft;
+    private final StructureDAO structureDAO = new StructureDAO();
     
     public SettlerCraftCommandExecutor(SettlerCraftPlugin settlerCraft) {
         this.settlerCraft = settlerCraft;
@@ -181,8 +182,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                 } catch (NumberFormatException nfe) {
                     throw new CommandException("Invalid id");
                 }
-                StructureService service = new StructureService();
-                Structure structure = service.getStructure(sid);
+                Structure structure = structureDAO.find(sid);
                 if (structure == null) {
                     throw new CommandException("No structure found with id #" + sid + "...");
                 }
@@ -318,7 +318,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                 }
             }
             structure.setRefundValue(0d);
-            new StructureService().save(structure);
+            structureDAO.save(structure);
         }
         if (talk) {
             sender.sendMessage("Deposited " + ChatColor.GOLD + ShopUtil.valueString(Math.floor(structure.getRefundValue() / structure.getOwnerships(PlayerOwnership.Type.FULL).size())) + ChatColor.RESET + " to all owners");

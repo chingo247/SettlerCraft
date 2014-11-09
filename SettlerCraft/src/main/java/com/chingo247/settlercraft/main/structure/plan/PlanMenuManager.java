@@ -17,11 +17,12 @@
 
 package com.chingo247.settlercraft.main.structure.plan;
 
+import com.chingo247.settlercraft.bukkit.BukkitStructureAPI;
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
+import com.chingo247.settlercraft.main.exception.StructureAPIException;
+import com.chingo247.settlercraft.main.exception.StructureDataException;
+import com.chingo247.settlercraft.main.persistence.SchematicDataDAO;
 import com.chingo247.settlercraft.main.util.FileUtil;
-import com.chingo247.structureapi.exception.StructureAPIException;
-import com.chingo247.structureapi.exception.StructureDataException;
-import com.chingo247.structureapi.plan.StructurePlan;
 import com.sc.module.menuapi.menus.menu.CategoryMenu;
 import com.sc.module.menuapi.menus.menu.MenuAPI;
 import com.sk89q.worldedit.data.DataException;
@@ -51,6 +52,8 @@ public class PlanMenuManager {
     private final Logger LOGGER = Logger.getLogger(PlanMenuManager.class);
     private boolean loadingPlans = false;
     private final SettlerCraftPlugin setterCraft;
+    private final SchematicDataDAO schematicDataDAO = new SchematicDataDAO();
+    
     
     public PlanMenuManager(SettlerCraftPlugin settlerCraft) {
         this.setterCraft = settlerCraft;
@@ -202,6 +205,7 @@ public class PlanMenuManager {
         
         final List<StructurePlan> plans = setterCraft.getStructureAPI().getStructurePlanManager().getPlans();
         final Iterator<StructurePlan> planIterator = plans.iterator();
+        final BukkitStructureAPI api = setterCraft.getStructureAPI();
 
         planMenu.clearItems();
 
@@ -210,7 +214,7 @@ public class PlanMenuManager {
 
             try {
                 // Add item to planmenu
-                StructurePlanItem planItem = StructurePlanItem.load(setterCraft.getStructureAPI().getSchematicManager(), plan);
+                StructurePlanItem planItem = StructurePlanItem.load(schematicDataDAO.find(plan.getChecksum()), plan);
                 planMenu.addItem(planItem);
             } catch (IOException | DataException | DocumentException | StructureDataException ex) {
                 LOGGER.error(ex.getMessage());
