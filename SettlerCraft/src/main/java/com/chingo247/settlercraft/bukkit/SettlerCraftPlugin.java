@@ -23,14 +23,15 @@ import com.chingo247.settlercraft.bukkit.commands.StructureCommandExecutor;
 import com.chingo247.settlercraft.bukkit.listener.FenceListener;
 import com.chingo247.settlercraft.bukkit.listener.PlanListener;
 import com.chingo247.settlercraft.bukkit.listener.PluginListener;
-import com.chingo247.settlercraft.main.HSQLServer;
-import com.chingo247.settlercraft.main.exception.SettlerCraftException;
-import com.chingo247.settlercraft.main.exception.StructureAPIException;
-import com.chingo247.settlercraft.main.persistence.HibernateUtil;
-import com.chingo247.settlercraft.main.persistence.ValidationService;
-import com.chingo247.settlercraft.main.structure.QStructure;
-import com.chingo247.settlercraft.main.structure.Structure;
-import com.chingo247.settlercraft.main.structure.plan.PlanMenuManager;
+import com.chingo247.settlercraft.structure.QStructure;
+import com.chingo247.settlercraft.structure.Structure;
+import com.chingo247.settlercraft.structure.exception.SettlerCraftException;
+import com.chingo247.settlercraft.structure.exception.StructureAPIException;
+import com.chingo247.settlercraft.structure.persistence.HSQLServer;
+import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.structure.persistence.hibernate.ValidationService;
+import com.chingo247.settlercraft.structure.plan.PlanMenuManager;
+import com.chingo247.settlercraft.structure.rollback.BlockLogger;
 import com.chingo247.xcore.platforms.bukkit.BukkitPlatform;
 import com.mysema.query.jpa.hibernate.HibernateUpdateClause;
 import com.sc.module.menuapi.menus.menu.CategoryMenu;
@@ -69,7 +70,6 @@ public class SettlerCraftPlugin extends JavaPlugin {
         this.planMenuManager = new PlanMenuManager(this);
         this.configProvider = new ConfigProvider();
         this.structureAPI = new BukkitStructureAPI(this, GLOBAL_THREADPOOL, new BukkitPlatform(getServer()));
-        
         if (Bukkit.getPluginManager().getPlugin("WorldEdit") == null) {
             System.out.println("[SettlerCraft]: WorldEdit NOT FOUND!!! Disabling...");
             this.setEnabled(false);
@@ -91,6 +91,19 @@ public class SettlerCraftPlugin extends JavaPlugin {
             System.out.println("[SettlerCraft]: Vault NOT FOUND!!! Disabling...");
             this.setEnabled(false);
             return;
+        }
+        
+        if(Bukkit.getPluginManager().getPlugin("BlocksHub") != null) {
+            System.out.println("Initialzing SettlerCraft-BlockLogger");
+            
+            try {
+                
+//                OrientDBServer server = new OrientDBServer();
+//                server.start();
+            new BlockLogger().start();
+            } catch (Exception ex) {
+                java.util.logging.Logger.getLogger(SettlerCraftPlugin.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         
         try {
@@ -152,6 +165,7 @@ public class SettlerCraftPlugin extends JavaPlugin {
         return structureAPI;
     }
     
+   
     
 
 

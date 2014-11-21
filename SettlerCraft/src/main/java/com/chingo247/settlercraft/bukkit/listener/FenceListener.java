@@ -16,9 +16,9 @@
  */
 package com.chingo247.settlercraft.bukkit.listener;
 
-import com.chingo247.settlercraft.main.persistence.StructureDAO;
-import com.chingo247.settlercraft.main.structure.Structure;
-import com.chingo247.settlercraft.main.world.Dimension;
+import com.chingo247.settlercraft.structure.persistence.hibernate.StructureDAO;
+import com.chingo247.settlercraft.structure.Structure;
+import com.chingo247.settlercraft.structure.world.Dimension;
 import com.sk89q.worldedit.Vector;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;

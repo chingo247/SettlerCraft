@@ -17,13 +17,13 @@
 package com.chingo247.settlercraft.bukkit.selection;
 
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
-import com.chingo247.settlercraft.main.structure.plan.schematic.Schematic;
-import com.chingo247.settlercraft.main.util.WorldUtil;
-import com.chingo247.settlercraft.main.world.Direction;
-import static com.chingo247.settlercraft.main.world.Direction.EAST;
-import static com.chingo247.settlercraft.main.world.Direction.NORTH;
-import static com.chingo247.settlercraft.main.world.Direction.SOUTH;
-import static com.chingo247.settlercraft.main.world.Direction.WEST;
+import com.chingo247.settlercraft.structure.schematic.SchematicData;
+import com.chingo247.settlercraft.structure.util.WorldUtil;
+import com.chingo247.settlercraft.structure.world.Direction;
+import static com.chingo247.settlercraft.structure.world.Direction.EAST;
+import static com.chingo247.settlercraft.structure.world.Direction.NORTH;
+import static com.chingo247.settlercraft.structure.world.Direction.SOUTH;
+import static com.chingo247.settlercraft.structure.world.Direction.WEST;
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.sk89q.worldedit.Vector;
@@ -60,11 +60,11 @@ public class SelectionManager {
         private static final int Z_AXIS = 3;
         private static final int END = 4;
 
-        public HoloSelection(final Player whoCanSee, final Vector pos1, final Vector pos2, Direction direction, Schematic schematic, boolean reverse) {
+        public HoloSelection(final Player whoCanSee, final Vector pos1, final Vector pos2, Direction direction, SchematicData schematic, boolean reverse) {
             this.pos1 = pos1;
             this.pos2 = pos2;
             this.holos = new Hologram[5];
-            this.checksum = schematic.getCheckSum();
+            this.checksum = schematic.getChecksum();
 
             final Vector self;
             switch (direction) {
@@ -161,17 +161,17 @@ public class SelectionManager {
         return instance;
     }
 
-    public void select(Player player, Schematic schematic, Vector target, Vector pos2, boolean reverse) {
+    public void select(Player player, SchematicData schematic, Vector target, Vector pos2, boolean reverse) {
         Direction direction = WorldUtil.getDirection(player);
         selections.put(player.getUniqueId(), new HoloSelection(player, target, pos2, direction, schematic, reverse));
     }
 
-    public boolean matchesSelection(Player player, Schematic schematic, Vector target, Vector pos2) {
+    public boolean matchesSelection(Player player, SchematicData schematic, Vector target, Vector pos2) {
         HoloSelection selection = selections.get(player.getUniqueId());
         if (selection != null) {
 
             // is it the same structure and at the same position?
-            return selection.checksum == schematic.getCheckSum()
+            return selection.checksum == schematic.getChecksum()
                     && selection.pos1.equals(target)
                     && selection.pos2.equals(pos2);
         }

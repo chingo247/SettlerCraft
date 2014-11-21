@@ -18,18 +18,19 @@ package com.chingo247.settlercraft.bukkit;
 
 import com.chingo247.settlercraft.bukkit.plan.holograms.StructureHologramManager;
 import com.chingo247.settlercraft.bukkit.plan.overviews.StructureOverviewManager;
-import com.chingo247.settlercraft.main.exception.StructureException;
-import com.chingo247.settlercraft.main.structure.AbstractStructureAPI;
-import com.chingo247.settlercraft.main.structure.PlayerOwnership;
-import com.chingo247.settlercraft.main.structure.Structure;
-import com.chingo247.settlercraft.main.structure.StructureAPI;
-import com.chingo247.settlercraft.main.structure.construction.BuildOptions;
-import com.chingo247.settlercraft.main.structure.construction.DemolitionOptions;
-import com.chingo247.settlercraft.main.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.main.util.WorldGuardUtil;
-import com.chingo247.settlercraft.main.world.Dimension;
-import com.chingo247.settlercraft.main.world.Direction;
+import com.chingo247.settlercraft.structure.AbstractStructureAPI;
+import com.chingo247.settlercraft.structure.PlayerOwnership;
+import com.chingo247.settlercraft.structure.Structure;
+import com.chingo247.settlercraft.structure.StructureAPI;
+import com.chingo247.settlercraft.structure.construction.BuildOptions;
+import com.chingo247.settlercraft.structure.construction.DemolitionOptions;
+import com.chingo247.settlercraft.structure.exception.StructureException;
+import com.chingo247.settlercraft.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structure.util.WorldGuardUtil;
+import com.chingo247.settlercraft.structure.world.Dimension;
+import com.chingo247.settlercraft.structure.world.Direction;
 import com.chingo247.xcore.core.APlatform;
+import com.chingo247.xcore.platforms.bukkit.BukkitPlugin;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldguard.LocalPlayer;
@@ -54,17 +55,17 @@ import org.bukkit.entity.Player;
 public class BukkitStructureAPI extends AbstractStructureAPI<Player, World> {
 
     private final StructureAPI impl;
-    private final SettlerCraftPlugin plugin;
+    private final SettlerCraftPlugin settlerCraft;
     private static final String PREFIX = "SCREG-";
     private final StructureOverviewManager structureOverviewManager;
     private final StructureHologramManager structureHologramManager;
 
     BukkitStructureAPI(SettlerCraftPlugin settlerCraft, ExecutorService executor, APlatform platform) {
-        super(executor, platform, settlerCraft.getConfigProvider());
-        this.impl = new StructureAPI(executor, platform, settlerCraft.getConfigProvider());
-        this.plugin = settlerCraft;
-        this.structureHologramManager = new StructureHologramManager(plugin, this);
-        this.structureOverviewManager = new StructureOverviewManager(plugin, this);
+        super(executor, platform, settlerCraft.getConfigProvider(), new BukkitPlugin(settlerCraft));
+        this.impl = new StructureAPI(executor, platform, settlerCraft.getConfigProvider(), new BukkitPlugin(settlerCraft));
+        this.settlerCraft = settlerCraft;
+        this.structureHologramManager = new StructureHologramManager(settlerCraft, this);
+        this.structureOverviewManager = new StructureOverviewManager(settlerCraft, this);
     }
 
     private com.sk89q.worldedit.world.World wrapWorld(World world) {
@@ -108,7 +109,8 @@ public class BukkitStructureAPI extends AbstractStructureAPI<Player, World> {
     public Structure create(Player player, StructurePlan plan, World world, Vector pos, Direction direction) throws StructureException {
         Structure structure = impl.create(wrapPlayer(player), plan, wrapWorld(world), pos, direction);
         if (structure != null) {
-
+            structure.setStructureRegionId(PREFIX + structure.getId());
+            structure = structureDAO.save(structure);
         }
         return structure;
     }
@@ -307,16 +309,16 @@ public class BukkitStructureAPI extends AbstractStructureAPI<Player, World> {
     }
 
     public HashMap<Flag, Object> getDefaultFlags() {
-        return plugin.getConfigProvider().getDefaultRegionFlags();
+        return settlerCraft.getConfigProvider().getDefaultRegionFlags();
     }
 
     public boolean useHolograms() {
-        return plugin.getConfigProvider().useHolograms();
+        return settlerCraft.getConfigProvider().useHolograms();
     }
 
     @Override
     public File getAPIFolder() {
-        return plugin.getDataFolder();
+        return settlerCraft.getDataFolder();
     }
 
     public boolean isOnStructure(Location location) {

@@ -17,10 +17,10 @@
 
 package com.chingo247.settlercraft.bukkit.plan.holograms;
 
-import com.chingo247.settlercraft.main.exception.StructureDataException;
-import com.chingo247.settlercraft.main.structure.plan.document.Validator;
-import com.chingo247.settlercraft.main.util.Elements;
-import com.chingo247.settlercraft.main.util.Nodes;
+import com.chingo247.settlercraft.structure.exception.StructureDataException;
+import com.chingo247.settlercraft.structure.plan.document.Validator;
+import com.chingo247.settlercraft.structure.util.Elements;
+import com.chingo247.settlercraft.structure.util.Nodes;
 import java.util.List;
 import org.dom4j.Element;
 import org.dom4j.Node;
