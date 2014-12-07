@@ -46,9 +46,9 @@ public class HSQLServer {
     
 
     private HSQLServer() {
-        File configFile = new File(SettlerCraftPlugin.getInstance().getDataFolder(), "config.yml");
-        final FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
-        PORT = config.getInt("hsql.port");
+//        File configFile = new File(SettlerCraftPlugin.getInstance().getDataFolder(), "config.yml");
+//        final FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
+        PORT = 9001;
 
         server = new Server();
         server.setSilent(true);

@@ -19,11 +19,11 @@
 package com.chingo247.settlercraft.structure.plan;
 
 
+import com.chingo247.menu.item.CategoryTradeItem;
+import com.chingo247.menu.item.TradeItem;
+import com.chingo247.menu.util.ShopUtil;
 import com.chingo247.settlercraft.structure.exception.StructureDataException;
 import com.chingo247.settlercraft.structure.schematic.SchematicData;
-import com.sc.module.menuapi.menus.menu.item.CategoryTradeItem;
-import com.sc.module.menuapi.menus.menu.item.TradeItem;
-import com.sc.module.menuapi.menus.menu.util.ShopUtil;
 import com.sk89q.worldedit.data.DataException;
 import java.io.IOException;
 import java.util.Arrays;

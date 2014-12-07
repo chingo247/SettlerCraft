@@ -16,6 +16,7 @@
  */
 package com.chingo247.settlercraft.bukkit.commands;
 
+import com.chingo247.menu.util.ShopUtil;
 import com.chingo247.settlercraft.bukkit.BukkitStructureAPI;
 import com.chingo247.settlercraft.bukkit.WorldEditUtil;
 import com.chingo247.settlercraft.structure.PlayerOwnership;
@@ -36,7 +37,6 @@ import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.structure.persistence.hibernate.StructureDAO;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.module.menuapi.menus.menu.util.ShopUtil;
 import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.Vector;
 import java.util.Comparator;

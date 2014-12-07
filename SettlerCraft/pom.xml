@@ -9,7 +9,7 @@
         <!--Private ThirdParty Repo-->
         <repository>
             <id>Nexus</id>
-            <url>http://localhost:8088/nexus/content/repositories/thirdparty/</url>
+            <url>http://localhost:8084/nexus/content/repositories/thirdparty/</url>
         </repository>
         <!--WorldEdit Repo-->
         <repository>
@@ -78,8 +78,8 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.7.9-R0.2</version>
-            <scope>provided</scope>
+            <version>1.7.10</version>
+            <!--<scope>provided</scope>-->
         </dependency>
         <!--holographicDisplays-->
         <dependency>
@@ -93,14 +93,14 @@
             <groupId>com.thirdparty</groupId>
             <artifactId>asyncworldedit</artifactId>  
             <version>2.0.0</version>
-            <scope>provided</scope>
+            <!--<scope>provided</scope>-->
         </dependency>
         <!--AsyncWorldEdi-Injector-->
         <dependency>
             <groupId>com.thirdparty</groupId>
             <artifactId>asyncworldedit-injector</artifactId>  
             <version>2.0.0</version>
-            <scope>provided</scope>
+            <!--<scope>provided</scope>-->
         </dependency>
         <!--WorldGuard-->
         <dependency>
@@ -114,7 +114,7 @@
             <groupId>com.thirdparty</groupId>
             <artifactId>worldedit</artifactId>  
             <version>6.0-3308</version>
-            <scope>provided</scope>
+            <!--<scope>provided</scope>-->
         </dependency>
         <!--Vault-->
         <dependency>
@@ -304,13 +304,13 @@
             <version>1.4.7</version>
         </dependency>
         <dependency>
-            <groupId>com.sc.module</groupId>
-            <artifactId>MenuAPI</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>XCore</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>XCore</artifactId>
+            <artifactId>SettlerCraftMenuAPI</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>

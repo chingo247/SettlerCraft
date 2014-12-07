@@ -16,6 +16,7 @@
  */
 package com.chingo247.settlercraft.bukkit.listener;
 
+import com.chingo247.menu.util.EconomyUtil;
 import com.chingo247.settlercraft.bukkit.BukkitStructureAPI;
 import com.chingo247.settlercraft.bukkit.PermissionManager;
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
@@ -36,7 +37,6 @@ import static com.chingo247.settlercraft.structure.world.Direction.EAST;
 import static com.chingo247.settlercraft.structure.world.Direction.NORTH;
 import static com.chingo247.settlercraft.structure.world.Direction.SOUTH;
 import static com.chingo247.settlercraft.structure.world.Direction.WEST;
-import com.sc.module.menuapi.menus.menu.util.EconomyUtil;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.LocalSession;

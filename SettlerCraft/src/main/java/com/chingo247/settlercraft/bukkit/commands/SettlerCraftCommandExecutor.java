@@ -16,6 +16,9 @@
  */
 package com.chingo247.settlercraft.bukkit.commands;
 
+import com.chingo247.menu.CategoryMenu;
+import com.chingo247.menu.util.EconomyUtil;
+import com.chingo247.menu.util.ShopUtil;
 import com.chingo247.settlercraft.bukkit.PermissionManager;
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
 import com.chingo247.settlercraft.structure.PlayerOwnership;
@@ -28,9 +31,6 @@ import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.structure.persistence.hibernate.StructureDAO;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sc.module.menuapi.menus.menu.CategoryMenu;
-import com.sc.module.menuapi.menus.menu.util.EconomyUtil;
-import com.sc.module.menuapi.menus.menu.util.ShopUtil;
 import java.util.List;
 import java.util.Set;
 import net.milkbowl.vault.economy.Economy;

@@ -16,14 +16,18 @@
  */
 package com.chingo247.settlercraft.structure.rollback;
 
-import com.chingo247.settlercraft.structure.persistence.orientdb.document.BlockDatabase;
-import java.lang.reflect.Field;
-import java.util.List;
+import com.chingo247.settlercraft.structure.persistence.HSQLServer;
+import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
+import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.jpa.hibernate.HibernateQuery;
+import java.util.Queue;
 import java.util.Timer;
-import org.PrimeSoft.blocksHub.BlocksHub;
-import org.PrimeSoft.blocksHub.Logic;
-import org.apache.log4j.Logger;
-import org.bukkit.Bukkit;
+import java.util.TimerTask;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
  *
@@ -32,31 +36,107 @@ import org.bukkit.Bukkit;
 public class BlockLogger {
     
     private final Timer timer;
-    private BlockLoggerTask task;
-    private final BlockDatabase database = new BlockDatabase();
+    private Queue<BlockLog> blocksQueue = new LinkedBlockingQueue<>();
+    private final Lock lock = new ReentrantLock();
+    private final int BATCH = 1_000;
+    private final int THRESHOLD = 1000;
+    
+    
+    private final TimerTask task = new TimerTask() {
+
+        @Override
+        public void run() {
+            if(blocksQueue.isEmpty())  return;
+            if(!lock.tryLock()) return;
+            
+            System.out.println("Logging...");
+            Session session = null;
+            Transaction tx = null;
+            try {
+               
+                session = HibernateUtil.getSession();
+                tx = session.beginTransaction();
+                int commited = 0;
+                long start = System.currentTimeMillis();
+                
+                while(blocksQueue.peek() != null && ((System.currentTimeMillis() - start) < THRESHOLD)) {
+                    session.persist(blocksQueue.poll());
+                    commited++;
+                    
+                    if(commited % BATCH == 0) {
+                        tx.commit();
+                        System.out.println("Committing: " + commited);
+                        System.out.println("Queue: " + blocksQueue.size());
+                        tx = session.beginTransaction();
+                        commited = 0;
+                    }
+                }
+                System.out.println("Committing: " + commited);
+                System.out.println("Queue: " + blocksQueue.size());
+               
+                
+                tx.commit();
+            } catch(Exception e) {
+                if(tx != null) {
+                    tx.rollback();
+                }
+                throw e;
+            } finally {
+                if(session != null) {
+                    session.close();
+                }
+                lock.unlock();
+            }
+            
+        }
+    };
+    
 
     public BlockLogger() {
-        BlocksHub b = (BlocksHub) Bukkit.getPluginManager().getPlugin("BlocksHub");
-        this.timer = new Timer("SettlerCraft-BlockLogger");
+//        BlocksHub b = (BlocksHub) Bukkit.getPluginManager().getPlugin("BlocksHub");
+//        this.timer = new Timer("SettlerCraft-BlockLogger");
         
-        try {
-            task = new BlockLoggerTask(database);
-            
-            Field mLogicField = b.getClass().getDeclaredField("m_logic");
-            mLogicField.setAccessible(true);
-            Logic logic = (Logic)mLogicField.get(b);
-          
-            Field mLoggersField = logic.getClass().getDeclaredField("m_loggers");
-            mLoggersField.setAccessible(true);
-            List list = (List) mLoggersField.get(logic);
-            list.add(task);
-        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
-            Logger.getLogger(this.getClass()).error(ex);
-        } 
+//        try {
+//            
+//            
+//            Field mLogicField = b.getClass().getDeclaredField("m_logic");
+//            mLogicField.setAccessible(true);
+//            Logic logic = (Logic)mLogicField.get(b);
+//          
+//            Field mLoggersField = logic.getClass().getDeclaredField("m_loggers");
+//            mLoggersField.setAccessible(true);
+//            List list = (List) mLoggersField.get(logic);
+//            list.add(task);
+//        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+//            Logger.getLogger(this.getClass()).error(ex);
+//        } 
+        this.timer = new Timer();
+        timer.scheduleAtFixedRate(task, 0, 1000);
     }
     
-    public void start() {
-        timer.scheduleAtFixedRate(task, 0, 10000);
+    public void logBlock(int x, int y, int z, int oldMaterial, byte oldData, int newMaterial, byte newData) {
+        blocksQueue.add(new BlockLog(x, y, z, oldMaterial, oldData, newMaterial, newData));
+    }
+    
+    public static void main(String[] args) {
+        HSQLServer.getInstance().start();
+        
+        Session session = HibernateUtil.getSession();
+        JPQLQuery query = new HibernateQuery(session);
+        QBlockLog qb = QBlockLog.blockLog;
+        long total = query.from(qb).count();
+        session.close();
+        
+        System.out.println("Total: " + total);
+        
+        
+        BlockLogger logger = new BlockLogger();
+        for(int j = 0; j < 100; j++) {
+            for(int i = 0; i < 100_000; i++) {
+                logger.logBlock(i, i, i, 10, new Integer(0).byteValue(), i, new Integer(0).byteValue());
+            }
+        }
+        
     }
     
     

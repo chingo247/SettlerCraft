@@ -16,6 +16,7 @@
  */
 package com.chingo247.settlercraft.bukkit;
 
+import com.chingo247.menu.CategoryMenu;
 import com.chingo247.settlercraft.bukkit.PermissionManager.Perms;
 import com.chingo247.settlercraft.bukkit.commands.ConstructionCommandExecutor;
 import com.chingo247.settlercraft.bukkit.commands.SettlerCraftCommandExecutor;
@@ -34,7 +35,6 @@ import com.chingo247.settlercraft.structure.plan.PlanMenuManager;
 import com.chingo247.settlercraft.structure.rollback.BlockLogger;
 import com.chingo247.xcore.platforms.bukkit.BukkitPlatform;
 import com.mysema.query.jpa.hibernate.HibernateUpdateClause;
-import com.sc.module.menuapi.menus.menu.CategoryMenu;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -100,7 +100,6 @@ public class SettlerCraftPlugin extends JavaPlugin {
                 
 //                OrientDBServer server = new OrientDBServer();
 //                server.start();
-            new BlockLogger().start();
             } catch (Exception ex) {
                 java.util.logging.Logger.getLogger(SettlerCraftPlugin.class.getName()).log(Level.SEVERE, null, ex);
             }

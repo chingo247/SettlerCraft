@@ -17,14 +17,14 @@
 
 package com.chingo247.settlercraft.structure.plan;
 
+import com.chingo247.menu.CategoryMenu;
+import com.chingo247.menu.MenuAPI;
 import com.chingo247.settlercraft.bukkit.BukkitStructureAPI;
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
 import com.chingo247.settlercraft.structure.exception.StructureAPIException;
 import com.chingo247.settlercraft.structure.exception.StructureDataException;
 import com.chingo247.settlercraft.structure.persistence.hibernate.SchematicDataDAO;
 import com.chingo247.settlercraft.structure.util.FileUtil;
-import com.sc.module.menuapi.menus.menu.CategoryMenu;
-import com.sc.module.menuapi.menus.menu.MenuAPI;
 import com.sk89q.worldedit.data.DataException;
 import java.io.File;
 import java.io.IOException;
