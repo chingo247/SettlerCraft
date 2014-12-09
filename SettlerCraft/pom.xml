@@ -78,14 +78,14 @@
             <groupId>com.thirdparty</groupId>
             <artifactId>prism</artifactId>
             <version>2.0.4</version>
-            <!--<scope>provided</scope>-->
+            <scope>provided</scope>
         </dependency>
         <!--Bukkit-->
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
             <version>1.7.10</version>
-            <!--<scope>provided</scope>-->
+            <scope>provided</scope>
         </dependency>
         <!--holographicDisplays-->
         <dependency>
@@ -99,14 +99,14 @@
             <groupId>com.thirdparty</groupId>
             <artifactId>asyncworldedit</artifactId>  
             <version>2.0.0</version>
-            <!--<scope>provided</scope>-->
+            <scope>provided</scope>
         </dependency>
         <!--AsyncWorldEdi-Injector-->
         <dependency>
             <groupId>com.thirdparty</groupId>
             <artifactId>asyncworldedit-injector</artifactId>  
             <version>2.0.0</version>
-            <!--<scope>provided</scope>-->
+            <scope>provided</scope>
         </dependency>
         <!--WorldGuard-->
         <dependency>
@@ -120,7 +120,7 @@
             <groupId>com.thirdparty</groupId>
             <artifactId>worldedit</artifactId>  
             <version>6.0-3308</version>
-            <!--<scope>provided</scope>-->
+            <scope>provided</scope>
         </dependency>
         <!--Vault-->
         <dependency>
@@ -145,38 +145,6 @@
             <version>2.3.2</version>
             <scope>compile</scope>
         </dependency>
-        
-        <!--         MongoDB 
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongo-java-driver</artifactId>
-            <version>2.12.4</version>
-        </dependency>-->
-        
-        <!-- OrientDB -->
-        
-        <dependency>
-            <groupId>com.orientechnologies</groupId>
-            <artifactId>orientdb-enterprise</artifactId>
-            <version>2.0-M2</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.orientechnologies</groupId>
-            <artifactId>orientdb-client</artifactId>
-            <version>2.0-M2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.orientechnologies</groupId>
-            <artifactId>orient-commons</artifactId>
-            <version>2.0-M1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.orientechnologies</groupId>
-            <artifactId>orientdb-object</artifactId>
-            <version>2.0-M2</version>
-        </dependency>
-
 
 
         

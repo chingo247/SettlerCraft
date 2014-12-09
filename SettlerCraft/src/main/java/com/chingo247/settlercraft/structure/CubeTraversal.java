@@ -25,13 +25,10 @@ import com.sk89q.worldedit.Vector;
  */
 public class CubeTraversal {
 
-    private Vector size;
+    private final Vector size;
     private final int cubeX, cubeY, cubeZ;
-
     private int xIndex = 0, yIndex = 0, zIndex = 0;
-
     private int xCubeIndex = 0, yCubeIndex = 0, zCubeIndex = 0;
-
     private Vector current;
 
     public CubeTraversal(Vector size, int cubeX, int cubeY, int cubeZ) {
@@ -60,7 +57,7 @@ public class CubeTraversal {
         this.cubeX = cubeX;
         this.cubeY = cubeY;
         this.cubeZ = cubeZ;
-        this.current = new BlockVector(current);
+        this.current = current;
         this.xCubeIndex = xCubeIndex;
         this.xIndex = xIndex;
         this.yCubeIndex = yCubeIndex;
@@ -72,17 +69,29 @@ public class CubeTraversal {
     
 
     public Vector next() {
-        Vector v = new BlockVector((xCubeIndex * cubeX) + xIndex, yIndex, (zCubeIndex * cubeZ) + zIndex);
+        Vector v = new BlockVector((xCubeIndex * cubeX) + xIndex, (yCubeIndex * cubeY) + yIndex, (zCubeIndex * cubeZ) + zIndex);
 
+        // Stop condition!
+        if(((cubeY * yCubeIndex) + yIndex) >= size.getBlockY()) {
+            return null;
+        }
+
+        
         xIndex++;
         
         if (xIndex % cubeX == 0 || ((xCubeIndex * cubeX) + xIndex) >= size.getBlockX()) {
             xIndex = 0;
             zIndex++;
 
-            if (zIndex % cubeZ == 0 || zIndex == size.getBlockZ() || ((zCubeIndex * cubeZ) + zIndex) >= size.getBlockZ()) {
+            if (zIndex % cubeZ == 0 || ((zCubeIndex * cubeZ) + zIndex) >= size.getBlockZ()) {
                 zIndex = 0;
-                xCubeIndex++;
+                yIndex++;
+//                xCubeIndex++;
+                if(yIndex % cubeY == 0  || ((yCubeIndex * cubeY) + yIndex) >= size.getBlockY()) {
+                    yIndex= 0;
+                    xCubeIndex++;
+                }
+                
             }
         } 
 
@@ -96,30 +105,30 @@ public class CubeTraversal {
             yCubeIndex++;
         }
         
-//        if(((cubeY * yCubeIndex) + yIndex) == size.getBlockY()) {
-//            return null;
-//        }
 
+        
+        
         return v;
 
     }
     
     public boolean hasNext() {
-        return this.clone().next() != null;
+        return this.copy().next() != null;
     }
     
-    public CubeTraversal clone() {
+    public CubeTraversal copy() {
         return new CubeTraversal(size, cubeX, cubeY, cubeZ, current, xIndex, yIndex, zIndex, xCubeIndex, yCubeIndex, zCubeIndex);
     }
 
     public static void main(String[] args) {
-        CubeTraversal ct = new CubeTraversal(new Vector(9, 0, 9), 2, 2, 2);
+        CubeTraversal ct = new CubeTraversal(new Vector(10, 10, 10), 2, 2, 2);
         Vector v;
         int count = 0;
-        while (count < 81) {
+        while (ct.hasNext()) {
             v = ct.next();
-            System.out.println("x: " + (v.getBlockX()) + " z: " + v.getBlockZ());
+            System.out.println("x: " + (v.getBlockX()) + " y: " + v.getBlockY() + " z: " + v.getBlockZ());
             count++;
+            
         }
         System.out.println("Count: " + count);
     }
