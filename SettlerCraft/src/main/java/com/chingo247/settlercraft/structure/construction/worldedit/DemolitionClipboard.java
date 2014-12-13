@@ -17,6 +17,7 @@
 
 package com.chingo247.settlercraft.structure.construction.worldedit;
 
+import com.chingo247.settlercraft.structure.construction.DemolitionOptions;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
@@ -33,8 +34,8 @@ public class DemolitionClipboard extends StructureAsyncClipboard {
 
     
 
-    public DemolitionClipboard(CuboidClipboard parent, Comparator<StructureBlock> comparator) {
-        super(parent, comparator);
+    public DemolitionClipboard(CuboidClipboard parent, DemolitionOptions options) {
+        super(parent, options);
     }
 
     @Override

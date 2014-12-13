@@ -24,6 +24,8 @@ import static com.chingo247.settlercraft.structure.Structure.State.DEMOLISHING;
 import com.chingo247.settlercraft.structure.construction.BuildOptions;
 import com.chingo247.settlercraft.structure.construction.ConstructionManager;
 import com.chingo247.settlercraft.structure.construction.DemolitionOptions;
+import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncWorldEditUtil;
+import com.chingo247.settlercraft.structure.construction.asyncworldedit.SCAsyncClipboard;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.SCIBlockPlacerListener;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.SCIJobListener;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.SCJobEntry;
@@ -31,20 +33,35 @@ import com.chingo247.settlercraft.structure.exception.ConstructionException;
 import com.chingo247.settlercraft.structure.exception.StructureDataException;
 import com.chingo247.settlercraft.structure.persistence.hibernate.StructureDAO;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structure.world.Dimension;
+import com.sk89q.worldedit.CuboidClipboard;
+import com.sk89q.worldedit.MaxChangedBlocksException;
+import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.world.World;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import me.botsko.prism.Prism;
+import me.botsko.prism.actionlibs.ActionsQuery;
+import me.botsko.prism.actionlibs.QueryParameters;
+import me.botsko.prism.actionlibs.QueryResult;
+import me.botsko.prism.actions.Handler;
+import me.botsko.prism.appliers.PrismProcessType;
+import org.bukkit.Bukkit;
+import org.bukkit.util.Vector;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
  *
@@ -54,9 +71,11 @@ public class StructureTaskHandler extends ConstructionHandler {
 
     private final StructureDAO structureDAO = new StructureDAO();
     private final Map<Long, ConstructionEntry> entries = Collections.synchronizedMap(new HashMap<Long, ConstructionEntry>());
+    private final Prism prism;
 
     public StructureTaskHandler(final AbstractStructureAPI api, ExecutorService service) {
         super(api, service);
+        this.prism = (Prism) Bukkit.getPluginManager().getPlugin("Prism");
         final BlockPlacer blockPlacer = AsyncWorldEditMain.getInstance().getBlockPlacer();
         blockPlacer.addListener(new SCIBlockPlacerListener() {
 
@@ -107,6 +126,8 @@ public class StructureTaskHandler extends ConstructionHandler {
             entries.remove(structure.getId());
         }
     }
+    
+   
 
     private void build(final Player player, final UUID uuid, final Structure structure, final BuildOptions options, final boolean force) {
         executor.execute(structure.getId(), new Runnable() {
@@ -159,6 +180,50 @@ public class StructureTaskHandler extends ConstructionHandler {
             }
 
         });
+    }
+    
+    public void rollback(final Player player, Structure structure, Date targetDate) {
+        Dimension dim = structure.getDimension();
+        String world = structure.getWorldName();
+        
+        QueryParameters params = new QueryParameters();
+        
+        params.setSinceTime(targetDate.getTime());
+        params.setBeforeTime(new Date().getTime());
+        params.setWorld(world);
+        params.setMinLocation(new Vector(dim.getMinX(), dim.getMinY(), dim.getMinZ()));
+        params.setMaxLocation(new Vector(dim.getMaxX(), dim.getMaxY(), dim.getMaxZ()));
+        params.setProcessType(PrismProcessType.LOOKUP);
+        ActionsQuery aq = new ActionsQuery(prism);
+        
+        QueryResult lookupResult = aq.lookup(params);
+        HashMap<Integer, Handler> map = new HashMap<>();
+        for(Handler h : lookupResult.getActionResults()) {
+            int key = Objects.hashCode(String.valueOf(h.getX() + "" + h.getY() + "" + h.getZ()));
+            Handler current = map.get(key);
+            
+            // 
+            if(current == null ||(current.getId() > h.getId())) {
+                map.put(key, h);
+            }
+        }
+        
+        CuboidClipboard cc = new CuboidClipboard(new com.sk89q.worldedit.Vector(dim.getMaxX() - dim.getMinX(), dim.getMaxY() - dim.getMinY(), dim.getMaxZ() - dim.getMinZ()));
+        for(Handler h : map.values()) {
+            com.sk89q.worldedit.Vector v = structure.getRelativePosition(new com.sk89q.worldedit.Vector(h.getX(), h.getY(), h.getZ()));
+            cc.setBlock(v, new BaseBlock(h.getOldBlockId(), h.getOldBlockSubId()));
+        }
+        
+        AsyncEditSession editSession = (AsyncEditSession)AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(WorldEditUtil.getWorld(world), -1, player);
+        
+        PlayerEntry plyEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+        SCAsyncClipboard asyncStructureClipboard = new SCAsyncClipboard(plyEntry, cc, structure.getId());
+        try {
+            asyncStructureClipboard.place(editSession, structure.getDimension().getMinPosition(), false, false);
+        } catch (MaxChangedBlocksException ex) {
+            throw new AssertionError(ex); // Should never happen
+        }
+        
     }
 
     public void build(final Player player, final Structure structure, final BuildOptions options, final boolean force) {

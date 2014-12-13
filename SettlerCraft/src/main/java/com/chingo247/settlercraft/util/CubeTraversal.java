@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structure;
+package com.chingo247.settlercraft.util;
 
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
@@ -119,20 +119,6 @@ public class CubeTraversal {
     public CubeTraversal copy() {
         return new CubeTraversal(size, cubeX, cubeY, cubeZ, current, xIndex, yIndex, zIndex, xCubeIndex, yCubeIndex, zCubeIndex);
     }
-
-    public static void main(String[] args) {
-        CubeTraversal ct = new CubeTraversal(new Vector(10, 10, 10), 2, 2, 2);
-        Vector v;
-        int count = 0;
-        while (ct.hasNext()) {
-            v = ct.next();
-            System.out.println("x: " + (v.getBlockX()) + " y: " + v.getBlockY() + " z: " + v.getBlockZ());
-            count++;
-            
-        }
-        System.out.println("Count: " + count);
-    }
     
-    
-
+  
 }

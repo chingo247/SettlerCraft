@@ -71,8 +71,8 @@ public class ConstructionCommandExecutor implements CommandExecutor {
                 return build(player, args);
             case "demolish":
                 return demolish(player, args);
-//            case "rollback":
-//                return rollback(player, args);
+            case "rollback":
+                return rollback(player, args);
             default:
                 player.sendMessage(ChatColor.RED + "No actions known for: " + arg);
                 cs.sendMessage(new String[]{
@@ -235,5 +235,23 @@ public class ConstructionCommandExecutor implements CommandExecutor {
 //
 //        return true;
 //    }
+
+    private boolean rollback(Player player, String[] args) {
+        long structureID;
+        try {
+            structureID = Long.parseLong(args[1]);
+        } catch (NumberFormatException e) {
+            player.sendMessage("Invalid id...");
+            return true;
+        }
+        
+        Structure structure = structureDAO.find(structureID);
+        
+        structureAPI.rollback(player, structure, structure.getLog().getCreatedAt());
+        
+        return true;
+        
+        
+    }
     
 }

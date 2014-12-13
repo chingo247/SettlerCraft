@@ -247,9 +247,9 @@ public class StructureCommandExecutor implements CommandExecutor {
         } else if (args.length == 1 && (sender instanceof Player)) {
             Player player = (Player) sender;
             
-            LocalPlayer lp = WorldEditUtil.wrapPlayer(player);
+            Location l = player.getLocation();
             
-            structure = structureDAO.getStructure(CMD, MAX_LINES, MAX_LINES, MAX_LINES);
+            structure = structureDAO.getStructure(l.getWorld().getName(), l.getBlockX(), l.getBlockY(), l.getBlockZ());
             if (structure == null) {
                 sender.sendMessage(ChatColor.RED + " Currently not within a structure");
                 return true;

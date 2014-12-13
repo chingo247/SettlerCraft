@@ -46,7 +46,7 @@ public class BuildTask extends ConstructionTask {
         CuboidClipboard clipboard = getClipboard();
         if (clipboard != null) {
             SchematicUtil.align(clipboard, direction);
-            ConstructionClipboard constructionClipboard = new ConstructionClipboard(clipboard, options.getPattern().getComparator());
+            ConstructionClipboard constructionClipboard = new ConstructionClipboard(clipboard, options);
             doTask(constructionClipboard, position, options.noAir(), false);
         }
     }

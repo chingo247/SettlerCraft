@@ -23,8 +23,35 @@ package com.chingo247.settlercraft.structure.construction;
 public abstract class ConstructionOptions {
     
     private Pattern buildPattern = Pattern.createCompromisePattern();
+    private int xLayer = 16;
+    private int yLayer = -1;
+    private int zLayer = 16;
 
     ConstructionOptions() {
+    }
+    
+     public void setxLayer(int xLayer) {
+        this.xLayer = xLayer;
+    }
+
+    public void setyLayer(int yLayer) {
+        this.yLayer = yLayer;
+    }
+
+    public void setzLayer(int zLayer) {
+        this.zLayer = zLayer;
+    }
+
+    public int getXCube() {
+        return xLayer;
+    }
+
+    public int getYCube() {
+        return yLayer;
+    }
+
+    public int getZCube() {
+        return zLayer;
     }
 
      /**

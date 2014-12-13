@@ -18,6 +18,7 @@ package com.chingo247.settlercraft.structure;
 
 import com.chingo247.settlercraft.structure.construction.BuildOptions;
 import com.chingo247.settlercraft.structure.construction.DemolitionOptions;
+import com.chingo247.settlercraft.structure.event.structure.StructureCreateEvent;
 import com.chingo247.settlercraft.structure.exception.StructureDataException;
 import com.chingo247.settlercraft.structure.exception.StructureException;
 import com.chingo247.settlercraft.structure.persistence.hibernate.SchematicDataDAO;
@@ -57,7 +58,7 @@ public class StructureAPI extends AbstractStructureAPI<Player, World> {
 
     @Override
     public Structure create(Player player, StructurePlan plan, World world, Vector pos, Direction direction) throws StructureException {
-         // Retrieve schematic, should never return null as schematic data is stored in database on start up
+        // Retrieve schematic, should never return null as schematic data is stored in database on start up
         SchematicData schematicData = schematicDataDAO.find(plan.getChecksum());
 
         // Check if it is a valid location
@@ -92,10 +93,8 @@ public class StructureAPI extends AbstractStructureAPI<Player, World> {
 
             FileUtils.copyFile(config, new File(STRUCTURE_DIR, "StructurePlan.xml"));
             FileUtils.copyFile(schematicFile, new File(STRUCTURE_DIR, schematicFile.getName()));
-        } catch (IOException ex) {
-
-            java.util.logging.Logger.getLogger(StructureAPI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-            throw new StructureDataException(ChatColors.RED + "Couldn't copy data for structure");
+        } catch (IOException ex) {   
+            throw new AssertionError(ex);
         }
 
         

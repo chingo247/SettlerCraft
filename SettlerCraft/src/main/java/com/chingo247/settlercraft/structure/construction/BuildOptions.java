@@ -22,15 +22,19 @@ package com.chingo247.settlercraft.structure.construction;
  */
 public final class BuildOptions extends ConstructionOptions {
 
-    
     private boolean noAir;
     private boolean placeFence ;
+    private int xLayer = 16;
+    private int yLayer = 16;
+    private int zLayer = 16;
 
     
     public BuildOptions(boolean noAir) {
         this(noAir, true);
         
     }
+
+   
     
     public BuildOptions(boolean noAir, boolean placeFence) {
         this.noAir = noAir;
@@ -53,10 +57,4 @@ public final class BuildOptions extends ConstructionOptions {
         this.placeFence = placeFence;
     }
     
-    
-    
-    
-    
-   
-
 }

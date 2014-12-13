@@ -41,6 +41,7 @@ import com.sk89q.worldguard.protection.managers.storage.StorageException;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.io.File;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import org.bukkit.Bukkit;
@@ -69,6 +70,9 @@ public class BukkitStructureAPI extends AbstractStructureAPI<Player, World> {
     }
 
     private com.sk89q.worldedit.world.World wrapWorld(World world) {
+        if(world == null) {
+            return null;
+        }
         return WorldEditUtil.getWorld(world.getName());
     }
 
@@ -90,6 +94,10 @@ public class BukkitStructureAPI extends AbstractStructureAPI<Player, World> {
             structureHologramManager.init();
             structureOverviewManager.init();
         }
+    }
+    
+    public void rollback(Player player, Structure structure, Date date) {
+        structureTaskHandler.rollback(WorldEditUtil.wrapPlayer(player), structure, date);
     }
 
     public Structure create(StructurePlan plan, Location location, Direction direction) throws StructureException {

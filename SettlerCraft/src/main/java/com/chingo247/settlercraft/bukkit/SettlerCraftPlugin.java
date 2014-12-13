@@ -32,7 +32,6 @@ import com.chingo247.settlercraft.structure.persistence.HSQLServer;
 import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.structure.persistence.hibernate.ValidationService;
 import com.chingo247.settlercraft.structure.plan.PlanMenuManager;
-import com.chingo247.settlercraft.structure.rollback.BlockLogger;
 import com.chingo247.xcore.platforms.bukkit.BukkitPlatform;
 import com.mysema.query.jpa.hibernate.HibernateUpdateClause;
 import java.io.File;
@@ -93,17 +92,7 @@ public class SettlerCraftPlugin extends JavaPlugin {
             return;
         }
         
-        if(Bukkit.getPluginManager().getPlugin("BlocksHub") != null) {
-            System.out.println("Initialzing SettlerCraft-BlockLogger");
-            
-            try {
-                
-//                OrientDBServer server = new OrientDBServer();
-//                server.start();
-            } catch (Exception ex) {
-                java.util.logging.Logger.getLogger(SettlerCraftPlugin.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+
         
         try {
             configProvider.load();

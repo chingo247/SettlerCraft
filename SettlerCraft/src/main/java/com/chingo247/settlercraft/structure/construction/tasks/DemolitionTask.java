@@ -57,7 +57,7 @@ public class DemolitionTask extends ConstructionTask {
         CuboidClipboard clipboard = getClipboard();
         if (clipboard != null) {
             SchematicUtil.align(clipboard, direction);
-            DemolitionClipboard demolitionClipboard = new DemolitionClipboard(clipboard, options.getPattern().getComparator());
+            DemolitionClipboard demolitionClipboard = new DemolitionClipboard(clipboard, options);
             doTask(demolitionClipboard, position, false, true);
         }
     }

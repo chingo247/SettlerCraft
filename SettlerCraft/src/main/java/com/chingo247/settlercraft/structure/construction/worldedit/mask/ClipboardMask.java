@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Chingo247
+ * Copyright (C) 2014 Chingo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,33 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.chingo247.settlercraft.structure.construction.worldedit.mask;
 
-package com.chingo247.settlercraft.structure.construction.worldedit;
-
-import com.chingo247.settlercraft.structure.construction.ConstructionOptions;
 import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import java.util.Comparator;
+import com.sk89q.worldedit.function.mask.Mask;
 
 /**
  *
  * @author Chingo
  */
-public class ConstructionClipboard extends StructureAsyncClipboard {
-
+public abstract class ClipboardMask implements Mask {
     
-    public ConstructionClipboard(CuboidClipboard parent, ConstructionOptions options) {
-        super(parent, options);
+    private final CuboidClipboard clipboard;
+
+    public ClipboardMask(CuboidClipboard clipboard) {
+        this.clipboard = clipboard;
     }
 
-
-    
-
-    @Override
-    public void doblock(EditSession session, BaseBlock b, Vector blockPos, Vector pos) {
-        session.rawSetBlock(blockPos.add(pos), b);
+    protected CuboidClipboard getClipboard() {
+        return clipboard;
     }
-
+    
+    
 }

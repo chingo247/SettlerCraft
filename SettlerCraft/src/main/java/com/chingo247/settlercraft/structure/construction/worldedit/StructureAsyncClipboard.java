@@ -16,15 +16,17 @@
  */
 package com.chingo247.settlercraft.structure.construction.worldedit;
 
-import com.sk89q.worldedit.BlockVector;
+import com.chingo247.settlercraft.util.CubeTraversal;
+import com.chingo247.settlercraft.structure.construction.ConstructionOptions;
+import com.chingo247.settlercraft.structure.construction.worldedit.mask.ReplaceBlockClipboardMask;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
-import java.util.Comparator;
+import com.sk89q.worldedit.blocks.BlockID;
+import com.sk89q.worldedit.blocks.BlockType;
 import java.util.PriorityQueue;
-import java.util.Queue;
 
 /**
  *
@@ -32,36 +34,124 @@ import java.util.Queue;
  */
 public abstract class StructureAsyncClipboard extends SmartClipboard {
 
-    private final Comparator<StructureBlock> CONSTRUCTION_ORDER;
+    private static final int PRIORITY_FIRST = 4;
+    private static final int PRIORITY_LIQUID = 3;
+    private static final int PRIORITY_LATER = 2;
+    private static final int PRIORITY_FINAL = 1;
+    private final ConstructionOptions options;
+    private static final int BLOCK_BETWEEN = 100;
+    private static final int MAX_PLACE_LATER_TO_PLACE = 10;
 
-    public StructureAsyncClipboard(CuboidClipboard parent, Comparator<StructureBlock> constructionOrder) {
+    public StructureAsyncClipboard(CuboidClipboard parent, ConstructionOptions options) {
         super(parent);
-        this.CONSTRUCTION_ORDER = constructionOrder;
+        this.options = options;
+        
+        
     }
 
     @Override
     public void place(EditSession editSession, Vector pos, boolean noAir) throws MaxChangedBlocksException {
-        Queue<StructureBlock> structurequeu = new PriorityQueue<>(10, CONSTRUCTION_ORDER);
-        for (int y = 0; y < getHeight(); y++) {
-            for (int x = 0; x < getWidth(); x++) {
-                for (int z = 0; z < getLength(); z++) {
-                    final BlockVector v = new BlockVector(x, y, z);
-                    BaseBlock b = getBlock(v);
-                    if (b == null || (noAir && b.isAir())) {
-                        continue;
-                    }
+        int x = options.getXCube()<= 0 ? getSize().getBlockX(): options.getXCube();
+        int y = options.getYCube()<= 0 ? getSize().getBlockY(): options.getYCube();
+        int z = options.getZCube()<= 0 ? getSize().getBlockZ(): options.getZCube();
+        
+        ReplaceBlockClipboardMask mask = new ReplaceBlockClipboardMask(this, 35, 14, 35, 11);
+        
+        CubeTraversal traversal = new CubeTraversal(getSize(), x, y, z);
+        PriorityQueue<StructureBlock> placeLater = new PriorityQueue<>();
 
-                    structurequeu.add(new StructureBlock(v, b));
+        int placeLaterPlaced = 0;
+        int placeLaterPause = 0;
+        
+        
+
+        // Cube traverse this clipboard
+        while (traversal.hasNext()) {
+            Vector v = traversal.next();
+            
+            if(mask.test(v)) {
+                setBlock(v, new BaseBlock(mask.getMaterial(), mask.getData()));
+            }
+            
+            BaseBlock b = getBlock(v);
+            if(b == null) continue;
+            
+            int priority = getPriority(b);
+
+            if (priority == PRIORITY_FIRST) {
+                doblock(editSession, b, v, pos);
+            } else {
+                placeLater.add(new StructureBlock(v, b));
+            }
+
+            // For every 10 place intensive blocks, place 100 normal blocks
+            if (placeLaterPause > 0) {
+                placeLaterPause--;
+            } else {
+                
+                // only place after a greater ZCube-value, this way torches and other attachables will not be placed against air and break
+                while (placeLater.peek() != null && (getCube(placeLater.peek().getPosition().getBlockZ(), options.getZCube()) < (getCube(v.getBlockZ(), options.getZCube())))) {
+                    StructureBlock plb = placeLater.poll();
+                    doblock(editSession, plb.getBlock(), plb.getPosition(), pos);
+                    placeLaterPlaced++;
+                    if (placeLaterPlaced >= MAX_PLACE_LATER_TO_PLACE) {
+                        placeLaterPause = BLOCK_BETWEEN;
+                        placeLaterPlaced = 0;
+                    }
                 }
             }
-        }
+            
 
-        while (structurequeu.peek() != null) {
-            StructureBlock b = structurequeu.poll();
-            doblock(editSession, b.getBlock(), b.getPosition(), pos);
+        }
+        // Empty the queue
+        while (placeLater.peek() != null) {
+            StructureBlock plb = placeLater.poll();
+            doblock(editSession, plb.getBlock(), plb.getPosition(), pos);
         }
     }
 
     public abstract void doblock(EditSession session, BaseBlock b, Vector blockPos, Vector pos);
+
+    private int getCube(int index, int cube) {
+        if (index % cube == 0) {
+            return index / cube;
+        } else {
+            index -= (index % cube);
+            return index / cube;
+        }
+    }
+
+    private int getPriority(BaseBlock block) {
+        if (isWater(block) || isLava(block)) {
+            return PRIORITY_LIQUID;
+        }
+
+        if (BlockType.shouldPlaceLast(block.getId())) {
+            return PRIORITY_LATER;
+        }
+
+        if (BlockType.shouldPlaceFinal(block.getId())) {
+            return PRIORITY_FINAL;
+        }
+
+        return PRIORITY_FIRST;
+
+    }
+
+    private boolean isLava(BaseBlock b) {
+        int bi = b.getType();
+        if (bi == BlockID.LAVA || bi == BlockID.STATIONARY_LAVA) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isWater(BaseBlock b) {
+        int bi = b.getType();
+        if (bi == BlockID.WATER || bi == BlockID.STATIONARY_WATER) {
+            return true;
+        }
+        return false;
+    }
 
 }
