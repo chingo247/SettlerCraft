@@ -122,6 +122,11 @@ public class Dimension implements Serializable {
         return new Vector(maxX, maxY, maxZ);
     }
 
+    @Override
+    public String toString() {
+        return "minX: " + minX + " minY: " + minY + " minZ: " + minZ + " maxX: " + maxX + " maxY: " + maxY + " maxZ: " + maxZ;    
+    }
+
 
 
 }

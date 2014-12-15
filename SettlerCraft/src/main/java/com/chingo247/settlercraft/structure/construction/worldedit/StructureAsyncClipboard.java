@@ -16,7 +16,7 @@
  */
 package com.chingo247.settlercraft.structure.construction.worldedit;
 
-import com.chingo247.settlercraft.util.CubeTraversal;
+import com.chingo247.settlercraft.util.CubicIterator;
 import com.chingo247.settlercraft.structure.construction.ConstructionOptions;
 import com.chingo247.settlercraft.structure.construction.worldedit.mask.ReplaceBlockClipboardMask;
 import com.sk89q.worldedit.CuboidClipboard;
@@ -57,7 +57,7 @@ public abstract class StructureAsyncClipboard extends SmartClipboard {
         
         ReplaceBlockClipboardMask mask = new ReplaceBlockClipboardMask(this, 35, 14, 35, 11);
         
-        CubeTraversal traversal = new CubeTraversal(getSize(), x, y, z);
+        CubicIterator traversal = new CubicIterator(getSize(), x, y, z);
         PriorityQueue<StructureBlock> placeLater = new PriorityQueue<>();
 
         int placeLaterPlaced = 0;

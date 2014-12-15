@@ -23,7 +23,7 @@ import com.sk89q.worldedit.Vector;
  *
  * @author Chingo
  */
-public class CubeTraversal {
+public class CubicIterator {
 
     private final Vector size;
     private final int cubeX, cubeY, cubeZ;
@@ -31,7 +31,7 @@ public class CubeTraversal {
     private int xCubeIndex = 0, yCubeIndex = 0, zCubeIndex = 0;
     private Vector current;
 
-    public CubeTraversal(Vector size, int cubeX, int cubeY, int cubeZ) {
+    public CubicIterator(Vector size, int cubeX, int cubeY, int cubeZ) {
         this.size = size;
         this.cubeX = cubeX;
         this.cubeY = cubeY;
@@ -52,7 +52,7 @@ public class CubeTraversal {
      * @param yCubeIndex
      * @param zCubeIndex 
      */
-    private CubeTraversal(Vector size, int cubeX, int cubeY, int cubeZ, Vector current, int xIndex, int yIndex, int zIndex, int xCubeIndex, int yCubeIndex, int zCubeIndex) {
+    private CubicIterator(Vector size, int cubeX, int cubeY, int cubeZ, Vector current, int xIndex, int yIndex, int zIndex, int xCubeIndex, int yCubeIndex, int zCubeIndex) {
         this.size = new BlockVector(size);
         this.cubeX = cubeX;
         this.cubeY = cubeY;
@@ -75,7 +75,6 @@ public class CubeTraversal {
         if(((cubeY * yCubeIndex) + yIndex) >= size.getBlockY()) {
             return null;
         }
-
         
         xIndex++;
         
@@ -105,9 +104,6 @@ public class CubeTraversal {
             yCubeIndex++;
         }
         
-
-        
-        
         return v;
 
     }
@@ -116,8 +112,8 @@ public class CubeTraversal {
         return this.copy().next() != null;
     }
     
-    public CubeTraversal copy() {
-        return new CubeTraversal(size, cubeX, cubeY, cubeZ, current, xIndex, yIndex, zIndex, xCubeIndex, yCubeIndex, zCubeIndex);
+    public CubicIterator copy() {
+        return new CubicIterator(size, cubeX, cubeY, cubeZ, current, xIndex, yIndex, zIndex, xCubeIndex, yCubeIndex, zCubeIndex);
     }
     
   
