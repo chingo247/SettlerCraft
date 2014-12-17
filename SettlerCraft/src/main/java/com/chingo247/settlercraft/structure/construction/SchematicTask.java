@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structure.construction.tasks;
+package com.chingo247.settlercraft.structure.construction;
 
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.data.DataException;
@@ -28,13 +28,13 @@ import java.util.logging.Logger;
  *
  * @author Chingo
  */
-public class SchematicTask extends StructureAPITask {
+public class SchematicTask extends SettlerCraftTask {
     
     private final File schematic;
     private static final String SCHEMATIC_LOAD_FAIL = "Failed to load schematic";
     private CuboidClipboard clipboard = null;
 
-    public SchematicTask(ConstructionHandler handler, File schematic, long taskid) {
+    public SchematicTask(ConstructionTaskManager handler, File schematic, long taskid) {
         super(handler, taskid);
         this.schematic = schematic;
     }

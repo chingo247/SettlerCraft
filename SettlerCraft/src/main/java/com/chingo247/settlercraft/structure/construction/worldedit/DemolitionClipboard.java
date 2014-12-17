@@ -17,7 +17,7 @@
 
 package com.chingo247.settlercraft.structure.construction.worldedit;
 
-import com.chingo247.settlercraft.structure.construction.DemolitionOptions;
+import com.chingo247.settlercraft.structure.construction.options.DemolitionOptions;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;

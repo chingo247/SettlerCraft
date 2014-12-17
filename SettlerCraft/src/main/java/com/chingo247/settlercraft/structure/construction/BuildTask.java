@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structure.construction.tasks;
+package com.chingo247.settlercraft.structure.construction;
 
-import com.chingo247.settlercraft.structure.construction.BuildOptions;
+import com.chingo247.settlercraft.structure.construction.options.BuildOptions;
 import com.chingo247.settlercraft.structure.construction.worldedit.ConstructionClipboard;
-import com.chingo247.settlercraft.structure.util.SchematicUtil;
+import com.chingo247.settlercraft.util.SchematicUtil;
 import com.chingo247.settlercraft.structure.world.Direction;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
@@ -35,7 +35,7 @@ public class BuildTask extends ConstructionTask {
     
     private final BuildOptions options;
 
-    BuildTask(ConstructionHandler constructionHandler, long taskId, File schematic, Player tasker, UUID uuid, World world, Vector pos, Direction direction, BuildOptions options) {
+    BuildTask(ConstructionTaskManager constructionHandler, long taskId, File schematic, Player tasker, UUID uuid, World world, Vector pos, Direction direction, BuildOptions options) {
         super(constructionHandler, taskId, schematic, tasker, uuid, world, pos, direction);
         this.options = options;
     }

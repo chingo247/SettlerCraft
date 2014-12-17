@@ -21,7 +21,7 @@ import com.chingo247.settlercraft.structure.PlayerMembership;
 import com.chingo247.settlercraft.structure.PlayerOwnership;
 import com.chingo247.settlercraft.structure.Plot;
 import com.chingo247.settlercraft.structure.Structure;
-import com.chingo247.settlercraft.structure.schematic.SchematicData;
+import com.chingo247.settlercraft.structure.plan.schematic.SchematicData;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;

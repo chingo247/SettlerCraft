@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Chingo247
+ * Copyright (C) 2014 Chingo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,12 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structure.construction;
+package com.chingo247.settlercraft.util.functions;
 
 /**
- * Defines all demolition options, might grow in the future
+ *
  * @author Chingo
  */
-public final class DemolitionOptions extends ConstructionOptions {
+public class Maths {
+    
+    public static float sqrtF(int number, int root) {
+        return (float) Math.floor(Math.pow(number, ((double)1/root)));
+    }
+    
+    public static double sqrtD(int number, int root) {
+        return (double) sqrt(number, root);
+    }
+    
+    public static int sqrt(int number, int root) {
+        return (int) Math.floor(Math.pow(number, ((double)1/root)));
+    }
     
 }

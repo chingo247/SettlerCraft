@@ -1,4 +1,4 @@
-package com.chingo247.settlercraft.structure.util;
+package com.chingo247.settlercraft.util;
 
 ///*
 // * Copyright (C) 2014 Chingo247

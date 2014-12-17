@@ -16,8 +16,8 @@
  */
 package com.chingo247.settlercraft.structure.construction.worldedit;
 
-import com.chingo247.settlercraft.util.CubicIterator;
-import com.chingo247.settlercraft.structure.construction.ConstructionOptions;
+import com.chingo247.settlercraft.util.functions.CubicIterator;
+import com.chingo247.settlercraft.structure.construction.options.ConstructionOptions;
 import com.chingo247.settlercraft.structure.construction.worldedit.mask.ReplaceBlockClipboardMask;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;

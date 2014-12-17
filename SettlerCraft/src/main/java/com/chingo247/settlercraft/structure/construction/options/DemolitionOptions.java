@@ -14,26 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
-package com.chingo247.settlercraft.structure.util;
-
-import org.bukkit.Material;
-import org.bukkit.material.Attachable;
-import org.bukkit.material.Directional;
+package com.chingo247.settlercraft.structure.construction.options;
 
 /**
- *
+ * Defines all demolition options, might grow in the future
  * @author Chingo
  */
-public class MaterialUtil {
-    
-    public static boolean isDirectional(Material material, byte b) {
-        return (material.getNewData(b) instanceof Directional);
-    }
-    
-    public static boolean isAttachable(Material material, byte b) {
-        return (material.getNewData(b) instanceof Attachable);
-    }
+public final class DemolitionOptions extends ConstructionOptions {
     
 }

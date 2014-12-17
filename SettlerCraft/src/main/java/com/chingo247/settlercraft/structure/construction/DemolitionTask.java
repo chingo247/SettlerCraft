@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structure.construction.tasks;
+package com.chingo247.settlercraft.structure.construction;
 
-import com.chingo247.settlercraft.structure.construction.DemolitionOptions;
+import com.chingo247.settlercraft.structure.construction.options.DemolitionOptions;
 import com.chingo247.settlercraft.structure.construction.worldedit.DemolitionClipboard;
-import com.chingo247.settlercraft.structure.util.SchematicUtil;
+import com.chingo247.settlercraft.util.SchematicUtil;
 import com.chingo247.settlercraft.structure.world.Direction;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
@@ -46,7 +46,7 @@ public class DemolitionTask extends ConstructionTask {
      * @param direction The direction
      * @param options The DemolitionOption
      */
-    DemolitionTask(ConstructionHandler constructionHandler, long taskId, File schematic, Player player, UUID uuid, World world, Vector pos, Direction direction, DemolitionOptions options) {
+    DemolitionTask(ConstructionTaskManager constructionHandler, long taskId, File schematic, Player player, UUID uuid, World world, Vector pos, Direction direction, DemolitionOptions options) {
         super(constructionHandler, taskId, schematic, player, uuid , world, pos, direction);
         this.options = options;
     }

@@ -20,7 +20,7 @@ import com.chingo247.settlercraft.structure.exception.StructureDataException;
 import com.chingo247.settlercraft.structure.AbstractStructureAPI;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.plan.StructurePlanManager;
-import com.chingo247.settlercraft.structure.util.Elements;
+import com.chingo247.settlercraft.util.document.Elements;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;

@@ -16,15 +16,15 @@
  */
 package com.chingo247.settlercraft.structure;
 
-import com.chingo247.settlercraft.structure.construction.BuildOptions;
-import com.chingo247.settlercraft.structure.construction.DemolitionOptions;
+import com.chingo247.settlercraft.structure.construction.options.BuildOptions;
+import com.chingo247.settlercraft.structure.construction.options.DemolitionOptions;
 import com.chingo247.settlercraft.structure.event.structure.StructureCreateEvent;
 import com.chingo247.settlercraft.structure.exception.StructureDataException;
 import com.chingo247.settlercraft.structure.exception.StructureException;
 import com.chingo247.settlercraft.structure.persistence.hibernate.SchematicDataDAO;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structure.schematic.SchematicData;
-import com.chingo247.settlercraft.structure.util.SchematicUtil;
+import com.chingo247.settlercraft.structure.plan.schematic.SchematicData;
+import com.chingo247.settlercraft.util.SchematicUtil;
 import com.chingo247.settlercraft.structure.world.Dimension;
 import com.chingo247.settlercraft.structure.world.Direction;
 import com.chingo247.xcore.core.APlatform;

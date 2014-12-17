@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structure.schematic;
+package com.chingo247.settlercraft.structure.plan.schematic;
 
-import com.chingo247.settlercraft.structure.schematic.Schematic;
-import com.chingo247.settlercraft.structure.util.SchematicUtil;
+import com.chingo247.settlercraft.structure.plan.schematic.Schematic;
+import com.chingo247.settlercraft.util.SchematicUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.data.DataException;

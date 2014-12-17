@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.chingo247.settlercraft.structure.util;
+package com.chingo247.settlercraft.util;
 
 import com.chingo247.settlercraft.structure.world.Dimension;
 import com.chingo247.settlercraft.structure.world.Direction;
@@ -23,7 +23,7 @@ import static com.chingo247.settlercraft.structure.world.Direction.EAST;
 import static com.chingo247.settlercraft.structure.world.Direction.NORTH;
 import static com.chingo247.settlercraft.structure.world.Direction.SOUTH;
 import static com.chingo247.settlercraft.structure.world.Direction.WEST;
-import com.chingo247.settlercraft.structure.schematic.SchematicData;
+import com.chingo247.settlercraft.structure.plan.schematic.SchematicData;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;

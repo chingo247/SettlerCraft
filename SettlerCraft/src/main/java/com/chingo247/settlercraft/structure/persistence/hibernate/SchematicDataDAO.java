@@ -16,7 +16,7 @@
  */
 package com.chingo247.settlercraft.structure.persistence.hibernate;
 
-import com.chingo247.settlercraft.structure.schematic.SchematicData;
+import com.chingo247.settlercraft.structure.plan.schematic.SchematicData;
 
 /**
  *

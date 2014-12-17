@@ -26,16 +26,20 @@ import com.chingo247.settlercraft.bukkit.listener.PlanListener;
 import com.chingo247.settlercraft.bukkit.listener.PluginListener;
 import com.chingo247.settlercraft.structure.QStructure;
 import com.chingo247.settlercraft.structure.Structure;
+import com.chingo247.settlercraft.structure.construction.prism.DimensionRollback;
 import com.chingo247.settlercraft.structure.exception.SettlerCraftException;
 import com.chingo247.settlercraft.structure.exception.StructureAPIException;
 import com.chingo247.settlercraft.structure.persistence.HSQLServer;
 import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.structure.persistence.hibernate.ValidationService;
 import com.chingo247.settlercraft.structure.plan.PlanMenuManager;
+import com.chingo247.settlercraft.structure.world.Dimension;
 import com.chingo247.xcore.platforms.bukkit.BukkitPlatform;
 import com.mysema.query.jpa.hibernate.HibernateUpdateClause;
+import com.sk89q.worldedit.Vector;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -102,7 +106,8 @@ public class SettlerCraftPlugin extends JavaPlugin {
             return;
         }
         
-        
+        DimensionRollback rollback = new DimensionRollback(new Dimension(Vector.ZERO, new Vector(100, 30, 100)), new Date(), 50000);
+        rollback.lookup("myWorld", new Dimension(Vector.ZERO, Vector.ONE), new Date());
         
         // Init HSQL Server
         HSQLServer hSQLServer = HSQLServer.getInstance();

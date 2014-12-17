@@ -17,10 +17,10 @@
 package com.chingo247.settlercraft.structure;
 
 import com.chingo247.settlercraft.structure.Structure.State;
-import com.chingo247.settlercraft.structure.construction.BuildOptions;
-import com.chingo247.settlercraft.structure.construction.DemolitionOptions;
-import com.chingo247.settlercraft.structure.construction.Pattern;
-import com.chingo247.settlercraft.structure.construction.tasks.StructureTaskHandler;
+import com.chingo247.settlercraft.structure.construction.options.BuildOptions;
+import com.chingo247.settlercraft.structure.construction.options.DemolitionOptions;
+import com.chingo247.settlercraft.structure.construction.options.Pattern;
+import com.chingo247.settlercraft.structure.construction.StructureTaskManager;
 import com.chingo247.settlercraft.structure.event.EventManager;
 import com.chingo247.settlercraft.structure.event.structure.StructureStateChangeEvent;
 import com.chingo247.settlercraft.structure.event.subscribers.StructureSubscriber;
@@ -34,8 +34,8 @@ import com.chingo247.settlercraft.structure.plan.document.PlanDocument;
 import com.chingo247.settlercraft.structure.plan.document.PlanDocumentGenerator;
 import com.chingo247.settlercraft.structure.plan.document.PlanDocumentManager;
 import com.chingo247.settlercraft.structure.plan.document.StructureDocumentManager;
-import com.chingo247.settlercraft.structure.schematic.Schematic;
-import com.chingo247.settlercraft.structure.schematic.SchematicManager;
+import com.chingo247.settlercraft.structure.plan.schematic.Schematic;
+import com.chingo247.settlercraft.structure.plan.schematic.SchematicManager;
 import com.chingo247.settlercraft.structure.world.Dimension;
 import com.chingo247.settlercraft.structure.world.Direction;
 import com.chingo247.xcore.core.APlatform;
@@ -66,7 +66,7 @@ public abstract class AbstractStructureAPI<P, W> {
     private final PlanDocumentGenerator planGenerator;
     private final EventBus eventBus;
     protected final APlatform platform;
-    protected final StructureTaskHandler structureTaskHandler;
+    protected final StructureTaskManager structureTaskHandler;
     protected final IConfigProvider configProvider;
     protected final StructureDAO structureDAO;
     protected final PlayerOwnershipDAO playerOwnershipDAO;
@@ -76,7 +76,7 @@ public abstract class AbstractStructureAPI<P, W> {
 
     public AbstractStructureAPI(ExecutorService executor, APlatform platform, IConfigProvider provider, IPlugin plugin) {
         this.platform = platform;
-        this.structureTaskHandler = new StructureTaskHandler(this, executor);
+        this.structureTaskHandler = new StructureTaskManager(this, executor);
         this.structurePlanManager = new StructurePlanManager(this, executor);
         this.planDocumentManager = new PlanDocumentManager(this, executor);
         this.structureDocumentManager = new StructureDocumentManager(this, executor);

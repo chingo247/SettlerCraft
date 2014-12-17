@@ -14,9 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.util;
+package com.chingo247.settlercraft.util.functions;
 
 import com.chingo247.settlercraft.structure.world.Dimension;
+import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.Vector;
 
 /**
@@ -31,6 +32,7 @@ public class DimensionIterator {
     private final int xRange, yRange, zRange;
 
     public DimensionIterator(Dimension dimension, int xRange, int yRange, int zRange) {
+//        Preconditions.checkNotNull(dimension);
         this.dimension = dimension;
         this.minX = dimension.getMinX();
         this.minY = dimension.getMinY();
@@ -39,7 +41,7 @@ public class DimensionIterator {
         this.yRange = yRange;
         this.zRange = zRange;
     }
-
+    
     /**
      * Copy constructor
      * @param dimension
@@ -60,9 +62,11 @@ public class DimensionIterator {
         this.minY = minY;
         this.minZ = minZ;
     }
-    
-    
 
+    public Dimension getDimension() {
+        return dimension;
+    }
+    
     public Dimension next() {
         currentStart = new Vector(minX, minY, minZ);
         currentEnd = new Vector(minX + xRange, minY + yRange, minZ + zRange);
@@ -110,14 +114,6 @@ public class DimensionIterator {
         return v.getBlockX() < dimension.getMaxX() && v.getBlockX() > dimension.getMinX()
                 && v.getBlockY() < dimension.getMaxY() && v.getBlockY() > dimension.getMinY()
                 && dimension.getMaxZ() < dimension.getMaxZ() && v.getBlockZ() > dimension.getMinZ();
-    }
-
-    public static void main(String[] args) {
-        DimensionIterator traversal = new DimensionIterator(new Dimension(Vector.ZERO, new Vector(32, 32, 32)), 4, 4, 4);
-
-        while(traversal.hasNext()) {
-            System.out.println(traversal.next());
-        }
     }
     
     public DimensionIterator copy() {

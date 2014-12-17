@@ -14,18 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structure.construction.tasks;
+package com.chingo247.settlercraft.structure.construction;
 
 /**
  *
  * @author Chingo
  */
-public abstract class StructureAPITask implements Runnable{
+public abstract class SettlerCraftTask implements Runnable{
     
-    protected final ConstructionHandler constructionHandler;
+    protected final ConstructionTaskManager constructionHandler;
     protected final long taskID;
 
-    protected StructureAPITask(ConstructionHandler constructionHandler, long taskId) {
+    protected SettlerCraftTask(ConstructionTaskManager constructionHandler, long taskId) {
         this.constructionHandler = constructionHandler;
         this.taskID = taskId;
     }

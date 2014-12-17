@@ -17,8 +17,8 @@
 package com.chingo247.settlercraft.bukkit.selection;
 
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
-import com.chingo247.settlercraft.structure.schematic.SchematicData;
-import com.chingo247.settlercraft.structure.util.WorldUtil;
+import com.chingo247.settlercraft.structure.plan.schematic.SchematicData;
+import com.chingo247.settlercraft.util.WorldUtil;
 import com.chingo247.settlercraft.structure.world.Direction;
 import static com.chingo247.settlercraft.structure.world.Direction.EAST;
 import static com.chingo247.settlercraft.structure.world.Direction.NORTH;

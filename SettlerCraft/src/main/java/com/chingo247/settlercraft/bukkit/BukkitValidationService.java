@@ -22,7 +22,7 @@ import com.chingo247.settlercraft.structure.persistence.hibernate.ValidationServ
 import com.chingo247.settlercraft.structure.PlayerMembership;
 import com.chingo247.settlercraft.structure.PlayerOwnership;
 import com.chingo247.settlercraft.structure.Structure;
-import com.chingo247.settlercraft.structure.util.WorldGuardUtil;
+import com.chingo247.settlercraft.util.WorldGuardUtil;
 import com.chingo247.settlercraft.structure.world.Dimension;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;

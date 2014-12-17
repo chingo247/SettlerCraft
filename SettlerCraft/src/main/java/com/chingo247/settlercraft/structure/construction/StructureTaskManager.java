@@ -14,16 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structure.construction.tasks;
+package com.chingo247.settlercraft.structure.construction;
 
+import com.chingo247.settlercraft.structure.construction.options.BuildOptions;
+import com.chingo247.settlercraft.structure.construction.options.DemolitionOptions;
 import com.chingo247.settlercraft.bukkit.WorldEditUtil;
 import com.chingo247.settlercraft.structure.AbstractStructureAPI;
 import com.chingo247.settlercraft.structure.Structure;
 import static com.chingo247.settlercraft.structure.Structure.State.BUILDING;
 import static com.chingo247.settlercraft.structure.Structure.State.DEMOLISHING;
-import com.chingo247.settlercraft.structure.construction.BuildOptions;
-import com.chingo247.settlercraft.structure.construction.ConstructionManager;
-import com.chingo247.settlercraft.structure.construction.DemolitionOptions;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.SCAsyncClipboard;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.SCIBlockPlacerListener;
@@ -67,13 +66,13 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
  *
  * @author Chingo
  */
-public class StructureTaskHandler extends ConstructionHandler {
+public class StructureTaskManager extends ConstructionTaskManager {
 
     private final StructureDAO structureDAO = new StructureDAO();
     private final Map<Long, ConstructionEntry> entries = Collections.synchronizedMap(new HashMap<Long, ConstructionEntry>());
     private final Prism prism;
 
-    public StructureTaskHandler(final AbstractStructureAPI api, ExecutorService service) {
+    public StructureTaskManager(final AbstractStructureAPI api, ExecutorService service) {
         super(api, service);
         this.prism = (Prism) Bukkit.getPluginManager().getPlugin("Prism");
         final BlockPlacer blockPlacer = AsyncWorldEditMain.getInstance().getBlockPlacer();
@@ -141,7 +140,7 @@ public class StructureTaskHandler extends ConstructionHandler {
                         if (player != null) {
                             player.printError(ex.getMessage());
                         } else {
-                            Logger.getLogger(StructureTaskHandler.class.getName()).log(Level.SEVERE, ex.getMessage());
+                            Logger.getLogger(StructureTaskManager.class.getName()).log(Level.SEVERE, ex.getMessage());
                         }
                         return;
                     }
@@ -160,7 +159,7 @@ public class StructureTaskHandler extends ConstructionHandler {
 
                     executor.execute(structure.getId(),
                             new BuildTask(
-                                    StructureTaskHandler.this,
+                                    StructureTaskManager.this,
                                     structure.getId(),
                                     plan.getSchematic(),
                                     player,
@@ -171,7 +170,7 @@ public class StructureTaskHandler extends ConstructionHandler {
                                     options
                             ));
                 } catch (StructureDataException | IOException ex) {
-                    Logger.getLogger(StructureTaskHandler.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(StructureTaskManager.class.getName()).log(Level.SEVERE, null, ex);
                     if (player != null) {
                         player.printError("Something went wrong");
                     }
@@ -242,7 +241,7 @@ public class StructureTaskHandler extends ConstructionHandler {
                 if (player != null) {
                     player.printError(ex.getMessage());
                 } else {
-                    Logger.getLogger(StructureTaskHandler.class.getName()).log(Level.SEVERE, ex.getMessage());
+                    Logger.getLogger(StructureTaskManager.class.getName()).log(Level.SEVERE, ex.getMessage());
                 }
                 return;
             }
@@ -254,7 +253,7 @@ public class StructureTaskHandler extends ConstructionHandler {
             World world = WorldEditUtil.getWorld(structure.getWorldName());
             executor.execute(structure.getId(),
                     new DemolitionTask(
-                            StructureTaskHandler.this,
+                            StructureTaskManager.this,
                             structure.getId(),
                             plan.getSchematic(),
                             player,
@@ -265,7 +264,7 @@ public class StructureTaskHandler extends ConstructionHandler {
                             options
                     ));
         } catch (StructureDataException | IOException ex) {
-            Logger.getLogger(StructureTaskHandler.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(StructureTaskManager.class.getName()).log(Level.SEVERE, null, ex);
             if (player != null) {
                 player.printError("Something went wrong");
             }
@@ -323,12 +322,12 @@ public class StructureTaskHandler extends ConstructionHandler {
                 throw new ConstructionException("Missing schematic file!");
             }
         } catch (IOException ex) {
-            Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(StructureTaskManager.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     @Override
-    void fail(StructureAPITask task, String reason) {
+    void fail(SettlerCraftTask task, String reason) {
 
     }
 

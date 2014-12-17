@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structure.construction.tasks;
+package com.chingo247.settlercraft.structure.construction;
 
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.SCAsyncClipboard;
@@ -36,7 +36,7 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
  *
  * @author Chingo
  */
-public class ConstructionTask extends StructureAPITask {
+public class ConstructionTask extends SettlerCraftTask {
 
     private final SchematicTask schematicTask;
     protected final World world;
@@ -47,7 +47,7 @@ public class ConstructionTask extends StructureAPITask {
     
     
 
-    protected ConstructionTask(ConstructionHandler constructionHandler, long taskId, File schematic, Player tasker, UUID uuid, World world, Vector pos, Direction direction) {
+    protected ConstructionTask(ConstructionTaskManager constructionHandler, long taskId, File schematic, Player tasker, UUID uuid, World world, Vector pos, Direction direction) {
         super(constructionHandler, taskId);
         this.schematicTask = new SchematicTask(constructionHandler, schematic, taskId);
         this.world = world;

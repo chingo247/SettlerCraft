@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structure.util;
+package com.chingo247.settlercraft.util;
 
 import com.chingo247.settlercraft.structure.world.Dimension;
 import com.chingo247.settlercraft.structure.world.Direction;

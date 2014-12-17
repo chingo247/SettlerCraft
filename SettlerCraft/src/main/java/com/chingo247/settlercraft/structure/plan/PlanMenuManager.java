@@ -24,7 +24,7 @@ import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
 import com.chingo247.settlercraft.structure.exception.StructureAPIException;
 import com.chingo247.settlercraft.structure.exception.StructureDataException;
 import com.chingo247.settlercraft.structure.persistence.hibernate.SchematicDataDAO;
-import com.chingo247.settlercraft.structure.util.FileUtil;
+import com.chingo247.settlercraft.util.FileUtil;
 import com.sk89q.worldedit.data.DataException;
 import java.io.File;
 import java.io.IOException;

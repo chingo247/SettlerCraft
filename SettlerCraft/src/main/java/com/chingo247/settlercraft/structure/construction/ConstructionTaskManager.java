@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structure.construction.tasks;
+package com.chingo247.settlercraft.structure.construction;
 
 import com.chingo247.settlercraft.structure.AbstractStructureAPI;
-import com.chingo247.settlercraft.structure.util.KeyPool;
+import com.chingo247.settlercraft.util.KeyPool;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
@@ -25,13 +25,13 @@ import java.util.concurrent.ExecutorService;
  *
  * @author Chingo
  */
-public abstract class ConstructionHandler {
+public abstract class ConstructionTaskManager {
     
     protected final KeyPool<Long> executor;
     protected final AbstractStructureAPI structureAPI;
     protected final ExecutorService service;
 
-    public ConstructionHandler(AbstractStructureAPI api, ExecutorService service) {
+    public ConstructionTaskManager(AbstractStructureAPI api, ExecutorService service) {
         this.executor = new KeyPool<>(service);
         this.structureAPI = api;
         this.service = service;
@@ -42,7 +42,7 @@ public abstract class ConstructionHandler {
      * Executed when a task fails...
      * @param task The failed task 
      */
-    abstract void fail(StructureAPITask task, String reason);
+    abstract void fail(SettlerCraftTask task, String reason);
     
     protected class ConstructionEntry {
         protected int jobId;

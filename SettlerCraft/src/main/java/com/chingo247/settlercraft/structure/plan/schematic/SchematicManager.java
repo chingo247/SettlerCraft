@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.chingo247.settlercraft.structure.schematic;
+package com.chingo247.settlercraft.structure.plan.schematic;
 
 
 import com.chingo247.settlercraft.structure.AbstractStructureAPI;

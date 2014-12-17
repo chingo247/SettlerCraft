@@ -15,32 +15,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.chingo247.settlercraft.structure.construction.worldedit;
 
-import com.chingo247.settlercraft.structure.construction.options.ConstructionOptions;
-import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import java.util.Comparator;
+package com.chingo247.settlercraft.util;
+
+import org.bukkit.Material;
+import org.bukkit.material.Attachable;
+import org.bukkit.material.Directional;
 
 /**
  *
  * @author Chingo
  */
-public class ConstructionClipboard extends StructureAsyncClipboard {
-
+public class MaterialUtil {
     
-    public ConstructionClipboard(CuboidClipboard parent, ConstructionOptions options) {
-        super(parent, options);
+    public static boolean isDirectional(Material material, byte b) {
+        return (material.getNewData(b) instanceof Directional);
     }
-
-
     
-
-    @Override
-    public void doblock(EditSession session, BaseBlock b, Vector blockPos, Vector pos) {
-        session.rawSetBlock(blockPos.add(pos), b);
+    public static boolean isAttachable(Material material, byte b) {
+        return (material.getNewData(b) instanceof Attachable);
     }
-
+    
 }

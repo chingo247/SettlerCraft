@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.settlercraft.structure.util;
+package com.chingo247.settlercraft.util;
 
 import java.util.HashMap;
 import java.util.LinkedList;

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.util;
+package com.chingo247.settlercraft.util.functions;
 
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
@@ -25,17 +25,24 @@ import com.sk89q.worldedit.Vector;
  */
 public class CubicIterator {
 
-    private final Vector size;
+    private final Vector size, start;
     private final int cubeX, cubeY, cubeZ;
     private int xIndex = 0, yIndex = 0, zIndex = 0;
     private int xCubeIndex = 0, yCubeIndex = 0, zCubeIndex = 0;
     private Vector current;
 
     public CubicIterator(Vector size, int cubeX, int cubeY, int cubeZ) {
+        this(Vector.ZERO, size, cubeX, cubeY, cubeZ);
+    }
+
+    
+    
+    public CubicIterator(Vector start, Vector size, int cubeX, int cubeY, int cubeZ) {
         this.size = size;
         this.cubeX = cubeX;
         this.cubeY = cubeY;
         this.cubeZ = cubeZ;
+        this.start = start;
     }
 
     /**
@@ -52,7 +59,7 @@ public class CubicIterator {
      * @param yCubeIndex
      * @param zCubeIndex 
      */
-    private CubicIterator(Vector size, int cubeX, int cubeY, int cubeZ, Vector current, int xIndex, int yIndex, int zIndex, int xCubeIndex, int yCubeIndex, int zCubeIndex) {
+    private CubicIterator(Vector start, Vector size, int cubeX, int cubeY, int cubeZ, Vector current, int xIndex, int yIndex, int zIndex, int xCubeIndex, int yCubeIndex, int zCubeIndex) {
         this.size = new BlockVector(size);
         this.cubeX = cubeX;
         this.cubeY = cubeY;
@@ -64,6 +71,7 @@ public class CubicIterator {
         this.yIndex = yIndex;
         this.zCubeIndex = zCubeIndex;
         this.zIndex = zIndex;
+        this.start = start;
     }
     
     
@@ -77,15 +85,14 @@ public class CubicIterator {
         }
         
         xIndex++;
-        
         if (xIndex % cubeX == 0 || ((xCubeIndex * cubeX) + xIndex) >= size.getBlockX()) {
             xIndex = 0;
             zIndex++;
-
+            
             if (zIndex % cubeZ == 0 || ((zCubeIndex * cubeZ) + zIndex) >= size.getBlockZ()) {
                 zIndex = 0;
                 yIndex++;
-//                xCubeIndex++;
+                
                 if(yIndex % cubeY == 0  || ((yCubeIndex * cubeY) + yIndex) >= size.getBlockY()) {
                     yIndex= 0;
                     xCubeIndex++;
@@ -104,7 +111,7 @@ public class CubicIterator {
             yCubeIndex++;
         }
         
-        return v;
+        return start.add(v);
 
     }
     
@@ -113,7 +120,7 @@ public class CubicIterator {
     }
     
     public CubicIterator copy() {
-        return new CubicIterator(size, cubeX, cubeY, cubeZ, current, xIndex, yIndex, zIndex, xCubeIndex, yCubeIndex, zCubeIndex);
+        return new CubicIterator(start, size, cubeX, cubeY, cubeZ, current, xIndex, yIndex, zIndex, xCubeIndex, yCubeIndex, zCubeIndex);
     }
     
   

@@ -6,8 +6,8 @@
 package com.chingo247.settlercraft.structure.plan.document;
 
 import com.chingo247.settlercraft.structure.AbstractStructureAPI;
-import com.chingo247.settlercraft.structure.util.Elements;
-import com.chingo247.settlercraft.structure.util.KeyPool;
+import com.chingo247.settlercraft.util.document.Elements;
+import com.chingo247.settlercraft.util.KeyPool;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;

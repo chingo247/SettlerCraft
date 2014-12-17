@@ -22,7 +22,7 @@ import com.chingo247.menu.util.ShopUtil;
 import com.chingo247.settlercraft.bukkit.PermissionManager;
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
 import com.chingo247.settlercraft.bukkit.WorldEditUtil;
-import com.chingo247.settlercraft.util.CubeTraversal;
+import com.chingo247.settlercraft.util.functions.CubicIterator;
 import com.chingo247.settlercraft.structure.PlayerOwnership;
 import com.chingo247.settlercraft.structure.QPlayerOwnership;
 import com.chingo247.settlercraft.structure.QStructure;
@@ -32,6 +32,8 @@ import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncWor
 import com.chingo247.settlercraft.structure.exception.CommandException;
 import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.structure.persistence.hibernate.StructureDAO;
+import com.chingo247.settlercraft.structure.world.Dimension;
+import com.chingo247.settlercraft.util.functions.DimensionIterator;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sk89q.worldedit.BlockVector;
@@ -92,6 +94,10 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                 case "cubetravers":
                     cubetravers(cs, args);
                     break;
+                case "dimtravers":
+                    dimtravers((Player) cs, args);
+                    break;
+
                 default:
                     String actionLast = "";
                     for (String s : args) {
@@ -414,7 +420,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
 
             @Override
             public void run() {
-                
+
                 final Vector pos = new BlockVector(player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ()).add(5, 5, 5);
                 long time;
                 int x, y, z;
@@ -426,12 +432,78 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                     y = Integer.parseInt(args[3]);
                     z = Integer.parseInt(args[4]);
                     size = Integer.parseInt(args[5]);
-                    
-                    CubeTraversal traversal = new CubeTraversal(new Vector(size, size, size), x, y, z);
+
+                    CubicIterator traversal = new CubicIterator(new Vector(size, size, size), x, y, z);
 
                     while (traversal.hasNext()) {
                         try {
                             session.smartSetBlock(traversal.next().add(pos), new BaseBlock(1));
+
+                            Thread.sleep(time);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(SettlerCraftCommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+
+                } catch (Exception e) {
+                    player.sendMessage(ChatColor.RED + "Something went wrong...");
+                }
+
+            }
+        }).start();
+
+    }
+
+    private void dimtravers(final Player player, final String[] args) {
+        final EditSession session = AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(WorldEditUtil.getWorld(player.getWorld().getName()), -1);
+
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                final Vector pos = new BlockVector(player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ()).add(5, 5, 5);
+                long time;
+                int x, y, z;
+                int size;
+
+                try {
+                    time = Long.parseLong(args[1]);
+                    x = Integer.parseInt(args[2]);
+                    y = Integer.parseInt(args[3]);
+                    z = Integer.parseInt(args[4]);
+                    size = Integer.parseInt(args[5]);
+
+                    DimensionIterator traversal = new DimensionIterator(new Dimension(pos, pos.add(size, size, size)), x, y, z);
+
+                    while (traversal.hasNext()) {
+                        try {
+                            Dimension dim = traversal.next();
+                            
+                            Vector min = dim.getMinPosition();
+                            Vector max = dim.getMaxPosition();
+                            
+                            Vector a = min;
+                            Vector b = new Vector(max.getBlockX(), min.getBlockY(), min.getBlockZ());
+                            Vector c = new Vector(min.getBlockX(), max.getBlockY(), min.getBlockZ());
+                            Vector d = new Vector(max.getBlockX(), min.getBlockY(), max.getBlockZ());
+                            
+                            Vector e = max;
+                            Vector f = new Vector(max.getBlockX(), max.getBlockY(), min.getBlockZ());
+                            Vector g = new Vector(min.getBlockX(), max.getBlockY(), max.getBlockZ());
+                            Vector h = new Vector(min.getBlockX(), min.getBlockY(), max.getBlockZ());
+                            System.out.println(dim);
+                            
+                            
+                            session.smartSetBlock(a, new BaseBlock(35, 0));
+                            session.smartSetBlock(b, new BaseBlock(35, 1));
+                            session.smartSetBlock(c, new BaseBlock(35, 2));
+                            session.smartSetBlock(d, new BaseBlock(35, 3));
+//                            
+                            session.smartSetBlock(e, new BaseBlock(35, 4));
+                            session.smartSetBlock(f, new BaseBlock(35, 5));
+                            session.smartSetBlock(g, new BaseBlock(35, 6));
+                            session.smartSetBlock(h, new BaseBlock(35, 7));
 
                             Thread.sleep(time);
                         } catch (InterruptedException ex) {
