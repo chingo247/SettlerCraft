@@ -16,8 +16,8 @@
  */
 package com.chingo247.settlercraft.bukkit;
 
-import com.chingo247.settlercraft.structure.IConfigProvider;
-import com.chingo247.settlercraft.structure.exception.SettlerCraftException;
+import com.chingo247.settlercraft.structureapi.IConfigProvider;
+import com.chingo247.settlercraft.structureapi.exception.SettlerCraftException;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.flags.Flag;

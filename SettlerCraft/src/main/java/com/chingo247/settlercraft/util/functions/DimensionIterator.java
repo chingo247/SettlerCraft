@@ -16,7 +16,7 @@
  */
 package com.chingo247.settlercraft.util.functions;
 
-import com.chingo247.settlercraft.structure.world.Dimension;
+import com.chingo247.settlercraft.structureapi.world.Dimension;
 import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.Vector;
 

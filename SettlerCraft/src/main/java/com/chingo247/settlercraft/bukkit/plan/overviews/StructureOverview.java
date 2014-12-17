@@ -17,7 +17,7 @@
 
 package com.chingo247.settlercraft.bukkit.plan.overviews;
 
-import com.chingo247.settlercraft.structure.plan.document.IStructurePlanElement;
+import com.chingo247.settlercraft.structureapi.plan.document.IStructurePlanElement;
 import com.chingo247.settlercraft.util.document.Elements;
 import org.dom4j.Element;
 import org.dom4j.tree.BaseElement;

@@ -17,13 +17,13 @@
 package com.chingo247.settlercraft.bukkit.selection;
 
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
-import com.chingo247.settlercraft.structure.plan.schematic.SchematicData;
+import com.chingo247.settlercraft.structureapi.plan.schematic.SchematicData;
 import com.chingo247.settlercraft.util.WorldUtil;
-import com.chingo247.settlercraft.structure.world.Direction;
-import static com.chingo247.settlercraft.structure.world.Direction.EAST;
-import static com.chingo247.settlercraft.structure.world.Direction.NORTH;
-import static com.chingo247.settlercraft.structure.world.Direction.SOUTH;
-import static com.chingo247.settlercraft.structure.world.Direction.WEST;
+import com.chingo247.settlercraft.structureapi.world.Direction;
+import static com.chingo247.settlercraft.structureapi.world.Direction.EAST;
+import static com.chingo247.settlercraft.structureapi.world.Direction.NORTH;
+import static com.chingo247.settlercraft.structureapi.world.Direction.SOUTH;
+import static com.chingo247.settlercraft.structureapi.world.Direction.WEST;
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.sk89q.worldedit.Vector;

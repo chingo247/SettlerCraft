@@ -16,12 +16,12 @@
  */
 package com.chingo247.settlercraft.util;
 
-import com.chingo247.settlercraft.structure.world.Dimension;
-import com.chingo247.settlercraft.structure.world.Direction;
-import static com.chingo247.settlercraft.structure.world.Direction.EAST;
-import static com.chingo247.settlercraft.structure.world.Direction.NORTH;
-import static com.chingo247.settlercraft.structure.world.Direction.SOUTH;
-import static com.chingo247.settlercraft.structure.world.Direction.WEST;
+import com.chingo247.settlercraft.structureapi.world.Dimension;
+import com.chingo247.settlercraft.structureapi.world.Direction;
+import static com.chingo247.settlercraft.structureapi.world.Direction.EAST;
+import static com.chingo247.settlercraft.structureapi.world.Direction.NORTH;
+import static com.chingo247.settlercraft.structureapi.world.Direction.SOUTH;
+import static com.chingo247.settlercraft.structureapi.world.Direction.WEST;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
 import org.bukkit.World;

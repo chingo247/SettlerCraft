@@ -17,10 +17,10 @@ package com.chingo247.settlercraft.bukkit.commands;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import com.chingo247.settlercraft.bukkit.BukkitStructureAPI;
-import com.chingo247.settlercraft.structure.persistence.hibernate.StructureDAO;
-import com.chingo247.settlercraft.structure.Structure;
-import com.chingo247.settlercraft.structure.construction.options.BuildOptions;
-import com.chingo247.settlercraft.structure.construction.options.DemolitionOptions;
+import com.chingo247.settlercraft.structureapi.persistence.hibernate.StructureDAO;
+import com.chingo247.settlercraft.structureapi.structure.Structure;
+import com.chingo247.settlercraft.structureapi.construction.options.BuildOptions;
+import com.chingo247.settlercraft.structureapi.construction.options.DemolitionOptions;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

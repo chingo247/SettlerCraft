@@ -16,14 +16,14 @@
  */
 package com.chingo247.settlercraft.bukkit;
 
-import com.chingo247.settlercraft.structure.persistence.hibernate.PlayerMembershipDAO;
-import com.chingo247.settlercraft.structure.persistence.hibernate.PlayerOwnershipDAO;
-import com.chingo247.settlercraft.structure.persistence.hibernate.ValidationService;
-import com.chingo247.settlercraft.structure.PlayerMembership;
-import com.chingo247.settlercraft.structure.PlayerOwnership;
-import com.chingo247.settlercraft.structure.Structure;
+import com.chingo247.settlercraft.structureapi.persistence.hibernate.PlayerMembershipDAO;
+import com.chingo247.settlercraft.structureapi.persistence.hibernate.PlayerOwnershipDAO;
+import com.chingo247.settlercraft.structureapi.persistence.hibernate.ValidationService;
+import com.chingo247.settlercraft.structureapi.structure.PlayerMembership;
+import com.chingo247.settlercraft.structureapi.structure.PlayerOwnership;
+import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.settlercraft.util.WorldGuardUtil;
-import com.chingo247.settlercraft.structure.world.Dimension;
+import com.chingo247.settlercraft.structureapi.world.Dimension;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldguard.LocalPlayer;

@@ -18,13 +18,13 @@ package com.chingo247.settlercraft.bukkit.plan.holograms;
 
 import com.chingo247.settlercraft.bukkit.BukkitStructureAPI;
 import com.chingo247.settlercraft.structure.QStructure;
-import com.chingo247.settlercraft.structure.Structure;
-import com.chingo247.settlercraft.structure.event.SettlerCraftDisableEvent;
-import com.chingo247.settlercraft.structure.event.structure.StructureCreateEvent;
-import com.chingo247.settlercraft.structure.event.structure.StructureStateChangeEvent;
-import com.chingo247.settlercraft.structure.exception.StructureDataException;
-import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
-import com.chingo247.settlercraft.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structureapi.structure.Structure;
+import com.chingo247.settlercraft.structureapi.event.SettlerCraftDisableEvent;
+import com.chingo247.settlercraft.structureapi.event.structure.StructureCreateEvent;
+import com.chingo247.settlercraft.structureapi.event.structure.StructureStateChangeEvent;
+import com.chingo247.settlercraft.structureapi.exception.StructureDataException;
+import com.chingo247.settlercraft.structureapi.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.google.common.eventbus.Subscribe;
@@ -89,7 +89,7 @@ public class StructureHologramManager {
                     StructurePlan plan = structureAPI.getStructurePlanManager().getPlan(structure);
                     List<StructureHologram> holos = plan.getHolograms();
                     for (StructureHologram sh : holos) {
-                        com.chingo247.settlercraft.structure.world.Location loc = structure.translateRelativeLocation(new Vector(sh.getX(), sh.getY(), sh.getZ()));
+                        com.chingo247.settlercraft.structureapi.world.Location loc = structure.translateRelativeLocation(new Vector(sh.getX(), sh.getY(), sh.getZ()));
                         Location location = new Location(Bukkit.getWorld(loc.getWorld()), loc.getX(), loc.getY(), loc.getZ());
 
                         Hologram hologram = HolographicDisplaysAPI.createHologram(plugin,

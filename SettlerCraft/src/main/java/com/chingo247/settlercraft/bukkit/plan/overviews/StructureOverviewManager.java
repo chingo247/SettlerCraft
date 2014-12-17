@@ -18,18 +18,18 @@ package com.chingo247.settlercraft.bukkit.plan.overviews;
  */
 import com.chingo247.settlercraft.bukkit.BukkitStructureAPI;
 import com.chingo247.settlercraft.structure.QStructure;
-import com.chingo247.settlercraft.structure.Structure;
-import com.chingo247.settlercraft.structure.Structure.State;
-import static com.chingo247.settlercraft.structure.Structure.State.BUILDING;
-import static com.chingo247.settlercraft.structure.Structure.State.COMPLETE;
-import static com.chingo247.settlercraft.structure.Structure.State.DEMOLISHING;
-import static com.chingo247.settlercraft.structure.Structure.State.STOPPED;
-import com.chingo247.settlercraft.structure.event.SettlerCraftDisableEvent;
-import com.chingo247.settlercraft.structure.event.structure.StructureCreateEvent;
-import com.chingo247.settlercraft.structure.event.structure.StructureStateChangeEvent;
-import com.chingo247.settlercraft.structure.exception.StructureDataException;
-import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
-import com.chingo247.settlercraft.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structureapi.structure.Structure;
+import com.chingo247.settlercraft.structureapi.structure.Structure.State;
+import static com.chingo247.settlercraft.structureapi.structure.Structure.State.BUILDING;
+import static com.chingo247.settlercraft.structureapi.structure.Structure.State.COMPLETE;
+import static com.chingo247.settlercraft.structureapi.structure.Structure.State.DEMOLISHING;
+import static com.chingo247.settlercraft.structureapi.structure.Structure.State.STOPPED;
+import com.chingo247.settlercraft.structureapi.event.SettlerCraftDisableEvent;
+import com.chingo247.settlercraft.structureapi.event.structure.StructureCreateEvent;
+import com.chingo247.settlercraft.structureapi.event.structure.StructureStateChangeEvent;
+import com.chingo247.settlercraft.structureapi.exception.StructureDataException;
+import com.chingo247.settlercraft.structureapi.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.google.common.eventbus.Subscribe;
@@ -85,7 +85,7 @@ public class StructureOverviewManager {
 
                     if (holos.isEmpty() && structureAPI.useHolograms()) {
 
-                        com.chingo247.settlercraft.structure.world.Location loc = structure.translateRelativeLocation(0, 2, 0); // Above ground and not in block...
+                        com.chingo247.settlercraft.structureapi.world.Location loc = structure.translateRelativeLocation(0, 2, 0); // Above ground and not in block...
                         World world = Bukkit.getWorld(loc.getWorld());
 
                         Hologram hologram = HolographicDisplaysAPI.createHologram(plugin, new Location(world, loc.getX(), loc.getY(), loc.getZ()),
@@ -98,7 +98,7 @@ public class StructureOverviewManager {
                     } else {
                         for (StructureOverview so : holos) {
 
-                            com.chingo247.settlercraft.structure.world.Location loc = structure.translateRelativeLocation(so.getX(), so.getY(), so.getZ()); // Above ground and not in block...
+                            com.chingo247.settlercraft.structureapi.world.Location loc = structure.translateRelativeLocation(so.getX(), so.getY(), so.getZ()); // Above ground and not in block...
                             World world = Bukkit.getWorld(loc.getWorld());
 
                             Hologram hologram = HolographicDisplaysAPI.createHologram(plugin, new Location(world, loc.getX(), loc.getY(), loc.getZ()),

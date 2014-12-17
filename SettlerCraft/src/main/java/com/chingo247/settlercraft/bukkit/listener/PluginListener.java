@@ -17,9 +17,9 @@
 package com.chingo247.settlercraft.bukkit.listener;
 
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
-import com.chingo247.settlercraft.structure.event.EventManager;
-import com.chingo247.settlercraft.structure.event.SettlerCraftDisableEvent;
-import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.structureapi.event.EventManager;
+import com.chingo247.settlercraft.structureapi.event.SettlerCraftDisableEvent;
+import com.chingo247.settlercraft.structureapi.persistence.hibernate.HibernateUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

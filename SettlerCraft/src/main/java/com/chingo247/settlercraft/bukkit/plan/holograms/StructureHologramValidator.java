@@ -17,8 +17,8 @@
 
 package com.chingo247.settlercraft.bukkit.plan.holograms;
 
-import com.chingo247.settlercraft.structure.exception.StructureDataException;
-import com.chingo247.settlercraft.structure.plan.document.Validator;
+import com.chingo247.settlercraft.structureapi.exception.StructureDataException;
+import com.chingo247.settlercraft.structureapi.plan.document.Validator;
 import com.chingo247.settlercraft.util.document.Elements;
 import com.chingo247.settlercraft.util.document.Nodes;
 import java.util.List;
