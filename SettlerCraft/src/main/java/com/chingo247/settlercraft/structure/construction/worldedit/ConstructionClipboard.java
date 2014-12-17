@@ -17,6 +17,7 @@
 
 package com.chingo247.settlercraft.structure.construction.worldedit;
 
+import com.chingo247.settlercraft.structure.construction.options.ConstructionOptions;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
@@ -30,8 +31,8 @@ import java.util.Comparator;
 public class ConstructionClipboard extends StructureAsyncClipboard {
 
     
-    public ConstructionClipboard(CuboidClipboard parent, Comparator<StructureBlock> comparator) {
-        super(parent, comparator);
+    public ConstructionClipboard(CuboidClipboard parent, ConstructionOptions options) {
+        super(parent, options);
     }
 
 

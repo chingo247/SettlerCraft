@@ -20,7 +20,7 @@ import com.chingo247.settlercraft.structure.AbstractStructureAPI;
 import com.chingo247.settlercraft.structure.QStructure;
 import com.chingo247.settlercraft.structure.Structure;
 import com.chingo247.settlercraft.structure.Structure.State;
-import com.chingo247.settlercraft.structure.util.WorldGuardUtil;
+import com.chingo247.settlercraft.util.WorldGuardUtil;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateDeleteClause;
 import com.mysema.query.jpa.hibernate.HibernateQuery;

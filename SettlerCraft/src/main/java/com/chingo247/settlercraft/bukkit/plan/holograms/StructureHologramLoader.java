@@ -18,8 +18,8 @@ package com.chingo247.settlercraft.bukkit.plan.holograms;
 
 import com.chingo247.settlercraft.structure.exception.StructureDataException;
 import com.chingo247.settlercraft.structure.plan.document.Loader;
-import com.chingo247.settlercraft.structure.util.Elements;
-import com.chingo247.settlercraft.structure.util.Nodes;
+import com.chingo247.settlercraft.util.document.Elements;
+import com.chingo247.settlercraft.util.document.Nodes;
 import java.util.ArrayList;
 import java.util.List;
 import org.dom4j.Element;

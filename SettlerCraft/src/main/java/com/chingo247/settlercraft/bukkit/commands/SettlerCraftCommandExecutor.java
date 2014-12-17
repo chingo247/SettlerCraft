@@ -21,18 +21,30 @@ import com.chingo247.menu.util.EconomyUtil;
 import com.chingo247.menu.util.ShopUtil;
 import com.chingo247.settlercraft.bukkit.PermissionManager;
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
+import com.chingo247.settlercraft.bukkit.WorldEditUtil;
+import com.chingo247.settlercraft.util.functions.CubicIterator;
 import com.chingo247.settlercraft.structure.PlayerOwnership;
 import com.chingo247.settlercraft.structure.QPlayerOwnership;
 import com.chingo247.settlercraft.structure.QStructure;
 import com.chingo247.settlercraft.structure.Structure;
 import com.chingo247.settlercraft.structure.Structure.State;
+import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.structure.exception.CommandException;
 import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.structure.persistence.hibernate.StructureDAO;
+import com.chingo247.settlercraft.structure.world.Dimension;
+import com.chingo247.settlercraft.util.functions.DimensionIterator;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
+import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.EditSessionFactory;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.blocks.BaseBlock;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -41,6 +53,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.hibernate.Session;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 
 /**
  *
@@ -51,7 +64,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
     private static final int MAX_LINES = 10;
     private final SettlerCraftPlugin settlerCraft;
     private final StructureDAO structureDAO = new StructureDAO();
-    
+
     public SettlerCraftCommandExecutor(SettlerCraftPlugin settlerCraft) {
         this.settlerCraft = settlerCraft;
     }
@@ -78,6 +91,13 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                 case "reload":
                     reload(cs, args);
                     break;
+                case "cubetravers":
+                    cubetravers(cs, args);
+                    break;
+                case "dimtravers":
+                    dimtravers((Player) cs, args);
+                    break;
+
                 default:
                     String actionLast = "";
                     for (String s : args) {
@@ -357,8 +377,8 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
     }
 
     /**
-     * Gets all the tasks that have been removed, but haven't been refunded (requires vault to
-     * refund)
+     * Gets all the tasks that have been removed, but haven't been refunded
+     * (requires vault to refund)
      *
      * @return A list of unrefunded tasks
      */
@@ -390,6 +410,114 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                 ).list(qpo.structure());
         session.close();
         return structures;
+    }
+
+    private void cubetravers(CommandSender cs, final String[] args) {
+        final Player player = (Player) cs;
+        final EditSession session = AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(WorldEditUtil.getWorld(player.getWorld().getName()), -1);
+
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                final Vector pos = new BlockVector(player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ()).add(5, 5, 5);
+                long time;
+                int x, y, z;
+                int size;
+
+                try {
+                    time = Long.parseLong(args[1]);
+                    x = Integer.parseInt(args[2]);
+                    y = Integer.parseInt(args[3]);
+                    z = Integer.parseInt(args[4]);
+                    size = Integer.parseInt(args[5]);
+
+                    CubicIterator traversal = new CubicIterator(new Vector(size, size, size), x, y, z);
+
+                    while (traversal.hasNext()) {
+                        try {
+                            session.smartSetBlock(traversal.next().add(pos), new BaseBlock(1));
+
+                            Thread.sleep(time);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(SettlerCraftCommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+
+                } catch (Exception e) {
+                    player.sendMessage(ChatColor.RED + "Something went wrong...");
+                }
+
+            }
+        }).start();
+
+    }
+
+    private void dimtravers(final Player player, final String[] args) {
+        final EditSession session = AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(WorldEditUtil.getWorld(player.getWorld().getName()), -1);
+
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                final Vector pos = new BlockVector(player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ()).add(5, 5, 5);
+                long time;
+                int x, y, z;
+                int size;
+
+                try {
+                    time = Long.parseLong(args[1]);
+                    x = Integer.parseInt(args[2]);
+                    y = Integer.parseInt(args[3]);
+                    z = Integer.parseInt(args[4]);
+                    size = Integer.parseInt(args[5]);
+
+                    DimensionIterator traversal = new DimensionIterator(new Dimension(pos, pos.add(size, size, size)), x, y, z);
+
+                    while (traversal.hasNext()) {
+                        try {
+                            Dimension dim = traversal.next();
+                            
+                            Vector min = dim.getMinPosition();
+                            Vector max = dim.getMaxPosition();
+                            
+                            Vector a = min;
+                            Vector b = new Vector(max.getBlockX(), min.getBlockY(), min.getBlockZ());
+                            Vector c = new Vector(min.getBlockX(), max.getBlockY(), min.getBlockZ());
+                            Vector d = new Vector(max.getBlockX(), min.getBlockY(), max.getBlockZ());
+                            
+                            Vector e = max;
+                            Vector f = new Vector(max.getBlockX(), max.getBlockY(), min.getBlockZ());
+                            Vector g = new Vector(min.getBlockX(), max.getBlockY(), max.getBlockZ());
+                            Vector h = new Vector(min.getBlockX(), min.getBlockY(), max.getBlockZ());
+                            System.out.println(dim);
+                            
+                            
+                            session.smartSetBlock(a, new BaseBlock(35, 0));
+                            session.smartSetBlock(b, new BaseBlock(35, 1));
+                            session.smartSetBlock(c, new BaseBlock(35, 2));
+                            session.smartSetBlock(d, new BaseBlock(35, 3));
+//                            
+                            session.smartSetBlock(e, new BaseBlock(35, 4));
+                            session.smartSetBlock(f, new BaseBlock(35, 5));
+                            session.smartSetBlock(g, new BaseBlock(35, 6));
+                            session.smartSetBlock(h, new BaseBlock(35, 7));
+
+                            Thread.sleep(time);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(SettlerCraftCommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+
+                } catch (Exception e) {
+                    player.sendMessage(ChatColor.RED + "Something went wrong...");
+                }
+
+            }
+        }).start();
+
     }
 
 }

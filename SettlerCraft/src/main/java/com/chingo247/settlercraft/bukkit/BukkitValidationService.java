@@ -22,7 +22,7 @@ import com.chingo247.settlercraft.structure.persistence.hibernate.ValidationServ
 import com.chingo247.settlercraft.structure.PlayerMembership;
 import com.chingo247.settlercraft.structure.PlayerOwnership;
 import com.chingo247.settlercraft.structure.Structure;
-import com.chingo247.settlercraft.structure.util.WorldGuardUtil;
+import com.chingo247.settlercraft.util.WorldGuardUtil;
 import com.chingo247.settlercraft.structure.world.Dimension;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
@@ -112,6 +112,8 @@ public class BukkitValidationService extends ValidationService {
         Vector p1 = dim.getMinPosition();
         Vector p2 = dim.getMaxPosition();
         String id = structure.getStructureRegion();
+        
+        System.out.println("StructureRegion: " + id);
 
         ProtectedCuboidRegion region = new ProtectedCuboidRegion(id, new BlockVector(p1.getBlockX(), p1.getBlockY(), p1.getBlockZ()), new BlockVector(p2.getBlockX(), p2.getBlockY(), p2.getBlockZ()));
         region.setOwners(new DefaultDomain());

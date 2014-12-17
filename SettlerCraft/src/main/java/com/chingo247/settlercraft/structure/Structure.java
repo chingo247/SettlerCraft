@@ -16,10 +16,10 @@
  */
 package com.chingo247.settlercraft.structure;
 
-import com.chingo247.settlercraft.structure.schematic.SchematicData;
+import com.chingo247.settlercraft.structure.plan.schematic.SchematicData;
 import com.chingo247.settlercraft.structure.PlayerOwnership.Type;
-import static com.chingo247.settlercraft.structure.util.SchematicUtil.calculateDimension;
-import com.chingo247.settlercraft.structure.util.WorldUtil;
+import static com.chingo247.settlercraft.util.SchematicUtil.calculateDimension;
+import com.chingo247.settlercraft.util.WorldUtil;
 import com.chingo247.settlercraft.structure.world.Dimension;
 import com.chingo247.settlercraft.structure.world.Direction;
 import static com.chingo247.settlercraft.structure.world.Direction.EAST;

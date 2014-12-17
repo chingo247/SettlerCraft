@@ -17,7 +17,7 @@
 package com.chingo247.settlercraft.structure.plan.worldguard;
 
 import com.chingo247.settlercraft.structure.plan.document.IStructurePlanElement;
-import com.chingo247.settlercraft.structure.util.Elements;
+import com.chingo247.settlercraft.util.document.Elements;
 import com.sk89q.worldguard.protection.flags.Flag;
 import org.dom4j.Element;
 import org.dom4j.tree.BaseElement;
