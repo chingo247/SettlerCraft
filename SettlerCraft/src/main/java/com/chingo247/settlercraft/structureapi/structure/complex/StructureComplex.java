@@ -17,8 +17,11 @@
 package com.chingo247.settlercraft.structureapi.structure.complex;
 
 import com.chingo247.settlercraft.structureapi.structure.Structure.State;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.world.World;
 import java.io.Serializable;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -36,11 +39,31 @@ public class StructureComplex implements Serializable {
     private Long id;
     private State state;
     private String name;
-   
     private Double value;
-    private Set<StructureComplex> subStructures;
+    private Set<SubStructure> subStructures;
+    
+    
+    protected StructureComplex() {}
 
+    StructureComplex(String name, Double value) {
+        this.state = State.INITIALIZING;
+        this.name = name;
+        this.value = value;
+        this.subStructures = new HashSet<>();
+    }
     
+   
+    public boolean isOnStructure(World world, Vector pos) {
+        throw new UnsupportedOperationException(); // ALSO CHECK SUBSTRUCTURES!
+    }
     
+    public boolean isOwner(Player player) {
+        throw new UnsupportedOperationException();
+    }
+    
+    public boolean isMember(Player player) {
+        throw new UnsupportedOperationException();
+    }
+
     
 }

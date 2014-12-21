@@ -14,26 +14,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structureapi;
+package com.chingo247.settlercraft.structureapi.structure.complex;
 
+import com.chingo247.settlercraft.structureapi.structure.Structure.State;
 import java.io.Serializable;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.Embeddable;
 
 /**
  *
  * @author Chingo
  */
+@Embeddable
+public class StructureProperties implements Serializable {
+    
+    private State state;
+    private String name;
+    private Double value;
 
-@Entity
-public class StructureLot implements Serializable {
-    @Id
-    private Long id;
+    /**
+     * JPA constructor
+     */
+    protected StructureProperties() {}
 
-    public Long getId() {
-        return id;
+    StructureProperties(State state, String name, Double value) {
+        this.state = state;
+        this.name = name;
+        this.value = value;
     }
-
+    
+    
     
     
     

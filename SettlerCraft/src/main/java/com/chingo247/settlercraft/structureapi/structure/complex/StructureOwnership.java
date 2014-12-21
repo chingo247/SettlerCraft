@@ -20,19 +20,6 @@ package com.chingo247.settlercraft.structureapi.structure.complex;
  *
  * @author Chingo
  */
-public enum StructureType {
+public class StructureOwnership {
     
-    /**
-     * Like the Main Structure, extension will claim it's own region
-     */
-    EXTENSION,
-    /**
-     * Will check if there is any overlap with any block at runtime
-     */
-    UNDEFINED_SUB_INNER,
-    /**
-     * The Sub-structure spots are pre-defined (in XML) therefore no checks are needed
-     */
-    DEFINED_SUB_INNER
-   
 }

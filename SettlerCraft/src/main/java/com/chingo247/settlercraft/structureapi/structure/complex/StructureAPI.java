@@ -16,50 +16,27 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.complex;
 
+import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
-import java.io.Serializable;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+import com.chingo247.settlercraft.structureapi.world.Dimension;
+import com.chingo247.settlercraft.structureapi.world.Direction;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.world.World;
 
 /**
  *
  * @author Chingo
  */
-@Entity
-public class StructurePlot implements Serializable {
+public interface StructureAPI {
     
-    @Id
-    @GeneratedValue
-    private Long id;
+    public StructureComplex create(Player player, StructurePlan plan, World world, Vector position, Direction direction);
     
-    @Embedded
-    private Plot plot;
+    public boolean overlaps(World world, Dimension dimension);
     
-    @OneToMany
-    private Set<StructureRoomPlot> roomPlots;
+    public void build(Player player, StructureComplex structure, boolean force);
     
-    @OneToOne
-    private Structure structure;
-
-    /**
-     * JPA Constructor
-     */
-    protected StructurePlot() {
-    }
-
-    StructurePlot(Structure structure, Plot plot) {
-        this.plot = plot;
-        this.roomPlots = new LinkedHashSet<>();
-        this.structure = structure;
-    }
+    public void demolish(Player player, StructureComplex structure, boolean force);
     
-    
-    
+    public void stop(Player player, StructureComplex structure, boolean force);
 }

@@ -14,14 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structureapi;
+package com.chingo247.settlercraft.structureapi.structure.complex;
 
 import com.chingo247.settlercraft.structureapi.world.Dimension;
-import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Date;
 import javax.persistence.Embedded;
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
@@ -29,11 +27,10 @@ import javax.persistence.Id;
  *
  * @author Chingo
  */
-@Entity
-public class Plot implements Serializable {
+
+public class CachedPlot {
     
     @Id
-    @GeneratedValue
     private Long id;
     
     @Embedded
@@ -46,13 +43,14 @@ public class Plot implements Serializable {
     /**
      * JPA Constructor.
      */
-    protected Plot() {}
+    protected CachedPlot() {}
 
     /**
      * Constructor
      * @param dimension 
      */
-    Plot(String world, Dimension dimension) {
+    CachedPlot(Long id, String world, Dimension dimension) {
+        this.id = id;
         this.dimension = dimension;
         this.createdAt = new Timestamp(new Date().getTime());
     }
@@ -72,5 +70,5 @@ public class Plot implements Serializable {
     public Timestamp getCreatedAt() {
         return createdAt;
     }
-
+    
 }

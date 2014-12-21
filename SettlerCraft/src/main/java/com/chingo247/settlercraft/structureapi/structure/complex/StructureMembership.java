@@ -16,40 +16,10 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.complex;
 
-import java.io.Serializable;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-
 /**
  *
  * @author Chingo
  */
-@Entity
-public class StructureRoomPlot implements Serializable {
-    
-    @Id
-    @GeneratedValue
-    private Long id;
-    
-    @ManyToOne
-    private StructurePlot structurePlot;
-    
-    @Embedded
-    private Plot plot;
-
-    /**
-     * JPA Constructor
-     */
-    protected StructureRoomPlot() {
-    }
-
-    StructureRoomPlot(Plot plot) {
-        this.plot = plot;
-    }
-    
-    
+public class StructureMembership {
     
 }

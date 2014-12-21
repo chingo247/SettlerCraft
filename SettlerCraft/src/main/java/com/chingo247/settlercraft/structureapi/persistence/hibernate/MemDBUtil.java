@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Chingo247
+ * Copyright (C) 2014 Chingo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,38 +14,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.chingo247.settlercraft.structureapi.persistence.hibernate;
 
+import com.chingo247.settlercraft.structureapi.plan.schematic.SchematicData;
 import com.chingo247.settlercraft.structureapi.structure.PlayerMembership;
 import com.chingo247.settlercraft.structureapi.structure.PlayerOwnership;
-import com.chingo247.settlercraft.structureapi.structure.complex.Plot;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
-import com.chingo247.settlercraft.structureapi.plan.schematic.SchematicData;
+import com.chingo247.settlercraft.structureapi.structure.complex.Plot;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;
 import org.hibernate.cfg.AnnotationConfiguration;
 
 /**
- * Hibernate Utility class with a method to get SessionFactory.
  *
  * @author Chingo
  */
-public class HibernateUtil {
+public class MemDBUtil {
 
     private static final SessionFactory sessionFactory;
-    
-    
+
     static {
         try {
             AnnotationConfiguration configuration = new AnnotationConfiguration();
-            configuration.addAnnotatedClass(Structure.class);
-            configuration.addAnnotatedClass(PlayerOwnership.class);
-            configuration.addAnnotatedClass(PlayerMembership.class);
-            configuration.addAnnotatedClass(SchematicData.class);
             configuration.addAnnotatedClass(Plot.class);
-            configuration = (AnnotationConfiguration) configuration.configure("com/chingo247/settlercraft/resources/hibernate.cfg.xml");
+            configuration = (AnnotationConfiguration) configuration.configure("com/chingo247/settlercraft/resources/memdb.cfg.xml");
             sessionFactory = configuration.buildSessionFactory();
         } catch (Throwable ex) {
             // Log the exception. 
@@ -53,17 +46,17 @@ public class HibernateUtil {
             throw new ExceptionInInitializerError(ex);
         }
     }
-    
+
     public static Session getSession() {
         return sessionFactory.openSession();
     }
-    
+
     public static StatelessSession getStatelessSession() {
         return sessionFactory.openStatelessSession();
     }
 
-    
     public static void shutdown() {
         sessionFactory.close();
     }
+
 }

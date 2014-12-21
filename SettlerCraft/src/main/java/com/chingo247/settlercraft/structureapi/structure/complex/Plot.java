@@ -17,27 +17,60 @@
 package com.chingo247.settlercraft.structureapi.structure.complex;
 
 import com.chingo247.settlercraft.structureapi.world.Dimension;
-import com.chingo247.settlercraft.structureapi.world.Location;
-import javax.persistence.Embeddable;
+import java.io.Serializable;
+import java.sql.Timestamp;
+import java.util.Date;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import org.hibernate.annotations.Entity;
 
 /**
  *
  * @author Chingo
  */
-@Embeddable
-public class Plot {
+@Entity
+public class Plot implements Serializable {
     
+    @Id
+    @GeneratedValue
+    private Long id;
     
-    private Location location; // Location != dimension.getMin()
+    @Embedded
     private Dimension dimension;
-    private String regionName; // WorldGuard
-    private boolean forSale;
     
-    public Plot(Location location, Dimension dimension) {
-        
+    private String world;
+    
+    private Timestamp createdAt;
+
+    /**
+     * JPA Constructor.
+     */
+    protected Plot() {}
+
+    /**
+     * Constructor
+     * @param dimension 
+     */
+    Plot(String world, Dimension dimension) {
+        this.dimension = dimension;
+        this.createdAt = new Timestamp(new Date().getTime());
+    }
+
+    public Long getId() {
+        return id;
     }
     
+    public Dimension getDimension() {
+        return dimension;
+    }
+
+    public String getWorld() {
+        return world;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
 }
