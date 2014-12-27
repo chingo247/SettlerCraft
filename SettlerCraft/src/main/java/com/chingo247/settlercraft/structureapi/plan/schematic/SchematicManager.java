@@ -18,31 +18,17 @@
 package com.chingo247.settlercraft.structureapi.plan.schematic;
 
 
-import com.chingo247.settlercraft.structureapi.structure.AbstractStructureAPI;
-import com.chingo247.settlercraft.structureapi.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.hibernate.HibernateQuery;
+import com.chingo247.settlercraft.structureapi.structure.plan.SettlerCraftPlan;
+import com.chingo247.settlercraft.structureapi.world.Direction;
+import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.data.DataException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 /**
  *
@@ -51,6 +37,8 @@ import org.hibernate.Transaction;
 public class SchematicManager {
     
     private final Map<Long, Schematic> schematics;
+    
+    
     private static SchematicManager instance;
     
     SchematicManager() {
@@ -64,10 +52,8 @@ public class SchematicManager {
         return instance;
     }
     
-   
-    
     /**
-     * Loads the file only if there is no cached version available. New schematics will be cached
+     * Loads the schematic from the file. If there is a cached instance of the schematic available, the cached instance is returned
      * @param schematic The schematic file
      * @return The schematic for this file
      * @throws IOException
@@ -85,11 +71,18 @@ public class SchematicManager {
         return s;
     }
     
-    public List<Schematic> getSchematics() {
-        return new LinkedList<>(schematics.values());
+    public Schematic getOrLoad(SettlerCraftPlan plan) throws IOException, DataException {
+        return getOrLoad(plan.getSchematic());
     }
     
-   
+    public CuboidClipboard getClipboard(Long checksum) {
+        throw new UnsupportedOperationException(); // UNMODIFIABLE CLIPBOARD!
+    }
+    
+    public CuboidClipboard getClipboard(Long checksum, Direction direction) {
+        throw new UnsupportedOperationException(); / UNMODIFIABLE CLIPBOARD!
+    }
+    
     public boolean hasSchematic(long checksum) {
         return schematics.get(checksum) != null;
     }
@@ -98,102 +91,8 @@ public class SchematicManager {
         long checkskum = FileUtils.checksumCRC32(plan.getSchematic());
         return hasSchematic(checkskum);
     }
+ 
     
-    /**
-     * Loads all schematics
-     */
-    public void load() {
-        List<File> schms = new LinkedList<>();
-        for(StructurePlan plan : structureAPI.getStructurePlanManager().getPlans()) {
-            schms.add(plan.getSchematic());
-        }
-        filter(schms);
-        save(schms);
-    }
-    
-    
-    private void filter(final List<File> schematics) {
-        Set<Long> checksums = new HashSet<>();
-        Iterator<File> it = schematics.iterator();
-        while(it.hasNext()) {
-            File file = it.next();
-            try {
-                long checksum = FileUtils.checksumCRC32(file);
-                QSchematicData qsd = QSchematicData.schematicData;
-                if(exists(checksum) || checksums.contains(checksum)){
-                    it.remove();
-                } else {
-                    checksums.add(checksum);
-                }
-                
-            } catch (IOException ex) {
-                Logger.getLogger(SchematicManager.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
-    
-    private boolean exists(long checksum) throws IOException {
-        Session session = HibernateUtil.getSession();
-        JPQLQuery query = new HibernateQuery(session);
-        QSchematicData qsd = QSchematicData.schematicData;
-        boolean exists  = query.from(qsd).where(qsd.checksum.eq(checksum)).exists();
-        session.close();
-        return exists;
-    }
-    
-    
-    private void save(final List<File> schematics) {
-        
-        final List<SchematicData> data = new LinkedList<>();
-        List<Future> tasks = new LinkedList<>();
-        
-        for(final File file : schematics) {
-            tasks.add(executor.submit(new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        data.add(SchematicData.load(file));
-                    } catch (IOException | DataException ex) {
-                        Logger.getLogger(SchematicManager.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }));
-        }
-        
-        for(Future task : tasks) {
-            try {
-                task.get();
-            } catch (InterruptedException | ExecutionException ex) {
-                Logger.getLogger(SchematicManager.class.getName()).log(Level.SEVERE, null, ex);
-                for(Future f : tasks) {
-                    f.cancel(true);
-                }
-            }
-        }
-        
-        Session session = null;
-        Transaction tx = null;
-        try {
-            session = HibernateUtil.getSession();
-            tx = session.beginTransaction();
-            for(SchematicData schematicData : data) {
-                session.merge(schematicData);
-            }
-            tx.commit();
-        } catch (HibernateException e) {
-            try {
-                tx.rollback();
-            } catch (HibernateException rbe) {
-                Logger.getLogger(SchematicManager.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
-            }
-            throw e;
-        } finally {
-            if (session != null) {
-                session.close();
-            }
-        }
-    }
     
     
     

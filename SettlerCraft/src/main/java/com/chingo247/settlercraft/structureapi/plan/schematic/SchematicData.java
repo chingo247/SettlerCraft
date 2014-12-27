@@ -16,7 +16,6 @@
  */
 package com.chingo247.settlercraft.structureapi.plan.schematic;
 
-import com.chingo247.settlercraft.structureapi.plan.schematic.Schematic;
 import com.chingo247.settlercraft.util.SchematicUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
@@ -91,6 +90,7 @@ public class SchematicData implements Serializable {
         int blocks = SchematicUtil.count(cc, true);
         return new SchematicData(checksum, cc.getWidth(), cc.getHeight(), cc.getLength(), blocks);
     }
+    
     
     
     

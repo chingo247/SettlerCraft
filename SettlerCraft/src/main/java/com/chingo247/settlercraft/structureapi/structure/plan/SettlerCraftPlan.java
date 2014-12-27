@@ -83,9 +83,15 @@ public class SettlerCraftPlan extends PluginElement {
         }
 
     }
-    
-    
 
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+    
     public String getFaction() {
         return faction;
     }

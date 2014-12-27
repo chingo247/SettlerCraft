@@ -140,7 +140,7 @@ public abstract class AbstractStructureAPI<P, W> {
 
         // Load schematics - Add schematic-data to Database
         print("Loading schematic data...");
-        getSchematicManager().load();
+        getSchematicManager().loadAllSchematics();
     }
 
     public PlanDocumentManager getPlanDocumentManager() {
