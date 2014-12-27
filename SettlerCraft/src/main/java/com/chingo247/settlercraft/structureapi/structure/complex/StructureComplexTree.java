@@ -16,11 +16,32 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.complex;
 
+import java.io.Serializable;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
 /**
  *
  * @author Chingo
  */
-public class SubStructure {
+@Entity
+public class StructureComplexTree implements Serializable {
+    
+    @Id
+    @GeneratedValue
+    private Long id;
+    
+    private Long parent; // Parent structure
+    private Long child;  // Child Structure
+
+    public StructureComplexTree() {
+    }
+
+    StructureComplexTree(Long parent, Long child) {
+        this.parent = parent;
+        this.child = child;
+    }
     
     
     

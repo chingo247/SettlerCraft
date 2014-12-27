@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structureapi.plan.worldguard;
+package com.chingo247.settlercraft.bukkit.plan.worldguard;
 
 import com.chingo247.settlercraft.structureapi.exception.StructureDataException;
 import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
-import com.chingo247.settlercraft.structureapi.plan.document.Loader;
+import com.chingo247.settlercraft.structureapi.plan.document.Validator;
 import com.chingo247.settlercraft.util.document.Elements;
 import com.chingo247.settlercraft.util.document.Nodes;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -26,7 +26,6 @@ import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,41 +37,39 @@ import org.dom4j.Node;
  *
  * @author Chingo
  */
-public class StructureRegionFlagLoader extends Loader<StructureRegionFlag> {
+public class StructureRegionFlagValidator extends Validator {
 
-    public StructureRegionFlagLoader() {
+    public StructureRegionFlagValidator() {
         super(Nodes.WORLDGUARD_FLAGS_NODE);
     }
 
     @Override
-    public List<StructureRegionFlag> load(Element regionFlagsElement) throws StructureDataException {
-        if(!regionFlagsElement.getName().equals(Elements.REGIONFLAGS)) {
-            throw new AssertionError("Expected element '"+Elements.REGIONFLAGS+"', but got '"+regionFlagsElement.getName()+"'");
-        }
-        
-        new StructureRegionFlagValidator().validate(regionFlagsElement);
-        List<StructureRegionFlag> flags = new LinkedList<>();
-        
-        Iterator<Node> it = regionFlagsElement.selectNodes(Elements.REGIONFLAG).iterator();
-        while(it.hasNext()) {
-            Node n = it.next();
-            
-            
-            Flag f = DefaultFlag.fuzzyMatchFlag(n.selectSingleNode(Elements.NAME).getText());
+    public void validate(Element en) throws StructureDataException {
+        List<Node> nodes = en.selectNodes(Elements.REGIONFLAG);
+        Iterator<Node> it = nodes.iterator();
+
+        while (it.hasNext()) {
+            Node e = it.next();
+
+            if (e.selectSingleNode("Name") == null) {
+                throw new StructureDataException("Missing 'name' node");
+            }
+            if (e.selectSingleNode("Value") == null) {
+                throw new StructureDataException("Missing 'value' node");
+            }
+
+            Flag f = DefaultFlag.fuzzyMatchFlag(e.selectSingleNode("Name").getText());
             if (f == null) {
-                throw new StructureDataException("Flag '" + n.selectSingleNode(Elements.NAME).getText() + "' not recognized");
+                throw new StructureDataException("Flag '" + e.selectSingleNode("Name").getText() + "' not recognized");
             }
 
             try {
-                Object v = f.parseInput(WorldGuardPlugin.inst(), Bukkit.getConsoleSender(), n.selectSingleNode(Elements.VALUE).getText());
-                StructureRegionFlag regionFlag = new StructureRegionFlag(f, v);
-                flags.add(regionFlag);
+                Object v = f.parseInput(WorldGuardPlugin.inst(), Bukkit.getConsoleSender(), e.selectSingleNode("Value").getText());
 
             } catch (InvalidFlagFormat ex) {
                 Logger.getLogger(StructurePlan.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        return flags;
     }
-    
+
 }

@@ -14,17 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structureapi.persistence.hibernate;
+package com.chingo247.settlercraft.structureapi.structure.plan;
+
+import org.dom4j.Element;
 
 /**
  *
  * @author Chingo
  */
-public interface AbstractDAO<T> {
+public interface PlanElement {
     
-    public T find(long id);
-    public T save(T t);
-    public void delete(T t);
-    public void insert(T t);
+    public Element toElement();
     
 }

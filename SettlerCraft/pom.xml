@@ -129,13 +129,16 @@
             <version>1.4.1</version>
             <scope>provided</scope>
         </dependency>
-        <!--Blockshub-->
+<!--        Blockshub
         <dependency>
             <groupId>com.thirdparty</groupId>
             <artifactId>blockshub</artifactId>  
             <version>0.5</version>
             <scope>provided</scope>
-        </dependency>
+        </dependency>-->
+        
+        
+        
         <!-- Persistence Dependencies -->
         
         <!-- HSQLServer -->
@@ -146,6 +149,7 @@
             <scope>compile</scope>
         </dependency>
 
+       
 
         
         <!--Hibernate-->

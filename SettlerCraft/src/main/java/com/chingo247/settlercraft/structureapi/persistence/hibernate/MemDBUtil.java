@@ -16,11 +16,6 @@
  */
 package com.chingo247.settlercraft.structureapi.persistence.hibernate;
 
-import com.chingo247.settlercraft.structureapi.plan.schematic.SchematicData;
-import com.chingo247.settlercraft.structureapi.structure.PlayerMembership;
-import com.chingo247.settlercraft.structureapi.structure.PlayerOwnership;
-import com.chingo247.settlercraft.structureapi.structure.Structure;
-import com.chingo247.settlercraft.structureapi.structure.complex.Plot;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;
@@ -37,7 +32,6 @@ public class MemDBUtil {
     static {
         try {
             AnnotationConfiguration configuration = new AnnotationConfiguration();
-            configuration.addAnnotatedClass(Plot.class);
             configuration = (AnnotationConfiguration) configuration.configure("com/chingo247/settlercraft/resources/memdb.cfg.xml");
             sessionFactory = configuration.buildSessionFactory();
         } catch (Throwable ex) {

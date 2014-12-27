@@ -20,7 +20,6 @@ import com.chingo247.menu.util.ShopUtil;
 import com.chingo247.settlercraft.bukkit.BukkitStructureAPI;
 import com.chingo247.settlercraft.bukkit.WorldEditUtil;
 import com.chingo247.settlercraft.structureapi.structure.PlayerOwnership;
-import com.chingo247.settlercraft.structure.QPlayerOwnership;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.settlercraft.structureapi.structure.Structure.State;
 import static com.chingo247.settlercraft.structureapi.structure.Structure.State.BUILDING;
@@ -35,9 +34,9 @@ import static com.chingo247.settlercraft.structureapi.structure.Structure.State.
 import com.chingo247.settlercraft.structureapi.exception.SettlerCraftException;
 import com.chingo247.settlercraft.structureapi.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.structureapi.persistence.hibernate.StructureDAO;
+import com.chingo247.settlercraft.structureapi.structure.QPlayerOwnership;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
-import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.Vector;
 import java.util.Comparator;
 import java.util.List;

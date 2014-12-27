@@ -21,7 +21,6 @@ package com.chingo247.settlercraft.structureapi.plan.schematic;
 import com.chingo247.settlercraft.structureapi.structure.AbstractStructureAPI;
 import com.chingo247.settlercraft.structureapi.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
-import com.chingo247.settlercraft.structure.plan.schematic.QSchematicData;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sk89q.worldedit.data.DataException;
@@ -51,13 +50,18 @@ import org.hibernate.Transaction;
  */
 public class SchematicManager {
     
-    private final Map<Long, Schematic> schematics = Collections.synchronizedMap(new HashMap<Long, Schematic>());
-    private final ExecutorService executor;
-    private final AbstractStructureAPI structureAPI;
+    private final Map<Long, Schematic> schematics;
+    private static SchematicManager instance;
     
-    public SchematicManager(AbstractStructureAPI structureAPI, ExecutorService executorService) {
-        this.executor = executorService;
-        this.structureAPI = structureAPI;
+    SchematicManager() {
+        this.schematics = Collections.synchronizedMap(new HashMap<Long, Schematic>());
+    }
+    
+    public static SchematicManager getInstance() {
+        if(instance == null) {
+            instance = new SchematicManager();
+        }
+        return instance;
     }
     
    
@@ -69,7 +73,7 @@ public class SchematicManager {
      * @throws IOException
      * @throws DataException 
      */
-    public Schematic load(File schematic) throws IOException, DataException {
+    public Schematic getOrLoad(File schematic) throws IOException, DataException {
         long checksum = FileUtils.checksumCRC32(schematic);
         Schematic s = schematics.get(checksum);
         if(s != null) {

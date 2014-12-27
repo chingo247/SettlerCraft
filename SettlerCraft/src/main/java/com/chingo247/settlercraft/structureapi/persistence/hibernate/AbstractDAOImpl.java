@@ -51,7 +51,31 @@ public class AbstractDAOImpl<T> implements AbstractDAO<T> {
         session.close();
         return t;
     }
+    
+    public void insert(T t) {
+        Session session = null;
+        Transaction tx = null;
 
+        try {
+            session = HibernateUtil.getSession();
+            tx = session.beginTransaction();
+            session.persist(t);
+            tx.commit();
+        } catch (HibernateException e) {
+            try {
+                tx.rollback();
+            } catch (HibernateException rbe) {
+                Logger.getLogger(AbstractDAO.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
+            }
+            throw e;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+
+    @Override
     public T save(T t) {
         Session session = null;
         Transaction tx = null;

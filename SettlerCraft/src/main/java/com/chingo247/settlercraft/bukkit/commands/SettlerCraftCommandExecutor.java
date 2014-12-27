@@ -24,21 +24,20 @@ import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
 import com.chingo247.settlercraft.bukkit.WorldEditUtil;
 import com.chingo247.settlercraft.util.functions.CubicIterator;
 import com.chingo247.settlercraft.structureapi.structure.PlayerOwnership;
-import com.chingo247.settlercraft.structure.QPlayerOwnership;
-import com.chingo247.settlercraft.structure.QStructure;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.settlercraft.structureapi.structure.Structure.State;
 import com.chingo247.settlercraft.structureapi.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.structureapi.exception.CommandException;
 import com.chingo247.settlercraft.structureapi.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.structureapi.persistence.hibernate.StructureDAO;
+import com.chingo247.settlercraft.structureapi.structure.QPlayerOwnership;
+import com.chingo247.settlercraft.structureapi.structure.QStructure;
 import com.chingo247.settlercraft.structureapi.world.Dimension;
 import com.chingo247.settlercraft.util.functions.DimensionIterator;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.EditSessionFactory;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import java.util.List;
@@ -53,7 +52,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.hibernate.Session;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 
 /**
  *

@@ -16,23 +16,28 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.complex;
 
+import com.chingo247.settlercraft.structureapi.plan.schematic.Schematic;
+import com.chingo247.settlercraft.structureapi.plan.schematic.SchematicData;
+import com.chingo247.settlercraft.structureapi.structure.Structure.State;
+
 /**
  *
  * @author Chingo
  */
-public enum StructureType {
+public interface SchematicStructure  extends Structure {
     
     /**
-     * Like the Main Structure, extension will claim it's own region
+     * Gets the schematic data
+     * @return The schematic data for this structure
      */
-    EXTENSION,
+    public SchematicData getSchematicData();
+    
     /**
-     * Will check if there is any overlap with any block at runtime
+     * Gets the schematic for this structure
+     * @return The schematic for this structure
      */
-    UNDEFINED_SUB_INNER,
-    /**
-     * The Sub-structure spots are pre-defined (in XML) therefore no checks are needed
-     */
-    DEFINED_SUB_INNER
-   
+    public Schematic getSchematic();
+    
+    public State getState();
+    
 }

@@ -17,7 +17,7 @@
 package com.chingo247.settlercraft.structureapi.persistence.hibernate;
 
 import com.chingo247.settlercraft.structureapi.structure.AbstractStructureAPI;
-import com.chingo247.settlercraft.structure.QStructure;
+import com.chingo247.settlercraft.structureapi.structure.QStructure;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.settlercraft.structureapi.structure.Structure.State;
 import com.chingo247.settlercraft.util.WorldGuardUtil;

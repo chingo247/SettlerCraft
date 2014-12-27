@@ -17,7 +17,6 @@ package com.chingo247.settlercraft.bukkit.plan.overviews;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import com.chingo247.settlercraft.bukkit.BukkitStructureAPI;
-import com.chingo247.settlercraft.structure.QStructure;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.settlercraft.structureapi.structure.Structure.State;
 import static com.chingo247.settlercraft.structureapi.structure.Structure.State.BUILDING;
@@ -30,6 +29,7 @@ import com.chingo247.settlercraft.structureapi.event.structure.StructureStateCha
 import com.chingo247.settlercraft.structureapi.exception.StructureDataException;
 import com.chingo247.settlercraft.structureapi.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
+import com.chingo247.settlercraft.structureapi.structure.QStructure;
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import com.google.common.eventbus.Subscribe;

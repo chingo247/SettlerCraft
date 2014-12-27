@@ -232,10 +232,10 @@ public abstract class AbstractStructureAPI<P, W> {
             StructurePlan plan = structurePlanManager.getPlan(structure);
             structure.setChecksum(plan.getChecksum());
             structureDAO.save(structure);
-            return schematicManager.load(plan.getSchematic());
+            return schematicManager.getOrLoad(plan.getSchematic());
         }
         StructurePlan plan = structurePlanManager.getPlan(structure);
-        return schematicManager.load(plan.getSchematic());
+        return schematicManager.getOrLoad(plan.getSchematic());
     }
 
     public Structure setState(Structure structure, State newState) {

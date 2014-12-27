@@ -14,10 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structureapi.structure.complex;
+package com.chingo247.settlercraft.structureapi.world;
 
-import com.chingo247.settlercraft.structureapi.structure.Structure.State;
+import com.google.common.base.Preconditions;
 import java.io.Serializable;
+import java.util.UUID;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 /**
@@ -25,25 +27,33 @@ import javax.persistence.Embeddable;
  * @author Chingo
  */
 @Embeddable
-public class StructureProperties implements Serializable {
+public class World implements Serializable {
     
-    private State state;
+    @Column(updatable = false, length = 100)
     private String name;
-    private Double value;
+    
+    @Column(updatable = false)
+    private UUID uuid;
 
     /**
-     * JPA constructor
+     * JPA Constructor
      */
-    protected StructureProperties() {}
+    protected World() {}
 
-    StructureProperties(State state, String name, Double value) {
-        this.state = state;
+    public World(String name, UUID uuid) {
+        Preconditions.checkNotNull(uuid);
+        Preconditions.checkNotNull(name);
+        Preconditions.checkArgument(name.length() <= 100);
         this.name = name;
-        this.value = value;
+        this.uuid = uuid;
     }
-    
-    
-    
-    
+
+    public String getName() {
+        return name;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
     
 }

@@ -16,7 +16,7 @@
  */
 package com.chingo247.settlercraft.structureapi.persistence.hibernate;
 
-import com.chingo247.settlercraft.structure.QStructure;
+import com.chingo247.settlercraft.structureapi.structure.QStructure;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.settlercraft.structureapi.world.Dimension;
 import com.mysema.query.jpa.JPQLQuery;

@@ -16,27 +16,38 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.complex;
 
-import com.chingo247.settlercraft.structureapi.exception.StructureException;
-import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
+import com.chingo247.settlercraft.structureapi.plan.schematic.SchematicData;
 import com.chingo247.settlercraft.structureapi.plan.schematic.SchematicManager;
-import com.chingo247.settlercraft.structureapi.structure.Structure;
+import com.chingo247.settlercraft.structureapi.structure.plan.SettlerCraftPlan;
 import com.chingo247.settlercraft.structureapi.world.Dimension;
-import com.chingo247.settlercraft.structureapi.world.Direction;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.world.World;
+import java.io.File;
+import java.util.List;
 
 /**
  *
  * @author Chingo
  */
-public interface StructureAPI {
+class SubstructureType {
     
-    public ComplexStructure create(Player player, StructurePlan plan, World world, Vector position, Direction direction) throws StructureException;
+    private String name;
+    private SettlerCraftPlan plan;
+    private Dimension dimension;
+    private SubstructureType parent;
+    private int level;
+    private List<SubstructureType> structures;
+
+    SubstructureType load(SettlerCraftPlan plan) {
+        File schematic = plan.getSchematic();
+        SchematicManager sm = SchematicManager.getInstance();
+        sm.getOrLoad(schematic)
+    }
     
-    public boolean overlaps(World world, Dimension dimension);
     
-    public SchematicManager getSchematicManager();
     
+    
+    
+    
+    
+       
     
 }

@@ -17,7 +17,7 @@
 package com.chingo247.settlercraft.structureapi.persistence.hibernate;
 
 import com.chingo247.settlercraft.structureapi.structure.PlayerOwnership;
-import com.chingo247.settlercraft.structure.QPlayerOwnership;
+import com.chingo247.settlercraft.structureapi.structure.QPlayerOwnership;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;

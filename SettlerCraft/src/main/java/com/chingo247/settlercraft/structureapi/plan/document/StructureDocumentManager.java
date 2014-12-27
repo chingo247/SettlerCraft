@@ -6,9 +6,9 @@
 package com.chingo247.settlercraft.structureapi.plan.document;
 
 import com.chingo247.settlercraft.structureapi.structure.AbstractStructureAPI;
-import com.chingo247.settlercraft.structure.QStructure;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.settlercraft.structureapi.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.structureapi.structure.QStructure;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import java.io.File;

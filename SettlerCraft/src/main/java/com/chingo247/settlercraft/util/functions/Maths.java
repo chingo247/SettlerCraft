@@ -22,11 +22,11 @@ package com.chingo247.settlercraft.util.functions;
  */
 public class Maths {
     
-    public static float sqrtF(int number, int root) {
+    public static float sqrtFloat(int number, int root) {
         return (float) Math.floor(Math.pow(number, ((double)1/root)));
     }
     
-    public static double sqrtD(int number, int root) {
+    public static double sqrtDouble(int number, int root) {
         return (double) sqrt(number, root);
     }
     

@@ -14,17 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structureapi.persistence.hibernate;
+package com.chingo247.settlercraft.structureapi.exception;
 
 /**
  *
  * @author Chingo
  */
-public interface AbstractDAO<T> {
+public class PlanException extends RuntimeException {
+
+    public PlanException(String message) {
+        super(message);
+    }
     
-    public T find(long id);
-    public T save(T t);
-    public void delete(T t);
-    public void insert(T t);
+    
     
 }

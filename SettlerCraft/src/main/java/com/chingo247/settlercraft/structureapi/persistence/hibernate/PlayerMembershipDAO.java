@@ -17,7 +17,7 @@
 package com.chingo247.settlercraft.structureapi.persistence.hibernate;
 
 import com.chingo247.settlercraft.structureapi.structure.PlayerMembership;
-import com.chingo247.settlercraft.structure.QPlayerMembership;
+import com.chingo247.settlercraft.structureapi.structure.QPlayerMembership;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;

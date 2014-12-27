@@ -19,6 +19,7 @@ package com.chingo247.settlercraft.structureapi.plan.document;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import java.io.File;
 import org.dom4j.DocumentException;
+import org.dom4j.io.OutputFormat;
 
 /**
  *
@@ -41,6 +42,7 @@ public class StructureDocument extends AbstractDocument<StructureDocumentPluginE
 
     @Override
     public void save() {
+        
         documentManager.save(this);
     }
 
