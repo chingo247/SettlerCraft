@@ -14,15 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structureapi.structure.complex;
+package com.chingo247.settlercraft.structureapi.structure.plan.substructure;
 
 import com.chingo247.settlercraft.structureapi.exception.PlanException;
-import com.chingo247.settlercraft.structureapi.plan.schematic.SchematicData;
 import com.chingo247.settlercraft.structureapi.plan.schematic.SchematicManager;
 import com.chingo247.settlercraft.structureapi.structure.plan.SettlerCraftPlan;
 import com.chingo247.settlercraft.structureapi.world.Dimension;
 import com.chingo247.settlercraft.structureapi.world.Direction;
-import com.chingo247.settlercraft.util.FileUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
 import java.io.File;
@@ -34,16 +32,16 @@ import org.apache.commons.io.FileUtils;
  *
  * @author Chingo
  */
-class SubstructureType {
+public class SubStructureType {
 
     private String name;
     private SettlerCraftPlan plan;
     private Dimension dimension;
-    private SubstructureType parent;
+    private SubStructureType parent;
     private int level;
-    private List<SubstructureType> structures;
+    private List<SubStructureType> structures;
 
-    SubstructureType load(SettlerCraftPlan plan, Direction direction, Vector position) throws IOException {
+    SubStructureType load(SettlerCraftPlan plan, Direction direction, Vector position) throws IOException {
         File schematic = plan.getSchematic();
         long checksum = FileUtils.checksumCRC32(schematic);
         SchematicManager sm = SchematicManager.getInstance();
@@ -61,7 +59,7 @@ class SubstructureType {
     }
     
     private boolean matchesParent(SettlerCraftPlan plan) {
-        
+        if()
     }
 
     private boolean hasParent() {

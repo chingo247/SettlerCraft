@@ -38,7 +38,6 @@ public class SchematicManager {
     
     private final Map<Long, Schematic> schematics;
     
-    
     private static SchematicManager instance;
     
     SchematicManager() {
@@ -80,7 +79,7 @@ public class SchematicManager {
     }
     
     public CuboidClipboard getClipboard(Long checksum, Direction direction) {
-        throw new UnsupportedOperationException(); / UNMODIFIABLE CLIPBOARD!
+        throw new UnsupportedOperationException(); // UNMODIFIABLE CLIPBOARD!
     }
     
     public boolean hasSchematic(long checksum) {
@@ -91,17 +90,5 @@ public class SchematicManager {
         long checkskum = FileUtils.checksumCRC32(plan.getSchematic());
         return hasSchematic(checkskum);
     }
- 
-    
-    
-    
-    
-    
- 
-    
-    
-    
 
-
-    
 }

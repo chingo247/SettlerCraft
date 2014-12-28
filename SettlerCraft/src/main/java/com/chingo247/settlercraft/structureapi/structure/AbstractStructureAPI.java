@@ -33,7 +33,7 @@ import com.chingo247.settlercraft.structureapi.persistence.hibernate.StructureDA
 import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.plan.StructurePlanManager;
 import com.chingo247.settlercraft.structureapi.plan.document.PlanDocument;
-import com.chingo247.settlercraft.structureapi.plan.document.PlanDocumentGenerator;
+import com.chingo247.settlercraft.structureapi.structure.plan.PlanDocumentGenerator;
 import com.chingo247.settlercraft.structureapi.plan.document.PlanDocumentManager;
 import com.chingo247.settlercraft.structureapi.plan.document.StructureDocumentManager;
 import com.chingo247.settlercraft.structureapi.plan.schematic.Schematic;

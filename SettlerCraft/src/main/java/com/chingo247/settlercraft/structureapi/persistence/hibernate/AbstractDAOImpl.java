@@ -52,6 +52,7 @@ public class AbstractDAOImpl<T> implements AbstractDAO<T> {
         return t;
     }
     
+    @Override
     public void insert(T t) {
         Session session = null;
         Transaction tx = null;

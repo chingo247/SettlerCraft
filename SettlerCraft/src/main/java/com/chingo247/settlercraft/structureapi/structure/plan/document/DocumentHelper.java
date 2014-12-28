@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structureapi.structure.plan;
+package com.chingo247.settlercraft.structureapi.structure.plan.document;
 
 import com.chingo247.settlercraft.structureapi.exception.PlanException;
 import com.google.common.base.Preconditions;

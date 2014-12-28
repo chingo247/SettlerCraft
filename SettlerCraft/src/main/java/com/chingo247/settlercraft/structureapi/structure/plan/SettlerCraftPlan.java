@@ -16,6 +16,7 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan;
 
+import com.chingo247.settlercraft.structureapi.structure.plan.document.DocumentHelper;
 import com.chingo247.settlercraft.bukkit.plan.holograms.StructureHologram;
 import com.chingo247.settlercraft.bukkit.plan.overviews.StructureOverview;
 import com.chingo247.settlercraft.bukkit.plan.worldguard.StructureRegionFlag;

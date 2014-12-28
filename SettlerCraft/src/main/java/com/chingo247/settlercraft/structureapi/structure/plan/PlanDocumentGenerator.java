@@ -14,12 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structureapi.plan.document;
+package com.chingo247.settlercraft.structureapi.structure.plan;
 
 import com.chingo247.settlercraft.structureapi.exception.StructureDataException;
 import com.chingo247.settlercraft.structureapi.structure.AbstractStructureAPI;
 import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.plan.StructurePlanManager;
+import com.chingo247.settlercraft.structureapi.plan.document.PlanDocument;
+import com.chingo247.settlercraft.structureapi.plan.document.PlanDocumentPluginElement;
 import com.chingo247.settlercraft.util.document.Elements;
 import java.io.File;
 import java.io.FileWriter;

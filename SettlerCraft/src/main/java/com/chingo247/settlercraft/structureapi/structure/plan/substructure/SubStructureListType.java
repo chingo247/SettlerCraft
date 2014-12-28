@@ -14,16 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structureapi.structure.plan;
+package com.chingo247.settlercraft.structureapi.structure.plan.substructure;
 
-import org.dom4j.Element;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author Chingo
  */
-public interface PlanElement {
+public class SubStructureListType {
     
-    public Element toElement();
+    private List<SubStructureType> substructures;
+
+    public SubStructureListType() {
+        this.substructures = new ArrayList<>();
+    }
+
+    public boolean add(SubStructureType e) {
+        return substructures.add(e);
+    }
+    
+    
+    
+    
     
 }

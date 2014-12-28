@@ -17,7 +17,7 @@
 package com.chingo247.settlercraft.bukkit.plan.overviews;
 
 import com.chingo247.settlercraft.structureapi.exception.StructureDataException;
-import com.chingo247.settlercraft.structureapi.plan.document.Loader;
+import com.chingo247.settlercraft.structureapi.structure.plan.document.Loader;
 import com.chingo247.settlercraft.util.document.Elements;
 import com.chingo247.settlercraft.util.document.Nodes;
 import java.util.ArrayList;

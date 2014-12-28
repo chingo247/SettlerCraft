@@ -18,7 +18,7 @@ package com.chingo247.settlercraft.bukkit.plan.worldguard;
 
 import com.chingo247.settlercraft.structureapi.exception.StructureDataException;
 import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
-import com.chingo247.settlercraft.structureapi.plan.document.Validator;
+import com.chingo247.settlercraft.structureapi.structure.plan.document.Validator;
 import com.chingo247.settlercraft.util.document.Elements;
 import com.chingo247.settlercraft.util.document.Nodes;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;

@@ -16,6 +16,7 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan;
 
+import com.chingo247.settlercraft.structureapi.structure.plan.document.Elementable;
 import com.chingo247.settlercraft.structureapi.exception.StructurePlanException;
 import org.dom4j.Element;
 
@@ -23,7 +24,7 @@ import org.dom4j.Element;
  *
  * @author Chingo
  */
-public abstract class PluginElement implements PlanElement {
+public abstract class PluginElement implements Elementable {
 
     private final StructureDocument document;
 
