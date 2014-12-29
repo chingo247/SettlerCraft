@@ -16,27 +16,10 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan.substructure;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  *
  * @author Chingo
  */
-public class SubStructureListType {
-    
-    private List<SubStructureType> substructures;
-
-    public SubStructureListType() {
-        this.substructures = new ArrayList<>();
-    }
-
-    public boolean add(SubStructureType e) {
-        return substructures.add(e);
-    }
-    
-    
-    
-    
+public class SchematicSubstructure {
     
 }

@@ -21,8 +21,12 @@ import com.chingo247.settlercraft.bukkit.plan.holograms.StructureHologram;
 import com.chingo247.settlercraft.bukkit.plan.overviews.StructureOverview;
 import com.chingo247.settlercraft.bukkit.plan.worldguard.StructureRegionFlag;
 import com.chingo247.settlercraft.structureapi.exception.PlanException;
+import com.chingo247.settlercraft.structureapi.plan.schematic.Schematic;
+import com.chingo247.settlercraft.structureapi.plan.schematic.SchematicManager;
+import com.sk89q.worldedit.data.DataException;
 import com.thoughtworks.xstream.XStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -56,10 +60,11 @@ public class SettlerCraftPlan extends PluginElement {
         this.price = 0.0d;
         this.faction = "Default";
         this.category = "Default";
+        load();
     }
 
     @Override
-    public void load() {
+    public final void load() {
         Element root = getElement();
         DocumentHelper.checkNotNull(root, "Schematic");
 
@@ -105,8 +110,13 @@ public class SettlerCraftPlan extends PluginElement {
         return price;
     }
 
-    public File getSchematic() {
+    public File getSchematicFile() {
         return schematic;
+    }
+    
+    public Schematic getSchematic() throws IOException, DataException {
+        SchematicManager scMgr = SchematicManager.getInstance();
+        return scMgr.getOrLoad(schematic);
     }
 
     @Override

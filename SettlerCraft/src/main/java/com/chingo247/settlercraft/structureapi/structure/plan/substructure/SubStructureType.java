@@ -32,54 +32,34 @@ import org.apache.commons.io.FileUtils;
  *
  * @author Chingo
  */
-public class SubStructureType {
+public abstract class SubStructureType {
 
     private String name;
     private SettlerCraftPlan plan;
-    private Dimension dimension;
     private SubStructureType parent;
     private int level;
     private List<SubStructureType> structures;
 
-    SubStructureType load(SettlerCraftPlan plan, Direction direction, Vector position) throws IOException {
-        File schematic = plan.getSchematic();
-        long checksum = FileUtils.checksumCRC32(schematic);
-        SchematicManager sm = SchematicManager.getInstance();
-        CuboidClipboard s = sm.getClipboard(checksum, direction);
-        Dimension dim = new Dimension(Vector.ZERO, new Vector(s.getWidth(), s.getLength(), s.getHeight()));
-
-        if (hasParent()) {
-            if (!(isFullyOutsideParent(dim) || isFullyWithinParent(dim))) {
-                throw new PlanException("Invalid substructureing at dept: " + level + " in plan " + plan.getName());
-            }
-            
-            
-        }
-
-    }
-    
-    private boolean matchesParent(SettlerCraftPlan plan) {
-        if()
-    }
-
     private boolean hasParent() {
         return parent != null;
     }
+    
+    public abstract Dimension getDimension();
 
     private boolean isFullyWithinParent(Dimension dimension) {
-        return parent.dimension.getMinX() <= dimension.getMinX()
-                && parent.dimension.getMinY() <= dimension.getMinY()
-                && parent.dimension.getMinZ() <= dimension.getMinZ()
-                && parent.dimension.getMaxZ() <= dimension.getMaxZ()
-                && parent.dimension.getMaxY() <= dimension.getMaxY()
-                && parent.dimension.getMaxX() <= dimension.getMaxX();
+        return parent.getDimension().getMinX() <= dimension.getMinX()
+                && parent.getDimension().getMinY() <= dimension.getMinY()
+                && parent.getDimension().getMinZ() <= dimension.getMinZ()
+                && parent.getDimension().getMaxZ() <= dimension.getMaxZ()
+                && parent.getDimension().getMaxY() <= dimension.getMaxY()
+                && parent.getDimension().getMaxX() <= dimension.getMaxX();
     }
 
     private boolean isFullyOutsideParent(Dimension dimension) {
         // NO OVERLAP AT ALL WITH PARENT
-        return !(parent.dimension.getMaxX() > dimension.getMinX() && parent.dimension.getMinX() < dimension.getMaxX()
-                && parent.dimension.getMaxY() > dimension.getMinY() && parent.dimension.getMinY() < dimension.getMaxY()
-                && parent.dimension.getMaxZ() > dimension.getMinZ() && parent.dimension.getMinZ() < dimension.getMaxZ());
+        return !(parent.getDimension().getMaxX() > dimension.getMinX() && parent.getDimension().getMinX() < dimension.getMaxX()
+                && parent.getDimension().getMaxY() > dimension.getMinY() && parent.getDimension().getMinY() < dimension.getMaxY()
+                && parent.getDimension().getMaxZ() > dimension.getMinZ() && parent.getDimension().getMinZ() < dimension.getMaxZ());
     }
 
 }

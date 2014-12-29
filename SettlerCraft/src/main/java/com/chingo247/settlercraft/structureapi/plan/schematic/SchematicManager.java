@@ -21,13 +21,18 @@ package com.chingo247.settlercraft.structureapi.plan.schematic;
 import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.SettlerCraftPlan;
 import com.chingo247.settlercraft.structureapi.world.Direction;
+import com.chingo247.settlercraft.util.SchematicUtil;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.data.DataException;
+import com.sk89q.worldedit.schematic.SchematicFormat;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -36,12 +41,15 @@ import org.apache.commons.io.FileUtils;
  */
 public class SchematicManager {
     
+    private static final Direction DEFAULT_DIRECTION = Direction.EAST; // By default schematics are pointing to east
     private final Map<Long, Schematic> schematics;
+    private final Map<Long, EnumMap<Direction, UnModifiableClipboard>> clipboards;
     
     private static SchematicManager instance;
     
     SchematicManager() {
         this.schematics = Collections.synchronizedMap(new HashMap<Long, Schematic>());
+        this.clipboards = new HashMap<>();
     }
     
     public static SchematicManager getInstance() {
@@ -71,15 +79,42 @@ public class SchematicManager {
     }
     
     public Schematic getOrLoad(SettlerCraftPlan plan) throws IOException, DataException {
-        return getOrLoad(plan.getSchematic());
+        return getOrLoad(plan.getSchematicFile());
     }
     
     public CuboidClipboard getClipboard(Long checksum) {
-        throw new UnsupportedOperationException(); // UNMODIFIABLE CLIPBOARD!
+        return getClipboard(checksum, DEFAULT_DIRECTION);
     }
     
     public CuboidClipboard getClipboard(Long checksum, Direction direction) {
-        throw new UnsupportedOperationException(); // UNMODIFIABLE CLIPBOARD!
+        synchronized(clipboards.get(checksum)) {
+            if(clipboards.get(checksum) == null) {
+                return null;
+            }
+        }
+        
+        synchronized(clipboards.get(checksum).get(direction)) {
+            CuboidClipboard clipboard = clipboards.get(checksum).get(direction);
+            if(clipboard != null) {
+                return clipboard;
+            } else if (schematics.get(checksum) == null) {
+                return null;
+            } else {
+                
+                Schematic schematic = schematics.get(checksum);
+                
+                try {
+                    CuboidClipboard cc = schematic.getClipboard();
+                    SchematicUtil.align(cc, direction);
+                    UnModifiableClipboard ucc = new UnModifiableClipboard(cc);
+                    clipboards.get(checksum).put(direction, ucc);
+                    return ucc;
+                } catch (IOException | DataException ex) { // Should never happen on existing clipboards that have succesfully been read once
+                    Logger.getLogger(SchematicManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return null;
     }
     
     public boolean hasSchematic(long checksum) {
