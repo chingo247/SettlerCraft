@@ -1,18 +1,26 @@
+
 /*
- * Copyright (C) 2014 Chingo
+ * The MIT License
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright 2015 Chingo.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 package com.chingo247.settlercraft.structureapi.structure.complex;
 
@@ -21,8 +29,8 @@ import com.chingo247.settlercraft.structureapi.persistence.hibernate.HibernateUt
 import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.plan.schematic.Schematic;
 import com.chingo247.settlercraft.structureapi.plan.schematic.SchematicData;
-import com.chingo247.settlercraft.structureapi.structure.Structure.State;
-import com.chingo247.settlercraft.structureapi.world.Dimension;
+import com.chingo247.settlercraft.structureapi.structure.old.Structure.State;
+import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
 import com.chingo247.settlercraft.structureapi.world.Direction;
 import com.chingo247.settlercraft.util.SchematicUtil;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
@@ -37,6 +45,7 @@ import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import org.hibernate.Session;
 
 /**
@@ -44,7 +53,7 @@ import org.hibernate.Session;
  * @author Chingo
  */
 @Entity(name = "StructureComplex")
-public class ComplexStructure implements Serializable, SchematicStructure {
+public class ComplexStructure  {
 
     @Id
     @GeneratedValue
@@ -56,10 +65,12 @@ public class ComplexStructure implements Serializable, SchematicStructure {
     private com.chingo247.settlercraft.structureapi.world.World world;
     
     @Embedded
-    private Dimension dimension;
+    private CuboidDimension dimension;
     @Column(name = "m_state")
     private State state;
 
+    @Transient
+    private ComplexStructureDAO complexStructureDAO;
     
     
     /**
@@ -73,27 +84,31 @@ public class ComplexStructure implements Serializable, SchematicStructure {
         this.name = plan.getName();
     }
 
-    @Override
     public Long getId() {
         return id;
     }
     
-    @Override
+    private ComplexStructureDAO getDAO() {
+        if(complexStructureDAO == null) {
+            complexStructureDAO = new ComplexStructureDAO();
+        }
+        return complexStructureDAO;
+    }
+    
+    
+    
     public String getName() {
         return name;
     }
     
-     @Override
     public World getWorld() {
          return WorldEditUtil.getWorld(world.getName());
     }
 
-    @Override
     public final SchematicData getSchematicData() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
     public Schematic getSchematic() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -103,13 +118,11 @@ public class ComplexStructure implements Serializable, SchematicStructure {
    
     
     
-    @Override
     public State getState() {
         return state;
     }
 
-    @Override
-    public Dimension getDimension() {
+    public CuboidDimension getDimension() {
         return dimension;
     }
 
@@ -152,8 +165,7 @@ public class ComplexStructure implements Serializable, SchematicStructure {
     
     
     
-    @Override
-    public boolean isWithin(World world, Dimension dimension) {
+    public boolean isWithin(World world, CuboidDimension dimension) {
         return this.world.getName().equals(world.getName())
                 && dimension.getMinX() > this.dimension.getMinX()
                 && dimension.getMinY() > this.dimension.getMinY()
@@ -163,23 +175,16 @@ public class ComplexStructure implements Serializable, SchematicStructure {
                 && dimension.getMaxZ() < this.dimension.getMaxZ();
     }
 
-    @Override
     public boolean isWithin(World world, Vector pos) {
         return this.world.getName().equals(world.getName())
                 && pos.getBlockX() < dimension.getMaxX() && pos.getBlockX() > dimension.getMinX()
                 && pos.getBlockY() < dimension.getMaxY() && pos.getBlockY() > dimension.getMinY()
                 && pos.getBlockZ() < dimension.getMaxZ() && pos.getBlockZ() > dimension.getMinZ();
     }
-
-    
-    
-    
-    @Override
     public List<StructureMembership> getMembers() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
     public List<StructureOwnership> getOwners() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

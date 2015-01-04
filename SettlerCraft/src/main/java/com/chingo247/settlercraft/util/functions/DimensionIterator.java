@@ -1,22 +1,30 @@
+
 /*
- * Copyright (C) 2014 Chingo
+ * The MIT License
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright 2015 Chingo.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 package com.chingo247.settlercraft.util.functions;
 
-import com.chingo247.settlercraft.structureapi.world.Dimension;
+import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
 import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.Vector;
 
@@ -26,12 +34,12 @@ import com.sk89q.worldedit.Vector;
  */
 public class DimensionIterator {
 
-    private final Dimension dimension;
+    private final CuboidDimension dimension;
     private Vector currentStart, currentEnd;
     private int minX, minY, minZ;
     private final int xRange, yRange, zRange;
 
-    public DimensionIterator(Dimension dimension, int xRange, int yRange, int zRange) {
+    public DimensionIterator(CuboidDimension dimension, int xRange, int yRange, int zRange) {
 //        Preconditions.checkNotNull(dimension);
         this.dimension = dimension;
         this.minX = dimension.getMinX();
@@ -51,7 +59,7 @@ public class DimensionIterator {
      * @param yRange
      * @param zRange 
      */
-    private DimensionIterator(Dimension dimension, Vector currentStart, Vector currentEnd, int xRange, int yRange, int zRange, int minX, int minY, int minZ) {
+    private DimensionIterator(CuboidDimension dimension, Vector currentStart, Vector currentEnd, int xRange, int yRange, int zRange, int minX, int minY, int minZ) {
         this.dimension = dimension;
         this.currentStart = currentStart;
         this.currentEnd = currentEnd;
@@ -63,11 +71,11 @@ public class DimensionIterator {
         this.minZ = minZ;
     }
 
-    public Dimension getDimension() {
+    public CuboidDimension getDimension() {
         return dimension;
     }
     
-    public Dimension next() {
+    public CuboidDimension next() {
         currentStart = new Vector(minX, minY, minZ);
         currentEnd = new Vector(minX + xRange, minY + yRange, minZ + zRange);
         
@@ -89,7 +97,7 @@ public class DimensionIterator {
         }
         
 
-        return new Dimension(currentStart, currentEnd);
+        return new CuboidDimension(currentStart, currentEnd);
     }
 
     /**

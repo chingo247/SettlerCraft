@@ -1,24 +1,31 @@
 /*
- * Copyright (C) 2014 Chingo247
+ * The MIT License
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright 2015 Chingo.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 package com.chingo247.settlercraft.bukkit.listener;
 
 import com.chingo247.settlercraft.structureapi.persistence.hibernate.StructureDAO;
-import com.chingo247.settlercraft.structureapi.structure.Structure;
-import com.chingo247.settlercraft.structureapi.world.Dimension;
+import com.chingo247.settlercraft.structureapi.structure.old.Structure;
+import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
 import com.sk89q.worldedit.Vector;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -41,7 +48,7 @@ public class FenceListener implements Listener {
             Structure structure = structureDAO.getStructure(l.getWorld().getName(), l.getBlockX(), l.getBlockY(), l.getBlockZ());
             if (structure != null && structure.getState() != Structure.State.COMPLETE) {
                 Vector v = structure.getRelativePosition(new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ()));
-                Dimension dim = structure.getDimension();
+                CuboidDimension dim = structure.getDimension();
 
                 if (v.getBlockY() == 1 && (l.getBlockX() == dim.getMinX() || l.getBlockX() == dim.getMaxX() || l.getBlockZ() == dim.getMinZ() || l.getBlockZ() == dim.getMaxZ())) {
                     if (bbe.getPlayer() != null) {
