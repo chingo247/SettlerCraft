@@ -26,8 +26,8 @@ package com.chingo247.settlercraft.structureapi.persistence.hibernate;
 
 import com.chingo247.settlercraft.structureapi.structure.old.AbstractStructureAPI;
 import com.chingo247.settlercraft.structureapi.structure.QStructure;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure.State;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State;
 import com.chingo247.settlercraft.util.WorldGuardUtil;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateDeleteClause;
@@ -110,17 +110,17 @@ public abstract class ValidationService {
             tx = session.beginTransaction();
             QStructure qct = QStructure.structure;
             JPQLQuery query = new HibernateQuery(session);
-            List<Structure> structures = query.from(qct).where(
+            List<NopeStructure> structures = query.from(qct).where(
                     qct.logEntry().autoremoved.eq(Boolean.FALSE)
                     .and(qct.location().world.eq(world))
                     .and(qct.logEntry().completedAt.after(timestamp).or(qct.logEntry().removedAt.after(timestamp)))).list(qct);
 
             if (!structures.isEmpty()) {
                 structureAPI.print("World " + world + " contains " + structures.size() + " that have an invalid status");
-                Iterator<Structure> it = structures.iterator();
+                Iterator<NopeStructure> it = structures.iterator();
                 RegionManager manager = WorldGuardUtil.getRegionManager(Bukkit.getWorld(world));
                 while (it.hasNext()) {
-                    Structure structure = it.next();
+                    NopeStructure structure = it.next();
 
                     if (!manager.hasRegion(structure.getStructureRegion())) {
                         structureAPI.print("Structure #" + structure.getId() + " was removed after last save");
@@ -160,9 +160,9 @@ public abstract class ValidationService {
         }
     }
 
-    protected abstract void reclaim(Structure structure);
+    protected abstract void reclaim(NopeStructure structure);
     
-    protected abstract void removeRegion(Structure structure, String world);
+    protected abstract void removeRegion(NopeStructure structure, String world);
 
     private void removeCreatedBefore(String world, Timestamp timestamp) {
         Session session = null;
@@ -172,17 +172,17 @@ public abstract class ValidationService {
             tx = session.beginTransaction();
             QStructure qct = QStructure.structure;
             JPQLQuery query = new HibernateQuery(session);
-            List<Structure> structures = query.from(qct).where(qct.logEntry().createdAt.after(timestamp)
+            List<NopeStructure> structures = query.from(qct).where(qct.logEntry().createdAt.after(timestamp)
                     .and(qct.location().world.eq(world))
                     .and(qct.state.ne(State.REMOVED))).list(qct);
             if (!structures.isEmpty()) {
                 structureAPI.print("World '" + world + "' has " + structures.size() + " structures that were placed after the last world save");
             }
-            Iterator<Structure> it = structures.iterator();
+            Iterator<NopeStructure> it = structures.iterator();
             
             Date removeDate = new Date();
             while (it.hasNext()) {
-                Structure structure = it.next();
+                NopeStructure structure = it.next();
                 removeRegion(structure, world);
                 structureAPI.print("Region: " + structure.getStructureRegion() + " has been removed");
                 structure.setState(State.REMOVED);

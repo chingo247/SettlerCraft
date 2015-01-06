@@ -25,7 +25,7 @@ package com.chingo247.settlercraft.bukkit.plan.worldguard;
 
 import com.chingo247.settlercraft.structureapi.exception.StructureDataException;
 import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
-import com.chingo247.settlercraft.structureapi.structure.plan.Loader;
+import com.chingo247.settlercraft.structureapi.structure.plan.ALoader;
 import com.chingo247.settlercraft.util.document.Elements;
 import com.chingo247.settlercraft.util.document.Nodes;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -46,7 +46,7 @@ import org.dom4j.Node;
  *
  * @author Chingo
  */
-public class StructureRegionFlagLoader extends Loader<StructureRegionFlag> {
+public class StructureRegionFlagLoader extends ALoader<StructureRegionFlag> {
 
     public StructureRegionFlagLoader() {
         super(Nodes.WORLDGUARD_FLAGS_NODE);

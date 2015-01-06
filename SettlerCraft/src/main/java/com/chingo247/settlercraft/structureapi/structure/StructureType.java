@@ -22,30 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structureapi.structure.complex;
-
-import com.chingo247.settlercraft.structureapi.plan.schematic.Schematic;
-import com.chingo247.settlercraft.structureapi.plan.schematic.SchematicData;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure.State;
+package com.chingo247.settlercraft.structureapi.structure;
 
 /**
  *
  * @author Chingo
  */
-public interface SchematicStructure  extends Structure {
-    
-    /**
-     * Gets the schematic data
-     * @return The schematic data for this structure
+public enum StructureType {
+     /**
+     * A Structure which has a schematic attached
      */
-    public SchematicData getSchematicData();
-    
+    SCHEMATIC,
     /**
-     * Gets the schematic for this structure
-     * @return The schematic for this structure
+     * A Structure Lot has no schematic attached. StructureLot are used to reserve an area for one or more structures. 
      */
-    public Schematic getSchematic();
-    
-    public State getState();
+    STRUCTURELOT,
+    /**
+     * Structure has no schematic and is completely generated based on info within the StructurePlan
+     */
+    GENERATED
     
 }

@@ -26,12 +26,12 @@ package com.chingo247.settlercraft.bukkit.plan.overviews;
 
 
 import com.chingo247.settlercraft.bukkit.BukkitStructureAPI;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure.State;
-import static com.chingo247.settlercraft.structureapi.structure.old.Structure.State.BUILDING;
-import static com.chingo247.settlercraft.structureapi.structure.old.Structure.State.COMPLETE;
-import static com.chingo247.settlercraft.structureapi.structure.old.Structure.State.DEMOLISHING;
-import static com.chingo247.settlercraft.structureapi.structure.old.Structure.State.STOPPED;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State;
+import static com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State.BUILDING;
+import static com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State.COMPLETE;
+import static com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State.DEMOLISHING;
+import static com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State.STOPPED;
 import com.chingo247.settlercraft.structureapi.event.SettlerCraftDisableEvent;
 import com.chingo247.settlercraft.structureapi.event.structure.StructureCreateEvent;
 import com.chingo247.settlercraft.structureapi.event.structure.StructureStateChangeEvent;
@@ -78,7 +78,7 @@ public class StructureOverviewManager {
         this.plugin = plugin;
     }
 
-    private synchronized void createHolograms(final Structure structure) {
+    private synchronized void createHolograms(final NopeStructure structure) {
 
         // In case being executed asynchronously
         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
@@ -127,7 +127,7 @@ public class StructureOverviewManager {
 
     }
 
-    private synchronized void removeHolos(Structure structure) {
+    private synchronized void removeHolos(NopeStructure structure) {
         for (Hologram hologram : holograms.get(structure.getId())) {
             if (!hologram.isDeleted()) {
                 hologram.delete();
@@ -136,7 +136,7 @@ public class StructureOverviewManager {
         }
     }
 
-    private String getStatusString(Structure structure) {
+    private String getStatusString(NopeStructure structure) {
         State state = structure.getState();
         String statusString;
         switch (state) {
@@ -163,7 +163,7 @@ public class StructureOverviewManager {
         return statusString;
     }
 
-    protected synchronized void updateHolos(final Structure structure) {
+    protected synchronized void updateHolos(final NopeStructure structure) {
         if (structure.getState() == State.REMOVED) {
             removeHolos(structure);
         }
@@ -184,9 +184,9 @@ public class StructureOverviewManager {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QStructure qs = QStructure.structure;
-        final List<Structure> structures = query.from(qs).where(qs.state.ne(Structure.State.REMOVED)).list(qs);
+        final List<NopeStructure> structures = query.from(qs).where(qs.state.ne(NopeStructure.State.REMOVED)).list(qs);
         session.close();
-        for (Structure s : structures) {
+        for (NopeStructure s : structures) {
             createHolograms(s);
         }
 

@@ -27,17 +27,17 @@ import com.chingo247.menu.util.ShopUtil;
 import com.chingo247.settlercraft.bukkit.BukkitStructureAPI;
 import com.chingo247.settlercraft.bukkit.WorldEditUtil;
 import com.chingo247.settlercraft.structureapi.structure.old.PlayerOwnership;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure.State;
-import static com.chingo247.settlercraft.structureapi.structure.old.Structure.State.BUILDING;
-import static com.chingo247.settlercraft.structureapi.structure.old.Structure.State.COMPLETE;
-import static com.chingo247.settlercraft.structureapi.structure.old.Structure.State.DEMOLISHING;
-import static com.chingo247.settlercraft.structureapi.structure.old.Structure.State.INITIALIZING;
-import static com.chingo247.settlercraft.structureapi.structure.old.Structure.State.LOADING_SCHEMATIC;
-import static com.chingo247.settlercraft.structureapi.structure.old.Structure.State.PLACING_FENCE;
-import static com.chingo247.settlercraft.structureapi.structure.old.Structure.State.QUEUED;
-import static com.chingo247.settlercraft.structureapi.structure.old.Structure.State.REMOVED;
-import static com.chingo247.settlercraft.structureapi.structure.old.Structure.State.STOPPED;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State;
+import static com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State.BUILDING;
+import static com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State.COMPLETE;
+import static com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State.DEMOLISHING;
+import static com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State.INITIALIZING;
+import static com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State.LOADING_SCHEMATIC;
+import static com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State.PLACING_FENCE;
+import static com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State.QUEUED;
+import static com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State.REMOVED;
+import static com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State.STOPPED;
 import com.chingo247.settlercraft.structureapi.exception.SettlerCraftException;
 import com.chingo247.settlercraft.structureapi.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.structureapi.persistence.hibernate.StructureDAO;
@@ -149,7 +149,7 @@ public class StructureCommandExecutor implements CommandExecutor {
     
 
     private boolean displayStructures(CommandSender sender, String[] args) {
-        List<Structure> structures;
+        List<NopeStructure> structures;
         
         // Who's structures do we want?
         if (args.length < 3) { // =>> ME!
@@ -211,7 +211,7 @@ public class StructureCommandExecutor implements CommandExecutor {
             int line = 1;
             int startIndex = (index - 1) * (MAX_LINES - 1);
             for (int i = startIndex; i < startIndex + (MAX_LINES - 1) && i < structures.size(); i++) {
-                Structure structure = structures.get(i);
+                NopeStructure structure = structures.get(i);
                 String l = "#" + ChatColor.GOLD + structure.getId() + " " + ChatColor.BLUE + structure.getName()+ ChatColor.RESET
                         + " " + ChatColor.YELLOW + "X: " + ChatColor.RESET + structure.getLocation().getX()
                         + " " + ChatColor.YELLOW + "Y: " + ChatColor.RESET + structure.getLocation().getY()
@@ -225,17 +225,17 @@ public class StructureCommandExecutor implements CommandExecutor {
         return true;
     }
 
-    private List<Structure> getStructures(Player player) {
+    private List<NopeStructure> getStructures(Player player) {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QPlayerOwnership qpo = QPlayerOwnership.playerOwnership;
-        List<Structure> structures = query.from(qpo).where(qpo.player.eq(player.getUniqueId()).and(qpo.structure().state.ne(State.REMOVED))).list(qpo.structure());
+        List<NopeStructure> structures = query.from(qpo).where(qpo.player.eq(player.getUniqueId()).and(qpo.structure().state.ne(State.REMOVED))).list(qpo.structure());
         session.close();
         return structures;
     }
 
     private boolean displayInfo(CommandSender sender, String[] args) {
-        Structure structure;
+        NopeStructure structure;
 
         if (args.length == 2) {
             Long id;
@@ -311,7 +311,7 @@ public class StructureCommandExecutor implements CommandExecutor {
     }
 
     private boolean getPos(Player player, String[] args) {
-        Structure structure;
+        NopeStructure structure;
         if (args.length == 1) {
             Location l = player.getLocation();
             structure = structureDAO.getStructure(l.getWorld().getName(), l.getBlockX(), l.getBlockY(), l.getBlockZ());
@@ -353,14 +353,14 @@ public class StructureCommandExecutor implements CommandExecutor {
         return true;
     }
 
-    private Structure getStructureFromString(CommandSender sender, String structureId) throws SettlerCraftException {
+    private NopeStructure getStructureFromString(CommandSender sender, String structureId) throws SettlerCraftException {
         Long id;
         try {
             id = Long.parseLong(structureId);
         } catch (NumberFormatException nfe){
             throw new SettlerCraftException("Invalid id");
         }
-        Structure structure = structureDAO.find(id);
+        NopeStructure structure = structureDAO.find(id);
         if(structure == null) {
             throw new SettlerCraftException("No structure found for id #" + id);
         }
@@ -376,7 +376,7 @@ public class StructureCommandExecutor implements CommandExecutor {
                 return new Integer(o2.getOwnerType().ordinal()).compareTo(o1.getOwnerType().ordinal());
             }
         };
-        Structure structure;
+        NopeStructure structure;
         try {
             structure = getStructureFromString(sender, args[1]);
         } catch (SettlerCraftException ex) {
@@ -421,7 +421,7 @@ public class StructureCommandExecutor implements CommandExecutor {
 
     private boolean addOwner(CommandSender sender, String[] args) {
        
-        Structure structure;
+        NopeStructure structure;
         try {
             structure = getStructureFromString(sender, args[1]);
         } catch (SettlerCraftException ex) {
@@ -458,7 +458,7 @@ public class StructureCommandExecutor implements CommandExecutor {
     private boolean removeOwner(CommandSender sender, String[] args) {
        
         
-        Structure structure;
+        NopeStructure structure;
         try {
             structure = getStructureFromString(sender, args[1]);
         } catch (SettlerCraftException ex) {

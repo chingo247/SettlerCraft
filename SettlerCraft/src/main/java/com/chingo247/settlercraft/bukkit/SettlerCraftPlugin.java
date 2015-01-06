@@ -31,14 +31,14 @@ import com.chingo247.settlercraft.bukkit.commands.StructureCommandExecutor;
 import com.chingo247.settlercraft.bukkit.listener.FenceListener;
 import com.chingo247.settlercraft.bukkit.listener.PlanListener;
 import com.chingo247.settlercraft.bukkit.listener.PluginListener;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
 import com.chingo247.settlercraft.structureapi.construction.prism.DimensionRollback;
 import com.chingo247.settlercraft.structureapi.exception.SettlerCraftException;
 import com.chingo247.settlercraft.structureapi.exception.StructureAPIException;
 import com.chingo247.settlercraft.structureapi.persistence.HSQLServer;
 import com.chingo247.settlercraft.structureapi.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.structureapi.persistence.hibernate.ValidationService;
-import com.chingo247.settlercraft.structureapi.plan.PlanMenuManager;
+import com.chingo247.settlercraft.structureapi.structure.plan.menu.PlanMenuManager;
 import com.chingo247.settlercraft.structureapi.structure.QStructure;
 import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
 import com.chingo247.xcore.platforms.bukkit.BukkitPlatform;
@@ -223,8 +223,8 @@ public class SettlerCraftPlugin extends JavaPlugin {
         Session session = HibernateUtil.getSession();
         QStructure qs = QStructure.structure;
 
-        new HibernateUpdateClause(session, qs).where(qs.state.ne(Structure.State.COMPLETE).and(qs.state.ne(Structure.State.REMOVED)))
-                .set(qs.state, Structure.State.STOPPED)
+        new HibernateUpdateClause(session, qs).where(qs.state.ne(NopeStructure.State.COMPLETE).and(qs.state.ne(NopeStructure.State.REMOVED)))
+                .set(qs.state, NopeStructure.State.STOPPED)
                 .execute();
         session.close();
     }

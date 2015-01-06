@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-package com.chingo247.settlercraft.structureapi.plan.schematic;
+package com.chingo247.settlercraft.structureapi.structure.schematic;
 
 
 import com.chingo247.settlercraft.structureapi.plan.StructurePlan;

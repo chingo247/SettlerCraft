@@ -34,8 +34,8 @@ import com.chingo247.settlercraft.structureapi.exception.StructureException;
 import com.chingo247.settlercraft.structureapi.persistence.hibernate.SchematicDataDAO;
 import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.selection.CUISelectionManager;
-import com.chingo247.settlercraft.structureapi.plan.schematic.SchematicData;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure;
+import com.chingo247.settlercraft.structureapi.structure.schematic.SchematicData;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
 import com.chingo247.settlercraft.util.SchematicUtil;
 import com.chingo247.settlercraft.util.WorldUtil;
 import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
@@ -159,7 +159,7 @@ public class PlanListener implements Listener {
             Vector pos = new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ());
 
             if (canPlace(player, pos, WorldUtil.getDirection(player), schematic)) {
-                Structure structure;
+                NopeStructure structure;
                 try {
                     structure = structureAPI.create(player, plan, l, WorldUtil.getDirection(player));
                     ItemStack clone = pie.getItem().clone();
@@ -271,7 +271,7 @@ public class PlanListener implements Listener {
             System.out.println("Can place?");
             if (canPlace(player, pos1, direction, schematic)) {
                 
-                Structure structure;
+                NopeStructure structure;
                 try {
                     System.out.println("Creating structure");
                     structure = structureAPI.create(player, plan, player.getWorld(), pos1, WorldUtil.getDirection(player));
@@ -329,7 +329,7 @@ public class PlanListener implements Listener {
 
             if (canPlace(player, pos1, direction, schematic)) {
 
-                Structure structure;
+                NopeStructure structure;
                 try {
                     structure = structureAPI.create(player, plan, player.getWorld(), pos1, WorldUtil.getDirection(player));
                     if (structure != null) {

@@ -46,18 +46,25 @@ public class KeyPool<T> {
     }
 
     public Future execute(T t, Runnable runnable) {
+        // Create a new Queue if there is now existing one for this key
         synchronized (tasks) {
             if (tasks.get(t) == null) {
                 tasks.put(t, new LinkedList<KeyRunnable>());
             }
         }
+        // Determines if the runnable should be submitted to the executor
         boolean execute;
         KeyRunnable keyRunnable = new KeyRunnable(t, runnable);
+        
+        // If this is this first runnable in the queue, then this runnable should be sumbitted to the executor
+        // Otherwise it will wait until the Runnable that is one place next in the queue has finished
         synchronized (tasks.get(t)) {
             execute = tasks.get(t).peek() == null;
             tasks.get(t).add(keyRunnable);
         }
 
+        
+        // Return the Future for this Runnable
         if (execute) {
             return executor.submit(keyRunnable);
         } else {
@@ -74,18 +81,24 @@ public class KeyPool<T> {
         public KeyRunnable(T t, Runnable r) {
             this.t = t;
             this.r = r;
-            this.f = new FutureTask(r, new Object());
+            this.f = new FutureTask(r, null);
         }
 
         @Override
         public void run() {
             try {
+                // Execute the runnable
                 r.run();
             } finally {
-                tasks.get(t).poll();
+                
                 synchronized (tasks.get(t)) {
+                    // Remove yourself from the Queue
+                    tasks.get(t).poll();
+                    
+                    // Check if there is another one waiting at your queue
                     Runnable nextTask = tasks.get(t).peek();
                     if (nextTask != null) {
+                        // Submit this task to the executor, so it's scheduled to be executed
                         executor.execute(nextTask);
                     }
                 }

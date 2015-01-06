@@ -24,7 +24,7 @@
 package com.chingo247.settlercraft.bukkit.plan.holograms;
 
 import com.chingo247.settlercraft.bukkit.BukkitStructureAPI;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
 import com.chingo247.settlercraft.structureapi.event.SettlerCraftDisableEvent;
 import com.chingo247.settlercraft.structureapi.event.structure.StructureCreateEvent;
 import com.chingo247.settlercraft.structureapi.event.structure.StructureStateChangeEvent;
@@ -75,14 +75,14 @@ public class StructureHologramManager {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QStructure qs = QStructure.structure;
-        final List<Structure> structures = query.from(qs).where(qs.state.ne(Structure.State.REMOVED)).list(qs);
-        for (Structure s : structures) {
+        final List<NopeStructure> structures = query.from(qs).where(qs.state.ne(NopeStructure.State.REMOVED)).list(qs);
+        for (NopeStructure s : structures) {
             createHolograms(s);
         }
         initialized = true;
     }
 
-    private void createHolograms(final Structure structure) {
+    private void createHolograms(final NopeStructure structure) {
         // FIX: Crashed the server when not performed sync delayed as this method could be called from a different thread
         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
 
@@ -114,7 +114,7 @@ public class StructureHologramManager {
         });
     }
 
-    public void removeHolos(Structure structure) {
+    public void removeHolos(NopeStructure structure) {
         for (Hologram h : holograms.get(structure.getId())) {
 
             h.delete();
@@ -124,7 +124,7 @@ public class StructureHologramManager {
 
     @Subscribe
     protected void onStateChanged(StructureStateChangeEvent changeEvent) {
-        if (changeEvent.getStructure().getState() == Structure.State.REMOVED) {
+        if (changeEvent.getStructure().getState() == NopeStructure.State.REMOVED) {
             removeHolos(changeEvent.getStructure());
         }
     }

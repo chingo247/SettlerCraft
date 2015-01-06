@@ -24,7 +24,7 @@
  */
 package com.chingo247.settlercraft.structureapi.plan.document;
 
-import com.chingo247.settlercraft.structureapi.structure.old.Structure;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
 import java.io.File;
 import org.dom4j.DocumentException;
 import org.dom4j.io.OutputFormat;
@@ -35,16 +35,16 @@ import org.dom4j.io.OutputFormat;
  */
 public class StructureDocument extends AbstractDocument<StructureDocumentPluginElement> {
     
-    private final Structure structure;
+    private final NopeStructure structure;
     private final StructureDocumentManager documentManager;
 
-    public StructureDocument(StructureDocumentManager documentManager, Structure structure, File docFile) throws DocumentException {
+    public StructureDocument(StructureDocumentManager documentManager, NopeStructure structure, File docFile) throws DocumentException {
         super(docFile);
         this.structure = structure;
         this.documentManager = documentManager;
     }
 
-    public Structure getStructure() {
+    public NopeStructure getStructure() {
         return structure;
     }
 

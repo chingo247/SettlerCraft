@@ -30,28 +30,35 @@ import com.sk89q.worldedit.Vector;
 import java.io.File;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 import org.dom4j.Document;
 
 /**
  *
  * @author Chingo
  */
-public class StructurePlan {
+public final class StructurePlan {
     
-    private StructurePlan parent;
+    protected transient UUID uuid;
+    
+    protected StructurePlan parent;
     private File structurePlan;
     private Document document;
     
     private List<StructurePlan> plans;  // Substructure - plan
     private List<Placeable> placeables; // Substructure - placeable
     
-    private Placeable placeable;
+    protected Placeable placeable;
     private long xxHashPlan;
 
     StructurePlan(StructurePlan parent, File structurePlan, Placeable placeable) {
         this.parent = parent;
         this.structurePlan = structurePlan;
+        this.uuid = UUID.randomUUID();
     }
+
+    
+    
     
     /**
      * Recursive function that checks if this StructurePlan is Top-Level, where TopLevel means the StructurePlan has no parent or the StructurePlan's

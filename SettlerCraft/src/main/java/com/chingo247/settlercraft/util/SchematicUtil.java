@@ -30,7 +30,7 @@ import static com.chingo247.settlercraft.structureapi.world.Direction.EAST;
 import static com.chingo247.settlercraft.structureapi.world.Direction.NORTH;
 import static com.chingo247.settlercraft.structureapi.world.Direction.SOUTH;
 import static com.chingo247.settlercraft.structureapi.world.Direction.WEST;
-import com.chingo247.settlercraft.structureapi.plan.schematic.SchematicData;
+import com.chingo247.settlercraft.structureapi.structure.schematic.SchematicData;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;

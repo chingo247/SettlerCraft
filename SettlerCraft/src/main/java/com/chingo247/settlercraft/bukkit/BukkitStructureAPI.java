@@ -27,7 +27,7 @@ import com.chingo247.settlercraft.bukkit.plan.holograms.StructureHologramManager
 import com.chingo247.settlercraft.bukkit.plan.overviews.StructureOverviewManager;
 import com.chingo247.settlercraft.structureapi.structure.old.AbstractStructureAPI;
 import com.chingo247.settlercraft.structureapi.structure.old.PlayerOwnership;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
 import com.chingo247.settlercraft.structureapi.structure.old.StructureAPI;
 import com.chingo247.settlercraft.structureapi.construction.options.BuildOptions;
 import com.chingo247.settlercraft.structureapi.construction.options.DemolitionOptions;
@@ -103,26 +103,26 @@ public class BukkitStructureAPI extends AbstractStructureAPI<Player, World> {
         }
     }
     
-    public void rollback(Player player, Structure structure, Date date) {
+    public void rollback(Player player, NopeStructure structure, Date date) {
         structureTaskHandler.rollback(WorldEditUtil.wrapPlayer(player), structure, date);
     }
 
-    public Structure create(StructurePlan plan, Location location, Direction direction) throws StructureException {
+    public NopeStructure create(StructurePlan plan, Location location, Direction direction) throws StructureException {
         return create(null, plan, location, direction);
     }
 
-    public Structure create(Player player, StructurePlan plan, Location location, Direction direction) throws StructureException {
+    public NopeStructure create(Player player, StructurePlan plan, Location location, Direction direction) throws StructureException {
         return create(player, plan, location.getWorld(), new Vector(location.getBlockX(), location.getBlockY(), location.getBlockZ()), direction);
     }
 
     @Override
-    public Structure create(StructurePlan plan, World world, Vector pos, Direction direction) throws StructureException {
+    public NopeStructure create(StructurePlan plan, World world, Vector pos, Direction direction) throws StructureException {
         return create(null, plan, world, pos, direction);
     }
 
     @Override
-    public Structure create(Player player, StructurePlan plan, World world, Vector pos, Direction direction) throws StructureException {
-        Structure structure = impl.create(wrapPlayer(player), plan, wrapWorld(world), pos, direction);
+    public NopeStructure create(Player player, StructurePlan plan, World world, Vector pos, Direction direction) throws StructureException {
+        NopeStructure structure = impl.create(wrapPlayer(player), plan, wrapWorld(world), pos, direction);
         if (structure != null) {
             structure.setStructureRegionId(PREFIX + structure.getId());
             structure = structureDAO.save(structure);
@@ -131,22 +131,22 @@ public class BukkitStructureAPI extends AbstractStructureAPI<Player, World> {
     }
 
     @Override
-    public boolean build(Player player, Structure structure, BuildOptions options, boolean force) {
+    public boolean build(Player player, NopeStructure structure, BuildOptions options, boolean force) {
         return impl.build(wrapPlayer(player), structure, options, force);
     }
 
     @Override
-    public boolean demolish(Player player, Structure structure, DemolitionOptions options, boolean force) {
+    public boolean demolish(Player player, NopeStructure structure, DemolitionOptions options, boolean force) {
         return impl.demolish(wrapPlayer(player), structure, options, force);
     }
 
     @Override
-    public boolean stop(Player player, Structure structure) {
+    public boolean stop(Player player, NopeStructure structure) {
         return impl.stop(wrapPlayer(player), structure);
     }
 
     @Override
-    public boolean makeOwner(Player player, PlayerOwnership.Type type, Structure structure) {
+    public boolean makeOwner(Player player, PlayerOwnership.Type type, NopeStructure structure) {
         if (!impl.makeOwner(wrapPlayer(player), type, structure)) {
             if (player == null) {
                 throw new AssertionError("Null player");
@@ -183,7 +183,7 @@ public class BukkitStructureAPI extends AbstractStructureAPI<Player, World> {
     }
 
     @Override
-    public boolean makeMember(Player player, Structure structure) {
+    public boolean makeMember(Player player, NopeStructure structure) {
         if (!impl.makeMember(wrapPlayer(player), structure)) {
 
             if (player == null) {
@@ -219,7 +219,7 @@ public class BukkitStructureAPI extends AbstractStructureAPI<Player, World> {
     }
 
     @Override
-    public boolean removeOwner(Player player, Structure structure) {
+    public boolean removeOwner(Player player, NopeStructure structure) {
         if (!impl.removeOwner(wrapPlayer(player), structure)) {
             // WorldGuard
             RegionManager rmgr = WorldGuardUtil.getRegionManager(Bukkit.getWorld(structure.getWorldName()));
@@ -249,7 +249,7 @@ public class BukkitStructureAPI extends AbstractStructureAPI<Player, World> {
     }
 
     @Override
-    public boolean removeMember(Player player, Structure structure) {
+    public boolean removeMember(Player player, NopeStructure structure) {
         if (!impl.removeMember(wrapPlayer(player), structure)) {
 
             if (player == null) {
@@ -340,7 +340,7 @@ public class BukkitStructureAPI extends AbstractStructureAPI<Player, World> {
         return getStructure(location) != null;
     }
 
-    public Structure getStructure(Location location) {
+    public NopeStructure getStructure(Location location) {
         return structureDAO.getStructure(location.getWorld().getName(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
     }
 

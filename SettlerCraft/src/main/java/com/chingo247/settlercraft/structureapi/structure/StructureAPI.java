@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -22,25 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structureapi.structure.api;
+package com.chingo247.settlercraft.structureapi.structure;
+
+import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
+import com.chingo247.settlercraft.structureapi.structure.schematic.Schematic;
+import com.chingo247.settlercraft.structureapi.world.Direction;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.world.World;
+import java.io.File;
+import java.util.UUID;
 
 /**
  *
  * @author Chingo
  */
-public enum StructureType {
-     /**
-     * A Structure which has a schematic attached
-     */
-    SCHEMATIC,
-    /**
-     * A Structure Lot has no schematic attached. Structure Lot are used to reserve an area for one or more structures. 
-     * 
-     */
-    STRUCTURE_LOT,
-    /**
-     * StructurePlan has no schematic attached. The StructurePlan has additional info about what blocks should be used to generate a cuboid
-     */
-    GENERATED
+public interface StructureAPI {
+    
+    public Structure create(StructurePlan plan, World world, Vector position, Direction direction);
+    
+    public void build(UUID uuid, Structure structure);
+    
+    public void demolish(UUID uuid, Structure structure);
+    
+    public void stop(Structure structure);
+    
+    public void addRestriction(StructureRestriction restriction);
+    
+    public Schematic loadSchematic(File schematic);
+    
+    public StructurePlan getStructurePlan(String id);
+    
+    public void loadPlans(File planDirectory);
     
 }

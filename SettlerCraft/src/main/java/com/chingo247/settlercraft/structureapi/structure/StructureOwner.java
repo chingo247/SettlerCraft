@@ -22,14 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structureapi.structure.complex;
-
-import com.chingo247.settlercraft.structureapi.persistence.hibernate.AbstractDAOImpl;
+package com.chingo247.settlercraft.structureapi.structure;
 
 /**
  *
  * @author Chingo
  */
-public class ComplexStructureDAO extends AbstractDAOImpl<ComplexStructure>{
+public class StructureOwner {
     
 }

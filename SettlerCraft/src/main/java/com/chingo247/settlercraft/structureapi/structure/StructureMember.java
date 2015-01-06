@@ -22,31 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structureapi.structure.plan;
-
-import org.dom4j.Element;
-import org.dom4j.Node;
+package com.chingo247.settlercraft.structureapi.structure;
 
 /**
  *
  * @author Chingo
  */
-public abstract class AbstractXMLReader {
-    
-    public String getXPathNodeValue(Element e, String xPath) {
-        Node n = e.selectSingleNode(xPath);
-        if(n != null) {
-            return n.getStringValue();
-        }
-        return null;
-    }
-    
-    public int getXPathIntValue(Element e, String xPath) {
-        Node n = e.selectSingleNode(xPath);
-        if(n != null) {
-            return Integer.parseInt(n.getStringValue());
-        }
-        throw new RuntimeException("Element '"+e.getName()+"' was not found");
-    } 
+public class StructureMember {
     
 }

@@ -24,7 +24,7 @@
 package com.chingo247.settlercraft.bukkit.plan.holograms;
 
 import com.chingo247.settlercraft.structureapi.exception.StructureDataException;
-import com.chingo247.settlercraft.structureapi.structure.plan.Loader;
+import com.chingo247.settlercraft.structureapi.structure.plan.ALoader;
 import com.chingo247.settlercraft.util.document.Elements;
 import com.chingo247.settlercraft.util.document.Nodes;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ import org.dom4j.Node;
  *
  * @author Chingo
  */
-public class StructureHologramLoader extends Loader<StructureHologram> {
+public class StructureHologramLoader extends ALoader<StructureHologram> {
 
     public StructureHologramLoader() {
         super(Nodes.HOLOGRAMS_NODE);

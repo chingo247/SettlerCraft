@@ -25,7 +25,7 @@
 package com.chingo247.settlercraft.structureapi.plan.document;
 
 import com.chingo247.settlercraft.structureapi.structure.old.AbstractStructureAPI;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
 import com.chingo247.settlercraft.structureapi.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.structureapi.structure.QStructure;
 import com.mysema.query.jpa.JPQLQuery;
@@ -63,7 +63,7 @@ public class StructureDocumentManager extends AbstractDocumentManager<Long, Stru
         save(pluginElement.root.getStructure().getId(), pluginElement);
     }
     
-    public void register(Structure structure) {
+    public void register(NopeStructure structure) {
         if (getDocument(structure.getId()) == null) {
             StructureDocument d;
             try {
@@ -92,12 +92,12 @@ public class StructureDocumentManager extends AbstractDocumentManager<Long, Stru
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QStructure qs = QStructure.structure;
-        List<Structure> structures = query.from(qs).where(qs.state.ne(Structure.State.REMOVED)).list(qs);
+        List<NopeStructure> structures = query.from(qs).where(qs.state.ne(NopeStructure.State.REMOVED)).list(qs);
         session.close();
 
         final List<Future> tasks = new LinkedList<>();
 
-        for (final Structure structure : structures) {
+        for (final NopeStructure structure : structures) {
             final File structureDocFile = structureAPI.getStructurePlanFile(structure);
             tasks.add(executor.submit(new Runnable() {
 

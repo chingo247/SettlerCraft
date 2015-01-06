@@ -26,7 +26,7 @@ package com.chingo247.settlercraft.structureapi.persistence.hibernate;
 
 import com.chingo247.settlercraft.structureapi.structure.old.PlayerOwnership;
 import com.chingo247.settlercraft.structureapi.structure.QPlayerOwnership;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sk89q.worldedit.entity.Player;
@@ -40,7 +40,7 @@ import org.hibernate.Session;
 public class PlayerOwnershipDAO {
     
     
-    public boolean isOwner(Player player, Structure structure) {
+    public boolean isOwner(Player player, NopeStructure structure) {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QPlayerOwnership qpo = QPlayerOwnership.playerOwnership;
@@ -49,16 +49,16 @@ public class PlayerOwnershipDAO {
         return isOwner;
     }
 
-    public List<Structure> getOwnedStructures(Player player) {
+    public List<NopeStructure> getOwnedStructures(Player player) {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QPlayerOwnership qpo = QPlayerOwnership.playerOwnership;
-        List<Structure> structures = query.from(qpo).where(qpo.player.eq(player.getUniqueId())).list(qpo.structure());
+        List<NopeStructure> structures = query.from(qpo).where(qpo.player.eq(player.getUniqueId())).list(qpo.structure());
         session.close();
         return structures;
     }
 
-    public List<PlayerOwnership> getOwners(Structure structure) {
+    public List<PlayerOwnership> getOwners(NopeStructure structure) {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QPlayerOwnership qpo = QPlayerOwnership.playerOwnership;

@@ -25,6 +25,7 @@
 package com.chingo247.settlercraft.structureapi.structure.plan;
 
 import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
+import com.chingo247.settlercraft.structureapi.world.Direction;
 import com.sk89q.worldedit.Vector;
 
 /**
@@ -34,7 +35,7 @@ import com.sk89q.worldedit.Vector;
 public class PlaceableStructureLot implements Placeable{
     
     public final Vector position;
-    public final int width, height, length;
+    public int width, height, length;
 
     public PlaceableStructureLot(int width, int height, int length) {
         this(Vector.ZERO, width, height, length);
@@ -67,6 +68,19 @@ public class PlaceableStructureLot implements Placeable{
     @Override
     public CuboidDimension getCuboidDimension() {
         return new CuboidDimension(position, new Vector(width, height, length));
+    }
+    
+    @Override
+    public void flip(Direction direction) {
+        switch(direction) {
+            case EAST:
+            case WEST: break;
+            case NORTH:
+            case SOUTH:
+            int temp = width;
+            width = length;
+            length = temp;
+        }
     }
     
 }

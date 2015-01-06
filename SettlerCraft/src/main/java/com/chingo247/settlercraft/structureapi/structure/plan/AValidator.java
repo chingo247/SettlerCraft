@@ -22,12 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structureapi.structure.complex;
+package com.chingo247.settlercraft.structureapi.structure.plan;
+
+import com.chingo247.settlercraft.structureapi.exception.PlanException;
+import org.dom4j.Element;
+import org.dom4j.Node;
 
 /**
  *
  * @author Chingo
  */
-public class StructureOwnership {
+public abstract class AValidator {
+    
+    public abstract void validate(Element element) throws PlanException;
+    
+    public void validate(Node node) throws PlanException {
+        validate((Element) node);
+    }
     
 }

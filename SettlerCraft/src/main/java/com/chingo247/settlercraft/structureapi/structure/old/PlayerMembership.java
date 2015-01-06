@@ -24,7 +24,7 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.old;
 
-import com.chingo247.settlercraft.structureapi.structure.old.Structure;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
 import com.sk89q.worldedit.entity.Player;
 import java.io.Serializable;
 import java.util.UUID;
@@ -39,6 +39,7 @@ import javax.persistence.ManyToOne;
  * @author Chingo
  */
 @Entity
+@Deprecated
 public class PlayerMembership implements Serializable {
 
     @EmbeddedId
@@ -51,7 +52,7 @@ public class PlayerMembership implements Serializable {
     
 //    @MapsId(value = "playerMembershipId")
     @ManyToOne(cascade = CascadeType.ALL)
-    private Structure structure;
+    private NopeStructure structure;
 
     /**
      * JPA Constructor.
@@ -65,7 +66,8 @@ public class PlayerMembership implements Serializable {
      * @param name The name of the owner
      * @param player Whether the owner is a isPlayer or not
      */
-    PlayerMembership(Player player, Structure structure) {
+    @Deprecated
+    PlayerMembership(Player player, NopeStructure structure) {
         this.structure = structure;
         this.uuid = player.getUniqueId();
         this.name = player.getName();
@@ -108,7 +110,7 @@ public class PlayerMembership implements Serializable {
     
    
 
-    public Structure getStructure() {
+    public NopeStructure getStructure() {
         return structure;
     }
 

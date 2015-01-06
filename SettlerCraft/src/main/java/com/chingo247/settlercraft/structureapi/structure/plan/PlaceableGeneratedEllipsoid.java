@@ -26,20 +26,38 @@ package com.chingo247.settlercraft.structureapi.structure.plan;
 
 import com.chingo247.settlercraft.structureapi.structure.generators.EllipsoidGenerator;
 import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
+import com.chingo247.settlercraft.structureapi.world.Direction;
 
 /**
  *
  * @author Chingo
  */
 public class PlaceableGeneratedEllipsoid extends PlaceableGenerated<EllipsoidGenerator> {
+    
+    private int xradius;
+    private int zradius;
 
-    public PlaceableGeneratedEllipsoid(EllipsoidGenerator generator) {
+    public PlaceableGeneratedEllipsoid(EllipsoidGenerator generator, int xradius, int zradius) {
         super(generator);
     }
 
     @Override
     public CuboidDimension getCuboidDimension() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void flip(Direction direction) {
+        switch(direction) {
+            case EAST:
+            case WEST:break;
+            case NORTH: 
+            case SOUTH: 
+            int temp = xradius;
+            xradius = zradius;
+            zradius = temp;
+            break;
+        }
     }
     
 }

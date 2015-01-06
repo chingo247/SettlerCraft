@@ -33,6 +33,7 @@ import javax.persistence.Embeddable;
  * @author Chingo
  */
 @Embeddable
+@Deprecated
 public class PlayerMembershipId implements Serializable {
     
     private Long structure;

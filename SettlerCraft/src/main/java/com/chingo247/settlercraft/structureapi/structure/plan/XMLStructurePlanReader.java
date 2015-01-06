@@ -26,11 +26,16 @@ package com.chingo247.settlercraft.structureapi.structure.plan;
 
 import com.chingo247.settlercraft.structureapi.exception.PlanException;
 import static com.chingo247.settlercraft.structureapi.structure.plan.XMLStructurePlan.*;
+import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
 import com.chingo247.settlercraft.structureapi.world.Direction;
 import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.Vector;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
@@ -41,14 +46,145 @@ import org.dom4j.io.SAXReader;
  *
  * @author Chingo
  */
-public class XMLStructurePlanReader extends AbstractXMLReader {
+public class XMLStructurePlanReader extends AXMLReader {
 
     public StructurePlan read(File structurePlan) throws DocumentException {
-        return read(structurePlan, null, Direction.EAST, Vector.ZERO, true);
+        read(structurePlan, null, Direction.EAST, Vector.ZERO, true);
+        // ROTATE STUFF HERE!
+        
+        // Perform Checks HERE!
     }
     
     private StructurePlan read(File structurePlan, StructurePlan parent, Vector position, boolean recursive) throws DocumentException {
-        return read(structurePlan, parent, Direction.EAST, position, recursive);
+        StructurePlan plan = read(structurePlan, parent, Direction.EAST, position, recursive);
+        
+        // Validate Parent-Child relation
+        checkParentChild(parent, plan, true);
+        checkOverlapOnSameLevel(plan);
+    }
+    
+    /**
+     * Validates the parent child relation of the StructurePlans. Constraints as location
+     * @param parent
+     * @param child 
+     */
+    private void checkParentChild(StructurePlan parent, StructurePlan child, boolean shouldCheckAnother) {
+        if(parent == null) return; // No relation to check
+        
+        // If there is overlap check if this is allowed.
+        if(CuboidDimension.overlaps(parent.placeable, child.placeable)) {
+            if(isGenerated(parent.placeable)) {
+                return; // Generated Stuff may be overlapped whatsoever
+            
+            // If there is overlap on a StructureLot, the child needs to be completely inside it's parent
+            } else if((isStructureLot(parent.placeable) && !CuboidDimension.isDimensionWithin(parent.placeable, child.placeable))
+                        || (isSchematic(parent.placeable) && !CuboidDimension.isDimensionWithin(parent.placeable, child.placeable))) {
+                String message = "SubStructurePlan #" + getChildIndex(child) + " ";
+                    if(shouldCheckAnother) {
+                        message += " overlaps it's parent, but was not fully inside"; 
+                    } else {
+                        message += " needs to be atleast within it"; 
+                    }
+            } 
+        // Only check one level above    
+        } else if(shouldCheckAnother) {
+            // If parent was null method will do nothing
+            // Otherwise the Same rules are applied
+            checkParentChild(parent.getParent(), child, false);
+        }
+        
+    }
+    
+    private void checkOverlapOnSameLevel(StructurePlan plan) {
+        Map<Integer, List<StructurePlan>> tree = new HashMap<>();
+        recursivePutLevels(plan, tree, 0);
+        for(int i = 0; i < tree.size(); i++) {
+            List<StructurePlan> plans = tree.get(i);
+            
+            
+            Iterator<StructurePlan> allIterator = plans.iterator();
+            while(allIterator.hasNext()) {
+                StructurePlan p = allIterator.next();
+                
+                // Guarantees that plans are not checked twice upon eachoter
+                Iterator<StructurePlan> it = plans.iterator();
+                while(it.hasNext()) {
+                    StructurePlan o = it.next();
+                    if(p.uuid.equals(o.uuid)) continue;
+                    
+                    if(CuboidDimension.overlaps(p.placeable, o.placeable)) {
+                        checkMayOverlap(plan, o); 
+                    }
+                    it.remove();
+                }
+            }
+            
+            
+            
+            
+        }
+    }
+    
+    private void checkMayOverlap(StructurePlan plan, StructurePlan other) {
+        
+    }
+    
+    /**
+     * Populates a map recursively, so we know at what levels what StructurePlans may overlap eachother
+     * @param plan The plan
+     * @param tree The holder
+     * @param depth The current depth
+     */
+    private void recursivePutLevels(StructurePlan plan, Map<Integer, List<StructurePlan>> tree, int depth) {
+        for(StructurePlan subStructurePlan : plan.getSubStructurePlans()) {
+            int m_depth = depth;
+            
+            // if it's outside its parent than it's actually a level higher in the Tree
+            if(plan.hasParent() && !CuboidDimension.overlaps(plan.parent.placeable, plan.placeable)) {
+                m_depth--; 
+            }
+            
+            if(!tree.containsKey(m_depth)) tree.put(depth, new ArrayList<StructurePlan>());
+            tree.get(m_depth).add(subStructurePlan);
+            
+            // Check children, recursive call here!
+            recursivePutLevels(subStructurePlan, tree, depth + 1);
+        }
+    }
+    
+    
+    
+   
+    
+    private boolean isSchematic(Placeable placeable) {
+        return placeable instanceof PlaceableSchematic;
+    }
+    
+    private boolean isStructureLot(Placeable placeable) {
+        return placeable instanceof PlaceableStructureLot;
+    }
+    
+    private boolean isGenerated(Placeable placeable) {
+        return placeable instanceof PlaceableGenerated;
+    }
+    
+    /**
+     * Used to get the index of the StructurePlan where an error occurred.
+     * returns -1 if there is no parent.
+     * @param plan
+     * @return 
+     */
+    private int getChildIndex(StructurePlan plan) {
+        if(!plan.hasParent()) {
+            return -1;
+        } else {
+            int index = 0;
+            for(StructurePlan p : plan.getParent().getSubStructurePlans()) {
+                if(p.uuid.equals(plan.uuid)) return index;
+                else index++;
+            }
+        }
+        throw new AssertionError("StructurePlan was not a Child of it's parent!");
     }
 
     private StructurePlan read(File structurePlan, StructurePlan parent, Direction direction, Vector position,  boolean recursive) throws DocumentException {
@@ -203,5 +339,7 @@ public class XMLStructurePlanReader extends AbstractXMLReader {
     private boolean isStructurePlan(Element e) {
         return e.getName().equals(ROOT_ELEMENT);
     }
+
+    
 
 }

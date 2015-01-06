@@ -24,7 +24,7 @@
 package com.chingo247.settlercraft.bukkit.listener;
 
 import com.chingo247.settlercraft.structureapi.persistence.hibernate.StructureDAO;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
 import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
 import com.sk89q.worldedit.Vector;
 import org.bukkit.ChatColor;
@@ -45,8 +45,8 @@ public class FenceListener implements Listener {
     public void onFenceBreak(BlockBreakEvent bbe) {
         if (bbe.getBlock().getType() == Material.IRON_FENCE) {
             Location l = bbe.getBlock().getLocation();
-            Structure structure = structureDAO.getStructure(l.getWorld().getName(), l.getBlockX(), l.getBlockY(), l.getBlockZ());
-            if (structure != null && structure.getState() != Structure.State.COMPLETE) {
+            NopeStructure structure = structureDAO.getStructure(l.getWorld().getName(), l.getBlockX(), l.getBlockY(), l.getBlockZ());
+            if (structure != null && structure.getState() != NopeStructure.State.COMPLETE) {
                 Vector v = structure.getRelativePosition(new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ()));
                 CuboidDimension dim = structure.getDimension();
 

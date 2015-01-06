@@ -25,7 +25,7 @@ package com.chingo247.settlercraft.bukkit.plan.worldguard;
 
 import com.chingo247.settlercraft.structureapi.exception.StructureDataException;
 import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
-import com.chingo247.settlercraft.structureapi.structure.plan.Validator;
+import com.chingo247.settlercraft.structureapi.structure.plan.AValidator;
 import com.chingo247.settlercraft.util.document.Elements;
 import com.chingo247.settlercraft.util.document.Nodes;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -44,7 +44,7 @@ import org.dom4j.Node;
  *
  * @author Chingo
  */
-public class StructureRegionFlagValidator extends Validator {
+public class StructureRegionFlagValidator extends AValidator {
 
     public StructureRegionFlagValidator() {
         super(Nodes.WORLDGUARD_FLAGS_NODE);

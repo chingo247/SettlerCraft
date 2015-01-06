@@ -24,7 +24,7 @@
 package com.chingo247.settlercraft.bukkit.plan.overviews;
 
 import com.chingo247.settlercraft.structureapi.exception.StructureDataException;
-import com.chingo247.settlercraft.structureapi.structure.plan.Loader;
+import com.chingo247.settlercraft.structureapi.structure.plan.ALoader;
 import com.chingo247.settlercraft.util.document.Elements;
 import com.chingo247.settlercraft.util.document.Nodes;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ import org.dom4j.Node;
  *
  * @author Chingo
  */
-public class StructureOverviewLoader extends Loader<StructureOverview>{
+public class StructureOverviewLoader extends ALoader<StructureOverview>{
 
     public StructureOverviewLoader() {
         super(Nodes.STRUCTURE_OVERVIEWS_NODE);

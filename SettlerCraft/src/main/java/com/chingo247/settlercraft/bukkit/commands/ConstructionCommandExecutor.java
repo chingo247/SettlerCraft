@@ -27,7 +27,7 @@ package com.chingo247.settlercraft.bukkit.commands;
 
 import com.chingo247.settlercraft.bukkit.BukkitStructureAPI;
 import com.chingo247.settlercraft.structureapi.persistence.hibernate.StructureDAO;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
 import com.chingo247.settlercraft.structureapi.construction.options.BuildOptions;
 import com.chingo247.settlercraft.structureapi.construction.options.DemolitionOptions;
 import org.bukkit.ChatColor;
@@ -119,7 +119,7 @@ public class ConstructionCommandExecutor implements CommandExecutor {
         }
 
         
-        Structure structure = structureDAO.find(id);
+        NopeStructure structure = structureDAO.find(id);
 
         if (structure == null) {
             player.sendMessage(ChatColor.RED + "Unable to find structure #" + ChatColor.GOLD + id);
@@ -159,7 +159,7 @@ public class ConstructionCommandExecutor implements CommandExecutor {
             return true;
         }
 
-        Structure structure = structureDAO.find(id);
+        NopeStructure structure = structureDAO.find(id);
 
         if (structure == null) {
             player.sendMessage(ChatColor.RED + "Unable to find structure # " + ChatColor.GOLD + id);
@@ -196,7 +196,7 @@ public class ConstructionCommandExecutor implements CommandExecutor {
             return true;
         }
         
-        Structure structure = structureDAO.find(id);
+        NopeStructure structure = structureDAO.find(id);
         
         if (structure == null) {
             player.sendMessage(ChatColor.RED + "Unable to find structure #" + id);
@@ -254,7 +254,7 @@ public class ConstructionCommandExecutor implements CommandExecutor {
             return true;
         }
         
-        Structure structure = structureDAO.find(structureID);
+        NopeStructure structure = structureDAO.find(structureID);
         
         structureAPI.rollback(player, structure, structure.getLog().getCreatedAt());
         

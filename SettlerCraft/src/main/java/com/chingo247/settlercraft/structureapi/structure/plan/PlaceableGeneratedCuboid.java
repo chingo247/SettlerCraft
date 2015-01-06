@@ -26,6 +26,7 @@ package com.chingo247.settlercraft.structureapi.structure.plan;
 
 import com.chingo247.settlercraft.structureapi.structure.generators.CuboidGenerator;
 import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
+import com.chingo247.settlercraft.structureapi.world.Direction;
 
 /**
  *
@@ -33,13 +34,31 @@ import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension
  */
 public class PlaceableGeneratedCuboid extends PlaceableGenerated<CuboidGenerator>{
 
-    public PlaceableGeneratedCuboid(CuboidGenerator generator) {
+    private int length;
+    private int width;
+    
+    public PlaceableGeneratedCuboid(CuboidGenerator generator, int width, int length) {
         super(generator);
+        this.length = length;
+        this.width = width; 
     }
 
     @Override
     public CuboidDimension getCuboidDimension() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void flip(Direction direction) {
+        switch(direction) {
+            case EAST:
+            case WEST: break;
+            case NORTH:
+            case SOUTH:
+            int temp = width;
+            width = length;
+            length = temp;
+        }
     }
     
 }

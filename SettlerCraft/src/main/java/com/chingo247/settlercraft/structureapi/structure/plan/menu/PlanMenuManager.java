@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-package com.chingo247.settlercraft.structureapi.plan;
+package com.chingo247.settlercraft.structureapi.structure.plan.menu;
 
 import com.chingo247.menu.CategoryMenu;
 import com.chingo247.menu.MenuAPI;
@@ -32,6 +32,7 @@ import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
 import com.chingo247.settlercraft.structureapi.exception.StructureAPIException;
 import com.chingo247.settlercraft.structureapi.exception.StructureDataException;
 import com.chingo247.settlercraft.structureapi.persistence.hibernate.SchematicDataDAO;
+import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
 import com.chingo247.settlercraft.util.FileUtil;
 import com.sk89q.worldedit.data.DataException;
 import java.io.File;

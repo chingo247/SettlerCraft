@@ -25,6 +25,7 @@
 package com.chingo247.settlercraft.structureapi.structure.plan;
 
 import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimensional;
+import com.chingo247.settlercraft.structureapi.world.Direction;
 import com.sk89q.worldedit.Vector;
 
 /**
@@ -34,9 +35,12 @@ import com.sk89q.worldedit.Vector;
 public interface Placeable extends CuboidDimensional {
     
     /**
-     * The position relative to it's parent Structure
+     * The position relative to it's parent Structure, If the Structure has no Parent then this method
+     * will likely return Vector.ZERO
      * @return The position relative to it's parent Structure
      */
     public Vector getRelativePosition();
+    
+    public void flip(Direction direction);
     
 }

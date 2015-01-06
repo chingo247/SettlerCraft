@@ -22,38 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structureapi.structure.api;
+package com.chingo247.settlercraft.structureapi.structure.plan;
 
-import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
-import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.world.World;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+import org.dom4j.Element;
+import org.dom4j.Node;
 
 /**
  *
  * @author Chingo
  */
+public abstract class ALoader<T> {
 
-public abstract class Structure {
+    public abstract T load(Element e);
     
-    @Id
-    @GeneratedValue
-    private Long id;
-    
-    public abstract Long getId();
-    
-    public abstract String getName();
-    
-    public abstract void build(Player player);
-    
-    public abstract void demolish(Player player);
-    
-    public abstract void stop(Player player);
-    
-    public abstract boolean overlaps(World world, CuboidDimension dimension);
-    
-    
+    public T load(Node n) {
+        return load((Element) n);
+    }
     
 }

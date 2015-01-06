@@ -22,35 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structureapi.structure.complex;
+package com.chingo247.settlercraft.structureapi.structure.plan;
 
-import java.io.Serializable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import org.dom4j.Element;
+import org.dom4j.Node;
 
 /**
  *
  * @author Chingo
  */
-@Entity
-public class StructureComplexTree implements Serializable {
+public abstract class AXMLReader {
     
-    @Id
-    @GeneratedValue
-    private Long id;
-    
-    private Long parent; // Parent structure
-    private Long child;  // Child Structure
-
-    public StructureComplexTree() {
-    }
-
-    StructureComplexTree(Long parent, Long child) {
-        this.parent = parent;
-        this.child = child;
+    public String getXPathNodeValue(Element e, String xPath) {
+        Node n = e.selectSingleNode(xPath);
+        if(n != null) {
+            return n.getStringValue();
+        }
+        return null;
     }
     
-    
+    public int getXPathIntValue(Element e, String xPath) {
+        Node n = e.selectSingleNode(xPath);
+        if(n != null) {
+            return Integer.parseInt(n.getStringValue());
+        }
+        throw new RuntimeException("Element '"+e.getName()+"' was not found");
+    } 
     
 }

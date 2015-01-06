@@ -70,6 +70,7 @@ public class WorldUtil {
             case WEST:
                 return location.add(-zOffset, yOffset, -xOffset);
             case NORTH:
+                
                 return location.add(xOffset, yOffset, -zOffset);
             default:
                 throw new AssertionError("unreachable");

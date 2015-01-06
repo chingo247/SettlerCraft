@@ -36,6 +36,7 @@ import javax.persistence.Embeddable;
  * @author Chingo
  */
 @Embeddable
+@Deprecated
 public class StructureLog implements Serializable {
 
     @Column(updatable = false)

@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -22,12 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structureapi.structure.complex;
+package com.chingo247.settlercraft.structureapi.structure;
+
+import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
+import com.chingo247.settlercraft.structureapi.structure.schematic.Schematic;
+import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.world.World;
+import java.util.List;
 
 /**
  *
  * @author Chingo
  */
-public class StructureMembership {
+public interface Structure {
+    
+    public long getId();
+    public String getName();
+    public World getWorld();
+    public CuboidRegion getCuboidRegion();
+    public Structure getParent();
+    public List<Structure> getSubStructures();
+    public Schematic getSchematic();
+    public StructurePlan getStructurePlan();
+    public List<StructureMember> getMembers();
+    public List<StructureOwner> getOwners();
+    
     
 }

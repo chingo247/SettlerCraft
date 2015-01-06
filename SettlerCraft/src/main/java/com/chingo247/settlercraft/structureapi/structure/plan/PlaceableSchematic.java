@@ -24,9 +24,13 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan;
 
-import com.chingo247.settlercraft.structureapi.plan.schematic.Schematic;
+import com.chingo247.settlercraft.structureapi.structure.schematic.Schematic;
 import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
+import com.chingo247.settlercraft.structureapi.structure.schematic.SchematicData;
 import com.chingo247.settlercraft.structureapi.world.Direction;
+import com.chingo247.settlercraft.util.SchematicUtil;
+import com.chingo247.settlercraft.util.WorldUtil;
+import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import java.io.File;
 
@@ -36,12 +40,13 @@ import java.io.File;
  */
 public class PlaceableSchematic implements PlaceableDirectional{
     
-    private File schematic;
+    private SchematicData schematic;
     private Vector position;
     private Direction direction;
+    private int rotation;
 
     public PlaceableSchematic(File schematic, Direction direction, Vector position) {
-        this.schematic = schematic;
+        this.schematic = getSchematicData();
         this.position = position;
         this.direction = direction;
     }
@@ -53,20 +58,68 @@ public class PlaceableSchematic implements PlaceableDirectional{
     public PlaceableSchematic(File schematic) {
         this(schematic, Vector.ZERO); // Default position is (0,0,0) xyz
     }
+    
+    private SchematicData getSchematicData() {
+        // Check if available
+        // Not? Then load the schematic and store the result
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public Direction getDirection() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return direction;
     }
 
     @Override
     public Vector getRelativePosition() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return position;
     }
 
     @Override
     public CuboidDimension getCuboidDimension() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+         Vector end = getPoint2Right(position, direction, new Vector(
+                schematic.getWidth(),
+                schematic.getHeight(),
+                schematic.getLength())
+        );
+        return  new CuboidDimension(position, end);
+    }
+    
+     private Vector getPoint2Right(Vector point1, Direction direction, Vector size) {
+        switch (direction) {
+            case EAST:
+                return point1.add(size.subtract(1, 1, 1));
+            case SOUTH:
+                return point1.add(-(size.getBlockZ() - 1), size.getBlockY() - 1, (size.getBlockX() - 1));
+            case WEST:
+                return point1.add(-(size.getBlockX() - 1), size.getBlockY() - 1, -(size.getBlockZ() - 1));
+            case NORTH:
+                return point1.add((size.getBlockZ() - 1), size.getBlockY() - 1, -(size.getBlockX() - 1));
+            default:
+                throw new AssertionError("unreachable");
+        }
+    }
+
+     /**
+      * Flips the Schematic, note that this method will fake the flip operation and only sets the direction of this Schematic internally as opposed to other flip operations where huge amount of blocks
+      * are swapped. This method is therefore a VERY LIGHT operation.
+      * @param direction 
+      */
+    @Override
+    public void flip(Direction direction) {
+        switch(direction) {
+            case EAST: break;
+            case SOUTH: rotation += 90; break;
+            case WEST: rotation += 180; break;
+            case NORTH: rotation += 270; break;
+            default:
+                throw new AssertionError("unreachable");
+        }
+        // If the amount is bigger than 360, then remove turn back 360
+        if(rotation >= 360) {
+            rotation  =- 360;
+        }
+        this.direction = WorldUtil.getDirection(rotation);
     }
     
 }

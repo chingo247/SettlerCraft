@@ -28,9 +28,9 @@ import com.chingo247.settlercraft.structureapi.construction.options.BuildOptions
 import com.chingo247.settlercraft.structureapi.construction.options.DemolitionOptions;
 import com.chingo247.settlercraft.bukkit.WorldEditUtil;
 import com.chingo247.settlercraft.structureapi.structure.old.AbstractStructureAPI;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure;
-import static com.chingo247.settlercraft.structureapi.structure.old.Structure.State.BUILDING;
-import static com.chingo247.settlercraft.structureapi.structure.old.Structure.State.DEMOLISHING;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
+import static com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State.BUILDING;
+import static com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State.DEMOLISHING;
 import com.chingo247.settlercraft.structureapi.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.structureapi.construction.asyncworldedit.SCAsyncClipboard;
 import com.chingo247.settlercraft.structureapi.construction.asyncworldedit.SCIBlockPlacerListener;
@@ -88,17 +88,17 @@ public class StructureTaskManager extends ConstructionTaskManager {
 
             @Override
             public void jobAdded(SCJobEntry entry) {
-                final Structure structure = structureDAO.find(entry.getTaskID());
+                final NopeStructure structure = structureDAO.find(entry.getTaskID());
                 final boolean building = !entry.isDemolishing();
                 entries.put(entry.getTaskID(), new ConstructionEntry(entry.getJobId(), entry.getPlayer().getUUID()));
 
                 // Update status
-                api.setState(structure, Structure.State.QUEUED);
+                api.setState(structure, NopeStructure.State.QUEUED);
                 entry.addStateChangeListener(new SCIJobListener() {
 
                     @Override
                     public void jobStateChanged(SCJobEntry entry) {
-                        Structure structure = structureDAO.find(entry.getTaskID());
+                        NopeStructure structure = structureDAO.find(entry.getTaskID());
                         if (entry.getStatus() == JobEntry.JobStatus.PlacingBlocks) {
                             if (building) {
                                 api.setState(structure, BUILDING);
@@ -114,13 +114,13 @@ public class StructureTaskManager extends ConstructionTaskManager {
             public void jobRemoved(SCJobEntry entry) {
                 // A job is removed when its either canceled or done
                 // Done means it was done building or demolishing
-                Structure structure = structureDAO.find(entry.getTaskID());
+                NopeStructure structure = structureDAO.find(entry.getTaskID());
                 if (!entry.isCanceled()) {
                     // Set state to Complete & set CompletedAt timestamp
                     if (!entry.isDemolishing()) {
-                        api.setState(structure, Structure.State.COMPLETE);
+                        api.setState(structure, NopeStructure.State.COMPLETE);
                     } else  {
-                        api.setState(structure, Structure.State.REMOVED);
+                        api.setState(structure, NopeStructure.State.REMOVED);
                     }
                 } 
                 remove(structure);
@@ -128,7 +128,7 @@ public class StructureTaskManager extends ConstructionTaskManager {
         });
     }
 
-    private void remove(Structure structure) {
+    private void remove(NopeStructure structure) {
         synchronized(entries) {
             entries.remove(structure.getId());
         }
@@ -136,14 +136,14 @@ public class StructureTaskManager extends ConstructionTaskManager {
     
    
 
-    private void build(final Player player, final UUID uuid, final Structure structure, final BuildOptions options, final boolean force) {
+    private void build(final Player player, final UUID uuid, final NopeStructure structure, final BuildOptions options, final boolean force) {
         executor.execute(structure.getId(), new Runnable() {
 
             @Override
             public void run() {
                 if (!force) {
                     try {
-                        performChecks(structure, Structure.State.BUILDING);
+                        performChecks(structure, NopeStructure.State.BUILDING);
                     } catch (ConstructionException | StructureDataException ex) {
                         if (player != null) {
                             player.printError(ex.getMessage());
@@ -161,7 +161,7 @@ public class StructureTaskManager extends ConstructionTaskManager {
                     System.out.println("Schematic:" + plan.getSchematic());
                     
                     
-                    structureAPI.setState(structure, Structure.State.QUEUED);
+                    structureAPI.setState(structure, NopeStructure.State.QUEUED);
 
                     World world = WorldEditUtil.getWorld(structure.getWorldName());
 
@@ -189,7 +189,7 @@ public class StructureTaskManager extends ConstructionTaskManager {
         });
     }
     
-    public void rollback(final Player player, Structure structure, Date targetDate) {
+    public void rollback(final Player player, NopeStructure structure, Date targetDate) {
         CuboidDimension dim = structure.getDimension();
         String world = structure.getWorldName();
         
@@ -233,18 +233,18 @@ public class StructureTaskManager extends ConstructionTaskManager {
         
     }
 
-    public void build(final Player player, final Structure structure, final BuildOptions options, final boolean force) {
+    public void build(final Player player, final NopeStructure structure, final BuildOptions options, final boolean force) {
         build(player, player.getUniqueId(), structure, options, force);
     }
 
-    public void build(final UUID uuid, final Structure structure, final BuildOptions options, final boolean force) {
+    public void build(final UUID uuid, final NopeStructure structure, final BuildOptions options, final boolean force) {
         build(null, uuid, structure, options, force);
     }
 
-    private void demolish(final Player player, final UUID uuid, final Structure structure, final DemolitionOptions options, final boolean force) {
+    private void demolish(final Player player, final UUID uuid, final NopeStructure structure, final DemolitionOptions options, final boolean force) {
         if (!force) {
             try {
-                performChecks(structure, Structure.State.DEMOLISHING);
+                performChecks(structure, NopeStructure.State.DEMOLISHING);
             } catch (ConstructionException | StructureDataException ex) {
                 if (player != null) {
                     player.printError(ex.getMessage());
@@ -257,7 +257,7 @@ public class StructureTaskManager extends ConstructionTaskManager {
         StructurePlan plan;
         try {
             plan = structureAPI.getStructurePlanManager().getPlan(structure);
-            structureAPI.setState(structure, Structure.State.QUEUED);
+            structureAPI.setState(structure, NopeStructure.State.QUEUED);
             World world = WorldEditUtil.getWorld(structure.getWorldName());
             executor.execute(structure.getId(),
                     new DemolitionTask(
@@ -279,20 +279,20 @@ public class StructureTaskManager extends ConstructionTaskManager {
         }
     }
 
-    public void demolish(final Player player, final Structure structure, final DemolitionOptions options, final boolean force) {
+    public void demolish(final Player player, final NopeStructure structure, final DemolitionOptions options, final boolean force) {
         demolish(player, player.getUniqueId(), structure, options, force);
     }
 
-    public void demolish(final UUID uuid, final Structure structure, final DemolitionOptions options, final boolean force) {
+    public void demolish(final UUID uuid, final NopeStructure structure, final DemolitionOptions options, final boolean force) {
         demolish(null, uuid, structure, options, force);
     }
     
-    public boolean stop(Structure structure) {
+    public boolean stop(NopeStructure structure) {
         ConstructionEntry entry = entries.get(structure.getId());
         if(entry != null) {
             PlayerEntry plyEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(entry.taskUUID);
             AsyncWorldEditMain.getInstance().getBlockPlacer().cancelJob(plyEntry, entry.jobId);
-            structureAPI.setState(structure, Structure.State.STOPPED);
+            structureAPI.setState(structure, NopeStructure.State.STOPPED);
             return true;
         }
         return false;
@@ -300,21 +300,21 @@ public class StructureTaskManager extends ConstructionTaskManager {
     
     
 
-    private void performChecks(Structure structure, Structure.State newState) throws ConstructionException, StructureDataException {
+    private void performChecks(NopeStructure structure, NopeStructure.State newState) throws ConstructionException, StructureDataException {
 
         switch (newState) {
             case BUILDING:
                 // Structure has already stopped constructing
-                if (structure.getState() == Structure.State.BUILDING) {
+                if (structure.getState() == NopeStructure.State.BUILDING) {
                     throw new ConstructionException("#" + structure.getId() + " is already being build");
                 }
                 // Structure has already completed construction
-                if (structure.getState() == Structure.State.COMPLETE) {
+                if (structure.getState() == NopeStructure.State.COMPLETE) {
                     throw new ConstructionException("#" + structure.getId() + " is already complete");
                 }
                 break;
             case DEMOLISHING:
-                if (structure.getState() == Structure.State.DEMOLISHING) {
+                if (structure.getState() == NopeStructure.State.DEMOLISHING) {
                     throw new ConstructionException("#" + structure.getId() + " is already being demolished");
                 }
                 break;

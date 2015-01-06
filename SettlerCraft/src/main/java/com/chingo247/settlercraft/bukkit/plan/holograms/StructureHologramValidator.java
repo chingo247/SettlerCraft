@@ -25,7 +25,7 @@
 package com.chingo247.settlercraft.bukkit.plan.holograms;
 
 import com.chingo247.settlercraft.structureapi.exception.StructureDataException;
-import com.chingo247.settlercraft.structureapi.structure.plan.Validator;
+import com.chingo247.settlercraft.structureapi.structure.plan.AValidator;
 import com.chingo247.settlercraft.util.document.Elements;
 import com.chingo247.settlercraft.util.document.Nodes;
 import java.util.List;
@@ -36,7 +36,7 @@ import org.dom4j.Node;
  *
  * @author Chingo
  */
-public class StructureHologramValidator extends Validator {
+public class StructureHologramValidator extends AValidator {
 
     public StructureHologramValidator() {
         super(Nodes.HOLOGRAMS_NODE);

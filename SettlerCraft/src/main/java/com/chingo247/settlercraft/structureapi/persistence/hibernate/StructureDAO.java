@@ -25,7 +25,7 @@
 package com.chingo247.settlercraft.structureapi.persistence.hibernate;
 
 import com.chingo247.settlercraft.structureapi.structure.QStructure;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
 import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
@@ -36,15 +36,15 @@ import org.hibernate.Session;
  * Structure Data Access Object for performing actions on the database
  * @author Chingo
  */
-public class StructureDAO extends AbstractDAOImpl<Structure>  {
+public class StructureDAO extends AbstractDAOImpl<NopeStructure>  {
 
 
-    public Structure getStructure(String world, int x, int y, int z) {
+    public NopeStructure getStructure(String world, int x, int y, int z) {
         QStructure qStructure = QStructure.structure;
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
 
-        Structure structure = query.from(qStructure)
+        NopeStructure structure = query.from(qStructure)
                 .where(qStructure.location().world.eq(world)
                         .and(qStructure.dimension().minX.loe(x))
                         .and(qStructure.dimension().maxX.goe(x))
@@ -52,7 +52,7 @@ public class StructureDAO extends AbstractDAOImpl<Structure>  {
                         .and(qStructure.dimension().maxZ.goe(z))
                         .and(qStructure.dimension().minY.loe(y))
                         .and(qStructure.dimension().maxY.goe(y))
-                        .and(qStructure.state.ne(Structure.State.REMOVED))
+                        .and(qStructure.state.ne(NopeStructure.State.REMOVED))
                 ).singleResult(qStructure);
         session.close();
         return structure;
@@ -67,22 +67,22 @@ public class StructureDAO extends AbstractDAOImpl<Structure>  {
                         .and(qStructure.dimension().maxX.goe(dimension.getMinX()).and(qStructure.dimension().minX.loe(dimension.getMaxX())))
                         .and(qStructure.dimension().maxY.goe(dimension.getMinY()).and(qStructure.dimension().minY.loe(dimension.getMaxY())))
                         .and(qStructure.dimension().maxZ.goe(dimension.getMinZ()).and(qStructure.dimension().minZ.loe(dimension.getMaxZ())))
-                        .and(qStructure.state.ne(Structure.State.REMOVED))
+                        .and(qStructure.state.ne(NopeStructure.State.REMOVED))
                 ).exists();
         session.close();
         return result;
     }
 
-    public List<Structure> getStructuresWithin(String world, CuboidDimension dimension) {
+    public List<NopeStructure> getStructuresWithin(String world, CuboidDimension dimension) {
         QStructure qStructure = QStructure.structure;
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
-        List<Structure> result = query.from(qStructure)
+        List<NopeStructure> result = query.from(qStructure)
                 .where(qStructure.location().world.eq(world)
                         .and(qStructure.dimension().maxX.goe(dimension.getMinX()).and(qStructure.dimension().minX.loe(dimension.getMaxX())))
                         .and(qStructure.dimension().maxY.goe(dimension.getMinY()).and(qStructure.dimension().minY.loe(dimension.getMaxY())))
                         .and(qStructure.dimension().maxZ.goe(dimension.getMinZ()).and(qStructure.dimension().minZ.loe(dimension.getMaxZ())))
-                        .and(qStructure.state.ne(Structure.State.REMOVED))
+                        .and(qStructure.state.ne(NopeStructure.State.REMOVED))
                 ).list(qStructure);
         session.close();
         return result;

@@ -28,7 +28,7 @@ import com.chingo247.settlercraft.structureapi.persistence.hibernate.PlayerOwner
 import com.chingo247.settlercraft.structureapi.persistence.hibernate.ValidationService;
 import com.chingo247.settlercraft.structureapi.structure.old.PlayerMembership;
 import com.chingo247.settlercraft.structureapi.structure.old.PlayerOwnership;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
 import com.chingo247.settlercraft.util.WorldGuardUtil;
 import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
 import com.sk89q.worldedit.BlockVector;
@@ -105,7 +105,7 @@ public class BukkitValidationService extends ValidationService {
     }
 
     @Override
-    protected void reclaim(Structure structure) {
+    protected void reclaim(NopeStructure structure) {
         World world = Bukkit.getWorld(structure.getLocation().getWorld());
         if (world == null) {
             return;
@@ -150,7 +150,7 @@ public class BukkitValidationService extends ValidationService {
     }
 
     @Override
-    protected void removeRegion(Structure structure, String w) {
+    protected void removeRegion(NopeStructure structure, String w) {
         World world = Bukkit.getWorld(w);
         
         if (world == null) {

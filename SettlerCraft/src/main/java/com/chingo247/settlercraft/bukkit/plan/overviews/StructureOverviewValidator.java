@@ -24,7 +24,7 @@
 package com.chingo247.settlercraft.bukkit.plan.overviews;
 
 import com.chingo247.settlercraft.structureapi.exception.StructureDataException;
-import com.chingo247.settlercraft.structureapi.structure.plan.Validator;
+import com.chingo247.settlercraft.structureapi.structure.plan.AValidator;
 import com.chingo247.settlercraft.util.document.Elements;
 import com.chingo247.settlercraft.util.document.Nodes;
 import java.util.List;
@@ -35,7 +35,7 @@ import org.dom4j.Node;
  *
  * @author Chingo
  */
-public class StructureOverviewValidator extends Validator {
+public class StructureOverviewValidator extends AValidator {
 
     public StructureOverviewValidator() {
         super(Nodes.STRUCTURE_OVERVIEWS_NODE);

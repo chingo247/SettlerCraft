@@ -23,14 +23,15 @@
  * THE SOFTWARE.
  */
 
-package com.chingo247.settlercraft.structureapi.plan;
+package com.chingo247.settlercraft.structureapi.structure.plan.menu;
 
 
 import com.chingo247.menu.item.CategoryTradeItem;
 import com.chingo247.menu.item.TradeItem;
 import com.chingo247.menu.util.ShopUtil;
 import com.chingo247.settlercraft.structureapi.exception.StructureDataException;
-import com.chingo247.settlercraft.structureapi.plan.schematic.SchematicData;
+import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
+import com.chingo247.settlercraft.structureapi.structure.schematic.SchematicData;
 import com.sk89q.worldedit.data.DataException;
 import java.io.IOException;
 import java.util.Arrays;

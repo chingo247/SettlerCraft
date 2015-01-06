@@ -31,8 +31,8 @@ import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
 import com.chingo247.settlercraft.bukkit.WorldEditUtil;
 import com.chingo247.settlercraft.util.functions.CubicIterator;
 import com.chingo247.settlercraft.structureapi.structure.old.PlayerOwnership;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure;
-import com.chingo247.settlercraft.structureapi.structure.old.Structure.State;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
+import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State;
 import com.chingo247.settlercraft.structureapi.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.structureapi.exception.CommandException;
 import com.chingo247.settlercraft.structureapi.persistence.hibernate.HibernateUtil;
@@ -207,12 +207,12 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                 } catch (NumberFormatException nfe) {
                     throw new CommandException("Invalid id");
                 }
-                Structure structure = structureDAO.find(sid);
+                NopeStructure structure = structureDAO.find(sid);
                 if (structure == null) {
                     throw new CommandException("No structure found with id #" + sid + "...");
                 }
 
-                if (structure.getState() != Structure.State.REMOVED) {
+                if (structure.getState() != NopeStructure.State.REMOVED) {
                     throw new CommandException("Structure isn't removed...");
                 }
 
@@ -256,7 +256,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
                 "refund list [index] - List all refundable structures of all players",
                 "refund list [index][player] - List all refundable structures of a player",});
         }
-        List<Structure> structures;
+        List<NopeStructure> structures;
         // List all
         if (ply != null) {
             Player player = Bukkit.getPlayer(ply.trim());
@@ -279,7 +279,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
             int line = 1;
             int startIndex = (index - 1) * (MAX_LINES - 1);
             for (int i = startIndex; i < startIndex + (MAX_LINES - 1) && i < amountOfRefundables; i++) {
-                Structure structure = structures.get(i);
+                NopeStructure structure = structures.get(i);
                 String value = ShopUtil.valueString(structure.getRefundValue());
                 String l = "#" + ChatColor.GOLD + structure.getId() + ChatColor.RESET + " value: " + ChatColor.GOLD + value;
                 message[line] = l;
@@ -292,20 +292,20 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
 
     private void refundAll(CommandSender sender) {
         // Note: only gets the structures with a refundValue > 0
-        List<Structure> structures = getRefundables();
+        List<NopeStructure> structures = getRefundables();
 
         if (structures.isEmpty()) {
             sender.sendMessage(SettlerCraftPlugin.MSG_PREFIX + "No structures that need to be refunded...");
             return;
         }
 
-        for (Structure s : structures) {
+        for (NopeStructure s : structures) {
             makeDeposit(sender, s, false);
         }
 
     }
 
-    private void refundStructure(CommandSender sender, Structure structure) {
+    private void refundStructure(CommandSender sender, NopeStructure structure) {
 
         if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
             sender.sendMessage(ChatColor.RED + "Vault was not found...");
@@ -321,7 +321,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
 
     }
 
-    private void makeDeposit(CommandSender sender, Structure structure, boolean talk) {
+    private void makeDeposit(CommandSender sender, NopeStructure structure, boolean talk) {
 
         Set<PlayerOwnership> ownerships = structure.getOwnerships(PlayerOwnership.Type.FULL);
         if (structure.getRefundValue() > 0) {
@@ -387,12 +387,12 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
      *
      * @return A list of unrefunded tasks
      */
-    public List<Structure> getRefundables() {
+    public List<NopeStructure> getRefundables() {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QStructure qs = QStructure.structure;
 
-        List<Structure> structures = query.from(qs).orderBy(qs.logEntry().removedAt.desc())
+        List<NopeStructure> structures = query.from(qs).orderBy(qs.logEntry().removedAt.desc())
                 .where(
                         qs.state.eq(State.REMOVED)
                         .and(qs.refundValue.gt(0))
@@ -402,12 +402,12 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
         return structures;
     }
 
-    public List<Structure> getRefundables(Player player) {
+    public List<NopeStructure> getRefundables(Player player) {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         QPlayerOwnership qpo = QPlayerOwnership.playerOwnership;
 
-        List<Structure> structures = query.from(qpo).orderBy(qpo.structure().logEntry().removedAt.desc())
+        List<NopeStructure> structures = query.from(qpo).orderBy(qpo.structure().logEntry().removedAt.desc())
                 .where(
                         qpo.structure().state.eq(State.REMOVED)
                         .and(qpo.structure().refundValue.gt(0))

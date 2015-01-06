@@ -37,7 +37,7 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class World implements Serializable {
     
-    @Column(updatable = false, length = 100)
+    @Column(updatable = false)
     private String name;
     
     @Column(updatable = false)
