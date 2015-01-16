@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -22,18 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package com.chingo247.settlercraft.structureapi.structure.plan;
 
-package com.chingo247.settlercraft.structureapi.plan.document;
-
-import org.dom4j.Element;
+import java.io.File;
+import org.dom4j.Node;
 
 /**
  *
  * @author Chingo
  */
-public interface IStructurePlanElement {
-    
-    public Element asElement();
-    
+public class GeneratedPlacementProcessor extends PlacementProcessor {
+
+    public GeneratedPlacementProcessor(File file, Node placeableNode) {
+        super(file, placeableNode);
+    }
+
+    @Override
+    protected Placement compute() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

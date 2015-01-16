@@ -24,62 +24,48 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan;
 
+import com.chingo247.settlercraft.structureapi.structure.generators.CylinderGenerator;
 import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
 import com.chingo247.settlercraft.structureapi.world.Direction;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.regions.CylinderRegion;
 
 /**
  *
  * @author Chingo
  */
-public class PlaceableStructureLot implements Placeable{
+public class GeneratedCylinder extends GeneratedPlacement<CylinderGenerator>{
     
-    public final Vector position;
-    public int width, height, length;
-
-    public PlaceableStructureLot(int width, int height, int length) {
-        this(Vector.ZERO, width, height, length);
+    private int xradius;
+    private int zradius;
+    
+    public GeneratedCylinder(CylinderGenerator generator, int xradius, int zradius) {
+        this(generator, xradius, zradius, Vector.ZERO);
     }
 
-    public PlaceableStructureLot(Vector position, int width, int height, int length) {
-        this.position = position;
-        this.width = width;
-        this.height = height;
-        this.length = length;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public int getLength() {
-        return length;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    @Override
-    public Vector getRelativePosition() {
-        return position;
+    public GeneratedCylinder(CylinderGenerator generator, int xradius, int zradius, Vector position) {
+        super(generator, position);
+        this.xradius = xradius;
+        this.zradius = zradius;
     }
 
     @Override
     public CuboidDimension getCuboidDimension() {
-        return new CuboidDimension(position, new Vector(width, height, length));
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
     @Override
-    public void flip(Direction direction) {
+    public void rotate(Direction direction) {
         switch(direction) {
             case EAST:
-            case WEST: break;
-            case NORTH:
-            case SOUTH:
-            int temp = width;
-            width = length;
-            length = temp;
+            case WEST:break;
+            case NORTH: 
+            case SOUTH: 
+            int temp = xradius;
+            xradius = zradius;
+            zradius = temp;
+            break;
         }
     }
     

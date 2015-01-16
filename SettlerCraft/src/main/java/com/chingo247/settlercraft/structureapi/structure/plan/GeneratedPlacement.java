@@ -22,26 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structureapi.plan;
+package com.chingo247.settlercraft.structureapi.structure.plan;
 
-import java.io.File;
+import com.chingo247.settlercraft.structureapi.structure.generators.Generator;
+import com.google.common.base.Preconditions;
+import com.sk89q.worldedit.Vector;
 
 /**
- * Supports generating StructurePlans from schematics, advanced options incoming later
+ *
  * @author Chingo
+ * @param <T>
+ * 
  */
-public abstract class StructurePlanGenerator {
+public abstract class GeneratedPlacement<T extends Generator> extends Placement {
     
-    
-    
-    public void generate(File sourceFolder, File destinationFolder) {
-        // Generate plans
+    private final Generator generator;
+    private final Vector position;
+
+    public GeneratedPlacement(T generator, Vector relativePosition) {
+        Preconditions.checkNotNull(generator);
+        this.generator =  generator;
+        this.position = relativePosition;
+    }
+
+    public Generator getGenerator() {
+        return generator;
     }
     
-    public void generate(File sourceFolder, File destinationFolder, StructurePlan plan) {
-        // Generate plans
+    @Override
+    public Vector getRelativePosition() {
+        return position;
     }
-    
-    public abstract StructurePlan load();
-    
+
 }

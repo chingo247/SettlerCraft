@@ -24,12 +24,10 @@
  */
 package com.chingo247.settlercraft.structureapi.persistence;
 
+import com.chingo247.settlercraft.util.Logger;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+
 import org.hsqldb.HsqlException;
 import org.hsqldb.server.Server;
 
@@ -40,6 +38,7 @@ import org.hsqldb.server.Server;
 
 public class HSQLServer {
 
+    private final Logger logger = new Logger();
     private final String HOST = "localhost";
     private final int PORT;
     private final String MAIN_DATABASE = "SettlerCraft";
@@ -77,17 +76,17 @@ public class HSQLServer {
         Socket socket = null;
         try {
             socket = new Socket(HOST, PORT);
-            print("HSQL Server already running");        
+            logger.print("HSQL Server already running");        
             return true;
         } catch(IOException | HsqlException ex) {
-            print("HSQL Server not running, startng it on port " + PORT);        
+            logger.print("HSQL Server not running, startng it on port " + PORT);        
             return false;
         } finally {
             if(socket != null) {
                 try {
                     socket.close();
                 } catch (IOException ex) {
-                    Logger.getLogger(HSQLServer.class.getName()).log(Level.SEVERE, null, ex);
+                    logger.print(ex.getMessage());
                 }
             }
         }
@@ -99,11 +98,9 @@ public class HSQLServer {
     }
 
     public void stop() {
-        print("Stopping HSQL server");
+        logger.print("Stopping HSQL server");
         server.stop();
     }
     
-    private void print(String messsage) {
-        Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "[SettlerCraft]: " + ChatColor.RESET + messsage);
-    }
+   
 }

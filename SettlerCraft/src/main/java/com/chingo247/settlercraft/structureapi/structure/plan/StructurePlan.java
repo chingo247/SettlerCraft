@@ -26,10 +26,11 @@ package com.chingo247.settlercraft.structureapi.structure.plan;
 
 import com.chingo247.settlercraft.structureapi.exception.PlanException;
 import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
-import com.sk89q.worldedit.Vector;
 import java.io.File;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.UUID;
 import org.dom4j.Document;
 
@@ -37,7 +38,10 @@ import org.dom4j.Document;
  *
  * @author Chingo
  */
-public final class StructurePlan {
+public final class StructurePlan  {
+    
+    private double price;
+    private String name;
     
     protected transient UUID uuid;
     
@@ -45,20 +49,55 @@ public final class StructurePlan {
     private File structurePlan;
     private Document document;
     
-    private List<StructurePlan> plans;  // Substructure - plan
-    private List<Placeable> placeables; // Substructure - placeable
+    private Set<StructurePlan> plans;  // Substructure - plan
+    private Set<Placement> placements; // Substructure - placeable
     
-    protected Placeable placeable;
-    private long xxHashPlan;
+    protected Placement placement;
 
-    StructurePlan(StructurePlan parent, File structurePlan, Placeable placeable) {
-        this.parent = parent;
-        this.structurePlan = structurePlan;
+    StructurePlan(File structurePlan, StructurePlan parent, Placement placement) {
         this.uuid = UUID.randomUUID();
+        this.structurePlan = structurePlan;
+        this.parent = parent;
+        this.plans = new HashSet<>();
+        this.placements = new HashSet<>();
+        this.placement = placement;
     }
 
-    
-    
+    public String getName() {
+        return name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    /**
+     * Gets the file of this StructurePlan
+     * @return The file
+     */
+    public File getFile() {
+        return structurePlan;
+    }
+
+    /**
+     * Sets the name
+     * @param name The name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Sets the price
+     * @param price The price to set
+     */
+    public void setPrice(double price) {
+        this.price = price;
+    }
     
     /**
      * Recursive function that checks if this StructurePlan is Top-Level, where TopLevel means the StructurePlan has no parent or the StructurePlan's
@@ -69,7 +108,7 @@ public final class StructurePlan {
         if(!hasParent()) {
             return true;
         // StructurePlan is referenced in a parent, but outside
-        } else if(!CuboidDimension.isDimensionWithin(parent.placeable, placeable)) {
+        } else if(!CuboidDimension.isDimensionWithin(parent.placement, placement)) {
             // If the parent isTopLevel then this child is also toplevel, because it was outside it's parent
             return parent.isTopLevel();
         } else {
@@ -81,19 +120,27 @@ public final class StructurePlan {
         return parent != null;
     }
     
-    void addPlaceable(Placeable placeable) {
-        this.placeables.add(placeable);
+    public void removePlacement(Placement placement) {
+        Iterator<Placement> it = placements.iterator();
+        while(it.hasNext()) {
+            if(it.next().getUUID().equals(placement.getUUID())) {
+                it.remove();
+                break;
+            }
+        }
     }
     
-    
-    
-    void addStructurePlan(StructurePlan plan) {
-        if(matchesAnyAncestors(plan)) throw new PlanException("Plans may not be equal to any of its ancestors. Otherwise a StackOverflow will occur");
-        this.plans.add(plan);
+    public void addPlacement(Placement placement) {
+        placements.add(placement);
     }
     
-    File getFile() {
-        return structurePlan;
+    public void addStructurePlan(StructurePlan plan) {
+        if(matchesAnyAncestors(plan.getFile().getAbsolutePath())) throw new PlanException("Plans may not be equal to any of its ancestors.");
+        plans.add(plan);
+    }
+    
+    public void removeStructurePlan(StructurePlan plan) {
+        
     }
     
     /**
@@ -101,32 +148,38 @@ public final class StructurePlan {
      * @param plan The StructurePlan to check
      * @return True if it matches any ancestors
      */
-    private boolean matchesAnyAncestors(StructurePlan plan) {
-        String path = plan.getFile().getAbsolutePath();
+    boolean matchesAnyAncestors(String path) {
+        
         if(path.equals(getFile().getAbsolutePath())) {
             return true;
         } else if(parent != null) {
-            return parent.matchesAnyAncestors(plan);
+            return parent.matchesAnyAncestors(path);
         } else {
             return false;
         }
     }
 
-    public Placeable getPlaceable() {
-        return placeable;
+    public Placement getPlacement() {
+        return placement;
     }
 
     public StructurePlan getParent() {
         return parent;
     }
 
-    public List<Placeable> getSubStructurePlaceables() {
-        return placeables;
+    public Collection<Placement> getSubStructurePlacements() {
+        return placements;
     }
 
-    public List<StructurePlan> getSubStructurePlans() {
+    public Collection<StructurePlan> getSubStructurePlans() {
         return plans;
     }
+
+    
+
+  
+
+    
 
     
    

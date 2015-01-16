@@ -23,9 +23,8 @@
  */
 package com.chingo247.settlercraft.structureapi.structure;
 
-import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
+import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.schematic.Schematic;
-import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.util.List;
@@ -46,6 +45,9 @@ public interface Structure {
     public StructurePlan getStructurePlan();
     public List<StructureMember> getMembers();
     public List<StructureOwner> getOwners();
+    public void build(boolean force);
+    public void stop(boolean force);
+    public void demolish(boolean force);
     
     
 }

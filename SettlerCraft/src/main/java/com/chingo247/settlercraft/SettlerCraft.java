@@ -24,11 +24,21 @@
  */
 package com.chingo247.settlercraft;
 
+import java.util.Properties;
+
 /**
  *
  * @author Chingo
  */
 public class SettlerCraft {
+    
+    private Properties properties;
+
+    public SettlerCraft() {
+        this.properties = new Properties();
+    }
+    
+    
     
     private static SettlerCraft instance;
     

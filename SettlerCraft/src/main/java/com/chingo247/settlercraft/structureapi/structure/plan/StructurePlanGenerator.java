@@ -24,29 +24,25 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan;
 
-import org.dom4j.Element;
-import org.dom4j.Node;
+import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
+import java.io.File;
 
 /**
- *
+ * Supports generating StructurePlans from schematics, advanced options incoming later
  * @author Chingo
  */
-public abstract class AXMLReader {
+public abstract class StructurePlanGenerator {
     
-    public String getXPathNodeValue(Element e, String xPath) {
-        Node n = e.selectSingleNode(xPath);
-        if(n != null) {
-            return n.getStringValue();
-        }
-        return null;
+    
+    
+    public void generate(File sourceFolder, File destinationFolder) {
+        // Generate plans
     }
     
-    public int getXPathIntValue(Element e, String xPath) {
-        Node n = e.selectSingleNode(xPath);
-        if(n != null) {
-            return Integer.parseInt(n.getStringValue());
-        }
-        throw new RuntimeException("Element '"+e.getName()+"' was not found");
-    } 
+    public void generate(File sourceFolder, File destinationFolder, StructurePlan plan) {
+        // Generate plans
+    }
+    
+    public abstract StructurePlan load();
     
 }

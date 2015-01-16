@@ -24,41 +24,6 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.old;
 
-import com.chingo247.settlercraft.structureapi.IConfigProvider;
-import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
-import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure.State;
-import com.chingo247.settlercraft.structureapi.construction.options.BuildOptions;
-import com.chingo247.settlercraft.structureapi.construction.options.DemolitionOptions;
-import com.chingo247.settlercraft.structureapi.construction.options.Pattern;
-import com.chingo247.settlercraft.structureapi.construction.StructureTaskManager;
-import com.chingo247.settlercraft.structureapi.event.EventManager;
-import com.chingo247.settlercraft.structureapi.event.structure.StructureStateChangeEvent;
-import com.chingo247.settlercraft.structureapi.event.subscribers.StructureSubscriber;
-import com.chingo247.settlercraft.structureapi.exception.StructureException;
-import com.chingo247.settlercraft.structureapi.persistence.hibernate.PlayerMembershipDAO;
-import com.chingo247.settlercraft.structureapi.persistence.hibernate.PlayerOwnershipDAO;
-import com.chingo247.settlercraft.structureapi.persistence.hibernate.StructureDAO;
-import com.chingo247.settlercraft.structureapi.plan.StructurePlan;
-import com.chingo247.settlercraft.structureapi.plan.StructurePlanManager;
-import com.chingo247.settlercraft.structureapi.plan.document.PlanDocument;
-import com.chingo247.settlercraft.structureapi.plan.document.PlanDocumentManager;
-import com.chingo247.settlercraft.structureapi.plan.document.StructureDocumentManager;
-import com.chingo247.settlercraft.structureapi.structure.schematic.Schematic;
-import com.chingo247.settlercraft.structureapi.structure.schematic.SchematicManager;
-import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
-import com.chingo247.settlercraft.structureapi.world.Direction;
-import com.chingo247.xcore.core.APlatform;
-import com.chingo247.xcore.core.IPlayer;
-import com.chingo247.xcore.core.IPlugin;
-import com.chingo247.xcore.util.ChatColors;
-import com.google.common.eventbus.EventBus;
-import com.sk89q.worldedit.Vector;
-import java.io.File;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-
 /**
  *
  * @author Chingo

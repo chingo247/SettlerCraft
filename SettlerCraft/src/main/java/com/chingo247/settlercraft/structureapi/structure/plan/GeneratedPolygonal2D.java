@@ -37,13 +37,16 @@ import java.util.List;
  *
  * @author Chingo
  */
-public class PlaceableGeneratedPolygonal2D extends PlaceableGenerated<PolygonalGenerator> {
+public class GeneratedPolygonal2D extends GeneratedPlacement<PolygonalGenerator> {
 
     private Polygonal2DRegion region;
 
-    public PlaceableGeneratedPolygonal2D(PolygonalGenerator generator, Polygonal2DRegion region) {
-        super(generator);
-
+    public GeneratedPolygonal2D(PolygonalGenerator generator, Polygonal2DRegion region) {
+        this(generator, region, Vector.ZERO);
+    }
+    
+    public GeneratedPolygonal2D(PolygonalGenerator generator, Polygonal2DRegion region, Vector position) {
+        super(generator, position);
     }
 
     @Override
@@ -61,7 +64,7 @@ public class PlaceableGeneratedPolygonal2D extends PlaceableGenerated<PolygonalG
     }
 
     @Override
-    public void flip(Direction direction) {
+    public void rotate(Direction direction) {
         Polygonal2DRegion copy;
         switch (direction) {
             case EAST:

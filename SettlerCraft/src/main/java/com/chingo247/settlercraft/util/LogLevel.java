@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -22,41 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structureapi.plan.document;
-
-import java.io.File;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
+package com.chingo247.settlercraft.util;
 
 /**
  *
  * @author Chingo
  */
-public class PlanDocument extends AbstractDocument<PlanDocumentPluginElement> {
-
-    private final PlanDocumentManager documentManager;
-
-    PlanDocument(PlanDocumentManager documentManager, File documentFile) throws DocumentException {
-        super(documentFile);
-        this.documentFile = documentFile;
-        this.document = new SAXReader().read(documentFile);
-        this.documentManager = documentManager;
-    }
+public enum LogLevel {
+    ALL(0),
+    DEBUG(1),
+    INFO(2),
+    OFF(3),
+    ERROR(4);
     
-    @Override
-    public void save() {
-        documentManager.save(this);
-    }
-    
-    @Override
-    protected void save(PlanDocumentPluginElement element) {
-        Element e = (Element) document.getRootElement().selectSingleNode(element.pluginName);
-        e.clearContent();
-        e.setContent(element.pluginElement.elements());
-        documentManager.save(element);
+    private int value;
+
+    private LogLevel(int value) {
+        this.value = value;
     }
 
+    public int intValue() {
+        return value;
+    }
     
-
+    
+    
 }

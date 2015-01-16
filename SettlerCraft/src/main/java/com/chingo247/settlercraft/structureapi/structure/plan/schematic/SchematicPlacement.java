@@ -22,15 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structureapi.structure.plan;
+package com.chingo247.settlercraft.structureapi.structure.plan.schematic;
 
-import com.chingo247.settlercraft.structureapi.structure.schematic.Schematic;
 import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
-import com.chingo247.settlercraft.structureapi.structure.schematic.SchematicData;
+import com.chingo247.settlercraft.structureapi.structure.plan.schematic.SchematicData;
+import com.chingo247.settlercraft.structureapi.structure.plan.DirectionalPlacement;
+import com.chingo247.settlercraft.structureapi.structure.plan.DirectionalPlacement;
 import com.chingo247.settlercraft.structureapi.world.Direction;
-import com.chingo247.settlercraft.util.SchematicUtil;
 import com.chingo247.settlercraft.util.WorldUtil;
-import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import java.io.File;
 
@@ -38,33 +37,24 @@ import java.io.File;
  *
  * @author Chingo
  */
-public class PlaceableSchematic implements PlaceableDirectional{
+class SchematicPlacement extends DirectionalPlacement{
     
-    private SchematicData schematic;
-    private Vector position;
+    private final Long schematicId;
+    private final Vector position;
     private Direction direction;
     private int rotation;
+    private final File schematicFile;
 
-    public PlaceableSchematic(File schematic, Direction direction, Vector position) {
-        this.schematic = getSchematicData();
+    private SchematicData data;
+    
+    SchematicPlacement(File schematicFile, Long schematicId, Direction direction, Vector position) {
+        this.schematicId = schematicId;
         this.position = position;
         this.direction = direction;
+        this.schematicFile = schematicFile;
     }
 
-    public PlaceableSchematic(File schematic, Vector position) {
-        this(schematic,Direction.EAST, position); // Default direction is EAST
-    }
     
-    public PlaceableSchematic(File schematic) {
-        this(schematic, Vector.ZERO); // Default position is (0,0,0) xyz
-    }
-    
-    private SchematicData getSchematicData() {
-        // Check if available
-        // Not? Then load the schematic and store the result
-        throw new UnsupportedOperationException();
-    }
-
     @Override
     public Direction getDirection() {
         return direction;
@@ -74,13 +64,20 @@ public class PlaceableSchematic implements PlaceableDirectional{
     public Vector getRelativePosition() {
         return position;
     }
+    
+    private SchematicData getSchematicData() {
+        if(data == null) {
+            
+        }
+        return data;
+    }
 
     @Override
     public CuboidDimension getCuboidDimension() {
          Vector end = getPoint2Right(position, direction, new Vector(
-                schematic.getWidth(),
-                schematic.getHeight(),
-                schematic.getLength())
+                getSchematicData().getWidth(),
+                getSchematicData().getHeight(),
+                getSchematicData().getLength())
         );
         return  new CuboidDimension(position, end);
     }
@@ -106,7 +103,7 @@ public class PlaceableSchematic implements PlaceableDirectional{
       * @param direction 
       */
     @Override
-    public void flip(Direction direction) {
+    public void rotate(Direction direction) {
         switch(direction) {
             case EAST: break;
             case SOUTH: rotation += 90; break;

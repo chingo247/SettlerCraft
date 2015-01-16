@@ -27,8 +27,8 @@ package com.chingo247.settlercraft.structureapi.persistence.hibernate;
 
 import com.chingo247.settlercraft.structureapi.structure.old.PlayerMembership;
 import com.chingo247.settlercraft.structureapi.structure.old.PlayerOwnership;
-import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
-import com.chingo247.settlercraft.structureapi.structure.schematic.SchematicData;
+import com.chingo247.settlercraft.structureapi.structure.old.Structure;
+import com.chingo247.settlercraft.structureapi.structure.plan.schematic.SchematicData;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;
@@ -47,7 +47,7 @@ public class HibernateUtil {
     static {
         try {
             AnnotationConfiguration configuration = new AnnotationConfiguration();
-            configuration.addAnnotatedClass(NopeStructure.class);
+            configuration.addAnnotatedClass(Structure.class);
             configuration.addAnnotatedClass(PlayerOwnership.class);
             configuration.addAnnotatedClass(PlayerMembership.class);
             configuration.addAnnotatedClass(SchematicData.class);

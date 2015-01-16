@@ -24,44 +24,67 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan;
 
-import com.chingo247.settlercraft.structureapi.structure.generators.CylinderGenerator;
-import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
+import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimensional;
 import com.chingo247.settlercraft.structureapi.world.Direction;
-import com.sk89q.worldedit.Vector2D;
-import com.sk89q.worldedit.regions.CylinderRegion;
+import com.sk89q.worldedit.Vector;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  *
  * @author Chingo
  */
-public class PlaceableGeneratedCylinder extends PlaceableGenerated<CylinderGenerator>{
+public abstract class Placement implements CuboidDimensional {
     
-    private int xradius;
-    private int zradius;
+    protected final UUID id;
 
-    public PlaceableGeneratedCylinder(CylinderGenerator generator, int xradius, int zradius) {
-        super(generator);
-        this.xradius = xradius;
-        this.zradius = zradius;
+    public Placement() {
+        this.id = UUID.randomUUID();
+    }
+
+    /**
+     * A unique id generated for this placement
+     * @return The unique id
+     */
+    public UUID getUUID() {
+        return id;
+    }
+
+    
+
+    @Override
+    public final int hashCode() {
+        int hash = 7;
+        hash = 53 * hash + Objects.hashCode(this.id);
+        return hash;
     }
 
     @Override
-    public CuboidDimension getCuboidDimension() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void flip(Direction direction) {
-        switch(direction) {
-            case EAST:
-            case WEST:break;
-            case NORTH: 
-            case SOUTH: 
-            int temp = xradius;
-            xradius = zradius;
-            zradius = temp;
-            break;
+    public final boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
         }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Placement other = (Placement) obj;
+        if (!Objects.equals(this.id, other.id)) {
+            return false;
+        }
+        return true;
     }
+    
+    
+    
+    /**
+     * The position relative to it's parent Structure, If the Structure has no Parent then this method
+     * will likely return Vector.ZERO
+     * @return The position relative to it's parent Structure
+     */
+    public abstract Vector getRelativePosition();
+    
+    public abstract void rotate(Direction direction);
+    
+    
     
 }

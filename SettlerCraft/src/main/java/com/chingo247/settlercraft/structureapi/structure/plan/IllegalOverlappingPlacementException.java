@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -22,43 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structureapi.plan.document;
-
-import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
-import java.io.File;
-import org.dom4j.DocumentException;
-import org.dom4j.io.OutputFormat;
+package com.chingo247.settlercraft.structureapi.structure.plan;
 
 /**
  *
  * @author Chingo
  */
-public class StructureDocument extends AbstractDocument<StructureDocumentPluginElement> {
+public class IllegalOverlappingPlacementException extends RuntimeException {
     
-    private final NopeStructure structure;
-    private final StructureDocumentManager documentManager;
-
-    public StructureDocument(StructureDocumentManager documentManager, NopeStructure structure, File docFile) throws DocumentException {
-        super(docFile);
-        this.structure = structure;
-        this.documentManager = documentManager;
-    }
-
-    public NopeStructure getStructure() {
-        return structure;
-    }
-
-    @Override
-    public void save() {
-        
-        documentManager.save(this);
-    }
-
-    @Override
-    protected void save(StructureDocumentPluginElement element) {
-        documentManager.save(element);
-    }
+    private final Placement overlap1, overlap2;
     
+
+    public IllegalOverlappingPlacementException(String message, Placement overlap1, Placement overlap2) {
+        super(message);
+        this.overlap1 = overlap1;
+        this.overlap2 = overlap2;
+    }
+
+    public Placement getOverlap1() {
+        return overlap1;
+    }
+
+    public Placement getOverlap2() {
+        return overlap2;
+    }
     
     
     

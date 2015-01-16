@@ -24,7 +24,7 @@
  */
 package com.chingo247.settlercraft.structureapi.event.structure;
 
-import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
+import com.chingo247.settlercraft.structureapi.structure.old.Structure;
 
 /**
  *
@@ -32,13 +32,13 @@ import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
  */
 public class StructureEvent {
     
-    private final NopeStructure structure;
+    private final Structure structure;
 
-    public StructureEvent(NopeStructure structure) {
+    public StructureEvent(Structure structure) {
         this.structure = structure;
     }
 
-    public NopeStructure getStructure() {
+    public Structure getStructure() {
         return structure;
     }
     

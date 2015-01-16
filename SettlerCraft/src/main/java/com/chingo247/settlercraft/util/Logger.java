@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -22,25 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structureapi.structure.plan;
+package com.chingo247.settlercraft.util;
 
-import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimensional;
-import com.chingo247.settlercraft.structureapi.world.Direction;
-import com.sk89q.worldedit.Vector;
+import java.io.File;
+import org.apache.log4j.Level;
 
 /**
  *
  * @author Chingo
  */
-public interface Placeable extends CuboidDimensional {
+public class Logger {
     
-    /**
-     * The position relative to it's parent Structure, If the Structure has no Parent then this method
-     * will likely return Vector.ZERO
-     * @return The position relative to it's parent Structure
-     */
-    public Vector getRelativePosition();
+    private static final String PREFIX = "[SettlerCraft]: ";
+    private final LogLevel currenLevel = LogLevel.INFO;
     
-    public void flip(Direction direction);
+    public void print(String message) {
+        System.out.println(PREFIX + message);
+    }
+    
+    public void print(LogLevel level, File file, String type, Long time) {
+        print(level, file.getName(), type, time);
+    }
+    
+    public void print(LogLevel level, String data, String type, Long time) {
+        if(level == LogLevel.OFF) return;
+        if(level.intValue() >= currenLevel.intValue()) {
+            if(time != null) {
+                System.out.printf("[SettlerCraft]%-16s %-64s %-16s \n", "["+type+"]:" , data, " time: " + (time) + " ms");
+            } else {
+                System.out.printf("[SettlerCraft]%-16s %-48s \n", "["+type+"]:" , data);
+            } 
+        }
+    }
+    
+    public void print(LogLevel level, File file, String type) {
+        print(level, file, type, null);
+    }
     
 }

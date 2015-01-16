@@ -24,32 +24,58 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan;
 
-import com.chingo247.settlercraft.structureapi.structure.generators.CuboidGenerator;
 import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
 import com.chingo247.settlercraft.structureapi.world.Direction;
+import com.google.common.base.Preconditions;
+import com.sk89q.worldedit.Vector;
 
 /**
  *
  * @author Chingo
  */
-public class PlaceableGeneratedCuboid extends PlaceableGenerated<CuboidGenerator>{
-
-    private int length;
-    private int width;
+public class StructureLot extends Placement{
     
-    public PlaceableGeneratedCuboid(CuboidGenerator generator, int width, int length) {
-        super(generator);
+    public final Vector position;
+    public int width, height, length;
+
+    public StructureLot(int width, int height, int length) {
+        this(Vector.ZERO, width, height, length);
+    }
+
+    public StructureLot(Vector position, int width, int height, int length) {
+        Preconditions.checkArgument(width > 0);
+        Preconditions.checkArgument(height > 0);
+        Preconditions.checkArgument(length > 0);
+        this.position = position;
+        this.width = width;
+        this.height = height;
         this.length = length;
-        this.width = width; 
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public int getLength() {
+        return length;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    @Override
+    public Vector getRelativePosition() {
+        return position;
     }
 
     @Override
     public CuboidDimension getCuboidDimension() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new CuboidDimension(position, new Vector(width, height, length));
     }
-
+    
     @Override
-    public void flip(Direction direction) {
+    public void rotate(Direction direction) {
         switch(direction) {
             case EAST:
             case WEST: break;

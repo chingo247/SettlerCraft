@@ -24,34 +24,48 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan;
 
-import com.chingo247.settlercraft.structureapi.structure.generators.Generator;
+import com.chingo247.settlercraft.structureapi.structure.generators.CuboidGenerator;
 import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
-import com.google.common.base.Preconditions;
-import com.sk89q.worldedit.CuboidClipboard;
+import com.chingo247.settlercraft.structureapi.world.Direction;
 import com.sk89q.worldedit.Vector;
 
 /**
  *
  * @author Chingo
- * @param <T>
- * 
  */
-public abstract class PlaceableGenerated<T extends Generator> implements Placeable {
-    
-    private final Generator generator;
+public class GeneratedCuboid extends GeneratedPlacement<CuboidGenerator>{
 
-    public PlaceableGenerated(T generator) {
-        Preconditions.checkNotNull(generator);
-        this.generator =  generator;
-    }
+    private int length;
+    private int width;
 
-    public Generator getGenerator() {
-        return generator;
+    public GeneratedCuboid(CuboidGenerator generator, int width, int length) {
+        this(generator, width, length, Vector.ZERO);
     }
     
+    
+    
+    public GeneratedCuboid(CuboidGenerator generator, int width, int length, Vector position) {
+        super(generator, position);
+        this.length = length;
+        this.width = width; 
+    }
+
     @Override
-    public Vector getRelativePosition() {
+    public CuboidDimension getCuboidDimension() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
+    public void rotate(Direction direction) {
+        switch(direction) {
+            case EAST:
+            case WEST: break;
+            case NORTH:
+            case SOUTH:
+            int temp = width;
+            width = length;
+            length = temp;
+        }
+    }
+    
 }

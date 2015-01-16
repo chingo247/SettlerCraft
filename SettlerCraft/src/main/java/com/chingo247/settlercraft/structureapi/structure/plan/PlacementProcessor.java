@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -24,40 +23,33 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan;
 
-import com.chingo247.settlercraft.structureapi.structure.generators.EllipsoidGenerator;
-import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
-import com.chingo247.settlercraft.structureapi.world.Direction;
+import com.google.common.base.Preconditions;
+import java.io.File;
+import java.util.concurrent.RecursiveTask;
+import org.dom4j.Node;
 
 /**
  *
  * @author Chingo
  */
-public class PlaceableGeneratedEllipsoid extends PlaceableGenerated<EllipsoidGenerator> {
+public abstract class PlacementProcessor extends RecursiveTask<Placement> {
     
-    private int xradius;
-    private int zradius;
+    protected final Node placeableNode;
+    protected final File file;
 
-    public PlaceableGeneratedEllipsoid(EllipsoidGenerator generator, int xradius, int zradius) {
-        super(generator);
+    /**
+     * Processes a Placeable
+     * @param file
+     * @param placeableNode 
+     */
+    public PlacementProcessor(File file, Node placeableNode) {
+        Preconditions.checkArgument(placeableNode.getName().equals("Placeable"));
+        this.placeableNode = placeableNode;
+        this.file = file;
     }
 
-    @Override
-    public CuboidDimension getCuboidDimension() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    
 
-    @Override
-    public void flip(Direction direction) {
-        switch(direction) {
-            case EAST:
-            case WEST:break;
-            case NORTH: 
-            case SOUTH: 
-            int temp = xradius;
-            xradius = zradius;
-            zradius = temp;
-            break;
-        }
-    }
+    
     
 }

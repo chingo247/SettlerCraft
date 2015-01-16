@@ -25,7 +25,7 @@
 
 package com.chingo247.settlercraft.structureapi.structure.old;
 
-import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
+import com.chingo247.settlercraft.structureapi.structure.old.Structure;
 import com.sk89q.worldedit.entity.Player;
 import java.io.Serializable;
 import java.util.UUID;
@@ -68,7 +68,7 @@ public class PlayerOwnership implements Serializable {
     
 //    @MapsId(value = "ownershipId")
     @ManyToOne(cascade = CascadeType.ALL)
-    private NopeStructure structure;
+    private Structure structure;
     
     private Type ownerType;
     
@@ -85,7 +85,7 @@ public class PlayerOwnership implements Serializable {
      * @param structure The structure
      * @param player Whether the owner is a isPlayer or not
      */
-    PlayerOwnership(Player player, NopeStructure structure, Type ownerType) {
+    PlayerOwnership(Player player, Structure structure, Type ownerType) {
         this.structure = structure;
         this.player = player.getUniqueId();
         this.name = player.getName();
@@ -138,7 +138,7 @@ public class PlayerOwnership implements Serializable {
 
     
 
-    public NopeStructure getStructure() {
+    public Structure getStructure() {
         return structure;
     }
 

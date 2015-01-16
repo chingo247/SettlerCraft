@@ -30,8 +30,8 @@ import com.chingo247.settlercraft.structureapi.world.Direction;
  *
  * @author Chingo
  */
-public interface PlaceableDirectional extends Placeable {
+public abstract class DirectionalPlacement extends Placement {
     
-    public Direction getDirection();
+    public abstract Direction getDirection();
     
 }

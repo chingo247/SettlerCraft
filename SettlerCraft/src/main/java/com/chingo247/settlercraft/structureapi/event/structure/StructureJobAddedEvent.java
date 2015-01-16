@@ -24,7 +24,7 @@
  */
 package com.chingo247.settlercraft.structureapi.event.structure;
 
-import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
+import com.chingo247.settlercraft.structureapi.structure.old.Structure;
 
 /**
  *
@@ -32,7 +32,7 @@ import com.chingo247.settlercraft.structureapi.structure.old.NopeStructure;
  */
 public class StructureJobAddedEvent extends StructureEvent {
 
-    public StructureJobAddedEvent(NopeStructure structure) {
+    public StructureJobAddedEvent(Structure structure) {
         super(structure);
     }
     

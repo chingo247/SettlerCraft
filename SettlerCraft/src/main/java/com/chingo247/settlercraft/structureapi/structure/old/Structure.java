@@ -24,7 +24,7 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.old;
 
-import com.chingo247.settlercraft.structureapi.structure.schematic.SchematicData;
+import com.chingo247.settlercraft.structureapi.structure.plan.schematic.SchematicData;
 import com.chingo247.settlercraft.structureapi.structure.old.PlayerOwnership.Type;
 import static com.chingo247.settlercraft.util.SchematicUtil.calculateDimension;
 import com.chingo247.settlercraft.util.WorldUtil;
@@ -61,7 +61,7 @@ import javax.persistence.OneToMany;
  */
 @Entity(name = "SC_STRUCTURE")
 @Deprecated
-public class NopeStructure implements Serializable {
+public class Structure implements Serializable {
 
     public enum State {
 
@@ -143,7 +143,7 @@ public class NopeStructure implements Serializable {
     /**
      * JPA Constructor
      */
-    protected NopeStructure() {
+    protected Structure() {
     }
 
     /**
@@ -155,7 +155,7 @@ public class NopeStructure implements Serializable {
      * @param plan The plan
      * @param structureschematic
      */
-    NopeStructure(World world, Vector pos, Direction direction, SchematicData schematic) {
+    Structure(World world, Vector pos, Direction direction, SchematicData schematic) {
         Preconditions.checkNotNull(pos);
         Preconditions.checkNotNull(direction);
         Preconditions.checkNotNull(schematic);

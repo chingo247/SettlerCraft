@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structureapi.structure.schematic;
+package com.chingo247.settlercraft.structureapi.structure.plan.schematic;
 
 import com.chingo247.settlercraft.util.SchematicUtil;
 import com.sk89q.worldedit.CuboidClipboard;
@@ -51,7 +51,6 @@ public class SchematicData implements Serializable {
     private Integer s_width;
     private Integer s_height;
     private Integer s_length;
-    private Integer blocks;
 
     
     /**
@@ -60,12 +59,11 @@ public class SchematicData implements Serializable {
     protected SchematicData() {
     }
 
-    SchematicData(Long checksum, Integer s_width, Integer s_height, Integer s_length, Integer blocks) {
+    SchematicData(Long checksum, Integer s_width, Integer s_height, Integer s_length) {
         this.checksum = checksum;
         this.s_width = s_width;
         this.s_height = s_height;
         this.s_length = s_length;
-        this.blocks = blocks;
     }
 
     public long getChecksum() {
@@ -84,10 +82,6 @@ public class SchematicData implements Serializable {
         return s_width;
     }
 
-    public int getBlocks() {
-        return blocks;
-    }
-    
     public Vector getSize() {
         return new Vector(s_width, s_height, s_length);
     }
@@ -95,8 +89,8 @@ public class SchematicData implements Serializable {
     public static SchematicData load(File schematic) throws IOException, DataException {
         CuboidClipboard cc = SchematicFormat.MCEDIT.load(schematic);
         long checksum = FileUtils.checksumCRC32(schematic);
-        int blocks = SchematicUtil.count(cc, true);
-        return new SchematicData(checksum, cc.getWidth(), cc.getHeight(), cc.getLength(), blocks);
+//        int blocks = SchematicUtil.count(cc, true); Removed because too expensive
+        return new SchematicData(checksum, cc.getWidth(), cc.getHeight(), cc.getLength());
     }
     
     

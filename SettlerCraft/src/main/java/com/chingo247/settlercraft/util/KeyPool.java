@@ -75,20 +75,18 @@ public class KeyPool<T> {
     private class KeyRunnable implements Runnable {
 
         private final T t;
-        private final Runnable r;
-        private final Future f;
+        private final FutureTask f;
 
         public KeyRunnable(T t, Runnable r) {
             this.t = t;
-            this.r = r;
-            this.f = new FutureTask(r, null);
+            this.f = new FutureTask(r, t);
         }
 
         @Override
         public void run() {
             try {
                 // Execute the runnable
-                r.run();
+                f.run();
             } finally {
                 
                 synchronized (tasks.get(t)) {
@@ -100,6 +98,9 @@ public class KeyPool<T> {
                     if (nextTask != null) {
                         // Submit this task to the executor, so it's scheduled to be executed
                         executor.execute(nextTask);
+                    } else {
+                        // remove the whole queue if im the last one 
+                        tasks.remove(t);
                     }
                 }
             }
