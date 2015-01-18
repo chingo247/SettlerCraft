@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StructurePlan>
+  <Name>AoE - House 2</Name>
+  <Placeable>
+		<Type>Schematic</Type>
+		<Schematic>AoE - House 2.schematic</Schematic>
+  </Placeable>
+  <Price>14503</Price>
+</StructurePlan>

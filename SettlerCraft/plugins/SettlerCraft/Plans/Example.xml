@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StructurePlan>
+	<Name>Example</Name>
+	<Placeable>
+		<Type>Schematic</Type>
+		<Schematic>Example.schematic</Schematic>
+	</Placeable>
+	<Price>10000</Price>
+	<SubStructures>
+		<SubStructure>
+			<Position>
+				<X>20</X>
+				<Y>0</Y>
+				<Z>20</Z>
+			</Position>
+			<Type>Schematic</Type>
+			<Schematic>AoE - House.schematic</Schematic>
+		</SubStructure>
+		<SubStructure>
+			<Position>
+				<X>-20</X>
+				<Y>0</Y>
+				<Z>-20</Z>
+			</Position>
+			<Type>Embedded</Type>
+			<File>AoE - Barrac.xml</File>
+		</SubStructure>
+
+	</SubStructures>
+</StructurePlan>

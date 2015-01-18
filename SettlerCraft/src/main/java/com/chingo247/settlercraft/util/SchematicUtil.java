@@ -24,18 +24,16 @@
  */
 package com.chingo247.settlercraft.util;
 
-import com.chingo247.settlercraft.structureapi.structure.regions.CuboidDimension;
-import com.chingo247.settlercraft.structureapi.world.Direction;
-import static com.chingo247.settlercraft.structureapi.world.Direction.EAST;
-import static com.chingo247.settlercraft.structureapi.world.Direction.NORTH;
-import static com.chingo247.settlercraft.structureapi.world.Direction.SOUTH;
-import static com.chingo247.settlercraft.structureapi.world.Direction.WEST;
-import com.chingo247.settlercraft.structureapi.structure.plan.schematic.SchematicData;
+
+import com.chingo247.structureapi.plan.schematic.SchematicData;
+import com.chingo247.structureapi.regions.CuboidDimension;
+import com.chingo247.settlercraft.world.Direction;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.util.Countable;
+
 import org.bukkit.Material;
 import org.bukkit.material.Attachable;
 import org.bukkit.material.Crops;
