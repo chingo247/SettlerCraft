@@ -23,35 +23,62 @@
  */
 package com.chingo247.structureapi;
 
+import com.chingo247.structureapi.construction.options.BuildOptions;
+import com.chingo247.structureapi.construction.options.DemolitionOptions;
+import com.chingo247.structureapi.entities.StructurePlayerMemberEntity;
+import com.chingo247.structureapi.entities.StructurePlayerOwnerEntity;
 import com.chingo247.structureapi.plan.StructurePlan;
-import com.chingo247.structureapi.plan.schematic.Schematic;
+import com.chingo247.structureapi.plan.schematic.Placement;
+import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.util.List;
+import java.util.UUID;
 
 /**
  *
  * @author Chingo
  */
-public interface Structure {
+public abstract class Structure {
     
-    public long getId();
-    public String getName();
-    public void setName(String name);
-    public double getValue();
-    public void setValue(double value);
-    public World getWorld();
-    public CuboidRegion getCuboidRegion();
-    public Structure getParent();
-    public List<Structure> getSubStructures();
-    public Schematic getSchematic();
-    public StructurePlan getStructurePlan();
-    public List<StructureMember> getMembers();
-    public List<StructureOwner> getOwners();
+    public abstract long getId();
+    public abstract String getName();
+    public abstract void setName(String name);
+    public abstract double getValue();
+    public abstract void setValue(double value);
+    public abstract World getWorld();
+    public abstract CuboidRegion getCuboidRegion();
+    public abstract Structure getParent();
+    public abstract List<Structure> getSubStructures();
+    public abstract Placement getPlacement();
+    public abstract StructurePlan getStructurePlan();
+    public abstract List<StructurePlayerMemberEntity> getMembers();
+    public abstract List<StructurePlayerOwnerEntity> getOwners();
     
-    public void build(boolean force);
-    public void stop(boolean force);
-    public void demolish(boolean force);
+    public abstract boolean isOwner(UUID player);
+    public boolean isOwner(Player player) {
+        return isOwner(player.getUniqueId());
+    }
+    
+    public abstract boolean isMember(UUID player);
+    public boolean isMember(Player player) {
+        return isMember(player.getUniqueId());
+    }
+    
+    public void build(boolean force) {
+        build(new BuildOptions(false), force);
+    }
+    public abstract void build(BuildOptions options, boolean force);
+    
+    public abstract void demolish(DemolitionOptions options, boolean force);
+    public void demolish(boolean force) {
+        demolish(new DemolitionOptions(), force);
+    }
+    
+    public abstract void stop(boolean force);
+    
+    
+    
     
     
 }

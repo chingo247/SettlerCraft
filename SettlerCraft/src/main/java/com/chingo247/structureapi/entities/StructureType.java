@@ -22,12 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi;
+package com.chingo247.structureapi.entities;
 
 /**
  *
  * @author Chingo
  */
-public class StructureOwner {
+public enum StructureType {
+     /**
+     * A Structure which has a schematic attached
+     */
+    SCHEMATIC,
+    /**
+     * A Structure Lot has no schematic attached. StructureLot are used to reserve an area for one or more structures. 
+     */
+    STRUCTURELOT,
+    /**
+     * Structure has no schematic and is completely generated based on info within the StructurePlan
+     */
+    GENERATED
     
 }

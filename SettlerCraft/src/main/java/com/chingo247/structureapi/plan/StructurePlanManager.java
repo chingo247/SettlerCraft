@@ -88,6 +88,7 @@ public class StructurePlanManager {
         sdm.load();
         
         LOG.print("Loading StructurePlans...");
+        System.out.printf("******************************************\n");
         Iterator<File> fit = FileUtils.iterateFiles(directory, new String[]{"xml"}, true);
         
         StructurePlanProcessorManager sppm = new StructurePlanProcessorManager();
@@ -108,8 +109,10 @@ public class StructurePlanManager {
 
         // Close the database connection
         System.out.printf("******************************************\n");
-        System.out.printf("[SettlerCraft]: Cores: %d\n", pool.getParallelism());
-        System.out.printf("[SettlerCraft]: Steal Count: %d\n", pool.getStealCount());
+        System.out.printf("[SettlerCraft]: Parallel Threads: %d\n", pool.getParallelism());
+        System.out.printf("[SettlerCraft]: Plans loaded: %d\n", plans.size());
+        System.out.printf("[SettlerCraft]: Schematics processed: %d\n", SchematicDataManager.getInstance().getAmountOfSchematics());
+//        System.out.printf("[SettlerCraft]: Steal Count: %d\n", pool.getStealCount());
         System.out.printf("[SettlerCraft]: Time: %d ms\n", (System.currentTimeMillis() - start));
         System.out.printf("******************************************\n");
     }

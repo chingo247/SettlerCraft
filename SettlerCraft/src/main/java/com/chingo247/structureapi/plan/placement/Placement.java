@@ -46,7 +46,7 @@ public abstract class Placement implements CuboidDimensional {
      * A unique id generated for this placement
      * @return The unique id
      */
-    public UUID getUUID() {
+    public UUID getId() {
         return id;
     }
 
@@ -85,6 +85,6 @@ public abstract class Placement implements CuboidDimensional {
     
     public abstract void rotate(Direction direction);
     
-    
+    public abstract void move(Vector offset);
     
 }

@@ -30,6 +30,8 @@ import com.chingo247.structureapi.util.WorldUtil;
 import com.chingo247.settlercraft.world.Direction;
 import com.sk89q.worldedit.Vector;
 import java.io.File;
+import java.io.IOException;
+import net.minecraft.util.org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -44,8 +46,8 @@ public class SchematicPlacement extends DirectionalPlacement{
     private Direction direction;
     private int rotation;
     
-    SchematicPlacement(File schematicFile, long checksum, Direction direction, Vector position) {
-        this.checksum = checksum;
+    SchematicPlacement(File schematicFile, Direction direction, Vector position) throws IOException {
+        this.checksum = FileUtils.checksumCRC32(schematicFile);
         this.position = position;
         this.direction = direction;
         this.schematicFile = schematicFile;
@@ -77,10 +79,11 @@ public class SchematicPlacement extends DirectionalPlacement{
 
     @Override
     public CuboidDimension getCuboidDimension() {
+         Vector size = getSchematicData().getSize();
          Vector end = getPoint2Right(position, direction, new Vector(
-                getSchematicData().getWidth(),
-                getSchematicData().getHeight(),
-                getSchematicData().getLength())
+                size.getBlockX(),
+                size.getBlockY(),
+                size.getBlockZ())
         );
         return  new CuboidDimension(position, end);
     }
@@ -120,6 +123,11 @@ public class SchematicPlacement extends DirectionalPlacement{
             rotation  =- 360;
         }
         this.direction = WorldUtil.getDirection(rotation);
+    }
+
+    @Override
+    public void move(Vector offset) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

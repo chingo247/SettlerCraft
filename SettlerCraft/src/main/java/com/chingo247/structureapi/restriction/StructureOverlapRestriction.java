@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -22,24 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi;
+package com.chingo247.structureapi.restriction;
+
+import com.chingo247.structureapi.entities.StructureType;
+import com.chingo247.structureapi.regions.CuboidDimensional;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.world.World;
 
 /**
  *
  * @author Chingo
  */
-public enum StructureType {
-     /**
-     * A Structure which has a schematic attached
-     */
-    SCHEMATIC,
-    /**
-     * A Structure Lot has no schematic attached. StructureLot are used to reserve an area for one or more structures. 
-     */
-    STRUCTURELOT,
-    /**
-     * Structure has no schematic and is completely generated based on info within the StructurePlan
-     */
-    GENERATED
+public class StructureOverlapRestriction extends StructureRestriction {
+
+    public StructureOverlapRestriction() {
+        super("Structure overlaps another structure!");
+    }
+
+    @Override
+    public boolean test(World world, CuboidDimensional cuboid, StructureType type) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

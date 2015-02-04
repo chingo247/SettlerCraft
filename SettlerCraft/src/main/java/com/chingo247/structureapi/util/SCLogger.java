@@ -23,12 +23,8 @@
  */
 package com.chingo247.structureapi.util;
 
-import com.chingo247.settlercraft.common.util.ChatColors;
 import com.chingo247.settlercraft.common.util.LogLevel;
-import com.sun.istack.internal.logging.Logger;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 
 /**
@@ -69,7 +65,7 @@ public class SCLogger {
         if(level == LogLevel.OFF) return;
         if(level.intValue() >= currenLevel.intValue()) {
             if(time != null) {
-                System.out.printf("[SettlerCraft]%-16s %-64s %-16s \n", "["+type+"]:" , data, " time: " + (time) + " ms");
+                System.out.printf("[SettlerCraft]%-16s %-32s %-16s \n", "["+type+"]:" , data, " time: " + (time) + " ms");
             } else {
                 System.out.printf("[SettlerCraft]%-16s %-48s \n", "["+type+"]:" , data);
             } 

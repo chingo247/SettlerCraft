@@ -21,35 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.plan;
+package com.chingo247.structureapi.restriction;
 
-import com.chingo247.structureapi.plan.placement.Placement;
+import com.chingo247.structureapi.entities.StructureType;
+import com.chingo247.structureapi.regions.CuboidDimensional;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.world.World;
 
 /**
- *
+ * 
  * @author Chingo
  */
-public class IllegalOverlappingPlacementException extends RuntimeException {
-    
-    private final Placement overlap1, overlap2;
-    
+public class StructureWorldRestriction extends StructureRestriction {
 
-    public IllegalOverlappingPlacementException(String message, Placement overlap1, Placement overlap2) {
-        super(message);
-        this.overlap1 = overlap1;
-        this.overlap2 = overlap2;
+    public StructureWorldRestriction() {
+        super("This world doesn't allow structures!");
     }
 
-    public Placement getOverlap1() {
-        return overlap1;
+    @Override
+    public boolean test(World world, CuboidDimensional cuboid, StructureType type) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
-    public Placement getOverlap2() {
-        return overlap2;
-    }
-    
-    
-    
-    
     
 }

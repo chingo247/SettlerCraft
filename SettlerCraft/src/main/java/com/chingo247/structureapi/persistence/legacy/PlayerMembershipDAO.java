@@ -1,4 +1,4 @@
-package com.chingo247.structureapi.persistence;
+package com.chingo247.structureapi.persistence.legacy;
 
 //
 ///*

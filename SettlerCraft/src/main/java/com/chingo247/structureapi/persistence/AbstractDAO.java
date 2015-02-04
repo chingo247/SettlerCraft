@@ -24,6 +24,8 @@
  */
 package com.chingo247.structureapi.persistence;
 
+import java.util.List;
+
 /**
  *
  * @author Chingo
@@ -34,5 +36,6 @@ public interface AbstractDAO<T> {
     public T save(T t);
     public void delete(T t);
     public void insert(T t);
+    public void bulkInsert(List<T> ts);
     
 }

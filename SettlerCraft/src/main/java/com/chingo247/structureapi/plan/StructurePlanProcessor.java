@@ -166,7 +166,7 @@ public class StructurePlanProcessor extends RecursiveTask<StructurePlan> {
 //                StructurePlanUtil.validate(plan);
             }
             LOG.print(LogLevel.INFO, structurePlan, "StructurePlan", System.currentTimeMillis() - start);
-        } catch (DocumentException | IOException | PlanException ex) { // Catch every exception because we are on the highest level!
+        } catch (PlanException ex) { 
             LOG.print(LogLevel.ERROR, "Error in '" + structurePlan.getAbsolutePath() + "' >> " + ex.getMessage(), "StructurePlan", null);
             plan = null;
         } catch (Exception ex) {

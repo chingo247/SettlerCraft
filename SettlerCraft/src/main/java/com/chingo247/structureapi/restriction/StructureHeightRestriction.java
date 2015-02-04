@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -22,44 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.plan.generated;
+package com.chingo247.structureapi.restriction;
 
-import com.chingo247.structureapi.generators.Generator;
-import com.chingo247.structureapi.plan.placement.Placement;
-import com.google.common.base.Preconditions;
-import com.sk89q.worldedit.Vector;
+import com.chingo247.structureapi.entities.StructureType;
+import com.chingo247.structureapi.regions.CuboidDimensional;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.world.World;
 
 /**
  *
  * @author Chingo
- * @param <T>
- * 
  */
-public abstract class GeneratedPlacement<T extends Generator> extends Placement {
-    
-    private final Generator generator;
-    private final Vector position;
+public class StructureHeightRestriction extends StructureRestriction {
 
-    public GeneratedPlacement(T generator, Vector relativePosition) {
-        Preconditions.checkNotNull(generator);
-        this.generator =  generator;
-        this.position = relativePosition;
-    }
-
-    public Generator getGenerator() {
-        return generator;
-    }
-    
-    @Override
-    public Vector getRelativePosition() {
-        return position;
+    public StructureHeightRestriction() {
+        super("Structure exceeds the world height!");
     }
 
     @Override
-    public void move(Vector offset) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean test(World world, CuboidDimensional region, StructureType type) {
+        if(region.getCuboidDimension().getMaxY() < world.getMaxY()) {
+            if(region.getCuboidDimension().getMinY() > 0) {
+                return true;
+            } else {
+                reason = "Structure is below world!";
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
     
-    
-
 }

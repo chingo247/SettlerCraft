@@ -24,7 +24,7 @@
  */
 package com.chingo247.structureapi.plan.schematic;
 
-import com.chingo247.structureapi.plan.schematic.Schematic;
+import com.chingo247.structureapi.plan.placement.Placement;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.data.DataException;
@@ -39,7 +39,7 @@ import org.apache.commons.io.FileUtils;
 
 /**
  * Contains data about the schematic, however it doesn't contain data for construction. 
- * See {@link Schematic} to obtain the CuboidClipboard
+ * See {@link Placement} to obtain the CuboidClipboard
  * @author Chingo
  */
 @Entity
@@ -70,18 +70,6 @@ public class SchematicData implements Serializable {
         return checksum;
     }
 
-    public int getLength() {
-        return s_length;
-    }
-
-    public int getHeight() {
-        return s_height;
-    }
-
-    public int getWidth() {
-        return s_width;
-    }
-
     public Vector getSize() {
         return new Vector(s_width, s_height, s_length);
     }
@@ -89,7 +77,7 @@ public class SchematicData implements Serializable {
     public static SchematicData load(File schematic) throws IOException, DataException {
         CuboidClipboard cc = SchematicFormat.MCEDIT.load(schematic);
         long checksum = FileUtils.checksumCRC32(schematic);
-//        int blocks = SchematicUtil.count(cc, true); Removed because too expensive
+//        int blocks = SchematicUtil.count(cc, true); Removed because too expensive)
         return new SchematicData(checksum, cc.getWidth(), cc.getHeight(), cc.getLength());
     }
     

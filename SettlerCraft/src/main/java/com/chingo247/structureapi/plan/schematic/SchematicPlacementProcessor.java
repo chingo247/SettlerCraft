@@ -54,7 +54,6 @@ public class SchematicPlacementProcessor extends PlacementProcessor {
         
         try {
             long start = System.currentTimeMillis();
-            long checksum = FileUtils.checksumCRC32(schematiFile);
             
             Element pe = (Element) placeableNode;
             Vector pos;
@@ -66,7 +65,7 @@ public class SchematicPlacementProcessor extends PlacementProcessor {
             if(XMLUtils.hasDirection(pe)) direction = XMLUtils.getDirectionFrom(pe);
             else direction = Direction.NORTH;
             
-            SchematicPlacement schematic = new SchematicPlacement(schematiFile, checksum, direction, pos);
+            SchematicPlacement schematic = new SchematicPlacement(schematiFile, direction, pos);
             LOG.print(LogLevel.INFO, schematiFile, "Schematic", System.currentTimeMillis() - start);
             return schematic;
             

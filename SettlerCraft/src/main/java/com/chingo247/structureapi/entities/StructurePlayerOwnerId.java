@@ -1,5 +1,3 @@
-package com.chingo247.structureapi;
-
 
 /*
  * The MIT License
@@ -24,22 +22,37 @@ package com.chingo247.structureapi;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package com.chingo247.structureapi.entities;
 
+import com.chingo247.structureapi.legacy.*;
+import java.io.Serializable;
+import java.util.UUID;
+import javax.persistence.Embeddable;
 
 /**
  *
  * @author Chingo
  */
-public interface IConfigProvider {
+@Embeddable
+public class StructurePlayerOwnerId implements Serializable {
     
-    public boolean isPlanMenuEnabled();
+    private Long structure;
+    private UUID player;
 
-    public boolean isPlanShopEnabled();
+    public UUID getPlayer() {
+        return player;
+    }
 
-    public int getBuildMode();
+   
+
+    protected StructurePlayerOwnerId() {
+    }
+
+    StructurePlayerOwnerId(Long structureId, UUID player) {
+        this.structure = structureId;
+        this.player = player;
+    }
     
-    public int getDemolisionMode();
-
-    public double getRefundPercentage();
+    
     
 }

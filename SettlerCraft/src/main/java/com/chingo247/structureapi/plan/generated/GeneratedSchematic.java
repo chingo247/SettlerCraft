@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -22,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi;
+package com.chingo247.structureapi.plan.generated;
 
 /**
- *
+ * Generated Schematic uses a Schematic as base and will repeat itself along one or more axis
  * @author Chingo
  */
-public class StructureMember {
+public class GeneratedSchematic {
     
 }

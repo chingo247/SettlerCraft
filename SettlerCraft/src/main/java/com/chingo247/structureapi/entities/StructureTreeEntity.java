@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -22,44 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.plan.generated;
+package com.chingo247.structureapi.entities;
 
-import com.chingo247.structureapi.generators.Generator;
-import com.chingo247.structureapi.plan.placement.Placement;
-import com.google.common.base.Preconditions;
-import com.sk89q.worldedit.Vector;
+import java.io.Serializable;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 /**
- *
+ * Defines substructure relation between two structures
  * @author Chingo
- * @param <T>
- * 
  */
-public abstract class GeneratedPlacement<T extends Generator> extends Placement {
+@Entity
+public class StructureTreeEntity implements Serializable {
     
-    private final Generator generator;
-    private final Vector position;
+    @Id
+    @GeneratedValue
+    private Long id;
+    private Long parent;
+    private Long child;
 
-    public GeneratedPlacement(T generator, Vector relativePosition) {
-        Preconditions.checkNotNull(generator);
-        this.generator =  generator;
-        this.position = relativePosition;
+    /**
+     * JPA Constructor
+     */
+    protected StructureTreeEntity() {
     }
 
-    public Generator getGenerator() {
-        return generator;
-    }
     
-    @Override
-    public Vector getRelativePosition() {
-        return position;
-    }
-
-    @Override
-    public void move(Vector offset) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    /**
+     * Constructor.
+     * @param parent The parent structure
+     * @param child The child structure
+     */
+    public StructureTreeEntity(Long parent, Long child) {
+        this.child = child;
+        this.parent = parent;
     }
     
     
-
 }

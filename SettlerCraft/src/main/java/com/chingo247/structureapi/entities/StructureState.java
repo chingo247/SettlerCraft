@@ -1,5 +1,3 @@
-package com.chingo247.structureapi;
-
 /*
  * The MIT License
  *
@@ -23,27 +21,52 @@ package com.chingo247.structureapi;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
-import com.chingo247.structureapi.plan.StructurePlan;
-import com.chingo247.structureapi.plan.schematic.Schematic;
-import com.chingo247.settlercraft.world.Direction;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.world.World;
-import java.io.File;
+package com.chingo247.structureapi.entities;
 
 /**
  *
  * @author Chingo
  */
-public interface IStructureAPI {
-    
-    public Structure create(StructurePlan plan, World world, Vector position, Direction direction);
-    
-    public void addRestriction(StructureRestriction restriction);
-    
-    public Schematic loadSchematic(File schematic);
-    
-    public StructurePlan getStructurePlan(String id);
-    
-    
+public enum StructureState {
+        
+        /**
+         * Before persisting into database
+         */
+        INITIALIZING,
+        /**
+         * Structure has been added to AsyncWorldEdit's blockplacer's Queue
+         */
+        QUEUED,
+        /**
+         * Schematic is being loaded
+         */
+        LOADING_SCHEMATIC,
+        /**
+         * Fence is being placed
+         */
+        PLACING_FENCE,
+        /**
+         * Structure is being build
+         */
+        BUILDING,
+        /**
+         * Structure is being demolished
+         */
+        DEMOLISHING,
+        /**
+         * Progress has been completed
+         */
+        COMPLETE,
+        /**
+         * Structure has been removed
+         */
+        REMOVED,
+        /**
+         * Progress has stopped
+         */
+        STOPPED,
+        /**
+         * Structure has successfully been persisted into the database
+         */
+        CREATED
 }

@@ -22,44 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.plan.generated;
+package com.chingo247.structureapi.entities;
 
-import com.chingo247.structureapi.generators.Generator;
-import com.chingo247.structureapi.plan.placement.Placement;
-import com.google.common.base.Preconditions;
-import com.sk89q.worldedit.Vector;
+import com.chingo247.structureapi.legacy.*;
+import java.io.Serializable;
+import java.util.UUID;
+import javax.persistence.Embeddable;
 
 /**
  *
  * @author Chingo
- * @param <T>
- * 
  */
-public abstract class GeneratedPlacement<T extends Generator> extends Placement {
+@Embeddable
+public class StructurePlayerMemberId implements Serializable {
     
-    private final Generator generator;
-    private final Vector position;
+    private Long structure;
+    private UUID player;
 
-    public GeneratedPlacement(T generator, Vector relativePosition) {
-        Preconditions.checkNotNull(generator);
-        this.generator =  generator;
-        this.position = relativePosition;
+    public UUID getPlayer() {
+        return player;
     }
 
-    public Generator getGenerator() {
-        return generator;
-    }
-    
-    @Override
-    public Vector getRelativePosition() {
-        return position;
+    protected StructurePlayerMemberId() {
     }
 
-    @Override
-    public void move(Vector offset) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    StructurePlayerMemberId(Long structureId, UUID player) {
+        this.structure = structureId;
+        this.player = player;
     }
     
-    
-
 }

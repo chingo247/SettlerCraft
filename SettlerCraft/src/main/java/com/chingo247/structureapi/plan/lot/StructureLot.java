@@ -87,5 +87,10 @@ public class StructureLot extends Placement{
             length = temp;
         }
     }
+
+    @Override
+    public void move(Vector offset) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

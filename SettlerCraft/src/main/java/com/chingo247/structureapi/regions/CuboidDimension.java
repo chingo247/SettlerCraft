@@ -173,6 +173,17 @@ public class CuboidDimension implements Serializable, CuboidDimensional {
     public CuboidDimension getCuboidDimension() {
         return this;
     }
+    
+    public void move(Vector offset) {
+        Vector min = getMinPosition().add(offset);
+        Vector max = getMaxPosition().add(offset);
+        this.minX = min.getBlockX();
+        this.minY = min.getBlockY();
+        this.minZ = min.getBlockZ();
+        this.maxX = max.getBlockX();
+        this.maxY = max.getBlockY();
+        this.maxZ = max.getBlockZ();
+    }
 
 
 }

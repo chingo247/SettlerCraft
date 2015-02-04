@@ -24,56 +24,32 @@ package com.chingo247.structureapi;
  * THE SOFTWARE.
  */
 
+import com.chingo247.structureapi.restriction.StructureRestriction;
 import com.chingo247.structureapi.plan.StructurePlan;
-import com.chingo247.structureapi.plan.schematic.Schematic;
 import com.chingo247.settlercraft.world.Direction;
+import com.chingo247.structureapi.exception.StructureException;
+import com.chingo247.structureapi.plan.placement.Placement;
+import com.chingo247.structureapi.regions.CuboidDimensional;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.world.World;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
  * @author Chingo
  */
-public class StructureAPI implements IStructureAPI {
+public interface StructureAPI {
     
-    public List<StructureRestriction> restrictions;
-    private static StructureAPI instance;
+    public Structure getStructure(long id);
     
-    private StructureAPI() {
-        this.restrictions = new ArrayList<>();
-    }
+    public boolean overlaps(CuboidDimensional cuboid);
     
-    public static IStructureAPI getInstance() {
-        if(instance == null) {
-            instance = new StructureAPI();
-        }
-        return instance;
-    }
+    public Structure create(StructurePlan plan, World world, Vector position, Direction direction) throws StructureException;
     
-    @Override
-    public void addRestriction(StructureRestriction restriction) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Schematic loadSchematic(File schematic) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public StructurePlan getStructurePlan(String id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Structure create(StructurePlan plan, World world, Vector position, Direction direction) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-   
+    public Structure create(Placement placement, World world, Vector position, Direction direction) throws StructureException;
+    
+    public void addRestriction(StructureRestriction restriction);
+    
+    public StructurePlan getStructurePlan(String id);
     
     
 }

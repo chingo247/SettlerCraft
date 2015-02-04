@@ -50,10 +50,11 @@ public class SchematicUtil {
     }
 
     public static CuboidDimension calculateDimension(SchematicData schematic, Vector pos, Direction direction) {
+        Vector size = schematic.getSize();
         Vector end = getPoint2Right(pos, direction, new BlockVector(
-                schematic.getWidth(),
-                schematic.getHeight(),
-                schematic.getLength())
+                size.getBlockX(),
+                size.getBlockY(),
+                size.getBlockZ())
         );
         CuboidDimension dimension = new CuboidDimension(pos, end);
         return dimension;

@@ -83,6 +83,10 @@ public class SchematicDataManager {
         return schematicData.get(checksum);
     }
 
+    public int getAmountOfSchematics() {
+        return schematicData.size();
+    }
+    
     public void load() {
         if (lock.tryLock()) {
             
@@ -126,7 +130,7 @@ public class SchematicDataManager {
                 try {
                     session = HibernateUtil.getSession();
 
-                    session.setFlushMode(FlushMode.MANUAL);
+                    
                     int persisted = 0;
 
                     tx = session.beginTransaction();
@@ -139,6 +143,7 @@ public class SchematicDataManager {
                         persisted++;
                     }
                     tx.commit();
+                    session.flush();
                 } catch (HibernateException e) {
                     try {
                         if (tx != null) {

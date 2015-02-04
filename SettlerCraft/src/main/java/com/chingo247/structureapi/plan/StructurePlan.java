@@ -47,11 +47,11 @@ public final class StructurePlan  {
     protected transient UUID uuid;
     
     protected StructurePlan parent;
-    private File structurePlan;
+    private final File structurePlan;
     private Document document;
     
-    private Set<StructurePlan> plans;  // Substructure - plan
-    private Set<Placement> placements; // Substructure - placeable
+    private final Set<StructurePlan> plans;  // Substructure - plan
+    private final Set<Placement> placements; // Substructure - placeable
     
     protected Placement placement;
 
@@ -124,7 +124,7 @@ public final class StructurePlan  {
     public void removePlacement(Placement placement) {
         Iterator<Placement> it = placements.iterator();
         while(it.hasNext()) {
-            if(it.next().getUUID().equals(placement.getUUID())) {
+            if(it.next().getId().equals(placement.getId())) {
                 it.remove();
                 break;
             }

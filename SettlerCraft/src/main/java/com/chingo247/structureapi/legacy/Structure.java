@@ -58,6 +58,7 @@ import javax.persistence.OneToMany;
 /**
  *
  * @author Chingo
+ * 
  */
 @Entity(name = "SC_STRUCTURE")
 @Deprecated

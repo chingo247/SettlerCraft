@@ -1,3 +1,5 @@
+package com.chingo247.settlercraft;
+
 
 /*
  * The MIT License
@@ -22,44 +24,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.plan.generated;
 
-import com.chingo247.structureapi.generators.Generator;
-import com.chingo247.structureapi.plan.placement.Placement;
-import com.google.common.base.Preconditions;
-import com.sk89q.worldedit.Vector;
 
 /**
  *
  * @author Chingo
- * @param <T>
- * 
  */
-public abstract class GeneratedPlacement<T extends Generator> extends Placement {
+public interface IConfigProvider {
     
-    private final Generator generator;
-    private final Vector position;
+    public boolean isPlanMenuEnabled();
 
-    public GeneratedPlacement(T generator, Vector relativePosition) {
-        Preconditions.checkNotNull(generator);
-        this.generator =  generator;
-        this.position = relativePosition;
-    }
+    public boolean isPlanShopEnabled();
 
-    public Generator getGenerator() {
-        return generator;
-    }
+    public int getBuildMode();
     
-    @Override
-    public Vector getRelativePosition() {
-        return position;
-    }
+    public int getDemolisionMode();
 
-    @Override
-    public void move(Vector offset) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    public double getRefundPercentage();
     
-    
-
 }

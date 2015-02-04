@@ -26,6 +26,7 @@ package com.chingo247.structureapi.persistence;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.hibernate.HibernateException;
@@ -70,6 +71,39 @@ public class AbstractDAOImpl<T> implements AbstractDAO<T> {
             tx = session.beginTransaction();
             session.persist(t);
             tx.commit();
+        } catch (HibernateException e) {
+            try {
+                tx.rollback();
+            } catch (HibernateException rbe) {
+                Logger.getLogger(AbstractDAO.class.getName()).log(Level.SEVERE, "Couldn’t roll back transaction", rbe);
+            }
+            throw e;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+    
+    @Override
+    public void bulkInsert(List<T> ts) {
+        Session session = null;
+        Transaction tx = null;
+        try {
+            session = HibernateUtil.getSession();
+            tx = session.beginTransaction();
+            int count = 0;
+            for(T t : ts) {
+               session.persist(t); 
+               count++;
+               if(count % 50 == 0) {
+                   tx.commit();
+                   tx.begin();
+               }
+            }
+            tx.commit();
+            session.flush();
+            
         } catch (HibernateException e) {
             try {
                 tx.rollback();

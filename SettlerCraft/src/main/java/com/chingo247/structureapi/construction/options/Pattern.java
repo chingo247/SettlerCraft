@@ -32,9 +32,10 @@ import java.util.Comparator;
  * realistic effect. The thought behind this is that lots of block-changes on a smaller area
  * (square) will have increased performance.
  *
- *
+ * @deprecated Not used anymore as clipboard perform cubic iteration on the fly, which increased performance even more...
  * @author Chingo
  */
+@Deprecated
 public class Pattern {
 
     private final Comparator<StructureBlock> buildPattern;

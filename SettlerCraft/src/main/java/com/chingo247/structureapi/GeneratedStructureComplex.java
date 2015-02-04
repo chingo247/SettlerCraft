@@ -23,34 +23,10 @@
  */
 package com.chingo247.structureapi;
 
-import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldedit.world.World;
-
 /**
- * StructureRestriction class is used to determine if a Structure may be build in a certain area
+ *
  * @author Chingo
  */
-public abstract class StructureRestriction {
-    
-    public final String reason;
-
-    /**
-     * Constructor.
-     * @param reason The reason when to tell the player, why the structure can't be build
-     */
-    public StructureRestriction(String reason) {
-        this.reason = reason;
-    }
-    
-    
-    
-    /**
-     * Used to check if a Structure may be build on a specified location.
-     * @param world The world of the region
-     * @param region The cuboid-region (representing the Structure)
-     * @param type The type of the Structure
-     * @return True if a Structure is allowed to be build upon target area
-     */
-    public abstract boolean allow(World world, CuboidRegion region, StructureType type);
+public class GeneratedStructureComplex {
     
 }
