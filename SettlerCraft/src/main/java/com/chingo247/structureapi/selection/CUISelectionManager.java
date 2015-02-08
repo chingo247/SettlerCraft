@@ -26,7 +26,7 @@
 package com.chingo247.structureapi.selection;
 
 import com.chingo247.settlercraft.common.util.WorldEditUtil;
-import com.chingo247.structureapi.plan.schematic.SchematicData;
+import com.chingo247.structureapi.schematic.SchematicData;
 import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.Vector;

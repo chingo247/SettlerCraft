@@ -12,7 +12,7 @@
  *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- *
+ *s
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,9 +30,7 @@ import com.chingo247.structureapi.entities.StructureType;
 import com.chingo247.structureapi.exception.StructureException;
 import com.chingo247.structureapi.persistence.StructureDAO;
 import com.chingo247.structureapi.plan.StructurePlan;
-import com.chingo247.structureapi.plan.placement.Placement;
-import com.chingo247.structureapi.plan.schematic.SchematicData;
-import com.chingo247.structureapi.plan.schematic.SchematicDataManager;
+import com.chingo247.structureapi.placement.Placement;
 import com.chingo247.structureapi.regions.CuboidDimensional;
 import com.chingo247.structureapi.restriction.StructureHeightRestriction;
 import com.chingo247.structureapi.restriction.StructureOverlapRestriction;
@@ -46,7 +44,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -83,7 +80,7 @@ public class StructureAPIImpl implements StructureAPI {
             if(entity == null) {
                 return null;
             } 
-            complex = new StructureComplex(cachedPool, entity, this);
+            complex = new StructureComplex(cachedPool, entity, this) {};
             structureStorage.store(complex);
         }
         return complex;
@@ -93,21 +90,24 @@ public class StructureAPIImpl implements StructureAPI {
         return structureStorage;
     }
     
-    
+    private void createRecursive(StructurePlan plan, World world, Vector position, Direction d, List<StructureComplex> holder) {
+        StructureEntity entity = new StructureEntity(world, plan.getPlacement().getCuboidDimension(), StructureType.getType(plan.getPlacement()));
+        holder.add(new StructureComplex(cachedPool, entity, this));
+        for(Placement p : plan.getSubStructurePlacements()) {
+            holder.add(new StructureComplex(cachedPool, new StructureEntity(world, p.getCuboidDimension(), StructureType.getType(p)), this));
+        }
+        for(StructurePlan p : plan.getSubStructurePlans()) {
+            createRecursive(p, world, position, d, holder);
+        }
+    }
 
     @Override
     public Structure create(StructurePlan plan, World world, Vector position, Direction direction) {
-        try {
-            // Check placements
-            
-            
-            
-            
-            
-        } catch (IOException ex) {
-            Logger.getLogger(StructureAPIImpl.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
+        List<StructureComplex> structures = new ArrayList<>();
+        createRecursive(plan, world, position, direction, structures);
+        
+        // setup order
+        
         return null;
     }
     

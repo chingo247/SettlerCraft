@@ -66,7 +66,7 @@ public class StructureStorage {
     private StructureComplex find(StructureEntity entity) {
         if(entity == null) return null;
         
-        StructureWorldPartition worldPartition = storage.get(entity.getWorld().getName());
+        StructureWorldPartition worldPartition = storage.get(entity.getWorld());
         if(worldPartition == null) {
             return null;
         }

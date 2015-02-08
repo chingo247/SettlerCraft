@@ -23,12 +23,14 @@
  */
 package com.chingo247.structureapi;
 
+import com.chingo247.structureapi.construction.asyncworldedit.Options;
 import com.chingo247.structureapi.construction.options.BuildOptions;
 import com.chingo247.structureapi.construction.options.DemolitionOptions;
 import com.chingo247.structureapi.entities.StructurePlayerMemberEntity;
 import com.chingo247.structureapi.entities.StructurePlayerOwnerEntity;
+import com.chingo247.structureapi.placement.Placement;
 import com.chingo247.structureapi.plan.StructurePlan;
-import com.chingo247.structureapi.plan.schematic.Placement;
+import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
@@ -65,20 +67,16 @@ public abstract class Structure {
         return isMember(player.getUniqueId());
     }
     
-    public void build(boolean force) {
-        build(new BuildOptions(false), force);
+    public void build(EditSession session, boolean force) {
+        build(session, Options.defaultOptions(), force);
     }
-    public abstract void build(BuildOptions options, boolean force);
+    public abstract void build(EditSession session, Options options, boolean force);
     
-    public abstract void demolish(DemolitionOptions options, boolean force);
-    public void demolish(boolean force) {
-        demolish(new DemolitionOptions(), force);
+    public abstract void demolish(EditSession session, Options options, boolean force);
+    public void demolish(EditSession session, boolean force) {
+        demolish(session, Options.defaultOptions(), force);
     }
     
     public abstract void stop(boolean force);
-    
-    
-    
-    
     
 }

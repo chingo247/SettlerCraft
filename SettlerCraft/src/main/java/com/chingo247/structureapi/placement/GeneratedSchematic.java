@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -22,46 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.world;
-
-import com.google.common.base.Preconditions;
-import java.io.Serializable;
-import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
+package com.chingo247.structureapi.placement;
 
 /**
- *
+ * Generated Schematic uses a Schematic as base and will repeat itself along one or more axis
  * @author Chingo
  */
-@Embeddable
-public class World implements Serializable {
-    
-    @Column(updatable = false)
-    private String name;
-    
-    @Column(updatable = false)
-    private UUID uuid;
-
-    /**
-     * JPA Constructor
-     */
-    protected World() {}
-
-    public World(String name, UUID uuid) {
-        Preconditions.checkNotNull(uuid);
-        Preconditions.checkNotNull(name);
-        Preconditions.checkArgument(name.length() <= 100);
-        this.name = name;
-        this.uuid = uuid;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public UUID getUuid() {
-        return uuid;
-    }
+public class GeneratedSchematic {
     
 }

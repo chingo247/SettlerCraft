@@ -31,7 +31,7 @@ import com.chingo247.structureapi.entities.StructurePlayerOwnerEntity;
 import com.chingo247.structureapi.legacy.PlayerMembership;
 import com.chingo247.structureapi.legacy.PlayerOwnership;
 import com.chingo247.structureapi.legacy.Structure;
-import com.chingo247.structureapi.plan.schematic.SchematicData;
+import com.chingo247.structureapi.schematic.SchematicData;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;

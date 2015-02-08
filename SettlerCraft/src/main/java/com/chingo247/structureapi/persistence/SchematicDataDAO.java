@@ -24,7 +24,7 @@
  */
 package com.chingo247.structureapi.persistence;
 
-import com.chingo247.structureapi.plan.schematic.SchematicData;
+import com.chingo247.structureapi.schematic.SchematicData;
 
 /**
  *

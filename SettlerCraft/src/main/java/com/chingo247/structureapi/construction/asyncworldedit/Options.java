@@ -21,12 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.plan.generated;
+package com.chingo247.structureapi.construction.asyncworldedit;
 
 /**
- * Generated Schematic uses a Schematic as base and will repeat itself along one or more axis
+ *
  * @author Chingo
  */
-public class GeneratedSchematic {
+public class Options {
+    
+    public static Options defaultOptions() {
+        throw new UnsupportedOperationException();
+    }
     
 }

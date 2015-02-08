@@ -22,59 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.plan.lot;
+package com.chingo247.structureapi.placement;
 
-import com.chingo247.structureapi.plan.placement.Placement;
+import com.chingo247.structureapi.generators.CuboidGenerator;
 import com.chingo247.structureapi.regions.CuboidDimension;
 import com.chingo247.settlercraft.world.Direction;
-import com.google.common.base.Preconditions;
+import com.chingo247.structureapi.construction.asyncworldedit.Options;
+import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 
 /**
  *
  * @author Chingo
  */
-public class StructureLot extends Placement{
+public class GeneratedCuboid extends GeneratedPlacement<CuboidGenerator>{
+
+    private int length;
+    private int width;
+
+    public GeneratedCuboid(CuboidGenerator generator, int width, int length) {
+        this(generator, width, length, Vector.ZERO);
+    }
     
-    public final Vector position;
-    public int width, height, length;
-
-    public StructureLot(int width, int height, int length) {
-        this(Vector.ZERO, width, height, length);
-    }
-
-    public StructureLot(Vector position, int width, int height, int length) {
-        Preconditions.checkArgument(width > 0);
-        Preconditions.checkArgument(height > 0);
-        Preconditions.checkArgument(length > 0);
-        this.position = position;
-        this.width = width;
-        this.height = height;
+    
+    
+    public GeneratedCuboid(CuboidGenerator generator, int width, int length, Vector position) {
+        super(generator, position);
         this.length = length;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public int getLength() {
-        return length;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    @Override
-    public Vector getRelativePosition() {
-        return position;
+        this.width = width; 
     }
 
     @Override
     public CuboidDimension getCuboidDimension() {
-        return new CuboidDimension(position, new Vector(width, height, length));
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
     @Override
     public void rotate(Direction direction) {
         switch(direction) {
@@ -89,7 +71,7 @@ public class StructureLot extends Placement{
     }
 
     @Override
-    public void move(Vector offset) {
+    public void place(EditSession editSession, Vector pos, Options options) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

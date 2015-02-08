@@ -23,7 +23,7 @@
  */
 package com.chingo247.structureapi.plan;
 
-import com.chingo247.structureapi.plan.schematic.SchematicDataManager;
+import com.chingo247.structureapi.schematic.SchematicDataManager;
 import com.chingo247.settlercraft.persistence.hsql.HSQLServer;
 import java.io.File;
 import java.util.ArrayList;

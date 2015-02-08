@@ -22,12 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.plan.generated;
+package com.chingo247.structureapi.placement;
 
 import com.chingo247.structureapi.generators.PolygonalGenerator;
 import com.chingo247.structureapi.regions.CuboidDimension;
 import com.chingo247.settlercraft.world.Direction;
+import com.chingo247.structureapi.construction.asyncworldedit.Options;
 import com.sk89q.worldedit.BlockVector2D;
+import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.Polygonal2DRegion;
 
@@ -100,6 +102,11 @@ public class GeneratedPolygonal2D extends GeneratedPlacement<PolygonalGenerator>
             default:
                 throw new AssertionError("unreachable");
         }
+    }
+
+    @Override
+    public void place(EditSession editSession, Vector pos, Options options) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

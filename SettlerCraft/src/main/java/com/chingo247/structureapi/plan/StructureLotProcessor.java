@@ -3,12 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.structureapi.plan.lot;
+package com.chingo247.structureapi.plan;
 
+import com.chingo247.structureapi.placement.StructureLot;
 import com.chingo247.settlercraft.common.util.LogLevel;
 import com.chingo247.structureapi.exception.PlanException;
 import com.chingo247.structureapi.plan.XMLUtils;
-import com.chingo247.structureapi.plan.placement.PlacementProcessor;
+import com.chingo247.structureapi.plan.PlacementProcessor;
 import com.chingo247.structureapi.util.SCLogger;
 import com.sk89q.worldedit.Vector;
 import java.io.File;

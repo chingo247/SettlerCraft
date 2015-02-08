@@ -25,7 +25,7 @@
 package com.chingo247.settlercraft.util;
 
 
-import com.chingo247.structureapi.plan.schematic.SchematicData;
+import com.chingo247.structureapi.schematic.SchematicData;
 import com.chingo247.structureapi.regions.CuboidDimension;
 import com.chingo247.settlercraft.world.Direction;
 import com.sk89q.worldedit.BlockVector;

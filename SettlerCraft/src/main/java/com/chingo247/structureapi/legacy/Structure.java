@@ -24,7 +24,7 @@
  */
 package com.chingo247.structureapi.legacy;
 
-import com.chingo247.structureapi.plan.schematic.SchematicData;
+import com.chingo247.structureapi.schematic.SchematicData;
 import com.chingo247.structureapi.legacy.PlayerOwnership.Type;
 import static com.chingo247.settlercraft.util.SchematicUtil.calculateDimension;
 import com.chingo247.structureapi.regions.CuboidDimension;

@@ -1,4 +1,4 @@
-package com.chingo247.structureapi.plan.schematic;
+package com.chingo247.structureapi.schematic;
 
 //
 ///*

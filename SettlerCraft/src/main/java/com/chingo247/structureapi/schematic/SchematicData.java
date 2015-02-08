@@ -22,9 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.plan.schematic;
+package com.chingo247.structureapi.schematic;
 
-import com.chingo247.structureapi.plan.placement.Placement;
+import com.chingo247.structureapi.placement.Placement;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.data.DataException;

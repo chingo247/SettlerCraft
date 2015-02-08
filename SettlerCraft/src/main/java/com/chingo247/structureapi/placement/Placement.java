@@ -22,10 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.plan.placement;
+package com.chingo247.structureapi.placement;
 
 import com.chingo247.structureapi.regions.CuboidDimensional;
 import com.chingo247.settlercraft.world.Direction;
+import com.chingo247.structureapi.construction.asyncworldedit.Options;
+import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import java.util.Objects;
 import java.util.UUID;
@@ -49,6 +51,8 @@ public abstract class Placement implements CuboidDimensional {
     public UUID getId() {
         return id;
     }
+    
+    
 
     
 
@@ -75,6 +79,7 @@ public abstract class Placement implements CuboidDimensional {
     }
     
     
+    public abstract void place(EditSession editSession, Vector pos, Options options);
     
     /**
      * The position relative to it's parent Structure, If the Structure has no Parent then this method

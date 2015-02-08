@@ -1,4 +1,4 @@
-package com.chingo247.structureapi.plan.menu;
+package com.chingo247.structureapi.menu;
 
 //
 ///*

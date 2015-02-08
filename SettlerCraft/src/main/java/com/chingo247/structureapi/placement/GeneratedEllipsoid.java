@@ -22,30 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.plan.generated;
+package com.chingo247.structureapi.placement;
 
-import com.chingo247.structureapi.generators.CylinderGenerator;
+import com.chingo247.structureapi.generators.EllipsoidGenerator;
 import com.chingo247.structureapi.regions.CuboidDimension;
 import com.chingo247.settlercraft.world.Direction;
+import com.chingo247.structureapi.construction.asyncworldedit.Options;
+import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 
 /**
  *
  * @author Chingo
  */
-public class GeneratedCylinder extends GeneratedPlacement<CylinderGenerator>{
+public class GeneratedEllipsoid extends GeneratedPlacement<EllipsoidGenerator> {
     
     private int xradius;
     private int zradius;
-    
-    public GeneratedCylinder(CylinderGenerator generator, int xradius, int zradius) {
-        this(generator, xradius, zradius, Vector.ZERO);
-    }
 
-    public GeneratedCylinder(CylinderGenerator generator, int xradius, int zradius, Vector position) {
+    public GeneratedEllipsoid(EllipsoidGenerator generator, int xradius, int zradius, Vector position) {
         super(generator, position);
-        this.xradius = xradius;
-        this.zradius = zradius;
     }
 
     @Override
@@ -65,6 +61,11 @@ public class GeneratedCylinder extends GeneratedPlacement<CylinderGenerator>{
             zradius = temp;
             break;
         }
+    }
+
+    @Override
+    public void place(EditSession editSession, Vector pos, Options options) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

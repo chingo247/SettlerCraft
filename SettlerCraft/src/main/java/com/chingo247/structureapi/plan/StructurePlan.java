@@ -24,7 +24,7 @@
  */
 package com.chingo247.structureapi.plan;
 
-import com.chingo247.structureapi.plan.placement.Placement;
+import com.chingo247.structureapi.placement.Placement;
 import com.chingo247.structureapi.exception.PlanException;
 import com.chingo247.structureapi.regions.CuboidDimension;
 import java.io.File;

@@ -21,9 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.plan.schematic;
+package com.chingo247.structureapi.schematic;
 
-import com.chingo247.structureapi.plan.placement.PlacementProcessor;
+import com.chingo247.structureapi.placement.SchematicPlacement;
+import com.chingo247.structureapi.plan.PlacementProcessor;
 import com.chingo247.settlercraft.common.util.LogLevel;
 import com.chingo247.structureapi.plan.XMLUtils;
 import com.chingo247.settlercraft.world.Direction;

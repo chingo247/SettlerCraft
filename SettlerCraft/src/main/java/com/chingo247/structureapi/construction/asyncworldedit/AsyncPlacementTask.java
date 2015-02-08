@@ -21,26 +21,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.plan.generated;
+package com.chingo247.structureapi.construction.asyncworldedit;
 
-import com.chingo247.structureapi.plan.placement.Placement;
-import com.chingo247.structureapi.plan.placement.PlacementProcessor;
-import java.io.File;
-import org.dom4j.Node;
+import com.chingo247.structureapi.placement.Placement;
+import com.sk89q.worldedit.CuboidClipboard;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.MaxChangedBlocksException;
+import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 
 /**
  *
  * @author Chingo
  */
-public class GeneratedPlacementProcessor extends PlacementProcessor {
+public abstract class AsyncPlacementTask extends SCBaseTask {
+    
+    private Placement placement;
 
-    public GeneratedPlacementProcessor(File file, Node placeableNode) {
-        super(file, placeableNode);
+    public AsyncPlacementTask(Placement placement, EditSession editSession, PlayerEntry player, String commandName, BlockPlacer blocksPlacer, SCJobEntry job) {
+        super(editSession, player, commandName, blocksPlacer, job);
+        this.placement = placement;
+    }
+
+    
+    @Override
+    protected Object doRun() throws MaxChangedBlocksException {
+        task(placement);
+        return null;
     }
 
     @Override
-    protected Placement compute() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    protected void doPostRun(Object o) {
     }
+    
+    /**
+     * Task to run
+     *
+     * @param placement The placement
+     * @throws com.sk89q.worldedit.MaxChangedBlocksException
+     */
+    public abstract void task(Placement placement)
+            throws MaxChangedBlocksException;
     
 }

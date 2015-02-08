@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -22,44 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.plan.generated;
+package com.chingo247.structureapi.plan;
 
-import com.chingo247.structureapi.generators.Generator;
-import com.chingo247.structureapi.plan.placement.Placement;
-import com.google.common.base.Preconditions;
-import com.sk89q.worldedit.Vector;
+import com.chingo247.structureapi.placement.Placement;
+import com.chingo247.structureapi.plan.PlacementProcessor;
+import java.io.File;
+import org.dom4j.Node;
 
 /**
  *
  * @author Chingo
- * @param <T>
- * 
  */
-public abstract class GeneratedPlacement<T extends Generator> extends Placement {
-    
-    private final Generator generator;
-    private final Vector position;
+public class GeneratedPlacementProcessor extends PlacementProcessor {
 
-    public GeneratedPlacement(T generator, Vector relativePosition) {
-        Preconditions.checkNotNull(generator);
-        this.generator =  generator;
-        this.position = relativePosition;
-    }
-
-    public Generator getGenerator() {
-        return generator;
-    }
-    
-    @Override
-    public Vector getRelativePosition() {
-        return position;
+    public GeneratedPlacementProcessor(File file, Node placeableNode) {
+        super(file, placeableNode);
     }
 
     @Override
-    public void move(Vector offset) {
+    protected Placement compute() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-    
-
 }

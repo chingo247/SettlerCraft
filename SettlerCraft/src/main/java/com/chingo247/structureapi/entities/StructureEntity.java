@@ -23,8 +23,8 @@
  */
 package com.chingo247.structureapi.entities;
 
-import com.chingo247.settlercraft.world.World;
 import com.chingo247.structureapi.regions.CuboidDimension;
+import com.sk89q.worldedit.world.World;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -54,8 +54,8 @@ public class StructureEntity implements Serializable {
     
     private String name;
     
-    @Embedded
-    private World world;
+    private String world;
+    
     @Embedded
     private CuboidDimension dimension;
     
@@ -81,8 +81,8 @@ public class StructureEntity implements Serializable {
     protected StructureEntity() {
     }
     
-    public StructureEntity(String world, UUID worldId, CuboidDimension dimension, StructureType type) {
-        this.world = new World(world, worldId);
+    public StructureEntity(World world, CuboidDimension dimension, StructureType type) {
+        this.world = world.getName();
         this.dimension = dimension;
         this.type = type;
     }
@@ -111,7 +111,7 @@ public class StructureEntity implements Serializable {
         return state;
     }
 
-    public World getWorld() {
+    public String getWorld() {
         return world;
     }
 

@@ -22,12 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.plan.schematic;
+package com.chingo247.structureapi.placement;
 
-import com.chingo247.structureapi.plan.placement.DirectionalPlacement;
+import com.chingo247.structureapi.placement.DirectionalPlacement;
 import com.chingo247.structureapi.regions.CuboidDimension;
 import com.chingo247.structureapi.util.WorldUtil;
 import com.chingo247.settlercraft.world.Direction;
+import com.chingo247.structureapi.construction.asyncworldedit.Options;
+import com.chingo247.structureapi.schematic.SchematicData;
+import com.chingo247.structureapi.schematic.SchematicDataManager;
+import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +50,7 @@ public class SchematicPlacement extends DirectionalPlacement{
     private Direction direction;
     private int rotation;
     
-    SchematicPlacement(File schematicFile, Direction direction, Vector position) throws IOException {
+    public SchematicPlacement(File schematicFile, Direction direction, Vector position) throws IOException {
         this.checksum = FileUtils.checksumCRC32(schematicFile);
         this.position = position;
         this.direction = direction;
@@ -127,6 +131,11 @@ public class SchematicPlacement extends DirectionalPlacement{
 
     @Override
     public void move(Vector offset) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void place(EditSession editSession, Vector pos, Options options) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

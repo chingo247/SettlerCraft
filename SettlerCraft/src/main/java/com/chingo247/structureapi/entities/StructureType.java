@@ -24,6 +24,11 @@
  */
 package com.chingo247.structureapi.entities;
 
+import com.chingo247.structureapi.placement.GeneratedPlacement;
+import com.chingo247.structureapi.placement.Placement;
+import com.chingo247.structureapi.placement.SchematicPlacement;
+import com.chingo247.structureapi.placement.StructureLot;
+
 /**
  *
  * @author Chingo
@@ -40,6 +45,22 @@ public enum StructureType {
     /**
      * Structure has no schematic and is completely generated based on info within the StructurePlan
      */
-    GENERATED
+    GENERATED,
+    
+    OTHER;
+    
+   
+    public static StructureType getType(Placement placement) {
+        if(placement instanceof SchematicPlacement) {
+            return SCHEMATIC;
+        } else if (placement instanceof StructureLot) {
+            return STRUCTURELOT;
+        } else if (placement instanceof GeneratedPlacement){
+            return GENERATED;
+        } else {
+            return OTHER;
+        }
+    }
+    
     
 }

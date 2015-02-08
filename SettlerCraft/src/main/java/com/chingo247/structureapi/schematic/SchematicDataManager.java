@@ -21,11 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.plan.schematic;
+package com.chingo247.structureapi.schematic;
 
 import com.chingo247.structureapi.persistence.AbstractDAO;
 import com.chingo247.structureapi.persistence.HibernateUtil;
 import com.chingo247.settlercraft.common.util.LogLevel;
+import com.chingo247.structureapi.plan.schematic.QSchematicData;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sk89q.worldedit.data.DataException;
 import java.io.File;

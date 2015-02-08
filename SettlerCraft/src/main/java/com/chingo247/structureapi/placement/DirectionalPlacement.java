@@ -1,4 +1,3 @@
-package com.chingo247.structureapi;
 
 /*
  * The MIT License
@@ -23,33 +22,17 @@ package com.chingo247.structureapi;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package com.chingo247.structureapi.placement;
 
-import com.chingo247.structureapi.restriction.StructureRestriction;
-import com.chingo247.structureapi.plan.StructurePlan;
 import com.chingo247.settlercraft.world.Direction;
-import com.chingo247.structureapi.exception.StructureException;
-import com.chingo247.structureapi.placement.Placement;
-import com.chingo247.structureapi.regions.CuboidDimensional;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.world.World;
+
 
 /**
  *
  * @author Chingo
  */
-public interface StructureAPI {
+public abstract class DirectionalPlacement extends Placement {
     
-    public Structure getStructure(long id);
-    
-    public boolean overlaps(CuboidDimensional cuboid);
-    
-    public Structure create(StructurePlan plan, World world, Vector position, Direction direction) throws StructureException;
-    
-    public Structure create(Placement placement, World world, Vector position, Direction direction) throws StructureException;
-    
-    public void addRestriction(StructureRestriction restriction);
-    
-    public StructurePlan getStructurePlan(String id);
-    
+    public abstract Direction getDirection();
     
 }

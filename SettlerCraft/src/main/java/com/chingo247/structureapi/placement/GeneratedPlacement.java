@@ -22,17 +22,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.plan.placement;
+package com.chingo247.structureapi.placement;
 
-import com.chingo247.settlercraft.world.Direction;
-
+import com.chingo247.structureapi.generators.Generator;
+import com.chingo247.structureapi.placement.Placement;
+import com.google.common.base.Preconditions;
+import com.sk89q.worldedit.Vector;
 
 /**
  *
  * @author Chingo
+ * @param <T>
+ * 
  */
-public abstract class DirectionalPlacement extends Placement {
+public abstract class GeneratedPlacement<T extends Generator> extends Placement {
     
-    public abstract Direction getDirection();
+    private final Generator generator;
+    private final Vector position;
+
+    public GeneratedPlacement(T generator, Vector relativePosition) {
+        Preconditions.checkNotNull(generator);
+        this.generator =  generator;
+        this.position = relativePosition;
+    }
+
+    public Generator getGenerator() {
+        return generator;
+    }
     
+    @Override
+    public Vector getRelativePosition() {
+        return position;
+    }
+
+    @Override
+    public void move(Vector offset) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
+
 }

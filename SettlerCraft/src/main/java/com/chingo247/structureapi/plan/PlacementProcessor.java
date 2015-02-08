@@ -21,8 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.plan.placement;
+package com.chingo247.structureapi.plan;
 
+import com.chingo247.structureapi.placement.Placement;
 import com.google.common.base.Preconditions;
 import java.io.File;
 import java.util.concurrent.RecursiveTask;

@@ -25,13 +25,13 @@ package com.chingo247.structureapi.persistence;
  * THE SOFTWARE.
  */
 
-import com.chingo247.settlercraft.world.World;
 import com.chingo247.structureapi.entities.QStructureEntity;
 import com.chingo247.structureapi.entities.StructureEntity;
 import com.chingo247.structureapi.entities.StructureState;
 import com.chingo247.structureapi.regions.CuboidDimension;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
+import com.sk89q.worldedit.world.World;
 import org.hibernate.Session;
 
 /**
@@ -45,7 +45,7 @@ public class StructureDAO extends AbstractDAOImpl<StructureEntity>  {
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         boolean result = query.from(qStructure)
-                .where(qStructure.world().uuid.eq(world.getUuid())
+                .where(qStructure.world().name.eq(world.getName())
                         .and(qStructure.dimension().maxX.goe(dimension.getMinX()).and(qStructure.dimension().minX.loe(dimension.getMaxX())))
                         .and(qStructure.dimension().maxY.goe(dimension.getMinY()).and(qStructure.dimension().minY.loe(dimension.getMaxY())))
                         .and(qStructure.dimension().maxZ.goe(dimension.getMinZ()).and(qStructure.dimension().minZ.loe(dimension.getMaxZ())))

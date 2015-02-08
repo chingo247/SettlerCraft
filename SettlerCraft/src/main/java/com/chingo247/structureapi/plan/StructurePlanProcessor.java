@@ -23,12 +23,9 @@
  */
 package com.chingo247.structureapi.plan;
 
-import com.chingo247.structureapi.plan.placement.PlacementProcessor;
-import com.chingo247.structureapi.plan.generated.GeneratedPlacementProcessor;
 import com.chingo247.structureapi.exception.PlanException;
 import com.chingo247.settlercraft.common.util.LogLevel;
-import com.chingo247.structureapi.plan.lot.StructureLotProcessor;
-import com.chingo247.structureapi.plan.schematic.SchematicPlacementProcessor;
+import com.chingo247.structureapi.schematic.SchematicPlacementProcessor;
 import com.chingo247.structureapi.util.SCLogger;
 import com.google.common.base.Preconditions;
 import java.io.File;

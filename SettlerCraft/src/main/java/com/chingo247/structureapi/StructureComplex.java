@@ -24,6 +24,7 @@
 package com.chingo247.structureapi;
 
 import com.chingo247.settlercraft.common.util.WorldEditUtil;
+import com.chingo247.structureapi.construction.asyncworldedit.Options;
 import com.chingo247.structureapi.construction.options.BuildOptions;
 import com.chingo247.structureapi.construction.options.DemolitionOptions;
 import com.chingo247.structureapi.entities.StructureEntity;
@@ -33,9 +34,11 @@ import com.chingo247.structureapi.persistence.StructureDAO;
 import com.chingo247.structureapi.persistence.StructureMemberDAO;
 import com.chingo247.structureapi.persistence.StructureOwnerDAO;
 import com.chingo247.structureapi.plan.StructurePlan;
-import com.chingo247.structureapi.plan.placement.Placement;
+import com.chingo247.structureapi.placement.Placement;
 import com.chingo247.structureapi.regions.CuboidDimension;
 import com.chingo247.structureapi.util.FireNextQueue;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.util.List;
@@ -46,7 +49,7 @@ import java.util.concurrent.ExecutorService;
  *
  * @author Chingo
  */
-public abstract class StructureComplex extends Structure {
+public class StructureComplex extends Structure {
     
     private FireNextQueue tasks;
     private long id;
@@ -99,7 +102,7 @@ public abstract class StructureComplex extends Structure {
 
     @Override
     public World getWorld() {
-        return WorldEditUtil.getWorld(entity.getWorld().getName());
+        return WorldEditUtil.getWorld(entity.getWorld());
     }
 
     @Override
@@ -146,6 +149,21 @@ public abstract class StructureComplex extends Structure {
     @Override
     public boolean isMember(UUID player) {
         return memberDAO.isMember(player, id);
+    }
+
+    @Override
+    public void build(EditSession session, Options options, boolean force) {
+        getPlacement().place(session, getCuboidRegion().getMinimumPoint(), options);
+    }
+
+    @Override
+    public void demolish(EditSession session, Options options, boolean force) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void stop(boolean force) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     

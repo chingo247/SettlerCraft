@@ -25,8 +25,8 @@ package com.chingo247.structureapi.plan;
 
 import com.chingo247.settlercraft.world.Direction;
 import com.chingo247.structureapi.exception.PlanException;
-import com.chingo247.structureapi.plan.generated.GeneratedPlacement;
-import com.chingo247.structureapi.plan.placement.Placement;
+import com.chingo247.structureapi.placement.GeneratedPlacement;
+import com.chingo247.structureapi.placement.Placement;
 import com.chingo247.structureapi.regions.CuboidDimension;
 import com.sk89q.worldedit.Vector;
 import java.util.ArrayList;
