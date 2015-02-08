@@ -57,16 +57,30 @@ public class StructureComplex extends Structure {
     private StructureDAO sdao;
     private StructureMemberDAO memberDAO;
     private StructureOwnerDAO ownerDAO;
+    private StructurePlan plan;
     
     private StructureAPIImpl api;
     private boolean isDirty;
     
-    StructureComplex(ExecutorService service, StructureEntity entity, StructureAPIImpl api) {
+    StructureComplex(ExecutorService service, StructureEntity entity, StructureAPIImpl api, StructurePlan plan) {
         this.isDirty = false;
         this.tasks = new FireNextQueue(service);
         this.memberDAO = new StructureMemberDAO();
         this.ownerDAO = new StructureOwnerDAO();
         this.api = api;
+        this.plan = plan;
+    }
+
+    public StructureEntity getEntity() {
+        return entity;
+    }
+    
+    private boolean isNew(StructureEntity entity) {
+        return entity.getId() == null;
+    }
+    
+    private void setDirty(boolean dirty) {
+        this.isDirty = dirty;
     }
 
     public boolean isDirty() {
@@ -86,7 +100,7 @@ public class StructureComplex extends Structure {
     @Override
     public void setName(String name) {
         entity.setName(name);
-        sdao.save(entity);
+        setDirty(true);
     }
 
     @Override
@@ -97,7 +111,7 @@ public class StructureComplex extends Structure {
     @Override
     public void setValue(double value) {
         entity.setValue(value);
-        sdao.save(entity);
+        setDirty(true);
     }
 
     @Override
@@ -128,7 +142,9 @@ public class StructureComplex extends Structure {
 
     @Override
     public StructurePlan getStructurePlan() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //TODO Null check and load!
+        
+        return plan;
     }
 
     @Override

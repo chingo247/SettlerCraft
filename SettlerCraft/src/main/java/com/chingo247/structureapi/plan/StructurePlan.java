@@ -50,8 +50,10 @@ public final class StructurePlan  {
     private final File structurePlan;
     private Document document;
     
-    private final Set<StructurePlan> plans;  // Substructure - plan
-    private final Set<Placement> placements; // Substructure - placeable
+    private final Set<StructurePlan> internalPlans;  // Substructure - plan
+    private final Set<StructurePlan> externalPlans;
+    private final Set<Placement> external; // Substructure - placeable
+    private final Set<Placement> internal;
     
     protected Placement placement;
 
@@ -59,8 +61,10 @@ public final class StructurePlan  {
         this.uuid = UUID.randomUUID();
         this.structurePlan = structurePlan;
         this.parent = parent;
-        this.plans = new HashSet<>();
-        this.placements = new HashSet<>();
+        this.internalPlans = new HashSet<>();
+        this.externalPlans = new HashSet<>();
+        this.internal = new HashSet<>();
+        this.external = new HashSet<>();
         this.placement = placement;
     }
 
@@ -121,23 +125,29 @@ public final class StructurePlan  {
         return parent != null;
     }
     
-    public void removePlacement(Placement placement) {
-        Iterator<Placement> it = placements.iterator();
-        while(it.hasNext()) {
-            if(it.next().getId().equals(placement.getId())) {
-                it.remove();
-                break;
-            }
+    public boolean removePlacement(Placement placement) {
+        if(!internal.remove(placement)) {
+            return external.remove(placement);
         }
+        return true;
     }
     
     public void addPlacement(Placement placement) {
-        placements.add(placement);
+        if(CuboidDimension.isDimensionWithin(this.placement, placement)) {
+            internal.add(placement);
+        } else {
+            external.add(placement);
+        }
     }
     
     public void addStructurePlan(StructurePlan plan) {
         if(matchesAnyAncestors(plan.getFile().getAbsolutePath())) throw new PlanException("Plans may not be equal to any of its ancestors.");
-        plans.add(plan);
+        if(CuboidDimension.isDimensionWithin(placement, plan.placement)) {
+            internalPlans.add(plan);
+        } else {
+            externalPlans.add(plan);
+        }
+        
     }
     
     public void removeStructurePlan(StructurePlan plan) {
@@ -168,12 +178,22 @@ public final class StructurePlan  {
         return parent;
     }
 
+    public Collection<Placement> getExternal() {
+        return external;
+    }
+
+    public Collection<Placement> getInternal() {
+        return internal;
+    }
+    
     public Collection<Placement> getSubStructurePlacements() {
+        Set<Placement> placements = new HashSet<>(external);
+        placements.addAll(internal);
         return placements;
     }
 
     public Collection<StructurePlan> getSubStructurePlans() {
-        return plans;
+        return internalPlans;
     }
 
     

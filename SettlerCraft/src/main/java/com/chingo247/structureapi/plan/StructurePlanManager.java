@@ -25,6 +25,7 @@ package com.chingo247.structureapi.plan;
 
 import com.chingo247.structureapi.schematic.SchematicDataManager;
 import com.chingo247.settlercraft.persistence.hsql.HSQLServer;
+import com.chingo247.structureapi.placement.Placement;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -115,6 +116,10 @@ public class StructurePlanManager {
 //        System.out.printf("[SettlerCraft]: Steal Count: %d\n", pool.getStealCount());
         System.out.printf("[SettlerCraft]: Time: %d ms\n", (System.currentTimeMillis() - start));
         System.out.printf("******************************************\n");
+    }
+    
+    public static StructurePlan createPlan(Placement p) {
+        throw new UnsupportedOperationException("Not supported yet..");
     }
 
     

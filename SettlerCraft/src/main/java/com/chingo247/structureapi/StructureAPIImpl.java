@@ -31,6 +31,7 @@ import com.chingo247.structureapi.exception.StructureException;
 import com.chingo247.structureapi.persistence.StructureDAO;
 import com.chingo247.structureapi.plan.StructurePlan;
 import com.chingo247.structureapi.placement.Placement;
+import com.chingo247.structureapi.plan.StructurePlanManager;
 import com.chingo247.structureapi.regions.CuboidDimensional;
 import com.chingo247.structureapi.restriction.StructureHeightRestriction;
 import com.chingo247.structureapi.restriction.StructureOverlapRestriction;
@@ -90,23 +91,29 @@ public class StructureAPIImpl implements StructureAPI {
         return structureStorage;
     }
     
-    private void createRecursive(StructurePlan plan, World world, Vector position, Direction d, List<StructureComplex> holder) {
-        StructureEntity entity = new StructureEntity(world, plan.getPlacement().getCuboidDimension(), StructureType.getType(plan.getPlacement()));
-        holder.add(new StructureComplex(cachedPool, entity, this));
+     private void createRecursive(StructurePlan plan, World world, Vector position, Direction d, StructureComplexTree holder) {
         for(Placement p : plan.getSubStructurePlacements()) {
-            holder.add(new StructureComplex(cachedPool, new StructureEntity(world, p.getCuboidDimension(), StructureType.getType(p)), this));
+            StructureEntity pEntity = new StructureEntity(world, p.getCuboidDimension(), StructureType.getType(p));
+            StructureComplex pComplex = new StructureComplex(cachedPool, pEntity, this, StructurePlanManager.createPlan(p));
+            holder.add(new StructureComplexTree(pComplex));
         }
         for(StructurePlan p : plan.getSubStructurePlans()) {
-            createRecursive(p, world, position, d, holder);
+            StructureEntity pEntity = new StructureEntity(world, p.getPlacement().getCuboidDimension(), StructureType.getType(p.getPlacement()));
+            StructureComplex pComplex = new StructureComplex(cachedPool, pEntity, this, plan);
+            StructureComplexTree pComplexTree = new StructureComplexTree(pComplex);
+            createRecursive(p, world, position, d, pComplexTree);
+            holder.add(pComplexTree);
         }
     }
 
     @Override
     public Structure create(StructurePlan plan, World world, Vector position, Direction direction) {
-        List<StructureComplex> structures = new ArrayList<>();
-        createRecursive(plan, world, position, direction, structures);
+        // Apply restrictions...
         
-        // setup order
+        StructureEntity entity = new StructureEntity(world, plan.getPlacement().getCuboidDimension(), StructureType.getType(plan.getPlacement()));
+        StructureComplex complex = new StructureComplex(cachedPool, entity, this, plan);
+        StructureComplexTree tree = new StructureComplexTree(complex);
+        
         
         return null;
     }
@@ -132,7 +139,40 @@ public class StructureAPIImpl implements StructureAPI {
     }
 
     
+    private class StructureComplexTree {
+    
+    private final StructureComplex self;
+    private List<StructureComplexTree> tree;
 
+    public StructureComplexTree(StructureComplex self) {
+        this.self = self;
+        this.tree = new ArrayList<>();
+    }
+    
+    public void add(StructureComplexTree complex) {
+        this.tree.add(complex);
+    }
+    
+    public List<StructureComplex> list() {
+        List<StructureComplex> structures = new ArrayList<>();
+        list(structures);
+        return structures;
+    }
+    
+    /**
+     * Recursive call
+     * @param holder 
+     */
+    private void list(List<StructureComplex> holder) {
+        holder.add(self);
+        for(StructureComplexTree sct : tree) {
+            sct.list(holder);
+        }
+    }
+    
+    
+    
+}
    
     
     
