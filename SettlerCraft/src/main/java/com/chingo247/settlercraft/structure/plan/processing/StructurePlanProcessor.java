@@ -1,3 +1,5 @@
+package com.chingo247.settlercraft.structure.plan.processing;
+
 /*
  * The MIT License
  *
@@ -21,12 +23,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.plan.processing;
 
 import com.chingo247.settlercraft.structure.exception.PlanException;
 import com.chingo247.settlercraft.commons.logging.SCLogger;
 import com.chingo247.settlercraft.commons.util.LogLevel;
-import com.chingo247.settlercraft.structure.plan.StructureAPIPlanManager;
+import com.chingo247.settlercraft.structure.plan.StructurePlanManager;
 import com.chingo247.settlercraft.structure.plan.xml.XMLUtils;
 import com.google.common.base.Preconditions;
 import java.io.File;
@@ -50,6 +51,7 @@ public class StructurePlanProcessor extends RecursiveTask<StructurePlanComplex> 
     private StructurePlanComplex parent;
     private StructurePlanProcessorManager sppm;
     private final SCLogger LOG = SCLogger.getLogger();
+    private StructurePlanManager reader;
 
     public StructurePlanProcessor(File structurePlan, StructurePlanProcessorManager sppm) {
         this(structurePlan, null, sppm);
@@ -69,7 +71,7 @@ public class StructurePlanProcessor extends RecursiveTask<StructurePlanComplex> 
         String path = structurePlan.getAbsolutePath();
 
         // Check if the StructurePlan was already loaded
-        StructureAPIPlanManager pmgr = StructureAPIPlanManager.getInstance();
+        StructurePlanManager pmgr = StructurePlanManager.getInstance();
         StructurePlanComplex loadedPlan = pmgr.getPlan(path);
         if (loadedPlan != null) {
             return loadedPlan;
@@ -172,7 +174,7 @@ public class StructurePlanProcessor extends RecursiveTask<StructurePlanComplex> 
         }
 
         if (plan != null) {
-            StructureAPIPlanManager.getInstance().putStructurePlan(plan);
+            StructurePlanManager.getInstance().putStructurePlan(plan);
         }
 
         return plan;

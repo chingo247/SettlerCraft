@@ -30,7 +30,7 @@ import com.chingo247.settlercraft.structure.persistence.entities.StructureState;
 import com.chingo247.settlercraft.structure.persistence.entities.StructureType;
 import com.chingo247.settlercraft.structure.persistence.service.StructureDAO;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structure.plan.StructureAPIPlanManager;
+import com.chingo247.settlercraft.structure.plan.StructurePlanManager;
 import com.chingo247.settlercraft.structure.plan.placement.Placement;
 import com.chingo247.settlercraft.structure.plan.processing.StructurePlanComplex;
 import com.chingo247.settlercraft.structure.regions.CuboidDimensional;
@@ -91,7 +91,7 @@ public class DefaultStructureAPI implements StructureAPI {
         if (!isLoading) {
             isLoading = true;
             try {
-                StructureAPIPlanManager.getInstance().loadPlans();
+                StructurePlanManager.getInstance().loadPlans();
             } finally {
                 isLoading = false;
             }
@@ -199,12 +199,12 @@ public class DefaultStructureAPI implements StructureAPI {
 
     @Override
     public StructurePlan getStructurePlan(String id) {
-        return StructureAPIPlanManager.getInstance().getPlan(id);
+        return StructurePlanManager.getInstance().getPlan(id);
     }
 
     @Override
     public List<StructurePlan> getStructurePlans() {
-        return StructureAPIPlanManager.getInstance().getPlans();
+        return StructurePlanManager.getInstance().getPlans();
     }
 
     protected class StructureComplexTree {

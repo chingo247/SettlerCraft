@@ -24,13 +24,12 @@
 package com.chingo247.settlercraft;
 
 import com.chingo247.settlercraft.entities.WorldEntity;
-import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.structure.persistence.service.WorldDAO;
+import com.chingo247.settlercraft.structure.plan.StructurePlanManager;
 import com.chingo247.settlercraft.world.World;
 import com.chingo247.xcore.core.APlatform;
 import com.chingo247.xcore.core.IWorld;
 import com.chingo247.xcore.platforms.PlatformFactory;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,6 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.apache.log4j.Logger;
-import org.bukkit.Bukkit;
 
 /**
  *
@@ -54,6 +52,7 @@ public class SettlerCraft {
     private final Map<UUID, SCWorld> WORLDS;
     private final ExecutorService SERVICE;
     private final String MSG_PREFIX;
+    private final StructurePlanManager PLAN_STORAGE;
 
     private SettlerCraft() {
         this.WORLD_DAO = new WorldDAO();
@@ -62,26 +61,32 @@ public class SettlerCraft {
         this.CONTEXT = SettlerCraftContext.getContext();
         this.PLATFORM = PlatformFactory.createPlatform(CONTEXT.getPlatform());
         this.MSG_PREFIX = "["+CONTEXT.getPluginName()+"]: ";
+        this.PLAN_STORAGE = StructurePlanManager.getInstance();
     }
 
     public static SettlerCraft getInstance() {
         if (instance == null) {
             instance = new SettlerCraft();
-            instance.init();
+            instance.load();
         }
         return instance;
     }
     
-    private void init() {
-        initWorlds();
+    private void load() {
+        loadWorlds();
+        reloadPlans();
     }
 
-    private void initWorlds() {
+    private void loadWorlds() {
         LOG.info(MSG_PREFIX + " Initializing worlds...");
         List<IWorld> ws = PLATFORM.getServer().getWorlds();
         for(IWorld world : ws) {
             getWorld(world.getUUID());
         }
+    }
+    
+    public void reloadPlans() {
+        PLAN_STORAGE.loadPlans();
     }
 
     public World getWorld(UUID world) {

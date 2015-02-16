@@ -25,11 +25,10 @@ package com.chingo247.settlercraft.structure.plan;
 
 import com.chingo247.settlercraft.structure.plan.processing.StructurePlanComplex;
 import com.chingo247.settlercraft.structure.plan.processing.StructurePlanProcessorManager;
-import com.chingo247.settlercraft.structure.plan.processing.StructurePlanProcessor;
 import com.chingo247.settlercraft.commons.logging.SCLogger;
 import com.chingo247.settlercraft.SettlerCraftContext;
+import com.chingo247.settlercraft.structure.plan.processing.StructurePlanProcessor;
 import com.chingo247.settlercraft.structure.plan.schematic.SchematicDataManager;
-import com.chingo247.settlercraft.structure.persistence.HSQLServer;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,15 +45,15 @@ import org.apache.commons.io.FileUtils;
  *
  * @author Chingo
  */
-public class StructureAPIPlanManager {
+public class StructurePlanManager {
 
     private final SCLogger LOG = SCLogger.getLogger();
     private final Map<String, StructurePlanComplex> plans;
     private final Lock planLock;
 
-    private static StructureAPIPlanManager instance;
+    private static StructurePlanManager instance;
 
-    private StructureAPIPlanManager() {
+    private StructurePlanManager() {
         this.planLock = new ReentrantLock();
         this.plans = new HashMap<>();
 
@@ -65,9 +64,9 @@ public class StructureAPIPlanManager {
      *
      * @return The StructurePlanManager instance
      */
-    public static StructureAPIPlanManager getInstance() {
+    public static StructurePlanManager getInstance() {
         if (instance == null) {
-            instance = new StructureAPIPlanManager();
+            instance = new StructurePlanManager();
         }
         return instance;
     }
