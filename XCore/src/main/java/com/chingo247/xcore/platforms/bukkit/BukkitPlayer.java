@@ -61,6 +61,16 @@ public class BukkitPlayer implements IPlayer {
     public int getExperience() {
         return player.getTotalExperience();
     }
+
+    @Override
+    public boolean isOP() {
+        return player.isOp();
+    }
+
+    @Override
+    public boolean hasPermission(String permission) {
+        return player.hasPermission(permission);
+    }
     
     
    

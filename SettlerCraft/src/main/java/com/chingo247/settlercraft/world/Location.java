@@ -24,11 +24,10 @@
  */
 package com.chingo247.settlercraft.world;
 
-import com.avaje.ebean.validation.NotEmpty;
-import com.avaje.ebean.validation.NotNull;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import org.hibernate.validator.NotNull;
 
 
 /**
@@ -50,7 +49,6 @@ public class Location implements Serializable {
     @Column(name = "z")
     protected int z;
 
-    @NotEmpty
     @NotNull
     @Column(name = "loc_world")
     protected String world;

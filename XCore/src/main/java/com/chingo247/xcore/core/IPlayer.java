@@ -29,4 +29,8 @@ public interface IPlayer {
     
     public int getExperience();
     
+    public boolean isOP();
+    
+    public boolean hasPermission(String permission);
+    
 }

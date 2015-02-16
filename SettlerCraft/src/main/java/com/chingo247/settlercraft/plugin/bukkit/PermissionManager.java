@@ -23,6 +23,11 @@
  */
 package com.chingo247.settlercraft.plugin.bukkit;
 
+import com.chingo247.settlercraft.commons.core.IPermission;
+import com.chingo247.settlercraft.SettlerCraftContext;
+import com.chingo247.xcore.core.APlatform;
+import com.chingo247.xcore.core.IPlayer;
+import com.chingo247.xcore.platforms.PlatformFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
@@ -32,9 +37,35 @@ import org.bukkit.permissions.PermissionDefault;
  *
  * @author Chingo
  */
-public class PermissionManager {
+public class PermissionManager implements IPermissionManager {
 
     private static final String prefix = "settlercraft.";
+    private final SettlerCraftContext context = SettlerCraftContext.getContext();
+    private APlatform platform = PlatformFactory.createPlatform(context.getPlatform());
+    
+    private static PermissionManager instance;
+    
+    public static IPermissionManager getInstance() {
+        if(instance == null) {
+            instance = new PermissionManager();
+        }
+        return instance;
+    }
+
+    @Override
+    public boolean isAllowed(IPlayer player, IPermission permission) {
+        if (player == null) {
+            return false;
+        }
+        if (player.isOP()) {
+            return true;
+        }
+
+        
+        
+        return player.hasPermission(permission.getName());
+    }
+    
 
     public enum Perms {
 
@@ -54,15 +85,8 @@ public class PermissionManager {
         }
     }
 
-    public static boolean isAllowed(Player player, Perms perms) {
-        if (player == null) {
-            return false;
-        }
-        if (player.isOp()) {
-            return true;
-        }
-
-        return player.hasPermission(perms.PERM);
+    public boolean isAllowed(Player player, Perms perms) {
+        
     }
     
 

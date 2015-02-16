@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -24,29 +23,89 @@
  */
 package com.chingo247.settlercraft;
 
-import java.util.Properties;
+import com.chingo247.settlercraft.entities.WorldEntity;
+import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.structure.persistence.service.WorldDAO;
+import com.chingo247.settlercraft.world.World;
+import com.chingo247.xcore.core.APlatform;
+import com.chingo247.xcore.core.IWorld;
+import com.chingo247.xcore.platforms.PlatformFactory;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import org.apache.log4j.Logger;
+import org.bukkit.Bukkit;
 
 /**
  *
  * @author Chingo
  */
 public class SettlerCraft {
-    
-    private Properties properties;
 
-    public SettlerCraft() {
-        this.properties = new Properties();
-    }
-    
-    
-    
     private static SettlerCraft instance;
-    
+    private final Logger LOG = Logger.getLogger(SettlerCraft.class);
+    private final APlatform PLATFORM;
+    private final SettlerCraftContext CONTEXT;
+    private final WorldDAO WORLD_DAO;
+    private final Map<UUID, SCWorld> WORLDS;
+    private final ExecutorService SERVICE;
+    private final String MSG_PREFIX;
+
+    private SettlerCraft() {
+        this.WORLD_DAO = new WorldDAO();
+        this.SERVICE = Executors.newCachedThreadPool();
+        this.WORLDS = new HashMap<>();
+        this.CONTEXT = SettlerCraftContext.getContext();
+        this.PLATFORM = PlatformFactory.createPlatform(CONTEXT.getPlatform());
+        this.MSG_PREFIX = "["+CONTEXT.getPluginName()+"]: ";
+    }
+
     public static SettlerCraft getInstance() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new SettlerCraft();
+            instance.init();
         }
         return instance;
     }
     
+    private void init() {
+        initWorlds();
+    }
+
+    private void initWorlds() {
+        LOG.info(MSG_PREFIX + " Initializing worlds...");
+        List<IWorld> ws = PLATFORM.getServer().getWorlds();
+        for(IWorld world : ws) {
+            getWorld(world.getUUID());
+        }
+    }
+
+    public World getWorld(UUID world) {
+        World w = null;
+        synchronized (WORLDS) {
+            WORLDS.get(world);
+        }
+
+        if (w == null) {
+            IWorld iWorld = PLATFORM.getServer().getWorld(world);
+            if (iWorld == null) {
+                return null;
+            }
+            synchronized (WORLDS) {
+                WorldEntity we = WORLD_DAO.find(world);
+                if (we == null) {
+                    we = new WorldEntity(iWorld.getName(), iWorld.getUUID());
+                }
+                SCWorld scw = new SCWorld(SERVICE, we);
+                WORLDS.put(scw.getUniqueId(), scw);
+                w = scw;
+            }
+        }
+        return w;
+    }
+
 }
