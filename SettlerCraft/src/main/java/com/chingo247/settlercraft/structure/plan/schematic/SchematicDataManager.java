@@ -85,10 +85,7 @@ public class SchematicDataManager {
         return schematicData.get(checksum);
     }
 
-    public int getAmountOfSchematics() {
-        return schematicData.size();
-    }
-    
+  
     public void load() {
         if (lock.tryLock()) {
             

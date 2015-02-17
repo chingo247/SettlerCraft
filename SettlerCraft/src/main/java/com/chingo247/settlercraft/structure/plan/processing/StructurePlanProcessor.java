@@ -27,16 +27,18 @@ package com.chingo247.settlercraft.structure.plan.processing;
 import com.chingo247.settlercraft.structure.exception.PlanException;
 import com.chingo247.settlercraft.commons.logging.SCLogger;
 import com.chingo247.settlercraft.commons.util.LogLevel;
-import com.chingo247.settlercraft.structure.plan.StructurePlanManager;
 import com.chingo247.settlercraft.structure.plan.xml.XMLUtils;
 import com.google.common.base.Preconditions;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.RecursiveTask;
 import net.minecraft.util.org.apache.commons.lang3.math.NumberUtils;
 import org.dom4j.Document;
+import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
@@ -47,36 +49,35 @@ import org.dom4j.io.SAXReader;
  */
 public class StructurePlanProcessor extends RecursiveTask<StructurePlanComplex> {
 
+    private final UUID id;
     private File structurePlan;
     private StructurePlanComplex parent;
-    private StructurePlanProcessorManager sppm;
     private final SCLogger LOG = SCLogger.getLogger();
-    private StructurePlanManager reader;
+    private Map<String,StructurePlanProcessor> holder;
+    
 
-    public StructurePlanProcessor(File structurePlan, StructurePlanProcessorManager sppm) {
-        this(structurePlan, null, sppm);
+    StructurePlanProcessor(File structurePlan, Map<String, StructurePlanProcessor> holder) {
+        this(structurePlan, null, holder);
     }
 
-    public StructurePlanProcessor(File structurePlan, StructurePlanComplex parent, StructurePlanProcessorManager sppm) {
+    StructurePlanProcessor(File structurePlan, StructurePlanComplex parent, Map<String, StructurePlanProcessor> holder) {
         Preconditions.checkNotNull(structurePlan);
         Preconditions.checkArgument(structurePlan.exists());
         this.structurePlan = structurePlan;
         this.parent = parent;
-        this.sppm = sppm;
+        this.holder = holder;
+        this.id = UUID.randomUUID();
     }
 
     @Override
     protected StructurePlanComplex compute() {
         long start = System.currentTimeMillis();
         String path = structurePlan.getAbsolutePath();
-
-        // Check if the StructurePlan was already loaded
-        StructurePlanManager pmgr = StructurePlanManager.getInstance();
-        StructurePlanComplex loadedPlan = pmgr.getPlan(path);
-        if (loadedPlan != null) {
-            return loadedPlan;
-        }
-
+        
+        StructurePlanProcessor processor = holder.get(path);
+        if(processor != null && !processor.id.equals(id)) return processor.join();
+        else holder.put(path, this);
+        
         SAXReader reader = new SAXReader();
         StructurePlanComplex plan;
         try {
@@ -124,11 +125,11 @@ public class StructurePlanProcessor extends RecursiveTask<StructurePlanComplex> 
                     if(t.trim().toLowerCase().equals("embedded")) {
                         // Perform recursion check here!
                         // Fully check branch for matchin types!
-                        File f = sppm.handleEmbeddedPlan(structurePlan, n);
+                        File f = handleEmbeddedPlan(structurePlan, n);
                         if (plan.matchesAnyAncestors(f.getAbsolutePath())) {
                             throw new PlanException("SubStructure #" + index + " matches a plan in his branch!");
                         }
-                        spps.add(sppm.task(structurePlan, parent, n));
+                        spps.add(new StructurePlanProcessor(f, parent, holder));
                     } else {
                         pps.add(handlePlaceable(structurePlan, placementNode));
                     }
@@ -164,6 +165,9 @@ public class StructurePlanProcessor extends RecursiveTask<StructurePlanComplex> 
             if (parent == null) {
 //                StructurePlanUtil.validate(plan);
             }
+            
+           
+            
             LOG.print(LogLevel.INFO, structurePlan, "StructurePlan", System.currentTimeMillis() - start);
         } catch (PlanException ex) { 
             LOG.print(LogLevel.ERROR, "Error in '" + structurePlan.getAbsolutePath() + "' >> " + ex.getMessage(), "StructurePlan", null);
@@ -173,9 +177,8 @@ public class StructurePlanProcessor extends RecursiveTask<StructurePlanComplex> 
             plan = null;
         }
 
-        if (plan != null) {
-            StructurePlanManager.getInstance().putStructurePlan(plan);
-        }
+        
+        
 
         return plan;
     }
@@ -222,6 +225,41 @@ public class StructurePlanProcessor extends RecursiveTask<StructurePlanComplex> 
 
     }
     
+    private File handleEmbeddedPlan(File structurePlan, Node n) throws DocumentException {
+        String type = handleSubStructureType(n);
+        if (!type.equalsIgnoreCase("Embedded")) {
+            throw new PlanException("StructurePlan was not of type Embedded"); // Self CHeck!
+        }
+        Node fileNode = n.selectSingleNode("File");
+        if (fileNode == null) {
+            throw new PlanException("The 'File' element was not defined for the 'SubStructure' element");
+        }
+        File f = new File(structurePlan.getParent(), fileNode.getText());
+        if (!f.exists()) {
+            throw new PlanException("Couldn't resolve relative path '" + fileNode.getText() + "' + from XML element 'Substructure/File'");
+        }
+        if (!isStructurePlan(f)) {
+            throw new PlanException("The 'File element doesn't reference to a 'StructurePlan-File' ");
+        }
+        return f;
+    }
+    
+    
+    
+    private String handleSubStructureType(Node n) {
+        Node typeNode = n.selectSingleNode("Type");
+        if (typeNode == null) {
+            throw new PlanException("The 'Type' element was not defined for Element 'SubStructure'");
+        }
+        return typeNode.getText().trim();
+
+    }
+
+    private boolean isStructurePlan(File file) throws DocumentException {
+        SAXReader reader = new SAXReader();
+        Document d = reader.read(file);
+        return d.getRootElement().getName().equals("StructurePlan");
+    }
     
 
 }

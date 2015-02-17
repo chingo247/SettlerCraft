@@ -25,7 +25,8 @@ package com.chingo247.settlercraft;
 
 import com.chingo247.settlercraft.entities.WorldEntity;
 import com.chingo247.settlercraft.structure.persistence.service.WorldDAO;
-import com.chingo247.settlercraft.structure.plan.StructurePlanManager;
+import com.chingo247.settlercraft.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structure.plan.processing.StructurePlanReader;
 import com.chingo247.settlercraft.world.World;
 import com.chingo247.xcore.core.APlatform;
 import com.chingo247.xcore.core.IWorld;
@@ -36,6 +37,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.log4j.Logger;
 
 /**
@@ -49,10 +52,13 @@ public class SettlerCraft {
     private final APlatform PLATFORM;
     private final SettlerCraftContext CONTEXT;
     private final WorldDAO WORLD_DAO;
-    private final Map<UUID, SCWorld> WORLDS;
     private final ExecutorService SERVICE;
     private final String MSG_PREFIX;
-    private final StructurePlanManager PLAN_STORAGE;
+    
+    private final Map<UUID, SCWorld> WORLDS;
+    private final Map<String, StructurePlan> PLANS;
+    
+    private final Lock PLANS_LOCK;
 
     private SettlerCraft() {
         this.WORLD_DAO = new WorldDAO();
@@ -61,7 +67,8 @@ public class SettlerCraft {
         this.CONTEXT = SettlerCraftContext.getContext();
         this.PLATFORM = PlatformFactory.createPlatform(CONTEXT.getPlatform());
         this.MSG_PREFIX = "["+CONTEXT.getPluginName()+"]: ";
-        this.PLAN_STORAGE = StructurePlanManager.getInstance();
+        this.PLANS = new HashMap<>();
+        this.PLANS_LOCK = new ReentrantLock();
     }
 
     public static SettlerCraft getInstance() {
@@ -74,7 +81,7 @@ public class SettlerCraft {
     
     private void load() {
         loadWorlds();
-        reloadPlans();
+        loadPlans();
     }
 
     private void loadWorlds() {
@@ -85,8 +92,21 @@ public class SettlerCraft {
         }
     }
     
-    public void reloadPlans() {
-        PLAN_STORAGE.loadPlans();
+    public void loadPlans() {
+        if(PLANS_LOCK.tryLock()) {
+            try {
+                synchronized(PLANS) {
+                    PLANS.clear();
+                    StructurePlanReader reader = new StructurePlanReader();
+                    List<StructurePlan> plans = reader.readDirectory(CONTEXT.getPlanDirectory());
+                    for(StructurePlan plan : plans) {
+                        PLANS.put(plan.getRelativePath(), plan);
+                    }
+                }
+            } finally {
+                PLANS_LOCK.unlock();
+            }
+        }
     }
 
     public World getWorld(UUID world) {
@@ -111,6 +131,10 @@ public class SettlerCraft {
             }
         }
         return w;
+    }
+    
+    public static void main(String[] args) {
+        
     }
 
 }
