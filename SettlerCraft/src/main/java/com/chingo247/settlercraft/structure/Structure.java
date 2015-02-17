@@ -24,8 +24,8 @@
 package com.chingo247.settlercraft.structure;
 
 import com.chingo247.settlercraft.structure.construction.options.Options;
-import com.chingo247.settlercraft.structure.persistence.entities.StructurePlayerMemberEntity;
-import com.chingo247.settlercraft.structure.persistence.entities.StructurePlayerOwnerEntity;
+import com.chingo247.settlercraft.entities.StructurePlayerMemberEntity;
+import com.chingo247.settlercraft.entities.StructurePlayerOwnerEntity;
 import com.chingo247.settlercraft.structure.plan.placement.Placement;
 import com.chingo247.settlercraft.structure.plan.processing.StructurePlanComplex;
 import com.sk89q.worldedit.EditSession;

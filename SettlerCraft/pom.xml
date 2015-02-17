@@ -9,7 +9,7 @@
         <!--Private ThirdParty Repo-->
         <repository>
             <id>Nexus</id>
-            <url>http://localhost:8084/nexus/content/repositories/thirdparty/</url>
+            <url>http://192.168.1.143:8084/nexus/content/repositories/thirdparty/</url>
         </repository>
         <!--WorldEdit Repo-->
         <repository>
@@ -165,11 +165,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>XCore</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>StructureAPI</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>

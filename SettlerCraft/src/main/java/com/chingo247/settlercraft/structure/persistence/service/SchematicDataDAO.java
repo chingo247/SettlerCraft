@@ -24,7 +24,7 @@
  */
 package com.chingo247.settlercraft.structure.persistence.service;
 
-import com.chingo247.settlercraft.structure.persistence.entities.SchematicDataEntity;
+import com.chingo247.settlercraft.entities.SchematicDataEntity;
 
 /**
  *

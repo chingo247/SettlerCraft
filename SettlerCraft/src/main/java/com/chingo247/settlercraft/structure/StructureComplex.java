@@ -25,9 +25,9 @@ package com.chingo247.settlercraft.structure;
 
 import com.chingo247.settlercraft.commons.util.WorldEditUtil;
 import com.chingo247.settlercraft.structure.construction.options.Options;
-import com.chingo247.settlercraft.structure.persistence.entities.StructureEntity;
-import com.chingo247.settlercraft.structure.persistence.entities.StructurePlayerMemberEntity;
-import com.chingo247.settlercraft.structure.persistence.entities.StructurePlayerOwnerEntity;
+import com.chingo247.settlercraft.entities.StructureEntity;
+import com.chingo247.settlercraft.entities.StructurePlayerMemberEntity;
+import com.chingo247.settlercraft.entities.StructurePlayerOwnerEntity;
 import com.chingo247.settlercraft.structure.persistence.service.StructureDAO;
 import com.chingo247.settlercraft.structure.persistence.service.StructureMemberDAO;
 import com.chingo247.settlercraft.structure.persistence.service.StructureOwnerDAO;

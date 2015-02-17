@@ -22,9 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package com.chingo247.settlercraft.entities;
 
-package com.chingo247.settlercraft.structure.persistence.entities;
-
+import com.chingo247.settlercraft.structure.persistence.legacy.Structure;
 import com.sk89q.worldedit.entity.Player;
 import java.io.Serializable;
 import java.util.UUID;
@@ -39,77 +39,54 @@ import javax.persistence.ManyToOne;
  * @author Chingo
  */
 @Entity
-public class StructurePlayerOwnerEntity implements Serializable {
-    
-    public enum Type {
-        /**
-         * May modify parts of the structure (Added to worldguard region)
-         */
-        BASIC,
-        /*
-         * May modify parts of the structure
-         * Gets a share when the structure is refunded
-         * May assign new owners below his rank
-         * May dismiss owners, by refunding them their share
-         */
-        FULL,
-    }
-    
-    
+public class StructurePlayerMemberEntity implements Serializable {
+
     @EmbeddedId
-    private StructurePlayerOwnerId ownershipId;
+    private StructurePlayerMemberId playerMembershipId;
     
     @Column(name = "PLAYER_ID")
-    private final UUID player;
-    private final String name;
+    private final UUID uuid;
     
+    private String name;
     
-//    @MapsId(value = "ownershipId")
+//    @MapsId(value = "playerMembershipId")
     @ManyToOne(cascade = CascadeType.ALL)
     private StructureEntity structure;
-    
-    private Type ownerType;
-    
+
     /**
      * JPA Constructor.
      */
-    protected StructurePlayerOwnerEntity() {
-        this.player = null;
-        this.name = null;
-    }
-    
-    /**
-     * Constructor.
-     * @param structure The structure
-     * @param player Whether the owner is a isPlayer or not
-     */
-    StructurePlayerOwnerEntity(Player player, StructureEntity structure, Type ownerType) {
-        this.structure = structure;
-        this.player = player.getUniqueId();
-        this.name = player.getName();
-        this.ownershipId = new StructurePlayerOwnerId(structure.getId(), player.getUniqueId());
-        this.ownerType = ownerType;
+    protected StructurePlayerMemberEntity() {
+        this.uuid = null;
     }
 
-    public Type getOwnerType() {
-        return ownerType;
+    /**
+     * Constructor.
+     * @param name The name of the owner
+     * @param player Whether the owner is a isPlayer or not
+     */
+    StructurePlayerMemberEntity(Player player, StructureEntity structure) {
+        this.structure = structure;
+        this.uuid = player.getUniqueId();
+        this.name = player.getName();
+        this.playerMembershipId = new StructurePlayerMemberId(structure.getId(), player.getUniqueId());
+    }
+
+   
+
+    public UUID getUUID() {
+        return uuid;
     }
 
     public String getName() {
         return name;
     }
 
-    public UUID getPlayerUUID() {
-        return player;
-    }
-
-    
-
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 71 * hash + (this.player != null ? this.player.hashCode() : 0);
-        hash = 71 * hash + (this.structure != null ? this.structure.hashCode() : 0);
+        int hash = 3;
+        hash = 29 * hash + (this.uuid != null ? this.uuid.hashCode() : 0);
+        hash = 29 * hash + (this.structure != null ? this.structure.hashCode() : 0);
         return hash;
     }
 
@@ -121,8 +98,8 @@ public class StructurePlayerOwnerEntity implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final StructurePlayerOwnerEntity other = (StructurePlayerOwnerEntity) obj;
-        if (this.player != other.player && (this.player == null || !this.player.equals(other.player))) {
+        final StructurePlayerMemberEntity other = (StructurePlayerMemberEntity) obj;
+        if (this.uuid != other.uuid && (this.uuid == null || !this.uuid.equals(other.uuid))) {
             return false;
         }
         if (this.structure != other.structure && (this.structure == null || !this.structure.equals(other.structure))) {
@@ -130,16 +107,5 @@ public class StructurePlayerOwnerEntity implements Serializable {
         }
         return true;
     }
- 
 
-    
-
-    
-
-    
-
-   
-    
-    
-    
 }

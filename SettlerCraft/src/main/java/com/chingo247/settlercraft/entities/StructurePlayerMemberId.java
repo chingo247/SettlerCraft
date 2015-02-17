@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.persistence.entities;
+package com.chingo247.settlercraft.entities;
 
 import java.io.Serializable;
 import java.util.UUID;
@@ -33,7 +33,7 @@ import javax.persistence.Embeddable;
  * @author Chingo
  */
 @Embeddable
-public class StructurePlayerOwnerId implements Serializable {
+public class StructurePlayerMemberId implements Serializable {
     
     private Long structure;
     private UUID player;
@@ -42,16 +42,12 @@ public class StructurePlayerOwnerId implements Serializable {
         return player;
     }
 
-   
-
-    protected StructurePlayerOwnerId() {
+    protected StructurePlayerMemberId() {
     }
 
-    StructurePlayerOwnerId(Long structureId, UUID player) {
+    StructurePlayerMemberId(Long structureId, UUID player) {
         this.structure = structureId;
         this.player = player;
     }
-    
-    
     
 }

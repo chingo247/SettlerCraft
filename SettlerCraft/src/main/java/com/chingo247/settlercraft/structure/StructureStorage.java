@@ -24,7 +24,7 @@
 package com.chingo247.settlercraft.structure;
 
 import com.chingo247.settlercraft.structure.persistence.entities.QStructureEntity;
-import com.chingo247.settlercraft.structure.persistence.entities.StructureEntity;
+import com.chingo247.settlercraft.entities.StructureEntity;
 import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.structure.persistence.service.StructureDAO;
 import com.chingo247.settlercraft.structure.regions.CuboidDimension;
@@ -46,7 +46,6 @@ public class StructureStorage {
     
     private static final int PARTITION_SIZE = 512;
     private final Map<String, StructureWorldPartition> storage;
-    private final StructureDAO sdao;
     
     StructureStorage() {
         this.storage = Collections.synchronizedMap(new HashMap<String, StructureWorldPartition>());
@@ -136,25 +135,7 @@ public class StructureStorage {
         return getPartition(new CuboidDimension(region.getMinimumPoint(), region.getMaximumPoint()));
     }
     
-    private static int getPartition(CuboidDimension dimension) {
-        CuboidRegion region = new CuboidRegion(dimension.getMinPosition(), dimension.getMaxPosition());
-        Vector v = region.getCenter();
-        
-        System.out.println(v);
-        
-        int xP = compute(v.getBlockX());
-        int zP = compute(v.getBlockZ());
-        
-        return 0;
-    }
     
-    private static int compute(int number) {
-        int x = number % PARTITION_SIZE;
-        number -= x;
-        number /= PARTITION_SIZE;
-        System.out.println(number);
-        return number;
-    }
     
     
     

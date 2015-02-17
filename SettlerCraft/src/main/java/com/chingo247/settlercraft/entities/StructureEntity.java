@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.persistence.entities;
+package com.chingo247.settlercraft.entities;
 
 import com.chingo247.settlercraft.structure.regions.CuboidDimension;
 import com.sk89q.worldedit.world.World;

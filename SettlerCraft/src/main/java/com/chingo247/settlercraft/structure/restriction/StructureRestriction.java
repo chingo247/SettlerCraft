@@ -23,7 +23,7 @@
  */
 package com.chingo247.settlercraft.structure.restriction;
 
-import com.chingo247.settlercraft.structure.persistence.entities.StructureType;
+import com.chingo247.settlercraft.entities.StructureType;
 import com.chingo247.settlercraft.structure.exception.StructureException;
 import com.chingo247.settlercraft.structure.regions.CuboidDimensional;
 import com.sk89q.worldedit.regions.CuboidRegion;

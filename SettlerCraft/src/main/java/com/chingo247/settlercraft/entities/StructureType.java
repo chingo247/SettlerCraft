@@ -22,32 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.persistence.entities;
+package com.chingo247.settlercraft.entities;
 
-import java.io.Serializable;
-import java.util.UUID;
-import javax.persistence.Embeddable;
+import com.chingo247.settlercraft.structure.plan.placement.GeneratedPlacement;
+import com.chingo247.settlercraft.structure.plan.placement.Placement;
+import com.chingo247.settlercraft.structure.plan.placement.SchematicPlacement;
+import com.chingo247.settlercraft.structure.plan.placement.StructureLot;
 
 /**
  *
  * @author Chingo
  */
-@Embeddable
-public class StructurePlayerMemberId implements Serializable {
+public enum StructureType {
+     /**
+     * A Structure which has a schematic attached
+     */
+    SCHEMATIC,
+    /**
+     * A Structure Lot has no schematic attached. StructureLot are used to reserve an area for one or more structures. 
+     */
+    STRUCTURELOT,
+    /**
+     * Structure has no schematic and is completely generated based on info within the StructurePlan
+     */
+    GENERATED,
     
-    private Long structure;
-    private UUID player;
-
-    public UUID getPlayer() {
-        return player;
+    OTHER;
+    
+   
+    public static StructureType getType(Placement placement) {
+        if(placement instanceof SchematicPlacement) {
+            return SCHEMATIC;
+        } else if (placement instanceof StructureLot) {
+            return STRUCTURELOT;
+        } else if (placement instanceof GeneratedPlacement){
+            return GENERATED;
+        } else {
+            return OTHER;
+        }
     }
-
-    protected StructurePlayerMemberId() {
-    }
-
-    StructurePlayerMemberId(Long structureId, UUID player) {
-        this.structure = structureId;
-        this.player = player;
-    }
+    
     
 }

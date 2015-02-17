@@ -25,26 +25,22 @@ package com.chingo247.settlercraft.entities;
 
 import java.io.Serializable;
 import java.util.UUID;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.Embeddable;
 
 /**
  *
  * @author Chingo
  */
-@Entity
+@Embeddable
 public class WorldEntity implements Serializable {
     
-    @Id
     private UUID id;
     private String name;
-    private boolean allowStructures;
     
     protected WorldEntity() {
     }
     
     public WorldEntity(String name, UUID id) {
-        this.allowStructures = false;
         this.name = name;
         this.id = id;
     }
@@ -61,20 +57,4 @@ public class WorldEntity implements Serializable {
         this.name = name;
     }
 
-    public boolean isAllowStructures() {
-        return allowStructures;
-    }
-
-    public void setAllowStructures(boolean allowStructures) {
-        this.allowStructures = allowStructures;
-    }
-
-    
-    
-    
-    
-    
-    
-    
-    
 }

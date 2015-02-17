@@ -24,7 +24,7 @@
 package com.chingo247.settlercraft.structure.plan.schematic;
 
 import com.chingo247.settlercraft.commons.logging.SCLogger;
-import com.chingo247.settlercraft.structure.persistence.entities.SchematicDataEntity;
+import com.chingo247.settlercraft.entities.SchematicDataEntity;
 import com.chingo247.settlercraft.structure.persistence.service.AbstractDAO;
 import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.commons.util.LogLevel;

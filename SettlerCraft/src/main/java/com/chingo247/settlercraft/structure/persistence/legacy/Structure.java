@@ -24,7 +24,7 @@
  */
 package com.chingo247.settlercraft.structure.persistence.legacy;
 
-import com.chingo247.settlercraft.structure.persistence.entities.SchematicDataEntity;
+import com.chingo247.settlercraft.entities.SchematicDataEntity;
 import com.chingo247.settlercraft.structure.persistence.legacy.PlayerOwnership.Type;
 import com.chingo247.settlercraft.structure.regions.CuboidDimension;
 import static com.chingo247.settlercraft.structure.util.SchematicUtil.calculateDimension;

@@ -25,7 +25,7 @@
 package com.chingo247.settlercraft.structure.util;
 
 
-import com.chingo247.settlercraft.structure.persistence.entities.SchematicDataEntity;
+import com.chingo247.settlercraft.entities.SchematicDataEntity;
 import com.chingo247.settlercraft.structure.regions.CuboidDimension;
 import com.chingo247.settlercraft.world.Direction;
 import com.sk89q.worldedit.BlockVector;

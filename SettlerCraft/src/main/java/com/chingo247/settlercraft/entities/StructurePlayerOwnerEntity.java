@@ -22,9 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.persistence.entities;
 
-import com.chingo247.settlercraft.structure.persistence.legacy.Structure;
+package com.chingo247.settlercraft.entities;
+
 import com.sk89q.worldedit.entity.Player;
 import java.io.Serializable;
 import java.util.UUID;
@@ -39,54 +39,77 @@ import javax.persistence.ManyToOne;
  * @author Chingo
  */
 @Entity
-public class StructurePlayerMemberEntity implements Serializable {
-
+public class StructurePlayerOwnerEntity implements Serializable {
+    
+    public enum Type {
+        /**
+         * May modify parts of the structure (Added to worldguard region)
+         */
+        BASIC,
+        /*
+         * May modify parts of the structure
+         * Gets a share when the structure is refunded
+         * May assign new owners below his rank
+         * May dismiss owners, by refunding them their share
+         */
+        FULL,
+    }
+    
+    
     @EmbeddedId
-    private StructurePlayerMemberId playerMembershipId;
+    private StructurePlayerOwnerId ownershipId;
     
     @Column(name = "PLAYER_ID")
-    private final UUID uuid;
+    private final UUID player;
+    private final String name;
     
-    private String name;
     
-//    @MapsId(value = "playerMembershipId")
+//    @MapsId(value = "ownershipId")
     @ManyToOne(cascade = CascadeType.ALL)
     private StructureEntity structure;
-
+    
+    private Type ownerType;
+    
     /**
      * JPA Constructor.
      */
-    protected StructurePlayerMemberEntity() {
-        this.uuid = null;
+    protected StructurePlayerOwnerEntity() {
+        this.player = null;
+        this.name = null;
     }
-
+    
     /**
      * Constructor.
-     * @param name The name of the owner
+     * @param structure The structure
      * @param player Whether the owner is a isPlayer or not
      */
-    StructurePlayerMemberEntity(Player player, StructureEntity structure) {
+    StructurePlayerOwnerEntity(Player player, StructureEntity structure, Type ownerType) {
         this.structure = structure;
-        this.uuid = player.getUniqueId();
+        this.player = player.getUniqueId();
         this.name = player.getName();
-        this.playerMembershipId = new StructurePlayerMemberId(structure.getId(), player.getUniqueId());
+        this.ownershipId = new StructurePlayerOwnerId(structure.getId(), player.getUniqueId());
+        this.ownerType = ownerType;
     }
 
-   
-
-    public UUID getUUID() {
-        return uuid;
+    public Type getOwnerType() {
+        return ownerType;
     }
 
     public String getName() {
         return name;
     }
 
+    public UUID getPlayerUUID() {
+        return player;
+    }
+
+    
+
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 29 * hash + (this.uuid != null ? this.uuid.hashCode() : 0);
-        hash = 29 * hash + (this.structure != null ? this.structure.hashCode() : 0);
+        int hash = 7;
+        hash = 71 * hash + (this.player != null ? this.player.hashCode() : 0);
+        hash = 71 * hash + (this.structure != null ? this.structure.hashCode() : 0);
         return hash;
     }
 
@@ -98,8 +121,8 @@ public class StructurePlayerMemberEntity implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final StructurePlayerMemberEntity other = (StructurePlayerMemberEntity) obj;
-        if (this.uuid != other.uuid && (this.uuid == null || !this.uuid.equals(other.uuid))) {
+        final StructurePlayerOwnerEntity other = (StructurePlayerOwnerEntity) obj;
+        if (this.player != other.player && (this.player == null || !this.player.equals(other.player))) {
             return false;
         }
         if (this.structure != other.structure && (this.structure == null || !this.structure.equals(other.structure))) {
@@ -107,5 +130,16 @@ public class StructurePlayerMemberEntity implements Serializable {
         }
         return true;
     }
+ 
 
+    
+
+    
+
+    
+
+   
+    
+    
+    
 }

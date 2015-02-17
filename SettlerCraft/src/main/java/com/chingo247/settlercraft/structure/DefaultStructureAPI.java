@@ -25,9 +25,9 @@ package com.chingo247.settlercraft.structure;
 
 import com.chingo247.settlercraft.SettlerCraftContext;
 import com.chingo247.settlercraft.structure.exception.StructureException;
-import com.chingo247.settlercraft.structure.persistence.entities.StructureEntity;
-import com.chingo247.settlercraft.structure.persistence.entities.StructureState;
-import com.chingo247.settlercraft.structure.persistence.entities.StructureType;
+import com.chingo247.settlercraft.entities.StructureEntity;
+import com.chingo247.settlercraft.entities.StructureState;
+import com.chingo247.settlercraft.entities.StructureType;
 import com.chingo247.settlercraft.structure.persistence.service.StructureDAO;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.plan.StructurePlanManager;

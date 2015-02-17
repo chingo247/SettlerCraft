@@ -27,7 +27,7 @@ package com.chingo247.settlercraft.structure.plan.placement;
 import com.chingo247.settlercraft.structure.regions.CuboidDimension;
 import com.chingo247.settlercraft.structure.util.WorldUtil;
 import com.chingo247.settlercraft.structure.construction.options.Options;
-import com.chingo247.settlercraft.structure.persistence.entities.SchematicDataEntity;
+import com.chingo247.settlercraft.entities.SchematicDataEntity;
 import com.chingo247.settlercraft.structure.plan.schematic.SchematicDataManager;
 import com.chingo247.settlercraft.world.Direction;
 import static com.chingo247.settlercraft.world.Direction.EAST;

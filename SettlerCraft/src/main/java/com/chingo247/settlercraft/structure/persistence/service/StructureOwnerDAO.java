@@ -25,8 +25,8 @@ package com.chingo247.settlercraft.structure.persistence.service;
 
 import com.chingo247.settlercraft.structure.persistence.entities.QStructurePlayerOwnerEntity;
 import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
-import com.chingo247.settlercraft.structure.persistence.entities.StructureEntity;
-import com.chingo247.settlercraft.structure.persistence.entities.StructurePlayerOwnerEntity;
+import com.chingo247.settlercraft.entities.StructureEntity;
+import com.chingo247.settlercraft.entities.StructurePlayerOwnerEntity;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import java.util.List;
 import java.util.UUID;

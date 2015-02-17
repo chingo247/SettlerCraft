@@ -26,13 +26,13 @@
 package com.chingo247.settlercraft.structure.persistence.hibernate;
 
 import com.chingo247.settlercraft.entities.WorldEntity;
-import com.chingo247.settlercraft.structure.persistence.entities.StructureEntity;
-import com.chingo247.settlercraft.structure.persistence.entities.StructurePlayerMemberEntity;
-import com.chingo247.settlercraft.structure.persistence.entities.StructurePlayerOwnerEntity;
+import com.chingo247.settlercraft.entities.StructureEntity;
+import com.chingo247.settlercraft.entities.StructurePlayerMemberEntity;
+import com.chingo247.settlercraft.entities.StructurePlayerOwnerEntity;
 import com.chingo247.settlercraft.structure.persistence.legacy.PlayerMembership;
 import com.chingo247.settlercraft.structure.persistence.legacy.PlayerOwnership;
 import com.chingo247.settlercraft.structure.persistence.legacy.Structure;
-import com.chingo247.settlercraft.structure.persistence.entities.SchematicDataEntity;
+import com.chingo247.settlercraft.entities.SchematicDataEntity;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;

@@ -26,8 +26,8 @@ package com.chingo247.settlercraft.structure.persistence.service;
  */
 
 import com.chingo247.settlercraft.structure.persistence.entities.QStructureEntity;
-import com.chingo247.settlercraft.structure.persistence.entities.StructureEntity;
-import com.chingo247.settlercraft.structure.persistence.entities.StructureState;
+import com.chingo247.settlercraft.entities.StructureEntity;
+import com.chingo247.settlercraft.entities.StructureState;
 import com.chingo247.settlercraft.structure.regions.CuboidDimension;
 import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
 import com.mysema.query.jpa.JPQLQuery;

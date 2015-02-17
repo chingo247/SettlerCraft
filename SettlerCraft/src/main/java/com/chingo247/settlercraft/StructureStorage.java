@@ -1,0 +1,80 @@
+/*
+ * The MIT License
+ *
+ * Copyright 2015 Chingo.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+package com.chingo247.settlercraft;
+
+import com.chingo247.settlercraft.structure.Structure;
+import com.chingo247.settlercraft.structure.regions.CuboidDimension;
+import com.google.common.base.Preconditions;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ *
+ * @author Chingo
+ */
+public abstract class StructureStorage {
+    
+    private int factor;
+    private int partitionSize;
+    private int minPartitionSize;
+    private Map<Integer, Map<Integer, StructureStorage>> subpartitions;
+    
+    public StructureStorage(int partitionSize, int minPartitionSize, int factor) {
+        Preconditions.checkArgument(partitionSize > minPartitionSize);
+        Preconditions.checkArgument(factor < partitionSize);
+        
+        this.minPartitionSize = minPartitionSize;
+        this.partitionSize = partitionSize;
+        if(partitionSize > minPartitionSize) {
+            subpartitions = new HashMap<>();
+        }
+    }
+    
+    public void store(Structure structure) {
+        CuboidRegion dimension = structure.getCuboidRegion();
+        int pX = getPartitionValue(dimension.getCenter().getBlockX());
+        int pZ = getPartitionValue(dimension.getCenter().getBlockZ());
+        
+    }
+    
+    
+    
+    
+    
+    private int getPartitionValue(int value) {
+        int v = value % (partitionSize/factor);
+        value -= v;
+        value /= (partitionSize/factor);
+        return value;
+    }
+    
+    public K find(K key) {
+        
+    }
+    
+    protected abstract int compute(V v);
+    
+}
