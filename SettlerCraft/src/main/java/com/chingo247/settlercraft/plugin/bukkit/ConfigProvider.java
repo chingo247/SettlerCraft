@@ -24,7 +24,6 @@ package com.chingo247.settlercraft.plugin.bukkit;
  * THE SOFTWARE.
  */
 
-import com.chingo247.settlercraft.IConfigProvider;
 import com.chingo247.settlercraft.structure.exception.SettlerCraftException;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;

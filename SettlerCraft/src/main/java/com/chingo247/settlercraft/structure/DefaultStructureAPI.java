@@ -23,7 +23,8 @@
  */
 package com.chingo247.settlercraft.structure;
 
-import com.chingo247.settlercraft.SettlerCraftContext;
+import com.chingo247.settlercraft.SCStructure;
+import com.chingo247.settlercraft.SCGlobalContext;
 import com.chingo247.settlercraft.structure.exception.StructureException;
 import com.chingo247.settlercraft.entities.StructureEntity;
 import com.chingo247.settlercraft.entities.StructureState;
@@ -32,13 +33,11 @@ import com.chingo247.settlercraft.structure.persistence.service.StructureDAO;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.plan.StructurePlanManager;
 import com.chingo247.settlercraft.structure.plan.placement.Placement;
-import com.chingo247.settlercraft.structure.plan.processing.StructurePlanComplex;
 import com.chingo247.settlercraft.structure.regions.CuboidDimensional;
 import com.chingo247.settlercraft.structure.restriction.StructureHeightRestriction;
 import com.chingo247.settlercraft.structure.restriction.StructureOverlapRestriction;
 import com.chingo247.settlercraft.structure.restriction.StructureRestriction;
 import com.chingo247.settlercraft.structure.restriction.StructureWorldRestriction;
-import com.chingo247.settlercraft.structure.selection.ISelectionManager;
 import com.chingo247.settlercraft.world.Direction;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.world.World;
@@ -59,13 +58,13 @@ public class DefaultStructureAPI implements StructureAPI {
     private Set<StructureRestriction> restrictions;
     private StructureStorage structureStorage;
     private ExecutorService cachedPool;
-    private SettlerCraftContext context;
+    private SCGlobalContext context;
     private static DefaultStructureAPI instance;
     private boolean isLoading = false;
 
     private DefaultStructureAPI() {
         this.structureStorage = new StructureStorage();
-        this.context = SettlerCraftContext.getContext();
+        this.context = SCGlobalContext.getContext();
         this.cachedPool = Executors.newCachedThreadPool();
         this.structureDAO = new StructureDAO();
         this.restrictions = new HashSet<>();
@@ -106,13 +105,13 @@ public class DefaultStructureAPI implements StructureAPI {
 
     @Override
     public Structure getStructure(long id) {
-        StructureComplex complex = structureStorage.find(id);
+        SCStructure complex = structureStorage.find(id);
         if (complex == null) {
             StructureEntity entity = structureDAO.find(id);
             if (entity == null) {
                 return null;
             }
-            complex = new StructureComplex(cachedPool, entity, this);
+            complex = new SCStructure(cachedPool, entity, this);
             structureStorage.store(complex);
         }
         return complex;
@@ -130,12 +129,12 @@ public class DefaultStructureAPI implements StructureAPI {
     private void createRecursive(StructurePlan plan, World world, Vector position, Direction d, StructureComplexTree holder) {
         for (Placement p : plan.getSubPlacements()) {
             StructureEntity pEntity = new StructureEntity(world, p.getCuboidDimension(), StructureType.getType(p));
-            StructureComplex pComplex = new StructureComplex(cachedPool, pEntity, this);
+            SCStructure pComplex = new SCStructure(cachedPool, pEntity, this);
             holder.add(new StructureComplexTree(pComplex));
         }
         for (StructurePlan p : plan.getSubStructurePlans()) {
             StructureEntity pEntity = new StructureEntity(world, p.getPlacement().getCuboidDimension(), StructureType.getType(p.getPlacement()));
-            StructureComplex pComplex = new StructureComplex(cachedPool, pEntity, this);
+            SCStructure pComplex = new SCStructure(cachedPool, pEntity, this);
             StructureComplexTree pComplexTree = new StructureComplexTree(pComplex);
             createRecursive(p, world, position, d, pComplexTree);
             holder.add(pComplexTree);
@@ -145,7 +144,7 @@ public class DefaultStructureAPI implements StructureAPI {
     @Override
     public Structure create(StructurePlan plan, World world, Vector position, Direction direction) {
         StructureEntity entity = new StructureEntity(world, plan.getPlacement().getCuboidDimension(), StructureType.getType(plan.getPlacement()));
-        StructureComplex complex = new StructureComplex(cachedPool, entity, this);
+        SCStructure complex = new SCStructure(cachedPool, entity, this);
         StructureComplexTree tree = new StructureComplexTree(complex);
 
         createRecursive(plan, world, position, direction, tree);
@@ -209,15 +208,15 @@ public class DefaultStructureAPI implements StructureAPI {
 
     protected class StructureComplexTree {
 
-        private final StructureComplex self;
+        private final SCStructure self;
         private List<StructureComplexTree> tree;
 
-        public StructureComplexTree(StructureComplex self) {
+        public StructureComplexTree(SCStructure self) {
             this.self = self;
             this.tree = new ArrayList<>();
         }
 
-        public StructureComplex getSelf() {
+        public SCStructure getSelf() {
             return self;
         }
 
@@ -229,8 +228,8 @@ public class DefaultStructureAPI implements StructureAPI {
             this.tree.add(complex);
         }
 
-        public List<StructureComplex> list() {
-            List<StructureComplex> structures = new ArrayList<>();
+        public List<SCStructure> list() {
+            List<SCStructure> structures = new ArrayList<>();
             list(structures);
             return structures;
         }
@@ -240,7 +239,7 @@ public class DefaultStructureAPI implements StructureAPI {
          *
          * @param holder
          */
-        private void list(List<StructureComplex> holder) {
+        private void list(List<SCStructure> holder) {
             holder.add(self);
             for (StructureComplexTree sct : tree) {
                 sct.list(holder);

@@ -23,9 +23,12 @@
  */
 package com.chingo247.settlercraft.entities;
 
+import com.chingo247.settlercraft.SettlerCraft;
+import com.chingo247.settlercraft.commons.core.IWorld;
 import com.chingo247.settlercraft.structure.regions.CuboidDimension;
 import com.sk89q.worldedit.world.World;
 import java.io.Serializable;
+import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -48,7 +51,7 @@ public class StructureEntity implements Serializable {
     
     private String name;
     
-    private String world;
+    private WorldData world;
     
     @Embedded
     private CuboidDimension dimension;
@@ -77,7 +80,8 @@ public class StructureEntity implements Serializable {
     
     public StructureEntity(World world, CuboidDimension dimension, StructureType type) {
         this.state = StructureState.INITIALIZING;
-        this.world = world.getName();
+        com.chingo247.settlercraft.world.World w = SettlerCraft.getInstance().getWorld(world.getName());
+        this.world = new WorldData(w.getName(), w.getUniqueId());
         this.dimension = dimension;
         this.type = type;
     }
@@ -87,7 +91,7 @@ public class StructureEntity implements Serializable {
     }
     
     public void setParent(Long id) {
-        this.parent = parent;
+        this.parent = id;
     }
 
     public Long getParent() {
@@ -118,7 +122,7 @@ public class StructureEntity implements Serializable {
         return state;
     }
 
-    public String getWorld() {
+    public WorldData getWorld() {
         return world;
     }
 

@@ -26,6 +26,7 @@ package com.chingo247.settlercraft.structure;
 import com.chingo247.settlercraft.structure.construction.options.Options;
 import com.chingo247.settlercraft.entities.StructurePlayerMemberEntity;
 import com.chingo247.settlercraft.entities.StructurePlayerOwnerEntity;
+import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.plan.placement.Placement;
 import com.chingo247.settlercraft.structure.plan.processing.StructurePlanComplex;
 import com.sk89q.worldedit.EditSession;
@@ -50,8 +51,7 @@ public abstract class Structure {
     public abstract CuboidRegion getCuboidRegion();
     public abstract Structure getParent();
     public abstract List<Structure> getSubStructures();
-    public abstract Placement getPlacement();
-    public abstract StructurePlanComplex getStructurePlan();
+    public abstract StructurePlan getStructurePlan();
     public abstract List<StructurePlayerMemberEntity> getMembers();
     public abstract List<StructurePlayerOwnerEntity> getOwners();
     

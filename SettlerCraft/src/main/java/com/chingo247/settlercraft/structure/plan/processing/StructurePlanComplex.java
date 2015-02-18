@@ -24,7 +24,7 @@
  */
 package com.chingo247.settlercraft.structure.plan.processing;
 
-import com.chingo247.settlercraft.SettlerCraftContext;
+import com.chingo247.settlercraft.SCGlobalContext;
 import com.chingo247.settlercraft.structure.plan.placement.Placement;
 import com.chingo247.settlercraft.structure.exception.PlanException;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
@@ -230,7 +230,7 @@ public final class StructurePlanComplex implements StructurePlan {
     @Override
     public String getRelativePath() {
         String path = getFile().getAbsolutePath();
-        String base = SettlerCraftContext.getContext().getPluginDirectory().getAbsolutePath();
+        String base = SCGlobalContext.getContext().getPluginDirectory().getAbsolutePath();
         String relative = new File(base).toURI().relativize(new File(path).toURI()).getPath();
         return relative;
     }

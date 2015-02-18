@@ -23,7 +23,7 @@
  */
 package com.chingo247.settlercraft;
 
-import com.chingo247.settlercraft.entities.WorldEntity;
+import com.chingo247.settlercraft.entities.WorldData;
 import com.chingo247.settlercraft.structure.persistence.service.WorldDAO;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.plan.processing.StructurePlanReader;
@@ -31,14 +31,18 @@ import com.chingo247.settlercraft.world.World;
 import com.chingo247.xcore.core.APlatform;
 import com.chingo247.xcore.core.IWorld;
 import com.chingo247.xcore.platforms.PlatformFactory;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
 import org.apache.log4j.Logger;
 
 /**
@@ -50,12 +54,13 @@ public class SettlerCraft {
     private static SettlerCraft instance;
     private final Logger LOG = Logger.getLogger(SettlerCraft.class);
     private final APlatform PLATFORM;
-    private final SettlerCraftContext CONTEXT;
+    private final SCGlobalContext CONTEXT;
     private final WorldDAO WORLD_DAO;
     private final ExecutorService SERVICE;
     private final String MSG_PREFIX;
     
     private final Map<UUID, SCWorld> WORLDS;
+    private final Map<UUID, Object> WORLDS_MUTEXES;
     private final Map<String, StructurePlan> PLANS;
     
     private final Lock PLANS_LOCK;
@@ -63,12 +68,13 @@ public class SettlerCraft {
     private SettlerCraft() {
         this.WORLD_DAO = new WorldDAO();
         this.SERVICE = Executors.newCachedThreadPool();
-        this.WORLDS = new HashMap<>();
-        this.CONTEXT = SettlerCraftContext.getContext();
+        this.CONTEXT = SCGlobalContext.getContext();
         this.PLATFORM = PlatformFactory.createPlatform(CONTEXT.getPlatform());
         this.MSG_PREFIX = "["+CONTEXT.getPluginName()+"]: ";
         this.PLANS = new HashMap<>();
         this.PLANS_LOCK = new ReentrantLock();
+        this.WORLDS = new HashMap<>();
+        this.WORLDS_MUTEXES = new HashMap<>();
     }
 
     public static SettlerCraft getInstance() {
@@ -87,8 +93,24 @@ public class SettlerCraft {
     private void loadWorlds() {
         LOG.info(MSG_PREFIX + " Initializing worlds...");
         List<IWorld> ws = PLATFORM.getServer().getWorlds();
-        for(IWorld world : ws) {
-            getWorld(world.getUUID());
+        List<Future> wTasks = new ArrayList<>(ws.size());
+        
+        for(final IWorld world : ws) {
+            Future<?> f = SERVICE.submit(new Runnable() {
+
+                @Override
+                public void run() {
+                     getWorld(world.getUUID());
+                }
+            });
+           wTasks.add(f);
+        }
+        for(Future f : wTasks) {
+            try {
+                f.get();
+            } catch (InterruptedException | ExecutionException ex) {
+                java.util.logging.Logger.getLogger(SettlerCraft.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
     
@@ -108,11 +130,19 @@ public class SettlerCraft {
             }
         }
     }
+    
+    public World getWorld(String world) {
+        IWorld w = PLATFORM.getServer().getWorld(world);
+        if(w == null) {
+            return null;
+        }
+        return getWorld(w.getUUID());
+    }
 
     public World getWorld(UUID world) {
-        World w = null;
+        World w;
         synchronized (WORLDS) {
-            WORLDS.get(world);
+            w = WORLDS.get(world);
         }
 
         if (w == null) {
@@ -120,13 +150,27 @@ public class SettlerCraft {
             if (iWorld == null) {
                 return null;
             }
-            synchronized (WORLDS) {
-                WorldEntity we = WORLD_DAO.find(world);
+            
+            // Check for null as we can't lock a null object
+            Object mutex;
+            synchronized(WORLDS_MUTEXES) {
+                mutex = WORLDS_MUTEXES.get(iWorld.getUUID());
+                if(mutex == null) {
+                    mutex = new Object();
+                    WORLDS_MUTEXES.put(iWorld.getUUID(), mutex);
+                }
+            }
+            
+            synchronized (mutex) {
+                WorldData we = WORLD_DAO.find(world);
                 if (we == null) {
-                    we = new WorldEntity(iWorld.getName(), iWorld.getUUID());
+                    we = new WorldData(iWorld.getName(), iWorld.getUUID());
                 }
                 SCWorld scw = new SCWorld(SERVICE, we);
-                WORLDS.put(scw.getUniqueId(), scw);
+                scw.load();
+                synchronized(WORLDS) {
+                    WORLDS.put(scw.getUniqueId(), scw);
+                }
                 w = scw;
             }
         }

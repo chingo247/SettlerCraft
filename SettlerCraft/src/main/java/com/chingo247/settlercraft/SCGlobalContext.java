@@ -18,9 +18,9 @@ import net.minecraft.util.org.apache.commons.io.IOUtils;
  *
  * @author Chingo
  */
-public class SettlerCraftContext {
+public class SCGlobalContext {
     
-    private static SettlerCraftContext instance;
+    private static SCGlobalContext instance;
     
     private String structureDirectory;
     private String structurePlanDirectory;
@@ -29,7 +29,7 @@ public class SettlerCraftContext {
     private String plugin;
     private String platform;
     
-    private SettlerCraftContext() {
+    private SCGlobalContext() {
         InputStream stream = this.getClass().getClassLoader().getResourceAsStream("com//chingo247//structureapi//resources//config.properties");
         Properties properties = new Properties();
         try {
@@ -43,7 +43,7 @@ public class SettlerCraftContext {
             this.platform = properties.getProperty("main.platform");
             
         } catch (IOException ex) {
-            Logger.getLogger(SettlerCraftContext.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SCGlobalContext.class.getName()).log(Level.SEVERE, null, ex);
         }
         
     }
@@ -52,9 +52,9 @@ public class SettlerCraftContext {
         return platform;
     }
     
-    public static SettlerCraftContext getContext() {
+    public static SCGlobalContext getContext() {
         if(instance == null) {
-            instance = new SettlerCraftContext();
+            instance = new SCGlobalContext();
         }
         return instance;
     }

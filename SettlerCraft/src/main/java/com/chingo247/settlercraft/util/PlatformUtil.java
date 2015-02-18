@@ -21,14 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.persistence.service;
+package com.chingo247.settlercraft.util;
 
-import com.chingo247.settlercraft.entities.WorldData;
-import java.util.UUID;
+import com.chingo247.settlercraft.SCGlobalContext;
 
 /**
  *
  * @author Chingo
  */
-public class WorldDAO extends AbstractDAOImpl<WorldData, UUID>{
+public class PlatformUtil {
+    
+   
 }

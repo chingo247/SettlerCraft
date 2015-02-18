@@ -1,9 +1,11 @@
+package com.chingo247.settlercraft;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.settlercraft.structure;
+
 
 import com.sk89q.worldedit.world.World;
 
@@ -11,12 +13,12 @@ import com.sk89q.worldedit.world.World;
  *
  * @author Chingo
  */
-public class WorldContext {
+public class SCWorldContext {
     
     private final World world;
     private boolean allowStructures;
 
-    private WorldContext(World world) {
+    private SCWorldContext(World world) {
         this.world = world;
         this.allowStructures = false;
     }
@@ -29,7 +31,7 @@ public class WorldContext {
         return world;
     }
     
-    public static WorldContext getContext(World world) {
+    public static SCWorldContext getContext(World world) {
         throw new UnsupportedOperationException("Not supported yet...");
     }
     

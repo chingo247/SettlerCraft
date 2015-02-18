@@ -34,7 +34,7 @@ import javax.persistence.OneToMany;
 public class ConstructionZoneEntity {
     
     private Long id;
-    private WorldEntity worldEntity;
+    private WorldData worldEntity;
     private CuboidDimension dimension;
     
     

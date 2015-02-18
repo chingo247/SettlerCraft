@@ -28,7 +28,7 @@ import com.chingo247.menu.MenuAPI;
 import com.chingo247.settlercraft.plugin.bukkit.SettlerCraftPlugin;
 import com.chingo247.settlercraft.structure.DefaultStructureAPI;
 import com.chingo247.settlercraft.structure.StructureAPI;
-import com.chingo247.settlercraft.SettlerCraftContext;
+import com.chingo247.settlercraft.SCGlobalContext;
 import com.chingo247.settlercraft.structure.exception.StructureAPIException;
 import com.chingo247.settlercraft.structure.exception.StructureDataException;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
@@ -58,11 +58,11 @@ public class PlanMenuManager {
     private CategoryMenu planMenu;
     private final Logger LOGGER = Logger.getLogger(PlanMenuManager.class.getName());
     private boolean loadingPlans = false;
-    private final SettlerCraftContext context;
+    private final SCGlobalContext context;
     private final StructureAPI structureAPI = DefaultStructureAPI.getInstance();
 
     public PlanMenuManager() {
-        this.context = SettlerCraftContext.getContext();
+        this.context = SCGlobalContext.getContext();
     }
     
     

@@ -25,7 +25,7 @@ package com.chingo247.settlercraft.structure.persistence.service;
  * THE SOFTWARE.
  */
 
-import com.chingo247.settlercraft.structure.persistence.entities.QStructureEntity;
+import com.chingo247.settlercraft.entities.QStructureEntity;
 import com.chingo247.settlercraft.entities.StructureEntity;
 import com.chingo247.settlercraft.entities.StructureState;
 import com.chingo247.settlercraft.structure.regions.CuboidDimension;
@@ -33,6 +33,8 @@ import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sk89q.worldedit.world.World;
+import java.util.List;
+import java.util.UUID;
 import org.hibernate.Session;
 
 /**
@@ -41,12 +43,12 @@ import org.hibernate.Session;
  */
 public class StructureDAO extends AbstractDAOImpl<StructureEntity, Long>  {
 
-    public boolean overlaps(World world, CuboidDimension dimension) {
+    public boolean overlaps(UUID world, CuboidDimension dimension) {
         QStructureEntity qStructure = QStructureEntity.structureEntity;
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);
         boolean result = query.from(qStructure)
-                .where(qStructure.world.eq(world.getName())
+                .where(qStructure.world().id.eq(world)
                         .and(qStructure.dimension().maxX.goe(dimension.getMinX()).and(qStructure.dimension().minX.loe(dimension.getMaxX())))
                         .and(qStructure.dimension().maxY.goe(dimension.getMinY()).and(qStructure.dimension().minY.loe(dimension.getMaxY())))
                         .and(qStructure.dimension().maxZ.goe(dimension.getMinZ()).and(qStructure.dimension().minZ.loe(dimension.getMaxZ())))
@@ -54,6 +56,15 @@ public class StructureDAO extends AbstractDAOImpl<StructureEntity, Long>  {
                 ).exists();
         session.close();
         return result;
+    }
+    
+    public List<StructureEntity> getStructureForWorld(UUID world) {
+        QStructureEntity qStructureEntity = QStructureEntity.structureEntity;
+        Session session = HibernateUtil.getSession();
+        HibernateQuery query = new HibernateQuery(session);
+        List<StructureEntity> ses = query.from(qStructureEntity).where(qStructureEntity.world().id.eq(world)).list(qStructureEntity);
+        session.close();
+        return ses;
     }
    
 

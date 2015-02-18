@@ -24,7 +24,7 @@
 package com.chingo247.settlercraft.plugin.bukkit;
 
 import com.chingo247.settlercraft.commons.core.IPermission;
-import com.chingo247.settlercraft.SettlerCraftContext;
+import com.chingo247.settlercraft.SCGlobalContext;
 import com.chingo247.xcore.core.APlatform;
 import com.chingo247.xcore.core.IPlayer;
 import com.chingo247.xcore.platforms.PlatformFactory;
@@ -40,7 +40,7 @@ import org.bukkit.permissions.PermissionDefault;
 public class PermissionManager implements IPermissionManager {
 
     private static final String prefix = "settlercraft.";
-    private final SettlerCraftContext context = SettlerCraftContext.getContext();
+    private final SCGlobalContext context = SCGlobalContext.getContext();
     private APlatform platform = PlatformFactory.createPlatform(context.getPlatform());
     
     private static PermissionManager instance;

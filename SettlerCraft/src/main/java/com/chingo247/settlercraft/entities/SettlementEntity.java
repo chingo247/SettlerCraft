@@ -45,7 +45,7 @@ public class SettlementEntity implements Serializable {
     
     @NotNull
     @ManyToOne(cascade = CascadeType.ALL)
-    private WorldEntity worldEntity;
+    private WorldData worldEntity;
 
     /**
      * JPA Constructor
@@ -57,13 +57,13 @@ public class SettlementEntity implements Serializable {
      * Constructor.
      * @param worldEntity  The worldEntity
      */
-    public SettlementEntity(WorldEntity worldEntity) {
+    public SettlementEntity(WorldData worldEntity) {
         this.worldEntity = worldEntity;
     }
 
     
     
-    public WorldEntity getWorldEntity() {
+    public WorldData getWorldEntity() {
         return worldEntity;
     }
     

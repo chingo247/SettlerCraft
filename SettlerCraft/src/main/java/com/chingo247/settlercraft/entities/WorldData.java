@@ -32,15 +32,15 @@ import javax.persistence.Embeddable;
  * @author Chingo
  */
 @Embeddable
-public class WorldEntity implements Serializable {
+public class WorldData implements Serializable {
     
     private UUID id;
     private String name;
     
-    protected WorldEntity() {
+    protected WorldData() {
     }
     
-    public WorldEntity(String name, UUID id) {
+    public WorldData(String name, UUID id) {
         this.name = name;
         this.id = id;
     }

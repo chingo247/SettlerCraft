@@ -21,16 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure;
+package com.chingo247.settlercraft;
 
 import com.chingo247.settlercraft.commons.util.WorldEditUtil;
 import com.chingo247.settlercraft.structure.construction.options.Options;
 import com.chingo247.settlercraft.entities.StructureEntity;
 import com.chingo247.settlercraft.entities.StructurePlayerMemberEntity;
 import com.chingo247.settlercraft.entities.StructurePlayerOwnerEntity;
+import com.chingo247.settlercraft.structure.Structure;
+import com.chingo247.settlercraft.structure.StructureAPI;
 import com.chingo247.settlercraft.structure.persistence.service.StructureDAO;
 import com.chingo247.settlercraft.structure.persistence.service.StructureMemberDAO;
 import com.chingo247.settlercraft.structure.persistence.service.StructureOwnerDAO;
+import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.plan.processing.StructurePlanComplex;
 import com.chingo247.settlercraft.structure.plan.placement.Placement;
 import com.chingo247.settlercraft.structure.regions.CuboidDimension;
@@ -46,7 +49,7 @@ import java.util.concurrent.ExecutorService;
  *
  * @author Chingo
  */
-public class StructureComplex extends Structure {
+public class SCStructure extends Structure {
     
     private FireNextQueue tasks;
     private long id;
@@ -55,16 +58,13 @@ public class StructureComplex extends Structure {
     private StructureMemberDAO memberDAO;
     private StructureOwnerDAO ownerDAO;
     private StructurePlanComplex plan;
+    private SCWorld world;
     
-    private StructureAPI api;
-    private boolean isDirty;
-    
-    StructureComplex(ExecutorService service, StructureEntity entity, StructureAPI api) {
-        this.isDirty = false;
+    SCStructure(ExecutorService service, StructureEntity entity, SCWorld world) {
         this.tasks = new FireNextQueue(service);
         this.memberDAO = new StructureMemberDAO();
         this.ownerDAO = new StructureOwnerDAO();
-        this.api = api;
+        this.world =  world;
     }
 
     public StructureEntity getEntity() {
@@ -75,17 +75,9 @@ public class StructureComplex extends Structure {
         this.entity = entity;
     }
     
-    private boolean isNew(StructureEntity entity) {
-        return entity.getId() == null;
-    }
     
-    private void setDirty(boolean dirty) {
-        this.isDirty = dirty;
-    }
-
-    public boolean isDirty() {
-        return isDirty;
-    }
+    
+    
     
     @Override
     public long getId() {
@@ -100,7 +92,6 @@ public class StructureComplex extends Structure {
     @Override
     public void setName(String name) {
         entity.setName(name);
-        setDirty(true);
     }
 
     @Override
@@ -111,12 +102,11 @@ public class StructureComplex extends Structure {
     @Override
     public void setValue(double value) {
         entity.setValue(value);
-        setDirty(true);
     }
 
     @Override
     public World getWorld() {
-        return WorldEditUtil.getWorld(entity.getWorld());
+        return WorldEditUtil.getWorld(entity.getWorld().getName());
     }
 
     @Override
@@ -127,7 +117,7 @@ public class StructureComplex extends Structure {
 
     @Override
     public Structure getParent() {
-        return api.getStructure(entity.getParent());
+        return world.getStructure(entity);
     }
 
     @Override
@@ -136,13 +126,9 @@ public class StructureComplex extends Structure {
         return api.getSubstructures(id);
     }
 
-    @Override
-    public Placement getPlacement() {
-        return getStructurePlan().getPlacement();
-    }
 
     @Override
-    public StructurePlanComplex getStructurePlan() {
+    public StructurePlan getStructurePlan() {
         //TODO Null check and load!
         
         return plan;
@@ -170,7 +156,6 @@ public class StructureComplex extends Structure {
 
     @Override
     public void build(EditSession session, Options options, boolean force) {
-        getPlacement().place(session, getCuboidRegion().getMinimumPoint(), options);
     }
 
     @Override
