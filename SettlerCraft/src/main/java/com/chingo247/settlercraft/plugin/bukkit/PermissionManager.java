@@ -23,6 +23,7 @@
  */
 package com.chingo247.settlercraft.plugin.bukkit;
 
+import com.chingo247.settlercraft.plugin.IPermissionManager;
 import com.chingo247.settlercraft.commons.core.IPermission;
 import com.chingo247.settlercraft.SCGlobalContext;
 import com.chingo247.xcore.core.APlatform;

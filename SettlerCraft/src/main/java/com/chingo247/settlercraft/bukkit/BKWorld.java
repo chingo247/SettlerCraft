@@ -21,17 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.plugin.bukkit;
+package com.chingo247.settlercraft.bukkit;
 
-import com.chingo247.settlercraft.commons.core.IPermission;
-import com.chingo247.xcore.core.IPlayer;
+import com.chingo247.settlercraft.SCWorld;
+import com.chingo247.settlercraft.entities.StructureEntity;
+import com.chingo247.settlercraft.entities.WorldEntity;
+import com.chingo247.settlercraft.structure.Structure;
+import java.util.concurrent.ExecutorService;
 
 /**
  *
  * @author Chingo
  */
-public interface IPermissionManager {
+public final class BKWorld extends SCWorld {
     
-    public boolean isAllowed(IPlayer player, String permission);
+    BKWorld(ExecutorService service, WorldEntity data) {
+        super(service,data);
+    }
+
+    @Override
+    protected Structure handleStructure(StructureEntity entity) {
+        return new BKStructure(EXECUTOR, entity, this);
+    }
     
 }

@@ -60,7 +60,7 @@ public class SCStructure extends Structure {
     private StructurePlanComplex plan;
     private SCWorld world;
     
-    SCStructure(ExecutorService service, StructureEntity entity, SCWorld world) {
+    protected SCStructure(ExecutorService service, StructureEntity entity, SCWorld world) {
         this.tasks = new FireNextQueue(service);
         this.memberDAO = new StructureMemberDAO();
         this.ownerDAO = new StructureOwnerDAO();
@@ -117,13 +117,12 @@ public class SCStructure extends Structure {
 
     @Override
     public Structure getParent() {
-        return world.getStructure(entity);
+        return world._prepare(entity);
     }
 
     @Override
     public List<Structure> getSubStructures() {
-        
-        return api.getSubstructures(id);
+        return world._getSubstructures(id);
     }
 
 

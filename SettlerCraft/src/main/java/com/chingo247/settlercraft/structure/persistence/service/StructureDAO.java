@@ -66,6 +66,8 @@ public class StructureDAO extends AbstractDAOImpl<StructureEntity, Long>  {
         session.close();
         return ses;
     }
+    
+    
    
 
 }

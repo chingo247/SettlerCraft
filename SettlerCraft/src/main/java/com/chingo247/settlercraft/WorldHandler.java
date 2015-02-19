@@ -21,14 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.persistence.service;
+package com.chingo247.settlercraft;
 
 import com.chingo247.settlercraft.entities.WorldEntity;
-import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 
 /**
  *
  * @author Chingo
  */
-public class WorldDAO extends AbstractDAOImpl<WorldEntity, UUID>{
+public abstract class WorldHandler {
+    
+    protected ExecutorService service;
+
+    protected WorldHandler(ExecutorService service) {
+        this.service = service;
+    }
+    
+    public abstract SCWorld handle(WorldEntity structureEntity);
+    
 }

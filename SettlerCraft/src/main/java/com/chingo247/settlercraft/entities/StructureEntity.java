@@ -51,7 +51,9 @@ public class StructureEntity implements Serializable {
     
     private String name;
     
-    private WorldData world;
+    private String world;
+    
+    private UUID worldUUID;
     
     @Embedded
     private CuboidDimension dimension;
@@ -81,7 +83,8 @@ public class StructureEntity implements Serializable {
     public StructureEntity(World world, CuboidDimension dimension, StructureType type) {
         this.state = StructureState.INITIALIZING;
         com.chingo247.settlercraft.world.World w = SettlerCraft.getInstance().getWorld(world.getName());
-        this.world = new WorldData(w.getName(), w.getUniqueId());
+        this.world = w.getName();
+        this.worldUUID = w.getUniqueId();
         this.dimension = dimension;
         this.type = type;
     }
@@ -122,7 +125,7 @@ public class StructureEntity implements Serializable {
         return state;
     }
 
-    public WorldData getWorld() {
+    public WorldEntity getWorld() {
         return world;
     }
 

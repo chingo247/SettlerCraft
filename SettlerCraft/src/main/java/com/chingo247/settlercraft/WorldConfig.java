@@ -8,19 +8,21 @@ package com.chingo247.settlercraft;
 
 
 import com.sk89q.worldedit.world.World;
+import java.util.Properties;
 
 /**
  *
  * @author Chingo
  */
-public class SCWorldContext {
+public class WorldConfig {
     
     private final World world;
     private boolean allowStructures;
 
-    private SCWorldContext(World world) {
+    protected WorldConfig(World world, Properties properties) {
         this.world = world;
         this.allowStructures = false;
+        
     }
 
     public boolean isAllowStructures() {
@@ -31,9 +33,7 @@ public class SCWorldContext {
         return world;
     }
     
-    public static SCWorldContext getContext(World world) {
-        throw new UnsupportedOperationException("Not supported yet...");
-    }
+    
     
     
     

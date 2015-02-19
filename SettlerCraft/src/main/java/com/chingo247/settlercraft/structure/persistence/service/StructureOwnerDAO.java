@@ -23,7 +23,7 @@
  */
 package com.chingo247.settlercraft.structure.persistence.service;
 
-import com.chingo247.settlercraft.structure.persistence.entities.QStructurePlayerOwnerEntity;
+import com.chingo247.settlercraft.entities.QStructurePlayerOwnerEntity;
 import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.entities.StructureEntity;
 import com.chingo247.settlercraft.entities.StructurePlayerOwnerEntity;

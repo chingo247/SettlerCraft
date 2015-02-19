@@ -23,7 +23,8 @@
  */
 package com.chingo247.settlercraft;
 
-import com.chingo247.settlercraft.entities.WorldData;
+import com.chingo247.settlercraft.bukkit.BKWorldHandler;
+import com.chingo247.settlercraft.entities.WorldEntity;
 import com.chingo247.settlercraft.structure.persistence.service.WorldDAO;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.plan.processing.StructurePlanReader;
@@ -61,6 +62,7 @@ public class SettlerCraft {
     
     private final Map<UUID, SCWorld> WORLDS;
     private final Map<UUID, Object> WORLDS_MUTEXES;
+    private final WorldHandler WORLD_HANDLER;
     private final Map<String, StructurePlan> PLANS;
     
     private final Lock PLANS_LOCK;
@@ -75,6 +77,7 @@ public class SettlerCraft {
         this.PLANS_LOCK = new ReentrantLock();
         this.WORLDS = new HashMap<>();
         this.WORLDS_MUTEXES = new HashMap<>();
+        this.WORLD_HANDLER = getWorldHandler();
     }
 
     public static SettlerCraft getInstance() {
@@ -162,12 +165,12 @@ public class SettlerCraft {
             }
             
             synchronized (mutex) {
-                WorldData we = WORLD_DAO.find(world);
+                WorldEntity we = WORLD_DAO.find(world);
                 if (we == null) {
-                    we = new WorldData(iWorld.getName(), iWorld.getUUID());
+                    we = new WorldEntity(iWorld.getName(), iWorld.getUUID());
                 }
-                SCWorld scw = new SCWorld(SERVICE, we);
-                scw.load();
+                SCWorld scw = WORLD_HANDLER.handle(we);
+                scw._load();
                 synchronized(WORLDS) {
                     WORLDS.put(scw.getUniqueId(), scw);
                 }
@@ -177,8 +180,11 @@ public class SettlerCraft {
         return w;
     }
     
-    public static void main(String[] args) {
-        
+    private WorldHandler getWorldHandler() {
+        switch(CONTEXT.getPlatform().toLowerCase()) {
+            case "bukkit": return new BKWorldHandler(SERVICE);
+            default: throw new AssertionError("Platform not supported: " + CONTEXT.getPlatform());
+        }
     }
 
 }

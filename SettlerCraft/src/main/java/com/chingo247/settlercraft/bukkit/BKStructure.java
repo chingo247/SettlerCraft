@@ -21,40 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.entities;
+package com.chingo247.settlercraft.bukkit;
 
-import java.io.Serializable;
-import java.util.UUID;
-import javax.persistence.Embeddable;
+import com.chingo247.settlercraft.SCStructure;
+import com.chingo247.settlercraft.entities.StructureEntity;
+import com.chingo247.settlercraft.entities.WorldEntity;
+import java.util.concurrent.ExecutorService;
 
 /**
  *
  * @author Chingo
  */
-@Embeddable
-public class WorldData implements Serializable {
+public class BKStructure extends SCStructure {
     
-    private UUID id;
-    private String name;
-    
-    protected WorldData() {
+    BKStructure(ExecutorService service, StructureEntity entity, BKWorld world) {
+        super(service,entity,world);
     }
     
-    public WorldData(String name, UUID id) {
-        this.name = name;
-        this.id = id;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
 }

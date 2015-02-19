@@ -1,4 +1,4 @@
-package com.chingo247.settlercraft.plugin.bukkit;
+package com.chingo247.settlercraft.plugin;
 
 
 /*

@@ -23,15 +23,19 @@
  */
 package com.chingo247.settlercraft;
 
+import com.chingo247.settlercraft.entities.QStructureEntity;
 import com.chingo247.settlercraft.entities.StructureEntity;
-import com.chingo247.settlercraft.entities.WorldData;
+import com.chingo247.settlercraft.entities.WorldEntity;
 import com.chingo247.settlercraft.structure.Structure;
+import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.structure.persistence.service.StructureDAO;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.plan.placement.Placement;
 import com.chingo247.settlercraft.world.Direction;
 import com.chingo247.settlercraft.world.World;
+import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sk89q.worldedit.Vector;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -39,58 +43,42 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
 
 /**
  *
  * @author Chingo
  */
-public class SCWorld implements World {
+public abstract class SCWorld implements World {
     
     private final Logger LOG = Logger.getLogger(SCWorld.class);
-    private ExecutorService threadService;
-    private WorldData worldEntity;
-    private SCWorldContext worldContext;
-    private final Map<Long,Structure> structures;
-    private final StructureDAO structureDAO = new StructureDAO();
+    protected final ExecutorService EXECUTOR;
+    private final WorldEntity WORLD_ENTITY;
+    private final Map<Long,Structure> STRUCTURES;
+    private final StructureDAO STRUCTURE_DAO = new StructureDAO();
+    private WorldConfig worldConfig;
 
-    SCWorld(ExecutorService threadService, WorldData worldEntity) {
-        this.threadService = threadService;
-        this.worldEntity = worldEntity;
-        this.structures = new HashMap<>();
+    protected SCWorld(ExecutorService executor, WorldEntity worldEntity) {
+        this.EXECUTOR = executor;
+        this.WORLD_ENTITY = worldEntity;
+        this.STRUCTURES = new HashMap<>();
     }
     
-    Structure getStructure(StructureEntity structureEntity) {
-        Structure structure = null;
-        synchronized(structures) {
-            structure = structures.get(structureEntity.getId());
-            if(structure == null) {
-                structure = new SCStructure(threadService, structureEntity, this);
-                structures.put(structure.getId(), structure);
-            }
-        }
-        return structure;
-    }
     
-    void load() {
-        worldContext = getContext();
-        List<StructureEntity> entities = structureDAO.getStructureForWorld(worldEntity.getId());
-        for(StructureEntity structureEntity : entities) {
-            getStructure(structureEntity);
-        }
-    }
-    
-    public SCWorldContext getContext() {
-        throw new UnsupportedOperationException("Not supported yet...");
-    }
 
     @Override
     public UUID getUniqueId() {
-        return worldEntity.getId();
+        return WORLD_ENTITY.getId();
     }
 
     @Override
     public String getName() {
-        return worldEntity.getName();
+        return WORLD_ENTITY.getName();
+    }
+    
+    @Override
+    public WorldConfig getConfig() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -105,13 +93,55 @@ public class SCWorld implements World {
 
     @Override
     public List<Structure> getStructures() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new ArrayList<>(STRUCTURES.values());
     }
     
+    @Override
     public Structure getStructure(long id) {
-        return structures.get(id);
+        return STRUCTURES.get(id);
     }
     
+    
+    
+    List<Structure> _getSubstructures(long id) {
+        List<Long> ids = getSubstructuresIds(id);
+        List<Structure> ss = new ArrayList<>(ids.size());
+        for(Long i : ids) {
+            ss.add(getStructure(i));
+        }
+        return ss;
+    }
+    
+    Structure _prepare(StructureEntity structureEntity) {
+        Structure structure = null;
+        synchronized(STRUCTURES) {
+            structure = STRUCTURES.get(structureEntity.getId());
+            if(structure == null) {
+                structure = handleStructure(structureEntity);
+                STRUCTURES.put(structure.getId(), structure);
+            }
+        }
+        return structure;
+    }
+    
+    void _load() {
+        worldConfig = getConfig();
+        List<StructureEntity> entities = STRUCTURE_DAO.getStructureForWorld(WORLD_ENTITY.getId());
+        for(StructureEntity structureEntity : entities) {
+            _prepare(structureEntity);
+        }
+    }
+    
+    protected abstract Structure handleStructure(StructureEntity entity);
+    
+    private List<Long> getSubstructuresIds(long id) {
+        QStructureEntity qse = QStructureEntity.structureEntity;
+        Session session = HibernateUtil.getSession();
+        HibernateQuery query = new HibernateQuery(session);
+        List<Long> entities = query.from(qse).where(qse.parent.eq(id)).list(qse.id);
+        session.close();
+        return entities;
+    }
     
     
 }

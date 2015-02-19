@@ -21,14 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.persistence.service;
+package com.chingo247.settlercraft.plugin;
 
-import com.chingo247.settlercraft.entities.WorldEntity;
-import java.util.UUID;
+import com.chingo247.settlercraft.commons.core.IPermission;
+import com.chingo247.xcore.core.IPlayer;
 
 /**
  *
  * @author Chingo
  */
-public class WorldDAO extends AbstractDAOImpl<WorldEntity, UUID>{
+public interface IPermissionManager {
+    
+    public boolean isAllowed(IPlayer player, String permission);
+    
 }
