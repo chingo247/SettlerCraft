@@ -24,23 +24,22 @@
 package com.chingo247.settlercraft;
 
 import com.chingo247.settlercraft.commons.util.WorldEditUtil;
-import com.chingo247.settlercraft.structure.construction.options.Options;
-import com.chingo247.settlercraft.entities.StructureEntity;
-import com.chingo247.settlercraft.entities.StructurePlayerMemberEntity;
-import com.chingo247.settlercraft.entities.StructurePlayerOwnerEntity;
+import com.chingo247.settlercraft.construction.options.Options;
+import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity;
+import com.chingo247.settlercraft.persistence.entities.structure.StructurePlayerEntity;
 import com.chingo247.settlercraft.structure.Structure;
-import com.chingo247.settlercraft.structure.StructureAPI;
-import com.chingo247.settlercraft.structure.persistence.service.StructureDAO;
-import com.chingo247.settlercraft.structure.persistence.service.StructureMemberDAO;
-import com.chingo247.settlercraft.structure.persistence.service.StructureOwnerDAO;
+import com.chingo247.settlercraft.persistence.service.StructureDAO;
+import com.chingo247.settlercraft.persistence.service.StructurePlayerDAO;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.plan.processing.StructurePlanComplex;
-import com.chingo247.settlercraft.structure.plan.placement.Placement;
+import com.chingo247.settlercraft.structure.plan.processing.StructurePlanReader;
 import com.chingo247.settlercraft.structure.regions.CuboidDimension;
 import com.chingo247.settlercraft.structure.util.FireNextQueue;
+import com.chingo247.settlercraft.world.World;
+import com.google.common.base.Splitter;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldedit.world.World;
+import java.io.File;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -51,107 +50,99 @@ import java.util.concurrent.ExecutorService;
  */
 public class SCStructure extends Structure {
     
-    private FireNextQueue tasks;
-    private long id;
-    private StructureEntity entity;
-    private StructureDAO sdao;
-    private StructureMemberDAO memberDAO;
-    private StructureOwnerDAO ownerDAO;
-    private StructurePlanComplex plan;
-    private SCWorld world;
+    private final FireNextQueue TASKS;
+    private final StructureEntity STRUCTURE_ENTITY;
+    private final StructureDAO STRUCTURE_DAO;
+    private final StructurePlayerDAO STRUCTURE_PLAYER_DAO;
+    private final SCWorld WORLD;
+    private final SCGlobalContext CONTEXT;
+    private StructurePlan PLAN;
     
-    protected SCStructure(ExecutorService service, StructureEntity entity, SCWorld world) {
-        this.tasks = new FireNextQueue(service);
-        this.memberDAO = new StructureMemberDAO();
-        this.ownerDAO = new StructureOwnerDAO();
-        this.world =  world;
+    
+    protected SCStructure(ExecutorService service, StructureEntity entity, SCWorld world, SCGlobalContext context) {
+        this.TASKS = new FireNextQueue(service);
+        this.STRUCTURE_PLAYER_DAO = new StructurePlayerDAO();
+        this.STRUCTURE_DAO = new StructureDAO();
+        this.WORLD =  world;
+        this.STRUCTURE_ENTITY = entity;
+        this.CONTEXT = context;
     }
 
     public StructureEntity getEntity() {
-        return entity;
+        return STRUCTURE_ENTITY;
     }
-    
-    public void setEntity(StructureEntity entity) {
-        this.entity = entity;
-    }
-    
-    
-    
     
     
     @Override
-    public long getId() {
-        return id;
+    public Long getId() {
+        return STRUCTURE_ENTITY.getId();
     }
 
     @Override
     public String getName() {
-        return entity.getName();
+        return STRUCTURE_ENTITY.getName();
     }
 
     @Override
     public void setName(String name) {
-        entity.setName(name);
+        STRUCTURE_ENTITY.setName(name);
     }
 
     @Override
     public double getValue() {
-        return entity.getValue();
+        return STRUCTURE_ENTITY.getValue();
     }
 
     @Override
     public void setValue(double value) {
-        entity.setValue(value);
+        STRUCTURE_ENTITY.setValue(value);
     }
 
     @Override
     public World getWorld() {
-        return WorldEditUtil.getWorld(entity.getWorld().getName());
+        return WORLD;
     }
 
     @Override
-    public CuboidRegion getCuboidRegion() {
-        CuboidDimension dim = entity.getDimension();
-        return new CuboidRegion(getWorld(), dim.getMinPosition(), dim.getMaxPosition());
+    public CuboidDimension getCuboidDimension() {
+        return STRUCTURE_ENTITY.getDimension();
     }
 
     @Override
     public Structure getParent() {
-        return world._prepare(entity);
+        return WORLD.getStructure(STRUCTURE_ENTITY.getParent());
     }
 
     @Override
     public List<Structure> getSubStructures() {
-        return world._getSubstructures(id);
+        return WORLD._getSubstructures(getId());
     }
 
 
     @Override
     public StructurePlan getStructurePlan() {
-        //TODO Null check and load!
+        if(PLAN == null) {
+            String world = STRUCTURE_ENTITY.getWorld();
+            String uuid = STRUCTURE_ENTITY.getWorldUUID().toString();
+            String path = world + " - " + uuid + "//" + STRUCTURE_ENTITY.getId();
+            File file = new File(CONTEXT.getStructureDirectory(), path + "//StructurePlan.xml");
+            StructurePlanReader reader = new StructurePlanReader();
+        }
         
-        return plan;
+        return PLAN;
     }
 
     @Override
-    public List<StructurePlayerMemberEntity> getMembers() {
-        return memberDAO.getOwnersForStructure(id);
-    }
-
-    @Override
-    public List<StructurePlayerOwnerEntity> getOwners() {
-        return ownerDAO.getOwnersForStructure(id);
+    public List<StructurePlayerEntity> getOwners() {
+        return STRUCTURE_PLAYER_DAO.getOwnersForStructure(getId());
     }
 
     @Override
     public boolean isOwner(UUID player) {
-        return ownerDAO.isOwner(player, id);
+        return STRUCTURE_PLAYER_DAO.isOwner(player, getId());
     }
 
-    @Override
-    public boolean isMember(UUID player) {
-        return memberDAO.isMember(player, id);
-    }
+    
 
     @Override
     public void build(EditSession session, Options options, boolean force) {
@@ -167,6 +158,8 @@ public class SCStructure extends Structure {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    
+    void _load() {
+        PLAN = getStructurePlan();
+    }
     
 }

@@ -25,7 +25,7 @@
 package com.chingo247.settlercraft.structure.util;
 
 
-import com.chingo247.settlercraft.entities.SchematicDataEntity;
+import com.chingo247.settlercraft.persistence.entities.SchematicEntity;
 import com.chingo247.settlercraft.structure.regions.CuboidDimension;
 import com.chingo247.settlercraft.world.Direction;
 import com.sk89q.worldedit.BlockVector;
@@ -49,7 +49,7 @@ public class SchematicUtil {
     private SchematicUtil() {
     }
 
-    public static CuboidDimension calculateDimension(SchematicDataEntity schematic, Vector pos, Direction direction) {
+    public static CuboidDimension calculateDimension(SchematicEntity schematic, Vector pos, Direction direction) {
         Vector size = schematic.getSize();
         Vector end = getPoint2Right(pos, direction, new BlockVector(
                 size.getBlockX(),

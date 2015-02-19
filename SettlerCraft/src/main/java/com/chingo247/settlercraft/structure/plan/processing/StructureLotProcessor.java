@@ -6,7 +6,7 @@
 package com.chingo247.settlercraft.structure.plan.processing;
 
 import com.chingo247.settlercraft.structure.plan.placement.StructureLot;
-import com.chingo247.settlercraft.structure.exception.PlanException;
+import com.chingo247.settlercraft.exception.PlanException;
 import com.chingo247.settlercraft.commons.logging.SCLogger;
 import com.chingo247.settlercraft.commons.util.LogLevel;
 import com.chingo247.settlercraft.structure.plan.xml.XMLUtils;

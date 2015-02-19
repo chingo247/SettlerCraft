@@ -26,8 +26,8 @@ package com.chingo247.settlercraft.structure.plan.placement;
 
 import com.chingo247.settlercraft.structure.regions.CuboidDimension;
 import com.chingo247.settlercraft.structure.util.WorldUtil;
-import com.chingo247.settlercraft.structure.construction.options.Options;
-import com.chingo247.settlercraft.entities.SchematicDataEntity;
+import com.chingo247.settlercraft.construction.options.Options;
+import com.chingo247.settlercraft.persistence.entities.SchematicEntity;
 import com.chingo247.settlercraft.structure.plan.schematic.SchematicDataManager;
 import com.chingo247.settlercraft.world.Direction;
 import static com.chingo247.settlercraft.world.Direction.EAST;
@@ -49,7 +49,7 @@ public class SchematicPlacement extends DirectionalPlacement{
     private final Long checksum;
     private final Vector position;
     private final File schematicFile;
-    private final SchematicDataEntity data;
+    private final SchematicEntity data;
     private Direction direction;
     private int rotation;
     
@@ -77,7 +77,7 @@ public class SchematicPlacement extends DirectionalPlacement{
         return position;
     }
     
-    private SchematicDataEntity getSchematicData() {
+    private SchematicEntity getSchematicData() {
         if(data == null) {
             
         }

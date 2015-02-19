@@ -26,7 +26,7 @@ package com.chingo247.settlercraft.structure;
 
 import com.chingo247.settlercraft.structure.restriction.StructureRestriction;
 import com.chingo247.settlercraft.structure.plan.processing.StructurePlanComplex;
-import com.chingo247.settlercraft.structure.exception.StructureException;
+import com.chingo247.settlercraft.exception.StructureException;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.plan.placement.Placement;
 import com.chingo247.settlercraft.structure.regions.CuboidDimensional;

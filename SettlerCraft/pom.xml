@@ -99,13 +99,6 @@
             <version>1.7.10</version>
             <!--<scope>provided</scope>-->
         </dependency>
-        <!--holographicDisplays-->
-        <dependency>
-            <groupId>com.thirdparty</groupId>
-            <artifactId>holographic-displays</artifactId>
-            <version>1.8.7</version>
-            <!--<scope>provided</scope>-->
-        </dependency>
         <!--AsyncWorldEdit-->
         <dependency>
             <groupId>com.thirdparty</groupId>

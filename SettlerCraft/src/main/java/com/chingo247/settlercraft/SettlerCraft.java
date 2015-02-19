@@ -23,9 +23,6 @@
  */
 package com.chingo247.settlercraft;
 
-import com.chingo247.settlercraft.bukkit.BKWorldHandler;
-import com.chingo247.settlercraft.entities.WorldEntity;
-import com.chingo247.settlercraft.structure.persistence.service.WorldDAO;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.plan.processing.StructurePlanReader;
 import com.chingo247.settlercraft.world.World;
@@ -50,25 +47,22 @@ import org.apache.log4j.Logger;
  *
  * @author Chingo
  */
-public class SettlerCraft {
+public abstract class SettlerCraft {
 
     private static SettlerCraft instance;
     private final Logger LOG = Logger.getLogger(SettlerCraft.class);
     private final APlatform PLATFORM;
     private final SCGlobalContext CONTEXT;
-    private final WorldDAO WORLD_DAO;
     private final ExecutorService SERVICE;
     private final String MSG_PREFIX;
     
     private final Map<UUID, SCWorld> WORLDS;
     private final Map<UUID, Object> WORLDS_MUTEXES;
-    private final WorldHandler WORLD_HANDLER;
     private final Map<String, StructurePlan> PLANS;
     
     private final Lock PLANS_LOCK;
 
-    private SettlerCraft() {
-        this.WORLD_DAO = new WorldDAO();
+    protected SettlerCraft() {
         this.SERVICE = Executors.newCachedThreadPool();
         this.CONTEXT = SCGlobalContext.getContext();
         this.PLATFORM = PlatformFactory.createPlatform(CONTEXT.getPlatform());
@@ -77,18 +71,11 @@ public class SettlerCraft {
         this.PLANS_LOCK = new ReentrantLock();
         this.WORLDS = new HashMap<>();
         this.WORLDS_MUTEXES = new HashMap<>();
-        this.WORLD_HANDLER = getWorldHandler();
     }
 
-    public static SettlerCraft getInstance() {
-        if (instance == null) {
-            instance = new SettlerCraft();
-            instance.load();
-        }
-        return instance;
-    }
     
-    private void load() {
+    
+    protected void load() {
         loadWorlds();
         loadPlans();
     }
@@ -165,11 +152,7 @@ public class SettlerCraft {
             }
             
             synchronized (mutex) {
-                WorldEntity we = WORLD_DAO.find(world);
-                if (we == null) {
-                    we = new WorldEntity(iWorld.getName(), iWorld.getUUID());
-                }
-                SCWorld scw = WORLD_HANDLER.handle(we);
+                SCWorld scw = handle(world);
                 scw._load();
                 synchronized(WORLDS) {
                     WORLDS.put(scw.getUniqueId(), scw);
@@ -180,11 +163,6 @@ public class SettlerCraft {
         return w;
     }
     
-    private WorldHandler getWorldHandler() {
-        switch(CONTEXT.getPlatform().toLowerCase()) {
-            case "bukkit": return new BKWorldHandler(SERVICE);
-            default: throw new AssertionError("Platform not supported: " + CONTEXT.getPlatform());
-        }
-    }
+    public abstract SCWorld handle(UUID world);
 
 }

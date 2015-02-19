@@ -23,16 +23,14 @@
  */
 package com.chingo247.settlercraft.structure;
 
-import com.chingo247.settlercraft.structure.construction.options.Options;
-import com.chingo247.settlercraft.entities.StructurePlayerMemberEntity;
-import com.chingo247.settlercraft.entities.StructurePlayerOwnerEntity;
+import com.chingo247.settlercraft.construction.options.Options;
+import com.chingo247.settlercraft.persistence.entities.structure.StructurePlayerEntity;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structure.plan.placement.Placement;
-import com.chingo247.settlercraft.structure.plan.processing.StructurePlanComplex;
+import com.chingo247.settlercraft.structure.regions.CuboidDimension;
+import com.chingo247.settlercraft.world.World;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldedit.world.World;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,27 +40,21 @@ import java.util.UUID;
  */
 public abstract class Structure {
     
-    public abstract long getId();
+    public abstract Long getId();
     public abstract String getName();
     public abstract void setName(String name);
     public abstract double getValue();
     public abstract void setValue(double value);
     public abstract World getWorld();
-    public abstract CuboidRegion getCuboidRegion();
+    public abstract CuboidDimension getCuboidDimension();
     public abstract Structure getParent();
     public abstract List<Structure> getSubStructures();
     public abstract StructurePlan getStructurePlan();
-    public abstract List<StructurePlayerMemberEntity> getMembers();
-    public abstract List<StructurePlayerOwnerEntity> getOwners();
+    public abstract List<StructurePlayerEntity> getOwners();
     
     public abstract boolean isOwner(UUID player);
     public boolean isOwner(Player player) {
         return isOwner(player.getUniqueId());
-    }
-    
-    public abstract boolean isMember(UUID player);
-    public boolean isMember(Player player) {
-        return isMember(player.getUniqueId());
     }
     
     public void build(EditSession session, boolean force) {

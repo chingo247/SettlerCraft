@@ -24,11 +24,11 @@
 package com.chingo247.settlercraft.structure.plan.schematic;
 
 import com.chingo247.settlercraft.commons.logging.SCLogger;
-import com.chingo247.settlercraft.entities.SchematicDataEntity;
-import com.chingo247.settlercraft.structure.persistence.service.AbstractDAO;
-import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.persistence.entities.SchematicEntity;
+import com.chingo247.settlercraft.persistence.service.AbstractDAO;
+import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.commons.util.LogLevel;
-import com.chingo247.settlercraft.entities.QSchematicDataEntity;
+import com.chingo247.settlercraft.persistence.entities.QSchematicEntity;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sk89q.worldedit.data.DataException;
 import java.io.File;
@@ -57,7 +57,7 @@ public class SchematicDataManager {
     private static final int BULK_INSERT_SIZE = 1000;
     private final SCLogger LOG = SCLogger.getLogger();
     private final Lock lock;
-    private final Map<Long, SchematicDataEntity> schematicData;
+    private final Map<Long, SchematicEntity> schematicData;
     private static SchematicDataManager instance;
     private final File structurePlanDirectory = new File("plugins/SettlerCraft/Plans"); //TODO Read from properties file and maven profile!
 
@@ -67,7 +67,7 @@ public class SchematicDataManager {
         // Populate the map with existing
         LOG.print(LogLevel.INFO, "Retrieving saved schematics...");
         Session session = HibernateUtil.getSession();
-        QSchematicDataEntity qsd = QSchematicDataEntity.schematicDataEntity;
+        QSchematicEntity qsd = QSchematicEntity.schematicEntity;
         HibernateQuery query = new HibernateQuery(session);
         schematicData = query.from(qsd).map(qsd.checksum, qsd);
         session.close();
@@ -81,17 +81,17 @@ public class SchematicDataManager {
         return instance;
     }
     
-    public SchematicDataEntity getData(Long checksum) {
+    public SchematicEntity getData(Long checksum) {
         return schematicData.get(checksum);
     }
 
   
-    public void load() {
+    public void load(File directory) {
         if (lock.tryLock()) {
             
             ForkJoinPool pool = new ForkJoinPool();
             try {
-                Iterator<File> fit = FileUtils.iterateFiles(structurePlanDirectory, new String[]{"schematic"}, true);
+                Iterator<File> fit = FileUtils.iterateFiles(directory, new String[]{"schematic"}, true);
 
                 // Process the schematics that need to be loaded
                 List<SchematicProcessor> tasks = new ArrayList<>();
@@ -112,9 +112,9 @@ public class SchematicDataManager {
                 }
 
                 // Wait for the processes the finish and queue them for bulk insert
-                List<SchematicDataEntity> toPersist = new ArrayList<>(tasks.size());
+                List<SchematicEntity> toPersist = new ArrayList<>(tasks.size());
                 for (SchematicProcessor sp : tasks) {
-                    SchematicDataEntity sd = sp.join();
+                    SchematicEntity sd = sp.join();
                     schematicData.put(sd.getChecksum(), sd);
                     toPersist.add(sd);
                 }
@@ -133,7 +133,7 @@ public class SchematicDataManager {
                     int persisted = 0;
 
                     tx = session.beginTransaction();
-                    for (SchematicDataEntity data : toPersist) {
+                    for (SchematicEntity data : toPersist) {
                         session.persist(data);
                         if (persisted % BULK_INSERT_SIZE == 0) {
                             tx.commit();
@@ -166,7 +166,7 @@ public class SchematicDataManager {
 
     }
 
-    private class SchematicProcessor extends RecursiveTask<SchematicDataEntity> {
+    private class SchematicProcessor extends RecursiveTask<SchematicEntity> {
 
         private final File schematic;
 
@@ -175,9 +175,9 @@ public class SchematicDataManager {
         }
 
         @Override
-        protected SchematicDataEntity compute() {
+        protected SchematicEntity compute() {
             try {
-                return SchematicDataEntity.load(schematic);
+                return SchematicEntity.load(schematic);
             } catch (IOException | DataException ex) {
                 Logger.getLogger(SchematicDataManager.class.getName()).log(Level.SEVERE, null, ex);
             }

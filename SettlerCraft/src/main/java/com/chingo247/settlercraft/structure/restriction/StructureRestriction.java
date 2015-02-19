@@ -23,8 +23,8 @@
  */
 package com.chingo247.settlercraft.structure.restriction;
 
-import com.chingo247.settlercraft.entities.StructureType;
-import com.chingo247.settlercraft.structure.exception.StructureException;
+import com.chingo247.settlercraft.persistence.entities.structure.StructureType;
+import com.chingo247.settlercraft.exception.StructureException;
 import com.chingo247.settlercraft.structure.regions.CuboidDimensional;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
@@ -58,7 +58,7 @@ public abstract class StructureRestriction {
      * @param region The cuboid-region (representing the Structure)
      * @param type The type of the Structure
      * @return True if a Structure is allowed to be build upon target area
-     * @throws com.chingo247.settlercraft.structure.exception.StructureException
+     * @throws com.chingo247.settlercraft.exception.StructureException
      */
     public final void allow(World world, CuboidDimensional cuboid, StructureType type) throws StructureException {
         if(!test(world, cuboid, type)) {

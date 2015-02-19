@@ -23,20 +23,23 @@
  */
 package com.chingo247.settlercraft;
 
-import com.chingo247.settlercraft.entities.QStructureEntity;
-import com.chingo247.settlercraft.entities.StructureEntity;
-import com.chingo247.settlercraft.entities.WorldEntity;
+import com.chingo247.settlercraft.persistence.entities.structure.QStructureEntity;
+import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity;
 import com.chingo247.settlercraft.structure.Structure;
-import com.chingo247.settlercraft.structure.persistence.hibernate.HibernateUtil;
-import com.chingo247.settlercraft.structure.persistence.service.StructureDAO;
+import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.persistence.service.StructureDAO;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.plan.placement.Placement;
+import com.chingo247.settlercraft.structure.restriction.StructureHeightRestriction;
+import com.chingo247.settlercraft.structure.restriction.StructureOverlapRestriction;
+import com.chingo247.settlercraft.structure.restriction.StructureRestriction;
+import com.chingo247.settlercraft.structure.restriction.StructureWorldRestriction;
 import com.chingo247.settlercraft.world.Direction;
 import com.chingo247.settlercraft.world.World;
+import com.chingo247.xcore.core.IWorld;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sk89q.worldedit.Vector;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,32 +53,36 @@ import org.hibernate.Session;
  * @author Chingo
  */
 public abstract class SCWorld implements World {
-    
+
     private final Logger LOG = Logger.getLogger(SCWorld.class);
     protected final ExecutorService EXECUTOR;
-    private final WorldEntity WORLD_ENTITY;
-    private final Map<Long,Structure> STRUCTURES;
+    private final Map<Long, Structure> STRUCTURES;
     private final StructureDAO STRUCTURE_DAO = new StructureDAO();
+    private final IWorld WORLD;
     private WorldConfig worldConfig;
+    private List<StructureRestriction> restrictions;
 
-    protected SCWorld(ExecutorService executor, WorldEntity worldEntity) {
+    protected SCWorld(ExecutorService executor, IWorld world) {
         this.EXECUTOR = executor;
-        this.WORLD_ENTITY = worldEntity;
+        this.WORLD = world;
         this.STRUCTURES = new HashMap<>();
+        this.restrictions = new ArrayList<>();
+        this.restrictions.add(new StructureWorldRestriction());
+        this.restrictions.add(new StructureHeightRestriction());
+        this.restrictions.add(new StructureOverlapRestriction());
+        // TODO ADD GLOBAL RESTRICTIONS
     }
-    
-    
 
     @Override
     public UUID getUniqueId() {
-        return WORLD_ENTITY.getId();
+        return WORLD.getUUID();
     }
 
     @Override
     public String getName() {
-        return WORLD_ENTITY.getName();
+        return WORLD.getName();
     }
-    
+
     @Override
     public WorldConfig getConfig() {
         throw new UnsupportedOperationException();
@@ -83,7 +90,7 @@ public abstract class SCWorld implements World {
 
     @Override
     public void createStructure(StructurePlan plan, Vector position, Direction direction) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
     }
 
     @Override
@@ -95,45 +102,43 @@ public abstract class SCWorld implements World {
     public List<Structure> getStructures() {
         return new ArrayList<>(STRUCTURES.values());
     }
-    
+
     @Override
     public Structure getStructure(long id) {
         return STRUCTURES.get(id);
     }
-    
-    
-    
+
     List<Structure> _getSubstructures(long id) {
         List<Long> ids = getSubstructuresIds(id);
         List<Structure> ss = new ArrayList<>(ids.size());
-        for(Long i : ids) {
+        for (Long i : ids) {
             ss.add(getStructure(i));
         }
         return ss;
     }
-    
-    Structure _prepare(StructureEntity structureEntity) {
+
+    private Structure _prepare(StructureEntity structureEntity) {
         Structure structure = null;
-        synchronized(STRUCTURES) {
+        synchronized (STRUCTURES) {
             structure = STRUCTURES.get(structureEntity.getId());
-            if(structure == null) {
+            if (structure == null) {
                 structure = handleStructure(structureEntity);
                 STRUCTURES.put(structure.getId(), structure);
             }
         }
         return structure;
     }
-    
+
     void _load() {
         worldConfig = getConfig();
-        List<StructureEntity> entities = STRUCTURE_DAO.getStructureForWorld(WORLD_ENTITY.getId());
-        for(StructureEntity structureEntity : entities) {
+        List<StructureEntity> entities = STRUCTURE_DAO.getStructureForWorld(getUniqueId());
+        for (StructureEntity structureEntity : entities) {
             _prepare(structureEntity);
         }
     }
-    
+
     protected abstract Structure handleStructure(StructureEntity entity);
-    
+
     private List<Long> getSubstructuresIds(long id) {
         QStructureEntity qse = QStructureEntity.structureEntity;
         Session session = HibernateUtil.getSession();
@@ -142,6 +147,5 @@ public abstract class SCWorld implements World {
         session.close();
         return entities;
     }
-    
-    
+
 }

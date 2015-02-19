@@ -26,7 +26,7 @@ package com.chingo247.settlercraft.structure.plan.processing;
 
 import com.chingo247.settlercraft.SCGlobalContext;
 import com.chingo247.settlercraft.structure.plan.placement.Placement;
-import com.chingo247.settlercraft.structure.exception.PlanException;
+import com.chingo247.settlercraft.exception.PlanException;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.regions.CuboidDimension;
 import java.io.File;

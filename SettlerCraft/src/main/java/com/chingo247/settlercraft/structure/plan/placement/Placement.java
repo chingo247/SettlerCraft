@@ -25,7 +25,7 @@
 package com.chingo247.settlercraft.structure.plan.placement;
 
 import com.chingo247.settlercraft.structure.regions.CuboidDimensional;
-import com.chingo247.settlercraft.structure.construction.options.Options;
+import com.chingo247.settlercraft.construction.options.Options;
 import com.chingo247.settlercraft.world.Direction;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;

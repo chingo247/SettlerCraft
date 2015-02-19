@@ -26,7 +26,7 @@ package com.chingo247.settlercraft.structure.plan.placement;
 
 import com.chingo247.settlercraft.structure.plan.generators.PolygonalGenerator;
 import com.chingo247.settlercraft.structure.regions.CuboidDimension;
-import com.chingo247.settlercraft.structure.construction.options.Options;
+import com.chingo247.settlercraft.construction.options.Options;
 import com.chingo247.settlercraft.world.Direction;
 import static com.chingo247.settlercraft.world.Direction.EAST;
 import static com.chingo247.settlercraft.world.Direction.NORTH;

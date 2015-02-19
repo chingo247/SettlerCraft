@@ -24,7 +24,7 @@
  */
 package com.chingo247.settlercraft.structure.plan.xml;
 
-import com.chingo247.settlercraft.structure.exception.PlanException;
+import com.chingo247.settlercraft.exception.PlanException;
 import com.chingo247.settlercraft.world.Direction;
 import com.sk89q.worldedit.Vector;
 import org.dom4j.Element;

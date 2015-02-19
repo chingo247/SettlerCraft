@@ -23,9 +23,10 @@
  */
 package com.chingo247.settlercraft.structure.plan.processing;
 
-import com.chingo247.settlercraft.structure.persistence.HSQLServer;
+import com.chingo247.settlercraft.persistence.HSQLServer;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.plan.schematic.SchematicDataManager;
+import com.google.common.base.Preconditions;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,10 +50,10 @@ public class StructurePlanReader {
         Iterator<File> fit = FileUtils.iterateFiles(structurePlanDirectory, new String[]{"xml"}, true);
 
         SchematicDataManager sdm = SchematicDataManager.getInstance();
-        sdm.load();
-        
-        Map<String,StructurePlanProcessor> processors = Collections.synchronizedMap(new HashMap<String,StructurePlanProcessor>());
-        
+        sdm.load(structurePlanDirectory);
+
+        Map<String, StructurePlanProcessor> processors = Collections.synchronizedMap(new HashMap<String, StructurePlanProcessor>());
+
         long start = System.currentTimeMillis();
         while (fit.hasNext()) {
             File structurePlanFile = fit.next();
@@ -65,7 +66,9 @@ public class StructurePlanReader {
         List<StructurePlan> plans = new ArrayList<>();
         for (StructurePlanProcessor spp : processors.values()) {
             StructurePlan plan = spp.join();
-            if(plan != null) plans.add(plan);
+            if (plan != null) {
+                plans.add(plan);
+            }
         }
 
         // Close the database connection
@@ -77,13 +80,31 @@ public class StructurePlanReader {
         System.out.printf("******************************************\n");
         return plans;
     }
+
+    public StructurePlan readFile(File structurePlanFile, ForkJoinPool pool) {
+        Preconditions.checkNotNull(pool);
+        System.out.println("Loading plans...");
+
+        SchematicDataManager sdm = SchematicDataManager.getInstance();
+        sdm.load(structurePlanFile.getParentFile());
+
+        Map<String, StructurePlanProcessor> processors = Collections.synchronizedMap(new HashMap<String, StructurePlanProcessor>());
+
+        StructurePlanProcessor spp = new StructurePlanProcessor(structurePlanFile, processors);
+        processors.put(structurePlanFile.getAbsolutePath(), spp);
+        pool.execute(spp);
+        pool.shutdown();
+        return spp.join();
+    }
     
     
+    
+
     public static void main(String[] args) {
         StructurePlanReader reader = new StructurePlanReader();
         HSQLServer server = HSQLServer.getInstance();
         server.start();
-        
+
         reader.readDirectory(new File("C:\\Users\\Chingo\\Documents\\NetBeansProjects\\SettlerCraft\\SettlerCraft\\SettlerCraft\\plugins\\SettlerCraft\\Plans"));
         server.stop();
     }
