@@ -23,8 +23,8 @@
  */
 package com.chingo247.settlercraft;
 
-import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structure.plan.processing.StructurePlanReader;
+import com.chingo247.settlercraft.plan.StructurePlan;
+import com.chingo247.settlercraft.plan.processing.StructurePlanReader;
 import com.chingo247.settlercraft.world.World;
 import com.chingo247.xcore.core.APlatform;
 import com.chingo247.xcore.core.IWorld;
@@ -49,11 +49,10 @@ import org.apache.log4j.Logger;
  */
 public abstract class SettlerCraft {
 
-    private static SettlerCraft instance;
     private final Logger LOG = Logger.getLogger(SettlerCraft.class);
     private final APlatform PLATFORM;
     private final SCGlobalContext CONTEXT;
-    private final ExecutorService SERVICE;
+    
     private final String MSG_PREFIX;
     
     private final Map<UUID, SCWorld> WORLDS;
@@ -61,8 +60,12 @@ public abstract class SettlerCraft {
     private final Map<String, StructurePlan> PLANS;
     
     private final Lock PLANS_LOCK;
+    private boolean isLoadingPlans;
+    
+    protected final ExecutorService SERVICE;
 
     protected SettlerCraft() {
+        this.isLoadingPlans = false;
         this.SERVICE = Executors.newCachedThreadPool();
         this.CONTEXT = SCGlobalContext.getContext();
         this.PLATFORM = PlatformFactory.createPlatform(CONTEXT.getPlatform());
@@ -75,9 +78,13 @@ public abstract class SettlerCraft {
 
     
     
-    protected void load() {
-        loadWorlds();
+    public boolean isLoadingPlans() {
+        return isLoadingPlans;
+    }
+    
+    private synchronized void load() {
         loadPlans();
+        loadWorlds();
     }
 
     private void loadWorlds() {
@@ -106,6 +113,7 @@ public abstract class SettlerCraft {
     
     public void loadPlans() {
         if(PLANS_LOCK.tryLock()) {
+            isLoadingPlans = true;
             try {
                 synchronized(PLANS) {
                     PLANS.clear();
@@ -116,6 +124,7 @@ public abstract class SettlerCraft {
                     }
                 }
             } finally {
+                isLoadingPlans = false;
                 PLANS_LOCK.unlock();
             }
         }
@@ -152,7 +161,7 @@ public abstract class SettlerCraft {
             }
             
             synchronized (mutex) {
-                SCWorld scw = handle(world);
+                SCWorld scw = handle(iWorld);
                 scw._load();
                 synchronized(WORLDS) {
                     WORLDS.put(scw.getUniqueId(), scw);
@@ -163,6 +172,20 @@ public abstract class SettlerCraft {
         return w;
     }
     
-    public abstract SCWorld handle(UUID world);
+    
+
+    public APlatform getPlatform() {
+        return PLATFORM;
+    }
+    
+    public StructurePlan getStructurePlan(String path) {
+        synchronized(PLANS) {
+            return PLANS.get(path);
+        }
+    }
+
+    protected abstract SCWorld handle(IWorld world);
+    
+    
 
 }

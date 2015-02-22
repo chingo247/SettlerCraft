@@ -23,7 +23,7 @@
  */
 package com.chingo247.settlercraft.construction.asyncworldedit;
 
-import com.chingo247.settlercraft.structure.plan.placement.Placement;
+import com.chingo247.settlercraft.plan.placement.Placement;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;

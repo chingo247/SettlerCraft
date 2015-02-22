@@ -23,16 +23,20 @@
  */
 package com.chingo247.settlercraft.structure;
 
+import com.chingo247.settlercraft.commons.util.WorldEditUtil;
+import com.chingo247.settlercraft.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.construction.options.Options;
 import com.chingo247.settlercraft.persistence.entities.structure.StructurePlayerEntity;
-import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structure.regions.CuboidDimension;
+import com.chingo247.settlercraft.plan.StructurePlan;
+import com.chingo247.settlercraft.regions.CuboidDimension;
 import com.chingo247.settlercraft.world.World;
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ForkJoinPool;
 
 /**
  *
@@ -57,7 +61,20 @@ public abstract class Structure {
         return isOwner(player.getUniqueId());
     }
     
+    public void build(Player player, Options options, boolean force) {
+        com.sk89q.worldedit.world.World world = WorldEditUtil.getWorld(getWorld().getName());
+        EditSession session = AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(world, -1, player);
+        build(session, options, force);
+    }
+    
+    /**
+     * Builds the structure
+     * @param session The editSession to use
+     * @param force Whether to skip checks to the structure's state
+     * @throws IllegalArgumentException if editsession's world  isn't equal to that of the structure
+     */
     public void build(EditSession session, boolean force) {
+        checkWorldSession(session);
         build(session, Options.defaultOptions(), force);
     }
     public abstract void build(EditSession session, Options options, boolean force);
@@ -68,5 +85,13 @@ public abstract class Structure {
     }
     
     public abstract void stop(boolean force);
+
+    protected abstract void _load(ForkJoinPool pool);
+    
+    protected void checkWorldSession(EditSession session) {
+        if(!session.getWorld().getName().equals(getWorld().getName())) {
+            throw new IllegalArgumentException("EditSession's world doesn't equal the world of the structure...");
+        }
+    }
     
 }

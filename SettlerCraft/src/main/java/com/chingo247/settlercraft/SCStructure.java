@@ -23,56 +23,48 @@
  */
 package com.chingo247.settlercraft;
 
-import com.chingo247.settlercraft.commons.util.WorldEditUtil;
 import com.chingo247.settlercraft.construction.options.Options;
 import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity;
 import com.chingo247.settlercraft.persistence.entities.structure.StructurePlayerEntity;
 import com.chingo247.settlercraft.structure.Structure;
-import com.chingo247.settlercraft.persistence.service.StructureDAO;
 import com.chingo247.settlercraft.persistence.service.StructurePlayerDAO;
-import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structure.plan.processing.StructurePlanComplex;
-import com.chingo247.settlercraft.structure.plan.processing.StructurePlanReader;
-import com.chingo247.settlercraft.structure.regions.CuboidDimension;
-import com.chingo247.settlercraft.structure.util.FireNextQueue;
+import com.chingo247.settlercraft.plan.StructurePlan;
+import com.chingo247.settlercraft.plan.processing.StructurePlanReader;
+import com.chingo247.settlercraft.regions.CuboidDimension;
+import com.chingo247.settlercraft.util.FireNextQueue;
 import com.chingo247.settlercraft.world.World;
-import com.google.common.base.Splitter;
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.regions.CuboidRegion;
 import java.io.File;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
 
 /**
  *
  * @author Chingo
  */
 public class SCStructure extends Structure {
-    
+
     private final FireNextQueue TASKS;
     private final StructureEntity STRUCTURE_ENTITY;
-    private final StructureDAO STRUCTURE_DAO;
     private final StructurePlayerDAO STRUCTURE_PLAYER_DAO;
     private final SCWorld WORLD;
     private final SCGlobalContext CONTEXT;
     private StructurePlan PLAN;
-    
-    
-    protected SCStructure(ExecutorService service, StructureEntity entity, SCWorld world, SCGlobalContext context) {
+
+    protected SCStructure(ExecutorService service, StructureEntity entity, SCWorld world) {
         this.TASKS = new FireNextQueue(service);
         this.STRUCTURE_PLAYER_DAO = new StructurePlayerDAO();
-        this.STRUCTURE_DAO = new StructureDAO();
-        this.WORLD =  world;
+        this.WORLD = world;
         this.STRUCTURE_ENTITY = entity;
-        this.CONTEXT = context;
+        this.CONTEXT = SCGlobalContext.getContext();
     }
 
     public StructureEntity getEntity() {
         return STRUCTURE_ENTITY;
     }
-    
-    
+
     @Override
     public Long getId() {
         return STRUCTURE_ENTITY.getId();
@@ -118,17 +110,8 @@ public class SCStructure extends Structure {
         return WORLD._getSubstructures(getId());
     }
 
-
     @Override
     public StructurePlan getStructurePlan() {
-        if(PLAN == null) {
-            String world = STRUCTURE_ENTITY.getWorld();
-            String uuid = STRUCTURE_ENTITY.getWorldUUID().toString();
-            String path = world + " - " + uuid + "//" + STRUCTURE_ENTITY.getId();
-            File file = new File(CONTEXT.getStructureDirectory(), path + "//StructurePlan.xml");
-            StructurePlanReader reader = new StructurePlanReader();
-        }
-        
         return PLAN;
     }
 
@@ -141,8 +124,6 @@ public class SCStructure extends Structure {
     public boolean isOwner(UUID player) {
         return STRUCTURE_PLAYER_DAO.isOwner(player, getId());
     }
-
-    
 
     @Override
     public void build(EditSession session, Options options, boolean force) {
@@ -161,5 +142,15 @@ public class SCStructure extends Structure {
     void _load() {
         PLAN = getStructurePlan();
     }
-    
+
+    @Override
+    protected void _load(ForkJoinPool pool) {
+        String world = STRUCTURE_ENTITY.getWorld();
+        String uuid = STRUCTURE_ENTITY.getWorldUUID().toString();
+        String path = world + " - " + uuid + "//" + STRUCTURE_ENTITY.getId();
+        File file = new File(CONTEXT.getStructureDirectory(), path + "//StructurePlan.xml");
+        StructurePlanReader reader = new StructurePlanReader();
+        PLAN = reader.readFile(file, pool);
+    }
+
 }

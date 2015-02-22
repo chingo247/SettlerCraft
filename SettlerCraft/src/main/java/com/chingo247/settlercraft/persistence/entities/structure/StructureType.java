@@ -24,10 +24,10 @@
  */
 package com.chingo247.settlercraft.persistence.entities.structure;
 
-import com.chingo247.settlercraft.structure.plan.placement.GeneratedPlacement;
-import com.chingo247.settlercraft.structure.plan.placement.Placement;
-import com.chingo247.settlercraft.structure.plan.placement.SchematicPlacement;
-import com.chingo247.settlercraft.structure.plan.placement.StructureLot;
+import com.chingo247.settlercraft.plan.placement.GeneratedPlacement;
+import com.chingo247.settlercraft.plan.placement.Placement;
+import com.chingo247.settlercraft.plan.placement.SchematicPlacement;
+import com.chingo247.settlercraft.plan.placement.StructureLot;
 
 /**
  *

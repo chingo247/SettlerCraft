@@ -26,7 +26,7 @@ package com.chingo247.settlercraft.construction.worldedit;
 
 import com.chingo247.settlercraft.construction.options.ConstructionOptions;
 import com.chingo247.settlercraft.construction.worldedit.mask.ReplaceBlockClipboardMask;
-import com.chingo247.settlercraft.structure.util.CubicIterator;
+import com.chingo247.settlercraft.util.CubicIterator;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;

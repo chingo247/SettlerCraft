@@ -24,7 +24,7 @@
 package com.chingo247.settlercraft.persistence.entities.structure;
 
 import com.chingo247.settlercraft.SettlerCraft;
-import com.chingo247.settlercraft.structure.regions.CuboidDimension;
+import com.chingo247.settlercraft.regions.CuboidDimension;
 import com.chingo247.xcore.core.IWorld;
 import com.sk89q.worldedit.world.World;
 import java.io.Serializable;

@@ -23,7 +23,7 @@
  */
 package com.chingo247.settlercraft.selection;
 
-import com.chingo247.settlercraft.structure.regions.CuboidDimension;
+import com.chingo247.settlercraft.regions.CuboidDimension;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 
@@ -32,6 +32,17 @@ import com.sk89q.worldedit.entity.Player;
  * @author Chingo
  */
 public class NoneSelectionManager extends ASelectionManager {
+    
+    private static NoneSelectionManager instance;
+    
+    private NoneSelectionManager() {}
+    
+    public static NoneSelectionManager getInstance() {
+        if(instance == null) {
+            instance = new NoneSelectionManager();
+        }
+        return instance;
+    }
 
     @Override
     public void select(Player player, Vector start, Vector end) {

@@ -26,7 +26,7 @@ package com.chingo247.settlercraft.construction;
 
 import com.chingo247.settlercraft.construction.options.BuildOptions;
 import com.chingo247.settlercraft.construction.worldedit.ConstructionClipboard;
-import com.chingo247.settlercraft.structure.util.SchematicUtil;
+import com.chingo247.settlercraft.util.SchematicUtil;
 import com.chingo247.settlercraft.world.Direction;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;

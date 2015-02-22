@@ -28,8 +28,8 @@ import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity
 import com.chingo247.settlercraft.structure.Structure;
 import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.persistence.service.StructureDAO;
-import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structure.plan.placement.Placement;
+import com.chingo247.settlercraft.plan.StructurePlan;
+import com.chingo247.settlercraft.plan.placement.Placement;
 import com.chingo247.settlercraft.structure.restriction.StructureHeightRestriction;
 import com.chingo247.settlercraft.structure.restriction.StructureOverlapRestriction;
 import com.chingo247.settlercraft.structure.restriction.StructureRestriction;
@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 
@@ -52,19 +53,18 @@ import org.hibernate.Session;
  *
  * @author Chingo
  */
-public abstract class SCWorld implements World {
+public abstract class SCWorld extends World {
 
     private final Logger LOG = Logger.getLogger(SCWorld.class);
     protected final ExecutorService EXECUTOR;
     private final Map<Long, Structure> STRUCTURES;
     private final StructureDAO STRUCTURE_DAO = new StructureDAO();
-    private final IWorld WORLD;
     private WorldConfig worldConfig;
     private List<StructureRestriction> restrictions;
 
     protected SCWorld(ExecutorService executor, IWorld world) {
+        super(world);
         this.EXECUTOR = executor;
-        this.WORLD = world;
         this.STRUCTURES = new HashMap<>();
         this.restrictions = new ArrayList<>();
         this.restrictions.add(new StructureWorldRestriction());
@@ -73,15 +73,7 @@ public abstract class SCWorld implements World {
         // TODO ADD GLOBAL RESTRICTIONS
     }
 
-    @Override
-    public UUID getUniqueId() {
-        return WORLD.getUUID();
-    }
-
-    @Override
-    public String getName() {
-        return WORLD.getName();
-    }
+    
 
     @Override
     public WorldConfig getConfig() {
@@ -89,12 +81,13 @@ public abstract class SCWorld implements World {
     }
 
     @Override
-    public void createStructure(StructurePlan plan, Vector position, Direction direction) {
-
+    public Structure createStructure(StructurePlan plan, Vector position, Direction direction) {
+        System.out.println("Creating structure...");
+        return null;
     }
 
     @Override
-    public void createStructure(Placement placement, Vector postion, Direction direction) {
+    public Structure createStructure(Placement placement, Vector postion, Direction direction) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -105,6 +98,7 @@ public abstract class SCWorld implements World {
 
     @Override
     public Structure getStructure(long id) {
+        
         return STRUCTURES.get(id);
     }
 
@@ -117,13 +111,15 @@ public abstract class SCWorld implements World {
         return ss;
     }
 
-    private Structure _prepare(StructureEntity structureEntity) {
+    private Structure _prepare(StructureEntity structureEntity, ForkJoinPool pool) {
         Structure structure = null;
         synchronized (STRUCTURES) {
             structure = STRUCTURES.get(structureEntity.getId());
             if (structure == null) {
-                structure = handleStructure(structureEntity);
-                STRUCTURES.put(structure.getId(), structure);
+                SCStructure ss = handleStructure(structureEntity);
+                ss._load(pool);
+                STRUCTURES.put(ss.getId(), structure);
+                structure = ss;
             }
         }
         return structure;
@@ -132,12 +128,14 @@ public abstract class SCWorld implements World {
     void _load() {
         worldConfig = getConfig();
         List<StructureEntity> entities = STRUCTURE_DAO.getStructureForWorld(getUniqueId());
+        ForkJoinPool pool = new ForkJoinPool();
         for (StructureEntity structureEntity : entities) {
-            _prepare(structureEntity);
+            _prepare(structureEntity, pool);
         }
+        pool.shutdown();
     }
 
-    protected abstract Structure handleStructure(StructureEntity entity);
+    protected abstract SCStructure handleStructure(StructureEntity entity);
 
     private List<Long> getSubstructuresIds(long id) {
         QStructureEntity qse = QStructureEntity.structureEntity;

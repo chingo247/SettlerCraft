@@ -1,6 +1,7 @@
 
 package com.chingo247.xcore.platforms.bukkit;
 
+import com.chingo247.xcore.core.AInventory;
 import com.chingo247.xcore.core.IPlayer;
 import com.chingo247.xcore.core.IServer;
 import com.chingo247.xcore.core.IWorld;
@@ -71,6 +72,22 @@ public class BukkitPlayer implements IPlayer {
     public boolean hasPermission(String permission) {
         return player.hasPermission(permission);
     }
+
+    @Override
+    public void updateInventory() {
+        player.updateInventory();
+    }
+
+    @Override
+    public AInventory getInventory() {
+        return new BukkitInventory(player.getInventory());
+    }
+
+    @Override
+    public boolean isSneaking() {
+        return player.isSneaking();
+    }
+    
     
     
    

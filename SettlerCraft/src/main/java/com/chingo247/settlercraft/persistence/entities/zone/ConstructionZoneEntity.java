@@ -23,7 +23,7 @@
  */
 package com.chingo247.settlercraft.persistence.entities.zone;
 
-import com.chingo247.settlercraft.structure.regions.CuboidDimension;
+import com.chingo247.settlercraft.regions.CuboidDimension;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
