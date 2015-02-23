@@ -21,21 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.restriction;
+package com.chingo247.settlercraft.restriction;
 
 import com.chingo247.settlercraft.persistence.entities.structure.StructureType;
 import com.chingo247.settlercraft.regions.CuboidDimensional;
-import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 
 /**
- *
+ * 
  * @author Chingo
  */
-public class StructureOverlapRestriction extends StructureRestriction {
+public class StructureWorldRestriction extends StructureRestriction {
+    
+    
 
-    public StructureOverlapRestriction() {
-        super("Structure overlaps another structure!");
+    public StructureWorldRestriction() {
+        super("This world doesn't allow structures!");
     }
 
     @Override

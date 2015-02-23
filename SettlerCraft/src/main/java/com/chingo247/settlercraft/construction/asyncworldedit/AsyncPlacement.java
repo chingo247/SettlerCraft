@@ -91,6 +91,7 @@ public class AsyncPlacement extends Placement {
                 if (wait != null) {
                     wait.checkAndWait(null);
                 }
+                System.out.println("task(placement)!");
                 placement.place(session, pos, options);
             }
         });

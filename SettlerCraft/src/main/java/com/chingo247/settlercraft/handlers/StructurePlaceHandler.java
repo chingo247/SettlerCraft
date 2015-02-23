@@ -48,7 +48,8 @@ import com.sk89q.worldedit.world.World;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 
 /**
@@ -94,6 +95,8 @@ public class StructurePlaceHandler {
 
             @Override
             public void run() {
+                try {
+                
                 IPlayer iPlayer = settlercraft.getPlatform().getPlayer(player.getUniqueId());
                 AInventory inventory = iPlayer.getInventory();
                 if (!inventory.hasItem(planItem)) {
@@ -129,6 +132,11 @@ public class StructurePlaceHandler {
                 }
                 System.out.println("Plan: " + plan.getName() + " ");
                 handlePlace(plan, planItem, player, world, pos, slm);
+                
+                } catch (Exception ex) {
+                    System.out.println("Error:");
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                }
             }
         });
 
@@ -149,6 +157,8 @@ public class StructurePlaceHandler {
             System.out.println("Player was NOT sneaking... pointing right!");
             pos2 = getPoint2Right(pos1, direction, plan.getPlacement().getCuboidDimension().getMaxPosition());
         }
+        
+        System.out.println("SelectionManager: " + selectionManager);
 
         // If player has NOT selected anything yet... make a new selection
         if(!selectionManager.hasSelection(player)) {
@@ -171,17 +181,17 @@ public class StructurePlaceHandler {
                     
                     System.out.println("Structure: " + structure);
                     if (structure != null) {
-                        AItemStack clone = item.clone();
-                        clone.setAmount(1);
-                        iPlayer.getInventory().removeItem(clone);
-                        iPlayer.updateInventory();
+//                        AItemStack clone = item.clone();
+//                        clone.setAmount(1);
+//                        iPlayer.getInventory().removeItem(clone);
+//                        iPlayer.updateInventory();
                         System.out.println("Build structure!");
                         structure.build(player, Options.defaultOptions(), false);
                     }
                 } catch (StructureException ex) {
                     player.print(ChatColors.RED + ex.getMessage());
                 } catch (Exception ex) {
-                    Logger.getLogger(getClass()).error(ex.getMessage(), ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
                 }
 
                 selectionManager.deselect(player);
@@ -193,7 +203,7 @@ public class StructurePlaceHandler {
     }
     
 
-    private boolean isStructurePlan(AItemStack itemStack) {
+    public static boolean isStructurePlan(AItemStack itemStack) {
         if (itemStack == null) {
             return false;
         }
@@ -207,7 +217,7 @@ public class StructurePlaceHandler {
             return false;
         } else {
             for (String s : lore) {
-                if (s.contains("Type") && s.contains("Plan")) {
+                if (s.contains("Type") && s.contains("StructurePlan")) {
                     return true;
                 }
             }
@@ -305,7 +315,8 @@ public class StructurePlaceHandler {
     }
 
     private boolean canPlace(Player player, World world, Vector pos1, Direction direction, StructurePlan plan) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        System.out.println("Still have to implement canPlace() in " + this.getClass().getName());
+        return true;
     }
 
 }

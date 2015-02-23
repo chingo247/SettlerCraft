@@ -28,8 +28,9 @@ import com.chingo247.settlercraft.exception.StructureException;
 import com.chingo247.settlercraft.structure.Structure;
 import com.chingo247.settlercraft.plan.StructurePlan;
 import com.chingo247.settlercraft.plan.placement.Placement;
-import com.chingo247.settlercraft.structure.restriction.StructureHeightRestriction;
-import com.chingo247.settlercraft.structure.restriction.StructureRestriction;
+import com.chingo247.settlercraft.regions.CuboidDimension;
+import com.chingo247.settlercraft.restriction.StructureHeightRestriction;
+import com.chingo247.settlercraft.restriction.StructureRestriction;
 import com.chingo247.xcore.core.IWorld;
 import com.sk89q.worldedit.Vector;
 import java.util.ArrayList;
@@ -102,6 +103,13 @@ public abstract class World {
      * @return The structure or null of structure was not found.
      */
     public abstract Structure getStructure(long id);
+    
+    /**
+     * Checks if the given cuboid overlaps any structures
+     * @param dimension The cuboid dimension
+     * @return True if there is overlap.
+     */
+    public abstract boolean overlapsStructures(CuboidDimension dimension);
     
     /**
      * Gets the world's config

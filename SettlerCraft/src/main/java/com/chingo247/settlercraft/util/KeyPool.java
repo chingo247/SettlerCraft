@@ -30,6 +30,8 @@ import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -87,6 +89,8 @@ public class KeyPool<T> {
             try {
                 // Execute the runnable
                 f.run();
+            } catch(Exception e) {
+               Logger.getLogger(getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
             } finally {
                 
                 synchronized (tasks.get(t)) {

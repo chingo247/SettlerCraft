@@ -32,6 +32,7 @@ import com.chingo247.settlercraft.world.World;
 import com.chingo247.xcore.core.APlatform;
 import com.chingo247.xcore.core.IWorld;
 import com.chingo247.xcore.platforms.PlatformFactory;
+import com.sk89q.worldedit.entity.Player;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -214,6 +215,9 @@ public abstract class SettlerCraft {
     }
 
     protected abstract SCWorld handle(IWorld world);
+
+    protected abstract Player getPlayer(UUID player);        
+    
     
     
 

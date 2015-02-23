@@ -21,27 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.restriction;
+package com.chingo247.settlercraft.analyzer;
 
-import com.chingo247.settlercraft.persistence.entities.structure.StructureType;
-import com.chingo247.settlercraft.regions.CuboidDimensional;
-import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import java.util.Map;
 
 /**
- * 
+ *
  * @author Chingo
  */
-public class StructureWorldRestriction extends StructureRestriction {
+public class RegionAnalyzer {
     
+    private Map<Vector,BaseBlock> blocks;
     
-
-    public StructureWorldRestriction() {
-        super("This world doesn't allow structures!");
+    public void analyze(CuboidRegion region) {
     }
-
-    @Override
-    public boolean test(World world, CuboidDimensional cuboid, StructureType type) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    
+    public Map<Vector,BaseBlock> getBlocks() {
+        return blocks;
     }
     
 }

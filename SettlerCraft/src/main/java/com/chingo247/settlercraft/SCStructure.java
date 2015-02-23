@@ -23,6 +23,8 @@
  */
 package com.chingo247.settlercraft;
 
+import com.chingo247.settlercraft.construction.asyncworldedit.AsyncPlacement;
+import com.chingo247.settlercraft.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.construction.options.Options;
 import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity;
 import com.chingo247.settlercraft.persistence.entities.structure.StructurePlayerEntity;
@@ -33,13 +35,19 @@ import com.chingo247.settlercraft.plan.StructurePlan;
 import com.chingo247.settlercraft.plan.processing.StructurePlanReader;
 import com.chingo247.settlercraft.regions.CuboidDimension;
 import com.chingo247.settlercraft.util.FireNextQueue;
+import com.chingo247.settlercraft.util.WorldEditUtil;
 import com.chingo247.settlercraft.world.World;
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.entity.Player;
 import java.io.File;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
  *
@@ -54,11 +62,12 @@ public class SCStructure extends Structure {
     private StructurePlan plan;
     protected final SettlerCraft settlerCraft;
 
-    protected SCStructure(SettlerCraft settlerCraft, ExecutorService service, StructureEntity entity, SCWorld world) {
+    protected SCStructure(SettlerCraft settlerCraft, ExecutorService service, StructureEntity entity, SCWorld world, StructurePlan plan) {
         this.tasks = new FireNextQueue(service);
         this.structurePlayerDao = new StructurePlayerDAO();
         this.world = world;
         this.structureEntity = entity;
+        this.plan = plan;
         this.settlerCraft = settlerCraft;
     }
 
@@ -134,7 +143,24 @@ public class SCStructure extends Structure {
     }
 
     @Override
-    public void build(EditSession session, Options options, boolean force) {
+    public void build(UUID player, Options options, boolean force) {
+        PlayerEntry entry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(player);
+        AsyncPlacement placement = new AsyncPlacement(entry, plan.getPlacement());
+        
+        com.sk89q.worldedit.world.World w = WorldEditUtil.getWorld(world.getName());
+        
+        Player ply = settlerCraft.getPlayer(player);
+        
+        AsyncEditSession editSession;
+        if (player == null) {
+            editSession = (AsyncEditSession)AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(w, -1);
+        } else {
+            editSession = (AsyncEditSession)AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(w, -1, ply);
+        }
+        
+        System.out.println("Build structure: " + getId());
+        
+        placement.place(editSession, structureEntity.getDimension().getMinPosition(), options);
     }
 
     @Override

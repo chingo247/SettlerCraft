@@ -86,10 +86,10 @@ public class StructureEntity implements Serializable {
     protected StructureEntity() {
     }
     
-    public StructureEntity(IWorld world, CuboidDimension dimension, StructureType type) {
+    public StructureEntity(String world, UUID worldUUID, CuboidDimension dimension, StructureType type) {
         this.state = StructureState.INITIALIZING;
-        this.world = world.getName();
-        this.worldUUID = world.getUUID();
+        this.world = world;
+        this.worldUUID = worldUUID;
         this.dimension = dimension;
         this.type = type;
     }

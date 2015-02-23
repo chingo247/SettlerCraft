@@ -27,14 +27,13 @@ package com.chingo247.settlercraft.construction.options;
  *
  * @author Chingo
  */
-public abstract class ConstructionOptions {
+public class ConstructionOptions {
     
-    private Pattern buildPattern = Pattern.createCompromisePattern();
     private int xLayer = 16;
     private int yLayer = -1;
     private int zLayer = 16;
 
-    ConstructionOptions() {
+    public ConstructionOptions() {
     }
     
      public void setxLayer(int xLayer) {
@@ -61,20 +60,6 @@ public abstract class ConstructionOptions {
         return zLayer;
     }
 
-     /**
-     * Sets the pattern in which blocks are placed
-     * @param buildPattern The pattern.
-     * 
-     * Use the Pattern factory methods to retrieve an instance of Pattern.
-     * for example {@link Pattern#createPerformancePattern()}
-     */
-    public void setPattern(Pattern buildPattern) {
-        this.buildPattern = buildPattern;
-    }
-    
-    public Pattern getPattern() {
-        return buildPattern;
-    }
     
     
     

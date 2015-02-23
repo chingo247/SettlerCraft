@@ -21,51 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.restriction;
+package com.chingo247.settlercraft.restriction;
 
 import com.chingo247.settlercraft.persistence.entities.structure.StructureType;
-import com.chingo247.settlercraft.exception.StructureException;
 import com.chingo247.settlercraft.regions.CuboidDimensional;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 
 /**
- * StructureRestriction class is used to determine if a Structure may be build in a certain area
+ *
  * @author Chingo
  */
-public abstract class StructureRestriction {
-    
-    protected String reason;
+public class StructureOverlapRestriction extends StructureRestriction {
 
-    /**
-     * Constructor.
-     * @param reason The reason when to tell the player, why the structure can't be build
-     */
-    public StructureRestriction(String reason) {
-        this.reason = reason;
+    public StructureOverlapRestriction() {
+        super("Structure overlaps another structure!");
     }
 
-    public void setReason(String reason) {
-        this.reason = reason;
+    @Override
+    public boolean test(World world, CuboidDimensional cuboid, StructureType type) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    public abstract boolean test(World world, CuboidDimensional cuboid, StructureType type);
-    
-    /**
-     * Used to check if a Structure may be build on a specified location.
-     * @param world The world of the region
-     * @param cuboid
-     * @param region The cuboid-region (representing the Structure)
-     * @param type The type of the Structure
-     * @return True if a Structure is allowed to be build upon target area
-     * @throws com.chingo247.settlercraft.exception.StructureException
-     */
-    public final void allow(World world, CuboidDimensional cuboid, StructureType type) throws StructureException {
-        if(!test(world, cuboid, type)) {
-            throw new StructureException(reason);
-        }
-    }
-    
-    
     
 }

@@ -62,22 +62,10 @@ public abstract class Structure {
     }
     
     public void build(Player player, Options options, boolean force) {
-        com.sk89q.worldedit.world.World world = WorldEditUtil.getWorld(getWorld().getName());
-        EditSession session = AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(world, -1, player);
-        build(session, options, force);
+        build(player.getUniqueId(), options, force);
     }
     
-    /**
-     * Builds the structure
-     * @param session The editSession to use
-     * @param force Whether to skip checks to the structure's state
-     * @throws IllegalArgumentException if editsession's world  isn't equal to that of the structure
-     */
-    public void build(EditSession session, boolean force) {
-        checkWorldSession(session);
-        build(session, Options.defaultOptions(), force);
-    }
-    public abstract void build(EditSession session, Options options, boolean force);
+    public abstract void build(UUID uuid, Options options, boolean force);
     
     public abstract void demolish(EditSession session, Options options, boolean force);
     public void demolish(EditSession session, boolean force) {

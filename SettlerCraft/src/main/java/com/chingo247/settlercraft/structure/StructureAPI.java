@@ -24,7 +24,7 @@ package com.chingo247.settlercraft.structure;
  * THE SOFTWARE.
  */
 
-import com.chingo247.settlercraft.structure.restriction.StructureRestriction;
+import com.chingo247.settlercraft.restriction.StructureRestriction;
 import com.chingo247.settlercraft.plan.processing.StructurePlanComplex;
 import com.chingo247.settlercraft.exception.StructureException;
 import com.chingo247.settlercraft.plan.StructurePlan;
