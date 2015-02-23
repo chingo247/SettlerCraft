@@ -24,9 +24,9 @@
 package com.chingo247.settlercraft.handlers;
 
 import com.chingo247.settlercraft.SettlerCraft;
-import com.chingo247.settlercraft.construction.options.Options;
+import com.chingo247.settlercraft.structure.construction.options.Options;
 import com.chingo247.settlercraft.exception.StructureException;
-import com.chingo247.settlercraft.plan.StructurePlan;
+import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.provider.EconomyProvider;
 import com.chingo247.settlercraft.selection.CUISelectionManager;
 import com.chingo247.settlercraft.selection.ISelectionManager;
@@ -142,11 +142,13 @@ public class StructurePlaceHandler {
 
     }
     
-    private void handlePlace(StructurePlan plan, AItemStack item,Player player, World world, Vector pos1, ISelectionManager selectionManager) {
+    private void handlePlace(StructurePlan plan, AItemStack item, Player player, World world, Vector pos1, ISelectionManager selectionManager) {
         System.out.println("Handling placement...");
         IPlayer iPlayer = settlercraft.getPlatform().getPlayer(player.getUniqueId());
         
-        Direction direction = WorldUtil.getDirection(Math.round(iPlayer.getYaw()));
+        Direction direction = WorldUtil.getDirection(iPlayer.getYaw());
+        System.out.println("Direction: " + direction);
+        
         Vector pos2;
         
         boolean toLeft = iPlayer.isSneaking();

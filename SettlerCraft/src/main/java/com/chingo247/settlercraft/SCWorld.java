@@ -24,18 +24,17 @@
 package com.chingo247.settlercraft;
 
 import com.chingo247.settlercraft.persistence.entities.structure.QStructureEntity;
-import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity;
-import com.chingo247.settlercraft.persistence.entities.structure.StructureType;
 import com.chingo247.settlercraft.structure.Structure;
 import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.persistence.service.StructureDAO;
-import com.chingo247.settlercraft.plan.StructurePlan;
-import com.chingo247.settlercraft.plan.placement.Placement;
-import com.chingo247.settlercraft.regions.CuboidDimension;
-import com.chingo247.settlercraft.restriction.StructureHeightRestriction;
-import com.chingo247.settlercraft.restriction.StructureOverlapRestriction;
-import com.chingo247.settlercraft.restriction.StructureRestriction;
-import com.chingo247.settlercraft.restriction.StructureWorldRestriction;
+import com.chingo247.settlercraft.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structure.placement.Placement;
+import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity;
+import com.chingo247.settlercraft.persistence.entities.structure.StructureType;
+import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
+import com.chingo247.settlercraft.structure.restriction.StructureHeightRestriction;
+import com.chingo247.settlercraft.structure.restriction.StructureOverlapRestriction;
+import com.chingo247.settlercraft.structure.restriction.StructureRestriction;
 import com.chingo247.settlercraft.world.Direction;
 import com.chingo247.settlercraft.world.World;
 import com.chingo247.xcore.core.IWorld;
@@ -45,7 +44,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 import org.apache.log4j.Logger;
@@ -94,7 +92,7 @@ public abstract class SCWorld extends World {
         
         CuboidDimension planDimension = plan.getPlacement().getCuboidDimension();
         CuboidDimension dimension = new CuboidDimension(planDimension.getMinPosition().add(position), planDimension.getMaxPosition().add(position));
-        StructureEntity entity = new StructureEntity(worldName, worldUuid, dimension, StructureType.OTHER);
+        StructureEntity entity = new StructureEntity(worldName, worldUuid, dimension, StructureType.OTHER, direction);
         entity = structureDao.save(entity);
         SCStructure structure = new SCStructure(settlerCraft, executor, entity, this, plan);
         return structure;
@@ -150,12 +148,17 @@ public abstract class SCWorld extends World {
         List<StructureEntity> entities = structureDao.getStructureForWorld(getUniqueId());
         ForkJoinPool pool = new ForkJoinPool();
         for (StructureEntity structureEntity : entities) {
+                System.out.println("Prepare structure is off! in SCWorld#Load" );
 //            _prepare(structureEntity, pool);
         }
         pool.shutdown();
     }
 
     protected abstract SCStructure handleStructure(StructureEntity entity);
+    
+    protected StructurePlan getStructurePlan(StructureEntity entity) {
+        throw new UnsupportedOperationException("Not supported yet");
+    }
 
     private List<Long> getSubstructuresIds(long id) {
         QStructureEntity qse = QStructureEntity.structureEntity;

@@ -89,9 +89,12 @@ public class KeyPool<T> {
             try {
                 // Execute the runnable
                 f.run();
+                f.get(); // Will throw the exception which should be catched
             } catch(Exception e) {
                Logger.getLogger(getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
             } finally {
+                
+                
                 
                 synchronized (tasks.get(t)) {
                     // Remove yourself from the Queue

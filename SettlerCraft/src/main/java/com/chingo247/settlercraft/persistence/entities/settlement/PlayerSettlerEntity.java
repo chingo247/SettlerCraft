@@ -23,7 +23,6 @@
  */
 package com.chingo247.settlercraft.persistence.entities.settlement;
 
-import com.sk89q.worldedit.entity.Player;
 import java.io.Serializable;
 import java.util.UUID;
 import javax.persistence.CascadeType;
@@ -66,9 +65,9 @@ public class PlayerSettlerEntity implements Serializable {
     protected PlayerSettlerEntity() {
     }
 
-    public PlayerSettlerEntity(Player player, SettlementEntity settlementEntity) {
-        this.playerName = player.getName();
-        this.playerId = player.getUniqueId();
+    public PlayerSettlerEntity(UUID playerUUID, String playerName, SettlementEntity settlementEntity) {
+        this.playerName = playerName;
+        this.playerId = playerUUID;
         this.settlementEntity = settlementEntity;
     }
 

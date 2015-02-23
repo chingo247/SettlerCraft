@@ -23,10 +23,6 @@
  */
 package com.chingo247.settlercraft.structure;
 
-import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  *
  * @author Chingo

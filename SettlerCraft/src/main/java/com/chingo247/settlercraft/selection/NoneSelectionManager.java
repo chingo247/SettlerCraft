@@ -23,7 +23,7 @@
  */
 package com.chingo247.settlercraft.selection;
 
-import com.chingo247.settlercraft.regions.CuboidDimension;
+import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 

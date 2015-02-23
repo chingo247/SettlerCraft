@@ -24,6 +24,7 @@
  */
 package com.chingo247.settlercraft.regions;
 
+import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
 import com.sk89q.worldedit.regions.CylinderRegion;
 
 /**

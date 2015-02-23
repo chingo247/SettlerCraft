@@ -23,13 +23,13 @@
  */
 package com.chingo247.settlercraft.structure;
 
-import com.chingo247.settlercraft.construction.asyncworldedit.AsyncWorldEditUtil;
-import com.chingo247.settlercraft.construction.options.Options;
+import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity;
+import com.chingo247.settlercraft.structure.construction.options.Options;
+import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.persistence.entities.structure.StructurePlayerEntity;
 import com.chingo247.settlercraft.persistence.entities.structure.StructureState;
-import com.chingo247.settlercraft.plan.StructurePlan;
-import com.chingo247.settlercraft.regions.CuboidDimension;
-import com.chingo247.settlercraft.util.WorldEditUtil;
+import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
+import com.chingo247.settlercraft.world.Direction;
 import com.chingo247.settlercraft.world.World;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.entity.Player;
@@ -43,18 +43,50 @@ import java.util.concurrent.ForkJoinPool;
  */
 public abstract class Structure {
     
-    public abstract Long getId();
-    public abstract String getName();
-    public abstract void setName(String name);
-    public abstract double getValue();
-    public abstract void setValue(double value);
+    private StructureEntity structureEntity;
+    
+    protected Structure(StructureEntity entity) {
+        this.structureEntity = entity;
+    }
+    
+    public Long getId() {
+        return structureEntity.getId();
+    }
+    
+    public Direction getDirection() {
+        return structureEntity.getDirection();
+    }
+    
+    public String getName() {
+        return structureEntity.getName();
+    }
+    public void setName(String name) {
+        structureEntity.setName(name);
+    }
+    public double getValue() {
+        return structureEntity.getValue();
+    }
+    public void setValue(double value) {
+        structureEntity.setValue(value);
+    }
+    
+    public CuboidDimension getCuboidDimension() {
+        return structureEntity.getDimension();
+    }
+
+    public void setState(StructureState state) {
+        structureEntity.setState(state);
+    }
+    
+    public StructureState getState() {
+        return structureEntity.getState();
+    }
+    
     public abstract World getWorld();
-    public abstract CuboidDimension getCuboidDimension();
     public abstract Structure getParent();
     public abstract List<Structure> getSubStructures();
     public abstract StructurePlan getStructurePlan();
     public abstract List<StructurePlayerEntity> getOwners();
-    public abstract StructureState getState();
     
     public abstract boolean isOwner(UUID player);
     public boolean isOwner(Player player) {

@@ -25,39 +25,28 @@ package com.chingo247.settlercraft.bukkit.commands;
  */
 
 import com.chingo247.menu.CategoryMenu;
-import com.chingo247.menu.util.EconomyUtil;
-import com.chingo247.menu.util.ShopUtil;
 import com.chingo247.settlercraft.bukkit.BKPermissionManager;
 import com.chingo247.settlercraft.bukkit.BKPermissionManager.Perms;
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
-import com.chingo247.settlercraft.construction.asyncworldedit.AsyncWorldEditUtil;
+import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.exception.CommandException;
-import com.chingo247.settlercraft.persistence.entities.structure.StructureState;
-import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.persistence.service.StructureDAO;
-import com.chingo247.settlercraft.regions.CuboidDimension;
-import com.chingo247.settlercraft.structure.Structure;
+import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
 import com.chingo247.settlercraft.util.CubicIterator;
 import com.chingo247.settlercraft.util.DimensionIterator;
 import com.chingo247.settlercraft.util.WorldEditUtil;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
-import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.hibernate.Session;
 
 /**
  *

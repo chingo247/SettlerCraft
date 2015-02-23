@@ -60,6 +60,18 @@ public class WorldUtil {
             return Direction.SOUTH;
         }
     }
+    
+    public static Direction getDirection(float yaw) {
+        if (yaw >= 45f && yaw < 135f || yaw >= -315f && yaw < -225f) {
+            return Direction.WEST;
+        } else if (yaw >= 135f && yaw < 225f || yaw >= -225f && yaw < -135f) {
+            return Direction.NORTH;
+        } else if (yaw >= 225f && yaw < 315f || yaw >= -135f && yaw < -45f) {
+            return Direction.EAST;
+        } else /*(yaw >= 315 && yaw < 360 || yaw >= 0 && < 45) */ {
+            return Direction.SOUTH;
+        }
+    }
 
     public static Vector translateLocation(Vector location, Direction direction, double xOffset, double yOffset, double zOffset) {
         switch (direction) {

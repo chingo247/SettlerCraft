@@ -23,10 +23,8 @@
  */
 package com.chingo247.settlercraft.persistence.entities.structure;
 
-import com.chingo247.settlercraft.SettlerCraft;
-import com.chingo247.settlercraft.regions.CuboidDimension;
-import com.chingo247.xcore.core.IWorld;
-import com.sk89q.worldedit.world.World;
+import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
+import com.chingo247.settlercraft.world.Direction;
 import java.io.Serializable;
 import java.util.Set;
 import java.util.UUID;
@@ -67,6 +65,9 @@ public class StructureEntity implements Serializable {
     @Embedded
     private CuboidDimension dimension;
     
+    
+    private Direction direction;
+    
     @NotNull
     @Column(name = "structure_type")
     private StructureType type;
@@ -86,12 +87,13 @@ public class StructureEntity implements Serializable {
     protected StructureEntity() {
     }
     
-    public StructureEntity(String world, UUID worldUUID, CuboidDimension dimension, StructureType type) {
+    public StructureEntity(String world, UUID worldUUID, CuboidDimension dimension, StructureType type, Direction direction) {
         this.state = StructureState.INITIALIZING;
         this.world = world;
         this.worldUUID = worldUUID;
         this.dimension = dimension;
         this.type = type;
+        this.direction = direction;
     }
     
     public Long getId() {
@@ -102,6 +104,10 @@ public class StructureEntity implements Serializable {
         this.parent = id;
     }
 
+    public Direction getDirection() {
+        return direction;
+    }
+    
     public Long getParent() {
         return parent;
     }

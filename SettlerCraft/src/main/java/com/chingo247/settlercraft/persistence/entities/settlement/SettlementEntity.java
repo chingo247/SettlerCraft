@@ -24,18 +24,13 @@
 package com.chingo247.settlercraft.persistence.entities.settlement;
 
 import com.chingo247.xcore.core.IWorld;
-import com.sk89q.worldedit.world.World;
 import java.io.Serializable;
 import java.util.UUID;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import org.hibernate.annotations.Index;
-import org.hibernate.validator.NotNull;
 
 /**
  *

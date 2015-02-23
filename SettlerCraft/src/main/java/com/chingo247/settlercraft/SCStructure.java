@@ -23,22 +23,22 @@
  */
 package com.chingo247.settlercraft;
 
-import com.chingo247.settlercraft.construction.asyncworldedit.AsyncPlacement;
-import com.chingo247.settlercraft.construction.asyncworldedit.AsyncWorldEditUtil;
-import com.chingo247.settlercraft.construction.options.Options;
+import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncPlacement;
+import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncWorldEditUtil;
+import com.chingo247.settlercraft.structure.construction.options.Options;
+import com.chingo247.settlercraft.structure.Structure;
+import com.chingo247.settlercraft.persistence.service.StructurePlayerDAO;
+import com.chingo247.settlercraft.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structure.plan.processing.StructurePlanReader;
 import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity;
 import com.chingo247.settlercraft.persistence.entities.structure.StructurePlayerEntity;
 import com.chingo247.settlercraft.persistence.entities.structure.StructureState;
-import com.chingo247.settlercraft.structure.Structure;
-import com.chingo247.settlercraft.persistence.service.StructurePlayerDAO;
-import com.chingo247.settlercraft.plan.StructurePlan;
-import com.chingo247.settlercraft.plan.processing.StructurePlanReader;
-import com.chingo247.settlercraft.regions.CuboidDimension;
+import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
 import com.chingo247.settlercraft.util.FireNextQueue;
 import com.chingo247.settlercraft.util.WorldEditUtil;
+import com.chingo247.settlercraft.world.Direction;
 import com.chingo247.settlercraft.world.World;
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.entity.Player;
 import java.io.File;
 import java.util.List;
@@ -63,6 +63,7 @@ public class SCStructure extends Structure {
     protected final SettlerCraft settlerCraft;
 
     protected SCStructure(SettlerCraft settlerCraft, ExecutorService service, StructureEntity entity, SCWorld world, StructurePlan plan) {
+        super(entity);
         this.tasks = new FireNextQueue(service);
         this.structurePlayerDao = new StructurePlayerDAO();
         this.world = world;
@@ -75,47 +76,13 @@ public class SCStructure extends Structure {
         return structureEntity;
     }
 
-    @Override
-    public Long getId() {
-        return structureEntity.getId();
-    }
-
-    @Override
-    public StructureState getState() {
-        return structureEntity.getState();
-    }
-    
-    
-
-    @Override
-    public String getName() {
-        return structureEntity.getName();
-    }
-
-    @Override
-    public void setName(String name) {
-        structureEntity.setName(name);
-    }
-
-    @Override
-    public double getValue() {
-        return structureEntity.getValue();
-    }
-
-    @Override
-    public void setValue(double value) {
-        structureEntity.setValue(value);
-    }
 
     @Override
     public World getWorld() {
         return world;
     }
 
-    @Override
-    public CuboidDimension getCuboidDimension() {
-        return structureEntity.getDimension();
-    }
+    
 
     @Override
     public Structure getParent() {
@@ -159,7 +126,7 @@ public class SCStructure extends Structure {
         }
         
         System.out.println("Build structure: " + getId());
-        
+        placement.rotate(getDirection());
         placement.place(editSession, structureEntity.getDimension().getMinPosition(), options);
     }
 

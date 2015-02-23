@@ -29,7 +29,7 @@ import com.chingo247.settlercraft.SettlerCraft;
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
 import com.chingo247.settlercraft.exception.StructureAPIException;
 import com.chingo247.settlercraft.exception.StructureDataException;
-import com.chingo247.settlercraft.plan.StructurePlan;
+import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.util.FileUtil;
 import com.sk89q.worldedit.data.DataException;
 import java.io.File;

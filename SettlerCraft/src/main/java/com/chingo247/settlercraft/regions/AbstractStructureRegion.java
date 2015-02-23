@@ -24,6 +24,7 @@
  */
 package com.chingo247.settlercraft.regions;
 
+import com.chingo247.settlercraft.persistence.entities.world.CuboidDimensional;
 import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;

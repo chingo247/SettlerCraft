@@ -27,7 +27,6 @@ import com.chingo247.settlercraft.SCStructure;
 import com.chingo247.settlercraft.SCWorld;
 import com.chingo247.settlercraft.SettlerCraft;
 import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity;
-import com.chingo247.settlercraft.structure.Structure;
 import com.chingo247.xcore.core.IWorld;
 import java.util.concurrent.ExecutorService;
 
@@ -43,7 +42,7 @@ public final class BKWorld extends SCWorld {
 
     @Override
     protected SCStructure handleStructure(StructureEntity entity) {
-        return new BKStructure(executor, entity, this, null);
+        return new BKStructure(executor, entity, this, getStructurePlan(entity));
     }
 
     
