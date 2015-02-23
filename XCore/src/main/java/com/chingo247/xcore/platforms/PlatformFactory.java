@@ -26,7 +26,7 @@ import org.bukkit.Bukkit;
  */
 public class PlatformFactory {
     
-    public static APlatform createPlatform(String platform) {
+    public static APlatform getPlatform(String platform) {
         switch(platform.toLowerCase()) {
             case "bukkit": return new BukkitPlatform(Bukkit.getServer());
             default: throw new AssertionError("Unsupported platform: " + platform);

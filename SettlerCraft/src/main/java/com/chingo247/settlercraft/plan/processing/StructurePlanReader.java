@@ -26,6 +26,7 @@ package com.chingo247.settlercraft.plan.processing;
 import com.chingo247.settlercraft.persistence.HSQLServer;
 import com.chingo247.settlercraft.plan.StructurePlan;
 import com.chingo247.settlercraft.plan.schematic.SchematicDataManager;
+import com.chingo247.xcore.util.ChatColors;
 import com.google.common.base.Preconditions;
 import java.io.File;
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ import org.apache.commons.io.FileUtils;
 public class StructurePlanReader {
 
     public List<StructurePlan> readDirectory(File structurePlanDirectory) {
-        System.out.println("Loading plans...");
+        System.out.println("[SettlerCraft]: Loading plans...");
         ForkJoinPool pool = new ForkJoinPool();
         Iterator<File> fit = FileUtils.iterateFiles(structurePlanDirectory, new String[]{"xml"}, true);
 
@@ -72,18 +73,18 @@ public class StructurePlanReader {
         }
 
         // Close the database connection
-        System.out.printf("******************************************\n");
-        System.out.printf("[SettlerCraft]: Parallel Threads: %d\n", pool.getParallelism());
-        System.out.printf("[SettlerCraft]: Plans loaded: %d\n", plans.size());
+        System.out.println("******************************************");
+        System.out.println(ChatColors.YELLOW + "[SettlerCraft]: "+ChatColors.RESET+"Parallel Threads: " + pool.getParallelism());
+        System.out.println(ChatColors.YELLOW + "[SettlerCraft]: "+ChatColors.RESET +"Plans loaded: " +  plans.size());
 //        System.out.printf("[SettlerCraft]: Steal Count: %d\n", pool.getStealCount());
-        System.out.printf("[SettlerCraft]: Time: %d ms\n", (System.currentTimeMillis() - start));
-        System.out.printf("******************************************\n");
+        System.out.println(ChatColors.YELLOW + "[SettlerCraft]: "+ChatColors.RESET + (System.currentTimeMillis() - start) + " ms");
+        System.out.println("******************************************");
         return plans;
     }
 
     public StructurePlan readFile(File structurePlanFile, ForkJoinPool pool) {
         Preconditions.checkNotNull(pool);
-        System.out.println("Loading plans...");
+        System.out.println(ChatColors.YELLOW + "[SettlerCraft]: "+ChatColors.RESET + "Loading plans...");
 
         SchematicDataManager sdm = SchematicDataManager.getInstance();
         sdm.load(structurePlanFile.getParentFile());

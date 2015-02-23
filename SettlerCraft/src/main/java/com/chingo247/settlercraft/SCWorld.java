@@ -126,7 +126,7 @@ public abstract class SCWorld extends World {
     }
 
     void _load() {
-        worldConfig = getConfig();
+//        worldConfig = getConfig();
         List<StructureEntity> entities = STRUCTURE_DAO.getStructureForWorld(getUniqueId());
         ForkJoinPool pool = new ForkJoinPool();
         for (StructureEntity structureEntity : entities) {

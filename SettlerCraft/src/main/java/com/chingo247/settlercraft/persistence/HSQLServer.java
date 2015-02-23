@@ -25,9 +25,9 @@
 package com.chingo247.settlercraft.persistence;
 
 
-import com.chingo247.settlercraft.commons.logging.SCLogger;
 import java.io.IOException;
 import java.net.Socket;
+import org.apache.log4j.Logger;
 
 import org.hsqldb.HsqlException;
 import org.hsqldb.Server;
@@ -39,7 +39,7 @@ import org.hsqldb.Server;
 
 public class HSQLServer {
 
-    private final SCLogger logger = SCLogger.getLogger();
+    private final Logger LOG = Logger.getLogger(getClass());
     private final String HOST = "localhost";
     private final int PORT;
     private final String MAIN_DATABASE = "SettlerCraft";
@@ -77,17 +77,17 @@ public class HSQLServer {
         Socket socket = null;
         try {
             socket = new Socket(HOST, PORT);
-            logger.print("HSQL Server already running");        
+            LOG.info("HSQL Server already running");        
             return true;
         } catch(IOException | HsqlException ex) {
-            logger.print("HSQL Server not running, startng it on port " + PORT);        
+            LOG.info("HSQL Server not running, startng it on port " + PORT);        
             return false;
         } finally {
             if(socket != null) {
                 try {
                     socket.close();
                 } catch (IOException ex) {
-                    logger.print(ex.getMessage());
+                    LOG.error(ex.getMessage());
                 }
             }
         }
@@ -99,7 +99,7 @@ public class HSQLServer {
     }
 
     public void stop() {
-        logger.print("Stopping HSQL server");
+        LOG.info("Stopping HSQL server");
         server.stop();
     }
     

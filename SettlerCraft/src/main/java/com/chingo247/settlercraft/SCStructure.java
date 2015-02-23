@@ -26,6 +26,7 @@ package com.chingo247.settlercraft;
 import com.chingo247.settlercraft.construction.options.Options;
 import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity;
 import com.chingo247.settlercraft.persistence.entities.structure.StructurePlayerEntity;
+import com.chingo247.settlercraft.persistence.entities.structure.StructureState;
 import com.chingo247.settlercraft.structure.Structure;
 import com.chingo247.settlercraft.persistence.service.StructurePlayerDAO;
 import com.chingo247.settlercraft.plan.StructurePlan;
@@ -46,83 +47,90 @@ import java.util.concurrent.ForkJoinPool;
  */
 public class SCStructure extends Structure {
 
-    private final FireNextQueue TASKS;
-    private final StructureEntity STRUCTURE_ENTITY;
-    private final StructurePlayerDAO STRUCTURE_PLAYER_DAO;
-    private final SCWorld WORLD;
-    private final SCGlobalContext CONTEXT;
-    private StructurePlan PLAN;
+    private final FireNextQueue tasks;
+    private final StructureEntity structureEntity;
+    private final StructurePlayerDAO structurePlayerDao;
+    private final SCWorld world;
+    private StructurePlan plan;
+    protected final SettlerCraft settlerCraft;
 
-    protected SCStructure(ExecutorService service, StructureEntity entity, SCWorld world) {
-        this.TASKS = new FireNextQueue(service);
-        this.STRUCTURE_PLAYER_DAO = new StructurePlayerDAO();
-        this.WORLD = world;
-        this.STRUCTURE_ENTITY = entity;
-        this.CONTEXT = SCGlobalContext.getContext();
+    protected SCStructure(SettlerCraft settlerCraft, ExecutorService service, StructureEntity entity, SCWorld world) {
+        this.tasks = new FireNextQueue(service);
+        this.structurePlayerDao = new StructurePlayerDAO();
+        this.world = world;
+        this.structureEntity = entity;
+        this.settlerCraft = settlerCraft;
     }
 
     public StructureEntity getEntity() {
-        return STRUCTURE_ENTITY;
+        return structureEntity;
     }
 
     @Override
     public Long getId() {
-        return STRUCTURE_ENTITY.getId();
+        return structureEntity.getId();
     }
 
     @Override
+    public StructureState getState() {
+        return structureEntity.getState();
+    }
+    
+    
+
+    @Override
     public String getName() {
-        return STRUCTURE_ENTITY.getName();
+        return structureEntity.getName();
     }
 
     @Override
     public void setName(String name) {
-        STRUCTURE_ENTITY.setName(name);
+        structureEntity.setName(name);
     }
 
     @Override
     public double getValue() {
-        return STRUCTURE_ENTITY.getValue();
+        return structureEntity.getValue();
     }
 
     @Override
     public void setValue(double value) {
-        STRUCTURE_ENTITY.setValue(value);
+        structureEntity.setValue(value);
     }
 
     @Override
     public World getWorld() {
-        return WORLD;
+        return world;
     }
 
     @Override
     public CuboidDimension getCuboidDimension() {
-        return STRUCTURE_ENTITY.getDimension();
+        return structureEntity.getDimension();
     }
 
     @Override
     public Structure getParent() {
-        return WORLD.getStructure(STRUCTURE_ENTITY.getParent());
+        return world.getStructure(structureEntity.getParent());
     }
 
     @Override
     public List<Structure> getSubStructures() {
-        return WORLD._getSubstructures(getId());
+        return world._getSubstructures(getId());
     }
 
     @Override
     public StructurePlan getStructurePlan() {
-        return PLAN;
+        return plan;
     }
 
     @Override
     public List<StructurePlayerEntity> getOwners() {
-        return STRUCTURE_PLAYER_DAO.getOwnersForStructure(getId());
+        return structurePlayerDao.getOwnersForStructure(getId());
     }
 
     @Override
     public boolean isOwner(UUID player) {
-        return STRUCTURE_PLAYER_DAO.isOwner(player, getId());
+        return structurePlayerDao.isOwner(player, getId());
     }
 
     @Override
@@ -140,17 +148,17 @@ public class SCStructure extends Structure {
     }
 
     void _load() {
-        PLAN = getStructurePlan();
+        plan = getStructurePlan();
     }
 
     @Override
     protected void _load(ForkJoinPool pool) {
-        String world = STRUCTURE_ENTITY.getWorld();
-        String uuid = STRUCTURE_ENTITY.getWorldUUID().toString();
-        String path = world + " - " + uuid + "//" + STRUCTURE_ENTITY.getId();
-        File file = new File(CONTEXT.getStructureDirectory(), path + "//StructurePlan.xml");
+        String world = structureEntity.getWorld();
+        String uuid = structureEntity.getWorldUUID().toString();
+        String path = world + " - " + uuid + "//" + structureEntity.getId();
+        File file = new File(settlerCraft.getStructureDirectory(), path + "//StructurePlan.xml");
         StructurePlanReader reader = new StructurePlanReader();
-        PLAN = reader.readFile(file, pool);
+        plan = reader.readFile(file, pool);
     }
 
 }

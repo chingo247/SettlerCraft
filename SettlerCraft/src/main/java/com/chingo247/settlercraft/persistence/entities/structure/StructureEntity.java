@@ -45,7 +45,7 @@ import org.hibernate.validator.NotNull;
  *
  * @author Chingo
  */
-@Entity(name = "StructureEntity")
+@Entity(name = "structure_entity")
 public class StructureEntity implements Serializable {
     
     @Id
@@ -74,7 +74,7 @@ public class StructureEntity implements Serializable {
     @Column(name = "value")
     private Double value;
     
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "structureentity")
     private Set<StructurePlayerEntity> players;
     
     @Column(name = "structure_state")

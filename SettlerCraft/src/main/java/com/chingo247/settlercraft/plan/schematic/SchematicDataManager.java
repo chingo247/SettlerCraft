@@ -23,12 +23,12 @@
  */
 package com.chingo247.settlercraft.plan.schematic;
 
-import com.chingo247.settlercraft.commons.logging.SCLogger;
 import com.chingo247.settlercraft.persistence.entities.SchematicEntity;
 import com.chingo247.settlercraft.persistence.service.AbstractDAO;
 import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
-import com.chingo247.settlercraft.commons.util.LogLevel;
 import com.chingo247.settlercraft.persistence.entities.QSchematicEntity;
+import com.chingo247.settlercraft.util.LogLevel;
+import com.chingo247.settlercraft.util.SCLogger;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sk89q.worldedit.data.DataException;
 import java.io.File;
@@ -39,8 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;

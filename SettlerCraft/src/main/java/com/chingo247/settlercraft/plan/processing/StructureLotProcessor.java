@@ -7,9 +7,9 @@ package com.chingo247.settlercraft.plan.processing;
 
 import com.chingo247.settlercraft.plan.placement.StructureLot;
 import com.chingo247.settlercraft.exception.PlanException;
-import com.chingo247.settlercraft.commons.logging.SCLogger;
-import com.chingo247.settlercraft.commons.util.LogLevel;
 import com.chingo247.settlercraft.plan.xml.XMLUtils;
+import com.chingo247.settlercraft.util.LogLevel;
+import com.chingo247.settlercraft.util.SCLogger;
 import com.sk89q.worldedit.Vector;
 import java.io.File;
 import org.dom4j.Element;

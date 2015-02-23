@@ -23,17 +23,16 @@
  */
 package com.chingo247.settlercraft.structure;
 
-import com.chingo247.settlercraft.commons.util.WorldEditUtil;
 import com.chingo247.settlercraft.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.construction.options.Options;
 import com.chingo247.settlercraft.persistence.entities.structure.StructurePlayerEntity;
+import com.chingo247.settlercraft.persistence.entities.structure.StructureState;
 import com.chingo247.settlercraft.plan.StructurePlan;
 import com.chingo247.settlercraft.regions.CuboidDimension;
+import com.chingo247.settlercraft.util.WorldEditUtil;
 import com.chingo247.settlercraft.world.World;
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.regions.CuboidRegion;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
@@ -55,6 +54,7 @@ public abstract class Structure {
     public abstract List<Structure> getSubStructures();
     public abstract StructurePlan getStructurePlan();
     public abstract List<StructurePlayerEntity> getOwners();
+    public abstract StructureState getState();
     
     public abstract boolean isOwner(UUID player);
     public boolean isOwner(Player player) {

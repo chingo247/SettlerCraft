@@ -19,7 +19,7 @@ public class WorldConfig {
     private final World world;
     private boolean allowStructures;
 
-    protected WorldConfig(World world, Properties properties) {
+    protected WorldConfig(World world) {
         this.world = world;
         this.allowStructures = false;
         
@@ -33,7 +33,9 @@ public class WorldConfig {
         return world;
     }
     
-    
+    void _load(SettlerCraft settlerCraft) {
+        
+    }
     
     
     

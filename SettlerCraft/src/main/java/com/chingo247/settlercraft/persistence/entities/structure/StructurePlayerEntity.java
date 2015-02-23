@@ -25,6 +25,7 @@
 
 package com.chingo247.settlercraft.persistence.entities.structure;
 
+import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.entity.Player;
 import java.io.Serializable;
 import java.util.UUID;
@@ -44,7 +45,7 @@ import org.hibernate.annotations.Index;
  * @author Chingo
  */
 @Entity(name = "structure_owner")
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"player_id", "structure"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"player_id", "structure_id"}))
 public class StructurePlayerEntity implements Serializable {
     
     @Id
@@ -60,7 +61,10 @@ public class StructurePlayerEntity implements Serializable {
     
     @Index(name = "structure_index")
     @ManyToOne(cascade = CascadeType.ALL)
-    private StructureEntity structure;
+    private StructureEntity structureentity;
+    
+    @Column(updatable = false, name = "structure_id")
+    private long structureId;
     
     @Index(name = "structure_player_role_index")
     private StructurePlayerRole playerRole;
@@ -79,10 +83,13 @@ public class StructurePlayerEntity implements Serializable {
      * @param player Whether the owner is a isPlayer or not
      */
     StructurePlayerEntity(Player player, StructureEntity structure, StructurePlayerRole playerRole) {
-        this.structure = structure;
+        Preconditions.checkNotNull(structure);
+        Preconditions.checkNotNull(structure.getId());
+        this.structureentity = structure;
         this.player = player.getUniqueId();
         this.playerName = player.getName();
         this.playerRole = playerRole;
+        this.structureId = structure.getId();
     }
 
     public Long getId() {
@@ -105,7 +112,7 @@ public class StructurePlayerEntity implements Serializable {
     public int hashCode() {
         int hash = 7;
         hash = 71 * hash + (this.player != null ? this.player.hashCode() : 0);
-        hash = 71 * hash + (this.structure != null ? this.structure.hashCode() : 0);
+        hash = 71 * hash + (this.structureentity != null ? this.structureentity.hashCode() : 0);
         return hash;
     }
 
@@ -121,7 +128,7 @@ public class StructurePlayerEntity implements Serializable {
         if (this.player != other.player && (this.player == null || !this.player.equals(other.player))) {
             return false;
         }
-        if (this.structure != other.structure && (this.structure == null || !this.structure.equals(other.structure))) {
+        if (this.structureentity != other.structureentity && (this.structureentity == null || !this.structureentity.equals(other.structureentity))) {
             return false;
         }
         return true;

@@ -25,7 +25,7 @@
 package com.chingo247.settlercraft.construction;
 
 import com.chingo247.settlercraft.persistence.legacy.AbstractStructureAPI;
-import com.chingo247.settlercraft.commons.util.KeyPool;
+import com.chingo247.settlercraft.util.KeyPool;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 

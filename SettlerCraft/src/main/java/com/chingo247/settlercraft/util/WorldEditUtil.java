@@ -23,13 +23,9 @@
  */
 package com.chingo247.settlercraft.util;
 
-import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.world.World;
 import java.util.List;
-import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 
 /**
  *
@@ -52,12 +48,5 @@ public class WorldEditUtil {
     }
     
   
-//    public static LocalPlayer wrapPlayer(Player player) {
-//        return getWorldEditPlugin().wrapPlayer(player);
-//    }
-//
-//    public static WorldEditPlugin getWorldEditPlugin() {
-//        return AsyncWorldEditMain.getWorldEdit(AsyncWorldEditMain.getInstance());
-//    }
 
 }

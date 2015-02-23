@@ -19,6 +19,9 @@ package com.chingo247.xcore.util;
 /**
  * Chatcolors util class, defines textcolors as described on:
  * http://minecraft.gamepedia.com/Formatting_codes
+ * 
+ * Note that the actual coloring depends on the implementation of the server
+ * 
  * @author Chingo
  */
 public class ChatColors {

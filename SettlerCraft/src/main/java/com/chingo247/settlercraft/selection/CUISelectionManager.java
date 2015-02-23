@@ -25,22 +25,13 @@
 
 package com.chingo247.settlercraft.selection;
 
-import com.chingo247.settlercraft.SettlerCraft;
-import com.chingo247.settlercraft.commons.util.WorldEditUtil;
-import com.chingo247.settlercraft.persistence.entities.SchematicEntity;
-import com.chingo247.xcore.core.IPlayer;
-import com.sk89q.worldedit.LocalPlayer;
+import com.chingo247.settlercraft.util.WorldEditUtil;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.world.World;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import org.apache.log4j.Logger;
-import org.hibernate.sql.Select;
 
 /**
  *
@@ -75,7 +66,7 @@ public class CUISelectionManager extends ASelectionManager {
 
     @Override
     public void deselect(Player player) {
-        LocalSession session = WorldEditUtil.getWorldEditPlugin().getWorldEdit().getSession(player);
+        LocalSession session = WorldEdit.getInstance().getSession(player);
         World world = WorldEditUtil.getWorld(player.getWorld().getName());
         if (session.getRegionSelector(world).isDefined()) {
             session.getRegionSelector(world).clear();

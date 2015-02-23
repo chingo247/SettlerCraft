@@ -25,8 +25,8 @@ package com.chingo247.settlercraft.plan.processing;
 
 import com.chingo247.settlercraft.plan.placement.SchematicPlacement;
 import com.chingo247.settlercraft.plan.xml.XMLUtils;
-import com.chingo247.settlercraft.commons.logging.SCLogger;
-import com.chingo247.settlercraft.commons.util.LogLevel;
+import com.chingo247.settlercraft.util.LogLevel;
+import com.chingo247.settlercraft.util.SCLogger;
 import com.chingo247.settlercraft.world.Direction;
 import com.sk89q.worldedit.Vector;
 import java.io.File;

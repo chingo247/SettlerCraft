@@ -23,7 +23,6 @@
  */
 package com.chingo247.settlercraft.plugin;
 
-import com.chingo247.settlercraft.commons.core.IPermission;
 import com.chingo247.xcore.core.IPlayer;
 
 /**

@@ -42,7 +42,7 @@ public class StructurePlayerDAO extends AbstractDAOImpl<StructurePlayerEntity, L
         Session session = HibernateUtil.getSession();
         HibernateQuery query = new HibernateQuery(session);
         QStructurePlayerEntity qspoe = QStructurePlayerEntity.structurePlayerEntity;
-        List<StructurePlayerEntity> owners = query.from(qspoe).where(qspoe.structure().id.eq(structureId)).list(qspoe);
+        List<StructurePlayerEntity> owners = query.from(qspoe).where(qspoe.structureentity().id.eq(structureId)).list(qspoe);
         session.close();
         return owners;
     }
@@ -51,7 +51,7 @@ public class StructurePlayerDAO extends AbstractDAOImpl<StructurePlayerEntity, L
         Session session = HibernateUtil.getSession();
         HibernateQuery query = new HibernateQuery(session);
         QStructurePlayerEntity qspoe = QStructurePlayerEntity.structurePlayerEntity;
-        List<StructureEntity> owners = query.from(qspoe).where(qspoe.player.eq(player)).list(qspoe.structure());
+        List<StructureEntity> owners = query.from(qspoe).where(qspoe.player.eq(player)).list(qspoe.structureentity());
         session.close();
         return owners;
     }
@@ -61,7 +61,7 @@ public class StructurePlayerDAO extends AbstractDAOImpl<StructurePlayerEntity, L
         HibernateQuery query = new HibernateQuery(session);
         QStructurePlayerEntity qspoe = QStructurePlayerEntity.structurePlayerEntity;
         boolean owners = query.from(qspoe)
-                .where(qspoe.structure().id.eq(structure)
+                .where(qspoe.structureentity().id.eq(structure)
                         .and(qspoe.player.eq(player)))
                 .exists();
         session.close();

@@ -24,7 +24,6 @@
 package com.chingo247.settlercraft.handlers;
 
 import com.chingo247.settlercraft.SettlerCraft;
-import com.chingo247.settlercraft.construction.options.BuildOptions;
 import com.chingo247.settlercraft.construction.options.Options;
 import com.chingo247.settlercraft.exception.StructureException;
 import com.chingo247.settlercraft.plan.StructurePlan;
