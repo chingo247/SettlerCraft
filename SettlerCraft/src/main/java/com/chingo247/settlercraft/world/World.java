@@ -23,99 +23,16 @@
  */
 package com.chingo247.settlercraft.world;
 
-import com.chingo247.settlercraft.WorldConfig;
-import com.chingo247.settlercraft.exception.StructureException;
-import com.chingo247.settlercraft.structure.Structure;
-import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structure.placement.Placement;
-import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
-import com.chingo247.settlercraft.structure.restriction.StructureHeightRestriction;
-import com.chingo247.settlercraft.structure.restriction.StructureRestriction;
-import com.chingo247.xcore.core.IWorld;
-import com.sk89q.worldedit.Vector;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 /**
  *
  * @author Chingo
  */
-public abstract class World {
+public interface World {
     
-    protected final String worldName;
-    protected final UUID worldUuid;
+    public UUID getUUID();
     
-    private final List<StructureRestriction> restrictions;
+    public String getName();
     
-    public World(IWorld iWorld) {
-        this.worldName = iWorld.getName();
-        this.worldUuid = iWorld.getUUID();
-        this.restrictions = new ArrayList<>();
-        this.restrictions.add(new StructureHeightRestriction());
-    }
-    
-    /**
-     * Gets the world UUID
-     * @return The worldUUID
-     */
-    public UUID getUniqueId() {
-        return worldUuid;
-    }
-    
-    /**
-     * Gets the name of the world
-     * @return The name of the world
-     */
-    public String getName() {
-        return worldName;
-    }
-    
-    /**
-     * Creates a structure
-     * @param plan The StructurePlan
-     * @param position The position where the structure is gonna be placed
-     * @param direction The direction of the structure
-     * @return 
-     * @throws com.chingo247.settlercraft.exception.StructureException
-     */
-    public abstract Structure createStructure(StructurePlan plan, Vector position, Direction direction) throws StructureException;
-    
-    /**
-     * Create a structure
-     * @param placement The placement
-     * @param postion The position
-     * @param direction The direction
-     * @return 
-     * @throws com.chingo247.settlercraft.exception.StructureException
-     */
-    public abstract Structure createStructure(Placement placement, Vector postion, Direction direction) throws StructureException;
-    
-    /**
-     * Gets all the structures in this world
-     * @return The structures in this world
-     */
-    public abstract List<Structure> getStructures();
-    
-    /**
-     * Gets the structure with the corresponding id
-     * @param id The structure
-     * @return The structure or null of structure was not found.
-     */
-    public abstract Structure getStructure(long id);
-    
-    /**
-     * Checks if the given cuboid overlaps any structures
-     * @param dimension The cuboid dimension
-     * @return True if there is overlap.
-     */
-    public abstract boolean overlapsStructures(CuboidDimension dimension);
-    
-    /**
-     * Gets the world's config
-     * @return The config of this world
-     */
-    public abstract WorldConfig getConfig();
-    
-
 }

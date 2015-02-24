@@ -138,6 +138,8 @@ public class SchematicPlacement extends DirectionalPlacement {
      */
     @Override
     public void rotate(Direction direction) {
+        
+        
         switch (direction) {
             case EAST:
                 break;

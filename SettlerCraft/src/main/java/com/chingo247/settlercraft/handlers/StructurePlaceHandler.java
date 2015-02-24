@@ -24,6 +24,7 @@
 package com.chingo247.settlercraft.handlers;
 
 import com.chingo247.settlercraft.SettlerCraft;
+import com.chingo247.settlercraft.SettlerCraftStructure;
 import com.chingo247.settlercraft.structure.construction.options.Options;
 import com.chingo247.settlercraft.exception.StructureException;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
@@ -31,7 +32,6 @@ import com.chingo247.settlercraft.provider.EconomyProvider;
 import com.chingo247.settlercraft.selection.CUISelectionManager;
 import com.chingo247.settlercraft.selection.ISelectionManager;
 import com.chingo247.settlercraft.selection.NoneSelectionManager;
-import com.chingo247.settlercraft.structure.Structure;
 import com.chingo247.settlercraft.util.KeyPool;
 import com.chingo247.settlercraft.util.WorldUtil;
 import com.chingo247.settlercraft.world.Direction;
@@ -175,8 +175,8 @@ public class StructurePlaceHandler {
             
             System.out.println("Can place?");
             if (canPlace(player, world, pos1, direction, plan)) {
-                com.chingo247.settlercraft.world.World settlerCraftWorld = settlercraft.getWorld(world.getName());
-                Structure structure;
+                com.chingo247.settlercraft.SettlerCraftWorld settlerCraftWorld = settlercraft.getWorld(world.getName());
+                SettlerCraftStructure structure;
                 try {
                     System.out.println("Creating structure");
                     structure = settlerCraftWorld.createStructure(plan, pos1, direction);
@@ -188,7 +188,7 @@ public class StructurePlaceHandler {
 //                        iPlayer.getInventory().removeItem(clone);
 //                        iPlayer.updateInventory();
                         System.out.println("Build structure!");
-                        structure.build(player, Options.defaultOptions(), false);
+                        structure.build(player.getUniqueId(), Options.defaultOptions(), false);
                     }
                 } catch (StructureException ex) {
                     player.print(ChatColors.RED + ex.getMessage());

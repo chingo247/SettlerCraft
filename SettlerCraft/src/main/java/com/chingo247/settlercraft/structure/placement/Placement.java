@@ -92,4 +92,5 @@ public abstract class Placement implements CuboidDimensional {
     
     public abstract void move(Vector offset);
     
+    
 }

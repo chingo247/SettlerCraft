@@ -36,8 +36,8 @@ import com.sk89q.worldedit.Vector;
  */
 public abstract class GeneratedPlacement<T extends Generator> extends Placement {
     
-    private final Generator generator;
-    private final Vector position;
+    protected final T generator;
+    protected final Vector position;
 
     public GeneratedPlacement(T generator, Vector relativePosition) {
         Preconditions.checkNotNull(generator);
@@ -45,7 +45,7 @@ public abstract class GeneratedPlacement<T extends Generator> extends Placement 
         this.position = relativePosition;
     }
 
-    public Generator getGenerator() {
+    public T getGenerator() {
         return generator;
     }
     

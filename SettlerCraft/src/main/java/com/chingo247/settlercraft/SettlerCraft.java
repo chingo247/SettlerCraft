@@ -27,8 +27,6 @@ import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity
 import com.chingo247.settlercraft.persistence.service.StructureDAO;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.plan.processing.StructurePlanReader;
-import com.chingo247.settlercraft.structure.Structure;
-import com.chingo247.settlercraft.world.World;
 import com.chingo247.xcore.core.APlatform;
 import com.chingo247.xcore.core.IWorld;
 import com.sk89q.worldedit.entity.Player;
@@ -54,7 +52,7 @@ public abstract class SettlerCraft {
 
     public static final String MSG_PREFIX = "[SettlerCraft]: ";
     private final Logger LOG = Logger.getLogger(SettlerCraft.class);
-    private final Map<UUID, SCWorld> worlds;
+    private final Map<UUID, SettlerCraftWorld> worlds;
     private final Map<UUID, Object> worldMutexes;
     private final Map<String, StructurePlan> strucuturePlans;
     private final StructureDAO structureDAO;
@@ -130,20 +128,20 @@ public abstract class SettlerCraft {
         }
     }
     
-    public Structure getStructure(long id) {
+    public SettlerCraftStructure getStructure(long id) {
         StructureEntity entity = structureDAO.find(id);
         if(entity == null) {
             return null;
         }
         UUID world = entity.getWorldUUID();
-        World w = getWorld(world); 
+        SettlerCraftWorld w = getWorld(world); 
         if(w == null) { 
             return null;
         }
         return w.getStructure(id);
     }
     
-    public World getWorld(String world) {
+    public SettlerCraftWorld getWorld(String world) {
         IWorld w = getPlatform().getServer().getWorld(world);
         if(w == null) {
             return null;
@@ -151,8 +149,8 @@ public abstract class SettlerCraft {
         return getWorld(w.getUUID());
     }
 
-    public World getWorld(UUID world) {
-        World w;
+    public SettlerCraftWorld getWorld(UUID world) {
+        SettlerCraftWorld w;
         synchronized (worlds) {
             w = worlds.get(world);
         }
@@ -174,7 +172,7 @@ public abstract class SettlerCraft {
             }
             
             synchronized (mutex) {
-                SCWorld scw = handle(iWorld);
+                SettlerCraftWorld scw = handle(iWorld);
                 scw._load();
                 synchronized(worlds) {
                     worlds.put(scw.getUniqueId(), scw);
@@ -212,7 +210,7 @@ public abstract class SettlerCraft {
         }
     }
 
-    protected abstract SCWorld handle(IWorld world);
+    protected abstract SettlerCraftWorld handle(IWorld world);
 
     protected abstract Player getPlayer(UUID player);        
     

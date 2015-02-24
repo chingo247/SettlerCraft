@@ -24,7 +24,6 @@
 package com.chingo247.settlercraft;
 
 import com.chingo247.settlercraft.persistence.entities.structure.QStructureEntity;
-import com.chingo247.settlercraft.structure.Structure;
 import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.persistence.service.StructureDAO;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
@@ -36,7 +35,6 @@ import com.chingo247.settlercraft.structure.restriction.StructureHeightRestricti
 import com.chingo247.settlercraft.structure.restriction.StructureOverlapRestriction;
 import com.chingo247.settlercraft.structure.restriction.StructureRestriction;
 import com.chingo247.settlercraft.world.Direction;
-import com.chingo247.settlercraft.world.World;
 import com.chingo247.xcore.core.IWorld;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sk89q.worldedit.Vector;
@@ -44,6 +42,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 import org.apache.log4j.Logger;
@@ -53,19 +52,20 @@ import org.hibernate.Session;
  *
  * @author Chingo
  */
-public abstract class SCWorld extends World {
+public abstract class SettlerCraftWorld {
 
-    private final Logger LOG = Logger.getLogger(SCWorld.class);
+    private final Logger LOG = Logger.getLogger(SettlerCraftWorld.class);
     protected final ExecutorService executor;
-    private final Map<Long, Structure> structures;
+    private final Map<Long, SettlerCraftStructure> structures;
     private final StructureDAO structureDao = new StructureDAO();
     private final SettlerCraft settlerCraft;
     private WorldConfig worldConfig;
     private List<StructureRestriction> restrictions;
     
-
-    protected SCWorld(ExecutorService executor, SettlerCraft settlerCraft, IWorld world) {
-        super(world);
+    protected final String worldName;
+    protected final UUID worldUuid;
+    
+    protected SettlerCraftWorld(ExecutorService executor, SettlerCraft settlerCraft, IWorld iWorld) {
         this.executor = executor;
         this.structures = new HashMap<>();
         this.restrictions = new ArrayList<>();
@@ -73,12 +73,29 @@ public abstract class SCWorld extends World {
         this.restrictions.add(new StructureHeightRestriction());
         this.restrictions.add(new StructureOverlapRestriction());
         this.settlerCraft = settlerCraft;
-        // TODO ADD GLOBAL RESTRICTIONS
+        this.worldName = iWorld.getName();
+        this.worldUuid = iWorld.getUUID();
+        this.restrictions = new ArrayList<>();
+        this.restrictions.add(new StructureHeightRestriction());
+    }
+
+     /**
+     * Gets the world UUID
+     * @return The worldUUID
+     */
+    public UUID getUniqueId() {
+        return worldUuid;
+    }
+    
+    /**
+     * Gets the name of the world
+     * @return The name of the world
+     */
+    public String getName() {
+        return worldName;
     }
 
     
-
-    @Override
     public WorldConfig getConfig() {
         if(worldConfig == null) {
             
@@ -86,55 +103,50 @@ public abstract class SCWorld extends World {
         return worldConfig;
     }
 
-    @Override
-    public Structure createStructure(StructurePlan plan, Vector position, Direction direction) {
+    public SettlerCraftStructure createStructure(StructurePlan plan, Vector position, Direction direction) {
         System.out.println("Creating structure...");
         
         CuboidDimension planDimension = plan.getPlacement().getCuboidDimension();
         CuboidDimension dimension = new CuboidDimension(planDimension.getMinPosition().add(position), planDimension.getMaxPosition().add(position));
         StructureEntity entity = new StructureEntity(worldName, worldUuid, dimension, StructureType.OTHER, direction);
         entity = structureDao.save(entity);
-        SCStructure structure = new SCStructure(settlerCraft, executor, entity, this, plan);
+        SettlerCraftStructure structure = new SettlerCraftStructure(settlerCraft, executor, entity, this, plan);
         return structure;
     }
 
-    @Override
-    public Structure createStructure(Placement placement, Vector postion, Direction direction) {
+    public SettlerCraftStructure createStructure(Placement placement, Vector postion, Direction direction) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public List<Structure> getStructures() {
+    public List<SettlerCraftStructure> getStructures() {
         return new ArrayList<>(structures.values());
     }
 
-    @Override
-    public Structure getStructure(long id) {
+    public SettlerCraftStructure getStructure(long id) {
         return structures.get(id);
     }
 
-    @Override
     public boolean overlapsStructures(CuboidDimension dimension) {
         return structureDao.overlaps(worldUuid, dimension);
     }
     
     
 
-    List<Structure> _getSubstructures(long id) {
+    List<SettlerCraftStructure> _getSubstructures(long id) {
         List<Long> ids = getSubstructuresIds(id);
-        List<Structure> ss = new ArrayList<>(ids.size());
+        List<SettlerCraftStructure> ss = new ArrayList<>(ids.size());
         for (Long i : ids) {
             ss.add(getStructure(i));
         }
         return ss;
     }
 
-    private Structure _prepare(StructureEntity structureEntity, ForkJoinPool pool) {
-        Structure structure = null;
+    private SettlerCraftStructure _prepare(StructureEntity structureEntity, ForkJoinPool pool) {
+        SettlerCraftStructure structure = null;
         synchronized (structures) {
             structure = structures.get(structureEntity.getId());
             if (structure == null) {
-                SCStructure ss = handleStructure(structureEntity);
+                SettlerCraftStructure ss = handleStructure(structureEntity);
                 ss._load(pool);
                 structures.put(ss.getId(), structure);
                 structure = ss;
@@ -154,7 +166,7 @@ public abstract class SCWorld extends World {
         pool.shutdown();
     }
 
-    protected abstract SCStructure handleStructure(StructureEntity entity);
+    protected abstract SettlerCraftStructure handleStructure(StructureEntity entity);
     
     protected StructurePlan getStructurePlan(StructureEntity entity) {
         throw new UnsupportedOperationException("Not supported yet");

@@ -5,7 +5,7 @@
  */
 package com.chingo247.settlercraft.bukkit;
 
-import com.chingo247.settlercraft.SCWorld;
+import com.chingo247.settlercraft.SettlerCraftWorld;
 import com.chingo247.settlercraft.SettlerCraft;
 import com.chingo247.settlercraft.bukkit.util.BKWorldEditUtil;
 import com.chingo247.xcore.core.IWorld;
@@ -30,7 +30,7 @@ public class BKSettlerCraft extends SettlerCraft {
     }
 
     @Override
-    protected SCWorld handle(IWorld world) {
+    protected SettlerCraftWorld handle(IWorld world) {
         return new BKWorld(EXECUTOR, this, world);
     }
     

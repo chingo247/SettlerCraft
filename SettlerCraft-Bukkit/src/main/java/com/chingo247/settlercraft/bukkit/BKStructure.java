@@ -23,7 +23,7 @@
  */
 package com.chingo247.settlercraft.bukkit;
 
-import com.chingo247.settlercraft.SCStructure;
+import com.chingo247.settlercraft.SettlerCraftStructure;
 import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import java.util.concurrent.ExecutorService;
@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService;
  *
  * @author Chingo
  */
-public class BKStructure extends SCStructure {
+public class BKStructure extends SettlerCraftStructure {
     
     BKStructure(ExecutorService service, StructureEntity entity, BKWorld world, StructurePlan plan) {
         super(SettlerCraftPlugin.getInstance().getSettlerCraft(), service, entity, world, plan);

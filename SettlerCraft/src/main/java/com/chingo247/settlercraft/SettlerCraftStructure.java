@@ -23,10 +23,12 @@
  */
 package com.chingo247.settlercraft;
 
+import com.chingo247.settlercraft.SettlerCraft;
+import com.chingo247.settlercraft.SettlerCraftWorld;
+import com.chingo247.settlercraft.exception.StructureException;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.structure.construction.options.Options;
-import com.chingo247.settlercraft.structure.Structure;
 import com.chingo247.settlercraft.persistence.service.StructurePlayerDAO;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.plan.processing.StructurePlanReader;
@@ -37,7 +39,6 @@ import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
 import com.chingo247.settlercraft.util.FireNextQueue;
 import com.chingo247.settlercraft.util.WorldEditUtil;
 import com.chingo247.settlercraft.world.Direction;
-import com.chingo247.settlercraft.world.World;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.entity.Player;
 import java.io.File;
@@ -53,17 +54,16 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
  *
  * @author Chingo
  */
-public class SCStructure extends Structure {
+public class SettlerCraftStructure {
 
     private final FireNextQueue tasks;
     private final StructureEntity structureEntity;
     private final StructurePlayerDAO structurePlayerDao;
-    private final SCWorld world;
+    private final SettlerCraftWorld world;
     private StructurePlan plan;
     protected final SettlerCraft settlerCraft;
 
-    protected SCStructure(SettlerCraft settlerCraft, ExecutorService service, StructureEntity entity, SCWorld world, StructurePlan plan) {
-        super(entity);
+    protected SettlerCraftStructure(SettlerCraft settlerCraft, ExecutorService service, StructureEntity entity, SettlerCraftWorld world, StructurePlan plan) {
         this.tasks = new FireNextQueue(service);
         this.structurePlayerDao = new StructurePlayerDAO();
         this.world = world;
@@ -72,45 +72,69 @@ public class SCStructure extends Structure {
         this.settlerCraft = settlerCraft;
     }
 
-    public StructureEntity getEntity() {
+    public Long getId() {
+        return structureEntity.getId();
+    }
+    
+    public String getName() {
+        return structureEntity.getName();
+    }
+    
+    public void setName(String name) {
+        structureEntity.setName(name);
+    }
+    public double getValue() {
+        return structureEntity.getValue();
+    }
+    public void setValue(double value) {
+        structureEntity.setValue(value);
+    }
+    
+    public SettlerCraftWorld getWorld() {
+        return settlerCraft.getWorld(structureEntity.getWorld());
+    }
+    
+    public CuboidDimension getCuboidDimension() {
+        return structureEntity.getDimension();
+    }
+
+    public void setState(StructureState state) {
+        structureEntity.setState(state);
+    }
+    
+    public StructureState getState() {
+        return structureEntity.getState();
+    }
+    
+    public Direction getDirection() {
+        return structureEntity.getDirection();
+    }
+    
+    protected StructureEntity getEntity() {
         return structureEntity;
     }
 
-
-    @Override
-    public World getWorld() {
-        return world;
-    }
-
-    
-
-    @Override
-    public Structure getParent() {
+    public SettlerCraftStructure getParent() {
         return world.getStructure(structureEntity.getParent());
     }
 
-    @Override
-    public List<Structure> getSubStructures() {
+    public List<SettlerCraftStructure> getSubStructures() {
         return world._getSubstructures(getId());
     }
 
-    @Override
     public StructurePlan getStructurePlan() {
         return plan;
     }
 
-    @Override
     public List<StructurePlayerEntity> getOwners() {
         return structurePlayerDao.getOwnersForStructure(getId());
     }
 
-    @Override
     public boolean isOwner(UUID player) {
         return structurePlayerDao.isOwner(player, getId());
     }
 
-    @Override
-    public void build(UUID player, Options options, boolean force) {
+    public void build(UUID player, Options options, boolean force) throws StructureException {
         PlayerEntry entry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(player);
         AsyncPlacement placement = new AsyncPlacement(entry, plan.getPlacement());
         
@@ -126,16 +150,14 @@ public class SCStructure extends Structure {
         }
         
         System.out.println("Build structure: " + getId());
-        placement.rotate(getDirection());
+//        placement.rotate(getDirection());
         placement.place(editSession, structureEntity.getDimension().getMinPosition(), options);
     }
 
-    @Override
     public void demolish(EditSession session, Options options, boolean force) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
     public void stop(boolean force) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -144,11 +166,10 @@ public class SCStructure extends Structure {
         plan = getStructurePlan();
     }
 
-    @Override
     protected void _load(ForkJoinPool pool) {
-        String world = structureEntity.getWorld();
-        String uuid = structureEntity.getWorldUUID().toString();
-        String path = world + " - " + uuid + "//" + structureEntity.getId();
+        String worldName = structureEntity.getWorld();
+        String worldUuid = structureEntity.getWorldUUID().toString();
+        String path = worldName + " - " + worldUuid + "//" + structureEntity.getId();
         File file = new File(settlerCraft.getStructureDirectory(), path + "//StructurePlan.xml");
         StructurePlanReader reader = new StructurePlanReader();
         plan = reader.readFile(file, pool);
