@@ -22,43 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.placement;
-
-import com.chingo247.settlercraft.structure.generators.Generator;
-import com.google.common.base.Preconditions;
-import com.sk89q.worldedit.Vector;
+package com.chingo247.settlercraft.structure.generators;
 
 /**
  *
  * @author Chingo
- * @param <T>
- * 
  */
-public abstract class GeneratedPlacement<T extends Generator> extends Placement {
+public class XMLGeneratorParser {
     
-    protected final T generator;
-    protected final Vector position;
-
-    public GeneratedPlacement(T generator, Vector relativePosition) {
-        Preconditions.checkNotNull(generator);
-        this.generator =  generator;
-        this.position = relativePosition;
-    }
-
-    public T getGenerator() {
-        return generator;
-    }
-    
-    @Override
-    public Vector getRelativePosition() {
-        return position;
-    }
-
-    @Override
-    public void move(Vector offset) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
-    
-
 }

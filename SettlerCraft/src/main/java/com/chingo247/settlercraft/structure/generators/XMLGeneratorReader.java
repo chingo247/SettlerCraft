@@ -22,12 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.plan.generators;
+package com.chingo247.settlercraft.structure.generators;
 
 /**
  *
  * @author Chingo
  */
-public class XMLGeneratorParser {
+public class XMLGeneratorReader {
     
 }

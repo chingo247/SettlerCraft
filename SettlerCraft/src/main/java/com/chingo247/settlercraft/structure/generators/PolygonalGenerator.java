@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.plan.generators;
+package com.chingo247.settlercraft.structure.generators;
 
 import com.chingo247.settlercraft.regions.StructurePolygonal2DRegion;
 import com.sk89q.worldedit.CuboidClipboard;

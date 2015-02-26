@@ -22,66 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.placement;
+package com.chingo247.settlercraft.structure.generators;
 
-import com.chingo247.settlercraft.structure.generators.EllipsoidGenerator;
-import com.chingo247.settlercraft.structure.construction.options.Options;
-import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
-import com.chingo247.settlercraft.world.Direction;
-import static com.chingo247.settlercraft.world.Direction.EAST;
-import static com.chingo247.settlercraft.world.Direction.NORTH;
-import static com.chingo247.settlercraft.world.Direction.SOUTH;
-import static com.chingo247.settlercraft.world.Direction.WEST;
+import com.chingo247.settlercraft.regions.StructureCuboidRegion;
+import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.Vector;
 
 /**
  *
  * @author Chingo
  */
-public class GeneratedEllipsoid extends GeneratedPlacement<EllipsoidGenerator> {
+public class CuboidGenerator extends Generator<StructureCuboidRegion> {
     
-    private int xradius;
-    private int zradius;
-
-    public GeneratedEllipsoid(EllipsoidGenerator generator, int xradius, int zradius, Vector position) {
-        super(generator, position);
-    }
-
-    public int getXradius() {
-        return xradius;
-    }
-
-    public int getZradius() {
-        return zradius;
-    }
-
-    public Vector getPosition() {
-        return position;
+    private int vertexMaterial = -1;
+    private int ribMaterial = -1;
+    private int faceMaterial = -1;
+    private int innerMaterial = -1;
+    
+    private int vertexData = -1;
+    private int ribData = -1;
+    private int faceData = -1;
+    private int innerData = -1;
+    
+    public CuboidGenerator() {
+        super("SettlerCraft", "Cuboid");
     }
     
+   
     @Override
-    public CuboidDimension getCuboidDimension() {
+    public CuboidClipboard generate(StructureCuboidRegion region) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void rotate(Direction direction) {
-        switch(direction) {
-            case EAST:
-            case WEST:break;
-            case NORTH: 
-            case SOUTH: 
-            int temp = xradius;
-            xradius = zradius;
-            zradius = temp;
-            break;
-        }
-    }
-
-    @Override
-    public void place(EditSession editSession, Vector pos, Options options) {
+    public void generate(StructureCuboidRegion region, EditSession session) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    
     
 }

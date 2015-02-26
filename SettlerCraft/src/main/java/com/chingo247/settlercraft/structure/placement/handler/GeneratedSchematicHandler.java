@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -22,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.plan.generators;
+package com.chingo247.settlercraft.structure.placement.handler;
 
 /**
  *
  * @author Chingo
  */
-public class XMLGeneratorReader {
+public class GeneratedSchematicHandler extends PlacementHandler<Gen> {
     
 }

@@ -23,10 +23,12 @@
  */
 package com.chingo247.settlercraft.structure.placement;
 
+import com.chingo247.settlercraft.structure.generators.Generator;
+
 /**
- * Generated Schematic uses a Schematic as base and will repeat itself along one or more axis
+ * Generated Schematic uses a Schematic as base/template and may repeat itself along one or more axis
  * @author Chingo
  */
-public class GeneratedSchematic {
+public class GeneratedSchematic extends GeneratedPlacement<Generator>{
     
 }

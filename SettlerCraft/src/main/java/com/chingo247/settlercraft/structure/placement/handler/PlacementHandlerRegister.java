@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -22,30 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.plan.generators;
+package com.chingo247.settlercraft.structure.placement.handler;
 
-import com.chingo247.settlercraft.regions.StructureCylinderRegion;
-import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.EditSession;
+import com.chingo247.xcore.core.IPlugin;
+import java.util.Map;
+import net.minecraft.util.com.google.common.collect.Maps;
 
 /**
  *
  * @author Chingo
  */
-public class CylinderGenerator extends Generator<StructureCylinderRegion>{
-
-    public CylinderGenerator() {
-        super("SettlerCraft", "Cylinder");
-    }
-
-    @Override
-    public CuboidClipboard generate(StructureCylinderRegion region) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void generate(StructureCylinderRegion region, EditSession session) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+public class PlacementHandlerRegister {
+    
+    
     
 }

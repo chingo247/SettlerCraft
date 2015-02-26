@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -22,43 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.plan.generators;
+package com.chingo247.settlercraft.structure.placement.handler;
 
-import com.chingo247.settlercraft.regions.StructureCuboidRegion;
-import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.EditSession;
+import com.chingo247.settlercraft.structure.placement.GeneratedEllipsoid;
+import org.dom4j.Document;
 
 /**
  *
  * @author Chingo
  */
-public class CuboidGenerator extends Generator<StructureCuboidRegion> {
-    
-    private int vertexMaterial = -1;
-    private int ribMaterial = -1;
-    private int faceMaterial = -1;
-    private int innerMaterial = -1;
-    
-    private int vertexData = -1;
-    private int ribData = -1;
-    private int faceData = -1;
-    private int innerData = -1;
-    
-    public CuboidGenerator() {
-        super("SettlerCraft", "Cuboid");
+public class GeneratedEllipsoidHandler extends PlacementHandler<GeneratedEllipsoid> {
+
+    public GeneratedEllipsoidHandler() {
+        super("SettlerCraft", "GeneratedEllipsoid");
     }
-    
-   
+
     @Override
-    public CuboidClipboard generate(StructureCuboidRegion region) {
+    public GeneratedEllipsoid handle(Document d) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void generate(StructureCuboidRegion region, EditSession session) {
+    public GeneratedEllipsoid copy(GeneratedEllipsoid t) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    
+    @Override
+    public Document asDocument(GeneratedEllipsoid t) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

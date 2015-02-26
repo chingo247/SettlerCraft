@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -22,30 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.plan.generators;
+package com.chingo247.settlercraft.structure.placement.handler;
 
-import com.chingo247.settlercraft.regions.StructureEllipsoidRegion;
-import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.EditSession;
+import com.chingo247.settlercraft.structure.placement.GeneratedPolygonal2D;
+import org.dom4j.Document;
 
 /**
  *
  * @author Chingo
  */
-public class EllipsoidGenerator extends Generator<StructureEllipsoidRegion> {
+public class GeneratedPolygonal2DHandler extends PlacementHandler<GeneratedPolygonal2D>{
 
-    public EllipsoidGenerator() {
-        super("SettlerCraft", "Cylinder");
-        throw new UnsupportedOperationException("Not supported yet.");
+    public GeneratedPolygonal2DHandler() {
+        super("SettlerCraft", "GeneratedPolygonal2D");
     }
 
     @Override
-    public CuboidClipboard generate(StructureEllipsoidRegion region) {
+    public GeneratedPolygonal2D handle(Document d) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void generate(StructureEllipsoidRegion region, EditSession session) {
+    public GeneratedPolygonal2D copy(GeneratedPolygonal2D t) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Document asDocument(GeneratedPolygonal2D t) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

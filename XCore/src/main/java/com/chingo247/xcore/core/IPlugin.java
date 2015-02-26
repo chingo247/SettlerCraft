@@ -24,6 +24,8 @@ import java.io.File;
  */
 public interface IPlugin {
     
+    public String getName();
+    
     public File getDataFolder();
     
 }

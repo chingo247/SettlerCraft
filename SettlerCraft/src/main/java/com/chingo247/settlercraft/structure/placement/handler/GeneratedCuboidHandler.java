@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -22,57 +21,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.placement;
+package com.chingo247.settlercraft.structure.placement.handler;
 
-import com.chingo247.settlercraft.structure.construction.options.Options;
-import com.chingo247.settlercraft.structure.generators.CuboidGenerator;
-import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
-import com.chingo247.settlercraft.world.Direction;
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.Vector;
+import com.chingo247.settlercraft.structure.placement.GeneratedCuboid;
+import org.dom4j.Document;
 
 /**
  *
  * @author Chingo
+ * @param <T>
  */
-public class GeneratedCuboid extends GeneratedPlacement<CuboidGenerator>{
-
-    private int length;
-    private int width;
-
-    public GeneratedCuboid(CuboidGenerator generator, int width, int length) {
-        this(generator, width, length, Vector.ZERO);
-    }
+public class GeneratedCuboidHandler<T extends GeneratedCuboid> extends PlacementHandler<T> {
     
-    
-    
-    public GeneratedCuboid(CuboidGenerator generator, int width, int length, Vector position) {
-        super(generator, position);
-        this.length = length;
-        this.width = width; 
+    public GeneratedCuboidHandler() {
+        super("SettlerCraft", "GeneratedCuboid");
     }
 
     @Override
-    public CuboidDimension getCuboidDimension() {
+    public T handle(Document d) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void rotate(Direction direction) {
-        switch(direction) {
-            case EAST:
-            case WEST: break;
-            case NORTH:
-            case SOUTH:
-            int temp = width;
-            width = length;
-            length = temp;
-        }
+    public T copy(T t) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void place(EditSession editSession, Vector pos, Options options) {
+    public Document asDocument(T t) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    
     
 }

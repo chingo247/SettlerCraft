@@ -22,43 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.placement;
+package com.chingo247.settlercraft.structure.generators;
 
-import com.chingo247.settlercraft.structure.generators.Generator;
-import com.google.common.base.Preconditions;
-import com.sk89q.worldedit.Vector;
+import com.chingo247.settlercraft.regions.AbstractStructureRegion;
+import com.sk89q.worldedit.CuboidClipboard;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.regions.Region;
 
 /**
  *
  * @author Chingo
- * @param <T>
- * 
+ * @param <T> The region Type
  */
-public abstract class GeneratedPlacement<T extends Generator> extends Placement {
+public abstract class Generator<T extends AbstractStructureRegion> {
     
-    protected final T generator;
-    protected final Vector position;
+    private final String m_plugin;
+    private final String m_id;
 
-    public GeneratedPlacement(T generator, Vector relativePosition) {
-        Preconditions.checkNotNull(generator);
-        this.generator =  generator;
-        this.position = relativePosition;
+    public Generator(String plugin, String id) {
+        this.m_plugin = plugin;
+        this.m_id = id;
     }
 
-    public T getGenerator() {
-        return generator;
-    }
-    
-    @Override
-    public Vector getRelativePosition() {
-        return position;
+    public String getId() {
+        return m_id;
     }
 
-    @Override
-    public void move(Vector offset) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public String getPlugin() {
+        return m_plugin;
     }
     
+    public abstract CuboidClipboard generate(T region);
     
-
+    public abstract void generate(T region, EditSession session);
+    
+    
+    
 }

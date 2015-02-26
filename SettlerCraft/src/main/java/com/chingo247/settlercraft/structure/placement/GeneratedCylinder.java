@@ -24,7 +24,7 @@
  */
 package com.chingo247.settlercraft.structure.placement;
 
-import com.chingo247.settlercraft.structure.plan.generators.CylinderGenerator;
+import com.chingo247.settlercraft.structure.generators.CylinderGenerator;
 import com.chingo247.settlercraft.structure.construction.options.Options;
 import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
 import com.chingo247.settlercraft.world.Direction;

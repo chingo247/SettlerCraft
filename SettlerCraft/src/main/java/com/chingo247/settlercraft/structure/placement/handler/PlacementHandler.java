@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -22,40 +21,56 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.plan.generators;
+package com.chingo247.settlercraft.structure.placement.handler;
 
-import com.chingo247.settlercraft.regions.AbstractStructureRegion;
-import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.regions.Region;
+import com.chingo247.settlercraft.structure.placement.Placement;
+import org.dom4j.Document;
 
 /**
  *
  * @author Chingo
- * @param <T> The region Type
+ * @param <T>
  */
-public abstract class Generator<T extends AbstractStructureRegion> {
+public abstract class PlacementHandler<T extends Placement> {
     
-    private final String m_plugin;
-    private final String m_id;
+    private String plugin;
+    private String type;
 
-    public Generator(String plugin, String id) {
-        this.m_plugin = plugin;
-        this.m_id = id;
+    /**
+     * Constructor
+     * @param pluginName The name of the plugin that can handle
+     * @param typeName The name of the type this handler can handle. 
+     * Note that the root element this Handler will handle will have to match: <pluginName.typeName>
+     */
+    public PlacementHandler(String pluginName, String typeName) {
+        this.plugin = pluginName;
+        this.type = typeName;
     }
-
-    public String getId() {
-        return m_id;
-    }
-
+    
     public String getPlugin() {
-        return m_plugin;
+        return plugin;
     }
     
-    public abstract CuboidClipboard generate(T region);
+    public String getType() {
+        return type;
+    }
     
-    public abstract void generate(T region, EditSession session);
     
     
+    /**
+     * Handles a document that should be handled by this handler
+     * @param d The document to handle
+     * @return The result of this handler as placement
+     */
+    public abstract T handle(Document d);
+    
+    /**
+     * Creates a copy of the given placement
+     * @param t
+     * @return 
+     */
+    public abstract T copy(T t);
+    
+    public abstract Document asDocument(T t);
     
 }

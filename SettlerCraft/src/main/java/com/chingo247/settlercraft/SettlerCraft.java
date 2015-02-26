@@ -25,10 +25,13 @@ package com.chingo247.settlercraft;
 
 import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity;
 import com.chingo247.settlercraft.persistence.service.StructureDAO;
+import com.chingo247.settlercraft.structure.placement.handler.PlacementHandler;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.plan.processing.StructurePlanReader;
 import com.chingo247.xcore.core.APlatform;
+import com.chingo247.xcore.core.IPlugin;
 import com.chingo247.xcore.core.IWorld;
+import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.entity.Player;
 import java.io.File;
 import java.util.ArrayList;
@@ -42,6 +45,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
+import net.minecraft.util.com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
 
 /**
@@ -54,7 +58,7 @@ public abstract class SettlerCraft {
     private final Logger LOG = Logger.getLogger(SettlerCraft.class);
     private final Map<UUID, SettlerCraftWorld> worlds;
     private final Map<UUID, Object> worldMutexes;
-    private final Map<String, StructurePlan> strucuturePlans;
+    private final Map<String, StructurePlan> structurePlans;
     private final StructureDAO structureDAO;
     
     private final Lock PLANS_LOCK;
@@ -66,7 +70,7 @@ public abstract class SettlerCraft {
     protected SettlerCraft(ExecutorService executor, APlatform platform) {
         this.isLoadingPlans = false;
         this.EXECUTOR = executor;
-        this.strucuturePlans = new HashMap<>();
+        this.structurePlans = new HashMap<>();
         this.PLANS_LOCK = new ReentrantLock();
         this.worlds = new HashMap<>();
         this.worldMutexes = new HashMap<>();
@@ -113,12 +117,12 @@ public abstract class SettlerCraft {
         if(PLANS_LOCK.tryLock()) {
             isLoadingPlans = true;
             try {
-                synchronized(strucuturePlans) {
-                    strucuturePlans.clear();
+                synchronized(structurePlans) {
+                    structurePlans.clear();
                     StructurePlanReader reader = new StructurePlanReader();
                     List<StructurePlan> plans = reader.readDirectory(getPlanDirectory());
                     for(StructurePlan plan : plans) {
-                        strucuturePlans.put(plan.getRelativePath(), plan);
+                        structurePlans.put(plan.getRelativePath(), plan);
                     }
                 }
             } finally {
@@ -199,14 +203,51 @@ public abstract class SettlerCraft {
     public abstract File getSchematicToPlanDirectory();
     
     public StructurePlan getStructurePlan(String path) {
-        synchronized(strucuturePlans) {
-            return strucuturePlans.get(path);
+        synchronized(structurePlans) {
+            return structurePlans.get(path);
         }
     }
     
     public List<StructurePlan> getStructurePlans() {
-        synchronized(strucuturePlans) {
-            return new ArrayList<>(strucuturePlans.values());
+        synchronized(structurePlans) {
+            return new ArrayList<>(structurePlans.values());
+        }
+    }
+    
+    private static final Map<String,Map<String,PlacementHandler>> handlers = Maps.newHashMap();
+    
+    public static void registerPlacementHandler(PlacementHandler handler) {
+        Map<String, PlacementHandler> map;
+        String p = handler.getPlugin();
+        String t = handler.getType();
+        synchronized(handlers) {
+            map = handlers.get(p);
+            if(map == null) {
+                map = Maps.newHashMap();
+                handlers.put(p, map);
+            }
+        }
+        synchronized(handlers.get(p)) {
+            if(handlers.get(p).get(t) != null) {
+                throw new RuntimeException("Handler with pluginName '"+p+"' and type '"+t+"' already exists!");
+            } 
+            map.put(handler.getType(), handler);
+        }
+    }
+    
+    public static PlacementHandler getPlacementHandler(String pluginName, String typeName) {
+        Preconditions.checkNotNull(typeName);
+        Preconditions.checkNotNull(pluginName);
+        
+        Map<String, PlacementHandler> map;
+        synchronized(handlers) {
+            map = handlers.get(pluginName);
+            if(map == null) {
+                return null;
+            }
+        }
+        synchronized(handlers.get(pluginName)) {
+            return map.get(typeName);
         }
     }
 

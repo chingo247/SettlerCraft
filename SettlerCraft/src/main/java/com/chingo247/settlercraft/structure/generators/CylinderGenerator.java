@@ -22,56 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.placement;
+package com.chingo247.settlercraft.structure.generators;
 
-import com.chingo247.settlercraft.structure.construction.options.Options;
-import com.chingo247.settlercraft.structure.generators.CuboidGenerator;
-import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
-import com.chingo247.settlercraft.world.Direction;
+import com.chingo247.settlercraft.regions.StructureCylinderRegion;
+import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.Vector;
 
 /**
  *
  * @author Chingo
  */
-public class GeneratedCuboid extends GeneratedPlacement<CuboidGenerator>{
+public class CylinderGenerator extends Generator<StructureCylinderRegion>{
 
-    private int length;
-    private int width;
-
-    public GeneratedCuboid(CuboidGenerator generator, int width, int length) {
-        this(generator, width, length, Vector.ZERO);
-    }
-    
-    
-    
-    public GeneratedCuboid(CuboidGenerator generator, int width, int length, Vector position) {
-        super(generator, position);
-        this.length = length;
-        this.width = width; 
+    public CylinderGenerator() {
+        super("SettlerCraft", "Cylinder");
     }
 
     @Override
-    public CuboidDimension getCuboidDimension() {
+    public CuboidClipboard generate(StructureCylinderRegion region) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void rotate(Direction direction) {
-        switch(direction) {
-            case EAST:
-            case WEST: break;
-            case NORTH:
-            case SOUTH:
-            int temp = width;
-            width = length;
-            length = temp;
-        }
-    }
-
-    @Override
-    public void place(EditSession editSession, Vector pos, Options options) {
+    public void generate(StructureCylinderRegion region, EditSession session) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
