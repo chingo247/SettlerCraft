@@ -23,15 +23,15 @@
  */
 package com.chingo247.settlercraft;
 
-import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity;
-import com.chingo247.settlercraft.persistence.service.StructureDAO;
-import com.chingo247.settlercraft.structure.placement.handler.PlacementHandler;
-import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structure.plan.processing.StructurePlanReader;
+import com.chingo247.settlercraft.model.entities.structure.StructureEntity;
+import com.chingo247.settlercraft.model.service.StructureDAO;
+import com.chingo247.structureapi.structure.placement.handler.PlacementHandler;
+import com.chingo247.structureapi.structure.plan.StructurePlan;
+import com.chingo247.structureapi.structure.plan.processing.StructurePlanReader;
 import com.chingo247.xcore.core.APlatform;
-import com.chingo247.xcore.core.IPlugin;
 import com.chingo247.xcore.core.IWorld;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import com.sk89q.worldedit.entity.Player;
 import java.io.File;
 import java.util.ArrayList;
@@ -45,7 +45,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
-import net.minecraft.util.com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
 
 /**

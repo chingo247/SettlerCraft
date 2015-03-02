@@ -23,22 +23,20 @@
  */
 package com.chingo247.settlercraft;
 
-import com.chingo247.settlercraft.SettlerCraft;
-import com.chingo247.settlercraft.SettlerCraftWorld;
-import com.chingo247.settlercraft.exception.StructureException;
-import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncPlacement;
-import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncWorldEditUtil;
-import com.chingo247.settlercraft.structure.construction.options.Options;
-import com.chingo247.settlercraft.persistence.service.StructurePlayerDAO;
-import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structure.plan.processing.StructurePlanReader;
-import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity;
-import com.chingo247.settlercraft.persistence.entities.structure.StructurePlayerEntity;
-import com.chingo247.settlercraft.persistence.entities.structure.StructureState;
-import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
-import com.chingo247.settlercraft.util.FireNextQueue;
-import com.chingo247.settlercraft.util.WorldEditUtil;
-import com.chingo247.settlercraft.world.Direction;
+import com.chingo247.structureapi.structure.exception.StructureException;
+import com.chingo247.structureapi.structure.construction.asyncworldedit.AsyncPlacement;
+import com.chingo247.structureapi.structure.construction.asyncworldedit.AsyncWorldEditUtil;
+import com.chingo247.structureapi.structure.construction.options.Options;
+import com.chingo247.settlercraft.model.service.StructurePlayerDAO;
+import com.chingo247.structureapi.structure.plan.StructurePlan;
+import com.chingo247.structureapi.structure.plan.processing.StructurePlanReader;
+import com.chingo247.settlercraft.model.entities.structure.StructureEntity;
+import com.chingo247.settlercraft.model.entities.structure.StructurePlayerEntity;
+import com.chingo247.settlercraft.model.entities.structure.StructureState;
+import com.chingo247.settlercraft.model.entities.world.CuboidDimension;
+import com.chingo247.settlercraft.common.util.FireNextQueue;
+import com.chingo247.settlercraft.common.util.WorldEditUtil;
+import com.chingo247.settlercraft.common.world.Direction;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.entity.Player;
 import java.io.File;

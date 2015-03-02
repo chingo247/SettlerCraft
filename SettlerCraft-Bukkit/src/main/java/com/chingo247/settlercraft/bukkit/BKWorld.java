@@ -26,7 +26,7 @@ package com.chingo247.settlercraft.bukkit;
 import com.chingo247.settlercraft.SettlerCraftStructure;
 import com.chingo247.settlercraft.SettlerCraftWorld;
 import com.chingo247.settlercraft.SettlerCraft;
-import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity;
+import com.chingo247.settlercraft.model.entities.structure.StructureEntity;
 import com.chingo247.xcore.core.IWorld;
 import java.util.concurrent.ExecutorService;
 

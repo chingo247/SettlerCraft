@@ -23,7 +23,7 @@
  */
 package com.chingo247.settlercraft.settlement;
 
-import com.chingo247.settlercraft.persistence.entities.settlement.SettlementEntity;
+import com.chingo247.settlercraft.model.entities.settlement.SettlementEntity;
 
 /**
  *

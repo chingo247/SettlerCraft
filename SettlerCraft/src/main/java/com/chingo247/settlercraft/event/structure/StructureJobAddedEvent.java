@@ -24,7 +24,7 @@
  */
 package com.chingo247.settlercraft.event.structure;
 
-import com.chingo247.settlercraft.persistence.legacy.Structure;
+import com.chingo247.settlercraft.model.legacy.Structure;
 
 /**
  *

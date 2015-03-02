@@ -29,10 +29,10 @@ import com.chingo247.settlercraft.bukkit.BKPermissionManager.Perms;
 import com.chingo247.settlercraft.bukkit.commands.SettlerCraftCommandExecutor;
 import com.chingo247.settlercraft.bukkit.listener.PlanListener;
 import com.chingo247.settlercraft.exception.SettlerCraftException;
-import com.chingo247.settlercraft.persistence.HSQLServer;
+import com.chingo247.settlercraft.model.HSQLServer;
 import com.chingo247.settlercraft.bukkit.menu.PlanMenuManager;
-import com.chingo247.settlercraft.exception.StructureAPIException;
-import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
+import com.chingo247.structureapi.structure.exception.StructureAPIException;
+import com.chingo247.settlercraft.model.hibernate.HibernateUtil;
 import com.chingo247.xcore.core.IPlugin;
 
 import java.io.File;

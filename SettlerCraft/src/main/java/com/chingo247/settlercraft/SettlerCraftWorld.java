@@ -23,18 +23,19 @@
  */
 package com.chingo247.settlercraft;
 
+import com.chingo247.settlercraft.common.world.Direction;
+import com.chingo247.structureapi.structure.WorldConfig;
 import com.chingo247.settlercraft.persistence.entities.structure.QStructureEntity;
-import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
-import com.chingo247.settlercraft.persistence.service.StructureDAO;
-import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structure.placement.Placement;
-import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity;
-import com.chingo247.settlercraft.persistence.entities.structure.StructureType;
-import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
-import com.chingo247.settlercraft.structure.restriction.StructureHeightRestriction;
-import com.chingo247.settlercraft.structure.restriction.StructureOverlapRestriction;
-import com.chingo247.settlercraft.structure.restriction.StructureRestriction;
-import com.chingo247.settlercraft.world.Direction;
+import com.chingo247.settlercraft.model.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.model.service.StructureDAO;
+import com.chingo247.structureapi.structure.plan.StructurePlan;
+import com.chingo247.structureapi.structure.placement.Placement;
+import com.chingo247.settlercraft.model.entities.structure.StructureEntity;
+import com.chingo247.settlercraft.model.entities.structure.StructureType;
+import com.chingo247.settlercraft.model.entities.world.CuboidDimension;
+import com.chingo247.structureapi.structure.restriction.StructureHeightRestriction;
+import com.chingo247.structureapi.structure.restriction.StructureOverlapRestriction;
+import com.chingo247.structureapi.structure.restriction.StructureRestriction;
 import com.chingo247.xcore.core.IWorld;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import com.sk89q.worldedit.Vector;
