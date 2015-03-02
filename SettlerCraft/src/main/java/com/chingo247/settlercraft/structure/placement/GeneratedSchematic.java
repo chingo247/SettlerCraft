@@ -23,12 +23,36 @@
  */
 package com.chingo247.settlercraft.structure.placement;
 
+import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
+import com.chingo247.settlercraft.structure.construction.options.Options;
 import com.chingo247.settlercraft.structure.generators.Generator;
+import com.chingo247.settlercraft.world.Direction;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.Vector;
 
 /**
  * Generated Schematic uses a Schematic as base/template and may repeat itself along one or more axis
  * @author Chingo
  */
 public class GeneratedSchematic extends GeneratedPlacement<Generator>{
+
+    public GeneratedSchematic(Generator generator, Vector relativePosition) {
+        super(generator, relativePosition);
+    }
+
+    @Override
+    public void place(EditSession editSession, Vector pos, Options options) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void rotate(Direction direction) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public CuboidDimension getCuboidDimension() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

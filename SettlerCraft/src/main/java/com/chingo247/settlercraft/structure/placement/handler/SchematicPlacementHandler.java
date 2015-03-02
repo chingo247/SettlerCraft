@@ -23,32 +23,45 @@
  */
 package com.chingo247.settlercraft.structure.placement.handler;
 
-import com.chingo247.settlercraft.structure.placement.GeneratedSchematic;
+import com.chingo247.settlercraft.exception.PlacementHandleException;
+import com.chingo247.settlercraft.exception.PlanException;
+import com.chingo247.settlercraft.structure.placement.SchematicPlacement;
+import com.chingo247.settlercraft.structure.plan.xml.XMLUtils;
+import java.io.File;
 import org.dom4j.Document;
+import org.dom4j.Element;
 
 /**
  *
  * @author Chingo
  */
-public class GeneratedSchematicHandler extends PlacementHandler<GeneratedSchematic> {
+public class SchematicPlacementHandler extends PlacementHandler<SchematicPlacement> {
 
-    public GeneratedSchematicHandler() {
-        super("SettlerCraft", "GeneratedSchematic");
+    public SchematicPlacementHandler() {
+        super("SettlerCraft", "Schematic");
     }
 
     @Override
-    public GeneratedSchematic handle(Document d) {
+    public SchematicPlacement handle(Element e) {
+        String schematic = XMLUtils.getXPathNodeValue(e, "Schematic");
+        if (schematic == null) {
+            throw new PlacementHandleException("Element '" + e.getName() + "' doesn't have an element called 'Schematic'");
+        }
+        File schematicFile = new File(structurePlanFile.getParent(), schematic);
+        if (!schematicFile.exists()) {
+            throw new PlanException("Error in '" + structurePlanFile.getAbsolutePath() + "': File '" + schematicFile.getAbsolutePath() + "' defined in element '<Schematic>' does not exist!");
+        }
+
+    }
+
+    @Override
+    public SchematicPlacement copy(SchematicPlacement t) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public GeneratedSchematic copy(GeneratedSchematic t) {
+    public Element asDocument(SchematicPlacement t) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public Document asDocument(GeneratedSchematic t) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
 }

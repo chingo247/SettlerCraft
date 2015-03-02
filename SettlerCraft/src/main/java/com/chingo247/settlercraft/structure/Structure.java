@@ -24,17 +24,13 @@
 package com.chingo247.settlercraft.structure;
 
 import com.chingo247.settlercraft.persistence.entities.structure.StructureEntity;
-import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.structure.construction.options.Options;
 import com.chingo247.settlercraft.util.WorldEditUtil;
 import com.chingo247.settlercraft.world.World;
-import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.entity.Player;
 import java.util.List;
 import java.util.UUID;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**

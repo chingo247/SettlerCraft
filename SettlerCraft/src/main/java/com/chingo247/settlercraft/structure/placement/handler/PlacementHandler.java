@@ -25,6 +25,7 @@ package com.chingo247.settlercraft.structure.placement.handler;
 
 import com.chingo247.settlercraft.structure.placement.Placement;
 import org.dom4j.Document;
+import org.dom4j.Element;
 
 /**
  *
@@ -62,7 +63,7 @@ public abstract class PlacementHandler<T extends Placement> {
      * @param d The document to handle
      * @return The result of this handler as placement
      */
-    public abstract T handle(Document d);
+    public abstract T handle(Element d);
     
     /**
      * Creates a copy of the given placement
@@ -71,6 +72,6 @@ public abstract class PlacementHandler<T extends Placement> {
      */
     public abstract T copy(T t);
     
-    public abstract Document asDocument(T t);
+    public abstract Element asDocument(T t);
     
 }

@@ -21,18 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.placement.handler;
-
-import com.chingo247.xcore.core.IPlugin;
-import java.util.Map;
-import net.minecraft.util.com.google.common.collect.Maps;
+package com.chingo247.settlercraft.exception;
 
 /**
  *
  * @author Chingo
  */
-public class PlacementHandlerRegister {
-    
+public class PlacementHandleException extends RuntimeException {
+
+    public PlacementHandleException(String message) {
+        super(message);
+    }
+ 
     
     
 }
