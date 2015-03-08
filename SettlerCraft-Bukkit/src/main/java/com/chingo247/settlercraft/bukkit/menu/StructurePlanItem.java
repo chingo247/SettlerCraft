@@ -48,10 +48,10 @@ package com.chingo247.settlercraft.bukkit.menu;
 import com.chingo247.menu.item.CategoryTradeItem;
 import com.chingo247.menu.item.TradeItem;
 import com.chingo247.menu.util.ShopUtil;
-import com.chingo247.structureapi.structure.exception.StructureDataException;
-import com.chingo247.structureapi.structure.plan.StructurePlan;
-import com.chingo247.structureapi.structure.placement.Placement;
+import com.chingo247.structureapi.placement.Placement;
 import com.chingo247.settlercraft.model.entities.world.CuboidDimension;
+import com.chingo247.structureapi.exception.StructureDataException;
+import com.chingo247.structureapi.plan.StructurePlan;
 import com.sk89q.worldedit.data.DataException;
 import java.io.IOException;
 import java.util.Arrays;
@@ -91,12 +91,12 @@ public class StructurePlanItem implements CategoryTradeItem {
     public static StructurePlanItem createItemFromPlan(StructurePlan plan) throws IOException, DataException, DocumentException, StructureDataException {
         
         Placement p = plan.getPlacement();
-        CuboidDimension dimension = p.getCuboidDimension();
+        CuboidDimension dimension = new CuboidDimension(p.getMinPosition(), p.getMaxPosition());
         
         int width = dimension.getMaxX();
         int height = dimension.getMaxY();
         int length = dimension.getMaxZ();
-        String path = plan.getRelativePath();
+        String id = plan.getId();
         String name = plan.getName();
         String category = plan.getCategory();
         String description = plan.getDescription();
@@ -104,7 +104,7 @@ public class StructurePlanItem implements CategoryTradeItem {
 
         
 
-        StructurePlanItem item = new StructurePlanItem(path, name, category, price, width, height, length, description);
+        StructurePlanItem item = new StructurePlanItem(id, name, category, price, width, height, length, description);
         return item;
     }
 

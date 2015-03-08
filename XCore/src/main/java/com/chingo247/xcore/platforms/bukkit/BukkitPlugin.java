@@ -36,6 +36,11 @@ public class BukkitPlugin implements IPlugin {
     public File getDataFolder() {
         return plugin.getDataFolder();
     }
+
+    @Override
+    public String getName() {
+        return plugin.getName();
+    }
     
     
     

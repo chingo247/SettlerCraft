@@ -28,7 +28,7 @@ import com.chingo247.menu.CategoryMenu;
 import com.chingo247.settlercraft.bukkit.BKPermissionManager;
 import com.chingo247.settlercraft.bukkit.BKPermissionManager.Perms;
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
-import com.chingo247.structureapi.structure.construction.asyncworldedit.AsyncWorldEditUtil;
+import com.chingo247.structureapi.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.exception.CommandException;
 import com.chingo247.settlercraft.model.service.StructureDAO;
 import com.chingo247.settlercraft.model.entities.world.CuboidDimension;

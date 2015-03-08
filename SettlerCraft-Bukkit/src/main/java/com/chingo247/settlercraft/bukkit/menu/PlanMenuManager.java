@@ -27,10 +27,11 @@ import com.chingo247.menu.CategoryMenu;
 import com.chingo247.menu.MenuAPI;
 import com.chingo247.settlercraft.SettlerCraft;
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
-import com.chingo247.structureapi.structure.exception.StructureAPIException;
-import com.chingo247.structureapi.structure.exception.StructureDataException;
-import com.chingo247.structureapi.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.util.FileUtil;
+import com.chingo247.structureapi.StructureAPI;
+import com.chingo247.structureapi.exception.StructureAPIException;
+import com.chingo247.structureapi.exception.StructureDataException;
+import com.chingo247.structureapi.plan.StructurePlan;
 import com.sk89q.worldedit.data.DataException;
 import java.io.File;
 import java.io.IOException;
@@ -76,7 +77,7 @@ public class PlanMenuManager {
      * @throws StructureAPIException When XML contains invalid data
      */
     public final void initialize() throws DocumentException, StructureAPIException {
-        File file = new File(settlerCraft.getPluginDirectory(), "menu.xml");
+        File file = new File(settlerCraft.getWorkingDirectory(), "menu.xml");
         if (!file.exists()) {
             InputStream input = PlanMenuManager.class.getClassLoader().getResourceAsStream(RESOURCE_FOLDER + "/menu.xml");
             FileUtil.write(input, file);
@@ -203,7 +204,8 @@ public class PlanMenuManager {
             }
         }
 
-        final List<StructurePlan> plans = settlerCraft.getStructurePlans();
+        StructureAPI structureAPI = settlerCraft.getStructureAPI();
+        final List<StructurePlan> plans = structureAPI.getStructurePlans();
         final Iterator<StructurePlan> planIterator = plans.iterator();
 
         planMenu.clearItems();

@@ -25,9 +25,9 @@
 package com.chingo247.settlercraft.event.subscribers;
 
 import com.chingo247.settlercraft.model.legacy.AbstractStructureAPI;
-import com.chingo247.settlercraft.event.structure.StructureCreateEvent;
-import com.chingo247.settlercraft.event.structure.StructureRemoveEvent;
-import com.chingo247.settlercraft.event.structure.StructureStateChangeEvent;
+import com.chingo247.structureapi.event.StructureCreateEvent;
+import com.chingo247.structureapi.event.StructureRemoveEvent;
+import com.chingo247.structureapi.event.StructureStateChangeEvent;
 import com.google.common.eventbus.Subscribe;
 
 /**

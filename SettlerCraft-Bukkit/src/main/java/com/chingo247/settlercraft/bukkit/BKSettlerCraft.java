@@ -5,9 +5,10 @@
  */
 package com.chingo247.settlercraft.bukkit;
 
-import com.chingo247.settlercraft.SettlerCraftWorld;
 import com.chingo247.settlercraft.SettlerCraft;
+import com.chingo247.settlercraft.SettlerCraftWorld;
 import com.chingo247.settlercraft.bukkit.util.BKWorldEditUtil;
+import com.chingo247.structureapi.StructureWorld;
 import com.chingo247.xcore.core.IWorld;
 import com.chingo247.xcore.platforms.PlatformFactory;
 import com.sk89q.worldedit.entity.Player;
@@ -25,50 +26,16 @@ public class BKSettlerCraft extends SettlerCraft {
     private final SettlerCraftPlugin plugin;
     
     BKSettlerCraft(ExecutorService executorService, SettlerCraftPlugin plugin) {
-        super(executorService, PlatformFactory.getPlatform("bukkit"));
+        super(executorService, PlatformFactory.getPlatform("bukkit"), new BKStructureAPI(plugin));
         this.plugin = plugin;
     }
 
-    @Override
-    protected SettlerCraftWorld handle(IWorld world) {
-        return new BKWorld(EXECUTOR, this, world);
-    }
-    
     @Override
     protected void load() {
         super.load();
     }
 
     
-
-    @Override
-    public File getStructureDirectory() {
-        File folder = new File(plugin.getDataFolder(), "Structures");
-        folder.mkdirs();
-        return folder;
-    }
-
-    @Override
-    public File getPlanDirectory() {
-        File folder =  new File(plugin.getDataFolder(), "StructurePlans");
-        folder.mkdirs();
-        return folder;
-    }
-
-    @Override
-    public File getPluginDirectory() {
-        File folder = plugin.getDataFolder();
-        folder.mkdirs();
-        return folder;
-    }
-
-    @Override
-    public File getSchematicToPlanDirectory() {
-        File folder = new File(plugin.getDataFolder(), "SchematicToPlan");
-        folder.mkdirs();
-        return folder;
-    }
-
     @Override
     protected Player getPlayer(UUID player) {
         org.bukkit.entity.Player ply = Bukkit.getPlayer(player);
@@ -76,6 +43,11 @@ public class BKSettlerCraft extends SettlerCraft {
             return BKWorldEditUtil.wrapPlayer(ply);
         }
         return null;
+    }
+
+    @Override
+    public File getWorkingDirectory() {
+        return plugin.getDataFolder();
     }
     
 }

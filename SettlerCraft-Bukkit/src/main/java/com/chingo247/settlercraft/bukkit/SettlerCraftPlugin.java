@@ -25,25 +25,20 @@ package com.chingo247.settlercraft.bukkit;
  */
 import com.chingo247.menu.CategoryMenu;
 import com.chingo247.settlercraft.SettlerCraft;
-import com.chingo247.settlercraft.bukkit.BKPermissionManager.Perms;
 import com.chingo247.settlercraft.bukkit.commands.SettlerCraftCommandExecutor;
 import com.chingo247.settlercraft.bukkit.listener.PlanListener;
 import com.chingo247.settlercraft.exception.SettlerCraftException;
 import com.chingo247.settlercraft.model.HSQLServer;
 import com.chingo247.settlercraft.bukkit.menu.PlanMenuManager;
-import com.chingo247.structureapi.structure.exception.StructureAPIException;
 import com.chingo247.settlercraft.model.hibernate.HibernateUtil;
+import com.chingo247.structureapi.exception.StructureAPIException;
 import com.chingo247.xcore.core.IPlugin;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dom4j.DocumentException;
 
@@ -132,23 +127,9 @@ public class SettlerCraftPlugin extends JavaPlugin implements IPlugin {
         getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
 //        getCommand("cst").setExecutor(new ConstructionCommandExecutor(structureAPI));
 //        getCommand("stt").setExecutor(new StructureCommandExecutor(structureAPI));
-//
-//        printPerms();
-//        structureAPI.print("Done!");
 
     }
 
-//    public ExecutorService getExecutorService() {
-//        return GLOBAL_THREADPOOL;
-//    }
-//    
-//    public ConfigProvider getConfigProvider() {
-//        return configProvider;
-//    }
-//
-//    public BukkitStructureAPI getStructureAPI() {
-//        return structureAPI;
-//    }
     public SettlerCraft getSettlerCraft() {
         return settlerCraft;
     }
@@ -160,49 +141,11 @@ public class SettlerCraftPlugin extends JavaPlugin implements IPlugin {
         HibernateUtil.shutdown();
     }
 
-    /**
-     * Gets the datafolder for the StructureAPI or creates them if none exists
-     *
-     * @return The datafolder
-     */
-    public final File getStructureDataFolder() {
-        File structureDirectory = new File(getDataFolder(), "Structures");
-        if (!structureDirectory.exists()) {
-            structureDirectory.mkdirs();
-        }
-        return structureDirectory;
-    }
 
     public BKConfigProvider getConfigProvider() {
         return configProvider;
     }
     
-    private void printPerms() {
-        File printedFile = new File(SettlerCraftPlugin.getInstance().getDataFolder(), "permissions.yml");
-        if (!printedFile.exists()) {
-            try {
-                printedFile.createNewFile();
-            } catch (IOException ex) {
-                java.util.logging.Logger.getLogger(SettlerCraftPlugin.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(printedFile);
-
-        for (Perms perm : Perms.values()) {
-            Permission p = perm.getPermission();
-            config.createSection(p.getName());
-            config.set(p.getName() + ".default", p.getDefault().toString());
-            config.set(p.getName() + ".description", p.getDescription());
-        }
-
-        try {
-            config.save(printedFile);
-        } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(SettlerCraftPlugin.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
-
     public static SettlerCraftPlugin getInstance() {
         return instance;
     }
