@@ -57,8 +57,6 @@ public class PlanListener implements Listener {
         System.out.println("On player interact!");
         if(pie.getItem() == null) return;
         if(pie.getClickedBlock() == null) return;
-    
-        
         
         AItemStack stack = new BukkitItemStack(pie.getItem());
         if(StructurePlaceHandler.isStructurePlan(stack)) {
@@ -66,14 +64,12 @@ public class PlanListener implements Listener {
             pie.setCancelled(true);
         }
         
-        
         WorldEditPlugin plugin = BKWorldEditUtil.getWorldEditPlugin();
         Player player = plugin.wrapPlayer(pie.getPlayer());
         Block block = pie.getClickedBlock();
         Location loc = block.getLocation();
         
         System.out.println("Location: " + loc);
-        
         System.out.println("[PlanListener]: Player uses structure plan!");
         placeHandler.handle(stack, player, player.getWorld(), new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
 

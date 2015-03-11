@@ -66,6 +66,15 @@ public class StructureDAO extends AbstractDAOImpl<StructureEntity, Long>  {
         return ses;
     }
     
+    public List<StructureEntity> findChildren(long parent) {
+        QStructureEntity qStructureEntity = QStructureEntity.structureEntity;
+        Session session = HibernateUtil.getSession();
+        HibernateQuery query = new HibernateQuery(session);
+        List<StructureEntity> ses = query.from(qStructureEntity).where(qStructureEntity.parent.eq(parent)).list(qStructureEntity);
+        session.close();
+        return ses;
+    }
+    
     
    
 

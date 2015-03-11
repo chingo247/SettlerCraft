@@ -38,7 +38,7 @@ import static com.chingo247.settlercraft.common.world.Direction.EAST;
 import static com.chingo247.settlercraft.common.world.Direction.NORTH;
 import static com.chingo247.settlercraft.common.world.Direction.SOUTH;
 import static com.chingo247.settlercraft.common.world.Direction.WEST;
-import com.chingo247.structureapi.StructureAPI;
+import com.chingo247.structureapi.structure.StructureAPI;
 import com.chingo247.structureapi.structure.Structure;
 import com.chingo247.xcore.core.AInventory;
 import com.chingo247.xcore.core.AItemStack;
@@ -182,11 +182,11 @@ public class StructurePlaceHandler {
             
             System.out.println("Can place?");
             if (canPlace(player, world, pos1, direction, plan)) {
-                com.chingo247.settlercraft.SettlerCraftWorld settlerCraftWorld = settlerCraft.getWorld(world.getName());
+                com.chingo247.settlercraft.SCWorld scWorld = settlerCraft.getWorld(world.getName());
                 Structure structure;
                 try {
                     System.out.println("Creating structure");
-                    structure = settlerCraftWorld.createStructure(plan, pos1, direction);
+                    structure = scWorld.getStructureManager().createStructure(plan, pos1, direction);
                     
                     System.out.println("Structure: " + structure);
                     if (structure != null) {

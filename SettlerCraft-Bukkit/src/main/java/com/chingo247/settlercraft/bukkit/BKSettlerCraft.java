@@ -6,10 +6,7 @@
 package com.chingo247.settlercraft.bukkit;
 
 import com.chingo247.settlercraft.SettlerCraft;
-import com.chingo247.settlercraft.SettlerCraftWorld;
 import com.chingo247.settlercraft.bukkit.util.BKWorldEditUtil;
-import com.chingo247.structureapi.StructureWorld;
-import com.chingo247.xcore.core.IWorld;
 import com.chingo247.xcore.platforms.PlatformFactory;
 import com.sk89q.worldedit.entity.Player;
 import java.io.File;
@@ -26,7 +23,7 @@ public class BKSettlerCraft extends SettlerCraft {
     private final SettlerCraftPlugin plugin;
     
     BKSettlerCraft(ExecutorService executorService, SettlerCraftPlugin plugin) {
-        super(executorService, PlatformFactory.getPlatform("bukkit"), new BKStructureAPI(plugin));
+        super(executorService, PlatformFactory.getPlatform("bukkit"), new BKStructureAPI(plugin, executorService));
         this.plugin = plugin;
     }
 

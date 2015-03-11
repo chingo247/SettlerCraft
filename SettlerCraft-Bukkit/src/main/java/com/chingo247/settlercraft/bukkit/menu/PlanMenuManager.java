@@ -28,7 +28,7 @@ import com.chingo247.menu.MenuAPI;
 import com.chingo247.settlercraft.SettlerCraft;
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
 import com.chingo247.settlercraft.util.FileUtil;
-import com.chingo247.structureapi.StructureAPI;
+import com.chingo247.structureapi.structure.StructureAPI;
 import com.chingo247.structureapi.exception.StructureAPIException;
 import com.chingo247.structureapi.exception.StructureDataException;
 import com.chingo247.structureapi.plan.StructurePlan;

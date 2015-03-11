@@ -26,6 +26,11 @@
             <id>bukkit-repo</id>
             <url>http://repo.bukkit.org/content/groups/public/</url>
         </repository>
+        <repository>
+            <id>basex</id>
+            <name>BaseX Maven Repository</name>
+            <url>http://files.basex.org/maven</url>
+        </repository>
     </repositories>
     <build>
         <plugins>
@@ -80,14 +85,18 @@
         </plugins>
     </build>
     <dependencies>
-         <!--WorldEdit-->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>SettlerCraft-Common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--WorldEdit-->
         <dependency>
             <groupId>com.thirdparty</groupId>
             <artifactId>worldedit</artifactId>  
             <version>6.0-3308</version>
             <scope>provided</scope>
         </dependency>
-        
         <!-- HSQL -->
         <dependency>
             <groupId>org.hsqldb</groupId>
@@ -101,6 +110,12 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate</artifactId>
             <version>3.2.6.ga</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-collections</groupId>
+                    <artifactId>commons-collections</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!--Hibernate Dependencies-->
         <dependency>
@@ -123,12 +138,6 @@
                     <groupId>javax.persistence</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.1.1</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -173,10 +182,6 @@
                     <artifactId>ecj</artifactId>
                     <groupId>org.eclipse.jdt.core.compiler</groupId>
                 </exclusion>
-                <exclusion>
-                    <artifactId>guava</artifactId>
-                    <groupId>com.google.guava</groupId>
-                </exclusion>
             </exclusions>
         </dependency> 
         <!--QueryDSL-->     
@@ -192,6 +197,10 @@
                 <exclusion>
                     <groupId>cglib</groupId>
                     <artifactId>cglib</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -214,10 +223,22 @@
             <artifactId>jaxen</artifactId>
             <version>1.1.6</version>
         </dependency>
+        
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>SettlerCraft-Common</artifactId>
-            <version>${project.version}</version>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>1.2.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-collections</groupId>
+                    <artifactId>commons-collections</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+<!--        <dependency>
+            <groupId>org.basex</groupId>
+            <artifactId>basex</artifactId>
+            <version>7.6</version>
+        </dependency>-->
     </dependencies>
 </project>

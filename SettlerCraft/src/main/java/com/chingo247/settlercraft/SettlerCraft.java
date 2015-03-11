@@ -24,8 +24,8 @@
 package com.chingo247.settlercraft;
 
 import com.chingo247.settlercraft.model.service.StructureDAO;
-import com.chingo247.structureapi.StructureAPI;
-import com.chingo247.structureapi.StructureWorld;
+import com.chingo247.structureapi.structure.StructureAPI;
+import com.chingo247.structureapi.structure.StructureManager;
 import com.chingo247.xcore.core.APlatform;
 import com.chingo247.xcore.core.IWorld;
 import com.sk89q.worldedit.entity.Player;
@@ -50,14 +50,14 @@ public abstract class SettlerCraft {
     public static final String MSG_PREFIX = "[SettlerCraft]: ";
     private final Logger LOG = Logger.getLogger(SettlerCraft.class);
 
-    private final Map<String, SettlerCraftWorld> worlds;
+    private final Map<String, SCWorld> worlds;
     private final Map<String, Object> worldMutexes;
 
     protected final StructureDAO structureDAO;
     protected ExecutorService EXECUTOR;
 
-    private APlatform platform;
-    private StructureAPI structureAPI;
+    private final APlatform platform;
+    private final StructureAPI structureAPI;
 
     protected SettlerCraft(ExecutorService executor, APlatform platform, StructureAPI structureAPI) {
         this.EXECUTOR = executor;
@@ -73,8 +73,8 @@ public abstract class SettlerCraft {
     }
 
     protected synchronized void load() {
-        // Load the plans first...
-        structureAPI.loadPlans();
+        // Load the StructureAPI first
+        structureAPI.load();
         loadWorlds();
     }
 
@@ -106,13 +106,13 @@ public abstract class SettlerCraft {
         return structureAPI;
     }
 
-    public SettlerCraftWorld getWorld(String world) {
-        SettlerCraftWorld settlerCraftWorld;
+    public SCWorld getWorld(String world) {
+        SCWorld scWorld;
         synchronized (worlds) {
-            settlerCraftWorld = worlds.get(world);
+            scWorld = worlds.get(world);
         }
 
-        if (settlerCraftWorld == null) {
+        if (scWorld == null) {
             IWorld iWorld = getPlatform().getServer().getWorld(world);
             if (iWorld == null) {
                 return null;
@@ -127,16 +127,17 @@ public abstract class SettlerCraft {
                     worldMutexes.put(iWorld.getName(), mutex);
                 }
             }
-            StructureWorld structureWorld = structureAPI.getWorld(world);
+            // Loads the world
+            StructureManager structureWorld = structureAPI.getStructureManager(world);
             synchronized (mutex) {
-                settlerCraftWorld = new SettlerCraftWorld(structureWorld);
-                settlerCraftWorld.load();
+                scWorld = new SCWorld(iWorld, structureWorld);
+                scWorld.load();
                 synchronized (worlds) {
-                    worlds.put(settlerCraftWorld.getName(), settlerCraftWorld);
+                    worlds.put(scWorld.getName(), scWorld);
                 }
             }
         }
-        return settlerCraftWorld;
+        return scWorld;
     }
 
     public APlatform getPlatform() {

@@ -24,11 +24,11 @@
  */
 package com.chingo247.settlercraft.common.regions;
 
-import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.World;
+import java.util.Objects;
 import java.util.Set;
 
 
@@ -42,7 +42,7 @@ public abstract class AbstractStructureRegion<T extends Region> implements Cuboi
     private final T region;
 
     public AbstractStructureRegion(T region) {
-        Preconditions.checkNotNull(region);
+        Objects.requireNonNull(region);
         this.region = region;
     }
 

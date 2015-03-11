@@ -25,13 +25,12 @@
 
 package com.chingo247.settlercraft.model.entities.structure;
 
-import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.entity.Player;
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -83,8 +82,8 @@ public class StructurePlayerEntity implements Serializable {
      * @param player Whether the owner is a isPlayer or not
      */
     StructurePlayerEntity(Player player, StructureEntity structure, StructurePlayerRole playerRole) {
-        Preconditions.checkNotNull(structure);
-        Preconditions.checkNotNull(structure.getId());
+        Objects.requireNonNull(structure);
+        Objects.requireNonNull(structure.getId());
         this.structureentity = structure;
         this.player = player.getUniqueId();
         this.playerName = player.getName();
