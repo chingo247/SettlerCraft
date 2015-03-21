@@ -23,7 +23,7 @@
  */
 package com.chingo247.settlercraft;
 
-import com.chingo247.structureapi.structure.StructureManager;
+import com.chingo247.settlercraft.structure.StructureManager;
 import com.chingo247.xcore.core.IWorld;
 import java.util.UUID;
 

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <StructurePlan>
    	<Name>AoE - Castle</Name>
-	<Placeable>
+	<Placement>
 		<Type>Schematic</Type>
 		<Schematic>AoE - Castle.schematic</Schematic>
-	</Placeable>
+	</Placement>
 	<Price>1450</Price>
 </StructurePlan>

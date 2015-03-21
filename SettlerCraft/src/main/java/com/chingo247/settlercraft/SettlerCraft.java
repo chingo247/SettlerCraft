@@ -23,9 +23,9 @@
  */
 package com.chingo247.settlercraft;
 
-import com.chingo247.settlercraft.model.service.StructureDAO;
-import com.chingo247.structureapi.structure.StructureAPI;
-import com.chingo247.structureapi.structure.StructureManager;
+import com.chingo247.settlercraft.model.persistence.dao.StructureDAO;
+import com.chingo247.settlercraft.structure.StructureAPI;
+import com.chingo247.settlercraft.structure.StructureManager;
 import com.chingo247.xcore.core.APlatform;
 import com.chingo247.xcore.core.IWorld;
 import com.sk89q.worldedit.entity.Player;
@@ -54,7 +54,7 @@ public abstract class SettlerCraft {
     private final Map<String, Object> worldMutexes;
 
     protected final StructureDAO structureDAO;
-    protected ExecutorService EXECUTOR;
+    protected final ExecutorService EXECUTOR;
 
     private final APlatform platform;
     private final StructureAPI structureAPI;
@@ -67,10 +67,8 @@ public abstract class SettlerCraft {
         this.structureDAO = new StructureDAO();
         this.structureAPI = structureAPI;
     }
-
-    public boolean isLoadingPlans() {
-        return structureAPI.isLoadingPlans();
-    }
+    
+    
 
     protected synchronized void load() {
         // Load the StructureAPI first
@@ -102,11 +100,9 @@ public abstract class SettlerCraft {
         }
     }
 
-    public final StructureAPI getStructureAPI() {
-        return structureAPI;
-    }
+    
 
-    public SCWorld getWorld(String world) {
+    public final SCWorld getWorld(String world) {
         SCWorld scWorld;
         synchronized (worlds) {
             scWorld = worlds.get(world);
@@ -144,8 +140,12 @@ public abstract class SettlerCraft {
         return platform;
     }
     
-    public abstract File getWorkingDirectory();
+    protected abstract File getWorkingDirectory();
 
     protected abstract Player getPlayer(UUID player);
+
+    public final StructureAPI getStructureAPI() {
+        return structureAPI;
+    }
 
 }

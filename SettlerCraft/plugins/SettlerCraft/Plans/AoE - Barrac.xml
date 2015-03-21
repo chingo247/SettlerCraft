@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <StructurePlan>
+	<Id>aoe.military.barrack</Id>
  	<Name>AoE - Barrac</Name>
-	<Placeable>
+	<Placement>
 		<Type>Schematic</Type>
 		<Schematic>AoE - Barrac.schematic</Schematic>
-	</Placeable>
+	</Placement>
 	<Price>1450</Price>
 </StructurePlan>

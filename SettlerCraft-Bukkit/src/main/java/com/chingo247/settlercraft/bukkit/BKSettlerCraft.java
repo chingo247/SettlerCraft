@@ -8,8 +8,8 @@ package com.chingo247.settlercraft.bukkit;
 import com.chingo247.settlercraft.SettlerCraft;
 import com.chingo247.settlercraft.bukkit.util.BKWorldEditUtil;
 import com.chingo247.xcore.platforms.PlatformFactory;
+import com.chingo247.xcore.platforms.bukkit.BukkitPlugin;
 import com.sk89q.worldedit.entity.Player;
-import java.io.File;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import org.bukkit.Bukkit;
@@ -20,11 +20,9 @@ import org.bukkit.Bukkit;
  */
 public class BKSettlerCraft extends SettlerCraft {
     
-    private final SettlerCraftPlugin plugin;
     
     BKSettlerCraft(ExecutorService executorService, SettlerCraftPlugin plugin) {
-        super(executorService, PlatformFactory.getPlatform("bukkit"), new BKStructureAPI(plugin, executorService));
-        this.plugin = plugin;
+        super(executorService, PlatformFactory.getPlatform("bukkit"), new BKStructureAPI(plugin, executorService), new BukkitPlugin(plugin));
     }
 
     @Override
@@ -42,9 +40,7 @@ public class BKSettlerCraft extends SettlerCraft {
         return null;
     }
 
-    @Override
-    public File getWorkingDirectory() {
-        return plugin.getDataFolder();
-    }
+
+    
     
 }

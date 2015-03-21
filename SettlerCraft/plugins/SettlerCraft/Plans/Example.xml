@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <StructurePlan>
 	<Name>Example</Name>
-	<Placeable>
+	<Placement>
 		<Type>Schematic</Type>
 		<Schematic>Example.schematic</Schematic>
-	</Placeable>
+	</Placement>
 	<Price>10000</Price>
 	<SubStructures>
 		<SubStructure>

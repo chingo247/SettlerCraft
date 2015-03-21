@@ -17,6 +17,7 @@
 package com.chingo247.xcore.platforms.bukkit;
 
 import com.chingo247.xcore.core.IPlugin;
+import com.google.common.base.Preconditions;
 import java.io.File;
 import org.bukkit.plugin.Plugin;
 
@@ -29,6 +30,7 @@ public class BukkitPlugin implements IPlugin {
     private final Plugin plugin;
 
     public BukkitPlugin(Plugin plugin) {
+        Preconditions.checkNotNull(plugin);
         this.plugin = plugin;
     }
 

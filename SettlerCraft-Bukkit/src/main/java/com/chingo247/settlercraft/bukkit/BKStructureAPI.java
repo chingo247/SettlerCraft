@@ -24,10 +24,10 @@
 package com.chingo247.settlercraft.bukkit;
 
 import com.chingo247.settlercraft.bukkit.util.BKWorldEditUtil;
-import com.chingo247.structureapi.structure.StructureAPI;
+import com.chingo247.settlercraft.structure.StructureAPI;
 import com.chingo247.xcore.platforms.PlatformFactory;
+import com.chingo247.xcore.platforms.bukkit.BukkitPlugin;
 import com.sk89q.worldedit.entity.Player;
-import java.io.File;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import org.bukkit.Bukkit;
@@ -38,19 +38,13 @@ import org.bukkit.Bukkit;
  */
 public class BKStructureAPI extends StructureAPI {
     
-    private SettlerCraftPlugin settlerCraft;
     
     BKStructureAPI(SettlerCraftPlugin settlerCraftPlugin, ExecutorService service) {
-        super(PlatformFactory.getPlatform("bukkit"), service);
+        super(PlatformFactory.getPlatform("bukkit"), service, new BukkitPlugin(settlerCraftPlugin));
     }
 
     @Override
-    protected File getWorkingDirectory() {
-        return settlerCraft.getDataFolder();
-    }
-
-    @Override
-    protected Player getPlayer(UUID player) {
+    protected Player getWorldEditPlayer(UUID player) {
         return BKWorldEditUtil.wrapPlayer(Bukkit.getPlayer(player));
     }
     

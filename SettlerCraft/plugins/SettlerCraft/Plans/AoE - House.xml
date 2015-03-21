@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <StructurePlan>
+  <Id>aoe.residence.house</Id>
   <Name>AoE - House</Name>
-  <Placeable>
+  <Placement>
 		<Type>Schematic</Type>
 		<Schematic>AoE - House.schematic</Schematic>
-  </Placeable>
+  </Placement>
   <Price>14503</Price>
 </StructurePlan>

@@ -6,7 +6,7 @@
 package com.chingo247.settlercraft.bukkit;
 
 import com.chingo247.menu.util.EconomyUtil;
-import com.chingo247.settlercraft.provider.EconomyProvider;
+import com.chingo247.settlercraft.plugin.EconomyProvider;
 import java.util.UUID;
 import net.milkbowl.vault.economy.Economy;
 

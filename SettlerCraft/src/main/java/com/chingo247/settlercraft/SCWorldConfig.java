@@ -27,9 +27,9 @@ package com.chingo247.settlercraft;
  *
  * @author Chingo
  */
-public class SCWorldConfig extends com.chingo247.structureapi.structure.WorldConfig {
+public class SCWorldConfig extends com.chingo247.settlercraft.structure.WorldConfig {
     
-    SCWorldConfig(com.chingo247.structureapi.structure.WorldConfig worldConfig) {
+    SCWorldConfig(com.chingo247.settlercraft.structure.WorldConfig worldConfig) {
         super(worldConfig);
     }
     
