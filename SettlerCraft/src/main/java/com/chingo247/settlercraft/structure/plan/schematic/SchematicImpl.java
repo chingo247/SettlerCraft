@@ -24,7 +24,6 @@
 package com.chingo247.settlercraft.structure.plan.schematic;
 
 import com.chingo247.settlercraft.model.world.Direction;
-import com.chingo247.settlercraft.model.persistence.entities.SchematicEntity;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.data.DataException;
@@ -42,41 +41,31 @@ import com.google.common.base.Preconditions;
  */
 public class SchematicImpl implements Schematic {
 
-    private final String schematicPath;
+    private final File schematicFile;
     private final long id;
     private final int width;
     private final int height;
     private final int length;
 
-    protected SchematicImpl(File schematicFile, SchematicEntity entity) {
-        Preconditions.checkNotNull(entity);
-        Preconditions.checkNotNull(entity.getId());
-        Preconditions.checkNotNull(schematicFile);
-        Preconditions.checkArgument(schematicFile.exists());
-        this.schematicPath = schematicFile.getAbsolutePath();
-        this.id = entity.getId();
-        this.width = entity.getWidth();
-        this.height = entity.getHeight();
-        this.length = entity.getLength();
-    }
+    
 
-    protected SchematicImpl(File schematicFile) {
+    protected SchematicImpl(File schematicFile, CuboidClipboard clipboard) {
         Preconditions.checkNotNull(schematicFile);
         Preconditions.checkArgument(schematicFile.exists());
-        this.schematicPath = schematicFile.getAbsolutePath();
+        this.schematicFile = schematicFile;
         try {
             this.id = FileUtils.checksumCRC32(schematicFile);
         } catch (IOException ex) {
             throw new SchematicException(ex);
         }
-        CuboidClipboard clipboard = getClipboard();
         this.width = clipboard.getWidth();
         this.height = clipboard.getHeight();
         this.length = clipboard.getLength();
     }
 
-    private File getFile() {
-        return new File(schematicPath);
+    @Override
+    public File getFile() {
+        return schematicFile;
     }
 
     @Override
@@ -86,11 +75,11 @@ public class SchematicImpl implements Schematic {
 
     @Override
     public final CuboidClipboard getClipboard() {
-        if (!getFile().exists()) {
-            throw new RuntimeException("File: " + schematicPath + " doesn't exist");
+        if (!schematicFile.exists()) {
+            throw new RuntimeException("File: " + schematicFile.getAbsolutePath() + " doesn't exist");
         }
         try {
-            return SchematicFormat.MCEDIT.load(getFile());
+            return SchematicFormat.getFormat(schematicFile).load(schematicFile);
         } catch (IOException | DataException ex) {
             throw new SchematicException(ex);
         }
@@ -98,7 +87,7 @@ public class SchematicImpl implements Schematic {
 
     @Override
     public Vector getSize() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new Vector(width, height, length);
     }
 
     @Override
@@ -117,7 +106,7 @@ public class SchematicImpl implements Schematic {
     }
 
     @Override
-    public SchematicPlacement getPlacement() {
+    public SchematicPlacement createPlacement() {
         return new SchematicPlacement(this, Direction.EAST, Vector.ZERO);
     }
 

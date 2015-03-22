@@ -30,8 +30,8 @@ import static com.chingo247.settlercraft.model.world.Direction.EAST;
 import static com.chingo247.settlercraft.model.world.Direction.NORTH;
 import static com.chingo247.settlercraft.model.world.Direction.SOUTH;
 import static com.chingo247.settlercraft.model.world.Direction.WEST;
-import com.chingo247.settlercraft.model.persistence.entities.SchematicEntity;
 import com.chingo247.settlercraft.model.persistence.entities.world.CuboidDimension;
+import com.chingo247.settlercraft.structure.plan.schematic.Schematic;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
@@ -53,7 +53,7 @@ public class SchematicUtil {
     private SchematicUtil() {
     }
 
-    public static CuboidDimension calculateDimension(SchematicEntity schematic, Vector pos, Direction direction) {
+    public static CuboidDimension calculateDimension(Schematic schematic, Vector pos, Direction direction) {
         Vector size = schematic.getSize();
         Vector end = getPoint2Right(pos, direction, new BlockVector(
                 size.getBlockX(),

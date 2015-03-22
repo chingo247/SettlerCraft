@@ -27,6 +27,8 @@ import com.chingo247.settlercraft.structure.placement.Placement;
 import com.chingo247.settlercraft.structure.plan.document.PlacementElement;
 import com.chingo247.settlercraft.structure.StructureAPI;
 import java.util.concurrent.RecursiveTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -47,8 +49,13 @@ public class PlacementProcessor extends RecursiveTask<Placement> {
 
     @Override
     protected Placement compute() {
-        Placement placement = StructureAPI.handle(placeableNode);
-        return placement;
+        try {
+            Placement placement = StructureAPI.handle(placeableNode);
+            return placement;
+        } catch (Exception ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+        }
+        return null;
     }
 
 }

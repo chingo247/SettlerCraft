@@ -24,6 +24,7 @@
 package com.chingo247.settlercraft.structure.plan.document;
 
 import com.chingo247.settlercraft.structure.plan.exception.PlanException;
+import com.google.common.base.Preconditions;
 import fiber.core.impl.xml.located.LocatedElement;
 import java.io.File;
 import org.apache.commons.lang.math.NumberUtils;
@@ -40,6 +41,8 @@ public class SimpleElement {
     private final File file;
 
     SimpleElement(File file, Element element) {
+        Preconditions.checkNotNull(file);
+        Preconditions.checkArgument(file.exists());
         if(! (element instanceof LocatedElement)) throw new IllegalArgumentException("Element must be instance of " + LocatedElement.class);
         this.le = (LocatedElement)element;
         this.file = file;

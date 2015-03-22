@@ -67,6 +67,7 @@ public class SchematicPlacement extends DirectionalPlacement {
     }
 
     public SchematicPlacement(Schematic schematic, Direction direction, Vector position) {
+        this.rotation =  -90;
         this.position = position;
         this.direction = direction;
         this.schematic = schematic;
@@ -111,7 +112,6 @@ public class SchematicPlacement extends DirectionalPlacement {
      */
     @Override
     public void rotate(Direction direction) {
-
         switch (direction) {
             case EAST:
                 break;
@@ -133,6 +133,39 @@ public class SchematicPlacement extends DirectionalPlacement {
         }
         this.direction = WorldUtil.getDirection(rotation);
     }
+    
+//    /**
+//     * Flips the Schematic, note that this method will fake the flip operation
+//     * and only sets the direction of this Schematic internally as opposed to
+//     * other flip operations where huge amount of blocks are swapped. This
+//     * method is therefore a VERY LIGHT operation.
+//     *
+//     * @param direction
+//     */
+//    @Override
+//    public void rotate(Direction direction) {
+//        System.out.println("Current Direction: " + direction);
+//        switch (direction) {
+//            case EAST:
+//                break;
+//            case SOUTH:
+//                rotation += 90;
+//                break;
+//            case WEST:
+//                rotation += 180;
+//                break;
+//            case NORTH:
+//                rotation += 270;
+//                break;
+//            default:
+//                throw new AssertionError("unreachable");
+//        }
+//        // If the amount is bigger than 360, then remove turn back 360
+//        if (rotation >= 360) {
+//            rotation = - 360;
+//        }
+//        this.direction = WorldUtil.getDirection(rotation);
+//    }
 
     @Override
     public void move(Vector offset) {
@@ -141,16 +174,10 @@ public class SchematicPlacement extends DirectionalPlacement {
 
     @Override
     public void place(EditSession editSession, Vector pos, Options o) {
-        System.out.println("SchematicPlacement#place()");
         ConstructionOptions options = new ConstructionOptions();
-
-        System.out.println("PlacementDirection: " + direction);
-
-        System.out.println("Placing clipboard on: (" + pos.getBlockX() + ", " + pos.getBlockY() + ", " + pos.getBlockZ() + ")");
         CuboidClipboard clipboard = schematic.getClipboard();
         SchematicUtil.align(clipboard, direction);
 
-        System.out.println("Size: " + clipboard.getSize());
 
         int x = options.getXCube() <= 0 ? clipboard.getSize().getBlockX() : options.getXCube();
         int y = options.getYCube() <= 0 ? clipboard.getSize().getBlockY() : options.getYCube();

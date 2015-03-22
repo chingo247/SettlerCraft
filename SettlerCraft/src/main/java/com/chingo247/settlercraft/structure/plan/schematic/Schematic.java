@@ -26,6 +26,7 @@ package com.chingo247.settlercraft.structure.plan.schematic;
 import com.chingo247.settlercraft.structure.placement.SchematicPlacement;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
+import java.io.File;
 
 /**
  *
@@ -35,10 +36,11 @@ public interface Schematic {
     
     public long getId();
     public CuboidClipboard getClipboard();
-    public SchematicPlacement getPlacement();
+    public SchematicPlacement createPlacement();
     public Vector getSize();
     public int getWidth();
     public int getHeight();
     public int getLength();
+    public File getFile();
     
 }

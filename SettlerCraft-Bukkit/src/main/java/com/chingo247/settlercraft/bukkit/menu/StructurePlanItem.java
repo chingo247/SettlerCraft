@@ -49,8 +49,8 @@ import com.chingo247.menu.item.CategoryTradeItem;
 import com.chingo247.menu.item.TradeItem;
 import com.chingo247.menu.util.ShopUtil;
 import com.chingo247.settlercraft.structure.placement.Placement;
+import com.chingo247.settlercraft.exception.SettlerCraftException;
 import com.chingo247.settlercraft.model.persistence.entities.world.CuboidDimension;
-import com.chingo247.settlercraft.exception.StructureDataException;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.sk89q.worldedit.data.DataException;
 import java.io.IOException;
@@ -88,9 +88,10 @@ public class StructurePlanItem implements CategoryTradeItem {
         this.description = description;
     }
 
-    public static StructurePlanItem createItemFromPlan(StructurePlan plan) throws IOException, DataException, DocumentException, StructureDataException {
+    public static StructurePlanItem createItemFromPlan(StructurePlan plan) throws IOException, DataException, DocumentException, SettlerCraftException {
         
         Placement p = plan.getPlacement();
+        
         CuboidDimension dimension = new CuboidDimension(p.getMinPosition(), p.getMaxPosition());
         
         int width = dimension.getMaxX();

@@ -67,12 +67,12 @@ public class PlanListener implements Listener {
         WorldEditPlugin plugin = BKWorldEditUtil.getWorldEditPlugin();
         Player player = plugin.wrapPlayer(pie.getPlayer());
         Block block = pie.getClickedBlock();
-        Location loc = block.getLocation();
-        
-        System.out.println("Location: " + loc);
-        System.out.println("[PlanListener]: Player uses structure plan!");
-        placeHandler.handle(stack, player, player.getWorld(), new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
-
+        if(block !=  null) { 
+            Location loc = block.getLocation();
+            System.out.println("Location: " + loc);
+            System.out.println("[PlanListener]: Player uses structure plan!");
+            placeHandler.handle(stack, player, player.getWorld(), new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
+        }
     }
 
 

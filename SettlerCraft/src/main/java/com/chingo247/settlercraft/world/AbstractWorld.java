@@ -23,10 +23,69 @@
  */
 package com.chingo247.settlercraft.world;
 
+import com.chingo247.settlercraft.SettlerCraft;
+import com.chingo247.settlercraft.model.world.Direction;
+import com.chingo247.settlercraft.structure.Structure;
+import com.chingo247.settlercraft.structure.StructureAPI;
+import com.chingo247.settlercraft.structure.StructureManager;
+import com.chingo247.settlercraft.structure.placement.Placement;
+import com.chingo247.settlercraft.structure.plan.StructurePlan;
+import com.google.common.base.Preconditions;
+import com.sk89q.worldedit.Vector;
+import java.io.File;
+import java.util.UUID;
+
 /**
  *
  * @author Chingo
  */
-public class AbstractWorld {
+public class AbstractWorld implements World {
+    
+    private final SettlerCraft settlerCraft;
+    private final StructureAPI structureAPI;
+    private final StructureManager structureManager;
+    
+    private final String world;
+    private final UUID uuid;
+    private final File worldFile;
+    
+    protected AbstractWorld(SettlerCraft settlerCraft, String world, UUID worldUUID, File worldFile) {
+        Preconditions.checkNotNull(settlerCraft);
+        Preconditions.checkNotNull(world);
+        Preconditions.checkNotNull(worldUUID);
+        Preconditions.checkNotNull(worldFile);
+        
+        this.world = world;
+        this.uuid = worldUUID;
+        this.worldFile = worldFile;
+        this.settlerCraft = settlerCraft;
+        this.structureAPI = settlerCraft.getStructureAPI();
+        this.structureManager = structureAPI.getStructureManager(world);
+    }
+
+    @Override
+    public String getName() {
+        return world;
+    }
+
+    @Override
+    public UUID getUUID() {
+        return uuid;
+    }
+
+    @Override
+    public Structure createStructure(Placement placement, Vector position, Direction direction) {
+        return structureManager.createStructure(placement, position, direction);
+    }
+
+    @Override
+    public Structure createStructure(StructurePlan plan, Vector position, Direction direction) {
+        return structureManager.createStructure(plan, position, direction);
+    }
+
+    @Override
+    public Structure getStructure(long id) {
+        return structureManager.getStructure(id);
+    }
     
 }

@@ -31,7 +31,6 @@ import com.chingo247.settlercraft.exception.SettlerCraftException;
 import com.chingo247.settlercraft.model.persistence.HSQLServer;
 import com.chingo247.settlercraft.bukkit.menu.PlanMenuManager;
 import com.chingo247.settlercraft.model.persistence.hibernate.HibernateUtil;
-import com.chingo247.settlercraft.exception.StructureAPIException;
 import com.chingo247.xcore.core.IPlugin;
 
 import java.util.concurrent.ExecutorService;
@@ -94,7 +93,7 @@ public class SettlerCraftPlugin extends JavaPlugin implements IPlugin {
 
         try {
             planMenuManager.initialize();
-        } catch (DocumentException | StructureAPIException ex) {
+        } catch (DocumentException | SettlerCraftException ex) {
             java.util.logging.Logger.getLogger(SettlerCraftPlugin.class.getName()).log(Level.SEVERE, null, ex);
             setEnabled(false);
             return;

@@ -28,13 +28,24 @@ import com.chingo247.settlercraft.model.persistence.entities.structure.Structure
 import com.chingo247.settlercraft.model.persistence.entities.structure.StructureState;
 import com.chingo247.settlercraft.model.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.model.persistence.dao.StructurePlayerDAO;
+import com.chingo247.settlercraft.model.persistence.entities.world.CuboidDimension;
+import com.chingo247.settlercraft.model.util.ProcessingQueue;
+import com.chingo247.settlercraft.model.world.Direction;
+import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.structure.construction.options.Options;
 import com.chingo247.settlercraft.structure.exception.StructureException;
+import com.chingo247.settlercraft.structure.placement.Placement;
+import com.chingo247.settlercraft.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structure.plan.StructurePlanReader;
+import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
@@ -43,18 +54,40 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
  */
 public class Structure {
 
+    private static final String STRUCTURE_PLAN_FILE = "StructurePlan.xml";
     private static final StructureDAO STRUCTURE_DAO = new StructureDAO();
     private static final StructurePlayerDAO STRUCTURE_PLAYER_DAO = new StructurePlayerDAO();
     
     protected final StructureEntity structureEntity;
     private final StructureManager structureManager;
     private final StructureAPI structureAPI;
+    private StructurePlan plan;
+    private ProcessingQueue processingQueue;
 
-    Structure(StructureAPI structureAPI, StructureManager structureManager, StructureEntity structureEntity) {
+    Structure(StructureAPI structureAPI, StructureManager structureManager, StructureEntity structureEntity, ExecutorService service) {
         this.structureEntity = structureEntity;
         this.structureManager = structureManager;
         this.structureAPI = structureAPI;
+        this.processingQueue = new ProcessingQueue(service);
     }
+    
+    private File getDirectory() {
+        return new File(structureManager.getStructuresDirectory(), String.valueOf(structureEntity.getId()));
+    }
+    
+    private File getStructurePlanFile() {
+        
+        return new File(getDirectory(), STRUCTURE_PLAN_FILE);
+    }
+    
+    public CuboidDimension getDimension() {
+        return structureEntity.getDimension();
+    }
+    
+    public Direction getDirection() {
+        return structureEntity.getDirection();
+    }
+    
 
     public final Long getId() {
         return structureEntity.getId();
@@ -82,6 +115,20 @@ public class Structure {
 //        }
         structureEntity.setState(state);
     }
+    
+    public synchronized StructurePlan getStructurePlan() {
+        if(plan == null) {
+            StructurePlanReader reader = new StructurePlanReader();
+            plan = reader.readFile(getStructurePlanFile());
+            if(plan != null) {
+                 Placement placement = plan.getPlacement();
+                 placement.rotate(structureEntity.getDirection());
+            }
+        }
+       
+        
+        return plan;
+    }
 
     public final void demolish(UUID anUUID, Options options, boolean force) throws StructureException {
         demolish(getSession(anUUID), options, force);
@@ -107,6 +154,14 @@ public class Structure {
     public final void build(AsyncEditSession editSession, Options options, boolean force) throws StructureException {
         //TODO: implement build structure
         //TODO: ignore substructure areas using masks (Ignore Mask)
+        System.out.println("Build structure....");
+        PlayerEntry entry = editSession.getPlayer();
+        AsyncPlacement placement = new AsyncPlacement(entry, getStructurePlan().getPlacement());
+        Vector position = getDimension().getMinPosition();
+        
+        placement.place(editSession, position, options);
+        
+        
     }
 
     private AsyncEditSession getSession(UUID anUUID) {

@@ -91,7 +91,6 @@ public class AsyncPlacement extends AbstractPlacement {
                 if (wait != null) {
                     wait.checkAndWait(null);
                 }
-                System.out.println("task(placement)!");
                 placement.place(session, pos, options);
             }
         });

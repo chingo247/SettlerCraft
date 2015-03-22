@@ -52,9 +52,6 @@ public class DAOFactory {
         return impl;
     }
 
-    public static void main(String[] args) {
-        StructureDAO structureDAO = DAOFactory.getDao(StructureDAO.class);
-        System.out.println("dao: " + structureDAO);
-    }
+    
     
 }

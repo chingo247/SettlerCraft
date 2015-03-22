@@ -28,7 +28,6 @@ package com.chingo247.settlercraft.model.persistence.hibernate;
 import com.chingo247.settlercraft.model.persistence.legacy.PlayerMembership;
 import com.chingo247.settlercraft.model.persistence.legacy.PlayerOwnership;
 import com.chingo247.settlercraft.model.persistence.legacy.Structure;
-import com.chingo247.settlercraft.model.persistence.entities.SchematicEntity;
 import com.chingo247.settlercraft.model.persistence.entities.structure.StructureEntity;
 import com.chingo247.settlercraft.model.persistence.entities.structure.StructurePlayerEntity;
 import org.hibernate.Session;
@@ -53,7 +52,6 @@ public class HibernateUtil {
             configuration.addAnnotatedClass(PlayerOwnership.class);
             configuration.addAnnotatedClass(PlayerMembership.class);
             configuration.addAnnotatedClass(StructurePlayerEntity.class);
-            configuration.addAnnotatedClass(SchematicEntity.class);
             configuration.addAnnotatedClass(StructureEntity.class);
             configuration = (AnnotationConfiguration) configuration.configure("com/chingo247/settlercraft/model/resources/hibernate.cfg.xml");
             sessionFactory = configuration.buildSessionFactory();

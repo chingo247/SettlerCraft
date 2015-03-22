@@ -34,6 +34,12 @@ import com.chingo247.settlercraft.model.world.Direction;
  */
 public abstract class DirectionalPlacement extends AbstractPlacement {
     
+    private int rotation = -90;
+
+    protected int getRotation() {
+        return rotation;
+    }
+    
     public abstract Direction getDirection();
     
 }

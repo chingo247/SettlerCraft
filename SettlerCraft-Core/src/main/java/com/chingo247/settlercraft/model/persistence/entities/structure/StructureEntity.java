@@ -37,7 +37,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import org.hibernate.annotations.Index;
-import org.hibernate.validator.NotNull;
 
 /**
  *
@@ -64,13 +63,8 @@ public class StructureEntity implements Serializable {
     
     @Embedded
     private CuboidDimension dimension;
-    
-    
+       
     private Direction direction;
-    
-    @NotNull
-    @Column(name = "structure_type")
-    private StructureType type;
     
     @Column(name = "value")
     private Double value;
@@ -87,12 +81,11 @@ public class StructureEntity implements Serializable {
     protected StructureEntity() {
     }
     
-    public StructureEntity(String world, UUID worldUUID, CuboidDimension dimension, StructureType type, Direction direction) {
+    public StructureEntity(String world, UUID worldUUID, CuboidDimension dimension, Direction direction) {
         this.state = StructureState.INITIALIZING;
         this.world = world;
         this.worldUUID = worldUUID;
         this.dimension = dimension;
-        this.type = type;
         this.direction = direction;
     }
     
@@ -112,9 +105,7 @@ public class StructureEntity implements Serializable {
         return parent;
     }
 
-    public StructureType getType() {
-        return type;
-    }
+  
     
     public void setName(String name) {
         this.name = name;

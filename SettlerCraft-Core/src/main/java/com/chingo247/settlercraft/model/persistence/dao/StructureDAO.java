@@ -25,7 +25,7 @@ package com.chingo247.settlercraft.model.persistence.dao;
  * THE SOFTWARE.
  */
 
-import com.chingo247.settlercraft.model.entities.structure.QStructureEntity;
+import com.chingo247.settlercraft.model.persistence.entities.structure.QStructureEntity;
 import com.chingo247.settlercraft.model.persistence.entities.structure.StructureEntity;
 import com.chingo247.settlercraft.model.persistence.entities.structure.StructureState;
 import com.chingo247.settlercraft.model.persistence.entities.world.CuboidDimension;

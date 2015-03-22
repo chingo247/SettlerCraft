@@ -29,10 +29,6 @@ import com.chingo247.settlercraft.structure.exception.StructureException;
 import com.chingo247.settlercraft.model.util.KeyPool;
 import com.chingo247.settlercraft.model.util.WorldUtil;
 import com.chingo247.settlercraft.model.world.Direction;
-import static com.chingo247.settlercraft.model.world.Direction.EAST;
-import static com.chingo247.settlercraft.model.world.Direction.NORTH;
-import static com.chingo247.settlercraft.model.world.Direction.SOUTH;
-import static com.chingo247.settlercraft.model.world.Direction.WEST;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.plugin.EconomyProvider;
 import com.chingo247.settlercraft.selection.CUISelectionManager;
@@ -40,6 +36,7 @@ import com.chingo247.settlercraft.selection.ISelectionManager;
 import com.chingo247.settlercraft.selection.NoneSelectionManager;
 import com.chingo247.settlercraft.structure.StructureAPI;
 import com.chingo247.settlercraft.structure.Structure;
+import com.chingo247.settlercraft.util.PlacementUtil;
 import com.chingo247.xcore.core.AInventory;
 import com.chingo247.xcore.core.AItemStack;
 import com.chingo247.xcore.core.IPlayer;
@@ -111,10 +108,8 @@ public class StructurePlaceHandler {
                     return;
                 }
 
-                System.out.println("Player has the item: " + planItem.getName());
 
                 String planId = getPlanID(planItem);
-                System.out.println("PlanID: " + planId);
 
                 StructurePlan plan = structureAPI.getPlan(planId);
 
@@ -137,11 +132,9 @@ public class StructurePlaceHandler {
 
                     return;
                 }
-                System.out.println("Plan: " + plan.getName() + " ");
                 handlePlace(plan, planItem, player, world, pos, slm);
                 
                 } catch (Exception ex) {
-                    System.out.println("Error:");
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
                 }
             }
@@ -154,20 +147,21 @@ public class StructurePlaceHandler {
         IPlayer iPlayer = settlerCraft.getPlatform().getPlayer(player.getUniqueId());
         
         Direction direction = WorldUtil.getDirection(iPlayer.getYaw());
-        System.out.println("Direction: " + direction);
         
         Vector pos2;
         
         boolean toLeft = iPlayer.isSneaking();
+        
+        System.out.println("plan size: " + plan.getPlacement().getMaxPosition());
+        
         if (toLeft) {
             System.out.println("Player was sneaking... pointing left!");
-            pos2 = getPoint2Left(pos1, direction, plan.getPlacement().getMaxPosition());
+            pos2 = PlacementUtil.getPoint2Left(pos1, direction, plan.getPlacement().getMaxPosition());
         } else {
             System.out.println("Player was NOT sneaking... pointing right!");
-            pos2 = getPoint2Right(pos1, direction, plan.getPlacement().getMaxPosition());
+            pos2 = PlacementUtil.getPoint2Right(pos1, direction, plan.getPlacement().getMaxPosition());
         }
         
-        System.out.println("SelectionManager: " + selectionManager);
 
         // If player has NOT selected anything yet... make a new selection
         if(!selectionManager.hasSelection(player)) {
@@ -175,26 +169,28 @@ public class StructurePlaceHandler {
             player.print(ChatColors.YELLOW + "Left-Click " + ChatColors.RESET + " in the " + ChatColors.GREEN + " green " + ChatColors.RESET + "square to " + ChatColors.YELLOW + "confirm");
             player.print(ChatColors.YELLOW + "Right-Click " + ChatColors.RESET + "to" + ChatColors.YELLOW + " deselect");
         } else if(selectionManager.matchesCurrentSelection(player, pos1, pos2)){
+            
+            System.out.println("pos1: " + pos1);
+            System.out.println("pos2: " + pos2);
             if (toLeft) {
                 // Fix WTF HOW?!!1?
                 pos1 = WorldUtil.translateLocation(pos1, direction, (-(plan.getPlacement().getMaxPosition().getBlockX()- 1)), 0, 0);
             }
             
-            System.out.println("Can place?");
+            
+            
             if (canPlace(player, world, pos1, direction, plan)) {
                 com.chingo247.settlercraft.SCWorld scWorld = settlerCraft.getWorld(world.getName());
                 Structure structure;
                 try {
-                    System.out.println("Creating structure");
                     structure = scWorld.getStructureManager().createStructure(plan, pos1, direction);
                     
-                    System.out.println("Structure: " + structure);
                     if (structure != null) {
 //                        AItemStack clone = item.clone();
 //                        clone.setAmount(1);
 //                        iPlayer.getInventory().removeItem(clone);
 //                        iPlayer.updateInventory();
-                        System.out.println("Build structure!");
+                        
                         structure.build(player.getUniqueId(), Options.defaultOptions(), false);
                     }
                 } catch (StructureException ex) {
@@ -272,56 +268,7 @@ public class StructurePlaceHandler {
         }
         return price;
     }
-    
-        /**
-     * Used to to getPlan the secondary position when selecting. So that the
-     * green square is always at the same place as the clicked block and the
-     * secondary always across.
-     *
-     * @param point1
-     * @param direction
-     * @param size
-     * @return point2
-     */
-    private Vector getPoint2Right(Vector point1, Direction direction, Vector size) {
-        switch (direction) {
-            case EAST:
-                return point1.add(size.subtract(1, 1, 1));
-            case SOUTH:
-                return point1.add(-(size.getBlockZ() - 1), size.getBlockY() - 1, (size.getBlockX() - 1));
-            case WEST:
-                return point1.add(-(size.getBlockX() - 1), size.getBlockY() - 1, -(size.getBlockZ() - 1));
-            case NORTH:
-                return point1.add((size.getBlockZ() - 1), size.getBlockY() - 1, -(size.getBlockX() - 1));
-            default:
-                throw new AssertionError("unreachable");
-        }
-    }
-
-    /**
-     * Used to to getPlan the secondary position when selecting. So that the
-     * green square is always at the same place as the clicked block and the
-     * secondary always across.
-     *
-     * @param point1
-     * @param direction
-     * @param size
-     * @return point2
-     */
-    private Vector getPoint2Left(Vector point1, Direction direction, Vector size) {
-        switch (direction) {
-            case EAST:
-                return point1.add((size.getBlockX() - 1), size.getBlockY() - 1, -(size.getBlockZ() - 1));
-            case SOUTH:
-                return point1.add((size.getBlockZ() - 1), size.getBlockY() - 1, (size.getBlockX() - 1));
-            case WEST:
-                return point1.add(-(size.getBlockX() - 1), size.getBlockY() - 1, (size.getBlockZ() - 1));
-            case NORTH:
-                return point1.add(-(size.getBlockZ() - 1), size.getBlockY() - 1, -(size.getBlockX() - 1));
-            default:
-                throw new AssertionError("unreachable");
-        }
-    }
+   
 
     private boolean canPlace(Player player, World world, Vector pos1, Direction direction, StructurePlan plan) {
         System.out.println("Still have to implement canPlace() in " + this.getClass().getName());

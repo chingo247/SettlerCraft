@@ -140,7 +140,7 @@ public abstract class SettlerCraft {
         return platform;
     }
     
-    protected abstract File getWorkingDirectory();
+    public abstract File getWorkingDirectory();
 
     protected abstract Player getPlayer(UUID player);
 

@@ -23,13 +23,11 @@
  */
 package com.chingo247.settlercraft.structure.plan;
 
-import com.chingo247.settlercraft.model.persistence.HSQLServer;
 import com.chingo247.settlercraft.event.EventManager;
 import com.chingo247.settlercraft.structure.placement.event.PlacementHandlerRegisterEvent;
 import com.chingo247.settlercraft.structure.event.StructurePlanLoadEvent;
 import com.chingo247.settlercraft.structure.plan.exception.PlanException;
 import com.chingo247.settlercraft.structure.placement.handlers.PlacementHandler;
-import com.chingo247.settlercraft.structure.placement.handlers.SchematicPlacementHandler;
 import com.chingo247.settlercraft.structure.plan.document.PlacementElement;
 import com.chingo247.settlercraft.structure.plan.document.SimpleElement;
 import com.chingo247.settlercraft.structure.plan.document.StructurePlanDocument;
@@ -177,9 +175,7 @@ public class GlobalPlanManager extends StructurePlanManager {
     }
 
     private void scanWaitingPlans(String plugin, String handlerType) {
-
         for (int i = 0; i < waitingJobs.size(); i++) {
-
             synchronized (waitingJobs.get(i)) {
                 StructurePlanJob job = waitingJobs.get(i);
                 if (job.checkSupportAndRemove(plugin, handlerType)) {
@@ -191,7 +187,6 @@ public class GlobalPlanManager extends StructurePlanManager {
             }
 
         }
-
     }
 
     private synchronized void processStagedJobs() {
@@ -304,13 +299,13 @@ public class GlobalPlanManager extends StructurePlanManager {
 
         private String[] splitType(SimpleElement element, String type) throws Exception {
             String[] pluginPlacement = type.split(".");
-            if (pluginPlacement.length == 1) {
-                return new String[]{"SettlerCraft", pluginPlacement[0]};
+            if (pluginPlacement.length == 0) {
+                return new String[]{"SettlerCraft", type};
             } else if (pluginPlacement.length == 2) {
                 return new String[]{pluginPlacement[0], pluginPlacement[1]};
             } else {
                 throw new PlanException("Invalid format for element <" + element.getElementName() + ">"
-                        + " on line " + element.getLine() + " in '"+element.getFile().getAbsolutePath()+"'"
+                        + " on line " + element.getLine() + " of '"+element.getFile().getAbsolutePath()+"'"
                         + ". Format should be: SomePluginName.SomeTypeName");
             }
         }
@@ -441,17 +436,6 @@ public class GlobalPlanManager extends StructurePlanManager {
             return null;
         }
 
-    }
-
-    public static void main(String[] args) {
-        StructureAPI.registerHandler(new SchematicPlacementHandler());
-        StructurePlanReader reader = new StructurePlanReader();
-        HSQLServer server = HSQLServer.getInstance();
-        server.start();
-
-        GlobalPlanManager planManager = new GlobalPlanManager(new File("C:\\Users\\Chingo\\Dropbox\\Bukkit\\Projects\\SettlerCraft\\SettlerCraft\\SettlerCraft\\plugins\\SettlerCraft\\Plans"));
-        planManager.loadPlans();
-        server.stop();
     }
 
 }

@@ -23,10 +23,10 @@
  */
 package com.chingo247.settlercraft.model.persistence.dao;
 
-import com.chingo247.settlercraft.model.entities.structure.QStructurePlayerEntity;
-import com.chingo247.settlercraft.model.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.model.persistence.entities.structure.QStructurePlayerEntity;
 import com.chingo247.settlercraft.model.persistence.entities.structure.StructureEntity;
 import com.chingo247.settlercraft.model.persistence.entities.structure.StructurePlayerEntity;
+import com.chingo247.settlercraft.model.persistence.hibernate.HibernateUtil;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import java.util.List;
 import java.util.UUID;

@@ -27,10 +27,9 @@ import com.chingo247.menu.CategoryMenu;
 import com.chingo247.menu.MenuAPI;
 import com.chingo247.settlercraft.SettlerCraft;
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
+import com.chingo247.settlercraft.exception.SettlerCraftException;
 import com.chingo247.settlercraft.util.FileUtil;
 import com.chingo247.settlercraft.structure.StructureAPI;
-import com.chingo247.settlercraft.exception.StructureAPIException;
-import com.chingo247.settlercraft.exception.StructureDataException;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.sk89q.worldedit.data.DataException;
 import java.io.File;
@@ -74,9 +73,9 @@ public class PlanMenuManager {
      * menu.xml from the jar will be written to the FileSystem.
      *
      * @throws DocumentException When XML is invalid
-     * @throws StructureAPIException When XML contains invalid data
+     * @throws SettlerCraftException When XML contains invalid data
      */
-    public final void initialize() throws DocumentException, StructureAPIException {
+    public final void initialize() throws DocumentException, SettlerCraftException {
         File file = new File(settlerCraft.getWorkingDirectory(), "menu.xml");
         if (!file.exists()) {
             InputStream input = PlanMenuManager.class.getClassLoader().getResourceAsStream(RESOURCE_FOLDER + "/menu.xml");
@@ -86,7 +85,7 @@ public class PlanMenuManager {
         Document d = new SAXReader().read(file);
         List<Node> rows = d.selectNodes("Menu/SlotRow");
         if (rows.size() > 2) {
-            throw new StructureAPIException("Max rows is 2 for menu.xml");
+            throw new SettlerCraftException("Max rows is 2 for menu.xml");
         }
 
         planMenu = MenuAPI.createMenu(SettlerCraftPlugin.getInstance(), PLANSHOP_NAME, 54);
@@ -97,9 +96,9 @@ public class PlanMenuManager {
             List<Node> slotNodes = rowNode.selectNodes("Slot");
             // Slot #1 is reserved for all category
             if (row == 0 && slotNodes.size() > 8) {
-                throw new StructureAPIException(" 'SlotRow#1' has max 8 slots to customize");
+                throw new SettlerCraftException(" 'SlotRow#1' has max 8 slots to customize");
             } else if (slotNodes.size() > 9) {
-                throw new StructureAPIException(" 'SlotRow#" + (row + 2) + "' has max 9 slots to customize");
+                throw new SettlerCraftException(" 'SlotRow#" + (row + 2) + "' has max 9 slots to customize");
             }
             int count = 0;
 
@@ -115,17 +114,17 @@ public class PlanMenuManager {
                 Node ali = categorySlotNode.selectSingleNode("Aliases");
 
                 if (mId == null) {
-                    throw new StructureAPIException("Missing 'MaterialID' element in 'SlotRow#" + (row + 1) + "' 'Slot#" + (count + 1) + "'");
+                    throw new SettlerCraftException("Missing 'MaterialID' element in 'SlotRow#" + (row + 1) + "' 'Slot#" + (count + 1) + "'");
                 }
                 if (cat == null) {
-                    throw new StructureAPIException("Missing 'Category' element in 'SlotRow#" + (row + 1) + "' 'Slot#" + (count + 1) + "'");
+                    throw new SettlerCraftException("Missing 'Category' element in 'SlotRow#" + (row + 1) + "' 'Slot#" + (count + 1) + "'");
                 }
 
                 int id;
                 try {
                     id = Integer.parseInt(mId.getText());
                 } catch (NumberFormatException nfe) {
-                    throw new StructureAPIException("Invalid number for 'MaterialID' element in 'SlotRow#" + (row + 1) + "' 'Slot#" + (count + 1) + "'");
+                    throw new SettlerCraftException("Invalid number for 'MaterialID' element in 'SlotRow#" + (row + 1) + "' 'Slot#" + (count + 1) + "'");
                 }
                 String category = cat.getText();
                 if (category.isEmpty()) {
@@ -133,7 +132,7 @@ public class PlanMenuManager {
                     category = catEl.attributeValue("value");
                 }
                 if (category.trim().isEmpty()) {
-                    throw new StructureAPIException("Empty 'Category' element in 'SlotRow#" + (row + 1) + "' and 'Slot#" + (count + 1) + "'");
+                    throw new SettlerCraftException("Empty 'Category' element in 'SlotRow#" + (row + 1) + "' and 'Slot#" + (count + 1) + "'");
                 }
                 category = category.replaceAll(" AND ", "&");
 
@@ -151,7 +150,7 @@ public class PlanMenuManager {
                             alias = aliasEl.attributeValue("value");
                         }
                         if (alias.trim().isEmpty()) {
-                            throw new StructureAPIException("Empty 'Alias' element in  'SlotRow#" + (row + 1) + "' and 'Slot#" + (count + 1) + "' and 'Alias#" + (j + 1) + "'");
+                            throw new SettlerCraftException("Empty 'Alias' element in  'SlotRow#" + (row + 1) + "' and 'Slot#" + (count + 1) + "' and 'Alias#" + (j + 1) + "'");
                         }
 
                         aliases[j] = aliasNodes.get(j).getText();
@@ -217,7 +216,7 @@ public class PlanMenuManager {
                 // Add item to planmenu
                 StructurePlanItem planItem = StructurePlanItem.createItemFromPlan(plan);
                 planMenu.addItem(planItem);
-            } catch (IOException | DataException | DocumentException | StructureDataException ex) {
+            } catch (IOException | DataException | DocumentException | SettlerCraftException ex) {
                 LOGGER.error(ex.getMessage());
             }
         }

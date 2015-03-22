@@ -23,8 +23,11 @@
  */
 package com.chingo247.settlercraft.world;
 
+import com.chingo247.settlercraft.model.world.Direction;
 import com.chingo247.settlercraft.structure.Structure;
-import java.util.List;
+import com.chingo247.settlercraft.structure.placement.Placement;
+import com.chingo247.settlercraft.structure.plan.StructurePlan;
+import com.sk89q.worldedit.Vector;
 import java.util.UUID;
 
 /**
@@ -37,7 +40,9 @@ public interface World {
     
     public UUID getUUID();
     
-    public List<Structure> listStructures();
+    public Structure createStructure(Placement placement, Vector position, Direction direction);
+    
+    public Structure createStructure(StructurePlan plan, Vector position, Direction direction);
     
     public Structure getStructure(long id);
     

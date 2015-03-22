@@ -5,9 +5,9 @@
  */
 package com.chingo247.settlercraft.structure;
 
-import com.chingo247.settlercraft.model.util.WorldEditUtil;
 import com.chingo247.settlercraft.model.world.Direction;
 import com.chingo247.settlercraft.event.EventManager;
+import com.chingo247.settlercraft.model.util.WorldEditUtil;
 import com.chingo247.settlercraft.structure.placement.event.PlacementHandlerRegisterEvent;
 import com.chingo247.settlercraft.structure.plan.exception.PlacementException;
 import com.chingo247.settlercraft.structure.placement.Placement;
@@ -30,6 +30,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -44,23 +47,24 @@ public abstract class StructureAPI {
     private static final Map<String, Map<String, PlacementHandler>> handlers = Maps.newHashMap();
 
     private final StructurePlanManager globalPlanManager;
-    private final Map<String, StructureManager> worlds;
+    private final Map<String, StructureManager> structureManagers;
     private final APlatform platform;
     private final ExecutorService service;
     private final Lock loadLock = new ReentrantLock();
     private final IPlugin plugin;
+    private final ThreadPoolExecutor executor;
     private boolean isLoadingPlans = false;
 
     protected StructureAPI(APlatform platform, ExecutorService executorService, IPlugin plugin) {
+        
         Preconditions.checkNotNull(platform);
         Preconditions.checkNotNull(executorService);
         Preconditions.checkNotNull(plugin);
+        this.executor = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 30L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
         this.plugin = plugin;
         this.service = executorService;
-        this.worlds = Maps.newHashMap();
-
+        this.structureManagers = Maps.newHashMap();
         this.platform = platform;
-
         // Register Handlers first...
 //        registerHandler(new GeneratedCuboidHandler());
 //        registerHandler(new GeneratedCylinderHandler());
@@ -101,34 +105,34 @@ public abstract class StructureAPI {
 
     public StructureManager getStructureManager(String world) {
         StructureManager sw;
-        synchronized (worlds) {
-            sw = worlds.get(world);
+        synchronized (structureManagers) {
+            sw = structureManagers.get(world);
         }
         if (sw == null) {
             IWorld iWorld = platform.getServer().getWorld(world);
-            sw = new StructureManager(this, WorldEditUtil.getWorld(world), iWorld.getUUID(), service);
+            sw = new StructureManager(this, WorldEditUtil.getWorld(world), iWorld.getUUID(), executor);
             sw.load();
-            synchronized (worlds) {
-                worlds.put(world, sw);
+            synchronized (structureManagers) {
+                structureManagers.put(world, sw);
             }
         }
         return sw;
     }
 
     public Structure create(StructurePlan plan, World world, Direction direction, Vector position) {
-        StructureManager w = worlds.get(world.getName());
-        if (w == null) {
+        StructureManager manager = structureManagers.get(world.getName());
+        if (manager == null) {
             throw new NullPointerException("World '" + world + "' + doesn't exist...");
         }
-        return w.createStructure(plan, position, direction);
+        return manager.createStructure(plan, position, direction);
     }
 
     public Structure create(Placement placement, World world, Direction direction, Vector position) {
-        StructureManager w = worlds.get(world.getName());
-        if (w == null) {
+        StructureManager manager = structureManagers.get(world.getName());
+        if (manager == null) {
             throw new NullPointerException("World '" + world + "' + doesn't exist...");
         }
-        return w.createStructure(placement, position, direction);
+        return manager.createStructure(placement, position, direction);
     }
 
     public final File getPlanDirectory() {
