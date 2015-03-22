@@ -81,6 +81,12 @@ public abstract class AbstractPlacement implements Placement {
         }
         return true;
     }
+
+    @Override
+    public CuboidDimension getDimension() {
+        return new CuboidDimension(getMinPosition(), getMaxPosition());
+    }
+    
     
     
 }

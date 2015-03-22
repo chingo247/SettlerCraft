@@ -23,7 +23,7 @@
  */
 package com.chingo247.settlercraft.structure.plan.document;
 
-import com.chingo247.settlercraft.structure.plan.exception.PlanException;
+import com.chingo247.settlercraft.structure.exception.ElementValueException;
 import com.google.common.base.Preconditions;
 import fiber.core.impl.xml.located.LocatedElement;
 import java.io.File;
@@ -43,11 +43,13 @@ public class SimpleElement {
     SimpleElement(File file, Element element) {
         Preconditions.checkNotNull(file);
         Preconditions.checkArgument(file.exists());
-        if(! (element instanceof LocatedElement)) throw new IllegalArgumentException("Element must be instance of " + LocatedElement.class);
-        this.le = (LocatedElement)element;
+        if (!(element instanceof LocatedElement)) {
+            throw new IllegalArgumentException("Element must be instance of " + LocatedElement.class);
+        }
+        this.le = (LocatedElement) element;
         this.file = file;
     }
-    
+
     public Element getElement() {
         return le.createCopy();
     }
@@ -55,88 +57,105 @@ public class SimpleElement {
     public File getFile() {
         return file;
     }
-    
+
     public String getElementName() {
         return le.getName();
     }
-    
+
     public String getTextValue() {
         return le.getText();
     }
-    
-    public double getDoubleValue() {
+
+    public double getDoubleValue() throws ElementValueException {
         String error = "Value of element <" + le.getName() + "> on line " + le.getLine() + " was not a number";
-        if(!hasText()) throw new PlanException(error + ", but empty");
-        try { 
+        if (!hasText()) {
+            throw new ElementValueException(error + ", but empty");
+        }
+        try {
             return Double.parseDouble(getTextValue());
         } catch (NumberFormatException nfe) {
-            throw new PlanException(error);
+            throw new ElementValueException(error);
         }
     }
-    
-    public int getIntValue() {
+
+    public boolean getBooleanValue() throws ElementValueException {
+        String value = getTextValue().toLowerCase().trim();
+        if (value.isEmpty() || (!value.equals("false") && !value.equals("true"))) {
+                throw new ElementValueException("Error in element <" + le.getName() + "> ' of " + file.getAbsolutePath() + "' on line " + le.getLine() + ": "
+                        + "value should be either of 'true' or 'false'");
+           
+        }
+        return Boolean.parseBoolean(value);
+    }
+
+    public int getIntValue() throws ElementValueException {
         double d = getDoubleValue();
         return (int) Math.round(d);
     }
-    
+
     public int getLine() {
         return le.getLine();
     }
-    
+
     public boolean hasNumberValue() {
         return NumberUtils.isNumber(le.getText());
     }
-    
+
     public boolean hasText() {
         return le.getText() != null && !le.getText().trim().isEmpty();
     }
-    
+
     public boolean hasElement(String xPath) {
         return le.selectSingleNode(xPath) != null;
     }
-    
-    public void checkHasNumber() {
-        if(!hasNumberValue()) {
-           throw new IllegalArgumentException("Value of element <"+le.getName()+"> on line " + le.getLine() + " in '"+file.getAbsolutePath()+"'" + " is not a number");
+
+    public void checkHasNumber() throws ElementValueException {
+        if (!hasNumberValue()) {
+            throw new ElementValueException("Value of element <" + le.getName() + "> on line " + le.getLine() + " in '" + file.getAbsolutePath() + "'" + " is not a number");
         }
     }
-    
-    public void checkNotNull(String xpath) {
-        if(!hasElement(xpath)) {
+
+    public void checkNotNull(String xpath) throws ElementValueException {
+        if (!hasElement(xpath)) {
             String element;
-            if(xpath.contains("/")) {
+            if (xpath.contains("/")) {
                 element = xpath.substring(xpath.lastIndexOf("/"));
             } else {
                 element = xpath;
             }
-            throw new PlanException("Expected element <"+element+"> within <" + le.getName() +"> on line " +le.getLine() + " in '"+file.getAbsolutePath()+"'");
+            throw new ElementValueException("Expected element <" + element + "> within <" + le.getName() + "> on line " + le.getLine() + " in '" + file.getAbsolutePath() + "'");
         }
     }
-    
-    public void checkNotEmpty() {
+
+    public void checkNotEmpty() throws ElementValueException {
         String text = le.getText().trim();
-        if(text.isEmpty()) {
-            throw new PlanException("Element <" + le.getName() +"> on line " +le.getLine() + "in '"+file.getAbsolutePath()+"'" + " was empty");
+        if (text.isEmpty()) {
+            throw new ElementValueException("Element <" + le.getName() + "> on line " + le.getLine() + "in '" + file.getAbsolutePath() + "'" + " was empty");
         }
     }
-    
-    public void checkNullOrNotEmpty(String xpath) {
+
+    public void checkNullOrNotEmpty(String xpath) throws ElementValueException {
         Node notNull = le.selectSingleNode(xpath);
-        if(notNull != null && notNull.getText().trim().isEmpty()) {
+        if (notNull != null && notNull.getText().trim().isEmpty()) {
             String element = xpath.substring(xpath.lastIndexOf("/"));
-            throw new PlanException("No value for element <"+element+"> within <" + le.getName() +"> on line " +le.getLine());
+            throw new ElementValueException("No value for element <" + element + "> within <" + le.getName() + "> on line " + le.getLine());
         }
     }
-    
+
     public SimpleElement selectSingleElement(String xpath) {
         Element e = (Element) le.selectSingleNode(xpath);
-        if(e != null) {
+        if (e != null) {
             return new SimpleElement(file, e);
         }
         return null;
     }
     
-    
-    
-    
+    public void createIfNotExist(String elementName, Object value) {
+        if(le.selectSingleNode(elementName) == null) {
+            LocatedElement element = new LocatedElement(elementName);
+            element.setText(String.valueOf(value));
+            le.add(element);
+        }
+    }
+
 }

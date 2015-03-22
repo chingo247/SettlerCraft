@@ -1,4 +1,3 @@
-
 /*
  * The MIT License
  *
@@ -22,40 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.model.persistence.entities.structure;
+package com.chingo247.settlercraft.structure.exception;
 
 /**
  *
  * @author Chingo
  */
-public enum StructureType {
-     /**
-     * A Structure which has a schematic attached
-     */
-    SCHEMATIC,
-    /**
-     * A Structure Lot has no schematic attached. StructureLot are used to reserve an area for one or more structures. 
-     */
-    STRUCTURELOT,
-    /**
-     * Structure has no schematic and is completely generated based on info within the StructurePlan
-     */
-    GENERATED,
+public class ElementValueException extends RuntimeException{
+
+    public ElementValueException(String message) {
+        super(message);
+    }
     
-    OTHER;
-    
-   
-//    public static StructureType getType(Placement placement) {
-//        if(placement instanceof SchematicPlacement) {
-//            return SCHEMATIC;
-//        } else if (placement instanceof StructureLot) {
-//            return STRUCTURELOT;
-//        } else if (placement instanceof GeneratedPlacement){
-//            return GENERATED;
-//        } else {
-//            return OTHER;
-//        }
-//    }
     
     
 }

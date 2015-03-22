@@ -183,5 +183,10 @@ public class CuboidDimension implements Serializable, CuboidDimensional {
         this.maxZ = max.getBlockZ();
     }
 
+    @Override
+    public CuboidDimension getDimension() {
+        return this;
+    }
+
 
 }

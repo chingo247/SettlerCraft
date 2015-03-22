@@ -30,6 +30,8 @@ public class BukkitLocation implements ILocation{
     private final int x;
     private final int y;
     private final int z;
+    
+    
 
     public BukkitLocation(BukkitWorld world, int x, int y, int z) {
         this.world = world;

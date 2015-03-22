@@ -47,7 +47,7 @@ public class AsyncPlacement extends AbstractPlacement {
 
     private final AsyncWorldEditMain awe;
     private final BlockPlacer placer;
-    private BukkitScheduler scheduler;
+    private final BukkitScheduler scheduler;
     private final Placement placement;
     private final PlayerEntry playerEntry;
 

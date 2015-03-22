@@ -28,58 +28,111 @@ import com.chingo247.settlercraft.model.world.Direction;
 import com.chingo247.settlercraft.structure.Structure;
 import com.chingo247.settlercraft.structure.StructureAPI;
 import com.chingo247.settlercraft.structure.StructureManager;
+import com.chingo247.settlercraft.structure.exception.StructureException;
+import com.chingo247.settlercraft.structure.exception.WorldConfigException;
 import com.chingo247.settlercraft.structure.placement.Placement;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structure.plan.SubStructuredPlan;
+import com.chingo247.settlercraft.structure.restriction.StructureRestriction;
+import com.chingo247.settlercraft.structure.restriction.StructureWorldRestriction;
+import com.chingo247.xcore.core.IWorld;
 import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.Vector;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import net.minecraft.util.com.google.common.collect.Maps;
 
 /**
  *
  * @author Chingo
  */
-public class AbstractWorld implements World {
-    
+public abstract class AbstractWorld implements World {
+
     private final SettlerCraft settlerCraft;
     private final StructureAPI structureAPI;
     private final StructureManager structureManager;
-    
-    private final String world;
-    private final UUID uuid;
+
+    private final IWorld world;
     private final File worldFile;
-    
-    protected AbstractWorld(SettlerCraft settlerCraft, String world, UUID worldUUID, File worldFile) {
+    private WorldConfig config;
+    private Map<Class, StructureRestriction> restrictions;
+
+    protected AbstractWorld(SettlerCraft settlerCraft, IWorld world, File worldFile) {
         Preconditions.checkNotNull(settlerCraft);
         Preconditions.checkNotNull(world);
-        Preconditions.checkNotNull(worldUUID);
         Preconditions.checkNotNull(worldFile);
-        
+
         this.world = world;
-        this.uuid = worldUUID;
         this.worldFile = worldFile;
         this.settlerCraft = settlerCraft;
         this.structureAPI = settlerCraft.getStructureAPI();
-        this.structureManager = structureAPI.getStructureManager(world);
+        this.structureManager = structureAPI.getStructureManager(world.getName());
+        this.restrictions = Maps.newHashMap();
+        this.restrictions.put(StructureWorldRestriction.class, new StructureWorldRestriction());
+
+    }
+    
+    @Override
+    public List<StructureRestriction> getRestrictions() {
+        return new ArrayList<>(restrictions.values());
+    }
+
+    public void addRestriction(StructureRestriction restriction) {
+        this.restrictions.put(restriction.getClass(), restriction);
+    }
+
+    public void load() {
+        try {
+            this.config = worldFile.exists() ? WorldConfig.load(worldFile) : WorldConfig.createDefault(worldFile);
+        } catch (WorldConfigException ex) {
+            Logger.getLogger(AbstractWorld.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
+    public WorldConfig getConfig() {
+        return config;
     }
 
     @Override
     public String getName() {
-        return world;
+        return world.getName();
     }
 
     @Override
     public UUID getUUID() {
-        return uuid;
+        return world.getUUID();
     }
 
     @Override
-    public Structure createStructure(Placement placement, Vector position, Direction direction) {
+    public int getMaxY() {
+        return world.getMaxHeight();
+    }
+
+    @Override
+    public Structure createStructure(Placement placement, Vector position, Direction direction) throws StructureException {
+        for (StructureRestriction restriction : restrictions.values()) {
+            restriction.allow(this, placement, placement);
+        }
+
         return structureManager.createStructure(placement, position, direction);
     }
 
     @Override
-    public Structure createStructure(StructurePlan plan, Vector position, Direction direction) {
+    public Structure createStructure(StructurePlan plan, Vector position, Direction direction) throws StructureException {
+        if (plan instanceof SubStructuredPlan) {
+            // Check recursively
+        } else {
+            for (StructureRestriction restriction : restrictions.values()) {
+                restriction.allow(this, plan.getPlacement(), plan.getPlacement());
+            }
+        }
+
         return structureManager.createStructure(plan, position, direction);
     }
 
@@ -87,5 +140,5 @@ public class AbstractWorld implements World {
     public Structure getStructure(long id) {
         return structureManager.getStructure(id);
     }
-    
+
 }

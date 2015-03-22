@@ -23,47 +23,23 @@
  */
 package com.chingo247.settlercraft;
 
-import com.chingo247.settlercraft.structure.StructureManager;
+import com.chingo247.settlercraft.world.AbstractWorld;
 import com.chingo247.xcore.core.IWorld;
-import java.util.UUID;
+import java.io.File;
 
 /**
  *
  * @author Chingo
  */
-public class SCWorld {
+public class SCWorld extends AbstractWorld {
     
-    private final StructureManager structureManager;
-    private final String name;
-    private final UUID worldUUID;
     
-    protected SCWorld(IWorld world, StructureManager structureManager) {
-        this.name = world.getName();
-        this.worldUUID = world.getUUID();
-        this.structureManager = structureManager;
-    }
-
-    public String getName() {
-        return name;
+    SCWorld(SettlerCraft settlerCraft, IWorld world, File worldFile) {
+        super(settlerCraft, world, worldFile);
     }
     
-    public UUID getWorldUUID() {
-        return worldUUID;
+    @Override
+    public void load() {
+         super.load();
     }
-
-    public StructureManager getStructureManager() {
-        return structureManager;
-    }
-
-    void load() {
-        // Load config and shit
-    }
-
-    
-    
-
-    
-    
-    
-    
 }

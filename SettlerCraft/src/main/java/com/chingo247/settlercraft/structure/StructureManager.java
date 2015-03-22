@@ -23,7 +23,6 @@
  */
 package com.chingo247.settlercraft.structure;
 
-import com.chingo247.settlercraft.world.WorldConfig;
 import com.chingo247.settlercraft.model.world.Direction;
 import com.chingo247.settlercraft.model.persistence.entities.structure.StructureEntity;
 import com.chingo247.settlercraft.model.persistence.entities.structure.StructureState;
@@ -31,11 +30,14 @@ import com.chingo247.settlercraft.model.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.event.EventManager;
 import com.chingo247.settlercraft.model.persistence.entities.world.CuboidDimension;
 import com.chingo247.settlercraft.structure.event.StructureCreateEvent;
+import com.chingo247.settlercraft.structure.exception.StructureException;
 import com.chingo247.settlercraft.structure.placement.Placement;
 import com.chingo247.settlercraft.structure.placement.SchematicPlacement;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.plan.SubStructuredPlan;
 import com.chingo247.settlercraft.util.PlacementUtil;
+import com.chingo247.xcore.core.ILocation;
+import com.chingo247.xcore.core.IWorld;
 import com.google.common.io.Files;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.world.World;
@@ -64,7 +66,6 @@ public class StructureManager {
     private final Map<Long, Structure> structures;
     private final StructureAPI structureAPI;
 
-    private WorldConfig config;
 
     protected StructureManager(StructureAPI structureAPI, com.sk89q.worldedit.world.World world, UUID worldUUID, ExecutorService service) {
         this.worldUUID = worldUUID;
@@ -96,18 +97,14 @@ public class StructureManager {
         return getStructure(entity);
     }
 
-    public WorldConfig getStructureConfiguration() {
-        return config;
-    }
-
     private void putStructure(Structure structure) {
         synchronized (structures) {
             structures.put(structure.getId(), structure);
         }
     }
 
-    public Structure createStructure(StructurePlan plan, Vector position, Direction direction) {
-        Structure structure = createUninitizalizedStructure(config, plan, world, direction, position);
+    public Structure createStructure(StructurePlan plan, Vector position, Direction direction) throws StructureException {
+        Structure structure = createUninitizalizedStructure(plan, direction, position);
         if (structure != null) {
             structure.setState(StructureState.CREATED);
 
@@ -116,8 +113,8 @@ public class StructureManager {
         return structure;
     }
 
-    public Structure createStructure(Placement placement, Vector position, Direction direction) {
-        Structure structure = createUninitizalizedStructure(config, placement, world, direction, position);
+    public Structure createStructure(Placement placement, Vector position, Direction direction) throws StructureException {
+        Structure structure = createUninitizalizedStructure(placement, direction, position);
         if (structure != null) {
             structure.setState(StructureState.CREATED);
             EventManager.getInstance().getEventBus().post(new StructureCreateEvent(structure));
@@ -127,7 +124,7 @@ public class StructureManager {
         return structure;
     }
 
-    public Structure createUninitizalizedStructure(WorldConfig worldConfig, StructurePlan plan, com.sk89q.worldedit.world.World world, Direction direction, Vector position) {
+    public Structure createUninitizalizedStructure(StructurePlan plan, Direction direction, Vector position) throws StructureException {
         System.out.println("Position is " + position);
         if (plan instanceof SubStructuredPlan) {
             System.out.println("Structure is SubstructurePlan!");
@@ -135,15 +132,28 @@ public class StructureManager {
         } else {
             System.out.println("Structure is StructurePlan!");
             Placement placement = plan.getPlacement();
-
+            
+            IWorld w = structureAPI.getPlatform().getServer().getWorld(worldUUID);
+            ILocation l = w.getSpawn();
+            Vector spawnPos = new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ());
+            
+            if(STRUCTURE_DAO.overlaps(worldUUID, new CuboidDimension(spawnPos, spawnPos))) {
+                throw new StructureException("Structure overlaps the world's spawn...");
+            }
+            
+            if(STRUCTURE_DAO.overlaps(worldUUID, placement)) {
+                throw new StructureException("Structure overlaps another structure...");
+            }
             Vector min = position;
             Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getMaxPosition());
 
             System.out.println("Min: " + min);
             System.out.println("Max: " + max);
             System.out.println("Direction: " + direction);
+            
 
-            StructureEntity entity = new StructureEntity(world.getName(), worldUUID, new CuboidDimension(min, max), direction);
+
+            StructureEntity entity = new StructureEntity(w.getName(), worldUUID, new CuboidDimension(min, max), direction);
             entity = STRUCTURE_DAO.save(entity); // store and get the ID
             Structure structure = new Structure(structureAPI, this, entity, service);
             File structureDir = new File(getStructuresDirectory(), String.valueOf(entity.getId()));
@@ -184,7 +194,7 @@ public class StructureManager {
         return f;
     }
 
-    public Structure createUninitizalizedStructure(WorldConfig worldConfig, Placement placement, com.sk89q.worldedit.world.World world, Direction direction, Vector position) {
+    public Structure createUninitizalizedStructure(Placement placement, Direction direction, Vector position) {
 
         //putStructure(null);
         throw new UnsupportedOperationException();

@@ -24,8 +24,10 @@
 package com.chingo247.settlercraft.structure.restriction;
 
 import com.chingo247.settlercraft.model.regions.CuboidDimensional;
-import com.chingo247.settlercraft.model.persistence.entities.structure.StructureType;
-import com.sk89q.worldedit.world.World;
+import com.chingo247.settlercraft.structure.placement.Placement;
+import com.chingo247.settlercraft.world.World;
+import com.chingo247.settlercraft.world.WorldConfig;
+import com.google.common.base.Preconditions;
 
 /**
  * 
@@ -40,8 +42,11 @@ public class StructureWorldRestriction extends StructureRestriction {
     }
 
     @Override
-    public boolean test(World world, CuboidDimensional cuboid, StructureType type) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean test(World world, CuboidDimensional cuboid, Placement placement) {
+        Preconditions.checkNotNull(world);
+        Preconditions.checkNotNull(world.getConfig());
+        WorldConfig config = world.getConfig();
+        return config.allowsStructures();
     }
     
 }

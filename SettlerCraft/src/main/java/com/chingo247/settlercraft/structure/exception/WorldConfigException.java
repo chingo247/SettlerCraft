@@ -21,34 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.restriction;
-
-import com.chingo247.settlercraft.model.regions.CuboidDimensional;
-import com.chingo247.settlercraft.model.persistence.entities.structure.StructureType;
-import com.sk89q.worldedit.world.World;
+package com.chingo247.settlercraft.structure.exception;
 
 /**
  *
  * @author Chingo
  */
-public class StructureHeightRestriction extends StructureRestriction {
+public class WorldConfigException extends Exception {
 
-    public StructureHeightRestriction() {
-        super("Structure exceeds the world height!");
-    }
-
-    @Override
-    public boolean test(World world, CuboidDimensional region, StructureType type) {
-        if(region.getMaxPosition().getBlockY() < world.getMaxY()) {
-            if(region.getMinPosition().getBlockY() > 0) {
-                return true;
-            } else {
-                reason = "Structure is below world!";
-                return false;
-            }
-        } else {
-            return false;
-        }
+    public WorldConfigException(String message) {
+        super(message);
     }
     
 }

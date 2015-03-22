@@ -30,6 +30,7 @@ import com.chingo247.settlercraft.model.persistence.entities.structure.Structure
 import com.chingo247.settlercraft.model.persistence.entities.structure.StructureState;
 import com.chingo247.settlercraft.model.persistence.entities.world.CuboidDimension;
 import com.chingo247.settlercraft.model.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.model.regions.CuboidDimensional;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import java.util.List;
@@ -42,7 +43,10 @@ import org.hibernate.Session;
  */
 public class StructureDAO extends AbstractDAOImpl<StructureEntity, Long>  {
 
-    public boolean overlaps(UUID world, CuboidDimension dimension) {
+    public boolean overlaps(UUID world, CuboidDimensional dimensional) {
+        
+        CuboidDimension dimension = dimensional.getDimension();
+        
         QStructureEntity qStructure = QStructureEntity.structureEntity;
         Session session = HibernateUtil.getSession();
         JPQLQuery query = new HibernateQuery(session);

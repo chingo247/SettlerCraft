@@ -24,6 +24,7 @@
  */
 package com.chingo247.settlercraft.model.regions;
 
+import com.chingo247.settlercraft.model.persistence.entities.world.CuboidDimension;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.regions.Region;
@@ -54,10 +55,12 @@ public abstract class AbstractStructureRegion<T extends Region> implements Cuboi
         return region.getArea();
     }
     
+    @Override
     public Vector getMinPosition() {
         return region.getMinimumPoint();
     }
     
+    @Override
     public Vector getMaxPosition() {
         return region.getMaximumPoint();
     }
@@ -70,6 +73,13 @@ public abstract class AbstractStructureRegion<T extends Region> implements Cuboi
        
         return region.getWorld();
     }
+
+    @Override
+    public CuboidDimension getDimension() {
+        return new CuboidDimension(getMinPosition(), getMaxPosition());
+    }
+    
+    
 
     
 }

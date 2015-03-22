@@ -8,6 +8,8 @@ package com.chingo247.settlercraft.structure;
 import com.chingo247.settlercraft.model.world.Direction;
 import com.chingo247.settlercraft.event.EventManager;
 import com.chingo247.settlercraft.model.util.WorldEditUtil;
+import com.chingo247.settlercraft.structure.exception.ElementValueException;
+import com.chingo247.settlercraft.structure.exception.StructureException;
 import com.chingo247.settlercraft.structure.placement.event.PlacementHandlerRegisterEvent;
 import com.chingo247.settlercraft.structure.plan.exception.PlacementException;
 import com.chingo247.settlercraft.structure.placement.Placement;
@@ -53,10 +55,11 @@ public abstract class StructureAPI {
     private final Lock loadLock = new ReentrantLock();
     private final IPlugin plugin;
     private final ThreadPoolExecutor executor;
+    
     private boolean isLoadingPlans = false;
+    
 
     protected StructureAPI(APlatform platform, ExecutorService executorService, IPlugin plugin) {
-        
         Preconditions.checkNotNull(platform);
         Preconditions.checkNotNull(executorService);
         Preconditions.checkNotNull(plugin);
@@ -119,7 +122,7 @@ public abstract class StructureAPI {
         return sw;
     }
 
-    public Structure create(StructurePlan plan, World world, Direction direction, Vector position) {
+    public Structure create(StructurePlan plan, World world, Direction direction, Vector position) throws StructureException {
         StructureManager manager = structureManagers.get(world.getName());
         if (manager == null) {
             throw new NullPointerException("World '" + world + "' + doesn't exist...");
@@ -127,7 +130,7 @@ public abstract class StructureAPI {
         return manager.createStructure(plan, position, direction);
     }
 
-    public Structure create(Placement placement, World world, Direction direction, Vector position) {
+    public Structure create(Placement placement, World world, Direction direction, Vector position) throws StructureException {
         StructureManager manager = structureManagers.get(world.getName());
         if (manager == null) {
             throw new NullPointerException("World '" + world + "' + doesn't exist...");
@@ -189,7 +192,7 @@ public abstract class StructureAPI {
         } else if (pluginPlacement.length == 2) {
             return canHandle(pluginPlacement[0], pluginPlacement[1]);
         } else {
-            throw new PlacementException("Invalid format for placment element '" + placementElement.getElementName() + "'"
+            throw new ElementValueException("Invalid format for placment element '" + placementElement.getElementName() + "'"
                     + " on line "+placementElement.getLine()+" of '"+placementElement.getFile().getAbsolutePath()+"'"
                     + " !\n Format should be: SomePluginName.SomeTypeName");
         }

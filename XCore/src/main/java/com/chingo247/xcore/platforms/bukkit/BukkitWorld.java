@@ -16,8 +16,10 @@
  */
 package com.chingo247.xcore.platforms.bukkit;
 
+import com.chingo247.xcore.core.ILocation;
 import com.chingo247.xcore.core.IWorld;
 import java.util.UUID;
+import org.bukkit.Location;
 import org.bukkit.World;
 
 /**
@@ -45,6 +47,13 @@ public class BukkitWorld implements IWorld {
     @Override
     public int getMaxHeight() {
         return world.getMaxHeight();
+    }
+    
+    @Override
+    public ILocation getSpawn() {
+        BukkitWorld w = new BukkitWorld(world);
+        Location location = world.getSpawnLocation();
+        return new BukkitLocation(w, location.getBlockX(), location.getBlockY(), location.getBlockZ());
     }
     
 }

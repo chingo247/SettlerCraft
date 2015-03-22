@@ -21,25 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structure.restriction;
-
-import com.chingo247.settlercraft.model.regions.CuboidDimensional;
-import com.chingo247.settlercraft.model.persistence.entities.structure.StructureType;
-import com.sk89q.worldedit.world.World;
+package com.chingo247.settlercraft.structure.exception;
 
 /**
  *
  * @author Chingo
  */
-public class StructureOverlapRestriction extends StructureRestriction {
+public class StructureRestrictionException extends RuntimeException {
 
-    public StructureOverlapRestriction() {
-        super("Structure overlaps another structure!");
+    public StructureRestrictionException(String message) {
+        super(message);
     }
-
-    @Override
-    public boolean test(World world, CuboidDimensional cuboid, StructureType type) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    
+    
     
 }

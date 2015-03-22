@@ -26,13 +26,14 @@ package com.chingo247.settlercraft.structure.plan;
 import com.chingo247.settlercraft.event.EventManager;
 import com.chingo247.settlercraft.structure.placement.event.PlacementHandlerRegisterEvent;
 import com.chingo247.settlercraft.structure.event.StructurePlanLoadEvent;
-import com.chingo247.settlercraft.structure.plan.exception.PlanException;
 import com.chingo247.settlercraft.structure.placement.handlers.PlacementHandler;
 import com.chingo247.settlercraft.structure.plan.document.PlacementElement;
 import com.chingo247.settlercraft.structure.plan.document.SimpleElement;
 import com.chingo247.settlercraft.structure.plan.document.StructurePlanDocument;
 import com.chingo247.settlercraft.structure.plan.document.SubStructureElement;
 import com.chingo247.settlercraft.structure.StructureAPI;
+import com.chingo247.settlercraft.structure.exception.ElementValueException;
+import com.chingo247.settlercraft.structure.plan.exception.PlanException;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.AllowConcurrentEvents;
@@ -121,7 +122,7 @@ public class GlobalPlanManager extends StructurePlanManager {
                 }
                 putPlan(plan);
             }
-        } catch (PlanException e) {
+        } catch (PlanException | ElementValueException e) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
         }
         System.out.println("Done loading!");
@@ -350,7 +351,7 @@ public class GlobalPlanManager extends StructurePlanManager {
             try {
                 job = new StructurePlanJob(structurePlanFile);
             
-            } catch (PlanException exception) {
+            } catch (ElementValueException exception) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, exception.getMessage(), exception);
             } catch (Exception ex) {
                 Logger.getLogger(GlobalPlanManager.class.getName()).log(Level.SEVERE, null, ex);

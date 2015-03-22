@@ -180,10 +180,10 @@ public class StructurePlaceHandler {
             
             
             if (canPlace(player, world, pos1, direction, plan)) {
-                com.chingo247.settlercraft.SCWorld scWorld = settlerCraft.getWorld(world.getName());
                 Structure structure;
                 try {
-                    structure = scWorld.getStructureManager().createStructure(plan, pos1, direction);
+                    // Create Structure using the SettlerCraft restrictions
+                    structure = settlerCraft.getWorld(world.getName()).createStructure(plan, pos1, direction);
                     
                     if (structure != null) {
 //                        AItemStack clone = item.clone();
@@ -202,8 +202,13 @@ public class StructurePlaceHandler {
                 selectionManager.deselect(player);
 
             }
-            
+        } else {
+            selectionManager.deselect(player);
+            selectionManager.select(player,  pos1, pos2);
+            player.print(ChatColors.YELLOW + "Left-Click " + ChatColors.RESET + " in the " + ChatColors.GREEN + " green " + ChatColors.RESET + "square to " + ChatColors.YELLOW + "confirm");
+            player.print(ChatColors.YELLOW + "Right-Click " + ChatColors.RESET + "to" + ChatColors.YELLOW + " deselect");
         }
+               
         
     }
     

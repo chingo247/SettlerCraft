@@ -63,7 +63,7 @@ public class SchematicPlacement extends DirectionalPlacement {
     private int rotation;
     
     public SchematicPlacement(Schematic schematic) {
-        this(schematic, Direction.EAST, Vector.ZERO);
+        this(schematic, Direction.NORTH, Vector.ZERO);
     }
 
     public SchematicPlacement(Schematic schematic, Direction direction, Vector position) {
@@ -87,21 +87,7 @@ public class SchematicPlacement extends DirectionalPlacement {
         return position;
     }
 
-    private Vector getPoint2Right(Vector point1, Direction direction, Vector size) {
-        switch (direction) {
-            case EAST:
-                return point1.add(size.subtract(1, 1, 1));
-            case SOUTH:
-                return point1.add(-(size.getBlockZ() - 1), size.getBlockY() - 1, (size.getBlockX() - 1));
-            case WEST:
-                return point1.add(-(size.getBlockX() - 1), size.getBlockY() - 1, -(size.getBlockZ() - 1));
-            case NORTH:
-                return point1.add((size.getBlockZ() - 1), size.getBlockY() - 1, -(size.getBlockX() - 1));
-            default:
-                throw new AssertionError("unreachable");
-        }
-    }
-
+  
     /**
      * Flips the Schematic, note that this method will fake the flip operation
      * and only sets the direction of this Schematic internally as opposed to

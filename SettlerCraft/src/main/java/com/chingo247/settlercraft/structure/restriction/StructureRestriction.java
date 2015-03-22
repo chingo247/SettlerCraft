@@ -24,9 +24,9 @@
 package com.chingo247.settlercraft.structure.restriction;
 
 import com.chingo247.settlercraft.model.regions.CuboidDimensional;
-import com.chingo247.settlercraft.model.persistence.entities.structure.StructureType;
 import com.chingo247.settlercraft.structure.exception.StructureException;
-import com.sk89q.worldedit.world.World;
+import com.chingo247.settlercraft.structure.placement.Placement;
+import com.chingo247.settlercraft.world.World;
 
 /**
  * StructureRestriction class is used to determine if a Structure may be build in a certain area
@@ -48,19 +48,17 @@ public abstract class StructureRestriction {
         this.reason = reason;
     }
     
-    public abstract boolean test(World world, CuboidDimensional cuboid, StructureType type);
+    public abstract boolean test(World world, CuboidDimensional cuboid, Placement placement);
     
     /**
      * Used to check if a Structure may be build on a specified location.
      * @param world The world of the region
      * @param cuboid
-     * @param region The cuboid-region (representing the Structure)
-     * @param type The type of the Structure
-     * @return True if a Structure is allowed to be build upon target area
+     * @param placement The type of the Structure
      * @throws com.chingo247.settlercraft.structure.exception.StructureException
      */
-    public final void allow(World world, CuboidDimensional cuboid, StructureType type) throws StructureException {
-        if(!test(world, cuboid, type)) {
+    public final void allow(World world, CuboidDimensional cuboid, Placement placement) throws StructureException {
+        if(!test(world, cuboid, placement)) {
             throw new StructureException(reason);
         }
     }

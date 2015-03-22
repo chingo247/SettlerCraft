@@ -27,5 +27,6 @@ public interface IWorld {
     public String getName();
     public UUID getUUID();
     public int getMaxHeight();
+    public ILocation getSpawn();
     
 }

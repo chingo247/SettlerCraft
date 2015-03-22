@@ -25,9 +25,12 @@ package com.chingo247.settlercraft.world;
 
 import com.chingo247.settlercraft.model.world.Direction;
 import com.chingo247.settlercraft.structure.Structure;
+import com.chingo247.settlercraft.structure.exception.StructureException;
 import com.chingo247.settlercraft.structure.placement.Placement;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structure.restriction.StructureRestriction;
 import com.sk89q.worldedit.Vector;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -40,10 +43,16 @@ public interface World {
     
     public UUID getUUID();
     
-    public Structure createStructure(Placement placement, Vector position, Direction direction);
+    public int getMaxY();
     
-    public Structure createStructure(StructurePlan plan, Vector position, Direction direction);
+    public WorldConfig getConfig();
+    
+    public Structure createStructure(Placement placement, Vector position, Direction direction) throws StructureException;
+    
+    public Structure createStructure(StructurePlan plan, Vector position, Direction direction) throws StructureException;
     
     public Structure getStructure(long id);
+    
+    public List<StructureRestriction> getRestrictions();
     
 }

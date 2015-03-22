@@ -25,6 +25,7 @@ package com.chingo247.settlercraft.structure.plan;
  */
 import com.chingo247.settlercraft.model.util.LogLevel;
 import com.chingo247.settlercraft.model.util.SCLogger;
+import com.chingo247.settlercraft.structure.exception.ElementValueException;
 import com.chingo247.settlercraft.structure.plan.exception.PlanException;
 import com.chingo247.settlercraft.structure.placement.PlacementProcessor;
 import com.chingo247.settlercraft.structure.plan.document.PlacementElement;
@@ -150,7 +151,7 @@ public class StructurePlanProcessor extends RecursiveTask<StructurePlan> {
             }
 
             LOG.print(LogLevel.INFO, structurePlanFile, "StructurePlan", System.currentTimeMillis() - start);
-        } catch (PlanException ex) {
+        } catch (ElementValueException ex) {
             LOG.print(LogLevel.ERROR, "Error in '" + structurePlanFile.getAbsolutePath() + "' >> " + ex.getMessage(), "StructurePlan", null);
         } catch (Exception ex) {
             java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, ex.getMessage(), ex);
@@ -159,7 +160,7 @@ public class StructurePlanProcessor extends RecursiveTask<StructurePlan> {
         return null;
     }
 
-    private File handleEmbeddedPlan(File structurePlan, SubStructureElement element) throws DocumentException {
+    private File handleEmbeddedPlan(File structurePlan, SubStructureElement element) throws DocumentException, ElementValueException {
         element.checkNotNull("File");
 
         SimpleElement simpleElement = element.selectSingleElement("File");

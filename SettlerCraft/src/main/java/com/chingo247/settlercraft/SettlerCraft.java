@@ -25,7 +25,6 @@ package com.chingo247.settlercraft;
 
 import com.chingo247.settlercraft.model.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.structure.StructureAPI;
-import com.chingo247.settlercraft.structure.StructureManager;
 import com.chingo247.xcore.core.APlatform;
 import com.chingo247.xcore.core.IWorld;
 import com.sk89q.worldedit.entity.Player;
@@ -124,9 +123,9 @@ public abstract class SettlerCraft {
                 }
             }
             // Loads the world
-            StructureManager structureWorld = structureAPI.getStructureManager(world);
             synchronized (mutex) {
-                scWorld = new SCWorld(iWorld, structureWorld);
+                File worldFile = new File(getWorkingDirectory(), "worlds/" + world + "/config.xml");
+                scWorld = new SCWorld(this, iWorld, worldFile);
                 scWorld.load();
                 synchronized (worlds) {
                     worlds.put(scWorld.getName(), scWorld);
