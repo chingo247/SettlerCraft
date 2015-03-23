@@ -66,13 +66,16 @@ public class WorldConfig {
         try {
             Document d = reader.read(file);
             
+            
+            Element root = d.getRootElement();
+            
             boolean isZonesOnly = false;
             boolean allowsStructures = false;
             
             
            
             
-            LocatedElement isZonesOnlyElement = (LocatedElement) d.selectSingleNode("IsZonesOnly");
+            LocatedElement isZonesOnlyElement = (LocatedElement) root.selectSingleNode("IsZonesOnly");
             if(isZonesOnlyElement == null) {
                 throw new WorldConfigException("Missing element '<IsZonesOnly>' in '<WorldConfig>'");
             }
@@ -85,16 +88,20 @@ public class WorldConfig {
                 isZonesOnly = Boolean.parseBoolean(value);
             }
             
-            LocatedElement allowStructuresElement = (LocatedElement) d.selectSingleNode("AllowStructures");
+            LocatedElement allowStructuresElement = (LocatedElement) root.selectSingleNode("AllowStructures");
             if(allowStructuresElement == null) {
                 throw new WorldConfigException("Missing element '<AllowStructures>' in '<WorldConfig>'");
             }
             
             value = allowStructuresElement.getText().toLowerCase().trim();
-            if(value.isEmpty() || (!(value.equals("false") && value.equals("true")))) {
+            if(value.isEmpty() || (!value.equals("false") && !value.equals("true"))) {
                 throw new WorldConfigException("Error in WorldConfig '"+file.getAbsolutePath()+"' on line " + allowStructuresElement.getLine() + ": "
                         + "value should be either of 'true' or 'false'");
+            } else {
+                allowsStructures = Boolean.parseBoolean(value);
             }
+            
+            
             
             WorldConfig config = new WorldConfig(file);
             config.setAllowsStructures(allowsStructures);
@@ -110,21 +117,25 @@ public class WorldConfig {
     public static WorldConfig createDefault(File file) {
         Document d = LocatedElementDocumentFactory.getInstance().createDocument(new BaseElement("WorldConfig"));
         
+        Element root = d.getRootElement();
+        
         // set zones only
         Element zonesOnlyElement = new LocatedElement("IsZonesOnly");
         zonesOnlyElement.setText("false");
-        d.add(zonesOnlyElement);
+        root.add(zonesOnlyElement);
         
         // set allows structures
         Element allowStructureElement = new LocatedElement("AllowStructures");
         allowStructureElement.setText("true");
-        d.add(allowStructureElement);
+        root.add(allowStructureElement);
         XMLWriter writer = null;
         try {
             
             OutputFormat format = OutputFormat.createPrettyPrint();
             writer = new XMLWriter(new FileWriter(file), format);
             writer.write(d);
+            
+            writer.close();
             
             return load(file);
         } catch (UnsupportedEncodingException ex) {
@@ -136,7 +147,7 @@ public class WorldConfig {
                 try {
                     writer.close();
                 } catch (IOException ex) {
-                    Logger.getLogger(WorldConfig.class.getName()).log(Level.SEVERE, null, ex);
+                    // close silent...
                 }
             }
         }

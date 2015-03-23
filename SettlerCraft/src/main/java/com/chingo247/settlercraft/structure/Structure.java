@@ -23,14 +23,15 @@
  */
 package com.chingo247.settlercraft.structure;
 
-import com.chingo247.settlercraft.model.persistence.entities.structure.StructureEntity;
-import com.chingo247.settlercraft.model.persistence.entities.structure.StructurePlayerEntity;
-import com.chingo247.settlercraft.model.persistence.entities.structure.StructureState;
-import com.chingo247.settlercraft.model.persistence.dao.StructureDAO;
-import com.chingo247.settlercraft.model.persistence.dao.StructurePlayerDAO;
-import com.chingo247.settlercraft.model.persistence.entities.world.CuboidDimension;
-import com.chingo247.settlercraft.model.util.ProcessingQueue;
-import com.chingo247.settlercraft.model.world.Direction;
+import com.chingo247.settlercraft.SettlerCraft;
+import com.chingo247.settlercraft.core.persistence.entities.structure.StructureEntity;
+import com.chingo247.settlercraft.core.persistence.entities.structure.StructurePlayerEntity;
+import com.chingo247.settlercraft.core.persistence.entities.structure.StructureState;
+import com.chingo247.settlercraft.core.persistence.dao.StructureDAO;
+import com.chingo247.settlercraft.core.persistence.dao.StructurePlayerDAO;
+import com.chingo247.settlercraft.core.persistence.entities.world.CuboidDimension;
+import com.chingo247.settlercraft.core.util.ProcessingQueue;
+import com.chingo247.settlercraft.core.world.Direction;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.structure.construction.options.Options;
@@ -60,15 +61,15 @@ public class Structure {
     
     protected final StructureEntity structureEntity;
     private final StructureManager structureManager;
-    private final StructureAPI structureAPI;
     private StructurePlan plan;
     private ProcessingQueue processingQueue;
+    private StructureAPI structureAPI;
 
-    Structure(StructureAPI structureAPI, StructureManager structureManager, StructureEntity structureEntity, ExecutorService service) {
+    Structure(StructureManager structureManager, StructureEntity structureEntity, ExecutorService service) {
         this.structureEntity = structureEntity;
         this.structureManager = structureManager;
-        this.structureAPI = structureAPI;
         this.processingQueue = new ProcessingQueue(service);
+        this.structureAPI = SettlerCraft.getInstance().getStructureAPI();
     }
     
     private File getDirectory() {
@@ -166,7 +167,7 @@ public class Structure {
 
     private AsyncEditSession getSession(UUID anUUID) {
         com.sk89q.worldedit.world.World w = structureManager.getWorld();
-        Player ply = structureAPI.getWorldEditPlayer(anUUID);
+        Player ply = structureAPI.getPlayer(anUUID);
         AsyncEditSession editSession;
         if (ply == null) {
             editSession = (AsyncEditSession) AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(w, -1);
@@ -201,7 +202,7 @@ public class Structure {
        
        List<Player> players = new ArrayList<>();
        for(StructurePlayerEntity p : playerEntitys) {
-           Player player = structureAPI.getWorldEditPlayer(p.getPlayerUUID());
+           Player player = structureAPI.getPlayer(p.getPlayerUUID());
            if(player != null) players.add(player);
        }
        return players;

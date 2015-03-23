@@ -26,11 +26,11 @@ package com.chingo247.settlercraft.structure.handlers;
 import com.chingo247.settlercraft.SettlerCraft;
 import com.chingo247.settlercraft.structure.construction.options.Options;
 import com.chingo247.settlercraft.structure.exception.StructureException;
-import com.chingo247.settlercraft.model.util.KeyPool;
-import com.chingo247.settlercraft.model.util.WorldUtil;
-import com.chingo247.settlercraft.model.world.Direction;
+import com.chingo247.settlercraft.core.util.KeyPool;
+import com.chingo247.settlercraft.core.util.WorldUtil;
+import com.chingo247.settlercraft.core.world.Direction;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.plugin.EconomyProvider;
+import com.chingo247.settlercraft.core.EconomyProvider;
 import com.chingo247.settlercraft.selection.CUISelectionManager;
 import com.chingo247.settlercraft.selection.ISelectionManager;
 import com.chingo247.settlercraft.selection.NoneSelectionManager;
@@ -87,6 +87,7 @@ public class StructurePlaceHandler {
         // Set the SelectionManager if null...
         if (selectionManager == null) {
             if (session.hasCUISupport()) {
+                System.out.println("HAS CUI SUPPORT");
                 slm = CUISelectionManager.getInstance();
             } else {
                 slm = NoneSelectionManager.getInstance();

@@ -24,7 +24,7 @@
  */
 package com.chingo247.settlercraft.structure.generators;
 
-import com.chingo247.settlercraft.model.regions.StructurePolygonal2DRegion;
+import com.chingo247.settlercraft.core.regions.StructurePolygonal2DRegion;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 

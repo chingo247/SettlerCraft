@@ -90,5 +90,13 @@ public interface IPlayer {
      */
     public boolean isSneaking();
     
+    /**
+     * Closes the inventory, if it was open...
+     */
+    public void closeInventory();
+
+    public  void  openInventory(AInventory inventory);
+    
+    
     
 }

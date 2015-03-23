@@ -5,6 +5,7 @@ import com.chingo247.xcore.core.AInventory;
 import com.chingo247.xcore.core.IPlayer;
 import com.chingo247.xcore.core.IServer;
 import com.chingo247.xcore.core.IWorld;
+import com.google.common.base.Preconditions;
 import java.util.UUID;
 import org.bukkit.entity.Player;
 
@@ -78,15 +79,38 @@ public class BukkitPlayer implements IPlayer {
         player.updateInventory();
     }
 
+   
+
+    @Override
+    public boolean isSneaking() {
+        return player.isSneaking();
+    }
+
+    @Override
+    public void closeInventory() {
+        player.closeInventory();
+    }
+
     @Override
     public AInventory getInventory() {
         return new BukkitInventory(player.getInventory());
     }
 
     @Override
-    public boolean isSneaking() {
-        return player.isSneaking();
+    public  void openInventory(AInventory inventory) {
+        Preconditions.checkArgument(inventory instanceof BukkitInventory);
+        BukkitInventory binv = (BukkitInventory) inventory;
+        player.openInventory(binv.getInventory());
     }
+
+    
+
+   
+  
+
+    
+
+    
     
     
     

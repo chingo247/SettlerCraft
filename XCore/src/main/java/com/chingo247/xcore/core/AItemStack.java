@@ -35,6 +35,8 @@ public abstract class AItemStack {
     public abstract int getAmount();
     
     public abstract void setAmount(int amount);
+    
+    public abstract void setMaterial(int material);
 
     public abstract int getMaterial();
 

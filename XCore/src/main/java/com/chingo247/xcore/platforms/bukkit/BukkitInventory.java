@@ -65,7 +65,19 @@ public class BukkitInventory extends AInventory{
         return stack;
     }
 
-    
+    @Override
+    public void addItem(AItemStack itemStack) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void clear() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public Inventory getInventory() {
+        return inventory;
+    }
 
     
     

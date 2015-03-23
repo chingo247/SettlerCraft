@@ -5,9 +5,9 @@
  */
 package com.chingo247.settlercraft.structure;
 
-import com.chingo247.settlercraft.model.world.Direction;
+import com.chingo247.settlercraft.SettlerCraft;
+import com.chingo247.settlercraft.core.world.Direction;
 import com.chingo247.settlercraft.event.EventManager;
-import com.chingo247.settlercraft.model.util.WorldEditUtil;
 import com.chingo247.settlercraft.structure.exception.ElementValueException;
 import com.chingo247.settlercraft.structure.exception.StructureException;
 import com.chingo247.settlercraft.structure.placement.event.PlacementHandlerRegisterEvent;
@@ -21,7 +21,6 @@ import com.chingo247.settlercraft.structure.plan.StructurePlanManager;
 import com.chingo247.settlercraft.structure.plan.document.PlacementElement;
 import com.chingo247.xcore.core.APlatform;
 import com.chingo247.xcore.core.IPlugin;
-import com.chingo247.xcore.core.IWorld;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.sk89q.worldedit.Vector;
@@ -32,9 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -45,27 +41,24 @@ import java.util.concurrent.locks.ReentrantLock;
 public abstract class StructureAPI {
 
     public static final String PLUGIN_NAME = "SettlerCraft";
-    public static final String PLANS_DIRECTORY = "StructurePlans";
+    public static final String PLANS_DIRECTORY = "plans";
     private static final Map<String, Map<String, PlacementHandler>> handlers = Maps.newHashMap();
 
     private final StructurePlanManager globalPlanManager;
     private final Map<String, StructureManager> structureManagers;
     private final APlatform platform;
-    private final ExecutorService service;
     private final Lock loadLock = new ReentrantLock();
     private final IPlugin plugin;
-    private final ThreadPoolExecutor executor;
-    
-    private boolean isLoadingPlans = false;
-    
+    private final ExecutorService executor;
 
-    protected StructureAPI(APlatform platform, ExecutorService executorService, IPlugin plugin) {
+    private boolean isLoadingPlans = false;
+
+    protected StructureAPI(APlatform platform, IPlugin plugin, ExecutorService service) {
         Preconditions.checkNotNull(platform);
-        Preconditions.checkNotNull(executorService);
         Preconditions.checkNotNull(plugin);
-        this.executor = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 30L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+        Preconditions.checkNotNull(service);
+        this.executor = service;
         this.plugin = plugin;
-        this.service = executorService;
         this.structureManagers = Maps.newHashMap();
         this.platform = platform;
         // Register Handlers first...
@@ -107,19 +100,17 @@ public abstract class StructureAPI {
     }
 
     public StructureManager getStructureManager(String world) {
-        StructureManager sw;
+        StructureManager structureManager;
         synchronized (structureManagers) {
-            sw = structureManagers.get(world);
-        }
-        if (sw == null) {
-            IWorld iWorld = platform.getServer().getWorld(world);
-            sw = new StructureManager(this, WorldEditUtil.getWorld(world), iWorld.getUUID(), executor);
-            sw.load();
-            synchronized (structureManagers) {
-                structureManagers.put(world, sw);
+            structureManager = structureManagers.get(world);
+
+            if (structureManager == null) {
+                structureManager = new StructureManager(SettlerCraft.getInstance().getWorld(world), executor);
+                structureManager.load();
+                structureManagers.put(world, structureManager);
             }
         }
-        return sw;
+        return structureManager;
     }
 
     public Structure create(StructurePlan plan, World world, Direction direction, Vector position) throws StructureException {
@@ -158,7 +149,7 @@ public abstract class StructureAPI {
             if (pluginPlacement.length == 2) {
                 return handle(pluginPlacement[0], pluginPlacement[1], placementElement);
             } else {
-                throw new PlacementException("Invalid format for placment element '" + placementElement.getElementName()+ "' on line " +placementElement.getLine()+"! Format should be: SomePluginName.SomeTypeName");
+                throw new PlacementException("Invalid format for placment element '" + placementElement.getElementName() + "' on line " + placementElement.getLine() + "! Format should be: SomePluginName.SomeTypeName");
             }
         } else {
             return handle(PLUGIN_NAME, type, placementElement);
@@ -186,14 +177,14 @@ public abstract class StructureAPI {
 
     public static boolean canHandle(PlacementElement placementElement) {
         String[] pluginPlacement = placementElement.getType().split(".");
-        
+
         if (pluginPlacement.length == 0) {
             return canHandle("SettlerCraft", placementElement.getType());
         } else if (pluginPlacement.length == 2) {
             return canHandle(pluginPlacement[0], pluginPlacement[1]);
         } else {
             throw new ElementValueException("Invalid format for placment element '" + placementElement.getElementName() + "'"
-                    + " on line "+placementElement.getLine()+" of '"+placementElement.getFile().getAbsolutePath()+"'"
+                    + " on line " + placementElement.getLine() + " of '" + placementElement.getFile().getAbsolutePath() + "'"
                     + " !\n Format should be: SomePluginName.SomeTypeName");
         }
     }
@@ -243,7 +234,6 @@ public abstract class StructureAPI {
     protected File getWorkingDirectory() {
         return plugin.getDataFolder();
     }
-    
 
-    protected abstract Player getWorldEditPlayer(UUID player);
+    public abstract Player getPlayer(UUID player);
 }

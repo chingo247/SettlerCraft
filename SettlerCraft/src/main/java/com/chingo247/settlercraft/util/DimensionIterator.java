@@ -26,7 +26,7 @@ package com.chingo247.settlercraft.util;
  */
 
 
-import com.chingo247.settlercraft.model.persistence.entities.world.CuboidDimension;
+import com.chingo247.settlercraft.core.persistence.entities.world.CuboidDimension;
 import com.sk89q.worldedit.Vector;
 
 /**

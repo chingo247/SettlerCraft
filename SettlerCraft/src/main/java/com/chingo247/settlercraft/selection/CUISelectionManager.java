@@ -25,7 +25,7 @@
 
 package com.chingo247.settlercraft.selection;
 
-import com.chingo247.settlercraft.model.util.WorldEditUtil;
+import com.chingo247.settlercraft.core.util.WorldEditUtil;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;

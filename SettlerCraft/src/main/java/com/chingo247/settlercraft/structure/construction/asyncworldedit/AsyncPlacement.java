@@ -23,7 +23,7 @@
  */
 package com.chingo247.settlercraft.structure.construction.asyncworldedit;
 
-import com.chingo247.settlercraft.model.world.Direction;
+import com.chingo247.settlercraft.core.world.Direction;
 import com.chingo247.settlercraft.structure.construction.options.Options;
 import com.chingo247.settlercraft.structure.placement.AbstractPlacement;
 import com.chingo247.settlercraft.structure.placement.Placement;

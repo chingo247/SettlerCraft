@@ -23,23 +23,23 @@ package com.chingo247.settlercraft.bukkit;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import com.chingo247.menu.CategoryMenu;
 import com.chingo247.settlercraft.SettlerCraft;
-import com.chingo247.settlercraft.bukkit.commands.SettlerCraftCommandExecutor;
 import com.chingo247.settlercraft.bukkit.listener.PlanListener;
 import com.chingo247.settlercraft.exception.SettlerCraftException;
-import com.chingo247.settlercraft.model.persistence.HSQLServer;
-import com.chingo247.settlercraft.bukkit.menu.PlanMenuManager;
-import com.chingo247.settlercraft.model.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.core.persistence.HSQLServer;
+import com.chingo247.settlercraft.core.persistence.hibernate.HibernateUtil;
 import com.chingo247.xcore.core.IPlugin;
-
+import com.chingo247.xcore.platforms.bukkit.BukkitPlatform;
+import com.chingo247.xcore.platforms.bukkit.BukkitPlugin;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.dom4j.DocumentException;
 
 /**
  *
@@ -50,54 +50,53 @@ public class SettlerCraftPlugin extends JavaPlugin implements IPlugin {
     public static final String MSG_PREFIX = "[SettlerCraft]: ";
     private static final Logger LOGGER = Logger.getLogger(SettlerCraftPlugin.class);
     private static SettlerCraftPlugin instance;
-    private BKSettlerCraft settlerCraft;
     private BKEconomyProvider provider;
+    private final SettlerCraft settlerCraft = SettlerCraft.getInstance();
 
-//    private final ThreadPoolExecutor GLOBAL_THREADPOOL = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 30L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-    private ExecutorService service;
-    private PlanMenuManager planMenuManager;
+    private final ExecutorService service = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 30L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+//    private PlanMenuManager planMenuManager;
     private BKConfigProvider configProvider;
     
 
     @Override
     public void onEnable() {
         instance = this;
-
         if (Bukkit.getPluginManager().getPlugin("WorldEdit") == null) {
             System.out.println(MSG_PREFIX + " WorldEdit NOT FOUND!!! Disabling...");
             this.setEnabled(false);
+            service.shutdown();
             return;
         }
         if (Bukkit.getPluginManager().getPlugin("AsyncWorldEdit") == null) {
             System.out.println(MSG_PREFIX + " AsyncWorldEdit NOT FOUND!!! Disabling...");
             this.setEnabled(false);
+            service.shutdown();
             return;
         }
-
         if (Bukkit.getPluginManager().getPlugin("WorldGuard") == null) {
             System.out.println(MSG_PREFIX + " WorldGuard NOT FOUND!!! Disabling...");
             this.setEnabled(false);
+            service.shutdown();
             return;
         }
-
         if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
             System.out.println(MSG_PREFIX + " Vault NOT FOUND!!! Disabling...");
             this.setEnabled(false);
+            service.shutdown();
             return;
         }
 
-        service = Executors.newCachedThreadPool();
-        settlerCraft = new BKSettlerCraft(service, this);
-        planMenuManager = new PlanMenuManager(settlerCraft);
-        provider = new BKEconomyProvider();
-
-        try {
-            planMenuManager.initialize();
-        } catch (DocumentException | SettlerCraftException ex) {
-            java.util.logging.Logger.getLogger(SettlerCraftPlugin.class.getName()).log(Level.SEVERE, null, ex);
-            setEnabled(false);
-            return;
-        }
+        
+//        planMenuManager = new PlanMenuManager(settlerCraft);
+//        provider = new BKEconomyProvider();
+//
+//        try {
+//            planMenuManager.initialize();
+//        } catch (DocumentException | SettlerCraftException ex) {
+//            java.util.logging.Logger.getLogger(SettlerCraftPlugin.class.getName()).log(Level.SEVERE, null, ex);
+//            setEnabled(false);
+//            return;
+//        }
 
         configProvider = new BKConfigProvider();
         try {
@@ -107,6 +106,13 @@ public class SettlerCraftPlugin extends JavaPlugin implements IPlugin {
             setEnabled(false);
             return;
         }
+        
+        settlerCraft.registerPlatform(new BukkitPlatform(Bukkit.getServer()));
+        settlerCraft.registerPlugin(new BukkitPlugin(this));
+        settlerCraft.registerStructureAPI(new BKStructureAPI(this, service));
+        settlerCraft.registerEconomyProvider(new BKEconomyProvider());
+        settlerCraft.registerConfigProvider(configProvider);
+        
 
         // Init HSQL Server
         HSQLServer hSQLServer = HSQLServer.getInstance();
@@ -118,12 +124,12 @@ public class SettlerCraftPlugin extends JavaPlugin implements IPlugin {
         // ValidationService restoreService = new BukkitValidationService(structureAPI);
         // restoreService.validate();
         // resetStates();
-        settlerCraft.load();
-        planMenuManager.load();
+        settlerCraft.initialize();
+//        planMenuManager.load();
 
         Bukkit.getPluginManager().registerEvents(new PlanListener(settlerCraft, service, provider), this);
 //
-        getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
+//        getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
 //        getCommand("cst").setExecutor(new ConstructionCommandExecutor(structureAPI));
 //        getCommand("stt").setExecutor(new StructureCommandExecutor(structureAPI));
 
@@ -149,9 +155,9 @@ public class SettlerCraftPlugin extends JavaPlugin implements IPlugin {
         return instance;
     }
 
-    public CategoryMenu getPlanMenu() {
-        return planMenuManager.getPlanMenu();
-    }
+//    public CategoryMenu getPlanMenu() {
+//        return planMenuManager.getPlanMenu();
+//    }
 
 //    private void resetStates() {
 //        Session session = HibernateUtil.getSession();

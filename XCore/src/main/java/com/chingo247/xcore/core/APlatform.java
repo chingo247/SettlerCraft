@@ -31,6 +31,10 @@ public abstract class APlatform {
     
     public abstract File getPluginsFolder();
     
+    public abstract AItemStack createItemStack();
+    
+    public abstract IColor getChatColors();
+    
     public IPlayer getPlayer(UUID player) {
         return getServer().getPlayer(player);
     }

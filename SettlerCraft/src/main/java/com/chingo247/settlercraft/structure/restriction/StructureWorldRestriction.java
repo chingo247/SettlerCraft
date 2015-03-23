@@ -23,9 +23,9 @@
  */
 package com.chingo247.settlercraft.structure.restriction;
 
-import com.chingo247.settlercraft.model.regions.CuboidDimensional;
+import com.chingo247.settlercraft.core.regions.CuboidDimensional;
 import com.chingo247.settlercraft.structure.placement.Placement;
-import com.chingo247.settlercraft.world.World;
+import com.chingo247.settlercraft.world.SWorld;
 import com.chingo247.settlercraft.world.WorldConfig;
 import com.google.common.base.Preconditions;
 
@@ -42,10 +42,10 @@ public class StructureWorldRestriction extends StructureRestriction {
     }
 
     @Override
-    public boolean test(World world, CuboidDimensional cuboid, Placement placement) {
+    public boolean test(SWorld world, CuboidDimensional cuboid, Placement placement) {
         Preconditions.checkNotNull(world);
-        Preconditions.checkNotNull(world.getConfig());
-        WorldConfig config = world.getConfig();
+        Preconditions.checkNotNull(world.getSettlerCraftConfig());
+        WorldConfig config = world.getSettlerCraftConfig();
         return config.allowsStructures();
     }
     

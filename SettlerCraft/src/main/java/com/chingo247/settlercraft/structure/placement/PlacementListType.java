@@ -25,7 +25,7 @@ package com.chingo247.settlercraft.structure.placement;
 
 import com.chingo247.settlercraft.structure.plan.StructurePlanComplex;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.model.persistence.entities.world.CuboidDimension;
+import com.chingo247.settlercraft.core.persistence.entities.world.CuboidDimension;
 import com.chingo247.settlercraft.structure.plan.exception.PlanException;
 import com.chingo247.settlercraft.structure.plan.SubStructuredPlan;
 import java.util.ArrayList;

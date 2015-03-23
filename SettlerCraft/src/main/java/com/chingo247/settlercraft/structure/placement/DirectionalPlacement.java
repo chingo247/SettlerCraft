@@ -24,7 +24,7 @@
  */
 package com.chingo247.settlercraft.structure.placement;
 
-import com.chingo247.settlercraft.model.world.Direction;
+import com.chingo247.settlercraft.core.world.Direction;
 
 
 

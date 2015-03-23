@@ -40,11 +40,11 @@ public class BKStructureAPI extends StructureAPI {
     
     
     BKStructureAPI(SettlerCraftPlugin settlerCraftPlugin, ExecutorService service) {
-        super(PlatformFactory.getPlatform("bukkit"), service, new BukkitPlugin(settlerCraftPlugin));
+        super(PlatformFactory.getPlatform("bukkit"), new BukkitPlugin(settlerCraftPlugin), service);
     }
 
     @Override
-    protected Player getWorldEditPlayer(UUID player) {
+    public Player getPlayer(UUID player) {
         return BKWorldEditUtil.wrapPlayer(Bukkit.getPlayer(player));
     }
     

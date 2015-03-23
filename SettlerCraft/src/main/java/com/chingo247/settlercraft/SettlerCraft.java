@@ -23,17 +23,20 @@
  */
 package com.chingo247.settlercraft;
 
-import com.chingo247.settlercraft.model.persistence.dao.StructureDAO;
+import com.chingo247.settlercraft.core.EconomyProvider;
+import com.chingo247.settlercraft.core.util.WorldEditUtil;
+import com.chingo247.settlercraft.plugin.IConfigProvider;
 import com.chingo247.settlercraft.structure.StructureAPI;
+import com.chingo247.settlercraft.world.SWorld;
 import com.chingo247.xcore.core.APlatform;
+import com.chingo247.xcore.core.IPlugin;
 import com.chingo247.xcore.core.IWorld;
-import com.sk89q.worldedit.entity.Player;
+import com.google.common.base.Preconditions;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -44,35 +47,108 @@ import org.apache.log4j.Logger;
  *
  * @author Chingo
  */
-public abstract class SettlerCraft {
+public class SettlerCraft {
 
     public static final String MSG_PREFIX = "[SettlerCraft]: ";
     private final Logger LOG = Logger.getLogger(SettlerCraft.class);
 
-    private final Map<String, SCWorld> worlds;
+    private static SettlerCraft instance;
+    private final Map<String, SWorldImpl> worlds;
     private final Map<String, Object> worldMutexes;
 
-    protected final StructureDAO structureDAO;
-    protected final ExecutorService EXECUTOR;
+    private ExecutorService service;
 
-    private final APlatform platform;
-    private final StructureAPI structureAPI;
+    private APlatform platform;
+    private StructureAPI structureAPI;
+    private IConfigProvider configProvider;
+    private IPlugin plugin;
+    private EconomyProvider economyProvider;
+    private boolean initialized = false;
 
-    protected SettlerCraft(ExecutorService executor, APlatform platform, StructureAPI structureAPI) {
-        this.EXECUTOR = executor;
+    private SettlerCraft() {
         this.worlds = new HashMap<>();
         this.worldMutexes = new HashMap<>();
+    }
+
+    public static SettlerCraft getInstance() {
+        if (instance == null) {
+            instance = new SettlerCraft();
+        }
+        return instance;
+    }
+
+    public void registerExecutor(ExecutorService service) {
+        Preconditions.checkNotNull(service);
+        if(this.service != null) {
+            throw new RuntimeException("Already registered a ExecutorService");
+        }
+        this.service = service;
+    }
+    
+    public void registerPlugin(IPlugin plugin) {
+        Preconditions.checkNotNull(plugin);
+        if (this.plugin != null) {
+            throw new RuntimeException("Can't register '" + plugin.getName() + "' already registered a plugin");
+        }
+        this.plugin = plugin;
+    }
+
+    public void registerPlatform(APlatform platform) throws RuntimeException {
+        Preconditions.checkNotNull(platform);
+        if (this.platform != null) {
+            throw new RuntimeException("Already registered a platform");
+        }
         this.platform = platform;
-        this.structureDAO = new StructureDAO();
+    }
+
+    public void registerStructureAPI(StructureAPI structureAPI) throws RuntimeException {
+        Preconditions.checkNotNull(structureAPI);
+        if (this.structureAPI != null) {
+            throw new RuntimeException("Already registered a StructureAPI");
+        }
         this.structureAPI = structureAPI;
     }
     
-    
+    public void registerEconomyProvider(EconomyProvider economyProvider) {
+        Preconditions.checkNotNull(economyProvider);
+        if(this.economyProvider != null) {
+            throw new RuntimeException("Already registered an '" + EconomyProvider.class.getSimpleName() + "'");
+        }
+        this.economyProvider = economyProvider;
+    }
 
-    protected synchronized void load() {
-        // Load the StructureAPI first
-        structureAPI.load();
-        loadWorlds();
+    public void registerConfigProvider(IConfigProvider configProvider) {
+        Preconditions.checkNotNull(configProvider);
+        this.configProvider = configProvider;
+    }
+
+    public IConfigProvider getConfigProvider() {
+        return configProvider;
+    }
+
+    public synchronized void initialize() {
+        if (!initialized) {
+            if (structureAPI == null) {
+                throw new RuntimeException("No StructureAPI was registered!");
+            }
+            if (platform == null) {
+                throw new RuntimeException("No platform was registered!");
+            }
+            if (plugin == null) {
+                throw new RuntimeException("No plugin was registered!");
+            }
+            if(service == null) {
+                throw new RuntimeException("No ExecutorService was registered!");
+            }
+            if(configProvider == null) {
+                throw new RuntimeException("No ConfigProvider was registered!");
+            }
+            
+            // Load the StructureAPI first
+            structureAPI.load();
+            loadWorlds();
+            initialized = true;
+        }
     }
 
     private void loadWorlds() {
@@ -81,7 +157,7 @@ public abstract class SettlerCraft {
         List<Future> wTasks = new ArrayList<>(ws.size());
 
         for (final IWorld world : ws) {
-            Future<?> f = EXECUTOR.submit(new Runnable() {
+            Future<?> f = service.submit(new Runnable() {
 
                 @Override
                 public void run() {
@@ -99,15 +175,13 @@ public abstract class SettlerCraft {
         }
     }
 
-    
-
-    public final SCWorld getWorld(String world) {
-        SCWorld scWorld;
+    public final SWorld getWorld(String world) {
+        SWorldImpl swi;
         synchronized (worlds) {
-            scWorld = worlds.get(world);
+            swi = worlds.get(world);
         }
 
-        if (scWorld == null) {
+        if (swi == null) {
             IWorld iWorld = getPlatform().getServer().getWorld(world);
             if (iWorld == null) {
                 return null;
@@ -124,27 +198,39 @@ public abstract class SettlerCraft {
             }
             // Loads the world
             synchronized (mutex) {
-                File worldFile = new File(getWorkingDirectory(), "worlds/" + world + "/config.xml");
-                scWorld = new SCWorld(this, iWorld, worldFile);
-                scWorld.load();
+                File worldsDirectory = new File(getWorkingDirectory(), "worlds");
+
+                File worldDirectory = new File(worldsDirectory, world);
+                worldDirectory.mkdirs();
+
+                File worldFile = new File(worldDirectory, "config.xml");
+
+                swi = new SWorldImpl(iWorld.getUUID(), WorldEditUtil.getWorld(world), worldFile);
+                swi.load();
                 synchronized (worlds) {
-                    worlds.put(scWorld.getName(), scWorld);
+                    worlds.put(swi.getName(), swi);
                 }
             }
         }
-        return scWorld;
+        return swi;
     }
 
     public APlatform getPlatform() {
         return platform;
     }
-    
-    public abstract File getWorkingDirectory();
 
-    protected abstract Player getPlayer(UUID player);
+    public File getWorkingDirectory() {
+        return plugin.getDataFolder();
+    }
 
     public final StructureAPI getStructureAPI() {
         return structureAPI;
     }
 
+    public EconomyProvider getEconomyProvider() {
+        return economyProvider;
+    }
+    
+    
+    
 }

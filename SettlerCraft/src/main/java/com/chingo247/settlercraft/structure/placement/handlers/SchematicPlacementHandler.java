@@ -23,9 +23,9 @@
  */
 package com.chingo247.settlercraft.structure.placement.handlers;
 
-import com.chingo247.settlercraft.model.util.LogLevel;
-import com.chingo247.settlercraft.model.util.SCLogger;
-import com.chingo247.settlercraft.model.world.Direction;
+import com.chingo247.settlercraft.core.util.LogLevel;
+import com.chingo247.settlercraft.core.util.SCLogger;
+import com.chingo247.settlercraft.core.world.Direction;
 import com.chingo247.settlercraft.structure.StructureAPI;
 import com.chingo247.settlercraft.structure.plan.exception.PlanException;
 import com.chingo247.settlercraft.structure.placement.SchematicPlacement;

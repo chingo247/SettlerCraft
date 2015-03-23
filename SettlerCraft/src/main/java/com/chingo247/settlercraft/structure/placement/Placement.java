@@ -23,8 +23,8 @@
  */
 package com.chingo247.settlercraft.structure.placement;
 
-import com.chingo247.settlercraft.model.regions.CuboidDimensional;
-import com.chingo247.settlercraft.model.world.Direction;
+import com.chingo247.settlercraft.core.regions.CuboidDimensional;
+import com.chingo247.settlercraft.core.world.Direction;
 import com.chingo247.settlercraft.structure.construction.options.Options;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;

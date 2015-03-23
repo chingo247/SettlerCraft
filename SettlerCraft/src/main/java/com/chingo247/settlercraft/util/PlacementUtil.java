@@ -23,7 +23,7 @@
  */
 package com.chingo247.settlercraft.util;
 
-import com.chingo247.settlercraft.model.world.Direction;
+import com.chingo247.settlercraft.core.world.Direction;
 import com.sk89q.worldedit.Vector;
 
 /**

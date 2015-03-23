@@ -16,9 +16,6 @@
  */
 package com.chingo247.xcore.core;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  *
  * @author Chingo
@@ -57,9 +54,13 @@ public abstract class AInventory {
         }
     }
     
+    public abstract void addItem(AItemStack itemStack);
+    
     public abstract void setItem(int index, AItemStack itemstack);          
     
     public abstract AItemStack[] getItems();
+    
+    public abstract void clear();
     
     
 }
