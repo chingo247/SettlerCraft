@@ -24,12 +24,12 @@
 package com.chingo247.settlercraft.structure;
 
 import com.chingo247.settlercraft.SettlerCraft;
-import com.chingo247.settlercraft.core.world.Direction;
-import com.chingo247.settlercraft.core.persistence.entities.structure.StructureEntity;
-import com.chingo247.settlercraft.core.persistence.entities.structure.StructureState;
-import com.chingo247.settlercraft.core.persistence.dao.StructureDAO;
+import commons.world.Direction;
+import commons.persistence.entities.structure.StructureEntity;
+import commons.persistence.entities.structure.StructureState;
+import commons.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.event.EventManager;
-import com.chingo247.settlercraft.core.persistence.entities.world.CuboidDimension;
+import commons.persistence.entities.world.CuboidDimension;
 import com.chingo247.settlercraft.structure.event.StructureCreateEvent;
 import com.chingo247.settlercraft.structure.exception.StructureException;
 import com.chingo247.settlercraft.structure.placement.Placement;

@@ -23,8 +23,8 @@ package com.chingo247.settlercraft.structure.plan;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import com.chingo247.settlercraft.core.util.LogLevel;
-import com.chingo247.settlercraft.core.util.SCLogger;
+import commons.util.LogLevel;
+import commons.util.SCLogger;
 import com.chingo247.settlercraft.structure.exception.ElementValueException;
 import com.chingo247.settlercraft.structure.plan.exception.PlanException;
 import com.chingo247.settlercraft.structure.placement.PlacementProcessor;

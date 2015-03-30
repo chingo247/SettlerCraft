@@ -24,8 +24,8 @@
  */
 package com.chingo247.settlercraft.structure.placement;
 
-import com.chingo247.settlercraft.core.util.WorldUtil;
-import com.chingo247.settlercraft.core.persistence.entities.world.CuboidDimension;
+import commons.util.WorldUtil;
+import commons.persistence.entities.world.CuboidDimension;
 import java.util.Objects;
 import java.util.UUID;
 

@@ -82,7 +82,7 @@ public class CategorySlot extends Slot {
     }
 
     public AItemStack getIcon() {
-        AItemStack stack = platform.createItemStack();
+        AItemStack stack = platform.createItemStack(icon);
         stack.setMaterial(icon);
         stack.setName(name);
         stack.setLore(null);

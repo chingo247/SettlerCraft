@@ -16,11 +16,16 @@
  */
 package com.chingo247.xcore.platforms.bukkit;
 
+import com.chingo247.xcore.core.AInventory;
+import com.chingo247.xcore.core.AItemStack;
 import com.chingo247.xcore.core.APlatform;
+import com.chingo247.xcore.core.IColor;
 import com.chingo247.xcore.core.IConsole;
 import com.chingo247.xcore.core.IServer;
 import java.io.File;
+import org.bukkit.Bukkit;
 import org.bukkit.Server;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -50,7 +55,22 @@ public class BukkitPlatform extends APlatform {
 
     @Override
     public File getPluginsFolder() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new File("plugins");
+    }
+
+    @Override
+    public AItemStack createItemStack(int material) {
+        return new BukkitItemStack(new ItemStack(material));
+    }
+
+    @Override
+    public IColor getChatColors() {
+        return BukkitChatColors.instance();
+    }
+
+    @Override
+    public AInventory createInventory(String title, int slots) {
+        return new BukkitInventory(Bukkit.createInventory(null, slots, title));
     }
     
     

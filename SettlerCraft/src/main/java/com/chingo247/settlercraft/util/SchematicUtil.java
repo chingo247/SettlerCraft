@@ -25,12 +25,12 @@
 package com.chingo247.settlercraft.util;
 
 
-import com.chingo247.settlercraft.core.world.Direction;
-import static com.chingo247.settlercraft.core.world.Direction.EAST;
-import static com.chingo247.settlercraft.core.world.Direction.NORTH;
-import static com.chingo247.settlercraft.core.world.Direction.SOUTH;
-import static com.chingo247.settlercraft.core.world.Direction.WEST;
-import com.chingo247.settlercraft.core.persistence.entities.world.CuboidDimension;
+import commons.world.Direction;
+import static commons.world.Direction.EAST;
+import static commons.world.Direction.NORTH;
+import static commons.world.Direction.SOUTH;
+import static commons.world.Direction.WEST;
+import commons.persistence.entities.world.CuboidDimension;
 import com.chingo247.settlercraft.structure.plan.schematic.Schematic;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;

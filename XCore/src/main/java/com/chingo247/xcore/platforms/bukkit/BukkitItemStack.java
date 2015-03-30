@@ -81,6 +81,11 @@ public class BukkitItemStack extends AItemStack {
         AItemStack clone = new BukkitItemStack(stack.clone());
         return clone;
     }
+
+    @Override
+    public void setMaterial(int material) {
+        stack.setTypeId(material);
+    }
     
     
     

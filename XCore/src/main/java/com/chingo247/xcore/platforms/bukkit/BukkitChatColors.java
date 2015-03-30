@@ -31,6 +31,17 @@ import com.chingo247.xcore.util.ChatColors;
  * @author Chingo
  */
 public class BukkitChatColors implements IColor {
+    
+    private BukkitChatColors(){}
+    
+    private static BukkitChatColors instance;
+    
+    public static BukkitChatColors instance() {
+        if(instance == null) {
+            instance = new BukkitChatColors();
+        }
+        return instance;
+    }
 
     @Override
     public String getBlue() {

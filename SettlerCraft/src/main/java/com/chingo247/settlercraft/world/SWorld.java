@@ -23,7 +23,7 @@
  */
 package com.chingo247.settlercraft.world;
 
-import com.chingo247.settlercraft.core.world.Direction;
+import commons.world.Direction;
 import com.chingo247.settlercraft.structure.Structure;
 import com.chingo247.settlercraft.structure.exception.StructureException;
 import com.chingo247.settlercraft.structure.placement.Placement;

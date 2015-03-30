@@ -32,6 +32,7 @@ public class BukkitWorld implements IWorld {
 
     public BukkitWorld(World world) {
         this.world = world;
+        
     }
 
     @Override

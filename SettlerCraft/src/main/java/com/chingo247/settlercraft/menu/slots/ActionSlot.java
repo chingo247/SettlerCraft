@@ -55,7 +55,7 @@ public class ActionSlot extends Slot {
     }
     
     public AItemStack getIcon() {
-        AItemStack stack = platform.createItemStack();
+        AItemStack stack = platform.createItemStack(icon);
         stack.setName(action);
         stack.setLore(lore);
         return stack;

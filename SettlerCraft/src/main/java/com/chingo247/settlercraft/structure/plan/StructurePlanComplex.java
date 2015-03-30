@@ -25,7 +25,7 @@
 package com.chingo247.settlercraft.structure.plan;
 
 import com.chingo247.settlercraft.structure.placement.Placement;
-import com.chingo247.settlercraft.core.persistence.entities.world.CuboidDimension;
+import commons.persistence.entities.world.CuboidDimension;
 import com.chingo247.settlercraft.structure.plan.exception.PlanException;
 import com.google.common.collect.Sets;
 import java.io.File;

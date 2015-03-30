@@ -23,8 +23,9 @@
  */
 package com.chingo247.settlercraft;
 
-import com.chingo247.settlercraft.core.EconomyProvider;
-import com.chingo247.settlercraft.core.util.WorldEditUtil;
+import commons.EconomyProvider;
+import commons.util.WorldEditUtil;
+import com.chingo247.settlercraft.menu.MenuAPI;
 import com.chingo247.settlercraft.plugin.IConfigProvider;
 import com.chingo247.settlercraft.structure.StructureAPI;
 import com.chingo247.settlercraft.world.SWorld;
@@ -60,6 +61,7 @@ public class SettlerCraft {
 
     private APlatform platform;
     private StructureAPI structureAPI;
+    private MenuAPI menuAPI;
     private IConfigProvider configProvider;
     private IPlugin plugin;
     private EconomyProvider economyProvider;
@@ -80,7 +82,7 @@ public class SettlerCraft {
     public void registerExecutor(ExecutorService service) {
         Preconditions.checkNotNull(service);
         if(this.service != null) {
-            throw new RuntimeException("Already registered a ExecutorService");
+            throw new RuntimeException("Already registered a ExecutorService!");
         }
         this.service = service;
     }
@@ -88,7 +90,7 @@ public class SettlerCraft {
     public void registerPlugin(IPlugin plugin) {
         Preconditions.checkNotNull(plugin);
         if (this.plugin != null) {
-            throw new RuntimeException("Can't register '" + plugin.getName() + "' already registered a plugin");
+            throw new RuntimeException("Can't register '" + plugin.getName() + "' already registered a plugin!");
         }
         this.plugin = plugin;
     }
@@ -96,7 +98,7 @@ public class SettlerCraft {
     public void registerPlatform(APlatform platform) throws RuntimeException {
         Preconditions.checkNotNull(platform);
         if (this.platform != null) {
-            throw new RuntimeException("Already registered a platform");
+            throw new RuntimeException("Already registered a platform!");
         }
         this.platform = platform;
     }
@@ -104,9 +106,17 @@ public class SettlerCraft {
     public void registerStructureAPI(StructureAPI structureAPI) throws RuntimeException {
         Preconditions.checkNotNull(structureAPI);
         if (this.structureAPI != null) {
-            throw new RuntimeException("Already registered a StructureAPI");
+            throw new RuntimeException("Already registered a StructureAPI!");
         }
         this.structureAPI = structureAPI;
+    }
+    
+    public void registerMenuAPI(MenuAPI menuAPI) throws RuntimeException {
+        Preconditions.checkNotNull(menuAPI);
+        if (this.menuAPI != null) {
+            throw new RuntimeException("Already registered a MenuAPI!");
+        }
+        this.menuAPI = menuAPI;
     }
     
     public void registerEconomyProvider(EconomyProvider economyProvider) {
@@ -175,7 +185,7 @@ public class SettlerCraft {
         }
     }
 
-    public final SWorld getWorld(String world) {
+    public SWorld getWorld(String world) {
         SWorldImpl swi;
         synchronized (worlds) {
             swi = worlds.get(world);
@@ -223,13 +233,19 @@ public class SettlerCraft {
         return plugin.getDataFolder();
     }
 
-    public final StructureAPI getStructureAPI() {
+    public StructureAPI getStructureAPI() {
         return structureAPI;
     }
 
     public EconomyProvider getEconomyProvider() {
         return economyProvider;
     }
+
+    public MenuAPI getMenuAPI() {
+        return menuAPI;
+    }
+    
+    
     
     
     

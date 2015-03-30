@@ -23,7 +23,7 @@
  */
 package com.chingo247.settlercraft.structure.restriction;
 
-import com.chingo247.settlercraft.core.regions.CuboidDimensional;
+import commons.regions.CuboidDimensional;
 import com.chingo247.settlercraft.structure.placement.Placement;
 import com.chingo247.settlercraft.world.SWorld;
 import com.chingo247.settlercraft.world.WorldConfig;

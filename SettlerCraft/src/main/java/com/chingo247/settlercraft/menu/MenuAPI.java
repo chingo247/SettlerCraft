@@ -17,7 +17,7 @@
 
 package com.chingo247.settlercraft.menu;
 
-import com.chingo247.settlercraft.SettlerCraft;
+import com.chingo247.xcore.core.AItemStack;
 import com.google.common.collect.Maps;
 import java.util.Iterator;
 import java.util.Map;
@@ -35,14 +35,13 @@ public abstract class MenuAPI {
         openMenus = Maps.newHashMap();
     }
     
-    public void registerMenu(ACategoryMenu menu) {
+    void registerMenu(ACategoryMenu menu) {
         synchronized(openMenus) {
             this.openMenus.put(menu.getPlayer().getUniqueId(), menu);
         }
-        menu.register(this);
     }
     
-    public ACategoryMenu getMenu(UUID player) {
+    public final ACategoryMenu getMenu(UUID player) {
         synchronized(openMenus) {
             return openMenus.get(player);
         }
@@ -54,11 +53,11 @@ public abstract class MenuAPI {
         }
     }
     
-    protected void onPlayerLeave(UUID player) {
+    protected final void onPlayerLeave(UUID player) {
         unRegisterMenu(player);
     }
     
-    protected void onServerReload() {
+    protected final void onServerReload() {
         for(Iterator<ACategoryMenu> it = openMenus.values().iterator(); it.hasNext();) {
             ACategoryMenu menu = it.next();
             if(menu != null) {
@@ -68,12 +67,11 @@ public abstract class MenuAPI {
         }
     }
     
-    protected void onPlayerClick(int slot, UUID player) {
-        SettlerCraft.getInstance().getWorld(null).
-    }
-    
-    protected void onPlayerCloseInventory(UUID player) {
-        unRegisterMenu(player);
+    protected final void onPlayerClick(int slot, UUID player, int clickType, AItemStack clicked) {
+        ACategoryMenu menu = openMenus.get(player);
+        if(menu != null) {
+            menu.onMenuSlotClicked(slot, clickType, clicked);
+        }
     }
     
 }

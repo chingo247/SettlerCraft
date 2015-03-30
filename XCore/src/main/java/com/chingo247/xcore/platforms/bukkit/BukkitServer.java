@@ -33,7 +33,7 @@ import org.bukkit.entity.Player;
  */
 public class BukkitServer implements IServer {
     
-    private final Server server;
+    final Server server;
     private final BukkitConsole console;
     
 

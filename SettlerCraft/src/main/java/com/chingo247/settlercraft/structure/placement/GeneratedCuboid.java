@@ -24,11 +24,11 @@
  */
 package com.chingo247.settlercraft.structure.placement;
 
-import com.chingo247.settlercraft.core.world.Direction;
-import static com.chingo247.settlercraft.core.world.Direction.EAST;
-import static com.chingo247.settlercraft.core.world.Direction.NORTH;
-import static com.chingo247.settlercraft.core.world.Direction.SOUTH;
-import static com.chingo247.settlercraft.core.world.Direction.WEST;
+import commons.world.Direction;
+import static commons.world.Direction.EAST;
+import static commons.world.Direction.NORTH;
+import static commons.world.Direction.SOUTH;
+import static commons.world.Direction.WEST;
 import com.chingo247.settlercraft.structure.construction.options.Options;
 import com.chingo247.settlercraft.structure.generators.CuboidGenerator;
 import com.sk89q.worldedit.EditSession;

@@ -6,7 +6,7 @@
 package com.chingo247.settlercraft.structure;
 
 import com.chingo247.settlercraft.SettlerCraft;
-import com.chingo247.settlercraft.core.world.Direction;
+import commons.world.Direction;
 import com.chingo247.settlercraft.event.EventManager;
 import com.chingo247.settlercraft.structure.exception.ElementValueException;
 import com.chingo247.settlercraft.structure.exception.StructureException;

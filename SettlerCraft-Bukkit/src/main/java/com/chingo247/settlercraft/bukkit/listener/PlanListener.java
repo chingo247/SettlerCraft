@@ -26,7 +26,7 @@ package com.chingo247.settlercraft.bukkit.listener;
 import com.chingo247.settlercraft.SettlerCraft;
 import com.chingo247.settlercraft.bukkit.util.BKWorldEditUtil;
 import com.chingo247.settlercraft.structure.handlers.StructurePlaceHandler;
-import com.chingo247.settlercraft.core.EconomyProvider;
+import commons.EconomyProvider;
 import com.chingo247.xcore.core.AItemStack;
 import com.chingo247.xcore.platforms.bukkit.BukkitItemStack;
 import com.sk89q.worldedit.Vector;

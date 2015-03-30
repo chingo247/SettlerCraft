@@ -24,7 +24,7 @@
 package com.chingo247.settlercraft;
 
 import com.chingo247.settlercraft.SettlerCraft;
-import com.chingo247.settlercraft.core.world.Direction;
+import commons.world.Direction;
 import com.chingo247.settlercraft.structure.Structure;
 import com.chingo247.settlercraft.structure.StructureAPI;
 import com.chingo247.settlercraft.structure.StructureManager;
