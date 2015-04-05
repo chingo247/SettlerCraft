@@ -24,13 +24,17 @@ package com.chingo247.settlercraft.bukkit;
  * THE SOFTWARE.
  */
 import com.chingo247.settlercraft.SettlerCraft;
+import com.chingo247.settlercraft.bukkit.commands.SettlerCraftCommandExecutor;
 import com.chingo247.settlercraft.bukkit.listener.PlanListener;
 import com.chingo247.settlercraft.exception.SettlerCraftException;
-import commons.persistence.HSQLServer;
-import commons.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.persistence.HSQLServer;
+import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.menu.CategoryMenu;
+import com.chingo247.settlercraft.menu.plan.StructurePlanMenuReader;
 import com.chingo247.xcore.core.IPlugin;
 import com.chingo247.xcore.platforms.bukkit.BukkitPlatform;
 import com.chingo247.xcore.platforms.bukkit.BukkitPlugin;
+import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -40,6 +44,7 @@ import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.dom4j.DocumentException;
 
 /**
  *
@@ -50,7 +55,7 @@ public class SettlerCraftPlugin extends JavaPlugin implements IPlugin {
     public static final String MSG_PREFIX = "[SettlerCraft]: ";
     private static final Logger LOGGER = Logger.getLogger(SettlerCraftPlugin.class);
     private static SettlerCraftPlugin instance;
-    private BKEconomyProvider provider;
+    private BKEconomyProvider economyProvider;
     private final SettlerCraft settlerCraft = SettlerCraft.getInstance();
 
     private final ExecutorService service = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 30L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
@@ -85,19 +90,16 @@ public class SettlerCraftPlugin extends JavaPlugin implements IPlugin {
             service.shutdown();
             return;
         }
+        // Register platform
+        settlerCraft.registerPlatform(new BukkitPlatform(Bukkit.getServer()));
+        settlerCraft.registerPlugin(new BukkitPlugin(this));
+        settlerCraft.registerExecutor(service);
 
+        // Register Economy
+        economyProvider = new BKEconomyProvider();
+        settlerCraft.registerEconomyProvider(new BKEconomyProvider());
         
-//        planMenuManager = new PlanMenuManager(settlerCraft);
-//        provider = new BKEconomyProvider();
-//
-//        try {
-//            planMenuManager.initialize();
-//        } catch (DocumentException | SettlerCraftException ex) {
-//            java.util.logging.Logger.getLogger(SettlerCraftPlugin.class.getName()).log(Level.SEVERE, null, ex);
-//            setEnabled(false);
-//            return;
-//        }
-
+        // Register Config
         configProvider = new BKConfigProvider();
         try {
             configProvider.load();
@@ -106,12 +108,32 @@ public class SettlerCraftPlugin extends JavaPlugin implements IPlugin {
             setEnabled(false);
             return;
         }
-        
-        settlerCraft.registerPlatform(new BukkitPlatform(Bukkit.getServer()));
-        settlerCraft.registerPlugin(new BukkitPlugin(this));
-        settlerCraft.registerStructureAPI(new BKStructureAPI(this, service));
-        settlerCraft.registerEconomyProvider(new BKEconomyProvider());
         settlerCraft.registerConfigProvider(configProvider);
+        
+        // Register menu API
+        BKMenuAPI menuAPI = new BKMenuAPI(economyProvider);
+        settlerCraft.registerMenuAPI(menuAPI);
+        Bukkit.getPluginManager().registerEvents(menuAPI, this);
+        
+        
+        StructurePlanMenuReader reader = new StructurePlanMenuReader();
+        CategoryMenu menu;
+        try {
+            menu = reader.read(menuAPI, new File(getDataFolder(), "menu.xml"));
+        } catch (DocumentException | SettlerCraftException ex) {
+            java.util.logging.Logger.getLogger(SettlerCraftPlugin.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Disabling SettlerCraft!");
+            this.setEnabled(false);
+            return;
+        }
+        
+        
+        
+        
+        settlerCraft.registerStructureAPI(new BKStructureAPI(this, service));
+        settlerCraft.registerPlanMenu(menu);
+        
+        
         
 
         // Init HSQL Server
@@ -121,15 +143,11 @@ public class SettlerCraftPlugin extends JavaPlugin implements IPlugin {
             hSQLServer.start();
         }
 
-        // ValidationService restoreService = new BukkitValidationService(structureAPI);
-        // restoreService.validate();
-        // resetStates();
         settlerCraft.initialize();
-//        planMenuManager.load();
 
-        Bukkit.getPluginManager().registerEvents(new PlanListener(settlerCraft, service, provider), this);
+        Bukkit.getPluginManager().registerEvents(new PlanListener(settlerCraft, service, economyProvider), this);
 //
-//        getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
+        getCommand("sc").setExecutor(new SettlerCraftCommandExecutor(this));
 //        getCommand("cst").setExecutor(new ConstructionCommandExecutor(structureAPI));
 //        getCommand("stt").setExecutor(new StructureCommandExecutor(structureAPI));
 

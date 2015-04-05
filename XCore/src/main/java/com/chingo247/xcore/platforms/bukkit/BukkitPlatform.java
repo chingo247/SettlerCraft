@@ -73,6 +73,11 @@ public class BukkitPlatform extends APlatform {
         return new BukkitInventory(Bukkit.createInventory(null, slots, title));
     }
     
-    
+    public static AItemStack wrapItem(ItemStack stack) {
+        if(stack != null) {
+            return new BukkitItemStack(stack);
+        } 
+        return null;
+    }
     
 }

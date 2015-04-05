@@ -25,10 +25,10 @@ package com.chingo247.settlercraft.bukkit.listener;
  */
 import com.chingo247.settlercraft.SettlerCraft;
 import com.chingo247.settlercraft.bukkit.util.BKWorldEditUtil;
+import com.chingo247.settlercraft.plugin.IEconomyProvider;
 import com.chingo247.settlercraft.structure.handlers.StructurePlaceHandler;
-import commons.EconomyProvider;
 import com.chingo247.xcore.core.AItemStack;
-import com.chingo247.xcore.platforms.bukkit.BukkitItemStack;
+import com.chingo247.xcore.platforms.bukkit.BukkitPlatform;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.entity.Player;
@@ -48,7 +48,7 @@ public class PlanListener implements Listener {
     private StructurePlaceHandler placeHandler;
 
 
-    public PlanListener(SettlerCraft settlerCraft, ExecutorService service, EconomyProvider provider) {
+    public PlanListener(SettlerCraft settlerCraft, ExecutorService service, IEconomyProvider provider) {
         this.placeHandler = new StructurePlaceHandler(service, provider,settlerCraft);
     }
 
@@ -58,7 +58,7 @@ public class PlanListener implements Listener {
         if(pie.getItem() == null) return;
         if(pie.getClickedBlock() == null) return;
         
-        AItemStack stack = new BukkitItemStack(pie.getItem());
+        AItemStack stack = BukkitPlatform.wrapItem(pie.getItem());
         if(StructurePlaceHandler.isStructurePlan(stack)) {
             System.out.println("Is Structureplan!");
             pie.setCancelled(true);

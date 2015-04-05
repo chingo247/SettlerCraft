@@ -7,6 +7,7 @@ import com.chingo247.xcore.core.IServer;
 import com.chingo247.xcore.core.IWorld;
 import com.google.common.base.Preconditions;
 import java.util.UUID;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 
@@ -19,9 +20,9 @@ public class BukkitPlayer implements IPlayer {
     private final Player player;
     private final IServer server;
 
-    public BukkitPlayer(Player player, IServer server) {
+    public BukkitPlayer(Player player) {
         this.player = player;
-        this.server = server;
+        this.server = new BukkitServer(Bukkit.getServer());
     }
 
     @Override

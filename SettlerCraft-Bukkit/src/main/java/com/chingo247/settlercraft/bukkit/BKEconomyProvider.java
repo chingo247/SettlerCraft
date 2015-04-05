@@ -5,43 +5,47 @@
  */
 package com.chingo247.settlercraft.bukkit;
 
-import com.chingo247.settlercraft.bukkit.util.EconomyUtil;
-import commons.EconomyProvider;
+import com.chingo247.settlercraft.plugin.IEconomyProvider;
 import java.util.UUID;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.RegisteredServiceProvider;
 
 /**
  *
  * @author Chingo
  */
-public class BKEconomyProvider implements EconomyProvider{
+public class BKEconomyProvider implements IEconomyProvider{
     
+    private RegisteredServiceProvider<Economy> economProvider;
     private Economy economy;
 
     public BKEconomyProvider() {
-        this.economy = EconomyUtil.getInstance().getEconomy();
+        this.economProvider = Bukkit.getServicesManager().getRegistration(Economy.class);
+        this.economy = economProvider.getProvider();
     }
     
-    
+    @Override
+    public boolean isEnabled() {
+        return economy != null;
+    }
 
     @Override
     public void give(UUID player, double amount) {
-        //
+        economy.depositPlayer(Bukkit.getOfflinePlayer(player), amount);
     }
 
     @Override
     public void withdraw(UUID player, double amount) {
-        //
-    }
-
-    @Override
-    public void transfer(UUID fromPlayer, UUID toPlayer, double amount) {
-        //
+        economy.withdrawPlayer(Bukkit.getOfflinePlayer(player), amount);
     }
 
     @Override
     public double getBalance(UUID player) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return economy.getBalance(Bukkit.getPlayer(player));
     }
     
+    
+
+  
 }

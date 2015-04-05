@@ -67,12 +67,12 @@ public class BukkitInventory extends AInventory{
 
     @Override
     public void addItem(AItemStack itemStack) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        inventory.addItem(((BukkitItemStack) itemStack).getStack());
     }
 
     @Override
     public void clear() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        inventory.clear();
     }
 
     public Inventory getInventory() {

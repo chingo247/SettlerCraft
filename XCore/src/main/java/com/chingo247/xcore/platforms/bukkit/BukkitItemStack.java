@@ -29,7 +29,7 @@ public class BukkitItemStack extends AItemStack {
     
     private final ItemStack stack;
 
-    public BukkitItemStack(ItemStack stack) {
+    BukkitItemStack(ItemStack stack) {
         this.stack = stack;
     }
     
@@ -76,6 +76,10 @@ public class BukkitItemStack extends AItemStack {
         stack.setAmount(amount);
     }
 
+    public ItemStack getStack() {
+        return stack;
+    }
+    
     @Override
     public AItemStack clone() {
         AItemStack clone = new BukkitItemStack(stack.clone());

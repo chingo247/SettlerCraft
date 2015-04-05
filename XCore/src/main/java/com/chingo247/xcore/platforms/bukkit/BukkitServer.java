@@ -51,7 +51,7 @@ public class BukkitServer implements IServer {
         final List<IPlayer> players = new ArrayList<>(server.getOnlinePlayers().length);
         final List<Player> bukkitPlayers = Arrays.asList(server.getOnlinePlayers());
         for(Player p : bukkitPlayers) {
-            players.add(new BukkitPlayer(p, this));
+            players.add(new BukkitPlayer(p));
         }
         return players;
     }
@@ -68,7 +68,7 @@ public class BukkitServer implements IServer {
 
     @Override
     public IPlayer getPlayer(UUID playerUUID) {
-        return new BukkitPlayer(server.getPlayer(playerUUID), this);
+        return new BukkitPlayer(server.getPlayer(playerUUID));
     }
 
     @Override

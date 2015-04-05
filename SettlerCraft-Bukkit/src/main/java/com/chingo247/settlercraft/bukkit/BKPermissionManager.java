@@ -64,7 +64,7 @@ public class BKPermissionManager implements IPermissionManager {
     }
     
     public boolean isAllowed(Player player, Perms perm) {
-        return isAllowed(new BukkitPlayer(player, platform.getServer()), perm.getPermission().getName());
+        return isAllowed(new BukkitPlayer(player), perm.getPermission().getName());
     }
     
 
