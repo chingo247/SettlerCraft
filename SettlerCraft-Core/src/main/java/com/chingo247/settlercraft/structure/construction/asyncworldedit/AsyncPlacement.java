@@ -23,6 +23,7 @@
  */
 package com.chingo247.settlercraft.structure.construction.asyncworldedit;
 
+import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
 import com.chingo247.settlercraft.world.Direction;
 import com.chingo247.settlercraft.structure.construction.options.Options;
 import com.chingo247.settlercraft.structure.placement.AbstractPlacement;
@@ -122,13 +123,9 @@ public class AsyncPlacement extends AbstractPlacement {
     }
 
     @Override
-    public Vector getMinPosition() {
-        return placement.getMinPosition();
+    public CuboidDimension getDimension() {
+        return placement.getDimension();
     }
 
-    @Override
-    public Vector getMaxPosition() {
-        return placement.getMaxPosition();
-    }
-    
+  
 }

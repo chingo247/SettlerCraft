@@ -24,6 +24,7 @@
  */
 package com.chingo247.settlercraft.structure.placement;
 
+import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
 import com.chingo247.settlercraft.world.Direction;
 import static com.chingo247.settlercraft.world.Direction.EAST;
 import static com.chingo247.settlercraft.world.Direction.NORTH;
@@ -271,13 +272,8 @@ public class SchematicPlacement extends DirectionalPlacement {
     }
 
     @Override
-    public Vector getMinPosition() {
-        return position;
-    }
-
-    @Override
-    public Vector getMaxPosition() {
-        return new Vector(position).add(schematic.getWidth(), schematic.getHeight(), schematic.getLength());
+    public CuboidDimension getDimension() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

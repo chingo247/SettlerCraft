@@ -68,7 +68,9 @@ public class BukkitItemStack extends AItemStack {
 
     @Override
     public void setLore(List<String> lore) {
-        stack.getItemMeta().setLore(lore);
+        ItemMeta meta = stack.getItemMeta();
+        meta.setLore(lore);
+        stack.setItemMeta(meta);
     }
 
     @Override
@@ -83,6 +85,7 @@ public class BukkitItemStack extends AItemStack {
     @Override
     public AItemStack clone() {
         AItemStack clone = new BukkitItemStack(stack.clone());
+        clone.setLore(stack.getItemMeta().getLore());
         return clone;
     }
 

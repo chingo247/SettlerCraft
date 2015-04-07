@@ -23,10 +23,9 @@
  */
 package com.chingo247.settlercraft;
 
-import com.chingo247.settlercraft.SettlerCraft;
-import com.chingo247.settlercraft.world.Direction;
 import com.chingo247.settlercraft.structure.Structure;
-import com.chingo247.settlercraft.structure.StructureManager;
+import com.chingo247.settlercraft.structure.StructureAPI;
+import com.chingo247.settlercraft.world.Direction;
 import com.chingo247.settlercraft.structure.exception.StructureException;
 import com.chingo247.settlercraft.structure.exception.WorldConfigException;
 import com.chingo247.settlercraft.structure.placement.Placement;
@@ -69,7 +68,6 @@ import net.minecraft.util.com.google.common.collect.Maps;
 public class SettlerCraftWorldImpl extends AbstractWorld implements SettlerCraftWorld{
 
     private final SettlerCraft sc;
-    private final StructureManager structureManager;
 
     private final World world;
     private final File worldFile;
@@ -77,7 +75,7 @@ public class SettlerCraftWorldImpl extends AbstractWorld implements SettlerCraft
     private Map<Class, StructureRestriction> restrictions;
     private UUID worldUUID;
 
-    protected SettlerCraftWorldImpl(StructureManager structureManager, UUID worldUUID, World world, File worldFile) {
+    protected SettlerCraftWorldImpl(UUID worldUUID, World world, File worldFile) {
         Preconditions.checkNotNull(world);
         Preconditions.checkNotNull(worldFile);
         Preconditions.checkNotNull(worldUUID);
@@ -86,7 +84,6 @@ public class SettlerCraftWorldImpl extends AbstractWorld implements SettlerCraft
         this.world = world;
         this.worldFile = worldFile;
         this.sc = SettlerCraft.getInstance();
-        this.structureManager = structureManager;
         this.restrictions = Maps.newHashMap();
         this.restrictions.put(StructureWorldRestriction.class, new StructureWorldRestriction());
 
@@ -134,8 +131,8 @@ public class SettlerCraftWorldImpl extends AbstractWorld implements SettlerCraft
         for (StructureRestriction restriction : restrictions.values()) {
             restriction.allow(this, placement.getDimension(), placement);
         }
-
-        return structureManager.createStructure(placement, position, direction);
+        StructureAPI sa = sc.getStructureAPI();
+        return sa.createStructure(this, placement, position, direction);
     }
 
     @Override
@@ -148,12 +145,8 @@ public class SettlerCraftWorldImpl extends AbstractWorld implements SettlerCraft
             }
         }
 
-        return structureManager.createStructure(plan, position, direction);
-    }
-
-    @Override
-    public Structure getStructure(long id) {
-        return structureManager.getStructure(id);
+        StructureAPI sa = sc.getStructureAPI();
+        return sa.createStructure(this, plan, position, direction);
     }
 
     @Override

@@ -30,7 +30,6 @@ import com.chingo247.settlercraft.menu.MenuAPI;
 import com.chingo247.settlercraft.menu.plan.StructurePlanMenu;
 import com.chingo247.settlercraft.plugin.IConfigProvider;
 import com.chingo247.settlercraft.structure.StructureAPI;
-import com.chingo247.settlercraft.structure.StructureManager;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.world.SettlerCraftWorld;
 import com.chingo247.xcore.core.APlatform;
@@ -242,8 +241,7 @@ public class SettlerCraft {
 
                 File worldFile = new File(worldDirectory, "config.xml");
                 if (worlds.get(world) == null) {
-                    StructureManager structureManager = structureAPI.getStructureManager(world);
-                    swi = new SettlerCraftWorldImpl(structureManager, iWorld.getUUID(), WorldEditUtil.getWorld(world), worldFile);
+                    swi = new SettlerCraftWorldImpl(iWorld.getUUID(), WorldEditUtil.getWorld(world), worldFile);
                     swi.load();
                     worlds.put(swi.getName(), swi);
                 } 

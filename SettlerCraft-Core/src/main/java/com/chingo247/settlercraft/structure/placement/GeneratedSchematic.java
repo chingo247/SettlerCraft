@@ -23,6 +23,7 @@
  */
 package com.chingo247.settlercraft.structure.placement;
 
+import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
 import com.chingo247.settlercraft.world.Direction;
 import com.chingo247.settlercraft.structure.construction.options.Options;
 import com.chingo247.settlercraft.structure.generators.Generator;
@@ -50,12 +51,7 @@ public class GeneratedSchematic extends GeneratedPlacement<Generator>{
     }
 
     @Override
-    public Vector getMinPosition() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Vector getMaxPosition() {
+    public CuboidDimension getDimension() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

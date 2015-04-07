@@ -37,6 +37,7 @@ import com.chingo247.settlercraft.selection.NoneSelectionManager;
 import com.chingo247.settlercraft.structure.StructureAPI;
 import com.chingo247.settlercraft.structure.Structure;
 import com.chingo247.settlercraft.util.PlacementUtil;
+import com.chingo247.settlercraft.world.SettlerCraftWorld;
 import com.chingo247.xcore.core.AInventory;
 import com.chingo247.xcore.core.AItemStack;
 import com.chingo247.xcore.core.IPlayer;
@@ -72,11 +73,11 @@ public class StructurePlaceHandler {
         this.structureAPI = settlerCraft.getStructureAPI();
     }
 
-    public void handle(final AItemStack planItem, final Player player, final World world, final Vector pos) {
+    public void handle(final AItemStack planItem, final Player player, final SettlerCraftWorld world, final Vector pos) {
         handle(planItem, player, world, pos, null);
     }
 
-    public void handle(final AItemStack planItem, final Player player, final World world, final Vector pos, ISelectionManager selectionManager) {
+    public void handle(final AItemStack planItem, final Player player, final SettlerCraftWorld world, final Vector pos, ISelectionManager selectionManager) {
         if (!isStructurePlan(planItem)) {
             return;
         }
@@ -133,6 +134,8 @@ public class StructurePlaceHandler {
 
                     return;
                 }
+                
+                
                 handlePlace(plan, planItem, player, world, pos, slm);
                 
                 } catch (Exception ex) {
@@ -143,7 +146,7 @@ public class StructurePlaceHandler {
 
     }
     
-    private void handlePlace(StructurePlan plan, AItemStack item, Player player, World world, Vector pos1, ISelectionManager selectionManager) {
+    private void handlePlace(StructurePlan plan, AItemStack item, Player player, SettlerCraftWorld world, Vector pos1, ISelectionManager selectionManager) {
         System.out.println("Handling placement...");
         IPlayer iPlayer = settlerCraft.getPlatform().getPlayer(player.getUniqueId());
         
@@ -153,14 +156,14 @@ public class StructurePlaceHandler {
         
         boolean toLeft = iPlayer.isSneaking();
         
-        System.out.println("plan size: " + plan.getPlacement().getMaxPosition());
+        System.out.println("plan size: " + plan.getPlacement().getDimension().getMaxPosition());
         
         if (toLeft) {
             System.out.println("Player was sneaking... pointing left!");
-            pos2 = PlacementUtil.getPoint2Left(pos1, direction, plan.getPlacement().getMaxPosition());
+            pos2 = PlacementUtil.getPoint2Left(pos1, direction, plan.getPlacement().getDimension().getMaxPosition());
         } else {
             System.out.println("Player was NOT sneaking... pointing right!");
-            pos2 = PlacementUtil.getPoint2Right(pos1, direction, plan.getPlacement().getMaxPosition());
+            pos2 = PlacementUtil.getPoint2Right(pos1, direction, plan.getPlacement().getDimension().getMaxPosition());
         }
         
 
@@ -175,7 +178,7 @@ public class StructurePlaceHandler {
             System.out.println("pos2: " + pos2);
             if (toLeft) {
                 // Fix WTF HOW?!!1?
-                pos1 = WorldUtil.translateLocation(pos1, direction, (-(plan.getPlacement().getMaxPosition().getBlockX()- 1)), 0, 0);
+                pos1 = WorldUtil.translateLocation(pos1, direction, (-(plan.getPlacement().getDimension().getMaxPosition().getBlockX()- 1)), 0, 0);
             }
             
             
@@ -184,7 +187,7 @@ public class StructurePlaceHandler {
                 Structure structure;
                 try {
                     // Create Structure using the SettlerCraft restrictions
-                    structure = settlerCraft.getWorld(world.getName()).createStructure(plan, pos1, direction);
+                    structure = structureAPI.createStructure(world, plan, pos1, direction);
                     
                     if (structure != null) {
 //                        AItemStack clone = item.clone();
@@ -192,7 +195,7 @@ public class StructurePlaceHandler {
 //                        iPlayer.getInventory().removeItem(clone);
 //                        iPlayer.updateInventory();
                         
-                        structure.build(player.getUniqueId(), Options.defaultOptions(), false);
+                        structure.build(player, Options.defaultOptions(), false);
                     }
                 } catch (StructureException ex) {
                     player.print(ChatColors.RED + ex.getMessage());
@@ -224,7 +227,7 @@ public class StructurePlaceHandler {
         }
 
         List<String> lore = itemStack.getLore();
-        if (lore.isEmpty()) {
+        if (lore == null || lore.isEmpty()) {
             return false;
         } else {
             for (String s : lore) {

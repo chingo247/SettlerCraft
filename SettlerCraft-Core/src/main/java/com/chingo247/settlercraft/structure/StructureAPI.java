@@ -5,33 +5,45 @@
  */
 package com.chingo247.settlercraft.structure;
 
+import com.chingo247.settlercraft.SettlerCraft;
 import com.chingo247.settlercraft.world.Direction;
 import com.chingo247.settlercraft.event.EventManager;
+import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
+import com.chingo247.settlercraft.structure.event.StructureCreateEvent;
 import com.chingo247.settlercraft.structure.exception.ElementValueException;
 import com.chingo247.settlercraft.structure.exception.StructureException;
 import com.chingo247.settlercraft.structure.placement.event.PlacementHandlerRegisterEvent;
 import com.chingo247.settlercraft.structure.plan.exception.PlacementException;
 import com.chingo247.settlercraft.structure.placement.Placement;
+import com.chingo247.settlercraft.structure.placement.SchematicPlacement;
 import com.chingo247.settlercraft.structure.placement.handlers.PlacementHandler;
 import com.chingo247.settlercraft.structure.placement.handlers.SchematicPlacementHandler;
 import com.chingo247.settlercraft.structure.plan.GlobalPlanManager;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structure.plan.StructurePlanManager;
+import com.chingo247.settlercraft.structure.plan.SubStructuredPlan;
 import com.chingo247.settlercraft.structure.plan.document.PlacementElement;
+import com.chingo247.settlercraft.util.PlacementUtil;
+import com.chingo247.settlercraft.world.SettlerCraftWorld;
 import com.chingo247.xcore.core.APlatform;
+import com.chingo247.xcore.core.ILocation;
 import com.chingo247.xcore.core.IPlugin;
+import com.chingo247.xcore.core.IWorld;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import com.google.common.io.Files;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.world.World;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -39,16 +51,17 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public abstract class StructureAPI {
 
+    public static final String STRUCTURE_PLAN_FILE_NAME = "structureplan.xml";
     public static final String PLUGIN_NAME = "SettlerCraft";
     public static final String PLANS_DIRECTORY = "plans";
     private static final Map<String, Map<String, PlacementHandler>> handlers = Maps.newHashMap();
 
     private final StructurePlanManager globalPlanManager;
-    private final Map<String, StructureManager> structureManagers;
     private final APlatform platform;
     private final Lock loadLock = new ReentrantLock();
     private final IPlugin plugin;
     private final ExecutorService executor;
+    private final StructureRepository repository;
 
     private boolean isLoadingPlans = false;
 
@@ -58,7 +71,6 @@ public abstract class StructureAPI {
         Preconditions.checkNotNull(service);
         this.executor = service;
         this.plugin = plugin;
-        this.structureManagers = Maps.newHashMap();
         this.platform = platform;
         // Register Handlers first...
 //        registerHandler(new GeneratedCuboidHandler());
@@ -69,6 +81,7 @@ public abstract class StructureAPI {
 
         // Now register the GlobalPlanManager
         this.globalPlanManager = new GlobalPlanManager(getPlanDirectory());
+        this.repository = new StructureRepository();
     }
 
     public void load() {
@@ -98,34 +111,113 @@ public abstract class StructureAPI {
         return globalPlanManager.getPlan(planId);
     }
 
-    public StructureManager getStructureManager(String world) {
-        StructureManager structureManager;
-        synchronized (structureManagers) {
-            structureManager = structureManagers.get(world);
+    public Structure createUninitizalizedStructure(SettlerCraftWorld world, Placement placement, Direction direction, Vector position) {
+        //putStructure(null);
+        throw new UnsupportedOperationException();
+    }
 
-            if (structureManager == null) {
-                structureManager = new StructureManager(world, executor, this);
-                structureManager.load();
-                structureManagers.put(world, structureManager);
+    public Structure createStructure(SettlerCraftWorld world, StructurePlan plan, Vector position, Direction direction) throws StructureException {
+        Structure structure = createUninitizalizedStructure(world, plan, direction, position);
+        if (structure != null) {
+            structure.setState(State.CREATED);
+            EventManager.getInstance().getEventBus().post(new StructureCreateEvent(structure));
+        }
+
+        return structure;
+    }
+
+    public Structure createStructure(SettlerCraftWorld world, Placement placement, Vector position, Direction direction) throws StructureException {
+        Structure structure = createUninitizalizedStructure(world, placement, direction, position);
+        if (structure != null) {
+            structure.setState(State.CREATED);
+            EventManager.getInstance().getEventBus().post(new StructureCreateEvent(structure));
+
+        }
+
+        return structure;
+    }
+
+    public Structure createUninitizalizedStructure(SettlerCraftWorld world, StructurePlan plan, Direction direction, Vector position) throws StructureException {
+        Preconditions.checkNotNull(plan);
+        Preconditions.checkNotNull(direction);
+        Preconditions.checkNotNull(position);
+
+        System.out.println("Position is " + position);
+        if (plan instanceof SubStructuredPlan) {
+            System.out.println("Structure is SubstructurePlan!");
+            return null;
+        } else {
+            System.out.println("Structure is StructurePlan!");
+            Placement placement = plan.getPlacement();
+
+            checkLocation(world, placement, position);
+
+            Vector min = position;
+            Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getDimension().getMaxPosition());
+
+            System.out.println("Min: " + min);
+            System.out.println("Max: " + max);
+            System.out.println("Direction: " + direction);
+
+            Structure structure = new SimpleStructure(plan.getName(), world, direction, new CuboidDimension(min, max));
+
+            structure = repository.save(structure); // store and get the ID
+            File structureDir = new File(getStructuresDirectory(world.getName()), String.valueOf(structure));
+
+            // Overwrite old one if exists...
+            if (structureDir.exists()) {
+                structureDir.delete();
             }
+            structureDir.mkdirs();
+
+            File planFile = plan.getFile();
+
+            try {
+                if (placement instanceof SchematicPlacement) {
+                    SchematicPlacement schematicPlacement = (SchematicPlacement) placement;
+                    File schematicFile = schematicPlacement.getSchematic().getFile();
+                    Files.copy(schematicFile, new File(structureDir, schematicFile.getName()));
+                }
+                Files.copy(planFile, new File(structureDir, STRUCTURE_PLAN_FILE_NAME));
+
+            } catch (IOException ex) {
+                structureDir.delete();
+                Logger.getLogger(StructureAPI.class.getName()).log(Level.SEVERE, null, ex);
+                return null;
+            }
+
+            return structure;
         }
-        return structureManager;
     }
 
-    public Structure create(StructurePlan plan, World world, Direction direction, Vector position) throws StructureException {
-        StructureManager manager = structureManagers.get(world.getName());
-        if (manager == null) {
-            throw new NullPointerException("World '" + world + "' + doesn't exist...");
+    private void checkLocation(SettlerCraftWorld world, Placement p, Vector position) throws StructureException {
+        IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getUUID());
+        ILocation l = w.getSpawn();
+        Vector spawnPos = new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ());
+
+        CuboidDimension placementDimension = new CuboidDimension(p.getDimension().getMinPosition().add(position), p.getDimension().getMaxPosition().add(position));
+
+        if (placementDimension.getMinY() <= 1) {
+            throw new StructureException("Structure must be placed at a minimum height of 1");
         }
-        return manager.createStructure(plan, position, direction);
+
+        if (placementDimension.getMaxY() > w.getMaxHeight()) {
+            throw new StructureException("Structure will reach above the world's max height (" + w.getMaxHeight() + ")");
+        }
+
+        if (CuboidDimension.isPositionWithin(placementDimension, spawnPos)) {
+            throw new StructureException("Structure overlaps the world's spawn...");
+        }
+
+        if (repository.overlaps(p.getDimension(), world)) {
+            throw new StructureException("Structure overlaps another structure...");
+        }
     }
 
-    public Structure create(Placement placement, World world, Direction direction, Vector position) throws StructureException {
-        StructureManager manager = structureManagers.get(world.getName());
-        if (manager == null) {
-            throw new NullPointerException("World '" + world + "' + doesn't exist...");
-        }
-        return manager.createStructure(placement, position, direction);
+    protected final File getStructuresDirectory(String world) {
+        File f = new File(SettlerCraft.getInstance().getWorkingDirectory(), "worlds//" + world + "//structures");
+        f.mkdirs(); // creates if not exists..
+        return f;
     }
 
     public final File getPlanDirectory() {

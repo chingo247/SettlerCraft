@@ -25,7 +25,6 @@
 package com.chingo247.settlercraft.regions;
 
 import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
-import com.sk89q.worldedit.Vector;
 
 
 /**
@@ -33,10 +32,6 @@ import com.sk89q.worldedit.Vector;
  * @author Chingo
  */
 public interface CuboidDimensional {
-    
-    public Vector getMinPosition();
-    
-    public Vector getMaxPosition();
     
     public CuboidDimension getDimension();
     

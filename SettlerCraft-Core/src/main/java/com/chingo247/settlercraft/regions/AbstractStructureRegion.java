@@ -55,16 +55,6 @@ public abstract class AbstractStructureRegion<T extends Region> implements Cuboi
         return region.getArea();
     }
     
-    @Override
-    public Vector getMinPosition() {
-        return region.getMinimumPoint();
-    }
-    
-    @Override
-    public Vector getMaxPosition() {
-        return region.getMaximumPoint();
-    }
-    
     public Set<Vector2D> getChunks() {
         return region.getChunks();
     }
@@ -76,7 +66,7 @@ public abstract class AbstractStructureRegion<T extends Region> implements Cuboi
 
     @Override
     public CuboidDimension getDimension() {
-        return new CuboidDimension(getMinPosition(), getMaxPosition());
+        return new CuboidDimension(region.getMinimumPoint(), region.getMaximumPoint());
     }
     
     

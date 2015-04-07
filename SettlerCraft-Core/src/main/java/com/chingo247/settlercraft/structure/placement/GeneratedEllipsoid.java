@@ -81,12 +81,7 @@ public class GeneratedEllipsoid extends GeneratedPlacement<EllipsoidGenerator> {
     }
 
     @Override
-    public Vector getMinPosition() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Vector getMaxPosition() {
+    public CuboidDimension getDimension() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

@@ -21,52 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.persistence.entities.structure;
+package com.chingo247.settlercraft.persistence;
 
 /**
  *
  * @author Chingo
  */
-public enum StructureState {
-        
-        /**
-         * Before structure has been placed...
-         */
-        INITIALIZING,
-        /**
-         * Structure has been added to AsyncWorldEdit's blockplacer's Queue
-         */
-        QUEUED,
-        /**
-         * Schematic is being loaded
-         */
-        LOADING_SCHEMATIC,
-        /**
-         * Fence is being placed
-         */
-        PLACING_FENCE,
-        /**
-         * Structure is being build
-         */
-        BUILDING,
-        /**
-         * Structure is being demolished
-         */
-        DEMOLISHING,
-        /**
-         * Progress has been completed
-         */
-        COMPLETE,
-        /**
-         * Structure has been removed
-         */
-        REMOVED,
-        /**
-         * Progress has stopped
-         */
-        STOPPED,
-        /**
-         * Structure has successfully been created and persisted.
-         */
-        CREATED
+public class IRepository {
+    
 }

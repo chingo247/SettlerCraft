@@ -23,7 +23,6 @@
  */
 package com.chingo247.settlercraft.menu.plan;
 
-import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
 import com.chingo247.settlercraft.menu.CategoryMenu;
 import com.chingo247.settlercraft.menu.DefaultCategoryMenu;
 import com.chingo247.settlercraft.menu.MenuAPI;
@@ -53,16 +52,19 @@ public class StructurePlanMenu {
     }
 
     public void load(StructurePlan plan) {
-        Placement p = plan.getPlacement();
-        CuboidDimension dimension = new CuboidDimension(p.getMinPosition(), p.getMaxPosition());
-        int width = dimension.getMaxX();
-        int height = dimension.getMaxY();
-        int length = dimension.getMaxZ();
+        Placement placement = plan.getPlacement();
+       
+        int width = placement.getDimension().getMaxX();
+        int height = placement.getDimension().getMaxY();
+        int length = placement.getDimension().getMaxZ();
+        
         String id = plan.getId();
         String name = plan.getName();
         String category = plan.getCategory();
         String description = plan.getDescription();
+        
         double price = plan.getPrice();
+        
         menu.addItem(new StructurePlanItem(platform, id, name, category, price, width, height, length, description));
     }
 

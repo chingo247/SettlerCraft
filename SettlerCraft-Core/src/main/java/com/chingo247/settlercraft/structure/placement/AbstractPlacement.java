@@ -25,7 +25,6 @@
 package com.chingo247.settlercraft.structure.placement;
 
 import com.chingo247.settlercraft.util.WorldUtil;
-import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -63,9 +62,6 @@ public abstract class AbstractPlacement implements Placement {
         rotate(WorldUtil.getDirection(yaw));
     }
     
-    public CuboidDimension getCuboidDimension() {
-        return new CuboidDimension(getMinPosition(), getMaxPosition());
-    }
 
     @Override
     public final boolean equals(Object obj) {
@@ -82,11 +78,4 @@ public abstract class AbstractPlacement implements Placement {
         return true;
     }
 
-    @Override
-    public CuboidDimension getDimension() {
-        return new CuboidDimension(getMinPosition(), getMaxPosition());
-    }
-    
-    
-    
 }

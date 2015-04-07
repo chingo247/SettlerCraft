@@ -99,7 +99,6 @@ public class GeneratedPolygonal2D extends GeneratedPlacement<PolygonalGenerator>
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
     public Vector getMinPosition() {
         Vector min = region.getMinimumPoint();
         Vector max = region.getMaximumPoint();
@@ -112,7 +111,6 @@ public class GeneratedPolygonal2D extends GeneratedPlacement<PolygonalGenerator>
         return minu;
     }
 
-    @Override
     public Vector getMaxPosition() {
         Vector min = region.getMinimumPoint();
         Vector max = region.getMaximumPoint();
@@ -126,7 +124,7 @@ public class GeneratedPolygonal2D extends GeneratedPlacement<PolygonalGenerator>
     }
     
     @Override
-    public CuboidDimension getCuboidDimension() {
+    public CuboidDimension getDimension() {
         Vector min = region.getMinimumPoint();
         Vector max = region.getMaximumPoint();
         Vector center = region.getCenter();

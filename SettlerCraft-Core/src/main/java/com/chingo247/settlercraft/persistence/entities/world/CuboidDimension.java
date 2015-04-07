@@ -125,15 +125,14 @@ public class CuboidDimension implements Serializable, CuboidDimensional {
         this.maxZ = maxZ;
     }
 
-    @Override
     public Vector getMinPosition() {
         return new Vector(minX, minY, minZ);
     }
     
-    @Override
     public Vector getMaxPosition() {
         return new Vector(maxX, maxY, maxZ);
     }
+    
 
     @Override
     public String toString() {
@@ -141,8 +140,8 @@ public class CuboidDimension implements Serializable, CuboidDimensional {
     }
 
     public static boolean isDimensionWithin(CuboidDimensional parent, CuboidDimensional child) {
-        CuboidDimension p = new CuboidDimension(parent.getMinPosition(), parent.getMaxPosition());
-        CuboidDimension c = new CuboidDimension(child.getMinPosition(), child.getMaxPosition());
+        CuboidDimension p = new CuboidDimension(parent.getDimension().getMinPosition(), parent.getDimension().getMaxPosition());
+        CuboidDimension c = new CuboidDimension(child.getDimension().getMinPosition(), child.getDimension().getMaxPosition());
         return p.getMinX() > c.getMinX()
                 && p.getMinY() > c.getMinY()
                 && p.getMinZ() > c.getMinZ()
@@ -158,8 +157,8 @@ public class CuboidDimension implements Serializable, CuboidDimensional {
      * @return True if the two CuboidDimensionals overlap each other
      */
     public static boolean overlaps(CuboidDimensional dimensionalA, CuboidDimensional dimensianalB) {
-        CuboidDimension p = new CuboidDimension(dimensionalA.getMinPosition(), dimensionalA.getMaxPosition());
-        CuboidDimension c = new CuboidDimension(dimensianalB.getMinPosition(), dimensianalB.getMaxPosition());
+        CuboidDimension p = new CuboidDimension(dimensionalA.getDimension().getMinPosition(), dimensionalA.getDimension().getMaxPosition());
+        CuboidDimension c = new CuboidDimension(dimensianalB.getDimension().getMaxPosition(), dimensianalB.getDimension().getMaxPosition());
         
         return p.getMaxX() >= c.getMinX() && p.getMinX() <= c.getMaxX()
                 && p.getMaxY() >= c.getMinY() && p.getMinY() <= c.getMaxY()

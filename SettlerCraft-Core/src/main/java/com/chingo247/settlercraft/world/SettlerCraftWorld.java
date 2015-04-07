@@ -46,8 +46,6 @@ public interface SettlerCraftWorld extends com.sk89q.worldedit.world.World {
     
     public Structure createStructure(StructurePlan plan, Vector position, Direction direction) throws StructureException;
     
-    public Structure getStructure(long id);
-    
     public List<StructureRestriction> getStructureRestrictions();
     
     
