@@ -54,7 +54,6 @@ public class PlanListener implements Listener {
 
     @EventHandler
     public void onPlayerUsePlan(final PlayerInteractEvent pie) {
-        System.out.println("On player interact!");
         if(pie.getItem() == null) return;
         if(pie.getClickedBlock() == null) return;
         
@@ -69,9 +68,7 @@ public class PlanListener implements Listener {
         Block block = pie.getClickedBlock();
         if(block !=  null) { 
             Location loc = block.getLocation();
-            System.out.println("Location: " + loc);
-            System.out.println("[PlanListener]: Player uses structure plan!");
-            placeHandler.handle(stack, player, player.getWorld(), new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
+            placeHandler.handle(stack, player, SettlerCraft.getInstance().getWorld(player.getWorld().getName()), new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
         }
     }
 

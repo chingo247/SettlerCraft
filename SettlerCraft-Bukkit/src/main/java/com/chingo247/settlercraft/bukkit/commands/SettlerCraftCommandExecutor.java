@@ -26,7 +26,6 @@ package com.chingo247.settlercraft.bukkit.commands;
 
 import com.chingo247.settlercraft.bukkit.BKPermissionManager;
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
-import com.chingo247.settlercraft.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.exception.CommandException;
 import com.chingo247.settlercraft.menu.CategoryMenu;
 import com.chingo247.xcore.platforms.bukkit.BukkitPlayer;
@@ -45,7 +44,7 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
 
     private static final int MAX_LINES = 10;
     private final SettlerCraftPlugin settlerCraft;
-    private final StructureDAO structureDAO = new StructureDAO();
+//    private final StructureDAO structureDAO = new StructureDAO();
 
     public SettlerCraftCommandExecutor(SettlerCraftPlugin settlerCraft) {
         this.settlerCraft = settlerCraft;

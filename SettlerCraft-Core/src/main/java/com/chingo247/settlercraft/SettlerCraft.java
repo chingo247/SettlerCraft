@@ -266,6 +266,12 @@ public class SettlerCraft {
         return economyProvider;
     }
 
+    public ExecutorService getExecutor() {
+        return service;
+    }
+
+    
+    
     public MenuAPI getMenuAPI() {
         return menuAPI;
     }

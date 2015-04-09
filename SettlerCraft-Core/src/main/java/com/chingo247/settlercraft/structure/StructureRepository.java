@@ -23,84 +23,193 @@
  */
 package com.chingo247.settlercraft.structure;
 
-import com.chingo247.settlercraft.SettlerCraft;
+import com.arangodb.ArangoDriver;
+import com.arangodb.ArangoException;
+import com.arangodb.ErrorNums;
+import com.arangodb.entity.CursorEntity;
+import com.arangodb.entity.DocumentEntity;
+import com.arangodb.entity.EdgeDefinitionEntity;
+import com.arangodb.util.MapBuilder;
+import com.chingo247.settlercraft.persistence.ArangoDB;
+import com.chingo247.settlercraft.persistence.graph.documents.StructureDocument;
 import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
 import com.chingo247.settlercraft.regions.CuboidDimensional;
 import com.chingo247.settlercraft.world.SettlerCraftWorld;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.orient.OrientGraph;
-import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
-import java.io.File;
+import com.sk89q.worldedit.Vector;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Handles all database operations regarding structures
+ *
  * @author Chingo
  */
 public class StructureRepository {
-    
-    private final OrientGraphFactory factory;
-    
+
+//    private final OrientGraphFactory graphFactory;
+    private final StructureFactory structureFactory;
+    private final ArangoDriver ad;
+    private static final String WORLD_GRAPH = "sc_world";
+    private static final String STRUCTURE_COLLECTION = "Structures";
+
     public StructureRepository() {
-        File settlercraftDir = SettlerCraft.getInstance().getWorkingDirectory();
-        String url = "plocal:" + settlercraftDir.getAbsolutePath() + "/database";
+//        File settlercraftDir = SettlerCraft.getInstance().getWorkingDirectory();
+        ArangoDB db;
+        try {
+            db = new ArangoDB(8529, "localhost", null, null, "SettlerCraft");
+        } catch (ArangoException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        this.ad = db.getDriver();
         
-        OrientGraph graph = new OrientGraph(url);
-        graph.shutdown();
         
-        this.factory = new OrientGraphFactory(url).setupPool(1, 10);
-    }
-    
-    public Structure find(long id) {
-        throw new UnsupportedOperationException("Not supported yet");
-    }
-    
-    public Structure save(Structure structure) {
-        if(structure instanceof StructureComplex) {
+        try {
+            if(!db.getGraphHelper().hasGraph(WORLD_GRAPH)) {
+                List<EdgeDefinitionEntity> edgeDefinitions = new ArrayList<>();
+                edgeDefinitions.add(createSubstructureDefinition());
+                List<String> orphanCollections = new ArrayList<>();
+
+                
+                db.createNumericKeyCollection(STRUCTURE_COLLECTION);
+                ad.createGraph(WORLD_GRAPH, edgeDefinitions, orphanCollections, true);
+            }
             
+            
+        } catch (ArangoException ex) {
+            Logger.getLogger(StructureRepository.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        this.structureFactory = new StructureFactory();
+    }
+
+    private EdgeDefinitionEntity createSubstructureDefinition() {
+        EdgeDefinitionEntity substructureDefinition = new EdgeDefinitionEntity();
+        substructureDefinition.setCollection("SubStructures");
+        
+        List<String> from = new ArrayList<>();
+        from.add(STRUCTURE_COLLECTION);
+        substructureDefinition.setFrom(from);
+
+        List<String> to = new ArrayList<>();
+        to.add(STRUCTURE_COLLECTION);
+        substructureDefinition.setTo(to);
+        return substructureDefinition;
+    }
+    
+    Structure save(Structure structure) {
+        if (structure instanceof ComplexStructure) {
+
         } else if (structure instanceof SimpleStructure) {
-            
+            return saveSimple((SimpleStructure) structure);
         } else {
             throw new AssertionError("Can't handle structure of type: " + structure.getClass());
         }
         return structure;
     }
-    
-    
-    
-    private void saveComplex(StructureComplex structureComplex) {
-        
-    }
-    
-    private void saveSimple(SimpleStructure simpleStructure) {
-        
-    }
-    
-    public void delete(Structure structure) {
-        delete(structure.getId());
-    }
-    
-    public void delete(long id) {
+
+    private void saveComplex(ComplexStructure structureComplex) {
         
     }
 
-    public boolean overlaps(CuboidDimensional cuboidDimensional, SettlerCraftWorld world) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private Structure saveSimple(SimpleStructure simpleSt) {
+        try {
+            CuboidDimension d = simpleSt.getDimension();
+            StructureDocument entity = new StructureDocument(
+                    simpleSt.getId() != null ? String.valueOf(simpleSt.getId()) : null, 
+                    simpleSt.getName(),
+                    simpleSt.getWorld().getName(),
+                    simpleSt.getWorld().getUUID().toString(), 
+                    simpleSt.getDirection(),
+                    d.getMinX(), d.getMinY(), d.getMinZ(), d.getMaxX(), d.getMaxY(), d.getMaxZ());
+            
+            DocumentEntity<StructureDocument> sd;
+            if(simpleSt.getId() == null) {
+                sd = ad.graphCreateVertex(WORLD_GRAPH, STRUCTURE_COLLECTION, entity, true);
+            } else {
+                sd = ad.graphUpdateVertex(WORLD_GRAPH, STRUCTURE_COLLECTION, String.valueOf(simpleSt.getId()), entity, Boolean.TRUE);
+            }
+            return structureFactory.createSimple(sd.getEntity());
+        } catch (ArangoException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public void delete(Structure structure) {
+        delete(structure.getId());
+    }
+
+    public boolean delete(long id) {
+        try {
+            ad.graphDeleteVertex(WORLD_GRAPH, STRUCTURE_COLLECTION, String.valueOf(id), true);
+            return true;
+        } catch (ArangoException ex) {
+            if(ex.getErrorNumber() != ErrorNums.ERROR_ARANGO_DOCUMENT_NOT_FOUND) {
+                Logger.getLogger(StructureRepository.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return false;
+        }
     }
     
-    protected Vertex formVertex(Structure structure, OrientGraph graph) {
-        Vertex vertex = graph.addVertex(null);
-        vertex.setProperty("id", structure.getId());
-        vertex.setProperty("name", structure.getName());
-        vertex.setProperty("direction", structure.getDirection().name());
-        
-        CuboidDimension cb = structure.getDimension();
-        vertex.setProperty("minX", cb.getDimension().getMinX());
-        vertex.setProperty("minY", cb.getDimension().getMinY());
-        vertex.setProperty("minZ", cb.getDimension().getMinZ());
-        vertex.setProperty("maxX", cb.getDimension().getMaxX());
-        vertex.setProperty("maxY", cb.getDimension().getMaxY());
-        vertex.setProperty("maxZ", cb.getDimension().getMaxZ());
-        return vertex;
+    public SimpleStructure findSimple(long id) {
+        try {
+            DocumentEntity<StructureDocument> document = ad.graphGetVertex(WORLD_GRAPH, STRUCTURE_COLLECTION, String.valueOf(id), StructureDocument.class);
+            return structureFactory.createSimple(document.getEntity());
+        } catch (ArangoException ex) {
+            if(ex.getErrorNumber() != ErrorNums.ERROR_ARANGO_DOCUMENT_NOT_FOUND) {
+                Logger.getLogger(StructureRepository.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return null;
     }
-  
+    
+    public ComplexStructure findComplex(long id) {
+        throw new UnsupportedOperationException("Not supported yet");
+    }
+
+    public boolean overlaps(CuboidDimensional cuboidDimensional, SettlerCraftWorld world) throws ArangoException {
+        CuboidDimension cd = cuboidDimensional.getDimension();
+        Map<String,Object> map = new MapBuilder()
+                .put("minX", cd.getMinX())
+                .put("minY", cd.getMinY())
+                .put("minZ", cd.getMinZ())
+                .put("maxX", cd.getMaxX())
+                .put("maxY", cd.getMaxY())
+                .put("maxZ", cd.getMaxZ())
+                .put("world", "test")
+                .put("state", State.DELETED)
+                .get();
+                
+        String query = "FOR s IN " + STRUCTURE_COLLECTION + " "
+                + "FILTER s.maxX >= @minX && s.minX <= @maxX "
+                + "&& s.maxY >= @minY && s.minY <= @maxY "
+                + "&& s.maxZ >= @minZ && s.minZ <= @maxZ "
+                + "&& s.world == @world "
+                + "&& s.state != @state "
+                + "LIMIT 1 "
+                + "RETURN s";
+        CursorEntity<StructureDocument> cursor = ad.executeQuery(query,map,  StructureDocument.class, false, 1);
+        return cursor.getCount() > 0;    
+    }
+    
+    public static void main(String[] args) {
+        StructureRepository repository = new StructureRepository();
+      
+        try {  
+            repository.overlaps(new CuboidDimension(Vector.ZERO, Vector.ONE), null);
+            CursorEntity<StructureDocument> cursor = repository.ad.executeSimpleAll("Structures", 0, 10, StructureDocument.class);
+            
+            Iterator<StructureDocument> it = cursor.iterator();
+            while(it.hasNext()) {
+                StructureDocument entity = it.next();
+            }
+            
+        } catch (ArangoException ex) {
+            Logger.getLogger(StructureRepository.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
 }

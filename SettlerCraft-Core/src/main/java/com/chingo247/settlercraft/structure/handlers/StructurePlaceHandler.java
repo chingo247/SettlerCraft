@@ -123,12 +123,11 @@ public class StructurePlaceHandler {
                     }
                     player.print(ChatColors.RED + "Plan: " + planId + "doesn't exist!");
                     int amount = inventory.getAmount(planItem);
-                    System.out.println("Total amount of invalid plans: " + amount);
                     double value = getValue(planItem);
                     if (value > 0.0d) {
                         economyProvider.give(player.getUniqueId(), value * amount);
                         iPlayer.getInventory().removeItem(planItem);
-                        player.print(ChatColor.RED + "StructurePlan was invalid...");
+                        
                         player.print(ChatColor.RED + "Invalid StructurePlans have been removed and you've been refunded: " + (value * amount));
                     }
 

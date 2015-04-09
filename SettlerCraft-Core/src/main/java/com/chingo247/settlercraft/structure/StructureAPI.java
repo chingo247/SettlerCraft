@@ -5,6 +5,7 @@
  */
 package com.chingo247.settlercraft.structure;
 
+import com.arangodb.ArangoException;
 import com.chingo247.settlercraft.SettlerCraft;
 import com.chingo247.settlercraft.world.Direction;
 import com.chingo247.settlercraft.event.EventManager;
@@ -61,7 +62,7 @@ public abstract class StructureAPI {
     private final Lock loadLock = new ReentrantLock();
     private final IPlugin plugin;
     private final ExecutorService executor;
-    private final StructureRepository repository;
+    private final StructureRepository structureRepository;
 
     private boolean isLoadingPlans = false;
 
@@ -81,7 +82,7 @@ public abstract class StructureAPI {
 
         // Now register the GlobalPlanManager
         this.globalPlanManager = new GlobalPlanManager(getPlanDirectory());
-        this.repository = new StructureRepository();
+        this.structureRepository = new StructureRepository();
     }
 
     public void load() {
@@ -138,11 +139,11 @@ public abstract class StructureAPI {
     }
 
     public Structure createUninitizalizedStructure(SettlerCraftWorld world, StructurePlan plan, Direction direction, Vector position) throws StructureException {
+        Preconditions.checkNotNull(world);
         Preconditions.checkNotNull(plan);
         Preconditions.checkNotNull(direction);
         Preconditions.checkNotNull(position);
 
-        System.out.println("Position is " + position);
         if (plan instanceof SubStructuredPlan) {
             System.out.println("Structure is SubstructurePlan!");
             return null;
@@ -150,7 +151,12 @@ public abstract class StructureAPI {
             System.out.println("Structure is StructurePlan!");
             Placement placement = plan.getPlacement();
 
-            checkLocation(world, placement, position);
+            try {
+                checkLocation(world, placement, position);
+            } catch (ArangoException ex) {
+                Logger.getLogger(StructureAPI.class.getName()).log(Level.SEVERE, null, ex);
+                return null;
+            }
 
             Vector min = position;
             Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getDimension().getMaxPosition());
@@ -161,8 +167,8 @@ public abstract class StructureAPI {
 
             Structure structure = new SimpleStructure(plan.getName(), world, direction, new CuboidDimension(min, max));
 
-            structure = repository.save(structure); // store and get the ID
-            File structureDir = new File(getStructuresDirectory(world.getName()), String.valueOf(structure));
+            structure = structureRepository.save(structure); // store and get the ID
+            File structureDir = new File(getStructuresDirectory(world.getName()), String.valueOf(structure.getId()));
 
             // Overwrite old one if exists...
             if (structureDir.exists()) {
@@ -190,7 +196,7 @@ public abstract class StructureAPI {
         }
     }
 
-    private void checkLocation(SettlerCraftWorld world, Placement p, Vector position) throws StructureException {
+    private void checkLocation(SettlerCraftWorld world, Placement p, Vector position) throws StructureException, ArangoException {
         IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getUUID());
         ILocation l = w.getSpawn();
         Vector spawnPos = new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ());
@@ -209,7 +215,7 @@ public abstract class StructureAPI {
             throw new StructureException("Structure overlaps the world's spawn...");
         }
 
-        if (repository.overlaps(p.getDimension(), world)) {
+        if (structureRepository.overlaps(p.getDimension(), world)) {
             throw new StructureException("Structure overlaps another structure...");
         }
     }

@@ -28,7 +28,6 @@ import com.chingo247.settlercraft.bukkit.commands.SettlerCraftCommandExecutor;
 import com.chingo247.settlercraft.bukkit.listener.PlanListener;
 import com.chingo247.settlercraft.exception.SettlerCraftException;
 import com.chingo247.settlercraft.persistence.HSQLServer;
-import com.chingo247.settlercraft.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.menu.CategoryMenu;
 import com.chingo247.settlercraft.menu.plan.StructurePlanMenuReader;
 import com.chingo247.xcore.core.IPlugin;
@@ -161,7 +160,7 @@ public class SettlerCraftPlugin extends JavaPlugin implements IPlugin {
     public void onDisable() {
         Bukkit.getConsoleSender().sendMessage(SettlerCraftPlugin.MSG_PREFIX + " Shutting down...");
         service.shutdown();
-        HibernateUtil.shutdown();
+//        HibernateUtil.shutdown();
     }
 
 

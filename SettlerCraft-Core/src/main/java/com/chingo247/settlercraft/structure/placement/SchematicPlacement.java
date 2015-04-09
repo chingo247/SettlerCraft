@@ -273,7 +273,7 @@ public class SchematicPlacement extends DirectionalPlacement {
 
     @Override
     public CuboidDimension getDimension() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new CuboidDimension(Vector.ZERO, new Vector(schematic.getWidth(), schematic.getHeight(), schematic.getLength()));
     }
 
 }

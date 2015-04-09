@@ -91,15 +91,13 @@ public class SchematicManager {
 
     public synchronized void load(File directory) {
         Preconditions.checkArgument(directory.isDirectory());
-        System.out.println("Searching directory for schematics in: " + directory.getAbsolutePath());
+        System.out.println("Searching for schematics in: " + directory.getAbsolutePath());
 
         ForkJoinPool pool;
         Iterator<File> fit = FileUtils.iterateFiles(directory, new String[]{"schematic"}, true);
         if (fit.hasNext()) {
-            System.out.println("Has schematics!");
             pool = new ForkJoinPool(); // only create the pool if we have schematics
         } else {
-            System.out.println("No schematics!");
             return;
         }
 
@@ -107,7 +105,6 @@ public class SchematicManager {
         List<SchematicProcessor> tasks = new ArrayList<>();
         while (fit.hasNext()) {
             File schematicFile = fit.next();
-            System.out.println("Loading schematic: " + schematicFile.getAbsolutePath());
             try {
                 long checksum = FileUtils.checksumCRC32(schematicFile);
                 // Only load schematic data that wasn't yet loaded...
@@ -143,7 +140,6 @@ public class SchematicManager {
         public SchematicProcessor(File schematic) {
             Preconditions.checkNotNull(schematic);
             Preconditions.checkArgument(schematic.exists());
-            System.out.println("SchematicFile: " + schematic.getAbsolutePath());
             this.schematicFile = schematic;
         }
 

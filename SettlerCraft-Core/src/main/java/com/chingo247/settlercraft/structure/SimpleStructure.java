@@ -28,12 +28,15 @@ import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
 import com.chingo247.settlercraft.structure.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.structure.construction.options.Options;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structure.plan.StructurePlanReader;
 import com.chingo247.settlercraft.world.Direction;
 import com.chingo247.settlercraft.world.SettlerCraftWorld;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.entity.Player;
+import java.io.File;
 import java.util.Objects;
 import java.util.UUID;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
@@ -50,7 +53,7 @@ public class SimpleStructure implements Structure {
     private State state;
     private ConstructionStatus constructionStatus;
 
-    public SimpleStructure(Long id, String name, SettlerCraftWorld world, Direction direction, CuboidDimension dimension) {
+    SimpleStructure(Long id, String name, SettlerCraftWorld world, Direction direction, CuboidDimension dimension) {
         this.id = id;
         this.name = name;
         this.world = world;
@@ -93,38 +96,45 @@ public class SimpleStructure implements Structure {
 
     @Override
     public void build(Player player, Options options, boolean force) {
-        build(getSession(player.getUniqueId()), options, force);
+        ConstructionManager.getInstance().build(this, player.getUniqueId(), getSession(player.getUniqueId()), options, force);
     }
 
     @Override
     public void build(EditSession session, Options options, boolean force) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        ConstructionManager.getInstance().build(this, PlayerEntry.CONSOLE.getUUID(), session, options, force);
     }
 
     @Override
     public void demolish(Player player, Options options, boolean force) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        ConstructionManager.getInstance().demolish(this, player.getUniqueId(), getSession(player.getUniqueId()), options, force);
     }
 
     @Override
     public void demolish(EditSession session, Options options, boolean force) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        ConstructionManager.getInstance().demolish(this, PlayerEntry.CONSOLE.getUUID(), session, options, force);
     }
 
     @Override
     public void stop(boolean force) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        ConstructionManager.getInstance().stop(this, force);
     }
 
     @Override
     public StructurePlan getPlan() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        StructureAPI structureAPI = SettlerCraft.getInstance().getStructureAPI();
+        File planFile = new File(structureAPI.getStructuresDirectory(world.getName()), String.valueOf(id));
+        StructurePlanReader reader = new StructurePlanReader();
+        StructurePlan plan = reader.readFile(planFile);
+        return plan;
     }
 
     @Override
     public void save() {
         StructureRepository repository = new StructureRepository();
-        repository.save(this);
+        Structure structure = repository.save(this);
+        if(this.getId() == null) {
+            this.id = structure.getId();
+        }
     }
 
     @Override

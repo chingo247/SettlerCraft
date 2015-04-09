@@ -23,7 +23,15 @@
  */
 package com.chingo247.settlercraft.structure;
 
-import com.tinkerpop.blueprints.Vertex;
+//import com.tinkerpop.blueprints.Vertex;
+
+import com.chingo247.settlercraft.SettlerCraft;
+import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
+import com.chingo247.settlercraft.persistence.graph.documents.StructureDocument;
+import com.chingo247.settlercraft.world.Direction;
+import com.chingo247.settlercraft.world.SettlerCraftWorld;
+import com.sk89q.worldedit.Vector;
+
 
 /**
  *
@@ -34,11 +42,18 @@ public class StructureFactory {
     StructureFactory() {
     }
     
-    public SimpleStructure createSimple(Vertex v) {
-        throw new AssertionError("Not supported");
+    public SimpleStructure createSimple(StructureDocument v) {
+        Long id = v.getKey() != null ? Long.parseLong(v.getKey()) : null;
+        String name = v.getName();
+        SettlerCraftWorld world = SettlerCraft.getInstance().getWorld(v.getWorld());
+        Direction direction = Direction.match(v.getDirection());
+        Vector min = new Vector(v.getMinX(), v.getMinY(), v.getMinZ());
+        Vector max = new Vector(v.getMaxX(), v.getMaxY(), v.getMaxZ());
+        CuboidDimension dimension = new CuboidDimension(min, max);
+        return new SimpleStructure(id, name, world, direction, dimension);
     }
     
-    public StructureComplex createComplex(Vertex v) {
+    public ComplexStructure createComplex(StructureDocument v) {
         throw new AssertionError("Not supported");
     }
     

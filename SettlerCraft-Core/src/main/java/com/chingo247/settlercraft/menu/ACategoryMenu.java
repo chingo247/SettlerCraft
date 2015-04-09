@@ -131,7 +131,6 @@ public abstract class ACategoryMenu {
         if (i == 0) {
             throw new IllegalArgumentException("Can't set the default slot '0'");
         }
-        System.out.println("Set slot: " + i + " as " + slot.getClass().getSimpleName());
         this.view.setSlot(i, slot);
     }
 
@@ -244,7 +243,6 @@ public abstract class ACategoryMenu {
     }
 
     private void resetInventory() {
-        System.out.println("Reset Inventory");
         inventory.clear();
         IColor colors = getColor();
         for (int i = 0; i < MENU_SIZE; i++) {
@@ -280,11 +278,9 @@ public abstract class ACategoryMenu {
                             );
                         }
                     }
-                    System.out.println("Set action slot at: " + i);
                     inventory.setItem(i, actionSlot.getIcon());
                 } else if (slot instanceof CategorySlot) {
                     CategorySlot cs = (CategorySlot) slot;
-                    System.out.println("Set category slot at: " + i);
                     inventory.setItem(i, cs.getIcon());
                 } else if (slot instanceof ItemSlot) {
                     view.setSlot(i, null);
@@ -295,7 +291,6 @@ public abstract class ACategoryMenu {
 
     private synchronized void updateMenu(String newCategory, int newPage, boolean checkNoUpdate) {
 
-        System.out.println("Update menu: " + newCategory + ", " + newPage);
         
 //        // Get the new category
 //        if (checkNoUpdate && newCategory.equals(currentCategory) && newPage == currentPage) {
@@ -308,14 +303,11 @@ public abstract class ACategoryMenu {
             currentPage = newPage;
         }
 
-        System.out.println("Category: " + currentCategory + " , " + currentPage);
         
         resetInventory();
 
         // Fill Inventory with items
-        System.out.println("Fetching items...");
         List<TradeItem> tradeItems = getItems(currentCategory, currentPage, player);
-        System.out.println("Items fetched: " + tradeItems.size());
         Iterator<TradeItem> it = tradeItems.iterator();
 
         
@@ -357,7 +349,6 @@ public abstract class ACategoryMenu {
             player.sendMessage(ChatColor.YELLOW + "[" + title + "]: " + ChatColor.RESET + " Your balance is " + ChatColor.RED + balance);
         }
 
-        System.out.println("MenuView, slots: " + view.getSlots().size());
         
         updateMenu(currentCategory, currentPage, false);
         player.openInventory(inventory);
@@ -410,9 +401,6 @@ public abstract class ACategoryMenu {
                     && stack.getAmount() > 0) {
 
                 MenuSlot s = view.getSlot(slot);
-                System.out.println("Clicked: " + stack.getName());
-                System.out.println("Clicked Slot: " + slot);
-                System.out.println("Type: " + s.getClass().getSimpleName());
 
                 // Slot is item slot
                 if (s instanceof ItemSlot) {
@@ -445,7 +433,6 @@ public abstract class ACategoryMenu {
                     }
                 } else if (s instanceof CategorySlot) {
                     CategorySlot categorySlot = (CategorySlot) s;
-                    System.out.println("Clicked: " + categorySlot.getName());
                     updateMenu(categorySlot.getName(), currentPage, true);
                 }
             }

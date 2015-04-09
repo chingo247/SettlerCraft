@@ -29,8 +29,33 @@ package com.chingo247.settlercraft.world;
  * @author Chingo
  */
 public enum Direction {
-    NORTH,
-    EAST,
-    SOUTH,
-    WEST
+    NORTH(0),
+    EAST(1),
+    SOUTH(2),
+    WEST(3);
+
+    private int id;
+    
+    private Direction(int direction) {
+        this.id = direction;
+    }
+
+    public int getDirectionId() {
+        return id;
+    }
+    
+    
+    public static Direction match(int direction) {
+        switch(direction) {
+            case 0: return NORTH;
+            case 1: return EAST;
+            case 2: return SOUTH;
+            case 3: return WEST;
+            default: throw new AssertionError("Unreachable");
+        }
+    }
+    
+    
+    
+    
 }

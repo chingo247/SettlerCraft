@@ -52,9 +52,7 @@ public class CategoryMenu extends ACategoryMenu {
     
     
     public void addItem(CategoryTradeItem tradeItem) {
-        System.out.println("Category: " + tradeItem.getCategory());
         String category = matchCategoryForName(tradeItem.getCategory());
-        System.out.println("Matched Category: " + category);
         List<CategoryTradeItem> itemList = items.get(category);
         if(itemList == null) {
             itemList = Lists.newArrayList();
@@ -63,7 +61,6 @@ public class CategoryMenu extends ACategoryMenu {
         items.get(category).add(tradeItem);
         
         
-        System.out.println("Adding items: " + items.get(category).size());
     }
     
     public List<CategoryTradeItem> getItemsForCategoryName(String category) {
@@ -90,14 +87,11 @@ public class CategoryMenu extends ACategoryMenu {
             tradeItems = items.get(category);
         }
         
-        System.out.println("Total inventory: " + getTotalInventorySize());
-        System.out.println("TradeItems: " + tradeItems.size());
         
         Preconditions.checkNotNull(tradeItems); // May NEVER be null at this point
         int slotsToFill = getFreeSlots();
         int min = Math.min(page * slotsToFill, tradeItems.size());
         int max = Math.min(min + slotsToFill, tradeItems.size());
-        System.out.println("category '"+category+"' from " + min + " to " + max);
         return tradeItems.subList(min, max);
     }
 
