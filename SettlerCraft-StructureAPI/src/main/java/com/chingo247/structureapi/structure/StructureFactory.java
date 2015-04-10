@@ -25,11 +25,11 @@ package com.chingo247.structureapi.structure;
 
 //import com.tinkerpop.blueprints.Vertex;
 
-import com.chingo247.structureapi.SettlerCraft;
+import com.chingo247.proxyplatform.core.IWorld;
+import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.regions.CuboidDimension;
 import com.chingo247.structureapi.persistence.graph.documents.StructureDocument;
 import com.chingo247.structureapi.world.Direction;
-import com.chingo247.structureapi.world.SettlerCraftWorld;
 import com.sk89q.worldedit.Vector;
 
 
@@ -45,7 +45,7 @@ public class StructureFactory {
     public SimpleStructure createSimple(StructureDocument v) {
         Long id = v.getKey() != null ? Long.parseLong(v.getKey()) : null;
         String name = v.getName();
-        SettlerCraftWorld world = SettlerCraft.getInstance().getWorld(v.getWorld());
+        IWorld world = SettlerCraft.getInstance().getPlatform().getServer().getWorld(v.getWorld());
         Direction direction = Direction.match(v.getDirection());
         Vector min = new Vector(v.getMinX(), v.getMinY(), v.getMinZ());
         Vector max = new Vector(v.getMaxX(), v.getMaxY(), v.getMaxZ());

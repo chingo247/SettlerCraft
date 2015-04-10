@@ -23,7 +23,7 @@
  */
 package com.chingo247.structureapi.structure.construction.asyncworldedit;
 
-import com.chingo247.structureapi.structure.placement.Placement;
+import com.chingo247.structureapi.plan.placement.Placement;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;

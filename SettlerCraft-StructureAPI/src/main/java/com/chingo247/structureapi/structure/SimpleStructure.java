@@ -23,16 +23,18 @@
  */
 package com.chingo247.structureapi.structure;
 
-import com.chingo247.structureapi.SettlerCraft;
+import com.chingo247.proxyplatform.core.IWorld;
+import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.regions.CuboidDimension;
 import com.chingo247.structureapi.structure.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.structureapi.structure.construction.options.Options;
-import com.chingo247.structureapi.structure.plan.StructurePlan;
-import com.chingo247.structureapi.structure.plan.StructurePlanReader;
+import com.chingo247.structureapi.plan.StructurePlan;
+import com.chingo247.structureapi.plan.StructurePlanReader;
+import com.chingo247.structureapi.util.WorldEditUtil;
 import com.chingo247.structureapi.world.Direction;
-import com.chingo247.structureapi.world.SettlerCraftWorld;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.util.Objects;
 import java.util.UUID;
@@ -47,13 +49,13 @@ public class SimpleStructure implements Structure {
 
     private Long id;
     private String name;
-    private SettlerCraftWorld world;
+    private IWorld world;
     private Direction direction;
     private CuboidDimension dimension;
     private State state;
     private ConstructionStatus constructionStatus;
 
-    SimpleStructure(Long id, String name, SettlerCraftWorld world, Direction direction, CuboidDimension dimension) {
+    SimpleStructure(Long id, String name, IWorld world, Direction direction, CuboidDimension dimension) {
         this.id = id;
         this.name = name;
         this.world = world;
@@ -65,7 +67,7 @@ public class SimpleStructure implements Structure {
     
     
 
-    SimpleStructure(String name, SettlerCraftWorld world, Direction direction, CuboidDimension dimension) {
+    SimpleStructure(String name, IWorld world, Direction direction, CuboidDimension dimension) {
         this(null, name, world, direction, dimension);
     }
 
@@ -80,8 +82,8 @@ public class SimpleStructure implements Structure {
     }
 
     @Override
-    public SettlerCraftWorld getWorld() {
-        return world;
+    public World getWorld() {
+        return WorldEditUtil.getWorld(world.getName());
     }
 
     @Override
@@ -121,7 +123,7 @@ public class SimpleStructure implements Structure {
 
     @Override
     public StructurePlan getPlan() {
-        StructureAPI structureAPI = SettlerCraft.getInstance().getStructureAPI();
+        StructureAPI structureAPI = StructureAPI.getInstance();
         File planFile = new File(structureAPI.getStructuresDirectory(world.getName()), String.valueOf(id));
         StructurePlanReader reader = new StructurePlanReader();
         StructurePlan plan = reader.readFile(planFile);
@@ -175,14 +177,14 @@ public class SimpleStructure implements Structure {
     }
 
     AsyncEditSession getSession(UUID playerId) {
-        StructureAPI structureAPI = SettlerCraft.getInstance().getStructureAPI();
-
-        Player ply = structureAPI.getPlayer(playerId);
+        Player ply = SettlerCraft.getInstance().getPlayer(playerId);
+        World w = SettlerCraft.getInstance().getWorld(world.getUUID());
+        
         AsyncEditSession editSession;
         if (ply == null) {
-            editSession = (AsyncEditSession) AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(world, -1);
+            editSession = (AsyncEditSession) AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(w, -1);
         } else {
-            editSession = (AsyncEditSession) AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(world, -1, ply);
+            editSession = (AsyncEditSession) AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(w, -1, ply);
         }
         return editSession;
     }

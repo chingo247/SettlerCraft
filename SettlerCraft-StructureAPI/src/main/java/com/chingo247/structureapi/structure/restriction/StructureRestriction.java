@@ -25,7 +25,7 @@ package com.chingo247.structureapi.structure.restriction;
 
 import com.chingo247.settlercraft.core.regions.CuboidDimensional;
 import com.chingo247.structureapi.structure.exception.StructureException;
-import com.chingo247.structureapi.structure.placement.Placement;
+import com.chingo247.structureapi.plan.placement.Placement;
 import com.chingo247.structureapi.world.SettlerCraftWorld;
 
 /**

@@ -25,8 +25,8 @@ package com.chingo247.structureapi.world;
 
 import com.chingo247.structureapi.structure.Structure;
 import com.chingo247.structureapi.structure.exception.StructureException;
-import com.chingo247.structureapi.structure.placement.Placement;
-import com.chingo247.structureapi.structure.plan.StructurePlan;
+import com.chingo247.structureapi.plan.placement.Placement;
+import com.chingo247.structureapi.plan.StructurePlan;
 import com.chingo247.structureapi.structure.restriction.StructureRestriction;
 import com.sk89q.worldedit.Vector;
 import java.util.List;

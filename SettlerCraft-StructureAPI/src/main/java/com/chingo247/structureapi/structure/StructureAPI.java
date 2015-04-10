@@ -5,40 +5,41 @@
  */
 package com.chingo247.structureapi.structure;
 
+import com.chingo247.menuapi.menu.CategoryMenu;
 import com.chingo247.proxyplatform.core.APlatform;
 import com.chingo247.proxyplatform.core.ILocation;
 import com.chingo247.proxyplatform.core.IPlugin;
 import com.chingo247.proxyplatform.core.IWorld;
-import com.chingo247.structureapi.SettlerCraft;
+import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.structureapi.world.Direction;
 import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.core.regions.CuboidDimension;
+import com.chingo247.structureapi.exception.StructureAPIException;
 import com.chingo247.structureapi.structure.event.StructureCreateEvent;
 import com.chingo247.structureapi.structure.exception.ElementValueException;
 import com.chingo247.structureapi.structure.exception.StructureException;
-import com.chingo247.structureapi.structure.placement.event.PlacementHandlerRegisterEvent;
-import com.chingo247.structureapi.structure.plan.exception.PlacementException;
-import com.chingo247.structureapi.structure.placement.Placement;
-import com.chingo247.structureapi.structure.placement.SchematicPlacement;
-import com.chingo247.structureapi.structure.placement.handlers.PlacementHandler;
-import com.chingo247.structureapi.structure.placement.handlers.SchematicPlacementHandler;
-import com.chingo247.structureapi.structure.plan.GlobalPlanManager;
-import com.chingo247.structureapi.structure.plan.StructurePlan;
-import com.chingo247.structureapi.structure.plan.StructurePlanManager;
-import com.chingo247.structureapi.structure.plan.SubStructuredPlan;
-import com.chingo247.structureapi.structure.plan.document.PlacementElement;
+import com.chingo247.structureapi.menu.StructurePlanMenu;
+import com.chingo247.structureapi.plan.placement.event.PlacementHandlerRegisterEvent;
+import com.chingo247.structureapi.plan.exception.PlacementException;
+import com.chingo247.structureapi.plan.placement.Placement;
+import com.chingo247.structureapi.plan.placement.SchematicPlacement;
+import com.chingo247.structureapi.plan.placement.handlers.PlacementHandler;
+import com.chingo247.structureapi.plan.placement.handlers.SchematicPlacementHandler;
+import com.chingo247.structureapi.plan.GlobalPlanManager;
+import com.chingo247.structureapi.plan.StructurePlan;
+import com.chingo247.structureapi.plan.StructurePlanManager;
+import com.chingo247.structureapi.plan.SubStructuredPlan;
+import com.chingo247.structureapi.plan.document.PlacementElement;
 import com.chingo247.structureapi.util.PlacementUtil;
-import com.chingo247.structureapi.world.SettlerCraftWorld;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -49,29 +50,27 @@ import java.util.logging.Logger;
  *
  * @author Chingo
  */
-public abstract class StructureAPI {
+public class StructureAPI {
 
     public static final String STRUCTURE_PLAN_FILE_NAME = "structureplan.xml";
     public static final String PLUGIN_NAME = "SettlerCraft";
     public static final String PLANS_DIRECTORY = "plans";
     private static final Map<String, Map<String, PlacementHandler>> handlers = Maps.newHashMap();
-
     private final StructurePlanManager globalPlanManager;
     private final APlatform platform;
     private final Lock loadLock = new ReentrantLock();
-    private final IPlugin plugin;
     private final ExecutorService executor;
+    private static StructureAPI instance;
+    private StructurePlanMenu planMenu;
+    
     private final StructureRepository structureRepository;
-
     private boolean isLoadingPlans = false;
+    private IPlugin plugin;
 
-    protected StructureAPI(APlatform platform, IPlugin plugin, ExecutorService service) {
-        Preconditions.checkNotNull(platform);
-        Preconditions.checkNotNull(plugin);
-        Preconditions.checkNotNull(service);
-        this.executor = service;
-        this.plugin = plugin;
-        this.platform = platform;
+    private StructureAPI() {
+        this.executor = SettlerCraft.getInstance().getExecutor();
+        this.platform = SettlerCraft.getInstance().getPlatform();
+       
         // Register Handlers first...
 //        registerHandler(new GeneratedCuboidHandler());
 //        registerHandler(new GeneratedCylinderHandler());
@@ -82,6 +81,26 @@ public abstract class StructureAPI {
         // Now register the GlobalPlanManager
         this.globalPlanManager = new GlobalPlanManager(getPlanDirectory());
         this.structureRepository = new StructureRepository();
+    }
+    
+    public void registerMenu(CategoryMenu menu) throws StructureAPIException {
+        if(planMenu != null) {
+            throw new StructureAPIException("Already registered a planmenu!");
+        }
+        
+        for(StructurePlan plan : globalPlanManager.getPlans()) {
+            planMenu.load(plan);
+        }
+        
+        
+        this.planMenu = new StructurePlanMenu(platform, menu);
+    }
+    
+    public static StructureAPI getInstance() {
+        if(instance == null) {
+            instance = new StructureAPI();
+        }
+        return instance;
     }
 
     public void load() {
@@ -95,9 +114,13 @@ public abstract class StructureAPI {
     }
 
     public synchronized void loadPlans() {
+        planMenu = new StructurePlanMenu(platform, null);
         isLoadingPlans = true;
         try {
             globalPlanManager.loadPlans();
+            for(StructurePlan plan : globalPlanManager.getPlans()) {
+                planMenu.load(plan);
+            }
         } finally {
             isLoadingPlans = false;
         }
@@ -111,12 +134,12 @@ public abstract class StructureAPI {
         return globalPlanManager.getPlan(planId);
     }
 
-    public Structure createUninitizalizedStructure(SettlerCraftWorld world, Placement placement, Direction direction, Vector position) {
+    public Structure createUninitizalizedStructure(World world, Placement placement, Direction direction, Vector position) {
         //putStructure(null);
         throw new UnsupportedOperationException();
     }
 
-    public Structure createStructure(SettlerCraftWorld world, StructurePlan plan, Vector position, Direction direction) throws StructureException {
+    public Structure createStructure(World world, StructurePlan plan, Vector position, Direction direction) throws StructureException {
         Structure structure = createUninitizalizedStructure(world, plan, direction, position);
         if (structure != null) {
             structure.setState(State.CREATED);
@@ -126,7 +149,7 @@ public abstract class StructureAPI {
         return structure;
     }
 
-    public Structure createStructure(SettlerCraftWorld world, Placement placement, Vector position, Direction direction) throws StructureException {
+    public Structure createStructure(World world, Placement placement, Vector position, Direction direction) throws StructureException {
         Structure structure = createUninitizalizedStructure(world, placement, direction, position);
         if (structure != null) {
             structure.setState(State.CREATED);
@@ -137,7 +160,7 @@ public abstract class StructureAPI {
         return structure;
     }
 
-    public Structure createUninitizalizedStructure(SettlerCraftWorld world, StructurePlan plan, Direction direction, Vector position) throws StructureException {
+    public Structure createUninitizalizedStructure(World world, StructurePlan plan, Direction direction, Vector position) throws StructureException {
         Preconditions.checkNotNull(world);
         Preconditions.checkNotNull(plan);
         Preconditions.checkNotNull(direction);
@@ -160,7 +183,8 @@ public abstract class StructureAPI {
             System.out.println("Max: " + max);
             System.out.println("Direction: " + direction);
 
-            Structure structure = new SimpleStructure(plan.getName(), world, direction, new CuboidDimension(min, max));
+            IWorld w = platform.getServer().getWorld(world.getName());
+            Structure structure = new SimpleStructure(plan.getName(), w, direction, new CuboidDimension(min, max));
 
             structure = structureRepository.save(structure); // store and get the ID
             File structureDir = new File(getStructuresDirectory(world.getName()), String.valueOf(structure.getId()));
@@ -191,8 +215,8 @@ public abstract class StructureAPI {
         }
     }
 
-    private void checkLocation(SettlerCraftWorld world, Placement p, Vector position) throws StructureException {
-        IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getUUID());
+    private void checkLocation(World world, Placement p, Vector position) throws StructureException {
+        IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
         ILocation l = w.getSpawn();
         Vector spawnPos = new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ());
 
@@ -225,6 +249,10 @@ public abstract class StructureAPI {
         return new File(getWorkingDirectory(), PLANS_DIRECTORY);
     }
 
+    public CategoryMenu createPlanMenu() {
+        return planMenu.createPlanMenu();
+    }
+    
     public static boolean isSupported(File structurePlan) {
         // Placement Check
         // SubPlacements Check
@@ -314,6 +342,13 @@ public abstract class StructureAPI {
             EventManager.getInstance().getEventBus().register(new PlacementHandlerRegisterEvent(handler));
         }
     }
+    
+    public void registerStructureAPIPlugin(IPlugin plugin) throws StructureAPIException {
+        if(this.plugin != null) {
+            throw new StructureAPIException("Already registered a Plugin for the StructureAPI, NOTE that this method should only be used by SettlerCraft-APIS!");
+        }
+        this.plugin = plugin;
+    }
 
     public APlatform getPlatform() {
         return platform;
@@ -327,5 +362,9 @@ public abstract class StructureAPI {
         return plugin.getDataFolder();
     }
 
-    public abstract Player getPlayer(UUID player);
+    
+
+    
+
+    
 }

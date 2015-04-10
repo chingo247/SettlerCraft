@@ -23,7 +23,7 @@
  */
 package com.chingo247.structureapi.structure.event;
 
-import com.chingo247.structureapi.structure.plan.StructurePlan;
+import com.chingo247.structureapi.plan.StructurePlan;
 
 /**
  *

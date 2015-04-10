@@ -23,9 +23,9 @@
  */
 package com.chingo247.structureapi.structure;
 
+import com.chingo247.proxyplatform.core.IWorld;
 import com.chingo247.settlercraft.core.regions.CuboidDimension;
 import com.chingo247.structureapi.world.Direction;
-import com.chingo247.structureapi.world.SettlerCraftWorld;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -38,12 +38,12 @@ public final class ComplexStructure extends SimpleStructure {
 
     private List<ComplexStructure> substructures;
 
-    public ComplexStructure(Long id, String name, SettlerCraftWorld world, Direction direction, CuboidDimension dimension) {
+    public ComplexStructure(Long id, String name, IWorld world, Direction direction, CuboidDimension dimension) {
         super(id, name, world, direction, dimension);
         this.substructures = new ArrayList<>();
     }
 
-    public ComplexStructure(String name, SettlerCraftWorld world, Direction direction, CuboidDimension dimension) {
+    public ComplexStructure(String name, IWorld world, Direction direction, CuboidDimension dimension) {
         this(null, name, world, direction, dimension);
     }
     

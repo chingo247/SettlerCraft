@@ -1,24 +1,10 @@
-name: SettlerCraft
-main: com.chingo247.settlercraft.bukkit.SettlerCraftPlugin
-version: 2.0.0
+name: SettlerCraft-StructureAPI
+main: com.chingo247.structureapi.platforms.bukkit.BKStructureAPIPlugin
+version: 1.0.0
 author: Chingo247
-description: Build & Interact with Structures!
-depend: [WorldEdit, AsyncWorldEdit, WorldGuard, Vault]
-softdepend: [HolographicDisplays, Prism]
+description: Plugin that enables players to build structures!
+depend: [WorldEdit, SettlerCraft-Core]
 
-commands:
-    sc:
-        description: SettlerCraft Commands
-        usage: /sc
-    cst:
-        description: Construction Commands
-        usage: /cst
-    stt:
-        description: Structure Commands
-        usage: /stt
-    sctest:
-        description: Test Commands
-        usage: /sctest
 
           
         

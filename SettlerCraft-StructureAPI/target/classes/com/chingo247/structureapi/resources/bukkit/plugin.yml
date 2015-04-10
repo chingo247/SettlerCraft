@@ -1,0 +1,19 @@
+name: SettlerCraft-Core
+main: com.chingo247.settlercraft.core.platforms.bukkit.BKSettlerCraftCorePlugin
+version: 2.0.0
+author: Chingo247
+description: Core for SettlerCraft Modules
+depend: [WorldEdit]
+
+
+          
+        
+                
+            
+
+                    
+                    
+
+            
+               
+               

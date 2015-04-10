@@ -27,13 +27,13 @@ import com.chingo247.proxyplatform.core.AInventory;
 import com.chingo247.proxyplatform.core.AItemStack;
 import com.chingo247.proxyplatform.core.IPlayer;
 import com.chingo247.proxyplatform.util.ChatColors;
-import com.chingo247.structureapi.SettlerCraft;
+import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.structureapi.structure.construction.options.Options;
 import com.chingo247.structureapi.structure.exception.StructureException;
 import com.chingo247.settlercraft.core.util.KeyPool;
 import com.chingo247.structureapi.util.WorldUtil;
 import com.chingo247.structureapi.world.Direction;
-import com.chingo247.structureapi.structure.plan.StructurePlan;
+import com.chingo247.structureapi.plan.StructurePlan;
 import com.chingo247.settlercraft.core.services.IEconomyProvider;
 import com.chingo247.structureapi.selection.CUISelectionManager;
 import com.chingo247.structureapi.selection.ISelectionManager;
@@ -41,7 +41,6 @@ import com.chingo247.structureapi.selection.NoneSelectionManager;
 import com.chingo247.structureapi.structure.StructureAPI;
 import com.chingo247.structureapi.structure.Structure;
 import com.chingo247.structureapi.util.PlacementUtil;
-import com.chingo247.structureapi.world.SettlerCraftWorld;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
@@ -50,7 +49,6 @@ import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.world.World;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
@@ -63,21 +61,19 @@ public class StructurePlaceHandler {
 
     private final KeyPool<UUID> playerPool;
     private final IEconomyProvider economyProvider;
-    private final SettlerCraft settlerCraft;
     private final StructureAPI structureAPI;
 
-    public StructurePlaceHandler(ExecutorService service, IEconomyProvider economyProvider, SettlerCraft settlerCraft) {
-        this.playerPool = new KeyPool<>(service);
+    public StructurePlaceHandler(IEconomyProvider economyProvider) {
+        this.playerPool = new KeyPool<>(SettlerCraft.getInstance().getExecutor());
         this.economyProvider = economyProvider;
-        this.settlerCraft = settlerCraft;
-        this.structureAPI = settlerCraft.getStructureAPI();
+        this.structureAPI = StructureAPI.getInstance();
     }
 
-    public void handle(final AItemStack planItem, final Player player, final SettlerCraftWorld world, final Vector pos) {
+    public void handle(final AItemStack planItem, final Player player, final World world, final Vector pos) {
         handle(planItem, player, world, pos, null);
     }
 
-    public void handle(final AItemStack planItem, final Player player, final SettlerCraftWorld world, final Vector pos, ISelectionManager selectionManager) {
+    public void handle(final AItemStack planItem, final Player player, final World world, final Vector pos, ISelectionManager selectionManager) {
         if (!isStructurePlan(planItem)) {
             return;
         }
@@ -103,7 +99,7 @@ public class StructurePlaceHandler {
             public void run() {
                 try {
                 
-                IPlayer iPlayer = settlerCraft.getPlatform().getPlayer(player.getUniqueId());
+                IPlayer iPlayer = SettlerCraft.getInstance().getPlatform().getPlayer(player.getUniqueId());
                 AInventory inventory = iPlayer.getInventory();
                 if (!inventory.hasItem(planItem)) {
                     System.out.println("Player doesnt have the item!");
@@ -145,9 +141,9 @@ public class StructurePlaceHandler {
 
     }
     
-    private void handlePlace(StructurePlan plan, AItemStack item, Player player, SettlerCraftWorld world, Vector pos1, ISelectionManager selectionManager) {
+    private void handlePlace(StructurePlan plan, AItemStack item, Player player, World world, Vector pos1, ISelectionManager selectionManager) {
         System.out.println("Handling placement...");
-        IPlayer iPlayer = settlerCraft.getPlatform().getPlayer(player.getUniqueId());
+        IPlayer iPlayer = SettlerCraft.getInstance().getPlatform().getPlayer(player.getUniqueId());
         
         Direction direction = WorldUtil.getDirection(iPlayer.getYaw());
         

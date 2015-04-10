@@ -23,7 +23,7 @@
  */
 package com.chingo247.structureapi.structure;
 
-import com.chingo247.structureapi.SettlerCraft;
+import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.structureapi.structure.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.structureapi.structure.construction.options.Options;
 import com.chingo247.settlercraft.core.util.KeyPool;
@@ -41,7 +41,7 @@ public class ConstructionManager {
     
     private final KeyPool<Long> pool;
     private static ConstructionManager instance;
-    private final StructureAPI structureAPI;
+    private final StructureAPI structureAPI = StructureAPI.getInstance();
     
     static ConstructionManager getInstance() {
         if(instance == null) {
@@ -53,7 +53,6 @@ public class ConstructionManager {
     private ConstructionManager() {
         ExecutorService service = SettlerCraft.getInstance().getExecutor();
         this.pool = new KeyPool<>(service);
-        this.structureAPI = SettlerCraft.getInstance().getStructureAPI();
     }
     
     public void build(final Structure structure, final UUID player, final EditSession session, final Options options, boolean force) {

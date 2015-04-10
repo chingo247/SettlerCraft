@@ -31,7 +31,6 @@ import static com.chingo247.structureapi.world.Direction.NORTH;
 import static com.chingo247.structureapi.world.Direction.SOUTH;
 import static com.chingo247.structureapi.world.Direction.WEST;
 import com.chingo247.structureapi.persistence.legacy.PlayerOwnership.Type;
-import com.chingo247.settlercraft.core.regions.CuboidDimension;
 import com.chingo247.structureapi.persistence.entities.world.Location;
 import com.chingo247.structureapi.util.WorldUtil;
 import com.sk89q.worldedit.BlockVector;
@@ -124,7 +123,7 @@ public class Structure implements Serializable {
 
     @Embedded
     @Column(updatable = false)
-    private CuboidDimension dimension;
+    private Dimension dimension;
 
     @Column(updatable = false)
     private Direction direction;
@@ -334,7 +333,7 @@ public class Structure implements Serializable {
         return new BlockVector(location.getX(), location.getY(), location.getZ());
     }
 
-    public CuboidDimension getDimension() {
+    public Dimension getDimension() {
         return dimension;
     }
 

@@ -25,11 +25,11 @@ package com.chingo247.structureapi.structure;
 
 import com.chingo247.settlercraft.core.regions.CuboidDimensional;
 import com.chingo247.structureapi.structure.construction.options.Options;
-import com.chingo247.structureapi.structure.plan.StructurePlan;
+import com.chingo247.structureapi.plan.StructurePlan;
 import com.chingo247.structureapi.world.Direction;
-import com.chingo247.structureapi.world.SettlerCraftWorld;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.world.World;
 
 /**
  *
@@ -39,7 +39,7 @@ public interface Structure extends CuboidDimensional {
     
     public Long getId();
     
-    public SettlerCraftWorld getWorld();
+    public World getWorld();
     
     public String getName();
     
