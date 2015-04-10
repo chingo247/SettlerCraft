@@ -23,6 +23,9 @@ package com.chingo247.settlercraft.bukkit;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+import com.chingo247.proxyplatform.core.IPlugin;
+import com.chingo247.proxyplatform.platforms.bukkit.BukkitPlatform;
+import com.chingo247.proxyplatform.platforms.bukkit.BukkitPlugin;
 import com.chingo247.settlercraft.SettlerCraft;
 import com.chingo247.settlercraft.bukkit.commands.SettlerCraftCommandExecutor;
 import com.chingo247.settlercraft.bukkit.listener.PlanListener;
@@ -30,9 +33,6 @@ import com.chingo247.settlercraft.exception.SettlerCraftException;
 import com.chingo247.settlercraft.persistence.HSQLServer;
 import com.chingo247.settlercraft.menu.CategoryMenu;
 import com.chingo247.settlercraft.menu.plan.StructurePlanMenuReader;
-import com.chingo247.xcore.core.IPlugin;
-import com.chingo247.xcore.platforms.bukkit.BukkitPlatform;
-import com.chingo247.xcore.platforms.bukkit.BukkitPlugin;
 import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;

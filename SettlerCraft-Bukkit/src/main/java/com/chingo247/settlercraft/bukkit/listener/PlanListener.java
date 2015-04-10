@@ -23,12 +23,12 @@ package com.chingo247.settlercraft.bukkit.listener;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+import com.chingo247.proxyplatform.core.AItemStack;
+import com.chingo247.proxyplatform.platforms.bukkit.BukkitPlatform;
 import com.chingo247.settlercraft.SettlerCraft;
 import com.chingo247.settlercraft.bukkit.util.BKWorldEditUtil;
 import com.chingo247.settlercraft.plugin.IEconomyProvider;
 import com.chingo247.settlercraft.structure.handlers.StructurePlaceHandler;
-import com.chingo247.xcore.core.AItemStack;
-import com.chingo247.xcore.platforms.bukkit.BukkitPlatform;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.entity.Player;

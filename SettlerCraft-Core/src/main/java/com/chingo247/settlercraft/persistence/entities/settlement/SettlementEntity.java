@@ -23,7 +23,7 @@
  */
 package com.chingo247.settlercraft.persistence.entities.settlement;
 
-import com.chingo247.xcore.core.IWorld;
+import com.chingo247.proxyplatform.core.IWorld;
 import java.io.Serializable;
 import java.util.UUID;
 import javax.persistence.Column;

@@ -24,11 +24,11 @@ package com.chingo247.settlercraft.bukkit.commands;
  * THE SOFTWARE.
  */
 
+import com.chingo247.proxyplatform.platforms.bukkit.BukkitPlayer;
 import com.chingo247.settlercraft.bukkit.BKPermissionManager;
 import com.chingo247.settlercraft.bukkit.SettlerCraftPlugin;
 import com.chingo247.settlercraft.exception.CommandException;
 import com.chingo247.settlercraft.menu.CategoryMenu;
-import com.chingo247.xcore.platforms.bukkit.BukkitPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;

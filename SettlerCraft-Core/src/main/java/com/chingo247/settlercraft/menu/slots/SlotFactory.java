@@ -23,9 +23,9 @@
  */
 package com.chingo247.settlercraft.menu.slots;
 
+import com.chingo247.proxyplatform.core.APlatform;
 import com.chingo247.settlercraft.SettlerCraft;
 import com.chingo247.settlercraft.menu.item.TradeItem;
-import com.chingo247.xcore.core.APlatform;
 
 /**
  *

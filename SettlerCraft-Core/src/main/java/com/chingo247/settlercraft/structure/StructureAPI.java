@@ -6,6 +6,10 @@
 package com.chingo247.settlercraft.structure;
 
 import com.arangodb.ArangoException;
+import com.chingo247.proxyplatform.core.APlatform;
+import com.chingo247.proxyplatform.core.ILocation;
+import com.chingo247.proxyplatform.core.IPlugin;
+import com.chingo247.proxyplatform.core.IWorld;
 import com.chingo247.settlercraft.SettlerCraft;
 import com.chingo247.settlercraft.world.Direction;
 import com.chingo247.settlercraft.event.EventManager;
@@ -26,10 +30,6 @@ import com.chingo247.settlercraft.structure.plan.SubStructuredPlan;
 import com.chingo247.settlercraft.structure.plan.document.PlacementElement;
 import com.chingo247.settlercraft.util.PlacementUtil;
 import com.chingo247.settlercraft.world.SettlerCraftWorld;
-import com.chingo247.xcore.core.APlatform;
-import com.chingo247.xcore.core.ILocation;
-import com.chingo247.xcore.core.IPlugin;
-import com.chingo247.xcore.core.IWorld;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;

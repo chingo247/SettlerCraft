@@ -23,6 +23,9 @@
  */
 package com.chingo247.settlercraft;
 
+import com.chingo247.proxyplatform.core.APlatform;
+import com.chingo247.proxyplatform.core.IPlugin;
+import com.chingo247.proxyplatform.core.IWorld;
 import com.chingo247.settlercraft.plugin.IEconomyProvider;
 import com.chingo247.settlercraft.util.WorldEditUtil;
 import com.chingo247.settlercraft.menu.CategoryMenu;
@@ -32,9 +35,6 @@ import com.chingo247.settlercraft.plugin.IConfigProvider;
 import com.chingo247.settlercraft.structure.StructureAPI;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.world.SettlerCraftWorld;
-import com.chingo247.xcore.core.APlatform;
-import com.chingo247.xcore.core.IPlugin;
-import com.chingo247.xcore.core.IWorld;
 import com.google.common.base.Preconditions;
 import java.io.File;
 import java.util.ArrayList;

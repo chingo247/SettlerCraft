@@ -17,10 +17,10 @@
 
 package com.chingo247.settlercraft.menu;
 
+import com.chingo247.proxyplatform.core.AInventory;
+import com.chingo247.proxyplatform.core.IPlayer;
 import com.chingo247.settlercraft.plugin.IEconomyProvider;
 import com.chingo247.settlercraft.menu.item.CategoryTradeItem;
-import com.chingo247.xcore.core.AInventory;
-import com.chingo247.xcore.core.IPlayer;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

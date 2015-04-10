@@ -16,8 +16,8 @@
  */
 package com.chingo247.settlercraft.menu.slots;
 
-import com.chingo247.xcore.core.AItemStack;
-import com.chingo247.xcore.core.APlatform;
+import com.chingo247.proxyplatform.core.AItemStack;
+import com.chingo247.proxyplatform.core.APlatform;
 import com.google.common.base.Preconditions;
 import java.util.Arrays;
 import java.util.HashSet;

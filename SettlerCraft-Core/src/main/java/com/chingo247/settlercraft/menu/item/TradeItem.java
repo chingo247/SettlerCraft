@@ -18,7 +18,7 @@
 
 package com.chingo247.settlercraft.menu.item;
 
-import com.chingo247.xcore.core.AItemStack;
+import com.chingo247.proxyplatform.core.AItemStack;
 
 /**
  *

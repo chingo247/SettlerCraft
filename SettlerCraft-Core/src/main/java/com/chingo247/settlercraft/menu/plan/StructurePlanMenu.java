@@ -23,12 +23,12 @@
  */
 package com.chingo247.settlercraft.menu.plan;
 
+import com.chingo247.proxyplatform.core.APlatform;
 import com.chingo247.settlercraft.menu.CategoryMenu;
 import com.chingo247.settlercraft.menu.DefaultCategoryMenu;
 import com.chingo247.settlercraft.menu.MenuAPI;
 import com.chingo247.settlercraft.structure.placement.Placement;
 import com.chingo247.settlercraft.structure.plan.StructurePlan;
-import com.chingo247.xcore.core.APlatform;
 import com.google.common.base.Preconditions;
 
 /**

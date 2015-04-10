@@ -23,10 +23,10 @@
  */
 package com.chingo247.settlercraft.bukkit;
 
+import com.chingo247.proxyplatform.platforms.bukkit.BukkitPlatform;
 import com.chingo247.settlercraft.menu.ACategoryMenu;
 import com.chingo247.settlercraft.menu.MenuAPI;
 import com.chingo247.settlercraft.plugin.IEconomyProvider;
-import com.chingo247.xcore.platforms.bukkit.BukkitPlatform;
 import org.apache.log4j.Logger;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

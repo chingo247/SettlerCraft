@@ -23,6 +23,10 @@
  */
 package com.chingo247.settlercraft.structure.handlers;
 
+import com.chingo247.proxyplatform.core.AInventory;
+import com.chingo247.proxyplatform.core.AItemStack;
+import com.chingo247.proxyplatform.core.IPlayer;
+import com.chingo247.proxyplatform.util.ChatColors;
 import com.chingo247.settlercraft.SettlerCraft;
 import com.chingo247.settlercraft.structure.construction.options.Options;
 import com.chingo247.settlercraft.structure.exception.StructureException;
@@ -38,10 +42,6 @@ import com.chingo247.settlercraft.structure.StructureAPI;
 import com.chingo247.settlercraft.structure.Structure;
 import com.chingo247.settlercraft.util.PlacementUtil;
 import com.chingo247.settlercraft.world.SettlerCraftWorld;
-import com.chingo247.xcore.core.AInventory;
-import com.chingo247.xcore.core.AItemStack;
-import com.chingo247.xcore.core.IPlayer;
-import com.chingo247.xcore.util.ChatColors;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;

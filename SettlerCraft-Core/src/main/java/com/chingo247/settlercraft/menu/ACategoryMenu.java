@@ -23,6 +23,11 @@
  */
 package com.chingo247.settlercraft.menu;
 
+import com.chingo247.proxyplatform.core.AInventory;
+import com.chingo247.proxyplatform.core.AItemStack;
+import com.chingo247.proxyplatform.core.APlatform;
+import com.chingo247.proxyplatform.core.IColor;
+import com.chingo247.proxyplatform.core.IPlayer;
 import com.chingo247.settlercraft.SettlerCraft;
 import com.chingo247.settlercraft.menu.item.TradeItem;
 import com.chingo247.settlercraft.menu.slots.ActionSlot;
@@ -32,11 +37,6 @@ import com.chingo247.settlercraft.plugin.IEconomyProvider;
 import com.chingo247.settlercraft.menu.slots.ItemSlot;
 import com.chingo247.settlercraft.menu.slots.SlotFactory;
 import com.chingo247.settlercraft.menu.util.ShopUtil;
-import com.chingo247.xcore.core.AInventory;
-import com.chingo247.xcore.core.AItemStack;
-import com.chingo247.xcore.core.APlatform;
-import com.chingo247.xcore.core.IColor;
-import com.chingo247.xcore.core.IPlayer;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;

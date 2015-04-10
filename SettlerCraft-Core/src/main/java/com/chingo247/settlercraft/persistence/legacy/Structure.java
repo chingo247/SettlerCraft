@@ -24,6 +24,7 @@
  */
 package com.chingo247.settlercraft.persistence.legacy;
 
+import com.chingo247.proxyplatform.util.ChatColors;
 import com.chingo247.settlercraft.world.Direction;
 import static com.chingo247.settlercraft.world.Direction.EAST;
 import static com.chingo247.settlercraft.world.Direction.NORTH;
@@ -33,7 +34,6 @@ import com.chingo247.settlercraft.persistence.legacy.PlayerOwnership.Type;
 import com.chingo247.settlercraft.persistence.entities.world.CuboidDimension;
 import com.chingo247.settlercraft.persistence.entities.world.Location;
 import com.chingo247.settlercraft.util.WorldUtil;
-import com.chingo247.xcore.util.ChatColors;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;

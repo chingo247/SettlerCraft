@@ -45,12 +45,12 @@ package com.chingo247.settlercraft.menu.plan;
  */
 
 
+import com.chingo247.proxyplatform.core.AItemStack;
+import com.chingo247.proxyplatform.core.APlatform;
+import com.chingo247.proxyplatform.core.IColor;
 import com.chingo247.settlercraft.menu.item.CategoryTradeItem;
 import com.chingo247.settlercraft.menu.item.TradeItem;
 import com.chingo247.settlercraft.menu.util.ShopUtil;
-import com.chingo247.xcore.core.AItemStack;
-import com.chingo247.xcore.core.APlatform;
-import com.chingo247.xcore.core.IColor;
 import com.sk89q.worldedit.blocks.ItemID;
 import java.util.Arrays;
 

@@ -23,11 +23,11 @@
  */
 package com.chingo247.settlercraft.bukkit;
 
+import com.chingo247.proxyplatform.core.APlatform;
+import com.chingo247.proxyplatform.core.IPlayer;
+import com.chingo247.proxyplatform.platforms.PlatformFactory;
+import com.chingo247.proxyplatform.platforms.bukkit.BukkitPlayer;
 import com.chingo247.settlercraft.plugin.IPermissionManager;
-import com.chingo247.xcore.core.APlatform;
-import com.chingo247.xcore.core.IPlayer;
-import com.chingo247.xcore.platforms.PlatformFactory;
-import com.chingo247.xcore.platforms.bukkit.BukkitPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;

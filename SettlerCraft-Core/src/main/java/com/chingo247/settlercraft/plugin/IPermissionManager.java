@@ -23,7 +23,7 @@
  */
 package com.chingo247.settlercraft.plugin;
 
-import com.chingo247.xcore.core.IPlayer;
+import com.chingo247.proxyplatform.core.IPlayer;
 
 /**
  *

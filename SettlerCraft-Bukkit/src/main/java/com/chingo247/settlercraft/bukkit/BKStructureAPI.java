@@ -23,10 +23,10 @@
  */
 package com.chingo247.settlercraft.bukkit;
 
+import com.chingo247.proxyplatform.platforms.PlatformFactory;
+import com.chingo247.proxyplatform.platforms.bukkit.BukkitPlugin;
 import com.chingo247.settlercraft.bukkit.util.BKWorldEditUtil;
 import com.chingo247.settlercraft.structure.StructureAPI;
-import com.chingo247.xcore.platforms.PlatformFactory;
-import com.chingo247.xcore.platforms.bukkit.BukkitPlugin;
 import com.sk89q.worldedit.entity.Player;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
