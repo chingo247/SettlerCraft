@@ -25,8 +25,8 @@ package com.chingo247.structureapi.structure.restriction;
 
 import com.chingo247.settlercraft.core.regions.CuboidDimensional;
 import com.chingo247.structureapi.structure.exception.StructureException;
-import com.chingo247.structureapi.plan.placement.Placement;
-import com.chingo247.structureapi.world.SettlerCraftWorld;
+import com.chingo247.structureapi.structure.plan.placement.Placement;
+import com.sk89q.worldedit.world.World;
 
 /**
  * StructureRestriction class is used to determine if a Structure may be build in a certain area
@@ -34,21 +34,37 @@ import com.chingo247.structureapi.world.SettlerCraftWorld;
  */
 public abstract class StructureRestriction {
     
-    protected String reason;
+    private final String message;
+    private final String plugin;
+    private final String restrictionName;
 
     /**
      * Constructor.
-     * @param reason The reason when to tell the player, why the structure can't be build
+     * 
+     * @param plugin The name of plugin to register this restriction
+     * @param restriction The name of the restriction
+     * @param message What to tell the violater?
      */
-    public StructureRestriction(String reason) {
-        this.reason = reason;
+    public StructureRestriction(String plugin, String restriction, String message) {
+        this.plugin = plugin;
+        this.restrictionName = restriction;
+        this.message = message;
     }
 
-    public void setReason(String reason) {
-        this.reason = reason;
+    public String getPlugin() {
+        return plugin;
+    }
+
+    
+    public String getMessage() {
+        return message;
     }
     
-    public abstract boolean test(SettlerCraftWorld world, CuboidDimensional cuboid, Placement placement);
+    
+
+    
+    
+    public abstract boolean test(World world, CuboidDimensional cuboid, Placement placement);
     
     /**
      * Used to check if a Structure may be build on a specified location.
@@ -57,9 +73,9 @@ public abstract class StructureRestriction {
      * @param placement The type of the Structure
      * @throws com.chingo247.structureapi.structure.exception.StructureException
      */
-    public final void allow(SettlerCraftWorld world, CuboidDimensional cuboid, Placement placement) throws StructureException {
+    public final void allow(World world, CuboidDimensional cuboid, Placement placement) throws StructureException {
         if(!test(world, cuboid, placement)) {
-            throw new StructureException(reason);
+            throw new StructureException(message);
         }
     }
     

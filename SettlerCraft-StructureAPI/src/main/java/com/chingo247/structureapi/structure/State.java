@@ -28,7 +28,26 @@ package com.chingo247.structureapi.structure;
  * @author Chingo
  */
 public enum State {
-    INITIALIZING,
-    CREATED,
-    DELETED
+    CREATED(0),
+    DELETED(1);
+
+    private final int stateId;
+    
+    private State(int stateId) {
+        this.stateId = stateId;
+    }
+
+    public int getStateId() {
+        return stateId;
+    }
+    
+    public static State match(int stateId) {
+        switch(stateId) {
+            case 1: return CREATED;
+            case 2: return DELETED;
+            default: throw new AssertionError("Unreachable");
+        }
+    }
+    
+    
 }

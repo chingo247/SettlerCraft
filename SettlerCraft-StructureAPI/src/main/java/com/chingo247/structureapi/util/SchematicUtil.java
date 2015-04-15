@@ -31,7 +31,7 @@ import static com.chingo247.structureapi.world.Direction.NORTH;
 import static com.chingo247.structureapi.world.Direction.SOUTH;
 import static com.chingo247.structureapi.world.Direction.WEST;
 import com.chingo247.settlercraft.core.regions.CuboidDimension;
-import com.chingo247.structureapi.plan.schematic.Schematic;
+import com.chingo247.structureapi.structure.plan.schematic.Schematic;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;

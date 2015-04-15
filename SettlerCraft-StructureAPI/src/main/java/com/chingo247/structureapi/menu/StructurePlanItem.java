@@ -48,9 +48,9 @@ package com.chingo247.structureapi.menu;
 import com.chingo247.menuapi.menu.item.CategoryTradeItem;
 import com.chingo247.menuapi.menu.item.TradeItem;
 import com.chingo247.menuapi.menu.util.ShopUtil;
-import com.chingo247.proxyplatform.core.AItemStack;
-import com.chingo247.proxyplatform.core.APlatform;
-import com.chingo247.proxyplatform.core.IColor;
+import com.chingo247.xplatform.core.AItemStack;
+import com.chingo247.xplatform.core.APlatform;
+import com.chingo247.xplatform.core.IColor;
 import com.sk89q.worldedit.blocks.ItemID;
 import java.util.Arrays;
 

@@ -27,7 +27,7 @@ package com.chingo247.structureapi.exception;
  *
  * @author Chingo
  */
-public class StructureAPIException extends Exception {
+public class StructureAPIException extends RuntimeException {
 
     public StructureAPIException(String message) {
         super(message);

@@ -63,7 +63,7 @@
  */
 package com.chingo247.structureapi.structure.construction.asyncworldedit;
 
-import com.chingo247.proxyplatform.util.ChatColors;
+import com.chingo247.xplatform.util.ChatColors;
 import java.util.ArrayList;
 import java.util.List;
 import org.primesoft.asyncworldedit.PlayerEntry;

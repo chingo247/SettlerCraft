@@ -28,9 +28,34 @@ package com.chingo247.structureapi.structure;
  * @author Chingo
  */
 public enum ConstructionStatus {
-    WAITING,
-    BUILDING,
-    STOPPED,
-    DEMOLISHING,
-    COMPLETED
+    ON_HOLD(0),
+    BUILDING(1),
+    STOPPED(2),
+    DEMOLISHING(3),
+    COMPLETED(4);
+
+    private final int statusId;
+    
+    private ConstructionStatus(int statusId) {
+        this.statusId = statusId;
+    }
+
+    public int getStatusId() {
+        return statusId;
+    }
+    
+    
+    public static ConstructionStatus match(int statusId) {
+        switch(statusId) {
+            case 0: return ON_HOLD;
+            case 1: return BUILDING;
+            case 2: return STOPPED;
+            case 3: return DEMOLISHING;
+            case 4: return COMPLETED;
+            default: throw new AssertionError("Unreachable");
+        }
+    }
+    
+    
+    
 }

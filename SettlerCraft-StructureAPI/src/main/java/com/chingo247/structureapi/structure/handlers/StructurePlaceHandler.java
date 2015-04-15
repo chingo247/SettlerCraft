@@ -23,23 +23,23 @@
  */
 package com.chingo247.structureapi.structure.handlers;
 
-import com.chingo247.proxyplatform.core.AInventory;
-import com.chingo247.proxyplatform.core.AItemStack;
-import com.chingo247.proxyplatform.core.IPlayer;
-import com.chingo247.proxyplatform.util.ChatColors;
+import com.chingo247.xplatform.core.AInventory;
+import com.chingo247.xplatform.core.AItemStack;
+import com.chingo247.xplatform.core.IPlayer;
+import com.chingo247.xplatform.util.ChatColors;
 import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.structureapi.structure.construction.options.Options;
 import com.chingo247.structureapi.structure.exception.StructureException;
 import com.chingo247.settlercraft.core.util.KeyPool;
 import com.chingo247.structureapi.util.WorldUtil;
 import com.chingo247.structureapi.world.Direction;
-import com.chingo247.structureapi.plan.StructurePlan;
+import com.chingo247.structureapi.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.core.services.IEconomyProvider;
 import com.chingo247.structureapi.selection.CUISelectionManager;
 import com.chingo247.structureapi.selection.ISelectionManager;
 import com.chingo247.structureapi.selection.NoneSelectionManager;
 import com.chingo247.structureapi.structure.StructureAPI;
 import com.chingo247.structureapi.structure.Structure;
+import com.chingo247.structureapi.structure.plan.placement.PlaceOptions;
 import com.chingo247.structureapi.util.PlacementUtil;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.Vector;
@@ -109,7 +109,7 @@ public class StructurePlaceHandler {
 
                 String planId = getPlanID(planItem);
 
-                StructurePlan plan = structureAPI.getPlan(planId);
+                StructurePlan plan = structureAPI.getPlanById(planId);
 
                 if (plan == null) {
                     System.out.println("Plan was null...");
@@ -190,7 +190,7 @@ public class StructurePlaceHandler {
 //                        iPlayer.getInventory().removeItem(clone);
 //                        iPlayer.updateInventory();
                         
-                        structure.build(player, Options.defaultOptions(), false);
+                        structure.build(player, new PlaceOptions(), false);
                     }
                 } catch (StructureException ex) {
                     player.print(ChatColors.RED + ex.getMessage());

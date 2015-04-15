@@ -30,7 +30,7 @@ package com.chingo247.structureapi.structure.construction.options;
 public class Options {
     
     public static Options defaultOptions() {
-        return null;
+        return new Options();
     }
     
 }

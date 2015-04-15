@@ -30,7 +30,7 @@ public class QStructure extends EntityPathBase<Structure> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    protected com.chingo247.structureapi.persistence.entities.world.QLocation location;
+    protected QLocation location;
 
     protected QStructureLog logEntry;
 
@@ -65,7 +65,7 @@ public class QStructure extends EntityPathBase<Structure> {
     public QStructure(Class<? extends Structure> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
         this.dimension = inits.isInitialized("dimension") ? new QDimension(forProperty("dimension")) : null;
-        this.location = inits.isInitialized("location") ? new com.chingo247.structureapi.persistence.entities.world.QLocation(forProperty("location")) : null;
+        this.location = inits.isInitialized("location") ? new QLocation(forProperty("location")) : null;
         this.logEntry = inits.isInitialized("logEntry") ? new QStructureLog(forProperty("logEntry")) : null;
     }
 
@@ -76,9 +76,9 @@ public class QStructure extends EntityPathBase<Structure> {
         return dimension;
     }
 
-    public com.chingo247.structureapi.persistence.entities.world.QLocation location() {
+    public QLocation location() {
         if (location == null) {
-            location = new com.chingo247.structureapi.persistence.entities.world.QLocation(forProperty("location"));
+            location = new QLocation(forProperty("location"));
         }
         return location;
     }

@@ -23,8 +23,8 @@ package com.chingo247.structureapi.platforms.bukkit.listener;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import com.chingo247.proxyplatform.core.AItemStack;
-import com.chingo247.proxyplatform.platforms.bukkit.BukkitPlatform;
+import com.chingo247.xplatform.core.AItemStack;
+import com.chingo247.xplatform.platforms.bukkit.BukkitPlatform;
 import com.chingo247.settlercraft.core.services.IEconomyProvider;
 import com.chingo247.structureapi.platforms.bukkit.util.BKWorldEditUtil;
 import com.chingo247.settlercraft.core.SettlerCraft;
@@ -44,7 +44,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
  */
 public class PlanListener implements Listener {
     
-    private StructurePlaceHandler placeHandler;
+    private final StructurePlaceHandler placeHandler;
 
 
     public PlanListener(IEconomyProvider provider) {

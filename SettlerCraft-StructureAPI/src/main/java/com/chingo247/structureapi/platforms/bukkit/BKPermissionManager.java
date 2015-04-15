@@ -23,10 +23,10 @@
  */
 package com.chingo247.structureapi.platforms.bukkit;
 
-import com.chingo247.proxyplatform.core.APlatform;
-import com.chingo247.proxyplatform.core.IPlayer;
-import com.chingo247.proxyplatform.platforms.PlatformFactory;
-import com.chingo247.proxyplatform.platforms.bukkit.BukkitPlayer;
+import com.chingo247.xplatform.core.APlatform;
+import com.chingo247.xplatform.core.IPlayer;
+import com.chingo247.xplatform.platforms.PlatformFactory;
+import com.chingo247.xplatform.platforms.bukkit.BukkitPlayer;
 import com.chingo247.settlercraft.core.platforms.IPermissionManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

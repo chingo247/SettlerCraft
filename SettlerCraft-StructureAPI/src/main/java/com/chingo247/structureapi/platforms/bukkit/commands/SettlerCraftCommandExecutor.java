@@ -25,7 +25,7 @@ package com.chingo247.structureapi.platforms.bukkit.commands;
  */
 
 import com.chingo247.menuapi.menu.CategoryMenu;
-import com.chingo247.proxyplatform.platforms.bukkit.BukkitPlayer;
+import com.chingo247.xplatform.platforms.bukkit.BukkitPlayer;
 import com.chingo247.structureapi.platforms.bukkit.BKPermissionManager;
 import com.chingo247.structureapi.platforms.bukkit.BKStructureAPIPlugin;
 import com.chingo247.structureapi.structure.StructureAPI;
@@ -103,26 +103,6 @@ public class SettlerCraftCommandExecutor implements CommandExecutor {
         if (!(sender instanceof Player)) {
             throw new CommandException("You are not a player!");
         }
-
-        if (!structureAPIPlugin.getConfigProvider().isPlanShopEnabled()) {
-            throw new CommandException("Planshop is disabled");
-        }
-
-        Player player = (Player) sender;
-        if (!BKPermissionManager.getInstance().isAllowed(player, BKPermissionManager.Perms.OPEN_PLAN_MENU)) {
-            throw new CommandException("You have no permission to open the plan shop");
-        }
-
-        CategoryMenu planmenu = StructureAPI.getInstance().createPlanMenu();
-        if (planmenu == null) {
-            throw new CommandException("Planmenu is initialized yet, please wait...");
-        }
-
-        if (!planmenu.isEnabled()) {
-            throw new CommandException("Planmenu is not ready yet, please wait");
-        }
-        planmenu.setNoCosts(true);
-        planmenu.openMenu(new BukkitPlayer(player));
     }
 
     private void openShop(CommandSender sender, String[] args) throws CommandException {

@@ -6,45 +6,63 @@
 package com.chingo247.structureapi.structure;
 
 import com.chingo247.menuapi.menu.CategoryMenu;
-import com.chingo247.proxyplatform.core.APlatform;
-import com.chingo247.proxyplatform.core.ILocation;
-import com.chingo247.proxyplatform.core.IPlugin;
-import com.chingo247.proxyplatform.core.IWorld;
+import com.chingo247.xplatform.core.APlatform;
+import com.chingo247.xplatform.core.ILocation;
+import com.chingo247.xplatform.core.IPlugin;
+import com.chingo247.xplatform.core.IWorld;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.structureapi.world.Direction;
 import com.chingo247.settlercraft.core.event.EventManager;
+import com.chingo247.settlercraft.core.exception.SettlerCraftException;
+import com.chingo247.settlercraft.core.persistence.repository.world.WorldNode;
+import com.chingo247.settlercraft.core.persistence.repository.world.WorldRepository;
 import com.chingo247.settlercraft.core.regions.CuboidDimension;
+import com.chingo247.settlercraft.core.util.KeyPool;
 import com.chingo247.structureapi.exception.StructureAPIException;
-import com.chingo247.structureapi.structure.event.StructureCreateEvent;
 import com.chingo247.structureapi.structure.exception.ElementValueException;
 import com.chingo247.structureapi.structure.exception.StructureException;
-import com.chingo247.structureapi.menu.StructurePlanMenu;
-import com.chingo247.structureapi.plan.placement.event.PlacementHandlerRegisterEvent;
-import com.chingo247.structureapi.plan.exception.PlacementException;
-import com.chingo247.structureapi.plan.placement.Placement;
-import com.chingo247.structureapi.plan.placement.SchematicPlacement;
-import com.chingo247.structureapi.plan.placement.handlers.PlacementHandler;
-import com.chingo247.structureapi.plan.placement.handlers.SchematicPlacementHandler;
-import com.chingo247.structureapi.plan.GlobalPlanManager;
-import com.chingo247.structureapi.plan.StructurePlan;
-import com.chingo247.structureapi.plan.StructurePlanManager;
-import com.chingo247.structureapi.plan.SubStructuredPlan;
-import com.chingo247.structureapi.plan.document.PlacementElement;
+import com.chingo247.structureapi.menu.StructurePlanMenuFactory;
+import com.chingo247.structureapi.menu.StructurePlanMenuReader;
+import com.chingo247.structureapi.persistence.repository.StructureNode;
+import com.chingo247.structureapi.persistence.repository.StructureRepository;
+import com.chingo247.structureapi.platforms.bukkit.IConfigProvider;
+import com.chingo247.structureapi.structure.plan.placement.event.PlacementHandlerRegisterEvent;
+import com.chingo247.structureapi.structure.plan.exception.PlacementException;
+import com.chingo247.structureapi.structure.plan.placement.Placement;
+import com.chingo247.structureapi.structure.plan.placement.handlers.PlacementHandler;
+import com.chingo247.structureapi.structure.plan.placement.handlers.SchematicPlacementHandler;
+import com.chingo247.structureapi.structure.plan.StructurePlan;
+import com.chingo247.structureapi.structure.plan.StructurePlanManager;
+import com.chingo247.structureapi.structure.plan.document.PlacementElement;
+import com.chingo247.structureapi.structure.construction.asyncworldedit.AsyncPlacement;
+import com.chingo247.structureapi.structure.construction.options.Options;
+import com.chingo247.structureapi.structure.event.StructureCreateEvent;
+import com.chingo247.structureapi.structure.plan.GlobalPlanManager;
+import com.chingo247.structureapi.structure.plan.SubStructuredPlan;
+import com.chingo247.structureapi.structure.plan.placement.PlaceOptions;
+import com.chingo247.structureapi.structure.plan.placement.SchematicPlacement;
 import com.chingo247.structureapi.util.PlacementUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
+import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.dom4j.DocumentException;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 
 /**
  *
@@ -56,54 +74,58 @@ public class StructureAPI {
     public static final String PLUGIN_NAME = "SettlerCraft";
     public static final String PLANS_DIRECTORY = "plans";
     private static final Map<String, Map<String, PlacementHandler>> handlers = Maps.newHashMap();
-    private final StructurePlanManager globalPlanManager;
-    private final APlatform platform;
-    private final Lock loadLock = new ReentrantLock();
-    private final ExecutorService executor;
-    private static StructureAPI instance;
-    private StructurePlanMenu planMenu;
-    
+
     private final StructureRepository structureRepository;
-    private boolean isLoadingPlans = false;
+    private final WorldRepository worldRepository;
+
+    private final APlatform platform;
     private IPlugin plugin;
+    private IConfigProvider config;
+
+    private final Lock loadLock = new ReentrantLock();
+    private StructurePlanManager globalPlanManager;
+    private StructurePlanMenuFactory planMenuFactory;
+    private final ExecutorService executor;
+    private final KeyPool<Long> pool;
+    private CategoryMenu planMenu;
+
+    private boolean isLoadingPlans = false;
+    private static StructureAPI instance;
+
+    private Map<Long, UUID> taskedBy = Maps.newHashMap();
+    private Map<Long, Integer> jobIds = Maps.newHashMap();
+    private final Lock jobLock = new ReentrantLock();
 
     private StructureAPI() {
         this.executor = SettlerCraft.getInstance().getExecutor();
         this.platform = SettlerCraft.getInstance().getPlatform();
-       
+
         // Register Handlers first...
 //        registerHandler(new GeneratedCuboidHandler());
 //        registerHandler(new GeneratedCylinderHandler());
 //        registerHandler(new GeneratedEllipsoidHandler());
 //        registerHandler(new GeneratedPolygonal2DHandler());
         registerHandler(new SchematicPlacementHandler());
+        this.pool = new KeyPool<>(executor);
 
         // Now register the GlobalPlanManager
-        this.globalPlanManager = new GlobalPlanManager(getPlanDirectory());
         this.structureRepository = new StructureRepository();
+        this.worldRepository = new WorldRepository();
     }
-    
-    public void registerMenu(CategoryMenu menu) throws StructureAPIException {
-        if(planMenu != null) {
-            throw new StructureAPIException("Already registered a planmenu!");
-        }
-        
-        for(StructurePlan plan : globalPlanManager.getPlans()) {
-            planMenu.load(plan);
-        }
-        
-        
-        this.planMenu = new StructurePlanMenu(platform, menu);
-    }
-    
+
     public static StructureAPI getInstance() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new StructureAPI();
         }
         return instance;
     }
 
-    public void load() {
+    public void initialize() throws DocumentException, SettlerCraftException {
+        StructurePlanMenuReader reader = new StructurePlanMenuReader();
+        planMenu = reader.read(new File(getWorkingDirectory(), "menu.xml"));
+        if (globalPlanManager == null) {
+            globalPlanManager = new GlobalPlanManager(getPlanDirectory());
+        }
         if (loadLock.tryLock()) {
             try {
                 loadPlans();
@@ -114,12 +136,12 @@ public class StructureAPI {
     }
 
     public synchronized void loadPlans() {
-        planMenu = new StructurePlanMenu(platform, null);
+        planMenuFactory = new StructurePlanMenuFactory(platform, planMenu);
         isLoadingPlans = true;
         try {
             globalPlanManager.loadPlans();
-            for(StructurePlan plan : globalPlanManager.getPlans()) {
-                planMenu.load(plan);
+            for (StructurePlan plan : globalPlanManager.getPlans()) {
+                planMenuFactory.load(plan);
             }
         } finally {
             isLoadingPlans = false;
@@ -130,37 +152,22 @@ public class StructureAPI {
         return isLoadingPlans;
     }
 
-    public StructurePlan getPlan(String planId) {
+    public StructurePlan getPlanById(String planId) {
         return globalPlanManager.getPlan(planId);
     }
 
-    public Structure createUninitizalizedStructure(World world, Placement placement, Direction direction, Vector position) {
-        //putStructure(null);
-        throw new UnsupportedOperationException();
-    }
-
-    public Structure createStructure(World world, StructurePlan plan, Vector position, Direction direction) throws StructureException {
-        Structure structure = createUninitizalizedStructure(world, plan, direction, position);
-        if (structure != null) {
-            structure.setState(State.CREATED);
-            EventManager.getInstance().getEventBus().post(new StructureCreateEvent(structure));
-        }
-
-        return structure;
-    }
-
-    public Structure createStructure(World world, Placement placement, Vector position, Direction direction) throws StructureException {
-        Structure structure = createUninitizalizedStructure(world, placement, direction, position);
-        if (structure != null) {
-            structure.setState(State.CREATED);
-            EventManager.getInstance().getEventBus().post(new StructureCreateEvent(structure));
-
-        }
-
-        return structure;
-    }
-
-    public Structure createUninitizalizedStructure(World world, StructurePlan plan, Direction direction, Vector position) throws StructureException {
+    /**
+     * Creates a structure and sets the given player as MASTER owner
+     *
+     * @param player The player who will be the MASTER owner
+     * @param world The world
+     * @param plan The plan
+     * @param position The position
+     * @param direction The direction
+     * @return The created Structure
+     * @throws StructureException
+     */
+    public Structure createStructureWithPlayer(Player player, World world, StructurePlan plan, Vector position, Direction direction) throws StructureException {
         Preconditions.checkNotNull(world);
         Preconditions.checkNotNull(plan);
         Preconditions.checkNotNull(direction);
@@ -174,7 +181,6 @@ public class StructureAPI {
             Placement placement = plan.getPlacement();
 
             checkLocation(world, placement, position);
-            
 
             Vector min = position;
             Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getDimension().getMaxPosition());
@@ -184,9 +190,17 @@ public class StructureAPI {
             System.out.println("Direction: " + direction);
 
             IWorld w = platform.getServer().getWorld(world.getName());
-            Structure structure = new SimpleStructure(plan.getName(), w, direction, new CuboidDimension(min, max));
+            WorldNode worldNode = worldRepository.findWorldNodeById(w.getUUID());
+            if (worldNode == null) {
+                worldRepository.addWorld(w.getName(), w.getUUID());
+                worldNode = worldRepository.findWorldNodeById(w.getUUID());
+                if (worldNode == null) {
+                    throw new StructureAPIException("Something went wrong during creation of the 'WorldNode'"); // should't happen but just in case...
+                }
+            }
 
-            structure = structureRepository.save(structure); // store and get the ID
+            StructureNode node = structureRepository.addStructure(worldNode, plan.getName(), plan.getPlacement().getDimension(), direction); // store and get the ID
+            Structure structure = StructureFactory.instance().create(node);
             File structureDir = new File(getStructuresDirectory(world.getName()), String.valueOf(structure.getId()));
 
             // Overwrite old one if exists...
@@ -208,14 +222,137 @@ public class StructureAPI {
             } catch (IOException ex) {
                 structureDir.delete();
                 Logger.getLogger(StructureAPI.class.getName()).log(Level.SEVERE, null, ex);
-                return null;
+                structureRepository.deleteStructure(structure.getId());
+                structure = null;
+            }
+
+            if (structure != null) {
+                EventManager.getInstance().getEventBus().post(new StructureCreateEvent(structure));
             }
 
             return structure;
         }
     }
 
+    /**
+     * Creates a structure without any owners
+     *
+     * @param world The world
+     * @param plan The plan
+     * @param position The position
+     * @param direction The direction
+     * @return The created Structure
+     * @throws StructureException
+     */
+    public Structure createStructure(World world, StructurePlan plan, Vector position, Direction direction) throws StructureException {
+        return createStructureWithPlayer(null, world, plan, position, direction);
+    }
+
+    /**
+     * Creates a structure with the given placement
+     *
+     * @param world The world
+     * @param placement The placement
+     * @param position The position
+     * @param direction The direction
+     * @return The created Structure
+     * @throws StructureException
+     */
+    public Structure createStructure(World world, Placement placement, Vector position, Direction direction) throws StructureException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Builds the structure
+     *
+     * @param structure The structure that has to be build
+     * @param uuid The player uuid, The UUID will be used to register this
+     * build-operation. This method does NOT check if the player is allowed to
+     * build
+     * @param session The session to use
+     * @param options The options, use {@link Options#defaultOptions() } to get
+     * the default options
+     * @param force whether the current construction state should be ignored.
+     * Therefore forcefully stops and starts a build operation
+     */
+    public void build(final Structure structure, final UUID uuid, final EditSession session, final PlaceOptions options, boolean force) {
+        Preconditions.checkNotNull(structure, "Structure may not be null");
+        Preconditions.checkNotNull(uuid, "UUID may not be null");
+        Preconditions.checkNotNull(session, "EditSession may not be null");
+        Preconditions.checkNotNull(options, "Options may not be null");
+
+        pool.execute(structure.getId(), new Runnable() {
+
+            @Override
+            public void run() {
+                PlayerEntry playerEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(uuid);
+                AsyncPlacement placement = new AsyncPlacement(playerEntry, structure.getPlan().getPlacement());
+                placement.rotate(structure.getDirection());
+                placement.place(session, structure.getDimension().getMinPosition(), options);
+            }
+        });
+    }
+
+    public void demolish(final Structure structure, final UUID player, final EditSession session, final PlaceOptions options, boolean force) {
+        pool.execute(structure.getId(), new Runnable() {
+
+            @Override
+            public void run() {
+                PlayerEntry playerEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(player);
+                AsyncPlacement placement = new AsyncPlacement(playerEntry, structure.getPlan().getPlacement());
+                placement.rotate(structure.getDirection());
+
+                // Set Negative MASK
+                // Set Negative not natural MASK
+                placement.place(session, structure.getDimension().getMinPosition(), options);
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        });
+    }
+
+    /**
+     * Stops a structure Build/Demolish operation
+     * @param player The player, which will only be used for feedback. May be null
+     * @param structure The structure
+     */
+    public void stop(final Player player, final Structure structure) {
+        Preconditions.checkNotNull(structure, "Structure may not be null");
+        pool.execute(structure.getId(), new Runnable() {
+
+            @Override
+            public void run() {
+                UUID uuid = null;
+                Integer jobId = null;
+
+                jobLock.lock();
+                try {
+                    uuid = taskedBy.get(structure.getId());
+                    jobId = jobIds.get(structure.getId());
+                } finally {
+                    jobLock.unlock();
+                }
+
+                if (uuid != null && jobId != null) {
+                    PlayerEntry entry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(uuid);
+                    if (entry != null) {
+                        BlockPlacer blockPlacer = AsyncWorldEditMain.getInstance().getBlockPlacer();
+                        blockPlacer.cancelJob(entry, jobId);
+                        if(player != null) {
+                            player.print("Stopping structure #" + structure.getId());
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    public void stop(final Structure structure) {
+        stop(null, structure);
+    }
+
     private void checkLocation(World world, Placement p, Vector position) throws StructureException {
+        // TODO check extra restrictions based on world
+
         IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
         ILocation l = w.getSpawn();
         Vector spawnPos = new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ());
@@ -234,7 +371,7 @@ public class StructureAPI {
             throw new StructureException("Structure overlaps the world's spawn...");
         }
 
-        if (structureRepository.overlaps(world, p.getDimension())) {
+        if (!structureRepository.getStructuresWithin(world, p.getDimension(), 1).isEmpty()) {
             throw new StructureException("Structure overlaps another structure...");
         }
     }
@@ -250,9 +387,9 @@ public class StructureAPI {
     }
 
     public CategoryMenu createPlanMenu() {
-        return planMenu.createPlanMenu();
+        return planMenuFactory.createPlanMenu();
     }
-    
+
     public static boolean isSupported(File structurePlan) {
         // Placement Check
         // SubPlacements Check
@@ -342,10 +479,10 @@ public class StructureAPI {
             EventManager.getInstance().getEventBus().register(new PlacementHandlerRegisterEvent(handler));
         }
     }
-    
+
     public void registerStructureAPIPlugin(IPlugin plugin) throws StructureAPIException {
-        if(this.plugin != null) {
-            throw new StructureAPIException("Already registered a Plugin for the StructureAPI, NOTE that this method should only be used by SettlerCraft-APIS!");
+        if (this.plugin != null) {
+            throw new StructureAPIException("Already registered a Plugin for the StructureAPI, NOTE that this method should only be used by SettlerCraft-APIs!");
         }
         this.plugin = plugin;
     }
@@ -362,9 +499,12 @@ public class StructureAPI {
         return plugin.getDataFolder();
     }
 
-    
+    public void registerConfigProvider(IConfigProvider configProvider) {
+        this.config = configProvider;
+    }
 
-    
+    public IConfigProvider getConfig() {
+        return config;
+    }
 
-    
 }

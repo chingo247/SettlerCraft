@@ -25,9 +25,9 @@ package com.chingo247.structureapi.structure.construction.asyncworldedit;
 
 import com.chingo247.settlercraft.core.regions.CuboidDimension;
 import com.chingo247.structureapi.world.Direction;
-import com.chingo247.structureapi.structure.construction.options.Options;
-import com.chingo247.structureapi.plan.placement.AbstractPlacement;
-import com.chingo247.structureapi.plan.placement.Placement;
+import com.chingo247.structureapi.structure.plan.placement.AbstractPlacement;
+import com.chingo247.structureapi.structure.plan.placement.PlaceOptions;
+import com.chingo247.structureapi.structure.plan.placement.Placement;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
@@ -44,7 +44,7 @@ import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
  *
  * @author Chingo
  */
-public class AsyncPlacement extends AbstractPlacement {
+public class AsyncPlacement extends AbstractPlacement<PlaceOptions> {
 
     private final AsyncWorldEditMain awe;
     private final BlockPlacer placer;
@@ -67,7 +67,7 @@ public class AsyncPlacement extends AbstractPlacement {
     }
 
     @Override
-    public void place(EditSession editSession, final Vector pos, final Options options) {
+    public void place(EditSession editSession, final Vector pos, final PlaceOptions options) {
 
         final int jobId = getJobId();
         final EditSession session;

@@ -23,7 +23,6 @@ package com.chingo247.structureapi.platforms.bukkit;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 import com.chingo247.settlercraft.core.exception.SettlerCraftException;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
@@ -53,15 +52,15 @@ public class BKConfigProvider implements IConfigProvider {
     private boolean defaultHolograms = false;
     private HashMap<Flag, Object> defaultFlags;
     private int port;
-    
+
     private final File file = new File(BKStructureAPIPlugin.getInstance().getDataFolder(), "config.yml");
-    
 
     public void load() throws SettlerCraftException {
+
         final FileConfiguration config = YamlConfiguration.loadConfiguration(file);
         this.menuEnabled = config.getBoolean("menus.planmenu");
         this.shopEnabled = config.getBoolean("menus.planshop");
-       
+
         this.refundPercentage = config.getDouble("structure.refund");
         if (refundPercentage < 0) {
             throw new SettlerCraftException("refund node in config was negative");
@@ -82,28 +81,29 @@ public class BKConfigProvider implements IConfigProvider {
     public boolean isDefaultHolograms() {
         return defaultHolograms;
     }
-    
-    private HashMap<Flag, Object> getDefaultFlags(FileConfiguration config) throws SettlerCraftException {
-        Map<String, Object> flags = config.getConfigurationSection("structure.default-flags").getValues(false);
-        HashMap<Flag, Object> df = new HashMap<>();
-        for (Map.Entry<String, Object> entry : flags.entrySet()) {
-            Flag foundFlag = DefaultFlag.fuzzyMatchFlag(entry.getKey());
-            if (foundFlag == null) {
-                throw new SettlerCraftException("Error in SettlerCraft config.yml: Flag '" + entry.getKey() + "' doesn't exist!");
-            } else {
-                try {
-                    df.put(foundFlag, foundFlag.parseInput(WorldGuardPlugin.inst(), Bukkit.getConsoleSender(), String.valueOf(entry.getValue())));
-                } catch (InvalidFlagFormat ex) {
-                    Bukkit.getConsoleSender().sendMessage("Error in: " + file.getAbsolutePath());
-                    Logger.getLogger(BKConfigProvider.class.getName()).log(Level.SEVERE, null, ex);
-                }
 
+    private HashMap<Flag, Object> getDefaultFlags(FileConfiguration config) throws SettlerCraftException {
+        HashMap<Flag, Object> df = new HashMap<>();
+        if (config.getConfigurationSection("structure.default-flags") != null) {
+            Map<String, Object> flags = config.getConfigurationSection("structure.default-flags").getValues(false);
+            for (Map.Entry<String, Object> entry : flags.entrySet()) {
+                Flag foundFlag = DefaultFlag.fuzzyMatchFlag(entry.getKey());
+                if (foundFlag == null) {
+                    throw new SettlerCraftException("Error in SettlerCraft config.yml: Flag '" + entry.getKey() + "' doesn't exist!");
+                } else {
+                    try {
+                        df.put(foundFlag, foundFlag.parseInput(WorldGuardPlugin.inst(), Bukkit.getConsoleSender(), String.valueOf(entry.getValue())));
+                    } catch (InvalidFlagFormat ex) {
+                        Bukkit.getConsoleSender().sendMessage("Error in: " + file.getAbsolutePath());
+                        Logger.getLogger(BKConfigProvider.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                }
             }
         }
 
         return df;
     }
-
 
     @Override
     public boolean isPlanMenuEnabled() {
@@ -114,7 +114,7 @@ public class BKConfigProvider implements IConfigProvider {
     public boolean isPlanShopEnabled() {
         return shopEnabled;
     }
-    
+
     public HashMap<Flag, Object> getDefaultRegionFlags() {
         return defaultFlags;
     }
@@ -133,7 +133,6 @@ public class BKConfigProvider implements IConfigProvider {
         return useHolograms;
     }
 
-
     @Override
     public double getRefundPercentage() {
         return refundPercentage;
@@ -143,6 +142,4 @@ public class BKConfigProvider implements IConfigProvider {
         return defaultHolograms;
     }
 
-    
- 
 }
