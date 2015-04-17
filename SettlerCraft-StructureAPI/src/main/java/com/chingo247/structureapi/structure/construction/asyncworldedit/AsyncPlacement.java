@@ -23,19 +23,13 @@
  */
 package com.chingo247.structureapi.structure.construction.asyncworldedit;
 
-import com.chingo247.settlercraft.core.regions.CuboidDimension;
-import com.chingo247.structureapi.world.Direction;
-import com.chingo247.structureapi.structure.plan.placement.AbstractPlacement;
+import com.chingo247.structureapi.structure.Structure;
 import com.chingo247.structureapi.structure.plan.placement.PlaceOptions;
 import com.chingo247.structureapi.structure.plan.placement.Placement;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
-import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitScheduler;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.PlayerEntry;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.utils.WaitFor;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
@@ -44,27 +38,30 @@ import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
  *
  * @author Chingo
  */
-public class AsyncPlacement extends AbstractPlacement<PlaceOptions> {
+public class AsyncPlacement extends AbstractAsyncPlacement<PlaceOptions, Placement> {
 
-    private final AsyncWorldEditMain awe;
-    private final BlockPlacer placer;
-    private final BukkitScheduler scheduler;
-    private final Placement placement;
-    private final PlayerEntry playerEntry;
-
+    private final AsyncPlacementCallback callback;
+    private final long structureId;
+    
     /**
      * Constructor.
      *
      * @param playerEntry The PlayerEntry
      * @param placement The placement
+     * @param callback
+     * @param structure
      */
-    public AsyncPlacement(PlayerEntry playerEntry, Placement placement) {
-        this.playerEntry = playerEntry;
-        this.awe = AsyncWorldEditMain.getInstance();
-        this.placer = awe.getBlockPlacer();
-        this.placement = placement;
-        this.scheduler = Bukkit.getScheduler();
+    public AsyncPlacement(PlayerEntry playerEntry, Placement placement, AsyncPlacementCallback callback, Structure structure) {
+        super(playerEntry, placement);
+        this.callback = callback;
+        this.structureId = structure == null ? -1 : structure.getId();
     }
+    
+    public AsyncPlacement(PlayerEntry playerEntry, Placement placement) {
+        this(playerEntry, placement, null, null);
+    }
+    
+    
 
     @Override
     public void place(EditSession editSession, final Vector pos, final PlaceOptions options) {
@@ -78,13 +75,17 @@ public class AsyncPlacement extends AbstractPlacement<PlaceOptions> {
             AsyncEditSession aSession = (AsyncEditSession) editSession;
             wait = aSession.getWait();
             session = new CancelabeEditSession(aSession, aSession.getMask(), jobId);
-            job = new SCJobEntry(playerEntry, (CancelabeEditSession) session, jobId, "place", -1L);
+            job = new SCJobEntry(playerEntry, (CancelabeEditSession) session, jobId, "place", structureId);
         } else {
             session = editSession;
             wait = null;
-            job = new SCJobEntry(playerEntry, jobId, "place", -1L);
+            job = new SCJobEntry(playerEntry, jobId, "place", structureId);
         }
 
+        if(callback != null) {
+            callback.onJobAdded(jobId);
+        }
+        
         scheduler.runTaskAsynchronously(awe, new AsyncPlacementTask(placement, session, playerEntry, null, placer, job) {
 
             @Override
@@ -98,34 +99,4 @@ public class AsyncPlacement extends AbstractPlacement<PlaceOptions> {
 
     }
 
-    @Override
-    public Vector getPosition() {
-        return placement.getPosition();
-    }
-
-    @Override
-    public void rotate(Direction direction) {
-        placement.rotate(direction);
-    }
-
-    @Override
-    public void move(Vector offset) {
-        placement.move(offset);
-    }
-
-    /**
-     * Get next job id for current player
-     *
-     * @return Job id
-     */
-    private int getJobId() {
-        return placer.getJobId(playerEntry);
-    }
-
-    @Override
-    public CuboidDimension getDimension() {
-        return placement.getDimension();
-    }
-
-  
 }

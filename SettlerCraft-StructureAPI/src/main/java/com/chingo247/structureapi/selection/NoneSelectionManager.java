@@ -23,9 +23,9 @@
  */
 package com.chingo247.structureapi.selection;
 
-import com.chingo247.settlercraft.core.regions.CuboidDimension;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.regions.CuboidRegion;
 
 /**
  * A Non-selection manager. Which will print the current selection to the player
@@ -46,8 +46,8 @@ public class NoneSelectionManager extends ASelectionManager {
 
     @Override
     public void select(Player player, Vector start, Vector end) {
-        CuboidDimension dimension = new CuboidDimension(start, end);
-        player.print("You've selected area: " + dimension.getMinPosition() + ", " + dimension.getMaxPosition());
+        CuboidRegion dimension = new CuboidRegion(start, end);
+        player.print("You've selected area: " + dimension.getMinimumPoint()+ ", " + dimension.getMaximumPoint());
         putSelection(new Selection(player.getUniqueId(), start, end));
     }
 

@@ -58,7 +58,6 @@ public class PlanListener implements Listener {
         
         AItemStack stack = BukkitPlatform.wrapItem(pie.getItem());
         if(StructurePlaceHandler.isStructurePlan(stack)) {
-            System.out.println("Is Structureplan!");
             pie.setCancelled(true);
         }
         

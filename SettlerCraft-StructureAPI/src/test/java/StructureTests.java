@@ -23,19 +23,24 @@
  */
 
 import com.chingo247.settlercraft.core.persistence.neo4j.Neo4jDatabase;
-import com.chingo247.settlercraft.core.persistence.repository.world.WorldNode;
-import com.chingo247.settlercraft.core.persistence.repository.world.WorldRepository;
-import com.chingo247.settlercraft.core.regions.CuboidDimension;
-import com.chingo247.structureapi.persistence.repository.StructureData;
-import com.chingo247.structureapi.persistence.repository.StructureRepository;
-import com.chingo247.structureapi.world.Direction;
+import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
+import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
+import com.chingo247.settlercraft.core.persistence.dao.world.WorldDAO;
+import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerDAO;
+import com.chingo247.settlercraft.core.persistence.dao.world.DefaultWorldFactory;
+import com.chingo247.settlercraft.core.World;
+import com.chingo247.structureapi.persistence.dao.structure.StructureDAO;
+import com.chingo247.structureapi.persistence.dao.structure.StructureNode;
+import com.chingo247.structureapi.persistence.dao.structure.StructureOwnerTypes;
+import com.chingo247.structureapi.persistence.dao.structure.StructureWorldNode;
+import com.chingo247.settlercraft.core.Direction;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.regions.CuboidRegion;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -48,80 +53,128 @@ import org.neo4j.graphdb.Transaction;
  */
 public class StructureTests {
 
-    private static StructureRepository structureRepository;
-    private static WorldRepository worldRepository;
-    private static WorldNode worldNode;
+    private static StructureDAO structureDAO;
+    private static WorldDAO worldDAO;
+    private static SettlerDAO settlerDAO;
+    private WorldNode worldNode;
+    private SettlerNode settlerNode;
     private static GraphDatabaseService graph;
-
-    public StructureTests() {
-        
-    }
+    private static boolean firstTime = true;
+    private UUID settlerUUID;
 
     @BeforeClass
     public static void setUpClass() {
         System.out.println("Setting up");
         Neo4jDatabase database = new Neo4jDatabase(new File("G:\\Neo4j\\SettlerCraft"), "testdb");
-        structureRepository = new StructureRepository(database.getGraph());
-        worldRepository = new WorldRepository(database.getGraph());
-        UUID worldUUID = UUID.randomUUID();
-        worldRepository.addWorld("testWorld", worldUUID);
-        worldNode = worldRepository.findWorldNodeById(worldUUID);
+        structureDAO = new StructureDAO(database.getGraph());
+        worldDAO = new WorldDAO(database.getGraph());
+        settlerDAO = new SettlerDAO(database.getGraph());
         graph = database.getGraph();
     }
 
     @AfterClass
     public static void tearDownClass() {
+        graph.shutdown();
     }
+
+    private static int count = 0;
 
     @Before
     public void setUp() {
-        
+        if (firstTime) {
+            System.out.println("Resetting graph");
+            try (Transaction tx = graph.beginTx()) {
+                graph.execute("START n=node(*) OPTIONAL MATCH (n)-[r]-() delete n,r");
+                tx.success();
+            }
+            firstTime = false;
+        }
+        count++;
+        System.out.println("test: " + count);
+
+        try (Transaction tx = graph.beginTx()) {
+            UUID worldUUID = UUID.randomUUID();
+            worldDAO.addWorld("testWorld", worldUUID);
+            worldNode = worldDAO.find(worldUUID);
+
+            settlerUUID = UUID.randomUUID();
+            settlerDAO.addSettler("testPlayer", settlerUUID);
+            settlerNode = settlerDAO.find(settlerUUID);
+            tx.success();
+        }
+
     }
 
     @After
     public void tearDown() {
     }
 
-    // TODO add test methods here.
-    // The methods must be annotated with annotation @Test. For example:
-    //
     @Test
     public void testAddStructure1() {
         long start = System.currentTimeMillis();
-        structureRepository.addStructure(worldNode, "test-", new CuboidDimension(Vector.ZERO, Vector.ONE), Direction.NORTH);
+        try (Transaction tx = graph.beginTx()) {
+            structureDAO.addStructure("test", new CuboidRegion(Vector.ZERO, Vector.ONE), Direction.NORTH, 100d);
+            tx.success();
+        }
         long time = System.currentTimeMillis() - start;
         System.out.println("testAddStructure1: " + time + " ms");
     }
 
     @Test
-    public void testAddStructures1000() {
+    public void testAddStructures100() {
         long start = System.currentTimeMillis();
-        addStructures(1000);
+
+        try (Transaction tx = graph.beginTx()) {
+            for (int i = 0; i < 100; i++) {
+                structureDAO.addStructure("test", new CuboidRegion(Vector.ZERO, Vector.ONE), Direction.NORTH, 1000d);
+            }
+            tx.success();
+        }
+
         long time = System.currentTimeMillis() - start;
         System.out.println("testAddStructures1000: " + time + " ms");
     }
-    
+
     @Test
-    public void testAddStructures10K() {
+    public void testAddStructures1000() {
         long start = System.currentTimeMillis();
-        addStructures(10_000);
+        try (Transaction tx = graph.beginTx()) {
+            for (int i = 0; i < 1000; i++) {
+                structureDAO.addStructure("test", new CuboidRegion(Vector.ZERO, Vector.ONE), Direction.NORTH, 1000d);
+            }
+            tx.success();
+        }
         long time = System.currentTimeMillis() - start;
         System.out.println("testAddStructures10K: " + time + " ms");
     }
 
-    private void addStructures(int amount) {
-        List<StructureData> data = new ArrayList<>(amount);
-        System.out.println("Generating: " + amount);
+    @Test
+    public void testCountStructures() {
+        long toAdd = 5;
         try (Transaction tx = graph.beginTx()) {
-            for (int i = 0; i < amount; i++) {
-                data.add(new StructureData("test", worldNode.getUUID(), worldNode.getName(), Direction.NORTH, new CuboidDimension(Vector.ZERO, Vector.ONE)));
+            for (int i = 0; i < toAdd; i++) {
+                StructureNode structureNode = structureDAO.addStructure("test", new CuboidRegion(Vector.ZERO, Vector.ONE), Direction.NORTH, 1000d);
+                structureNode.addOwner(settlerNode, StructureOwnerTypes.MEMBER);
             }
+            long owned = structureDAO.getStructureCountForSettler(settlerUUID);
+            Assert.assertTrue(toAdd == owned);
             tx.success();
         }
-        
-        System.out.println("Adding structures...");
-        long start = System.currentTimeMillis();
-        structureRepository.bulkCreateStructures(worldNode, data);
-        System.out.println("Done in: " + (System.currentTimeMillis() - start) + " ms");
+    }
+    
+    @Test
+    public void testHasStructuresWithin() {
+        try (Transaction tx = graph.beginTx()) {
+            StructureNode structureNode = structureDAO.addStructure("test", new CuboidRegion(Vector.ZERO, Vector.ONE), Direction.NORTH, 0);
+            StructureWorldNode structureWorldNode = new StructureWorldNode(worldNode);
+            structureWorldNode.addStructure(structureNode);
+            World defaultWorld = DefaultWorldFactory.instance().createWorld(structureWorldNode);
+            
+            boolean hasWithin = structureDAO.hasStructuresWithin(defaultWorld, new CuboidRegion(Vector.ZERO, Vector.ONE));
+            
+            
+            Assert.assertTrue(hasWithin);
+            tx.success();
+        }
     }
 }

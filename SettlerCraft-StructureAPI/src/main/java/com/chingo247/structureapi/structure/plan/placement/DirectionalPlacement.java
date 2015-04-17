@@ -24,13 +24,14 @@
  */
 package com.chingo247.structureapi.structure.plan.placement;
 
-import com.chingo247.structureapi.world.Direction;
+import com.chingo247.settlercraft.core.Direction;
 
 
 
 /**
  *
  * @author Chingo
+ * @param <T>
  */
 public abstract class DirectionalPlacement<T> extends AbstractPlacement<T> {
     

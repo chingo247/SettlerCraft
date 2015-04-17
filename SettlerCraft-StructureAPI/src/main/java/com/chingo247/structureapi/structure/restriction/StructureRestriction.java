@@ -23,9 +23,9 @@
  */
 package com.chingo247.structureapi.structure.restriction;
 
-import com.chingo247.settlercraft.core.regions.CuboidDimensional;
 import com.chingo247.structureapi.structure.exception.StructureException;
 import com.chingo247.structureapi.structure.plan.placement.Placement;
+import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 
 /**
@@ -60,11 +60,7 @@ public abstract class StructureRestriction {
         return message;
     }
     
-    
-
-    
-    
-    public abstract boolean test(World world, CuboidDimensional cuboid, Placement placement);
+    public abstract boolean test(World world, CuboidRegion region, Placement placement);
     
     /**
      * Used to check if a Structure may be build on a specified location.
@@ -73,7 +69,7 @@ public abstract class StructureRestriction {
      * @param placement The type of the Structure
      * @throws com.chingo247.structureapi.structure.exception.StructureException
      */
-    public final void allow(World world, CuboidDimensional cuboid, Placement placement) throws StructureException {
+    public final void allow(World world, CuboidRegion cuboid, Placement placement) throws StructureException {
         if(!test(world, cuboid, placement)) {
             throw new StructureException(message);
         }

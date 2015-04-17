@@ -39,6 +39,10 @@ public abstract class APlatform {
         return getServer().getPlayer(player);
     }
     
+    public IPlayer getPlayer(String player) {
+        return getServer().getPlayer(player);
+    }
+    
     public abstract AInventory createInventory(String title, int slots);
     
 }

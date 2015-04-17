@@ -25,8 +25,8 @@
 package com.chingo247.structureapi.structure.plan;
 
 import com.chingo247.structureapi.structure.plan.placement.Placement;
-import com.chingo247.settlercraft.core.regions.CuboidDimension;
 import com.chingo247.structureapi.structure.plan.exception.PlanException;
+import com.chingo247.structureapi.structure.plan.util.RegionUtil;
 import com.google.common.collect.Sets;
 import java.io.File;
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ public final class StructurePlanComplex extends AbstractStructurePlan implements
         if(parent == null) {
             return true;
         // StructurePlan is referenced in a parent, but outside
-        } else if(!CuboidDimension.isDimensionWithin(parent.placement, placement)) {
+        } else if(!RegionUtil.isDimensionWithin(parent.placement.getCuboidRegion(), placement.getCuboidRegion())) {
             // If the parent isTopLevel then this child is also toplevel, because it was outside it's parent
             return parent.isTopLevel();
         } else {
@@ -80,7 +80,7 @@ public final class StructurePlanComplex extends AbstractStructurePlan implements
     
     @Override
     public void addPlacement(Placement placement) {
-        if(CuboidDimension.isDimensionWithin(this.placement, placement)) {
+        if(RegionUtil.isDimensionWithin(this.placement.getCuboidRegion(), placement.getCuboidRegion())) {
             internal.add(placement);
         } else {
             external.add(placement);
@@ -90,7 +90,7 @@ public final class StructurePlanComplex extends AbstractStructurePlan implements
     @Override
     public void addStructurePlan(StructurePlan plan) {
         if(matchesAnyAncestors(plan.getFile())) throw new PlanException("Plans may not be equal to any of its ancestors.");
-        if(CuboidDimension.isDimensionWithin(placement, plan.getPlacement())) {
+        if(RegionUtil.isDimensionWithin(placement.getCuboidRegion(), plan.getPlacement().getCuboidRegion())) {
             internalPlans.add(plan);
         } else {
             externalPlans.add(plan);

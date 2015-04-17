@@ -23,7 +23,7 @@
  */
 package com.chingo247.structureapi.structure.plan.document;
 
-import com.chingo247.structureapi.world.Direction;
+import com.chingo247.settlercraft.core.Direction;
 import com.sk89q.worldedit.Vector;
 import java.io.File;
 import org.dom4j.Element;

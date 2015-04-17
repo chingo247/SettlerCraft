@@ -23,10 +23,10 @@
  */
 package com.chingo247.structureapi.structure.plan.placement;
 
-import com.chingo247.settlercraft.core.regions.CuboidDimensional;
-import com.chingo247.structureapi.world.Direction;
+import com.chingo247.settlercraft.core.Direction;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.regions.CuboidRegion;
 import java.util.UUID;
 
 /**
@@ -34,7 +34,7 @@ import java.util.UUID;
  * @author Chingo
  * @param <T>
  */
-public interface Placement<T> extends CuboidDimensional{
+public interface Placement<T> {
     
     public UUID getId();
     
@@ -47,5 +47,7 @@ public interface Placement<T> extends CuboidDimensional{
     public void rotate(Direction direction);
     
     public void move(Vector offset);
+    
+    public CuboidRegion getCuboidRegion();
     
 }

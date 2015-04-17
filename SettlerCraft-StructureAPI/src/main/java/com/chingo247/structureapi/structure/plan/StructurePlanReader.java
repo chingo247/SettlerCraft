@@ -88,7 +88,7 @@ public class StructurePlanReader {
     
    
     public StructurePlan readFile(File structurePlanFile) {
-        System.out.println("Reading file: " + structurePlanFile);
+        System.out.println("Reading file: " + structurePlanFile.getAbsolutePath());
         SchematicManager sdm = SchematicManager.getInstance();
         sdm.load(structurePlanFile.getParentFile());
         StructurePlanProcessor spp = new StructurePlanProcessor(structurePlanFile);

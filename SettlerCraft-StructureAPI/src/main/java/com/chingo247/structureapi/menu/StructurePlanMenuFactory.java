@@ -30,6 +30,7 @@ import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.structureapi.structure.plan.placement.Placement;
 import com.chingo247.structureapi.structure.plan.StructurePlan;
 import com.google.common.base.Preconditions;
+import com.sk89q.worldedit.regions.CuboidRegion;
 
 /**
  *
@@ -51,9 +52,11 @@ public class StructurePlanMenuFactory {
     public void load(StructurePlan plan) {
         Placement placement = plan.getPlacement();
        
-        int width = placement.getDimension().getMaxX();
-        int height = placement.getDimension().getMaxY();
-        int length = placement.getDimension().getMaxZ();
+        CuboidRegion region = placement.getCuboidRegion();
+        
+        int width = region.getMaximumPoint().getBlockX();
+        int height = region.getMaximumPoint().getBlockY();
+        int length = region.getMaximumPoint().getBlockZ();
         
         String id = plan.getId();
         String name = plan.getName();

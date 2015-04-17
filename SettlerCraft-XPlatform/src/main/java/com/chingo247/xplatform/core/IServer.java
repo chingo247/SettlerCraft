@@ -34,5 +34,8 @@ public interface IServer {
     public IWorld getWorld(String world);
     
     public IWorld getWorld(UUID worldUUID);
+
+    @Deprecated
+    public IPlayer getPlayer(String player);
     
 }

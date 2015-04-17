@@ -24,7 +24,7 @@
  */
 package com.chingo247.structureapi.structure.event;
 
-import com.chingo247.structureapi.persistence.repository.IStructure;
+import com.chingo247.structureapi.structure.Structure;
 
 
 /**
@@ -33,13 +33,13 @@ import com.chingo247.structureapi.persistence.repository.IStructure;
  */
 public class StructureEvent {
     
-    private final IStructure structure;
+    private final Structure structure;
 
-    public StructureEvent(IStructure structure) {
+    public StructureEvent(Structure structure) {
         this.structure = structure;
     }
 
-    public IStructure getStructure() {
+    public Structure getStructure() {
         return structure;
     }
     

@@ -63,6 +63,9 @@
  */
 package com.chingo247.structureapi.structure.construction.asyncworldedit;
 
+import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
+import com.chingo247.structureapi.structure.event.async.StructureJobCompleteEvent;
+import com.chingo247.structureapi.structure.event.async.StructureJobStartedEvent;
 import com.chingo247.xplatform.util.ChatColors;
 import java.util.ArrayList;
 import java.util.List;
@@ -116,6 +119,8 @@ public class SCJobEntry extends JobEntry {
      * All job state changed events
      */
     private final List<IJobEntryListener> m_jobStateChanged;
+    
+
 
     
     @Override
@@ -179,6 +184,9 @@ public class SCJobEntry extends JobEntry {
         m_cEditSession = null;
         m_jobStateChanged = new ArrayList<IJobEntryListener>();
         m_taskId = taskID;
+        
+        
+        
     }
 
     
@@ -201,6 +209,9 @@ public class SCJobEntry extends JobEntry {
         m_cEditSession = cEditSession;
         m_jobStateChanged = new ArrayList<IJobEntryListener>();
         m_taskId = taskID;
+        
+        
+        
     }
 
     /**
@@ -241,18 +252,19 @@ public class SCJobEntry extends JobEntry {
         
         switch (m_status) {
             case Done:
-                
                 bp.removeJob(player, this);
                 return true;
             case PlacingBlocks:
                 setStatus(JobStatus.Done);
                 bp.removeJob(player, this);
+                AsyncEventManager.getInstance().post(new StructureJobCompleteEvent(m_taskId, getJobId()));
                 break;
             case Initializing:
             case Preparing:
             case Waiting:
-                setStatus(JobStatus.PlacingBlocks);
                 
+                setStatus(JobStatus.PlacingBlocks);
+                AsyncEventManager.getInstance().post(new StructureJobStartedEvent(m_taskId, getJobId()));
                 break;
         }
 

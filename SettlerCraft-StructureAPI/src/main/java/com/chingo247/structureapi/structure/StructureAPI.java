@@ -7,25 +7,30 @@ package com.chingo247.structureapi.structure;
 
 import com.chingo247.menuapi.menu.CategoryMenu;
 import com.chingo247.xplatform.core.APlatform;
-import com.chingo247.xplatform.core.ILocation;
 import com.chingo247.xplatform.core.IPlugin;
 import com.chingo247.xplatform.core.IWorld;
 import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.structureapi.world.Direction;
+import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.event.EventManager;
+import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
 import com.chingo247.settlercraft.core.exception.SettlerCraftException;
-import com.chingo247.settlercraft.core.persistence.repository.world.WorldNode;
-import com.chingo247.settlercraft.core.persistence.repository.world.WorldRepository;
-import com.chingo247.settlercraft.core.regions.CuboidDimension;
+import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
+import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
+import com.chingo247.settlercraft.core.persistence.dao.world.WorldDAO;
 import com.chingo247.settlercraft.core.util.KeyPool;
 import com.chingo247.structureapi.exception.StructureAPIException;
 import com.chingo247.structureapi.structure.exception.ElementValueException;
 import com.chingo247.structureapi.structure.exception.StructureException;
 import com.chingo247.structureapi.menu.StructurePlanMenuFactory;
 import com.chingo247.structureapi.menu.StructurePlanMenuReader;
-import com.chingo247.structureapi.persistence.repository.StructureNode;
-import com.chingo247.structureapi.persistence.repository.StructureRepository;
+import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerDAO;
+import com.chingo247.settlercraft.core.persistence.dao.world.DefaultWorldFactory;
+import com.chingo247.structureapi.persistence.dao.structure.StructureDAO;
+import com.chingo247.structureapi.persistence.dao.structure.StructureNode;
+import com.chingo247.structureapi.persistence.dao.structure.StructureOwnerTypes;
+import com.chingo247.structureapi.persistence.dao.structure.StructureWorldNode;
 import com.chingo247.structureapi.platforms.bukkit.IConfigProvider;
+import com.chingo247.structureapi.structure.construction.asyncworldedit.AsyncDemolishingPlacement;
 import com.chingo247.structureapi.structure.plan.placement.event.PlacementHandlerRegisterEvent;
 import com.chingo247.structureapi.structure.plan.exception.PlacementException;
 import com.chingo247.structureapi.structure.plan.placement.Placement;
@@ -35,22 +40,36 @@ import com.chingo247.structureapi.structure.plan.StructurePlan;
 import com.chingo247.structureapi.structure.plan.StructurePlanManager;
 import com.chingo247.structureapi.structure.plan.document.PlacementElement;
 import com.chingo247.structureapi.structure.construction.asyncworldedit.AsyncPlacement;
+import com.chingo247.structureapi.structure.construction.asyncworldedit.AsyncPlacementCallback;
 import com.chingo247.structureapi.structure.construction.options.Options;
 import com.chingo247.structureapi.structure.event.StructureCreateEvent;
+import com.chingo247.structureapi.structure.event.async.StructureJobAddedEvent;
+import com.chingo247.structureapi.structure.event.async.StructureJobCanceledEvent;
+import com.chingo247.structureapi.structure.event.async.StructureJobCompleteEvent;
+import com.chingo247.structureapi.structure.event.async.StructureJobStartedEvent;
 import com.chingo247.structureapi.structure.plan.GlobalPlanManager;
 import com.chingo247.structureapi.structure.plan.SubStructuredPlan;
 import com.chingo247.structureapi.structure.plan.placement.PlaceOptions;
 import com.chingo247.structureapi.structure.plan.placement.SchematicPlacement;
+import com.chingo247.structureapi.structure.plan.placement.demolishing.DemolishingOptions;
+import com.chingo247.structureapi.structure.plan.placement.demolishing.DemolishingPlacement;
 import com.chingo247.structureapi.util.PlacementUtil;
+import com.chingo247.xplatform.core.IColor;
+import com.chingo247.xplatform.core.ILocation;
+import com.chingo247.xplatform.core.IPlayer;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import com.google.common.eventbus.AllowConcurrentEvents;
+import com.google.common.eventbus.Subscribe;
 import com.google.common.io.Files;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -60,6 +79,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.dom4j.DocumentException;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
@@ -70,13 +91,14 @@ import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
  */
 public class StructureAPI {
 
-    public static final String STRUCTURE_PLAN_FILE_NAME = "structureplan.xml";
+    public static final String STRUCTURE_PLAN_FILE_NAME = "plan.xml";
     public static final String PLUGIN_NAME = "SettlerCraft";
     public static final String PLANS_DIRECTORY = "plans";
     private static final Map<String, Map<String, PlacementHandler>> handlers = Maps.newHashMap();
 
-    private final StructureRepository structureRepository;
-    private final WorldRepository worldRepository;
+    private final StructureDAO structureDAO;
+    private final WorldDAO worldDAO;
+    private final SettlerDAO settlerDAO;
 
     private final APlatform platform;
     private IPlugin plugin;
@@ -88,29 +110,31 @@ public class StructureAPI {
     private final ExecutorService executor;
     private final KeyPool<Long> pool;
     private CategoryMenu planMenu;
+    private final GraphDatabaseService graph;
 
     private boolean isLoadingPlans = false;
     private static StructureAPI instance;
 
-    private Map<Long, UUID> taskedBy = Maps.newHashMap();
-    private Map<Long, Integer> jobIds = Maps.newHashMap();
+    private Map<Long, StructureEntry> tasks;
     private final Lock jobLock = new ReentrantLock();
+    private final IColor COLOR;
 
     private StructureAPI() {
         this.executor = SettlerCraft.getInstance().getExecutor();
         this.platform = SettlerCraft.getInstance().getPlatform();
+        this.graph = SettlerCraft.getInstance().getNeo4j();
 
         // Register Handlers first...
-//        registerHandler(new GeneratedCuboidHandler());
-//        registerHandler(new GeneratedCylinderHandler());
-//        registerHandler(new GeneratedEllipsoidHandler());
-//        registerHandler(new GeneratedPolygonal2DHandler());
         registerHandler(new SchematicPlacementHandler());
         this.pool = new KeyPool<>(executor);
 
         // Now register the GlobalPlanManager
-        this.structureRepository = new StructureRepository();
-        this.worldRepository = new WorldRepository();
+        this.structureDAO = new StructureDAO(graph);
+        this.worldDAO = new WorldDAO(graph);
+        this.settlerDAO = new SettlerDAO(graph);
+        this.COLOR = platform.getChatColors();
+        this.tasks = new HashMap<>();
+        AsyncEventManager.getInstance().register(new StructureEventHandler());
     }
 
     public static StructureAPI getInstance() {
@@ -159,48 +183,74 @@ public class StructureAPI {
     /**
      * Creates a structure and sets the given player as MASTER owner
      *
-     * @param player The player who will be the MASTER owner
      * @param world The world
      * @param plan The plan
      * @param position The position
      * @param direction The direction
+     * @param owner The owner of the structure
      * @return The created Structure
      * @throws StructureException
      */
-    public Structure createStructureWithPlayer(Player player, World world, StructurePlan plan, Vector position, Direction direction) throws StructureException {
+    public Structure createStructure(World world, StructurePlan plan, Vector position, Direction direction, Player owner) throws StructureException {
         Preconditions.checkNotNull(world);
         Preconditions.checkNotNull(plan);
         Preconditions.checkNotNull(direction);
         Preconditions.checkNotNull(position);
 
         if (plan instanceof SubStructuredPlan) {
+            //TODO Add Structure Restrictions HERE! 
             System.out.println("Structure is SubstructurePlan!");
             return null;
         } else {
-            System.out.println("Structure is StructurePlan!");
+
+            //TODO Add Structure Restrictions HERE! 
             Placement placement = plan.getPlacement();
 
             checkLocation(world, placement, position);
 
-            Vector min = position;
-            Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getDimension().getMaxPosition());
-
-            System.out.println("Min: " + min);
-            System.out.println("Max: " + max);
-            System.out.println("Direction: " + direction);
-
             IWorld w = platform.getServer().getWorld(world.getName());
-            WorldNode worldNode = worldRepository.findWorldNodeById(w.getUUID());
-            if (worldNode == null) {
-                worldRepository.addWorld(w.getName(), w.getUUID());
-                worldNode = worldRepository.findWorldNodeById(w.getUUID());
+            Structure structure = null;
+            try (Transaction tx = graph.beginTx()) {
+
+                // Perform area check!
+                Vector min = position;
+                Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getCuboidRegion().getMaximumPoint());
+                CuboidRegion structureRegion = new CuboidRegion(min, max);
+                System.out.println("created size: " + structureRegion.getMinimumPoint() + ", " + structureRegion.getMaximumPoint());
+                
+
+                // World exists?
+                WorldNode worldNode = worldDAO.find(w.getUUID());
                 if (worldNode == null) {
-                    throw new StructureAPIException("Something went wrong during creation of the 'WorldNode'"); // should't happen but just in case...
+                    worldDAO.addWorld(w.getName(), w.getUUID());
+                    worldNode = worldDAO.find(w.getUUID());
+                    if (worldNode == null) {
+                        tx.success(); // End here
+                        throw new StructureAPIException("Something went wrong during creation of the 'WorldNode'"); // SHOULD NEVER HAPPEN
+                    }
                 }
+                com.chingo247.settlercraft.core.World scWorld = DefaultWorldFactory.instance().createWorld(worldNode);
+                if (structureDAO.hasStructuresWithin(scWorld, structureRegion)) {
+                    tx.success(); // End here
+                    throw new StructureException("Structure overlaps another structure...");
+                }
+
+                StructureNode structureNode = structureDAO.addStructure(plan.getName(), structureRegion, direction, plan.getPrice());
+                StructureWorldNode structureWorldNode = new StructureWorldNode(worldNode);
+                structureWorldNode.addStructure(structureNode);
+
+                // Add owner!
+                if (owner != null) {
+                    SettlerNode settler = settlerDAO.find(owner.getUniqueId());
+                    if (settler == null) {
+                        throw new RuntimeException("Settler was null!"); // SHOULD NEVER HAPPEN AS SETTLERS ARE ADDED AT MOMENT OF FIRST LOGIN
+                    }
+                    structureNode.addOwner(settler, StructureOwnerTypes.MASTER);
+                }
+                structure = DefaultStructureFactory.instance().makeStructure(structureNode);
+                tx.success();
             }
 
-            StructureNode node = structureRepository.addStructure(worldNode, plan.getName(), plan.getPlacement().getDimension(), direction); // store and get the ID
-            Structure structure = StructureFactory.instance().create(node);
             File structureDir = new File(getStructuresDirectory(world.getName()), String.valueOf(structure.getId()));
 
             // Overwrite old one if exists...
@@ -222,7 +272,10 @@ public class StructureAPI {
             } catch (IOException ex) {
                 structureDir.delete();
                 Logger.getLogger(StructureAPI.class.getName()).log(Level.SEVERE, null, ex);
-                structureRepository.deleteStructure(structure.getId());
+                try (Transaction tx = graph.beginTx()) {
+                    structureDAO.delete(structure.getId());
+                    tx.success();
+                }
                 structure = null;
             }
 
@@ -231,6 +284,30 @@ public class StructureAPI {
             }
 
             return structure;
+        }
+    }
+
+    private void checkLocation(World world, Placement p, Vector position) throws StructureException {
+        Vector min = p.getCuboidRegion().getMinimumPoint().add(position);
+        Vector max = min.add(p.getCuboidRegion().getMaximumPoint());
+        CuboidRegion placementDimension = new CuboidRegion(min, max);
+
+        // Below the world?s
+        if (placementDimension.getMinimumPoint().getBlockY() <= 1) {
+            throw new StructureException("Structure must be placed at a minimum height of 1");
+        }
+
+        // Exceeds world height limit?
+        if (placementDimension.getMaximumPoint().getBlockY() > world.getMaxY()) {
+            throw new StructureException("Structure will reach above the world's max height (" + world.getMaxY() + ")");
+        }
+
+        // Check for overlap on the world's 'SPAWN'
+        IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
+        ILocation l = w.getSpawn();
+        Vector spawnPos = new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ());
+        if (placementDimension.contains(spawnPos)) {
+            throw new StructureException("Structure overlaps the world's spawn...");
         }
     }
 
@@ -245,7 +322,7 @@ public class StructureAPI {
      * @throws StructureException
      */
     public Structure createStructure(World world, StructurePlan plan, Vector position, Direction direction) throws StructureException {
-        return createStructureWithPlayer(null, world, plan, position, direction);
+        return createStructure(world, plan, position, direction, null);
     }
 
     /**
@@ -266,7 +343,7 @@ public class StructureAPI {
      * Builds the structure
      *
      * @param structure The structure that has to be build
-     * @param uuid The player uuid, The UUID will be used to register this
+     * @param player The player uuid, The UUID will be used to register this
      * build-operation. This method does NOT check if the player is allowed to
      * build
      * @param session The session to use
@@ -275,9 +352,9 @@ public class StructureAPI {
      * @param force whether the current construction state should be ignored.
      * Therefore forcefully stops and starts a build operation
      */
-    public void build(final Structure structure, final UUID uuid, final EditSession session, final PlaceOptions options, boolean force) {
+    public void build(final Structure structure, final UUID player, final EditSession session, final PlaceOptions options, boolean force) {
         Preconditions.checkNotNull(structure, "Structure may not be null");
-        Preconditions.checkNotNull(uuid, "UUID may not be null");
+        Preconditions.checkNotNull(player, "UUID may not be null");
         Preconditions.checkNotNull(session, "EditSession may not be null");
         Preconditions.checkNotNull(options, "Options may not be null");
 
@@ -285,37 +362,58 @@ public class StructureAPI {
 
             @Override
             public void run() {
-                PlayerEntry playerEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(uuid);
-                AsyncPlacement placement = new AsyncPlacement(playerEntry, structure.getPlan().getPlacement());
+                PlayerEntry playerEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(player);
+                tasks.put(structure.getId(), new StructureEntry(-1, false, player));
+
+                AsyncPlacement placement = new AsyncPlacement(playerEntry, structure.getPlan().getPlacement(), new AsyncPlacementCallback() {
+
+                    @Override
+                    public void onJobAdded(int jobId) {
+                        AsyncEventManager.getInstance().post(new StructureJobAddedEvent(structure.getId(), jobId, false));
+                    }
+                }, structure);
                 placement.rotate(structure.getDirection());
-                placement.place(session, structure.getDimension().getMinPosition(), options);
+                placement.place(session, structure.getCuboidRegion().getMinimumPoint(), options);
             }
         });
     }
 
-    public void demolish(final Structure structure, final UUID player, final EditSession session, final PlaceOptions options, boolean force) {
+    public void demolish(final Structure structure, final UUID player, final EditSession session, final DemolishingOptions options, boolean force) {
         pool.execute(structure.getId(), new Runnable() {
 
             @Override
             public void run() {
                 PlayerEntry playerEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(player);
-                AsyncPlacement placement = new AsyncPlacement(playerEntry, structure.getPlan().getPlacement());
-                placement.rotate(structure.getDirection());
+                Placement p = structure.getPlan().getPlacement();
+                p.rotate(structure.getDirection());
+                CuboidRegion region = p.getCuboidRegion();
+                
+                DemolishingPlacement dp = new DemolishingPlacement(region.getMaximumPoint());
+                tasks.put(structure.getId(), new StructureEntry(-1, true, player));
+                AsyncDemolishingPlacement placement = new AsyncDemolishingPlacement(playerEntry, dp, new AsyncPlacementCallback() {
+
+                    @Override
+                    public void onJobAdded(int jobId) {
+                        AsyncEventManager.getInstance().post(new StructureJobAddedEvent(structure.getId(), jobId, true));
+                    }
+                }, structure);
 
                 // Set Negative MASK
                 // Set Negative not natural MASK
-                placement.place(session, structure.getDimension().getMinPosition(), options);
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                placement.place(session, structure.getCuboidRegion().getMinimumPoint(), options);
             }
         });
     }
 
     /**
      * Stops a structure Build/Demolish operation
-     * @param player The player, which will only be used for feedback. May be null
+     *
+     * @param player The player, which will only be used for feedback. May be
+     * null
      * @param structure The structure
+     * @param force
      */
-    public void stop(final Player player, final Structure structure) {
+    public void stop(final Player player, final Structure structure, boolean force) {
         Preconditions.checkNotNull(structure, "Structure may not be null");
         pool.execute(structure.getId(), new Runnable() {
 
@@ -326,8 +424,13 @@ public class StructureAPI {
 
                 jobLock.lock();
                 try {
-                    uuid = taskedBy.get(structure.getId());
-                    jobId = jobIds.get(structure.getId());
+                    StructureEntry entry = tasks.get(structure.getId());
+                    if(entry == null) {
+                        return;
+                    }
+                    
+                    uuid = entry.getWhoStarted();
+                    jobId = entry.getJobId();
                 } finally {
                     jobLock.unlock();
                 }
@@ -337,7 +440,7 @@ public class StructureAPI {
                     if (entry != null) {
                         BlockPlacer blockPlacer = AsyncWorldEditMain.getInstance().getBlockPlacer();
                         blockPlacer.cancelJob(entry, jobId);
-                        if(player != null) {
+                        if (player != null) {
                             player.print("Stopping structure #" + structure.getId());
                         }
                     }
@@ -346,38 +449,12 @@ public class StructureAPI {
         });
     }
 
-    public void stop(final Structure structure) {
-        stop(null, structure);
-    }
-
-    private void checkLocation(World world, Placement p, Vector position) throws StructureException {
-        // TODO check extra restrictions based on world
-
-        IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
-        ILocation l = w.getSpawn();
-        Vector spawnPos = new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ());
-
-        CuboidDimension placementDimension = new CuboidDimension(p.getDimension().getMinPosition().add(position), p.getDimension().getMaxPosition().add(position));
-
-        if (placementDimension.getMinY() <= 1) {
-            throw new StructureException("Structure must be placed at a minimum height of 1");
-        }
-
-        if (placementDimension.getMaxY() > w.getMaxHeight()) {
-            throw new StructureException("Structure will reach above the world's max height (" + w.getMaxHeight() + ")");
-        }
-
-        if (CuboidDimension.isPositionWithin(placementDimension, spawnPos)) {
-            throw new StructureException("Structure overlaps the world's spawn...");
-        }
-
-        if (!structureRepository.getStructuresWithin(world, p.getDimension(), 1).isEmpty()) {
-            throw new StructureException("Structure overlaps another structure...");
-        }
+    public void stop(final Structure structure, boolean force) {
+        stop(null, structure, force);
     }
 
     protected final File getStructuresDirectory(String world) {
-        File f = new File(SettlerCraft.getInstance().getWorkingDirectory(), "worlds//" + world + "//structures");
+        File f = new File(getWorkingDirectory().getAbsolutePath() + "//worlds//" + world + "//structures");
         f.mkdirs(); // creates if not exists..
         return f;
     }
@@ -505,6 +582,237 @@ public class StructureAPI {
 
     public IConfigProvider getConfig() {
         return config;
+    }
+
+    /**
+     *
+     * @author Chingo
+     */
+    private class StructureEventHandler {
+
+        StructureEventHandler() {
+        }
+
+        @Subscribe
+        @AllowConcurrentEvents
+        public void onJobAddedEvent(StructureJobAddedEvent jobAddedEvent) {
+            long structureId = jobAddedEvent.getStructure();
+            UUID uuid;
+            jobLock.lock();
+            try {
+
+                int jobId = jobAddedEvent.getJobId();
+                StructureEntry entry = tasks.get(structureId);
+                entry.setJobId(jobId);
+                uuid = entry.getWhoStarted();
+            } finally {
+                jobLock.unlock();
+            }
+
+            Structure structure;
+            try (Transaction tx = graph.beginTx()) {
+                StructureNode structureNode = structureDAO.find(structureId);
+                structureNode.setConstructionStatus(ConstructionStatus.QUEUED);
+                structure = DefaultStructureFactory.instance().makeStructure(structureNode);
+                tx.success();
+            }
+
+            if (uuid != null) {
+                IPlayer player = platform.getServer().getPlayer(uuid);
+                if (player != null) {
+                    String status = getStatusString(structure);
+                    player.sendMessage(status);
+                }
+            }
+
+        }
+
+        @Subscribe
+        @AllowConcurrentEvents
+        public void onJobCanceledEvent(StructureJobCanceledEvent jobCanceledEvent) {
+            UUID uuid = null;
+            long structureId = jobCanceledEvent.getStructure();
+            jobLock.lock();
+            try {
+                long structure = jobCanceledEvent.getStructure();
+                StructureEntry entry = tasks.get(structure);
+                uuid = entry.getWhoStarted();
+                tasks.remove(structure);
+            } finally {
+                jobLock.unlock();
+            }
+
+            Structure structure;
+            try (Transaction tx = graph.beginTx()) {
+                StructureNode structureNode = structureDAO.find(structureId);
+                structureNode.setConstructionStatus(ConstructionStatus.STOPPED);
+                structure = DefaultStructureFactory.instance().makeStructure(structureNode);
+                tx.success();
+            }
+
+            if (uuid != null) {
+                IPlayer player = platform.getServer().getPlayer(uuid);
+                if (player != null) {
+                    String status = getStatusString(structure);
+                    player.sendMessage(status);
+                }
+            }
+        }
+
+        @Subscribe
+        @AllowConcurrentEvents
+        public void onJobCompleteEvent(StructureJobCompleteEvent jobCompleteEvent) {
+            UUID uuid = null;
+            boolean isDemolishing = false;
+            long structureId = jobCompleteEvent.getStructure();
+
+            jobLock.lock();
+            try {
+                StructureEntry entry = tasks.get(structureId);
+                uuid = entry.getWhoStarted();
+                tasks.remove(structureId);
+            } finally {
+                jobLock.unlock();
+            }
+
+            // Set the status
+            Structure structure;
+            try (Transaction tx = graph.beginTx()) {
+                StructureNode structureNode = structureDAO.find(structureId);
+                if (isDemolishing) {
+                    structureNode.setConstructionStatus(ConstructionStatus.REMOVED);
+                } else {
+                    structureNode.setConstructionStatus(ConstructionStatus.COMPLETED);
+                }
+                structure = DefaultStructureFactory.instance().makeStructure(structureNode);
+                tx.success();
+            }
+
+            // Tell the starter
+            if (uuid != null) {
+                IPlayer player = platform.getServer().getPlayer(uuid);
+                if (player != null) {
+                    String status = getStatusString(structure);
+                    player.sendMessage(status);
+                }
+            }
+
+        }
+
+        @Subscribe
+        @AllowConcurrentEvents
+        public void onJobStartedEvent(StructureJobStartedEvent jobStartedEvent) {
+            UUID uuid = null;
+            long structureId = jobStartedEvent.getStructure();
+            boolean isDemolishing = false;
+            jobLock.lock();
+            try {
+                StructureEntry entry = tasks.get(structureId);
+                isDemolishing = entry.isDemolishing();
+                uuid = entry.getWhoStarted();
+            } finally {
+                jobLock.unlock();
+            }
+
+            // Set the status!
+            Structure structure;
+            try (Transaction tx = graph.beginTx()) {
+                StructureNode structureNode = structureDAO.find(structureId);
+                if (isDemolishing) {
+                    structureNode.setConstructionStatus(ConstructionStatus.DEMOLISHING);
+                } else {
+                    structureNode.setConstructionStatus(ConstructionStatus.BUILDING);
+                }
+                structure = DefaultStructureFactory.instance().makeStructure(structureNode);
+                tx.success();
+            }
+
+            // Tell the new status!
+            if (uuid != null) {
+                IPlayer player = platform.getServer().getPlayer(uuid);
+                if (player != null) {
+                    String status = getStatusString(structure);
+                    player.sendMessage(status);
+                }
+
+            }
+        }
+
+        /**
+         * Sends the status of this structure to given player
+         *
+         * @param structure The structure
+         * @param player The player to tell
+         */
+        public String getStatusString(Structure structure) {
+            String statusString;
+            ConstructionStatus status = structure.getConstructionStatus();
+            switch (status) {
+                case BUILDING:
+                    statusString = COLOR.yellow() + "BUILDING " + COLOR.reset() + "#" + COLOR.gold() + structure.getId() + COLOR.blue() + " " + structure.getName();
+                    break;
+                case DEMOLISHING:
+                    statusString = COLOR.yellow() + "DEMOLISHING " + COLOR.reset() + "#" + COLOR.gold() + structure.getId() + COLOR.blue() + " " + structure.getName();
+                    break;
+                case COMPLETED:
+                    statusString = COLOR.green() + "COMPLETE " + COLOR.reset() + "#"  + COLOR.gold() + structure.getId() + COLOR.blue() + " " + structure.getName();
+                    break;
+                case ON_HOLD:
+                    statusString = COLOR.red() + "ON HOLD " + COLOR.reset() + "#" + COLOR.gold() + structure.getId() + COLOR.blue() + " " + structure.getName();
+                    break;
+                case QUEUED:
+                    statusString = COLOR.yellow() + "QUEUED " + COLOR.reset() + "#" + COLOR.gold() + structure.getId() + COLOR.blue() + " " + structure.getName();
+                    break;
+                case REMOVED:
+                    statusString = COLOR.red() + "REMOVED " + COLOR.reset() + "#" + COLOR.gold() + structure.getId() + COLOR.blue() + " " + structure.getName();
+                    break;
+                case STOPPED:
+                    statusString = COLOR.red() + "STOPPED " + COLOR.reset() + "#" + COLOR.gold() + structure.getId() + COLOR.blue() + " " + structure.getName();
+                    break;
+                default:
+                    statusString = status.name();
+            }
+            return statusString;
+        }
+
+    }
+
+    private class StructureEntry {
+
+        private int jobId;
+        private boolean isDemolishing;
+        private UUID whoStarted;
+
+        public StructureEntry(int jobId, boolean isDemolishing, UUID whoStarted) {
+            this.jobId = jobId;
+            this.isDemolishing = isDemolishing;
+            this.whoStarted = whoStarted;
+        }
+
+        public int getJobId() {
+            return jobId;
+        }
+
+        public UUID getWhoStarted() {
+            return whoStarted;
+        }
+
+        public boolean isDemolishing() {
+            return isDemolishing;
+        }
+
+        public void setIsDemolishing(boolean isDemolishing) {
+            this.isDemolishing = isDemolishing;
+        }
+
+        public void setJobId(int jobId) {
+            this.jobId = jobId;
+        }
+
+        public void setWhoStarted(UUID whoStarted) {
+            this.whoStarted = whoStarted;
+        }
+
     }
 
 }

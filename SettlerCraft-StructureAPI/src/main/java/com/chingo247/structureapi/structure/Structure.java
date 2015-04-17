@@ -23,188 +23,126 @@
  */
 package com.chingo247.structureapi.structure;
 
-import com.chingo247.structureapi.persistence.repository.IStructure;
-import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.settlercraft.core.regions.CuboidDimension;
-import com.chingo247.structureapi.persistence.repository.StructureNode;
 import com.chingo247.structureapi.structure.plan.StructurePlan;
-import com.chingo247.structureapi.structure.plan.StructurePlanReader;
-import com.chingo247.structureapi.structure.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.structureapi.structure.plan.placement.PlaceOptions;
-import com.chingo247.structureapi.world.Direction;
-import com.google.common.base.Preconditions;
+import com.chingo247.settlercraft.core.Direction;
+import com.chingo247.structureapi.structure.plan.placement.demolishing.DemolishingOptions;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.world.World;
-import java.io.File;
+import com.sk89q.worldedit.regions.CuboidRegion;
 import java.util.Date;
 import java.util.UUID;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
-import org.primesoft.asyncworldedit.PlayerEntry;
-import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
  *
  * @author Chingo
  */
-public class Structure implements IStructure {
+public interface Structure {
     
-    private final GraphDatabaseService graph;
-    private final StructureNode structureNode;
+    /**
+     * Gets the id of the structure
+     * @return The id of the structure
+     */
+    public Long getId();
+    /**
+     * Gets the name of the structure
+     * @return The name of the structure
+     */
+    public String getName();
+    /**
+     * Gets the name of the world of this structure
+     * @return The world
+     */
+    public String getWorld();
+    /**
+     * Gets the world id of this structure
+     * @return The world id
+     */
+    public UUID getWorldUUID();
+    /**
+     * Gets the direction in which this structure is oriented
+     * @return the direction
+     */
+    public Direction getDirection();
+    /**
+     * The region this structure overlaps
+     * @return The region
+     */
+    public CuboidRegion getCuboidRegion();
+    /**
+     * The current construction status of this structure
+     * @return The construction status
+     */
+    public ConstructionStatus getConstructionStatus();
+    /**
+     * Gets the plan for this structure
+     * @return The plan
+     */
+    public StructurePlan getPlan();
+    /**
+     * Gets the value/price of this structure 
+     * @return The value/price of this structure
+     */
+    public double getValue();
+    /**
+     * The object's state of this structure
+     * @return The state
+     */
+    public State getState();
+    /**
+     * Gets when this structure was completed, may return null
+     * @return The date of completion
+     */
+    public Date getCompletedAt();
+    /**
+     * Gets when this structure was created
+     * @return The date this structure was created
+     */
+    public Date getCreatedAt();
+    /**
+     * Gets the date when this structure was removed. may return null
+     * @return The date of removal
+     */
+    public Date getDeletedAt();
+    /**
+     * Builds the structure using the given player to create the editsession
+     * @param player The player
+     * @param options The placeOptions
+     * @param force whether building should be enforced by ignoring the current construction status
+     */
+    public void build(Player player, PlaceOptions options, boolean force);
+    /**
+     * Builds the structure
+     * @param session The EditSession
+     * @param options The placeOptions
+     * @param force whether building should be enforced by ignoring the current construction status
+     */
+    public void build(EditSession session, PlaceOptions options, boolean force);
+    /**
+     * Demolishes the structure with the given player to host the EditSession
+     * @param player The player
+     * @param options The option for demolishing
+     * @param force whether to force the demolition by ignoring the current construction status
+     */
+    public void demolish(Player player, DemolishingOptions options, boolean force);
+    /**
+     * Demolishes the structure
+     * @param session The EditSession
+     * @param options The Options
+     * @param force Whether to force the demolition by ignoring the current construction status
+     */
+    public void demolish(EditSession session, DemolishingOptions options, boolean force);
     
-    Structure(GraphDatabaseService graph, StructureNode structureNode) {
-        Preconditions.checkNotNull(graph);
-        Preconditions.checkNotNull(structureNode);
-        this.graph = graph;
-        this.structureNode = structureNode;
-    }
-    
-    @Override
-    public Long getId() {
-        Long id = null;
-        try (Transaction tx = graph.beginTx()) {
-            id = structureNode.getId();
-            tx.success();
-        }
-        return id;
-    }
-    
-    @Override
-    public String getName() {
-        String name = null;
-        try (Transaction tx = graph.beginTx()) {
-            name = structureNode.getName();
-            tx.success();
-        }
-        return name;
-    }
-    
-    public void setName(String name) {
-        try (Transaction tx = graph.beginTx()) {
-            structureNode.setName(name);
-            tx.success();
-        }
-    }
-    
-    @Override
-    public Direction getDirection() {
-        Direction direction = null;
-        try (Transaction tx = graph.beginTx()) {
-            direction = structureNode.getDirection();
-            tx.success();
-        }
-        return direction;
-    }
-    
-    @Override
-    public String getWorld() {
-        String world = null;
-        try (Transaction tx = graph.beginTx()) {
-            world = structureNode.getWorld().getName();
-            tx.success();
-        }
-        return world;
-    }
-    
-    public Date getCreatedAt() {
-        Date createdAt = null;
-        try (Transaction tx = graph.beginTx()) {
-            createdAt = structureNode.getCreatedAt();
-            tx.success();
-        }
-        return createdAt;
-    }
-    
-    public Date getDeletedAt() {
-        Date deletedAt = null;
-        try (Transaction tx = graph.beginTx()) {
-            deletedAt = structureNode.getDeletedAt();
-            tx.success();
-        }
-        return deletedAt;
-    }
-    
-    public State getState() {
-        State state = null;
-        try (Transaction tx = graph.beginTx()) {
-            state = structureNode.getState();
-            tx.success();
-        }
-        return state;
-    }
-    
-    public void setState(State state) {
-        try (Transaction tx = graph.beginTx()) {
-            structureNode.setState(state);
-            tx.success();
-        }
-    }
-    
-    public ConstructionStatus getConstructionStatus() {
-        ConstructionStatus status;
-        try (Transaction tx = graph.beginTx()) {
-            status = structureNode.getConstructionStatus();
-            tx.success();
-        }
-        return status;
-    }
-    
-    public void setConstructionStatus(ConstructionStatus newStatus) {
-        try (Transaction tx = graph.beginTx()) {
-            structureNode.setConstructionStatus(newStatus);
-            tx.success();
-        }
-    }
-    
-    public CuboidDimension getDimension() {
-        CuboidDimension cuboidDimension;
-        try (Transaction tx = graph.beginTx()) {
-            cuboidDimension = structureNode.getDimension();
-            tx.success();
-        }
-        return cuboidDimension;
-    }
-    
-    public void build(Player player, PlaceOptions options, boolean force) {
-        StructureAPI.getInstance().build(this, player.getUniqueId(), getSession(player.getUniqueId()), options, force);
-    }
+    /**
+     * Stops the construction, if the structure was being constructed
+     * @param useForce Whether to use force
+     */
+    public void stop(boolean useForce);
 
-    public void build(EditSession session, PlaceOptions options, boolean force) {
-        StructureAPI.getInstance().build(this, PlayerEntry.CONSOLE.getUUID(), session, options, force);
-    }
-
-    public void demolish(Player player, PlaceOptions options, boolean force) {
-        StructureAPI.getInstance().demolish(this, player.getUniqueId(), getSession(player.getUniqueId()), options, force);
-    }
-
-    public void demolish(EditSession session, PlaceOptions options, boolean force) {
-        StructureAPI.getInstance().demolish(this, PlayerEntry.CONSOLE.getUUID(), session, options, force);
-    }
-
-    public void stop() {
-        StructureAPI.getInstance().stop(this);
-    }
-    
-    public StructurePlan getPlan() {
-        StructureAPI structureAPI = StructureAPI.getInstance();
-        File planFile = new File(structureAPI.getStructuresDirectory(getWorld()), String.valueOf(getId()));
-        StructurePlanReader reader = new StructurePlanReader();
-        StructurePlan plan = reader.readFile(planFile);
-        return plan;
-    }
-    
-    AsyncEditSession getSession(UUID playerId) {
-        Player ply = SettlerCraft.getInstance().getPlayer(playerId);
-        World w = SettlerCraft.getInstance().getWorld(getWorld());
-        AsyncEditSession editSession;
-        if (ply == null) {
-            editSession = (AsyncEditSession) AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(w, -1);
-        } else {
-            editSession = (AsyncEditSession) AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(w, -1, ply);
-        }
-        return editSession;
-    }
-    
-    
+    /**
+     * Stops the construction, if the structure was being constructed
+     * @param player The player
+     * @param useForce Whether to use force by ignoring the current construction status
+     */
+    public void stop(Player player, boolean useForce);
 }

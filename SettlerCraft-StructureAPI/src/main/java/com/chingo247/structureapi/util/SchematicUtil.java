@@ -25,17 +25,17 @@
 package com.chingo247.structureapi.util;
 
 
-import com.chingo247.structureapi.world.Direction;
-import static com.chingo247.structureapi.world.Direction.EAST;
-import static com.chingo247.structureapi.world.Direction.NORTH;
-import static com.chingo247.structureapi.world.Direction.SOUTH;
-import static com.chingo247.structureapi.world.Direction.WEST;
-import com.chingo247.settlercraft.core.regions.CuboidDimension;
+import com.chingo247.settlercraft.core.Direction;
+import static com.chingo247.settlercraft.core.Direction.EAST;
+import static com.chingo247.settlercraft.core.Direction.NORTH;
+import static com.chingo247.settlercraft.core.Direction.SOUTH;
+import static com.chingo247.settlercraft.core.Direction.WEST;
 import com.chingo247.structureapi.structure.plan.schematic.Schematic;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.util.Countable;
 
 import org.bukkit.Material;
@@ -53,14 +53,14 @@ public class SchematicUtil {
     private SchematicUtil() {
     }
 
-    public static CuboidDimension calculateDimension(Schematic schematic, Vector pos, Direction direction) {
+    public static CuboidRegion calculateDimension(Schematic schematic, Vector pos, Direction direction) {
         Vector size = schematic.getSize();
         Vector end = getPoint2Right(pos, direction, new BlockVector(
                 size.getBlockX(),
                 size.getBlockY(),
                 size.getBlockZ())
         );
-        CuboidDimension dimension = new CuboidDimension(pos, end);
+        CuboidRegion dimension = new CuboidRegion(pos, end);
         return dimension;
     }
     

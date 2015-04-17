@@ -47,4 +47,5 @@ public class StructureLot extends AbstractCuboidPlacement<PlaceOptions> {
         // Does nothing at the moment... As StructureLot's have a different purpose
     }
 
+
 }

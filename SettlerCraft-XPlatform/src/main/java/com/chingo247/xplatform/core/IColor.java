@@ -29,18 +29,18 @@ package com.chingo247.xplatform.core;
  */
 public interface IColor {
     
-    public String getBlue();
+    public String blue();
     
-    public String getRed();
+    public String red();
     
-    public String getGold();
+    public String gold();
     
-    public String getPurple();
+    public String purple();
     
-    public String getGreen();
+    public String green();
     
-    public String getYellow();
+    public String yellow();
     
-    public String getReset();
+    public String reset();
     
 }

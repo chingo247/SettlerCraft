@@ -44,37 +44,37 @@ public class BukkitChatColors implements IColor {
     }
 
     @Override
-    public String getBlue() {
+    public String blue() {
         return ChatColors.BLUE;
     }
 
     @Override
-    public String getRed() {
+    public String red() {
        return ChatColors.RED;
     }
 
     @Override
-    public String getGold() {
+    public String gold() {
         return ChatColors.GOLD;
     }
 
     @Override
-    public String getPurple() {
+    public String purple() {
         return ChatColors.DARK_PURPLE;
     }
 
     @Override
-    public String getGreen() {
+    public String green() {
         return ChatColors.GREEN;
     }
 
     @Override
-    public String getYellow() {
+    public String yellow() {
         return ChatColors.YELLOW;
     }
     
     @Override
-    public String getReset() {
+    public String reset() {
         return ChatColors.RESET;
     }
     

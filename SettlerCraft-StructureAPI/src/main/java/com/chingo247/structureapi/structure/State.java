@@ -43,8 +43,8 @@ public enum State {
     
     public static State match(int stateId) {
         switch(stateId) {
-            case 1: return CREATED;
-            case 2: return DELETED;
+            case 0: return CREATED;
+            case 1: return DELETED;
             default: throw new AssertionError("Unreachable");
         }
     }

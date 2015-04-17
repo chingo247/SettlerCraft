@@ -24,6 +24,7 @@ package com.chingo247.structureapi.platforms.bukkit;
  * THE SOFTWARE.
  */
 import com.chingo247.menuapi.menu.BKVaultEconomyProvider;
+import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.xplatform.core.IPlugin;
 import com.chingo247.settlercraft.core.exception.SettlerCraftException;
 import com.chingo247.structureapi.platforms.bukkit.listener.PlanListener;
@@ -44,6 +45,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dom4j.DocumentException;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 /**
  *
@@ -57,7 +59,7 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
     private BKConfigProvider configProvider;
     private static BKStructureAPIPlugin instance;
     private StructureCommands structureCommands;
-    
+    private GraphDatabaseService graph;
     
 
     @Override
@@ -94,10 +96,8 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
             setEnabled(false);
             return;
         }
-        
-        
-        getDataFolder().mkdirs();
-        
+
+        // Register plugin & ConfigProvider
         StructureAPI.getInstance().registerStructureAPIPlugin(new BukkitPlugin(this));
         StructureAPI.getInstance().registerConfigProvider(configProvider);
         
@@ -112,27 +112,23 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         
         Bukkit.getPluginManager().registerEvents(new PlanListener(economyProvider), this);
 
-//        getCommand("stt").setExecutor(new SettlerCraftCommandExecutor(this));
-//        getCommand("cst").setExecutor(new ConstructionCommandExecutor(structureAPI));
-//        getCommand("stt").setExecutor(new StructureCommandExecutor(structureAPI));
-        structureCommands = new StructureCommands(StructureAPI.getInstance(), new BKPermissionManager());
-
-
+        graph = SettlerCraft.getInstance().getNeo4j();
+        structureCommands = new StructureCommands(StructureAPI.getInstance(), new BKPermissionManager(), SettlerCraft.getInstance().getExecutor(), graph);
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         ICommandSender s = (sender instanceof Player) ? new BukkitPlayer((Player) sender) : new BukkitConsoleSender(sender);
             try {
-                System.out.println("command: " + command.getName());
                 switch(command.getName()) {
                     case "stt": return structureCommands.handle(s, command.getName(), args);
-                    default: break;
+                    default:
+                        sender.sendMessage("No action known for " + command.getName());
+                        break;
                 }
-
-                return false; //To change body of generated methods, choose Tools | Templates.
+                return true; //To change body of generated methods, choose Tools | Templates.
             } catch (CommandException ex) {
-                sender.sendMessage(ChatColor.RED + ex.getMessage());
+                sender.sendMessage(ex.getPlayerErrorMessage());
                 
             }
         

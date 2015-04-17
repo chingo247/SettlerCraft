@@ -32,6 +32,7 @@ import java.util.UUID;
  *
  * @author Chingo
  * @param <T>
+ * @param <R>
  */
 public abstract class AbstractPlacement<T> implements Placement<T> {
     

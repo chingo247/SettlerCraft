@@ -25,24 +25,29 @@ package com.chingo247.structureapi.commands;
 
 import com.chingo247.menuapi.menu.CategoryMenu;
 import com.chingo247.menuapi.menu.MenuAPI;
+import com.chingo247.menuapi.menu.util.ShopUtil;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.exception.CommandException;
 import com.chingo247.settlercraft.core.platforms.IPermissionManager;
-import com.chingo247.settlercraft.core.util.CubicIterator;
-import com.chingo247.settlercraft.core.util.CubicIteratorReversed;
+import com.chingo247.structureapi.persistence.dao.structure.StructureDAO;
+import com.chingo247.structureapi.persistence.dao.structure.StructureNode;
 import com.chingo247.structureapi.platforms.util.Permissions;
+import com.chingo247.structureapi.structure.DefaultStructureFactory;
+import com.chingo247.structureapi.structure.Structure;
 import com.chingo247.structureapi.structure.StructureAPI;
+import com.chingo247.structureapi.structure.plan.placement.PlaceOptions;
+import com.chingo247.structureapi.structure.plan.placement.demolishing.DemolishingOptions;
+import com.chingo247.xplatform.core.IColor;
 import com.chingo247.xplatform.core.ICommandSender;
-import com.chingo247.xplatform.core.ILocation;
 import com.chingo247.xplatform.core.IPlayer;
-import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.world.World;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import org.apache.commons.lang.math.NumberUtils;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 
 /**
  *
@@ -50,35 +55,48 @@ import java.util.logging.Logger;
  */
 public class StructureCommands {
 
+    private static final int MAX_LINES = 10;
     private final StructureAPI structureAPI;
     private final IPermissionManager permissionManager;
+    private final IColor COLOR;
+    private final ExecutorService executorService;
+    private final StructureDAO structureDAO;
+    private final GraphDatabaseService graph;
 
-    public StructureCommands(StructureAPI structureAPI, IPermissionManager permissionManager) {
+    public StructureCommands(StructureAPI structureAPI, IPermissionManager permissionManager, ExecutorService executorService, GraphDatabaseService graph) {
         this.structureAPI = structureAPI;
         this.permissionManager = permissionManager;
+        this.COLOR = structureAPI.getPlatform().getChatColors();
+        this.executorService = executorService;
+        this.structureDAO = new StructureDAO(graph);
+        this.graph = graph;
     }
 
     public boolean handle(ICommandSender sender, String command, String[] args) throws CommandException {
-        argumentsInRange(1, 1, args);
+        if (args.length == 0) {
+            throw new CommandException("Too few arguments!");
+        }
 
         String commandArg = args[0];
         String[] commandArgs = Arrays.copyOfRange(args, 1, args.length);
 
+        System.out.println("issued: " + commandArg + " " + Arrays.toString(commandArgs));
+
         switch (commandArg) {
-            case "cuboidr":
-                checkIsPlayer(sender);
-                return cuboidReversed((IPlayer) sender, commandArgs);
-            case "cuboid":
-                checkIsPlayer(sender);
-                return cuboid((IPlayer) sender, commandArgs);
             case "info":
                 return info(sender, commandArgs);
             case "build":
-                return build(sender, commandArgs);
+                checkIsPlayer(sender);
+                return build((IPlayer)sender, commandArgs);
             case "demolish":
-                return demolish(sender, commandArgs);
-            case "stop":
-                return stop(sender, commandArgs);
+                checkIsPlayer(sender);
+                return demolish((IPlayer)sender, commandArgs);
+            case "halt":
+                checkIsPlayer(sender);
+                return stop((IPlayer)sender, commandArgs);
+            case "list":
+                checkIsPlayer(sender);
+                return list((IPlayer) sender, commandArgs);
             case "location":
                 checkIsPlayer(sender);
                 return location((IPlayer) sender, commandArgs);
@@ -103,19 +121,99 @@ public class StructureCommands {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    private boolean build(ICommandSender sender, String[] commandArgs) {
+    private boolean build(IPlayer player, String[] commandArgs) throws CommandException {
         System.out.println("Build Command");
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        argumentsInRange(1, 2, commandArgs);
+        
+        String structureIdArg = commandArgs[0];
+        if(!NumberUtils.isNumber(structureIdArg)) {
+            throw new CommandException("Expected a number but got '"+structureIdArg+"'");
+        }
+        
+        String force = commandArgs.length == 2 ? commandArgs[1] : null;
+        if(force != null && !(force.equals("force") && force.equals("f"))) {
+            throw new CommandException("Unknown second argument '"+force+"' ");
+        } 
+        boolean useForce = force != null && (force.equals("f") || force.equals("force"));
+        
+        long id = Long.parseLong(structureIdArg);
+        Structure structure;
+        try(Transaction tx = graph.beginTx()) {
+            StructureNode structureNode = structureDAO.find(id);
+            if(!structureNode.isOwner(player.getUniqueId())) {
+                if( !(player.isOP() && useForce)) {
+                    throw new CommandException("You don't own this structure...");
+                }
+            }
+            structure = DefaultStructureFactory.instance().makeStructure(structureNode);
+            tx.success();
+        }
+        structure.build(SettlerCraft.getInstance().getPlayer(player.getUniqueId()), new PlaceOptions(), useForce);
+        return true;
     }
 
-    private boolean demolish(ICommandSender sender, String[] commandArgs) {
+    private boolean demolish(IPlayer player, String[] commandArgs) throws CommandException {
         System.out.println("Demolish Command");
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        argumentsInRange(1, 2, commandArgs);
+        
+        String structureIdArg = commandArgs[0];
+        if(!NumberUtils.isNumber(structureIdArg)) {
+            throw new CommandException("Expected a number but got '"+structureIdArg+"'");
+        }
+        
+        String force = commandArgs.length == 2 ? commandArgs[1] : null;
+        if(force != null && !(force.equals("force") && force.equals("f"))) {
+            throw new CommandException("Unknown second argument '"+force+"' ");
+        } 
+        boolean useForce = force != null && (force.equals("f") || force.equals("force"));
+        
+        long id = Long.parseLong(structureIdArg);
+        Structure structure;
+        try(Transaction tx = graph.beginTx()) {
+            StructureNode structureNode = structureDAO.find(id);
+            if(!structureNode.isOwner(player.getUniqueId())) {
+                if( !(player.isOP() && useForce)) {
+                    throw new CommandException("You don't own this structure...");
+                }
+            }
+            structure = DefaultStructureFactory.instance().makeStructure(structureNode);
+            tx.success();
+        }
+        
+        structure.demolish(SettlerCraft.getInstance().getPlayer(player.getUniqueId()), new DemolishingOptions(), useForce);
+        return true;
     }
 
-    private boolean stop(ICommandSender sender, String[] commandArgs) {
+    private boolean stop(IPlayer player, String[] commandArgs) throws CommandException {
         System.out.println("Stop Command");
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        argumentsInRange(1, 2, commandArgs);
+        
+        String structureIdArg = commandArgs[0];
+        if(!NumberUtils.isNumber(structureIdArg)) {
+            throw new CommandException("Expected a number but got '"+structureIdArg+"'");
+        }
+        
+        String force = commandArgs.length == 2 ? commandArgs[1] : null;
+        if(force != null && !(force.equals("force") && force.equals("f"))) {
+            throw new CommandException("Unknown second argument '"+force+"' ");
+        } 
+        boolean useForce = force != null && (force.equals("f") || force.equals("force"));
+        
+        long id = Long.parseLong(structureIdArg);
+        Structure structure;
+        try(Transaction tx = graph.beginTx()) {
+            StructureNode structureNode = structureDAO.find(id);
+            if(!structureNode.isOwner(player.getUniqueId())) {
+                if( !(player.isOP() && useForce)) {
+                    throw new CommandException("You don't own this structure...");
+                }
+            }
+            structure = DefaultStructureFactory.instance().makeStructure(structureNode);
+            tx.success();
+        }
+        
+        structure.stop(useForce);
+        return true;
     }
 
     /**
@@ -170,69 +268,82 @@ public class StructureCommands {
         }
     }
 
-    private boolean cuboid(IPlayer player, String[] commandArgs) {
-        ILocation l = player.getLocation();
+    private boolean list(final IPlayer iPlayer, String[] commandArgs) throws CommandException {
+        // /stt list [player][page]
+        // /stt list [page]
+        argumentsInRange(0, 2, commandArgs);
 
-        Vector v = new BlockVector(l.getBlockX(), l.getBlockY(), l.getBlockZ()).add(new Vector(3, 3, 3));
-        System.out.println("position: " + v);
+        int page = 0;
+        final UUID playerId;
+        if (commandArgs.length == 0) {
+            playerId = iPlayer.getUniqueId();
 
-        final CubicIterator iterator = new CubicIterator(v, new Vector(10, 10, 10), 5, 5, 5);
-        final World w = SettlerCraft.getInstance().getWorld(player.getWorld().getName());
-        new Thread(new Runnable() {
+        } else if (commandArgs.length == 1) {
+            playerId = iPlayer.getUniqueId();
+            String arg1 = commandArgs[0];
+            if (NumberUtils.isNumber(arg1)) {
+                page = Integer.parseInt(arg1);
+            } else {
+                throw new CommandException("Expected a number but got '" + arg1 + "'");
+            }
+        } else { // 2 arguments
+
+            String plyName = commandArgs[0];
+            IPlayer ply = SettlerCraft.getInstance().getPlatform().getServer().getPlayer(plyName);
+            if (ply == null) {
+                throw new CommandException("Player '" + plyName + "' not found");
+            }
+            playerId = ply.getUniqueId();
+            String pageString = commandArgs[1];
+            if (NumberUtils.isNumber(pageString)) {
+                page = Integer.parseInt(pageString);
+            } else {
+                throw new CommandException("Expected a number but got '" + pageString + "'");
+            }
+        }
+
+        final int p = page;
+        executorService.submit(new Runnable() {
 
             @Override
             public void run() {
-                try {
-                    while (iterator.hasNext()) {
-                        Vector newPos = iterator.next();
-//                        System.out.println("new pos: " + newPos);
-                        w.setBlock(newPos, new BaseBlock(1));
-                        try {
-                            Thread.sleep(10);
-                        } catch (InterruptedException ex) {
-                            Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+                String[] message = new String[MAX_LINES];
+                int skip = p * MAX_LINES;
+                int limit = skip + MAX_LINES;
+
+                try (Transaction tx = graph.beginTx()) {
+                    long totalStructures = structureDAO.getStructureCountForSettler(playerId);
+                    long totalPages = Math.round(Math.ceil(totalStructures / (MAX_LINES - 1)));
+                    List<StructureNode> structures = structureDAO.getStructuresForOwner(playerId, skip, limit);
+                    if (p > totalPages || p < 0) {
+                        iPlayer.sendMessage(COLOR.red() + "Page " + p + " out of " + totalPages + "...");
+                        return;
                     }
-                } catch (WorldEditException ex) {
-                    Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, null, ex);
+                    
+                    int lineNumber = 0;
+                    message[0] = "-----------(Page: " + p + "/" + totalPages + ", Structures: " + totalStructures + ")-----------";
+                    for (StructureNode structure : structures) {
+                        lineNumber++;
+                        Vector position = structure.getCuboidRegion().getMinimumPoint();
+                        String line = "#" + COLOR.gold() + structure.getId() + " " + COLOR.blue() + structure.getName()
+                                + " " + COLOR.yellow() + "X: " + COLOR.reset() + position.getX()
+                                + " " + COLOR.yellow() + "Y: " + COLOR.reset() + position.getY()
+                                + " " + COLOR.yellow() + "Z: " + COLOR.reset() + position.getZ();
+                                if(structure.getValue() > 0.0d) {
+                                    line += " " + COLOR.reset() + COLOR.yellow() + "Value: " + ShopUtil.valueString(structure.getValue());
+                                }
+                        message[lineNumber] = line;
+                    }
+                    tx.success();
                 }
+                iPlayer.sendMessage(message);
             }
-        }).start();
+        });
 
         return true;
+
     }
-
-    private boolean cuboidReversed(IPlayer player, String[] commandArgs) {
-        ILocation l = player.getLocation();
-
-        Vector v = new BlockVector(l.getBlockX(), l.getBlockY(), l.getBlockZ()).add(new Vector(3, 3, 3));
-        System.out.println("position: " + v);
-
-        final CubicIteratorReversed iterator = new CubicIteratorReversed(v, new Vector(10, 10, 10), 5, 5, 5);
-        final World w = SettlerCraft.getInstance().getWorld(player.getWorld().getName());
-        
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    while (iterator.hasNext()) {
-                        Vector newPos = iterator.next();
-//                        System.out.println("new pos: " + newPos);
-                        w.setBlock(newPos, new BaseBlock(5));
-                        try {
-                            Thread.sleep(10);
-                        } catch (InterruptedException ex) {
-                            Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                } catch (WorldEditException ex) {
-                    Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }).start();
-
-        return true;
-    }
+    
+  
 
 }

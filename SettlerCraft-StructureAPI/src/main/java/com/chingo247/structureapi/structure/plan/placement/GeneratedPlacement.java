@@ -24,7 +24,6 @@
  */
 package com.chingo247.structureapi.structure.plan.placement;
 
-import com.chingo247.structureapi.structure.generators.Generator;
 import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.Vector;
 
@@ -34,18 +33,18 @@ import com.sk89q.worldedit.Vector;
  * @param <T>
  * 
  */
-public abstract class GeneratedPlacement<G extends Generator,T> extends AbstractPlacement<T> {
+public abstract class GeneratedPlacement<T> extends AbstractPlacement<T> {
     
-    protected final G generator;
+    protected final BlockGenerator generator;
     protected final Vector position;
 
-    public GeneratedPlacement(G generator, Vector relativePosition) {
+    public GeneratedPlacement(BlockGenerator generator, Vector relativePosition) {
         Preconditions.checkNotNull(generator);
         this.generator =  generator;
         this.position = relativePosition;
     }
 
-    public G getGenerator() {
+    public BlockGenerator getGenerator() {
         return generator;
     }
     

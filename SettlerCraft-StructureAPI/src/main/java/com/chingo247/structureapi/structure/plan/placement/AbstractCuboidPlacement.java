@@ -23,10 +23,10 @@
  */
 package com.chingo247.structureapi.structure.plan.placement;
 
-import com.chingo247.settlercraft.core.regions.CuboidDimension;
-import com.chingo247.structureapi.world.Direction;
+import com.chingo247.settlercraft.core.Direction;
 import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.regions.CuboidRegion;
 
 /**
  *
@@ -87,10 +87,9 @@ public abstract class AbstractCuboidPlacement<T> extends AbstractPlacement<T> {
         this.position.add(offset);
     }
 
-
     @Override
-    public CuboidDimension getDimension() {
-        return new CuboidDimension(position, new Vector(width, height, length));
+    public CuboidRegion getCuboidRegion() {
+        return new CuboidRegion(position, new Vector(width, height, length));
     }
     
 }

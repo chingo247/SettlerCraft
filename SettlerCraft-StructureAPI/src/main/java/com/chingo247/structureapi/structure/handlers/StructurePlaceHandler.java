@@ -31,7 +31,7 @@ import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.structureapi.structure.exception.StructureException;
 import com.chingo247.settlercraft.core.util.KeyPool;
 import com.chingo247.structureapi.util.WorldUtil;
-import com.chingo247.structureapi.world.Direction;
+import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.structureapi.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.core.services.IEconomyProvider;
 import com.chingo247.structureapi.selection.CUISelectionManager;
@@ -41,11 +41,13 @@ import com.chingo247.structureapi.structure.StructureAPI;
 import com.chingo247.structureapi.structure.Structure;
 import com.chingo247.structureapi.structure.plan.placement.PlaceOptions;
 import com.chingo247.structureapi.util.PlacementUtil;
+import com.chingo247.xplatform.core.IColor;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.blocks.ItemType;
 import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.util.List;
 import java.util.UUID;
@@ -62,11 +64,13 @@ public class StructurePlaceHandler {
     private final KeyPool<UUID> playerPool;
     private final IEconomyProvider economyProvider;
     private final StructureAPI structureAPI;
+    private final IColor COLOR;
 
     public StructurePlaceHandler(IEconomyProvider economyProvider) {
         this.playerPool = new KeyPool<>(SettlerCraft.getInstance().getExecutor());
         this.economyProvider = economyProvider;
         this.structureAPI = StructureAPI.getInstance();
+        this.COLOR = structureAPI.getPlatform().getChatColors();
     }
 
     public void handle(final AItemStack planItem, final Player player, final World world, final Vector pos) {
@@ -102,7 +106,6 @@ public class StructurePlaceHandler {
                 IPlayer iPlayer = SettlerCraft.getInstance().getPlatform().getPlayer(player.getUniqueId());
                 AInventory inventory = iPlayer.getInventory();
                 if (!inventory.hasItem(planItem)) {
-                    System.out.println("Player doesnt have the item!");
                     return;
                 }
 
@@ -112,19 +115,18 @@ public class StructurePlaceHandler {
                 StructurePlan plan = structureAPI.getPlanById(planId);
 
                 if (plan == null) {
-                    System.out.println("Plan was null...");
                     if (structureAPI.isLoadingPlans()) {
-                        player.print(ChatColors.RED + "Plans are not loaded yet... please wait...");
+                        player.print(COLOR.red() + "Plans are not loaded yet... please wait...");
                         return;
                     }
-                    player.print(ChatColors.RED + "Plan: " + planId + "doesn't exist!");
+                    player.print(COLOR.red() + "Plan: " + planId + "doesn't exist!");
                     int amount = inventory.getAmount(planItem);
                     double value = getValue(planItem);
                     if (value > 0.0d) {
                         economyProvider.give(player.getUniqueId(), value * amount);
                         iPlayer.getInventory().removeItem(planItem);
                         
-                        player.print(ChatColor.RED + "Invalid StructurePlans have been removed and you've been refunded: " + (value * amount));
+                        player.print(COLOR.red() + "Invalid StructurePlans have been removed and you've been refunded: " + (value * amount));
                     }
 
                     return;
@@ -142,7 +144,6 @@ public class StructurePlaceHandler {
     }
     
     private void handlePlace(StructurePlan plan, AItemStack item, Player player, World world, Vector pos1, ISelectionManager selectionManager) {
-        System.out.println("Handling placement...");
         IPlayer iPlayer = SettlerCraft.getInstance().getPlatform().getPlayer(player.getUniqueId());
         
         Direction direction = WorldUtil.getDirection(iPlayer.getYaw());
@@ -151,45 +152,39 @@ public class StructurePlaceHandler {
         
         boolean toLeft = iPlayer.isSneaking();
         
-        System.out.println("plan size: " + plan.getPlacement().getDimension().getMaxPosition());
         
         if (toLeft) {
-            System.out.println("Player was sneaking... pointing left!");
-            pos2 = PlacementUtil.getPoint2Left(pos1, direction, plan.getPlacement().getDimension().getMaxPosition());
+            pos2 = PlacementUtil.getPoint2Left(pos1, direction, plan.getPlacement().getCuboidRegion().getMaximumPoint());
         } else {
-            System.out.println("Player was NOT sneaking... pointing right!");
-            pos2 = PlacementUtil.getPoint2Right(pos1, direction, plan.getPlacement().getDimension().getMaxPosition());
+            pos2 = PlacementUtil.getPoint2Right(pos1, direction, plan.getPlacement().getCuboidRegion().getMaximumPoint());
         }
         
 
         // If player has NOT selected anything yet... make a new selection
         if(!selectionManager.hasSelection(player)) {
             selectionManager.select(player,  pos1, pos2);
-            player.print(ChatColors.YELLOW + "Left-Click " + ChatColors.RESET + " in the " + ChatColors.GREEN + " green " + ChatColors.RESET + "square to " + ChatColors.YELLOW + "confirm");
-            player.print(ChatColors.YELLOW + "Right-Click " + ChatColors.RESET + "to" + ChatColors.YELLOW + " deselect");
+            player.print(COLOR.yellow() + "Left-Click " + COLOR.reset() + " in the " + COLOR.green() + " green " + COLOR.reset() + "square to " + COLOR.yellow() + "confirm");
+            player.print(COLOR.yellow() + "Right-Click " + COLOR.reset() + "to" + COLOR.yellow() + " deselect");
         } else if(selectionManager.matchesCurrentSelection(player, pos1, pos2)){
             
-            System.out.println("pos1: " + pos1);
-            System.out.println("pos2: " + pos2);
             if (toLeft) {
                 // Fix WTF HOW?!!1?
-                pos1 = WorldUtil.translateLocation(pos1, direction, (-(plan.getPlacement().getDimension().getMaxPosition().getBlockX()- 1)), 0, 0);
+                pos1 = WorldUtil.translateLocation(pos1, direction, (-(plan.getPlacement().getCuboidRegion().getMaximumPoint().getBlockX()- 1)), 0, 0);
             }
-            
-            
             
             if (canPlace(player, world, pos1, direction, plan)) {
                 Structure structure;
                 try {
                     // Create Structure using the SettlerCraft restrictions
-                    structure = structureAPI.createStructure(world, plan, pos1, direction);
+                    CuboidRegion region = new CuboidRegion(pos1, pos2);
+                    System.out.println("before: " + region.getMinimumPoint() + ", " + region.getMaximumPoint());
                     
+                    structure = structureAPI.createStructure(world, plan, pos1, direction, player);
                     if (structure != null) {
 //                        AItemStack clone = item.clone();
 //                        clone.setAmount(1);
 //                        iPlayer.getInventory().removeItem(clone);
 //                        iPlayer.updateInventory();
-                        
                         structure.build(player, new PlaceOptions(), false);
                     }
                 } catch (StructureException ex) {

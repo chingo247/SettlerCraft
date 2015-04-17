@@ -23,23 +23,65 @@
  */
 package com.chingo247.structureapi.structure.plan.placement.demolishing;
 
+import com.chingo247.settlercraft.core.util.TopDownCubicIterator;
 import com.chingo247.structureapi.structure.plan.placement.AbstractCuboidPlacement;
+import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.blocks.BlockID;
+import com.sk89q.worldedit.blocks.BlockType;
+import com.sk89q.worldedit.regions.CuboidRegion;
 
 /**
  *
  * @author Chingo
  */
-public class DemolishingPlacement extends AbstractCuboidPlacement<DemolisionOptions> {
+public class DemolishingPlacement extends AbstractCuboidPlacement<DemolishingOptions> {
 
-    public DemolishingPlacement(int width, int height, int length) {
-        super(width, height, length);
+    public DemolishingPlacement(Vector size) {
+        super(size.getBlockX(), size.getBlockY(), size.getBlockZ());
     }
 
     @Override
-    public void place(EditSession session, Vector pos, DemolisionOptions option) {
+    public void place(EditSession session, Vector pos, DemolishingOptions option) {
+        CuboidRegion affectedArea = new CuboidRegion(pos, pos.add(width, height, length));
+        System.out.println("affected area: " + affectedArea.getMinimumPoint() + ", " + affectedArea.getMaximumPoint());
+        TopDownCubicIterator topDownCubicIterator = new TopDownCubicIterator(new BlockVector(width, height, length), option.getxAxisCube(), option.getyAxisCube(), option.getzAxisCube());
+       
+        while(topDownCubicIterator.hasNext()) {
+            Vector relativePosition = topDownCubicIterator.next();
+            Vector worldPosition = relativePosition.add(pos);
+            
+            BaseBlock currentBlock = session.getWorld().getBlock(worldPosition);
+            
+            if (currentBlock.isAir()  || currentBlock.getId() == BlockID.BEDROCK) {
+                continue;
+            }
+            
+            System.out.println("relative: " + relativePosition);
+            System.out.println("world: " + worldPosition);
+            
+                
+            if (relativePosition.getBlockY() == 0 && !currentBlock.isAir()) {
+                Vector wUnderPos = worldPosition.subtract(0, 1, 0);
+                BaseBlock worldBlockUnder = session.getWorld().getBlock(wUnderPos);
+            // replace the block with the block underneath you if it is a natural block
+                if (BlockType.isNaturalTerrainBlock(worldBlockUnder)) {
+                    session.rawSetBlock(worldPosition, worldBlockUnder);
+                }
+            } else {
+                session.rawSetBlock(worldPosition, new BaseBlock(BlockID.AIR));
+            }
+            
+            
+                   
+        }
         
+    }
+    
+    private boolean shouldRemove(BaseBlock b) {
+        return !BlockType.isNaturalTerrainBlock(b);
     }
     
     

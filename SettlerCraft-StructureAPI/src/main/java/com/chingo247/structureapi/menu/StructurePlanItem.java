@@ -114,13 +114,13 @@ public class StructurePlanItem implements CategoryTradeItem {
         IColor color = platform.getChatColors();
         
         item.setLore(Arrays.asList(
-                "Description: " + ((description == null || description.trim().isEmpty()) ? "-" : color.getGold() + description),
-                "Price: " + (price == 0 ? color.getGold() + "FREE" : color.getGold() + ShopUtil.valueString(price)),
-                "Width: " + color.getGold() + width,
-                "Length: " + color.getGold() + length,
-                "Height: " + color.getGold() + height,
-                "Path: " + color.getGold() + id,
-                "Type: " + color.getGold() + "StructurePlan"));
+                "Description: " + ((description == null || description.trim().isEmpty()) ? "-" : color.gold() + description),
+                "Price: " + (price == 0 ? color.gold() + "FREE" : color.gold() + ShopUtil.valueString(price)),
+                "Width: " + color.gold() + width,
+                "Length: " + color.gold() + length,
+                "Height: " + color.gold() + height,
+                "Path: " + color.gold() + id,
+                "Type: " + color.gold() + "StructurePlan"));
 
         
         return item;

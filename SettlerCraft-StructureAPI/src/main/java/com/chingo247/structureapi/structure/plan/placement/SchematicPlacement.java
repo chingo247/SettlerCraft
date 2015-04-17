@@ -24,12 +24,11 @@
  */
 package com.chingo247.structureapi.structure.plan.placement;
 
-import com.chingo247.settlercraft.core.regions.CuboidDimension;
-import com.chingo247.structureapi.world.Direction;
-import static com.chingo247.structureapi.world.Direction.EAST;
-import static com.chingo247.structureapi.world.Direction.NORTH;
-import static com.chingo247.structureapi.world.Direction.SOUTH;
-import static com.chingo247.structureapi.world.Direction.WEST;
+import com.chingo247.settlercraft.core.Direction;
+import static com.chingo247.settlercraft.core.Direction.EAST;
+import static com.chingo247.settlercraft.core.Direction.NORTH;
+import static com.chingo247.settlercraft.core.Direction.SOUTH;
+import static com.chingo247.settlercraft.core.Direction.WEST;
 import com.chingo247.structureapi.structure.construction.options.ConstructionOptions;
 import com.chingo247.structureapi.util.WorldUtil;
 import com.chingo247.structureapi.structure.construction.worldedit.StructureBlock;
@@ -42,6 +41,7 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.blocks.BlockType;
+import com.sk89q.worldedit.regions.CuboidRegion;
 import java.util.PriorityQueue;
 
 /**
@@ -145,17 +145,17 @@ public class SchematicPlacement extends DirectionalPlacement<PlaceOptions> {
         // Cube traverse this clipboard
         while (traversal.hasNext()) {
             Vector v = traversal.next();
-            BaseBlock b = clipboard.getBlock(v);
-            if (b == null) {
+            BaseBlock clipboardBlock = clipboard.getBlock(v);
+            if (clipboardBlock == null) {
                 continue;
             }
 
-            int priority = getPriority(b);
+            int priority = getPriority(clipboardBlock);
 
             if (priority == PRIORITY_FIRST) {
-                doblock(editSession, b, v, pos);
+                doblock(editSession, clipboardBlock, v, pos);
             } else {
-                placeLater.add(new StructureBlock(v, b));
+                placeLater.add(new StructureBlock(v, clipboardBlock));
             }
 
             // For every 10 place intensive blocks, place 100 normal blocks
@@ -195,6 +195,12 @@ public class SchematicPlacement extends DirectionalPlacement<PlaceOptions> {
 
     private void doblock(EditSession session, BaseBlock b, Vector blockPos, Vector pos) {
         Vector p = blockPos.add(pos);
+        
+        BaseBlock WorldBlock = session.getWorld().getBlock(p);
+        if(WorldBlock.getId() == b.getId()) {
+            return; // already done don't use up more space in the AWE Queue
+        }
+        
 //        System.out.println("Do block: " + p + ", " + b.getId() + " : " + b.getData());
         session.rawSetBlock(p, b);
     }
@@ -233,8 +239,8 @@ public class SchematicPlacement extends DirectionalPlacement<PlaceOptions> {
     }
 
     @Override
-    public CuboidDimension getDimension() {
-        return new CuboidDimension(Vector.ZERO, new Vector(schematic.getWidth(), schematic.getHeight(), schematic.getLength()));
+    public CuboidRegion getCuboidRegion() {
+        return new CuboidRegion(Vector.ZERO, new Vector(schematic.getWidth(), schematic.getHeight(), schematic.getLength()));
     }
 
    

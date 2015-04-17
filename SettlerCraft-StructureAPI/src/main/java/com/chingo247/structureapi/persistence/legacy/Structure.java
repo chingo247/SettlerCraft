@@ -25,11 +25,11 @@
 package com.chingo247.structureapi.persistence.legacy;
 
 import com.chingo247.xplatform.util.ChatColors;
-import com.chingo247.structureapi.world.Direction;
-import static com.chingo247.structureapi.world.Direction.EAST;
-import static com.chingo247.structureapi.world.Direction.NORTH;
-import static com.chingo247.structureapi.world.Direction.SOUTH;
-import static com.chingo247.structureapi.world.Direction.WEST;
+import com.chingo247.settlercraft.core.Direction;
+import static com.chingo247.settlercraft.core.Direction.EAST;
+import static com.chingo247.settlercraft.core.Direction.NORTH;
+import static com.chingo247.settlercraft.core.Direction.SOUTH;
+import static com.chingo247.settlercraft.core.Direction.WEST;
 import com.chingo247.structureapi.persistence.legacy.PlayerOwnership.Type;
 import com.chingo247.structureapi.util.WorldUtil;
 import com.sk89q.worldedit.BlockVector;

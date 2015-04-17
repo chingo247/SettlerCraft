@@ -26,7 +26,7 @@ public class QStructure extends EntityPathBase<Structure> {
 
     protected QDimension dimension;
 
-    public final EnumPath<com.chingo247.structureapi.world.Direction> direction = createEnum("direction", com.chingo247.structureapi.world.Direction.class);
+    public final EnumPath<com.chingo247.settlercraft.core.Direction> direction = createEnum("direction", com.chingo247.settlercraft.core.Direction.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 

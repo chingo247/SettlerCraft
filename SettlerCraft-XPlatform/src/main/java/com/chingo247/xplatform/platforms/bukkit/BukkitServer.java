@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -79,6 +80,12 @@ public class BukkitServer implements IServer {
     @Override
     public IWorld getWorld(UUID worldUUID) {
         return new BukkitWorld(server.getWorld(worldUUID));
+    }
+
+    @Override
+    public IPlayer getPlayer(String player) {
+        Player ply = Bukkit.getPlayer(player);
+        return ply != null ? new BukkitPlayer(ply) : null;
     }
 
     

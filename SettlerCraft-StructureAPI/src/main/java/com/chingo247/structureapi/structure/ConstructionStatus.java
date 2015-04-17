@@ -32,7 +32,9 @@ public enum ConstructionStatus {
     BUILDING(1),
     STOPPED(2),
     DEMOLISHING(3),
-    COMPLETED(4);
+    COMPLETED(4),
+    QUEUED(5),
+    REMOVED(6);
 
     private final int statusId;
     
@@ -52,6 +54,8 @@ public enum ConstructionStatus {
             case 2: return STOPPED;
             case 3: return DEMOLISHING;
             case 4: return COMPLETED;
+            case 5: return QUEUED;
+            case 6: return REMOVED;
             default: throw new AssertionError("Unreachable");
         }
     }

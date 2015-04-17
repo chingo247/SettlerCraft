@@ -25,9 +25,9 @@ package com.chingo247.structureapi.structure.plan.placement;
 
 import com.chingo247.structureapi.structure.plan.StructurePlanComplex;
 import com.chingo247.structureapi.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.core.regions.CuboidDimension;
 import com.chingo247.structureapi.structure.plan.exception.PlanException;
 import com.chingo247.structureapi.structure.plan.SubStructuredPlan;
+import com.chingo247.structureapi.structure.plan.util.RegionUtil;
 import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
@@ -89,15 +89,16 @@ public class PlacementListType {
         if (container == null) {
             return true;
         }
-        return CuboidDimension.isDimensionWithin(container.self, p);
+        
+        return RegionUtil.isDimensionWithin(container.self.getCuboidRegion(), p.getCuboidRegion());
     }
 
     private void putPlacementExternal(StructurePlan holder, Placement placement) {
         for (PlacementListType plt : externals) {
             // If there is any overlap
-            if (CuboidDimension.overlaps(plt.self, placement)) {
+            if (RegionUtil.overlaps(plt.self.getCuboidRegion(), placement.getCuboidRegion())) {
                 // And the placement is within this PlacementListType
-                if (CuboidDimension.isDimensionWithin(plt.self, placement)) {
+                if (RegionUtil.isDimensionWithin(plt.self.getCuboidRegion(), placement.getCuboidRegion())) {
 //                    if(holder.getUuid().equals(this.holder.getUuid())) {
                     plt.putPlacementInternal(holder, placement);
                     return;
@@ -119,10 +120,10 @@ public class PlacementListType {
         for (PlacementListType plt : internals) {
 
             // If there is any overlap...
-            if (CuboidDimension.overlaps(plt.self, placement)) {
+            if (RegionUtil.overlaps(plt.self.getCuboidRegion(), placement.getCuboidRegion())) {
 
                 // And placement is within...
-                if (CuboidDimension.isDimensionWithin(plt.self, placement)) {
+                if (RegionUtil.isDimensionWithin(plt.self.getCuboidRegion(), placement.getCuboidRegion())) {
 //                    if (holder.getUuid().equals(this.holder.getUuid())) {
                     plt.putPlacementInternal(holder, placement);
                     return;
@@ -151,12 +152,12 @@ public class PlacementListType {
             }
 
             // Check if placement is outside its parent
-            if (!CuboidDimension.overlaps(self, placement)) {
+            if (!RegionUtil.overlaps(self.getCuboidRegion(), placement.getCuboidRegion())) {
                 // Put external!
                 putPlacementExternal(holder, placement);
 
                 // otherwise check if placement is FULLY inside parent
-            } else if (CuboidDimension.isDimensionWithin(self, placement)) {
+            } else if (RegionUtil.isDimensionWithin(self.getCuboidRegion(), placement.getCuboidRegion())) {
 
             } else {
                 // throw exception?
@@ -177,11 +178,11 @@ public class PlacementListType {
 
         if (withinContainer(main)) {
 
-            if (!CuboidDimension.overlaps(self, main)) {
+            if (!RegionUtil.overlaps(self.getCuboidRegion(), main.getCuboidRegion())) {
 
                 // FIT????
                 newPlacementListType = new PlacementListType(plan, plan.getPlacement(), container, this);
-            } else if (CuboidDimension.isDimensionWithin(self, main)) {
+            } else if (RegionUtil.isDimensionWithin(self.getCuboidRegion(), main.getCuboidRegion())) {
                 // FIT????
                 newPlacementListType = new PlacementListType(plan, plan.getPlacement(), this, this);
             } else {
