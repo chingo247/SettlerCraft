@@ -31,7 +31,6 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.blocks.BlockType;
-import com.sk89q.worldedit.regions.CuboidRegion;
 
 /**
  *
@@ -45,8 +44,6 @@ public class DemolishingPlacement extends AbstractCuboidPlacement<DemolishingOpt
 
     @Override
     public void place(EditSession session, Vector pos, DemolishingOptions option) {
-        CuboidRegion affectedArea = new CuboidRegion(pos, pos.add(width, height, length));
-        System.out.println("affected area: " + affectedArea.getMinimumPoint() + ", " + affectedArea.getMaximumPoint());
         TopDownCubicIterator topDownCubicIterator = new TopDownCubicIterator(new BlockVector(width, height, length), option.getxAxisCube(), option.getyAxisCube(), option.getzAxisCube());
        
         while(topDownCubicIterator.hasNext()) {
@@ -59,10 +56,6 @@ public class DemolishingPlacement extends AbstractCuboidPlacement<DemolishingOpt
                 continue;
             }
             
-            System.out.println("relative: " + relativePosition);
-            System.out.println("world: " + worldPosition);
-            
-                
             if (relativePosition.getBlockY() == 0 && !currentBlock.isAir()) {
                 Vector wUnderPos = worldPosition.subtract(0, 1, 0);
                 BaseBlock worldBlockUnder = session.getWorld().getBlock(wUnderPos);

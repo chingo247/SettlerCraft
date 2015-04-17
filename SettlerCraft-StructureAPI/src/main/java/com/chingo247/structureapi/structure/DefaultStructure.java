@@ -54,11 +54,10 @@ public class DefaultStructure implements Structure {
     private final UUID worldUUID;
     private final ConstructionStatus status;
     private final State state;
-    
     private final Date createdAt;
     private final Date removedAt;
     private final Date completedAt;
-    private double value = 0;
+    private final double value;
 
     DefaultStructure(Long id, String name, CuboidRegion dimension, String world, UUID worldUUID, Direction direction, ConstructionStatus status, State state, Date createdAt, Date removedAt, Date completedAt, Double value) {
         this.id = id;
@@ -80,9 +79,7 @@ public class DefaultStructure implements Structure {
         return id;
     }
 
-    public void setValue(double value) {
-        this.value = value;
-    }
+    
     
     @Override
     public String getName() {

@@ -3,7 +3,7 @@ main: com.chingo247.structureapi.platforms.bukkit.BKStructureAPIPlugin
 version: 1.0.0
 author: Chingo247
 description: StructureAPI for SettlerCraft
-depend: [WorldEdit, SettlerCraft-Core]
+depend: [WorldEdit, AsyncWorldEdit, SettlerCraft-Core]
 
 commands:
     stt:

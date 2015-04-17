@@ -31,7 +31,7 @@ import com.chingo247.settlercraft.core.persistence.dao.world.DefaultWorldFactory
 import com.chingo247.settlercraft.core.World;
 import com.chingo247.structureapi.persistence.dao.structure.StructureDAO;
 import com.chingo247.structureapi.persistence.dao.structure.StructureNode;
-import com.chingo247.structureapi.persistence.dao.structure.StructureOwnerTypes;
+import com.chingo247.structureapi.persistence.dao.structure.StructureOwnerType;
 import com.chingo247.structureapi.persistence.dao.structure.StructureWorldNode;
 import com.chingo247.settlercraft.core.Direction;
 import com.sk89q.worldedit.Vector;
@@ -154,7 +154,7 @@ public class StructureTests {
         try (Transaction tx = graph.beginTx()) {
             for (int i = 0; i < toAdd; i++) {
                 StructureNode structureNode = structureDAO.addStructure("test", new CuboidRegion(Vector.ZERO, Vector.ONE), Direction.NORTH, 1000d);
-                structureNode.addOwner(settlerNode, StructureOwnerTypes.MEMBER);
+                structureNode.addOwner(settlerNode, StructureOwnerType.MEMBER);
             }
             long owned = structureDAO.getStructureCountForSettler(settlerUUID);
             Assert.assertTrue(toAdd == owned);

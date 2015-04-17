@@ -63,8 +63,6 @@
  */
 package com.chingo247.structureapi.structure.construction.asyncworldedit;
 
-import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
-import com.chingo247.structureapi.structure.event.async.StructureJobCanceledEvent;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -183,9 +181,6 @@ public abstract class SCBaseTask extends BukkitRunnable {
             m_player.say(MessageType.BLOCK_PLACER_MAX_CHANGED.format());
         } catch (IllegalArgumentException ex) {
             if (ex.getCause() instanceof SessionCanceled) {
-                if(m_job.getTaskID()  != -1) {
-                    AsyncEventManager.getInstance().post(new StructureJobCanceledEvent(m_job.getTaskID(), m_job.getJobId()));
-                }
                 m_job.setCanceled(true);
             }
         }

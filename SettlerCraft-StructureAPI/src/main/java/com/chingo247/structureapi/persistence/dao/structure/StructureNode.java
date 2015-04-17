@@ -25,9 +25,10 @@ package com.chingo247.structureapi.persistence.dao.structure;
 
 import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
 import com.chingo247.structureapi.structure.ConstructionStatus;
-import com.chingo247.structureapi.persistence.dao.structure.StructureOwnerTypes;
+import com.chingo247.structureapi.persistence.dao.structure.StructureOwnerType;
 import com.chingo247.structureapi.structure.State;
 import com.chingo247.settlercraft.core.Direction;
+import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import java.util.Date;
@@ -167,7 +168,7 @@ public class StructureNode {
         return null;
     }
     
-    public void addOwner(SettlerNode node, StructureOwnerTypes type) {
+    public void addOwner(SettlerNode node, StructureOwnerType type) {
         Relationship relationship = underlyingNode.createRelationshipTo(node.getRawNode(), DynamicRelationshipType.withName("OwnedBy"));
         relationship.setProperty("Type", type.name());
     }
@@ -190,6 +191,30 @@ public class StructureNode {
                 break;
             }
         }
+    }
+    
+    public List<SettlerNode> getOwners() {
+        List<SettlerNode> owners = Lists.newArrayList();
+        for(Relationship rel : underlyingNode.getRelationships(DynamicRelationshipType.withName("OwnedBy"))) {
+            SettlerNode ownerNode = new SettlerNode(rel.getOtherNode(underlyingNode));
+            owners.add(ownerNode);
+        }
+        return owners;
+    }
+    
+    public List<SettlerNode> getOwners(StructureOwnerType ownerType) {
+        Preconditions.checkNotNull(ownerType, "owner type can not be null, use getOwners() instead");
+        List<SettlerNode> owners = Lists.newArrayList();
+        for(Relationship rel : underlyingNode.getRelationships(DynamicRelationshipType.withName("OwnedBy"))) {
+            if(rel.hasProperty("Type")) {
+                String type = (String) rel.getProperty("Type");
+                if(StructureOwnerType.valueOf(type) == ownerType) {
+                    SettlerNode ownerNode = new SettlerNode(rel.getOtherNode(underlyingNode));
+                    owners.add(ownerNode);
+                }
+            }
+        }
+        return owners;
     }
 
     public List<StructureNode> getSubstructures() {

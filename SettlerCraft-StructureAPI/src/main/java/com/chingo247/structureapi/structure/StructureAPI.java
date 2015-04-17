@@ -27,7 +27,7 @@ import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerDAO;
 import com.chingo247.settlercraft.core.persistence.dao.world.DefaultWorldFactory;
 import com.chingo247.structureapi.persistence.dao.structure.StructureDAO;
 import com.chingo247.structureapi.persistence.dao.structure.StructureNode;
-import com.chingo247.structureapi.persistence.dao.structure.StructureOwnerTypes;
+import com.chingo247.structureapi.persistence.dao.structure.StructureOwnerType;
 import com.chingo247.structureapi.persistence.dao.structure.StructureWorldNode;
 import com.chingo247.structureapi.platforms.bukkit.IConfigProvider;
 import com.chingo247.structureapi.structure.construction.asyncworldedit.AsyncDemolishingPlacement;
@@ -41,6 +41,7 @@ import com.chingo247.structureapi.structure.plan.StructurePlanManager;
 import com.chingo247.structureapi.structure.plan.document.PlacementElement;
 import com.chingo247.structureapi.structure.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.structureapi.structure.construction.asyncworldedit.AsyncPlacementCallback;
+import com.chingo247.structureapi.structure.construction.asyncworldedit.SCJobEntry;
 import com.chingo247.structureapi.structure.construction.options.Options;
 import com.chingo247.structureapi.structure.event.StructureCreateEvent;
 import com.chingo247.structureapi.structure.event.async.StructureJobAddedEvent;
@@ -69,6 +70,7 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +86,8 @@ import org.neo4j.graphdb.Transaction;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.blockPlacer.IBlockPlacerListener;
+import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 
 /**
  *
@@ -135,6 +139,43 @@ public class StructureAPI {
         this.COLOR = platform.getChatColors();
         this.tasks = new HashMap<>();
         AsyncEventManager.getInstance().register(new StructureEventHandler());
+        AsyncWorldEditMain.getInstance().getBlockPlacer().addListener(new IBlockPlacerListener() {
+
+            @Override
+            public void jobAdded(JobEntry je) {
+                // DO NOTHING
+            }
+
+            @Override
+            public void jobRemoved(JobEntry je) {
+                if(je instanceof SCJobEntry) {
+                    // I FIRED THIS JOB!
+                    SCJobEntry jobEntry = (SCJobEntry) je;
+                    boolean isCanceled = false;
+                    jobLock.lock();
+                    try {
+                        StructureEntry entry = tasks.get(jobEntry.getTaskID());
+                        if(entry != null) {
+                            isCanceled = entry.isCanceled();
+                            if(isCanceled) {
+                                if(entry.isWasChecked()) {
+                                    isCanceled = false; // dont fire it again...
+                                } else {
+                                    entry.setWasChecked(true);
+                                }
+                            }
+                        }
+                    } finally {
+                        jobLock.unlock();
+                    }
+                    
+                    if(isCanceled) {
+                        AsyncEventManager.getInstance().post(new StructureJobCanceledEvent(jobEntry.getTaskID(), jobEntry.getJobId()));
+                    }
+                }
+            }
+        });
+        
     }
 
     public static StructureAPI getInstance() {
@@ -245,7 +286,7 @@ public class StructureAPI {
                     if (settler == null) {
                         throw new RuntimeException("Settler was null!"); // SHOULD NEVER HAPPEN AS SETTLERS ARE ADDED AT MOMENT OF FIRST LOGIN
                     }
-                    structureNode.addOwner(settler, StructureOwnerTypes.MASTER);
+                    structureNode.addOwner(settler, StructureOwnerType.MASTER);
                 }
                 structure = DefaultStructureFactory.instance().makeStructure(structureNode);
                 tx.success();
@@ -427,6 +468,8 @@ public class StructureAPI {
                     StructureEntry entry = tasks.get(structure.getId());
                     if(entry == null) {
                         return;
+                    } else {
+                        entry.setIsCanceled(true);
                     }
                     
                     uuid = entry.getWhoStarted();
@@ -600,7 +643,6 @@ public class StructureAPI {
             UUID uuid;
             jobLock.lock();
             try {
-
                 int jobId = jobAddedEvent.getJobId();
                 StructureEntry entry = tasks.get(structureId);
                 entry.setJobId(jobId);
@@ -630,46 +672,44 @@ public class StructureAPI {
         @Subscribe
         @AllowConcurrentEvents
         public void onJobCanceledEvent(StructureJobCanceledEvent jobCanceledEvent) {
-            UUID uuid = null;
             long structureId = jobCanceledEvent.getStructure();
             jobLock.lock();
             try {
-                long structure = jobCanceledEvent.getStructure();
-                StructureEntry entry = tasks.get(structure);
-                uuid = entry.getWhoStarted();
-                tasks.remove(structure);
+                tasks.remove(structureId);
             } finally {
                 jobLock.unlock();
             }
 
             Structure structure;
+            List<IPlayer> owners = new ArrayList<>();
             try (Transaction tx = graph.beginTx()) {
                 StructureNode structureNode = structureDAO.find(structureId);
                 structureNode.setConstructionStatus(ConstructionStatus.STOPPED);
                 structure = DefaultStructureFactory.instance().makeStructure(structureNode);
+                List<SettlerNode> settlers = structureNode.getOwners();
+                for(SettlerNode settlerNode : settlers) {
+                    IPlayer player = platform.getPlayer(settlerNode.getId());
+                    owners.add(player);
+                } 
                 tx.success();
             }
 
-            if (uuid != null) {
-                IPlayer player = platform.getServer().getPlayer(uuid);
-                if (player != null) {
-                    String status = getStatusString(structure);
-                    player.sendMessage(status);
-                }
+            String status = getStatusString(structure);
+            
+            // Tell the starter
+            for(IPlayer p : owners) {
+                p.sendMessage(status);
             }
         }
 
         @Subscribe
         @AllowConcurrentEvents
         public void onJobCompleteEvent(StructureJobCompleteEvent jobCompleteEvent) {
-            UUID uuid = null;
             boolean isDemolishing = false;
             long structureId = jobCompleteEvent.getStructure();
 
             jobLock.lock();
             try {
-                StructureEntry entry = tasks.get(structureId);
-                uuid = entry.getWhoStarted();
                 tasks.remove(structureId);
             } finally {
                 jobLock.unlock();
@@ -677,6 +717,7 @@ public class StructureAPI {
 
             // Set the status
             Structure structure;
+            List<IPlayer> owners = new ArrayList<>();
             try (Transaction tx = graph.beginTx()) {
                 StructureNode structureNode = structureDAO.find(structureId);
                 if (isDemolishing) {
@@ -685,16 +726,19 @@ public class StructureAPI {
                     structureNode.setConstructionStatus(ConstructionStatus.COMPLETED);
                 }
                 structure = DefaultStructureFactory.instance().makeStructure(structureNode);
+                List<SettlerNode> settlers = structureNode.getOwners();
+                for(SettlerNode settlerNode : settlers) {
+                    IPlayer player = platform.getPlayer(settlerNode.getId());
+                    owners.add(player);
+                } 
                 tx.success();
             }
 
+            String status = getStatusString(structure);
+            
             // Tell the starter
-            if (uuid != null) {
-                IPlayer player = platform.getServer().getPlayer(uuid);
-                if (player != null) {
-                    String status = getStatusString(structure);
-                    player.sendMessage(status);
-                }
+            for(IPlayer p : owners) {
+                p.sendMessage(status);
             }
 
         }
@@ -702,20 +746,19 @@ public class StructureAPI {
         @Subscribe
         @AllowConcurrentEvents
         public void onJobStartedEvent(StructureJobStartedEvent jobStartedEvent) {
-            UUID uuid = null;
             long structureId = jobStartedEvent.getStructure();
             boolean isDemolishing = false;
             jobLock.lock();
             try {
                 StructureEntry entry = tasks.get(structureId);
                 isDemolishing = entry.isDemolishing();
-                uuid = entry.getWhoStarted();
             } finally {
                 jobLock.unlock();
             }
 
             // Set the status!
             Structure structure;
+            List<IPlayer> owners = new ArrayList<>();
             try (Transaction tx = graph.beginTx()) {
                 StructureNode structureNode = structureDAO.find(structureId);
                 if (isDemolishing) {
@@ -724,17 +767,19 @@ public class StructureAPI {
                     structureNode.setConstructionStatus(ConstructionStatus.BUILDING);
                 }
                 structure = DefaultStructureFactory.instance().makeStructure(structureNode);
+                
+                List<SettlerNode> settlers = structureNode.getOwners();
+                for(SettlerNode settlerNode : settlers) {
+                    IPlayer ply = platform.getPlayer(settlerNode.getId());
+                    owners.add(ply);
+                } 
                 tx.success();
             }
 
+            String status = getStatusString(structure);
             // Tell the new status!
-            if (uuid != null) {
-                IPlayer player = platform.getServer().getPlayer(uuid);
-                if (player != null) {
-                    String status = getStatusString(structure);
-                    player.sendMessage(status);
-                }
-
+            for(IPlayer p : owners) {
+                p.sendMessage(status);
             }
         }
 
@@ -782,12 +827,31 @@ public class StructureAPI {
         private int jobId;
         private boolean isDemolishing;
         private UUID whoStarted;
+        private boolean isCanceled = false;
+        private boolean wasChecked = false;
 
         public StructureEntry(int jobId, boolean isDemolishing, UUID whoStarted) {
             this.jobId = jobId;
             this.isDemolishing = isDemolishing;
             this.whoStarted = whoStarted;
         }
+
+        public void setIsCanceled(boolean isCanceled) {
+            this.isCanceled = isCanceled;
+        }
+
+        public boolean isCanceled() {
+            return isCanceled;
+        }
+        
+        public boolean isWasChecked() {
+            return wasChecked;
+        }
+
+        public void setWasChecked(boolean wasChecked) {
+            this.wasChecked = wasChecked;
+        }
+        
 
         public int getJobId() {
             return jobId;

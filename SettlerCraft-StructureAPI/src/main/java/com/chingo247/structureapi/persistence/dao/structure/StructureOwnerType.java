@@ -27,7 +27,7 @@ package com.chingo247.structureapi.persistence.dao.structure;
  *
  * @author Chingo
  */
-public enum StructureOwnerTypes {
+public enum StructureOwnerType {
     
     MEMBER,
     MASTER
