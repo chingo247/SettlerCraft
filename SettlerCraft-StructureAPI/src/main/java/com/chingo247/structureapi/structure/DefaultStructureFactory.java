@@ -54,13 +54,12 @@ public class DefaultStructureFactory implements StructureFactory<Structure>{
         Direction direction = structureNode.getDirection();
         CuboidRegion dimension  = structureNode.getCuboidRegion();
         ConstructionStatus constructionStatus  = structureNode.getConstructionStatus();
-        State state = structureNode.getState();
         Date createdAt = structureNode.getCreatedAt();
         Date deletedAt  = structureNode.getDeletedAt();
         Date completedAt = structureNode.getCompletedAt();
         WorldNode world = structureNode.getWorld();
         Double value = structureNode.getValue();
-        return new DefaultStructure(id, name, dimension, world.getName(), world.getUUID(), direction, constructionStatus, state, createdAt, deletedAt, completedAt, value);
+        return new DefaultStructure(id, name, dimension, world.getName(), world.getUUID(), direction, constructionStatus, createdAt, deletedAt, completedAt, value);
     }
 
 }

@@ -23,9 +23,8 @@
  */
 package com.chingo247.structureapi.structure.plan.document;
 
+import com.chingo247.settlercraft.core.util.XXHasher;
 import com.google.common.base.Preconditions;
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
 import fiber.core.impl.BuildContextImpl;
 import fiber.core.impl.xml.ModelReader;
 import java.io.File;
@@ -43,7 +42,6 @@ import org.dom4j.Node;
  */
 public class StructurePlanDocument extends SimpleElement {
     
-    private static final HashFunction hashFunction = Hashing.md5();
 
     private final File file;
     private final Document doc;
@@ -74,7 +72,7 @@ public class StructurePlanDocument extends SimpleElement {
         Node idNode = doc.selectSingleNode("Id");
         if(idNode == null) {
             String path = file.getAbsolutePath();
-            return hashFunction.hashString(path).toString();
+            return String.valueOf(new XXHasher().hash32String(path));
         }
         SimpleElement element = new SimpleElement(getFile(),(Element) idNode);
         element.checkNotEmpty();

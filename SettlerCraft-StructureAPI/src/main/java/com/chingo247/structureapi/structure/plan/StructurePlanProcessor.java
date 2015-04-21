@@ -23,11 +23,12 @@ package com.chingo247.structureapi.structure.plan;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+import com.chingo247.structureapi.structure.plan.placement.processing.PlacementProcessors;
 import com.chingo247.settlercraft.core.util.LogLevel;
 import com.chingo247.settlercraft.core.util.SCLogger;
 import com.chingo247.structureapi.structure.exception.ElementValueException;
 import com.chingo247.structureapi.structure.plan.exception.PlanException;
-import com.chingo247.structureapi.structure.plan.placement.PlacementProcessor;
+import com.chingo247.structureapi.structure.plan.placement.processing.PlacementProcessor;
 import com.chingo247.structureapi.structure.plan.document.PlacementElement;
 import com.chingo247.structureapi.structure.plan.document.SimpleElement;
 import com.chingo247.structureapi.structure.plan.document.StructurePlanDocument;
@@ -78,9 +79,9 @@ public class StructurePlanProcessor extends RecursiveTask<StructurePlan> {
             String category = planDocument.getCategory();
 
             PlacementElement placementElement = planDocument.getPlacementElement();
-            PlacementProcessor placementProcessor = new PlacementProcessor(placementElement);
+            PlacementProcessor placementProcessor = PlacementProcessors.getProcessor(placementElement);
             placementProcessor.fork();
-
+            
             if (planDocument.hasSubStructureElements()) {
 
                 StructurePlanComplex plan = new StructurePlanComplex(id, structurePlanFile, parent, placementProcessor.join());
@@ -110,7 +111,7 @@ public class StructurePlanProcessor extends RecursiveTask<StructurePlan> {
                             }
                             spps.add(new StructurePlanProcessor(f, parent));
                         } else {
-                            pps.add(new PlacementProcessor(subStructureElement));
+                            pps.add(PlacementProcessors.getProcessor(subStructureElement));
                         }
                     }
                 }

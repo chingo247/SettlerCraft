@@ -146,7 +146,7 @@ public final class StructurePlanComplex extends AbstractStructurePlan implements
      * @return True if it matches any ancestors
      */
     boolean matchesAnyAncestors(File file) {
-        if(hash(file).equals(getMD5Hash())) {
+        if(hash(file).equals(getPathHash())) {
             return true;
         } else if(parent != null) {
             return parent.matchesAnyAncestors(file);

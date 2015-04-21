@@ -44,14 +44,8 @@ public class StructurePlanReader {
         return readDirectory(structurePlanDirectory, false, new ForkJoinPool());
     }
 
-    public List<StructurePlan> readDirectory(File structurePlanDirectory, boolean verbose, ForkJoinPool pool) {
-        if (verbose) {
-            System.out.println("[SettlerCraft]: Loading plans...");
-        }
-        
-       
+    public List<StructurePlan> readDirectory(File structurePlanDirectory, boolean printstuff, ForkJoinPool pool) {
         Iterator<File> fit = FileUtils.iterateFiles(structurePlanDirectory, new String[]{"xml"}, true);
-
         SchematicManager sdm = SchematicManager.getInstance();
         sdm.load(structurePlanDirectory);
 
@@ -73,22 +67,11 @@ public class StructurePlanReader {
                 plans.add(plan);
             }
         }
-
-        if (verbose) {
-            // Close the database connection
-            System.out.println("******************************************");
-            System.out.println("[SettlerCraft]: Parallel Threads: " + pool.getParallelism());
-            System.out.println("[SettlerCraft]: Plans loaded: " + plans.size());
-            System.out.println("[SettlerCraft]: Steal Count: " + pool.getStealCount());
-            System.out.println("[SettlerCraft]: " + (System.currentTimeMillis() - start) + " ms");
-            System.out.println("******************************************");
-        }
         return plans;
     }
     
    
     public StructurePlan readFile(File structurePlanFile) {
-        System.out.println("Reading file: " + structurePlanFile.getAbsolutePath());
         SchematicManager sdm = SchematicManager.getInstance();
         sdm.load(structurePlanFile.getParentFile());
         StructurePlanProcessor spp = new StructurePlanProcessor(structurePlanFile);

@@ -19,26 +19,20 @@ import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
 import com.chingo247.settlercraft.core.persistence.dao.world.WorldDAO;
 import com.chingo247.settlercraft.core.util.KeyPool;
 import com.chingo247.structureapi.exception.StructureAPIException;
-import com.chingo247.structureapi.structure.exception.ElementValueException;
 import com.chingo247.structureapi.structure.exception.StructureException;
 import com.chingo247.structureapi.menu.StructurePlanMenuFactory;
 import com.chingo247.structureapi.menu.StructurePlanMenuReader;
 import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerDAO;
 import com.chingo247.settlercraft.core.persistence.dao.world.DefaultWorldFactory;
+import com.chingo247.settlercraft.core.persistence.neo4j.Neo4jHelper;
 import com.chingo247.structureapi.persistence.dao.structure.StructureDAO;
 import com.chingo247.structureapi.persistence.dao.structure.StructureNode;
 import com.chingo247.structureapi.persistence.dao.structure.StructureOwnerType;
 import com.chingo247.structureapi.persistence.dao.structure.StructureWorldNode;
 import com.chingo247.structureapi.platforms.bukkit.IConfigProvider;
 import com.chingo247.structureapi.structure.construction.asyncworldedit.AsyncDemolishingPlacement;
-import com.chingo247.structureapi.structure.plan.placement.event.PlacementHandlerRegisterEvent;
-import com.chingo247.structureapi.structure.plan.exception.PlacementException;
 import com.chingo247.structureapi.structure.plan.placement.Placement;
-import com.chingo247.structureapi.structure.plan.placement.handlers.PlacementHandler;
-import com.chingo247.structureapi.structure.plan.placement.handlers.SchematicPlacementHandler;
 import com.chingo247.structureapi.structure.plan.StructurePlan;
-import com.chingo247.structureapi.structure.plan.StructurePlanManager;
-import com.chingo247.structureapi.structure.plan.document.PlacementElement;
 import com.chingo247.structureapi.structure.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.structureapi.structure.construction.asyncworldedit.AsyncPlacementCallback;
 import com.chingo247.structureapi.structure.construction.asyncworldedit.SCJobEntry;
@@ -48,8 +42,10 @@ import com.chingo247.structureapi.structure.event.async.StructureJobAddedEvent;
 import com.chingo247.structureapi.structure.event.async.StructureJobCanceledEvent;
 import com.chingo247.structureapi.structure.event.async.StructureJobCompleteEvent;
 import com.chingo247.structureapi.structure.event.async.StructureJobStartedEvent;
-import com.chingo247.structureapi.structure.plan.GlobalPlanManager;
+import com.chingo247.structureapi.structure.plan.StructurePlanManager;
 import com.chingo247.structureapi.structure.plan.SubStructuredPlan;
+import com.chingo247.structureapi.structure.plan.event.StructurePlansLoadedEvent;
+import com.chingo247.structureapi.structure.plan.event.StructurePlansReloadEvent;
 import com.chingo247.structureapi.structure.plan.placement.PlaceOptions;
 import com.chingo247.structureapi.structure.plan.placement.SchematicPlacement;
 import com.chingo247.structureapi.structure.plan.placement.demolishing.DemolishingOptions;
@@ -59,7 +55,6 @@ import com.chingo247.xplatform.core.IColor;
 import com.chingo247.xplatform.core.ILocation;
 import com.chingo247.xplatform.core.IPlayer;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.io.Files;
@@ -98,7 +93,6 @@ public class StructureAPI {
     public static final String STRUCTURE_PLAN_FILE_NAME = "plan.xml";
     public static final String PLUGIN_NAME = "SettlerCraft";
     public static final String PLANS_DIRECTORY = "plans";
-    private static final Map<String, Map<String, PlacementHandler>> handlers = Maps.newHashMap();
 
     private final StructureDAO structureDAO;
     private final WorldDAO worldDAO;
@@ -109,7 +103,6 @@ public class StructureAPI {
     private IConfigProvider config;
 
     private final Lock loadLock = new ReentrantLock();
-    private StructurePlanManager globalPlanManager;
     private StructurePlanMenuFactory planMenuFactory;
     private final ExecutorService executor;
     private final KeyPool<Long> pool;
@@ -128,8 +121,6 @@ public class StructureAPI {
         this.platform = SettlerCraft.getInstance().getPlatform();
         this.graph = SettlerCraft.getInstance().getNeo4j();
 
-        // Register Handlers first...
-        registerHandler(new SchematicPlacementHandler());
         this.pool = new KeyPool<>(executor);
 
         // Now register the GlobalPlanManager
@@ -138,7 +129,12 @@ public class StructureAPI {
         this.settlerDAO = new SettlerDAO(graph);
         this.COLOR = platform.getChatColors();
         this.tasks = new HashMap<>();
+       
+        EventManager.getInstance().getEventBus().register(new StructurePlanManagerHandler());
+        
         AsyncEventManager.getInstance().register(new StructureEventHandler());
+        
+        setupSchema();
         AsyncWorldEditMain.getInstance().getBlockPlacer().addListener(new IBlockPlacerListener() {
 
             @Override
@@ -177,6 +173,19 @@ public class StructureAPI {
         });
         
     }
+    
+    private void setupSchema() {
+        try(Transaction tx = graph.beginTx()) {
+            Neo4jHelper.createIndexIfNotExist(graph, StructureNode.LABEL, StructureNode.DELETED_AT_PROPERTY);
+            Neo4jHelper.createIndexIfNotExist(graph, StructureNode.LABEL, StructureNode.MIN_X_PROPERTY);
+            Neo4jHelper.createIndexIfNotExist(graph, StructureNode.LABEL, StructureNode.MIN_Z_PROPERTY);
+            Neo4jHelper.createIndexIfNotExist(graph, StructureNode.LABEL, StructureNode.MIN_Y_PROPERTY);
+            Neo4jHelper.createIndexIfNotExist(graph, StructureNode.LABEL, StructureNode.MAX_X_PROPERTY);
+            Neo4jHelper.createIndexIfNotExist(graph, StructureNode.LABEL, StructureNode.MAX_Z_PROPERTY);
+            Neo4jHelper.createIndexIfNotExist(graph, StructureNode.LABEL, StructureNode.MAX_Y_PROPERTY);
+            tx.success();
+        }
+    }
 
     public static StructureAPI getInstance() {
         if (instance == null) {
@@ -188,29 +197,20 @@ public class StructureAPI {
     public void initialize() throws DocumentException, SettlerCraftException {
         StructurePlanMenuReader reader = new StructurePlanMenuReader();
         planMenu = reader.read(new File(getWorkingDirectory(), "menu.xml"));
-        if (globalPlanManager == null) {
-            globalPlanManager = new GlobalPlanManager(getPlanDirectory());
-        }
-        if (loadLock.tryLock()) {
+        planMenuFactory = new StructurePlanMenuFactory(platform, planMenu);
+        loadPlans();
+    }
+
+    public void loadPlans() {
+        if(loadLock.tryLock()) {
             try {
-                loadPlans();
+                StructurePlanManager.getInstance().loadPlans();
             } finally {
                 loadLock.unlock();
             }
+            
         }
-    }
-
-    public synchronized void loadPlans() {
-        planMenuFactory = new StructurePlanMenuFactory(platform, planMenu);
-        isLoadingPlans = true;
-        try {
-            globalPlanManager.loadPlans();
-            for (StructurePlan plan : globalPlanManager.getPlans()) {
-                planMenuFactory.load(plan);
-            }
-        } finally {
-            isLoadingPlans = false;
-        }
+            
     }
 
     public boolean isLoadingPlans() {
@@ -218,7 +218,7 @@ public class StructureAPI {
     }
 
     public StructurePlan getPlanById(String planId) {
-        return globalPlanManager.getPlan(planId);
+        return StructurePlanManager.getInstance().getPlan(planId);
     }
 
     /**
@@ -510,99 +510,11 @@ public class StructureAPI {
         return planMenuFactory.createPlanMenu();
     }
 
-    public static boolean isSupported(File structurePlan) {
-        // Placement Check
-        // SubPlacements Check
-        // SubPlansCheck
-        throw new UnsupportedOperationException("Not supported yet...");
-    }
 
-    public static Placement handle(PlacementElement placementElement) {
-        String type = placementElement.getType();
-
-        if (type.contains(".")) {
-            String[] pluginPlacement = type.split(".");
-
-            if (pluginPlacement.length == 2) {
-                return handle(pluginPlacement[0], pluginPlacement[1], placementElement);
-            } else {
-                throw new PlacementException("Invalid format for placment element '" + placementElement.getElementName() + "' on line " + placementElement.getLine() + "! Format should be: SomePluginName.SomeTypeName");
-            }
-        } else {
-            return handle(PLUGIN_NAME, type, placementElement);
-        }
-    }
-
-    private static Placement handle(String plugin, String type, PlacementElement placemeElement) {
-        Map<String, PlacementHandler> handlerMap;
-        synchronized (handlers) {
-            handlerMap = handlers.get(plugin);
-            if (handlerMap == null) {
-                throw new AssertionError("No handlers registered for plugin: " + plugin);
-            }
-        }
-        PlacementHandler placementHandler;
-        synchronized (handlerMap) {
-            placementHandler = handlerMap.get(type);
-            if (placementHandler == null) {
-                throw new AssertionError("Not handler found for : " + type);
-            }
-        }
-
-        return placementHandler.handle(placemeElement);
-    }
-
-    public static boolean canHandle(PlacementElement placementElement) {
-        String[] pluginPlacement = placementElement.getType().split(".");
-
-        if (pluginPlacement.length == 0) {
-            return canHandle("SettlerCraft", placementElement.getType());
-        } else if (pluginPlacement.length == 2) {
-            return canHandle(pluginPlacement[0], pluginPlacement[1]);
-        } else {
-            throw new ElementValueException("Invalid format for placment element '" + placementElement.getElementName() + "'"
-                    + " on line " + placementElement.getLine() + " of '" + placementElement.getFile().getAbsolutePath() + "'"
-                    + " !\n Format should be: SomePluginName.SomeTypeName");
-        }
-    }
-
-    private static boolean canHandle(String plugin, String type) {
-        Map<String, PlacementHandler> handlerMap;
-        synchronized (handlers) {
-            handlerMap = handlers.get(plugin);
-            if (handlerMap == null) {
-                return false;
-            }
-        }
-        synchronized (handlerMap) {
-            return handlerMap.get(type) != null;
-        }
-    }
-
-    public static void registerHandler(PlacementHandler handler) {
-        Map<String, PlacementHandler> pluginHandlerMap;
-        String plugin = handler.getPlugin();
-        synchronized (handlers) {
-            pluginHandlerMap = handlers.get(plugin);
-            if (pluginHandlerMap == null) {
-                pluginHandlerMap = Maps.newHashMap();
-                handlers.put(plugin, pluginHandlerMap);
-            }
-        }
-
-        synchronized (pluginHandlerMap) {
-            if (pluginHandlerMap.get(handler.getType()) != null) {
-                throw new RuntimeException("Already registered a handler for plugin '" + plugin + "' "
-                        + "and type '" + handler.getType() + "'! Current registered handler: " + pluginHandlerMap.get(handler.getType()).getClass());
-            }
-            pluginHandlerMap.put(handler.getType(), handler);
-            EventManager.getInstance().getEventBus().register(new PlacementHandlerRegisterEvent(handler));
-        }
-    }
 
     public void registerStructureAPIPlugin(IPlugin plugin) throws StructureAPIException {
         if (this.plugin != null) {
-            throw new StructureAPIException("Already registered a Plugin for the StructureAPI, NOTE that this method should only be used by SettlerCraft-APIs!");
+            throw new StructureAPIException("Already registered a Plugin for the StructureAPI, NOTE that this method should only be used by StructureAPI Plugin itself!");
         }
         this.plugin = plugin;
     }
@@ -612,7 +524,7 @@ public class StructureAPI {
     }
 
     public List<StructurePlan> getStructurePlans() {
-        return globalPlanManager.getPlans();
+        return StructurePlanManager.getInstance().getPlans();
     }
 
     protected File getWorkingDirectory() {
@@ -877,6 +789,26 @@ public class StructureAPI {
             this.whoStarted = whoStarted;
         }
 
+    }
+    
+    private class StructurePlanManagerHandler {
+        
+        @Subscribe
+        @AllowConcurrentEvents
+        public void onLoadingStructurePlans(StructurePlansReloadEvent event) {
+            isLoadingPlans = true;
+            platform.getConsole().printMessage(COLOR.yellow() + "[SettlerCraft]: " + COLOR.reset() + "Loading StructurePlans");
+        }
+        
+        @Subscribe
+        @AllowConcurrentEvents
+        public void onStructurePlansLoaded(StructurePlansLoadedEvent event) {
+            for (StructurePlan plan : StructurePlanManager.getInstance().getPlans()) {
+                planMenuFactory.load(plan);
+            }
+            isLoadingPlans = false;
+            platform.getConsole().printMessage(COLOR.yellow() + "[SettlerCraft]: " + COLOR.reset() + "Plans are loaded!");
+        }
     }
 
 }

@@ -53,20 +53,18 @@ public class DefaultStructure implements Structure {
     private final String world;
     private final UUID worldUUID;
     private final ConstructionStatus status;
-    private final State state;
     private final Date createdAt;
     private final Date removedAt;
     private final Date completedAt;
     private final double value;
 
-    DefaultStructure(Long id, String name, CuboidRegion dimension, String world, UUID worldUUID, Direction direction, ConstructionStatus status, State state, Date createdAt, Date removedAt, Date completedAt, Double value) {
+    DefaultStructure(Long id, String name, CuboidRegion dimension, String world, UUID worldUUID, Direction direction, ConstructionStatus status, Date createdAt, Date removedAt, Date completedAt, Double value) {
         this.id = id;
         this.name = name;
         this.dimension = dimension;
         this.world = world;
         this.worldUUID = worldUUID;
         this.status = status;
-        this.state = state;
         this.createdAt = createdAt;
         this.removedAt = removedAt;
         this.direction = direction;
@@ -113,10 +111,7 @@ public class DefaultStructure implements Structure {
         return status;
     }
 
-    @Override
-    public State getState() {
-        return state;
-    }
+   
     
     @Override
     public Date getCompletedAt() {

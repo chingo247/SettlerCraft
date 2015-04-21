@@ -26,7 +26,6 @@ package com.chingo247.structureapi.persistence.dao.structure;
 import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
 import com.chingo247.structureapi.structure.ConstructionStatus;
 import com.chingo247.structureapi.persistence.dao.structure.StructureOwnerType;
-import com.chingo247.structureapi.structure.State;
 import com.chingo247.settlercraft.core.Direction;
 import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.Vector;
@@ -54,7 +53,6 @@ public class StructureNode {
     public static final String WORLD_PROPERTY = "world";
     public static final String WORLD_ID_PROPERTY = "worldId";
     public static final String CONSTRUCTION_STATUS_PROPERTY = "constructionStatus";
-    public static final String STATE_PROPERTY = "state";
     public static final String MIN_X_PROPERTY = "minX", MIN_Y_PROPERTY = "minY", MIN_Z_PROPERTY = "minZ", MAX_X_PROPERTY = "maxX", MAX_Y_PROPERTY = "maxY", MAX_Z_PROPERTY = "MAX_Z";
     public static final String CREATED_AT_PROPERTY = "createdAt", DELETED_AT_PROPERTY = "deletedAt", COMPLETED_AT_PROPERTY = "completedAt";
     public static final String VALUE_PROPERTY = "value";
@@ -93,18 +91,6 @@ public class StructureNode {
         underlyingNode.setProperty(NAME_PROPERTY, name);
     }
 
-    public State getState() {
-        Object o = underlyingNode.getProperty(STATE_PROPERTY);
-        return o != null ? State.match((int) o) : null;
-    }
-
-    public void setState(State state) {
-        underlyingNode.setProperty(STATE_PROPERTY, state);
-        if (state == State.DELETED) {
-            underlyingNode.setProperty(DELETED_AT_PROPERTY, System.currentTimeMillis());
-        }
-    }
-    
     public Date getCreatedAt() {
         Object o = underlyingNode.getProperty(CREATED_AT_PROPERTY);
         return o != null ? new Date((Long) o) : null;

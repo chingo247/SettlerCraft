@@ -119,7 +119,7 @@ public class StructurePlanItem implements CategoryTradeItem {
                 "Width: " + color.gold() + width,
                 "Length: " + color.gold() + length,
                 "Height: " + color.gold() + height,
-                "Path: " + color.gold() + id,
+                "UniqueId: " + color.gold() + id,
                 "Type: " + color.gold() + "StructurePlan"));
 
         

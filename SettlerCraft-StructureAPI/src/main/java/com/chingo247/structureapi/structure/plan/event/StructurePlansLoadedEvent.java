@@ -21,24 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.structure.event;
-
-import com.chingo247.structureapi.structure.plan.StructurePlan;
+package com.chingo247.structureapi.structure.plan.event;
 
 /**
  *
  * @author Chingo
  */
-public class StructurePlanLoadEvent {
-    
-    private final StructurePlan structurePlan;
-    
-    public StructurePlanLoadEvent(StructurePlan plan) {
-        this.structurePlan = plan;
-    }
-
-    public StructurePlan getStructurePlan() {
-        return structurePlan;
-    }
+public class StructurePlansLoadedEvent {
     
 }

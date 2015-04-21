@@ -134,6 +134,11 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         
         return false;
     }
+
+    @Override
+    public void onDisable() {
+        super.onDisable(); //To change body of generated methods, choose Tools | Templates.
+    }
     
     
     

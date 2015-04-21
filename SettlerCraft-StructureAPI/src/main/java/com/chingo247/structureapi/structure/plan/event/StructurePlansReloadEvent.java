@@ -21,33 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.structure;
+package com.chingo247.structureapi.structure.plan.event;
 
 /**
  *
  * @author Chingo
  */
-public enum State {
-    CREATED(0),
-    DELETED(1);
-
-    private final int stateId;
-    
-    private State(int stateId) {
-        this.stateId = stateId;
-    }
-
-    public int getStateId() {
-        return stateId;
-    }
-    
-    public static State match(int stateId) {
-        switch(stateId) {
-            case 0: return CREATED;
-            case 1: return DELETED;
-            default: throw new AssertionError("Unreachable");
-        }
-    }
-    
+public class StructurePlansReloadEvent {
     
 }

@@ -30,6 +30,7 @@ import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IPlugin;
 import com.chingo247.xplatform.core.IWorld;
 import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerDAO;
+import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
 import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
 import com.chingo247.settlercraft.core.platforms.IPlayerProvider;
 import com.google.common.base.Preconditions;
@@ -70,7 +71,7 @@ public class SettlerCraft {
     private void setupDatabase() {
         File databaseDir = new File(plugin.getDataFolder().getAbsolutePath() + "//databases//Neo4J");
         databaseDir.mkdirs();
-        this.graph = new Neo4jDatabase(databaseDir, "SettlerCraft").getGraph();
+        this.graph = new Neo4jDatabase(databaseDir, "SettlerCraft", 512).getGraph();
         this.settlerDAO = new SettlerDAO(graph);
         
         try (Transaction tx = graph.beginTx()) {
@@ -81,6 +82,16 @@ public class SettlerCraft {
                 tx.success();
             }
         }
+        try (Transaction tx = graph.beginTx()) {
+            if(!Neo4jHelper.hasUniqueConstraint(graph, SettlerNode.LABEL, SettlerNode.ID_PROPERTY)) {
+                graph.schema().constraintFor(SettlerNode.LABEL)
+                    .assertPropertyIsUnique(SettlerNode.ID_PROPERTY)
+                    .create();
+                tx.success();
+            }
+        }
+        
+        
         SettlerRegister structureOwnerRegister = new SettlerRegister(settlerDAO, service, graph);
         EventManager.getInstance().getEventBus().register(structureOwnerRegister);
     }

@@ -96,9 +96,9 @@ public class SCLogger {
         if(level == LogLevel.OFF) return;
         if(level.intValue() >= currenLevel.intValue()) {
             if(time != null) {
-                System.out.println("[SettlerCraft]["+type+"]:" + data + " time: " + (time) + " ms");
+                System.out.println("[SettlerCraft]["+type+"]: " + data + " time: " + (time) + " ms");
             } else {
-                System.out.println("[SettlerCraft]["+type+"]:" + data + " time: " + (time) + " ms");
+                System.out.println("[SettlerCraft]["+type+"]: " + data + " time: " + (time) + " ms");
             } 
         }
     }

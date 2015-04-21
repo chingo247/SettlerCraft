@@ -16,6 +16,7 @@
  */
 package com.chingo247.settlercraft.core.persistence.neo4j;
 
+import com.google.common.base.Preconditions;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.schema.ConstraintDefinition;
@@ -23,7 +24,7 @@ import org.neo4j.graphdb.schema.ConstraintType;
 import org.neo4j.graphdb.schema.IndexDefinition;
 
 /**
- *
+ * Helper class for neo40 operations, all operations need to be executed within a Transaction
  * @author Chingo
  */
 public class Neo4jHelper {
@@ -52,6 +53,15 @@ public class Neo4jHelper {
             }
         }
         return false;
+    }
+    
+    public static void createIndexIfNotExist(GraphDatabaseService graph, Label label, String property) {
+        Preconditions.checkNotNull(graph, "Graph was null");
+        Preconditions.checkNotNull(label, "Label was null");
+        Preconditions.checkNotNull(property, "Property was null");
+        if(!hasIndex(graph, label, property)) {
+            graph.schema().indexFor(label).on(property).create();
+        }
     }
 
 }

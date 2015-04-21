@@ -10,9 +10,7 @@ import com.chingo247.xplatform.platforms.bukkit.BukkitPlugin;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.core.event.PlayerSubscriber;
-import com.chingo247.settlercraft.core.persistence.hsql.HSQLServer;
 import com.google.common.eventbus.EventBus;
-import java.io.File;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -41,12 +39,12 @@ public class BKSettlerCraftCorePlugin extends JavaPlugin {
         SettlerCraft.getInstance().registerPlayerProvider(new BKPlayerProvider());
         
          // Init HSQL Server
-        
-        if (!HSQLServer.isRunning(HOST, PORT)) { 
-            Bukkit.getConsoleSender().sendMessage("SettlerCraft: Starting HSQL Server...");
-            HSQLServer hSQLServer = new HSQLServer(PORT, HOST, new File(getDataFolder(), "databases//HSQL//SettlerCraft"), HOST);
-            hSQLServer.start();
-        }
+//        
+//        if (!HSQLServer.isRunning(HOST, PORT)) { 
+//            Bukkit.getConsoleSender().sendMessage("SettlerCraft: Starting HSQL Server...");
+//            HSQLServer hSQLServer = new HSQLServer(PORT, HOST, new File(getDataFolder(), "databases//HSQL//SettlerCraft"), HOST);
+//            hSQLServer.start();
+//        }
         
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 
@@ -55,6 +53,11 @@ public class BKSettlerCraftCorePlugin extends JavaPlugin {
                 SettlerCraft.getInstance().getNeo4j().shutdown();
             }
         }));
+        
+        
+       
+        
+        
         
         Bukkit.getPluginManager().registerEvents(new BKEventListener(), this);
         EventBus eventBus  = EventManager.getInstance().getEventBus();

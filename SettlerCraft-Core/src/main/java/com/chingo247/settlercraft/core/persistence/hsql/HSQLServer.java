@@ -24,15 +24,6 @@
  */
 package com.chingo247.settlercraft.core.persistence.hsql;
 
-
-import java.io.File;
-import java.io.IOException;
-import java.net.Socket;
-import org.apache.log4j.Logger;
-
-import org.hsqldb.HsqlException;
-import org.hsqldb.Server;
-
 /**
  *
  * @author Chingo
@@ -40,54 +31,54 @@ import org.hsqldb.Server;
 
 public class HSQLServer {
 
-    private static final Logger LOG = Logger.getLogger(HSQLServer.class);
-    
-    private final Server server;
-    
-
-    public HSQLServer(int port, String host, File directory, String database) {
-        server = new Server();
-        server.setSilent(true);
-        server.setAddress(host);
-        server.setPort(port);
-        
-        server.setDatabaseName(0, database);
-        server.setDatabasePath(0, directory.getAbsolutePath());
-    
-        server.setLogWriter(null);
-        server.setErrWriter(null);
-    }
-
-    
-
-    public static boolean isRunning(String host, int port) {
-        Socket socket = null;
-        try {
-            socket = new Socket(host, port);
-            LOG.info("HSQL Server already running");        
-            return true;
-        } catch(IOException | HsqlException ex) {
-            LOG.info("HSQL Server not running, startng it on port " + port);        
-            return false;
-        } finally {
-            if(socket != null) {
-                try {
-                    socket.close();
-                } catch (IOException ex) {
-                    LOG.error(ex.getMessage());
-                }
-            }
-        }
-    }
-
-    public void start() {
-        server.start();
-    }
-
-    public void stop() {
-        LOG.info("Stopping HSQL server");
-        server.stop();
-    }
+//    private static final Logger LOG = Logger.getLogger(HSQLServer.class);
+//    
+//    private final Server server;
+//    
+//
+//    public HSQLServer(int port, String host, File directory, String database) {
+//        server = new Server();
+//        server.setSilent(true);
+//        server.setAddress(host);
+//        server.setPort(port);
+//        
+//        server.setDatabaseName(0, database);
+//        server.setDatabasePath(0, directory.getAbsolutePath());
+//    
+//        server.setLogWriter(null);
+//        server.setErrWriter(null);
+//    }
+//
+//    
+//
+//    public static boolean isRunning(String host, int port) {
+//        Socket socket = null;
+//        try {
+//            socket = new Socket(host, port);
+//            LOG.info("HSQL Server already running");        
+//            return true;
+//        } catch(IOException | HsqlException ex) {
+//            LOG.info("HSQL Server not running, startng it on port " + port);        
+//            return false;
+//        } finally {
+//            if(socket != null) {
+//                try {
+//                    socket.close();
+//                } catch (IOException ex) {
+//                    LOG.error(ex.getMessage());
+//                }
+//            }
+//        }
+//    }
+//
+//    public void start() {
+//        server.start();
+//    }
+//
+//    public void stop() {
+//        LOG.info("Stopping HSQL server");
+//        server.stop();
+//    }
     
    
 }

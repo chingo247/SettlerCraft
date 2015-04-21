@@ -16,7 +16,6 @@
  */
 package com.chingo247.settlercraft.core.persistence.dao.settler;
 
-import com.chingo247.settlercraft.core.persistence.neo4j.Neo4jHelper;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -37,14 +36,7 @@ public class SettlerDAO {
 
     public SettlerDAO(GraphDatabaseService graph) {
         this.graph = graph;
-        try (Transaction tx = graph.beginTx()) {
-            if(!Neo4jHelper.hasUniqueConstraint(graph, SettlerNode.LABEL, SettlerNode.ID_PROPERTY)) {
-                graph.schema().constraintFor(SettlerNode.LABEL)
-                    .assertPropertyIsUnique(SettlerNode.ID_PROPERTY)
-                    .create();
-                tx.success();
-            }
-        }
+        
     }
 
     public SettlerNode find(UUID settlerId) {

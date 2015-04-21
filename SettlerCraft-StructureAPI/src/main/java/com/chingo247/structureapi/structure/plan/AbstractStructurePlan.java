@@ -5,18 +5,14 @@
  */
 package com.chingo247.structureapi.structure.plan;
 
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
+import com.chingo247.settlercraft.core.util.XXHasher;
 import java.io.File;
-import java.nio.charset.Charset;
 
 /**
  *
  * @author Chingo
  */
 public abstract class AbstractStructurePlan implements StructurePlan {
-
-    private static final HashFunction hashFunction = Hashing.md5();
 
     private final String id;
     private String name, category, description;
@@ -25,12 +21,12 @@ public abstract class AbstractStructurePlan implements StructurePlan {
     private final File file;
     
     protected AbstractStructurePlan(File planFile) {
-        this(hashFunction.hashString(planFile.getAbsolutePath(), Charset.defaultCharset()).toString(), planFile);
+        this(String.valueOf(new XXHasher().hash32String(planFile.getAbsolutePath())), planFile);
     }
 
     protected AbstractStructurePlan(String id, File planFile) {
         this.file = planFile;
-        this.hash = hashFunction.hashString(file.getAbsolutePath(), Charset.defaultCharset()).toString();
+        this.hash = String.valueOf(new XXHasher().hash32String(planFile.getAbsolutePath()));
         this.price = 0.0d;
         this.category = "Default";
         this.id = id;
@@ -90,16 +86,13 @@ public abstract class AbstractStructurePlan implements StructurePlan {
         return file;
     }
     
-    /**
-     * Returns the MD5 hash of this StructurePlan, which is based on the File Path of this StructurePlan
-     * @return The MD5 hash which corresponds this StructurePlans file's path
-     */
-    protected String getMD5Hash() {
+   
+    protected String getPathHash() {
         return hash;
     }
 
     protected String hash(File f) {
-        return hashFunction.hashString(f.getAbsolutePath()).toString();
+        return String.valueOf(new XXHasher().hash32String(f.getAbsolutePath()));
     }
 
 }

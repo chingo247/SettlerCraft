@@ -34,7 +34,7 @@ import java.io.File;
  */
 public interface Schematic {
     
-    public long getId();
+    public long getHash();
     public CuboidClipboard getClipboard();
     public SchematicPlacement createPlacement();
     public Vector getSize();

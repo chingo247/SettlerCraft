@@ -21,24 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.structure.plan.placement.event;
-
-import com.chingo247.structureapi.structure.plan.placement.handlers.PlacementHandler;
+package com.chingo247.structureapi.persistence.dao.schematic;
 
 /**
  *
  * @author Chingo
  */
-public class PlacementHandlerRegisterEvent {
+public interface SchematicData {
     
-    private final PlacementHandler placementHandler;
-    
-    public PlacementHandlerRegisterEvent(PlacementHandler handler) {
-        this.placementHandler = handler;
-    }
-
-    public PlacementHandler getPlacementHandler() {
-        return placementHandler;
-    }
+    public int getWidth();
+    public int getHeight();
+    public int getLength();
+    public long getXXHash64();
+    public String getName();
+    public long getImportDate();
     
 }

@@ -84,11 +84,7 @@ public interface Structure {
      * @return The value/price of this structure
      */
     public double getValue();
-    /**
-     * The object's state of this structure
-     * @return The state
-     */
-    public State getState();
+    
     /**
      * Gets when this structure was completed, may return null
      * @return The date of completion

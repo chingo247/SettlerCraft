@@ -65,7 +65,7 @@ public class StructureTests {
     @BeforeClass
     public static void setUpClass() {
         System.out.println("Setting up");
-        Neo4jDatabase database = new Neo4jDatabase(new File("G:\\Neo4j\\SettlerCraft"), "testdb");
+        Neo4jDatabase database = new Neo4jDatabase(new File("G:\\Neo4j\\SettlerCraft"), "testdb", 256);
         structureDAO = new StructureDAO(database.getGraph());
         worldDAO = new WorldDAO(database.getGraph());
         settlerDAO = new SettlerDAO(database.getGraph());

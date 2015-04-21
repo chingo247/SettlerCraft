@@ -21,41 +21,61 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.structure.plan.placement;
-
-import com.chingo247.structureapi.structure.plan.placement.Placement;
-import com.chingo247.structureapi.structure.plan.document.PlacementElement;
-import com.chingo247.structureapi.structure.StructureAPI;
-import java.util.concurrent.RecursiveTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+package com.chingo247.structureapi.persistence.dao.schematic;
 
 /**
  *
  * @author Chingo
  */
-public class PlacementProcessor extends RecursiveTask<Placement> {
+public class DefaultSchematicData implements SchematicData{
+    
+    private final String name;
+    private final int width, height, length;
+    private final long importDate;
+    private final long xxhash64;
 
-    protected final PlacementElement placeableNode;
-
-    /**
-     * Processes a Placeable
-     *
-     * @param placementNode
-     */
-    public PlacementProcessor(PlacementElement placementNode) {
-        this.placeableNode = placementNode;
+    DefaultSchematicData(String name, long xxhash64, int width, int height, int length, long importDate) {
+        this.name = name;
+        this.xxhash64 = xxhash64;
+        this.width = width;
+        this.height = height;
+        this.length = length;
+        this.importDate = importDate;
     }
 
     @Override
-    protected Placement compute() {
-        try {
-            Placement placement = StructureAPI.handle(placeableNode);
-            return placement;
-        } catch (Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
-        }
-        return null;
+    public String getName() {
+        return name;
     }
 
+    @Override
+    public long getXXHash64() {
+        return xxhash64;
+    }
+
+    @Override
+    public int getWidth() {
+        return width;
+    }
+
+    @Override
+    public int getHeight() {
+        return height;
+    }
+
+    @Override
+    public int getLength() {
+        return length;
+    }
+
+    @Override
+    public long getImportDate() {
+        return importDate;
+    }
+
+    
+    
+    
+    
+    
 }

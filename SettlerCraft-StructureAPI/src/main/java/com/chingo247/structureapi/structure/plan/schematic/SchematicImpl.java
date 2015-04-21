@@ -24,16 +24,17 @@
 package com.chingo247.structureapi.structure.plan.schematic;
 
 import com.chingo247.settlercraft.core.Direction;
+import com.chingo247.settlercraft.core.util.XXHasher;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.data.DataException;
 import com.sk89q.worldedit.schematic.SchematicFormat;
 import java.io.File;
 import java.io.IOException;
-import org.apache.commons.io.FileUtils;
 import com.chingo247.structureapi.structure.plan.exception.SchematicException;
 import com.chingo247.structureapi.structure.plan.placement.SchematicPlacement;
 import com.google.common.base.Preconditions;
+
 
 /**
  *
@@ -42,25 +43,31 @@ import com.google.common.base.Preconditions;
 public class SchematicImpl implements Schematic {
 
     private final File schematicFile;
-    private final long id;
+    private final long xxhash;
     private final int width;
     private final int height;
     private final int length;
 
-    
-
-    protected SchematicImpl(File schematicFile, CuboidClipboard clipboard) {
+    protected SchematicImpl (File schematicFile, int width, int height, int length) {
         Preconditions.checkNotNull(schematicFile);
         Preconditions.checkArgument(schematicFile.exists());
         this.schematicFile = schematicFile;
+        
+        XXHasher hasher = new XXHasher();
+        
         try {
-            this.id = FileUtils.checksumCRC32(schematicFile);
+            this.xxhash = hasher.hash64(schematicFile);
         } catch (IOException ex) {
             throw new SchematicException(ex);
         }
-        this.width = clipboard.getWidth();
-        this.height = clipboard.getHeight();
-        this.length = clipboard.getLength();
+        
+        this.width = width;
+        this.height = height;
+        this.length = length;
+    }
+
+    protected SchematicImpl(File schematicFile, CuboidClipboard clipboard) {
+        this(schematicFile, clipboard.getWidth(), clipboard.getHeight(), clipboard.getLength());
     }
 
     @Override
@@ -69,8 +76,8 @@ public class SchematicImpl implements Schematic {
     }
 
     @Override
-    public long getId() {
-        return this.id;
+    public long getHash() {
+        return this.xxhash;
     }
 
     @Override

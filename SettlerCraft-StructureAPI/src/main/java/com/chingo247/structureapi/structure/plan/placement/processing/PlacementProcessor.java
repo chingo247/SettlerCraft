@@ -21,58 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.structure.plan.placement.handlers;
+package com.chingo247.structureapi.structure.plan.placement.processing;
 
-import com.chingo247.structureapi.structure.plan.placement.Placement;
 import com.chingo247.structureapi.structure.plan.document.PlacementElement;
-import org.dom4j.Element;
+import com.chingo247.structureapi.structure.plan.placement.Placement;
+import java.util.concurrent.RecursiveTask;
 
 /**
  *
  * @author Chingo
- * @param <T>
  */
-public abstract class PlacementHandler<T extends Placement> {
-    
-    private String plugin;
-    private String type;
+public abstract class PlacementProcessor extends RecursiveTask<Placement> {
+
+    protected final PlacementElement placeableNode;
 
     /**
-     * Constructor
-     * @param pluginName The name of the plugin that can handle
-     * @param typeName The name of the type this handler can handle. 
-     * Note that the root element this Handler will handle will have to match: <pluginName.typeName>
+     * Processes a Placeable
+     *
+     * @param placementNode
      */
-    public PlacementHandler(String pluginName, String typeName) {
-        this.plugin = pluginName;
-        this.type = typeName;
+    public PlacementProcessor(PlacementElement placementNode) {
+        this.placeableNode = placementNode;
     }
+
     
-    public String getPlugin() {
-        return plugin;
-    }
-    
-    public String getType() {
-        return type;
-    }
-    
-    
-    
-    /**
-     * Handles a document that should be handled by this handler
-     * @param d The document to handle
-     * @param file
-     * @return The result of this handler as placement
-     */
-    public abstract T handle(PlacementElement d);
-    
-    /**
-     * Creates a copy of the given placement
-     * @param t
-     * @return 
-     */
-    public abstract T copy(T t);
-    
-    public abstract Element asElement(T t);
-    
+
 }

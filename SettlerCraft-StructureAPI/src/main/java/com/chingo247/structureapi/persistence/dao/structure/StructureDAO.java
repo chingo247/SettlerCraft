@@ -28,7 +28,6 @@ import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
 import com.chingo247.settlercraft.core.World;
 import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
 import com.chingo247.structureapi.structure.ConstructionStatus;
-import com.chingo247.structureapi.structure.State;
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.xplatform.core.IWorld;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -69,7 +68,6 @@ public class StructureDAO {
         Node stNode = graph.createNode(StructureNode.LABEL);
         stNode.setProperty(StructureNode.NAME_PROPERTY, name);
         stNode.setProperty(StructureNode.CONSTRUCTION_STATUS_PROPERTY, ConstructionStatus.ON_HOLD.getStatusId());
-        stNode.setProperty(StructureNode.STATE_PROPERTY, State.CREATED.getStateId());
         stNode.setProperty(StructureNode.DIRECTION_PROPERTY, direction.getDirectionId());
         stNode.setProperty(StructureNode.MIN_X_PROPERTY, dimension.getMinimumPoint().getBlockX());
         stNode.setProperty(StructureNode.MIN_Y_PROPERTY, dimension.getMinimumPoint().getBlockY());
@@ -88,10 +86,10 @@ public class StructureDAO {
         List<StructureNode> structures = new ArrayList<>();
        
         String query = "MATCH (w: " + WorldNode.LABEL.name() + "{" + WorldNode.ID_PROPERTY + ": '" + w.getUUID().toString() + "'} )<-[:" + StructureRelTypes.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
-                + " WHERE s." + StructureNode.MAX_X_PROPERTY + " >= " + region.getMinimumPoint().getBlockX() + " AND s." + StructureNode.MIN_X_PROPERTY + " <= " + region.getMaximumPoint().getBlockX()
+                + " WHERE s." + StructureNode.DELETED_AT_PROPERTY + " IS NULL"
+                + " AND s." + StructureNode.MAX_X_PROPERTY + " >= " + region.getMinimumPoint().getBlockX() + " AND s." + StructureNode.MIN_X_PROPERTY + " <= " + region.getMaximumPoint().getBlockX()
                 + " AND s." + StructureNode.MAX_Y_PROPERTY + " >= " + region.getMinimumPoint().getBlockY() + " AND s." + StructureNode.MIN_Y_PROPERTY + " <= " + region.getMaximumPoint().getBlockY()
                 + " AND s." + StructureNode.MAX_Z_PROPERTY + " >= " + region.getMinimumPoint().getBlockZ() + " AND s." + StructureNode.MIN_Z_PROPERTY + " <= " + region.getMaximumPoint().getBlockZ()
-                + " AND NOT s." + StructureNode.STATE_PROPERTY + " = '" + State.DELETED.name() + "'"
                 + " RETURN s"
                 + " LIMIT " + limit;
         System.out.println("query: " + query);
