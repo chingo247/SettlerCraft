@@ -22,37 +22,11 @@ package com.chingo247.xplatform.core;
  */
 public abstract class AInventory {
     
-    public boolean hasItem(AItemStack stack) {
-        AItemStack[] items = getItems();
-        for(AItemStack item : items) {
-            if(item != null && item.matches(stack)) {
-                return true;
-            }
-        }
-        return false;
-    }
+    public abstract boolean hasItem(AItemStack stack);
     
-    public int getAmount(AItemStack stack) {
-        AItemStack[] items = getItems();
-        int count = 0;
-        for(AItemStack item : items) {
-            if(item.matches(stack)) {
-                count++;
-            }
-        }
-        return count;
-    }
+    public abstract void removeItem(AItemStack item);
     
-
     
-    public void removeItem(AItemStack item) {
-        AItemStack[] items = getItems();
-        for(int i = 0; i < items.length; i++) {
-            if(item.matches(items[i])) {
-                setItem(i, null);
-            }
-        }
-    }
     
     public abstract void addItem(AItemStack itemStack);
     

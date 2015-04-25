@@ -223,8 +223,12 @@ public abstract class ACategoryMenu {
         if (price <= balance) {
             player.getInventory().addItem(item.getItemStack());
             economyProvider.withdraw(player.getUniqueId(), price);
-            player.sendMessage("You bought: " + getColor().blue() + item.getName());
-            player.sendMessage("Your new balance is: " + getColor().gold() + economyProvider.getBalance(player.getUniqueId()));
+            if (price > 0) {
+                player.sendMessage("You bought: " + getColor().blue() + item.getName());
+                player.sendMessage("Your new balance is: " + getColor().gold() + economyProvider.getBalance(player.getUniqueId()));
+            } else {
+                player.sendMessage("You got: " + getColor().blue() + item.getName());
+            }
             return true;
         }
         // Not enough money

@@ -24,6 +24,7 @@
 package com.chingo247.menuapi.menu;
 
 import com.chingo247.menuapi.menu.ACategoryMenu;
+import com.chingo247.menuapi.menu.MenuAPI;
 import com.chingo247.xplatform.platforms.bukkit.BukkitPlatform;
 import org.apache.log4j.Logger;
 import org.bukkit.entity.Player;
@@ -79,8 +80,11 @@ public class BKMenuAPIListener  implements Listener {
                     return;
             }
             
+            
             if(MenuAPI.getInstance().onPlayerClick(ice.getRawSlot(), player.getUniqueId(), click, BukkitPlatform.wrapItem(ice.getCurrentItem()))) {
-                ice.setCancelled(true); // cancel this event
+                if(ice.getRawSlot() < 54) {
+                    ice.setCancelled(true); // cancel this event
+                }
             }
         }
 

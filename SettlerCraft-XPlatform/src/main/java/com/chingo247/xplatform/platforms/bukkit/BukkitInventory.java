@@ -27,19 +27,19 @@ import org.bukkit.material.MaterialData;
  *
  * @author Chingo
  */
-public class BukkitInventory extends AInventory{
-    
+public class BukkitInventory extends AInventory {
+
     private final Inventory inventory;
 
     public BukkitInventory(Inventory inventory) {
         this.inventory = inventory;
     }
-    
+
     @Override
     public AItemStack[] getItems() {
         ItemStack[] items = inventory.getContents();
         AItemStack[] copy = new AItemStack[items.length];
-        for(int i = 0; i < items.length; i++) {
+        for (int i = 0; i < items.length; i++) {
             copy[i] = new BukkitItemStack(items[i]);
         }
         return copy;
@@ -53,7 +53,7 @@ public class BukkitInventory extends AInventory{
 
     private ItemStack toBukkitItem(AItemStack itemstack) {
         ItemStack stack = null;
-        if(itemstack != null) {
+        if (itemstack != null) {
             stack = new ItemStack(itemstack.getMaterial());
             stack.setData(new MaterialData(itemstack.getMaterial(), new Integer(itemstack.getData()).byteValue()));
             stack.setAmount(itemstack.getAmount());
@@ -79,6 +79,16 @@ public class BukkitInventory extends AInventory{
         return inventory;
     }
 
-    
-    
+    @Override
+    public boolean hasItem(AItemStack stack) {
+        BukkitItemStack bkis = (BukkitItemStack) stack;
+        return inventory.contains(bkis.getStack());
+    }
+
+    @Override
+    public void removeItem(AItemStack item) {
+        BukkitItemStack bkis = (BukkitItemStack) item;
+        inventory.remove(bkis.getStack());
+    }
+
 }

@@ -27,7 +27,7 @@ import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
 import com.chingo247.settlercraft.core.World;
 import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
-import com.chingo247.structureapi.structure.ConstructionStatus;
+import com.chingo247.structureapi.ConstructionStatus;
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.xplatform.core.IWorld;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
+import net.minecraft.util.com.google.common.collect.Maps;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -64,7 +65,7 @@ public class StructureDAO {
         return structure;
     }
 
-    public StructureNode addStructure(String name, CuboidRegion dimension, Direction direction, double value) {
+    public StructureNode addStructure(String name, CuboidRegion dimension, Direction direction, double price) {
         Node stNode = graph.createNode(StructureNode.LABEL);
         stNode.setProperty(StructureNode.NAME_PROPERTY, name);
         stNode.setProperty(StructureNode.CONSTRUCTION_STATUS_PROPERTY, ConstructionStatus.ON_HOLD.getStatusId());
@@ -76,7 +77,7 @@ public class StructureDAO {
         stNode.setProperty(StructureNode.MAX_Y_PROPERTY, dimension.getMaximumPoint().getBlockY());
         stNode.setProperty(StructureNode.MAX_Z_PROPERTY, dimension.getMaximumPoint().getBlockZ());
         stNode.setProperty(StructureNode.CREATED_AT_PROPERTY, System.currentTimeMillis());
-        stNode.setProperty(StructureNode.VALUE_PROPERTY, value);
+        stNode.setProperty(StructureNode.PRICE_PROPERTY, price);
         return new StructureNode(stNode);
     }
 
@@ -84,8 +85,14 @@ public class StructureDAO {
         IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
         long start = System.currentTimeMillis();
         List<StructureNode> structures = new ArrayList<>();
+      
+        Map<String,Object> params = Maps.newHashMap();
+        params.put("worldId", world.getUUID().toString());
        
-        String query = "MATCH (w: " + WorldNode.LABEL.name() + "{" + WorldNode.ID_PROPERTY + ": '" + w.getUUID().toString() + "'} )<-[:" + StructureRelTypes.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
+        String query = 
+                   "MATCH (world:"+WorldNode.LABEL.name()+" { "+WorldNode.ID_PROPERTY+": {worldId} })"
+                + " WITH world "
+                + " MATCH (world)<-[:" + StructureRelTypes.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
                 + " WHERE s." + StructureNode.DELETED_AT_PROPERTY + " IS NULL"
                 + " AND s." + StructureNode.MAX_X_PROPERTY + " >= " + region.getMinimumPoint().getBlockX() + " AND s." + StructureNode.MIN_X_PROPERTY + " <= " + region.getMaximumPoint().getBlockX()
                 + " AND s." + StructureNode.MAX_Y_PROPERTY + " >= " + region.getMinimumPoint().getBlockY() + " AND s." + StructureNode.MIN_Y_PROPERTY + " <= " + region.getMaximumPoint().getBlockY()
@@ -109,19 +116,28 @@ public class StructureDAO {
         return !getStructuresWithin(world, region, 1).isEmpty();
     }
 
-    public List<StructureNode> getStructuresForOwner(UUID structureOwner, int skip, int limit) {
+    public List<StructureNode> getStructuresForSettler(UUID settler, int skip, int limit) {
         long start = System.currentTimeMillis();
         List<StructureNode> structures = new ArrayList<>();
-            String query = "MATCH (x: " + SettlerNode.LABEL.name() + " { " + SettlerNode.ID_PROPERTY + ": '" + structureOwner.toString() + "' })<-[:" + StructureRelTypes.RELATION_OWNED_BY + "]-(s: " + StructureNode.LABEL.name() + ")"
+        
+        Map<String,Object> params = Maps.newHashMap();
+        params.put("ownerId", settler.toString());
+        params.put("skip", skip);
+        params.put("limit", limit);
+        
+            String query =
+                    "   MATCH (settler:"+SettlerNode.LABEL.name()+" {"+SettlerNode.ID_PROPERTY+"}: {ownerId})"
+                    + " WITH settler"
+                    + " MATCH (settler)<-[:" + StructureRelTypes.RELATION_OWNED_BY + "]-(s: " + StructureNode.LABEL.name() + ")"
                     + " RETURN s"
                     + " ORDER BY s." + StructureNode.CREATED_AT_PROPERTY + " DESC ";
 
             if (skip > 0) {
-                query += " SKIP " + skip;
+                query += " SKIP {skip}";
             }
 
             if (limit > 0) {
-                query += " LIMIT " + limit;
+                query += " LIMIT {limit}";
             }
 
             Result result = graph.execute(query);
@@ -141,9 +157,15 @@ public class StructureDAO {
         long count = 0;
         long start = System.currentTimeMillis();
         try (Transaction tx = graph.beginTx()) {
-
-            String query = "MATCH (:" + SettlerNode.LABEL.name() + " { " + SettlerNode.ID_PROPERTY + ": '" + settler.toString() + "' })<-[:" + StructureRelTypes.RELATION_OWNED_BY + "]-(s:" + StructureNode.LABEL.name() + ") "
-                    + " RETURN COUNT(s) as count";
+            
+            Map<String,Object> params = Maps.newHashMap();
+            params.put("ownerId", settler.toString());
+        
+            String query =
+                       "MATCH (settler:"+SettlerNode.LABEL.name()+" {"+SettlerNode.ID_PROPERTY+"}: {ownerId})"
+                    + " WITH settler"
+                    + " MATCH (settler)<-[:" + StructureRelTypes.RELATION_OWNED_BY + "]-(s: " + StructureNode.LABEL.name() + ")"
+                    + " RETURN COUNT(s) as count ";
 
             Result result = graph.execute(query);
             System.out.println("query: " + query);

@@ -23,14 +23,14 @@ package com.chingo247.structureapi.platforms.bukkit;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import com.chingo247.menuapi.menu.BKVaultEconomyProvider;
+import com.chingo247.menuapi.platforms.bukkit.BKVaultEconomyProvider;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.xplatform.core.IPlugin;
 import com.chingo247.settlercraft.core.exception.SettlerCraftException;
 import com.chingo247.structureapi.platforms.bukkit.listener.PlanListener;
 import com.chingo247.settlercraft.core.exception.CommandException;
 import com.chingo247.structureapi.commands.StructureCommands;
-import com.chingo247.structureapi.structure.StructureAPI;
+import com.chingo247.structureapi.StructureAPI;
 import com.chingo247.xplatform.core.ICommandSender;
 import com.chingo247.xplatform.platforms.bukkit.BukkitConsoleSender;
 import com.chingo247.xplatform.platforms.bukkit.BukkitPlayer;

@@ -32,11 +32,11 @@ import com.chingo247.settlercraft.core.platforms.IPermissionManager;
 import com.chingo247.structureapi.persistence.dao.structure.StructureDAO;
 import com.chingo247.structureapi.persistence.dao.structure.StructureNode;
 import com.chingo247.structureapi.platforms.util.Permissions;
-import com.chingo247.structureapi.structure.DefaultStructureFactory;
-import com.chingo247.structureapi.structure.Structure;
-import com.chingo247.structureapi.structure.StructureAPI;
-import com.chingo247.structureapi.structure.plan.placement.PlaceOptions;
-import com.chingo247.structureapi.structure.plan.placement.demolishing.DemolishingOptions;
+import com.chingo247.structureapi.DefaultStructureFactory;
+import com.chingo247.structureapi.Structure;
+import com.chingo247.structureapi.StructureAPI;
+import com.chingo247.structureapi.plan.placement.options.PlaceOptions;
+import com.chingo247.structureapi.plan.placement.options.DemolishingOptions;
 import com.chingo247.xplatform.core.IColor;
 import com.chingo247.xplatform.core.ICommandSender;
 import com.chingo247.xplatform.core.IPlayer;
@@ -314,7 +314,7 @@ public class StructureCommands {
                 try (Transaction tx = graph.beginTx()) {
                     long totalStructures = structureDAO.getStructureCountForSettler(playerId);
                     long totalPages = Math.round(Math.ceil(totalStructures / (MAX_LINES - 1)));
-                    List<StructureNode> structures = structureDAO.getStructuresForOwner(playerId, skip, limit);
+                    List<StructureNode> structures = structureDAO.getStructuresForSettler(playerId, skip, limit);
                     if (p > totalPages || p < 0) {
                         iPlayer.sendMessage(COLOR.red() + "Page " + p + " out of " + totalPages + "...");
                         return;
@@ -329,8 +329,8 @@ public class StructureCommands {
                                 + " " + COLOR.yellow() + "X: " + COLOR.reset() + position.getX()
                                 + " " + COLOR.yellow() + "Y: " + COLOR.reset() + position.getY()
                                 + " " + COLOR.yellow() + "Z: " + COLOR.reset() + position.getZ();
-                                if(structure.getValue() > 0.0d) {
-                                    line += " " + COLOR.reset() + COLOR.yellow() + "Value: " + ShopUtil.valueString(structure.getValue());
+                                if(structure.getPrice() > 0.0d) {
+                                    line += " " + COLOR.reset() + COLOR.yellow() + "Value: " + ShopUtil.valueString(structure.getPrice());
                                 }
                         message[lineNumber] = line;
                     }

@@ -32,7 +32,7 @@ public class WorldNode {
     public static final String ID_PROPERTY = "uuid";
    
     
-    private Node underlyingNode;
+    private final Node underlyingNode;
     
     
 

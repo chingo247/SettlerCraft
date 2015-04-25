@@ -30,7 +30,7 @@ import static com.chingo247.settlercraft.core.Direction.EAST;
 import static com.chingo247.settlercraft.core.Direction.NORTH;
 import static com.chingo247.settlercraft.core.Direction.SOUTH;
 import static com.chingo247.settlercraft.core.Direction.WEST;
-import com.chingo247.structureapi.structure.plan.schematic.Schematic;
+import com.chingo247.structureapi.plan.schematic.Schematic;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
@@ -38,11 +38,6 @@ import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.util.Countable;
 
-import org.bukkit.Material;
-import org.bukkit.material.Attachable;
-import org.bukkit.material.Crops;
-import org.bukkit.material.Directional;
-import org.bukkit.material.SimpleAttachableMaterialData;
 
 /**
  *
@@ -161,21 +156,7 @@ public class SchematicUtil {
         }
     }
 
-    public static boolean isAttachable(Material material, byte data) {
-        return (material.getData().cast(material.getNewData(data)) instanceof Attachable);
-    }
-
-    public static boolean isDirectional(Material material, byte data) {
-        return (material.getData().cast(material.getNewData(data)) instanceof Directional);
-    }
-
-    public static boolean isSimpleAttachable(Material material, byte data) {
-        return (material.getData().cast(material.getNewData(data)) instanceof SimpleAttachableMaterialData);
-    }
-
-    public static boolean isCrops(Material material, byte data) {
-        return (material.getData().cast(material.getNewData(data)) instanceof Crops);
-    }
+    
 
     public static void align(CuboidClipboard clipboard, Direction direction) {
         switch (direction) {

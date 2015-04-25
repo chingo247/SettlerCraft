@@ -28,7 +28,7 @@ import com.chingo247.xplatform.platforms.bukkit.BukkitPlatform;
 import com.chingo247.settlercraft.core.services.IEconomyProvider;
 import com.chingo247.structureapi.platforms.bukkit.util.BKWorldEditUtil;
 import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.structureapi.structure.handlers.StructurePlaceHandler;
+import com.chingo247.structureapi.handlers.StructurePlaceHandler;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.entity.Player;

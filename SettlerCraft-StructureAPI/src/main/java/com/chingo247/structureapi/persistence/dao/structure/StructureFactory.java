@@ -23,7 +23,7 @@
  */
 package com.chingo247.structureapi.persistence.dao.structure;
 
-import com.chingo247.structureapi.structure.Structure;
+import com.chingo247.structureapi.Structure;
 
 /**
  *
@@ -32,6 +32,11 @@ import com.chingo247.structureapi.structure.Structure;
  */
 public interface StructureFactory<T extends Structure> {
     
+    /**
+     * Transforms the node data to a Structure
+     * @param node The node
+     * @return The structure
+     */
     public abstract T makeStructure(StructureNode node) ;
     
 }

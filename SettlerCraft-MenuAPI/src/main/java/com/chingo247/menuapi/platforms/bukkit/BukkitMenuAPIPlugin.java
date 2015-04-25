@@ -6,7 +6,6 @@
 package com.chingo247.menuapi.platforms.bukkit;
 
 import com.chingo247.menuapi.menu.BKMenuAPIListener;
-import com.chingo247.menuapi.menu.BKVaultEconomyProvider;
 import com.chingo247.menuapi.menu.MenuAPI;
 import com.chingo247.menuapi.menu.exception.MenuAPIException;
 import java.util.logging.Level;
