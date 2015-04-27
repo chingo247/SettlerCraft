@@ -25,10 +25,7 @@ package com.chingo247.structureapi.plan.schematic;
 
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.util.XXHasher;
-import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.data.DataException;
-import com.sk89q.worldedit.schematic.SchematicFormat;
 import java.io.File;
 import java.io.IOException;
 import com.chingo247.structureapi.plan.exception.SchematicException;
@@ -66,7 +63,7 @@ public class SchematicImpl implements Schematic {
         this.length = length;
     }
 
-    protected SchematicImpl(File schematicFile, CuboidClipboard clipboard) {
+    protected SchematicImpl(File schematicFile, FastClipboard clipboard) {
         this(schematicFile, clipboard.getWidth(), clipboard.getHeight(), clipboard.getLength());
     }
 
@@ -81,13 +78,13 @@ public class SchematicImpl implements Schematic {
     }
 
     @Override
-    public final CuboidClipboard getClipboard() {
+    public final FastClipboard getClipboard() {
         if (!schematicFile.exists()) {
             throw new RuntimeException("File: " + schematicFile.getAbsolutePath() + " doesn't exist");
         }
         try {
-            return SchematicFormat.getFormat(schematicFile).load(schematicFile);
-        } catch (IOException | DataException ex) {
+            return FastClipboard.read(schematicFile);
+        } catch (IOException ex) {
             throw new SchematicException(ex);
         }
     }

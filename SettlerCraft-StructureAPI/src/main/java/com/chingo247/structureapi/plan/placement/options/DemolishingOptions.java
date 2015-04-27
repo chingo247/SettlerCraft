@@ -23,14 +23,13 @@
  */
 package com.chingo247.structureapi.plan.placement.options;
 
-import com.chingo247.structureapi.construction.options.Options;
 import com.google.common.base.Preconditions;
 
 /**
  *
  * @author Chingo
  */
-public class DemolishingOptions extends Options {
+public class DemolishingOptions  {
     
     private int xAxisCube = 5;
     private int yAxisCube = 5;

@@ -52,14 +52,17 @@ public abstract class AbstractCuboidPlacement<T> extends Placement<T> {
         this.length = length;
     }
 
+    @Override
     public int getHeight() {
         return height;
     }
 
+    @Override
     public int getLength() {
         return length;
     }
 
+    @Override
     public int getWidth() {
         return width;
     }

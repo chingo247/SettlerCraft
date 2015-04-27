@@ -23,7 +23,9 @@
  */
 package com.chingo247.structureapi.plan.placement.node;
 
+import com.chingo247.structureapi.persistence.dao.placement.PlacementDataNode;
 import com.chingo247.structureapi.plan.placement.StructureLotPlacement;
+import java.io.File;
 import org.neo4j.graphdb.Node;
 
 /**
@@ -33,7 +35,7 @@ import org.neo4j.graphdb.Node;
 public class NodeStructureLotHandler extends NodePlacementHandler<StructureLotPlacement>{
 
     @Override
-    public StructureLotPlacement fromNode(Node node) {
+    public StructureLotPlacement fromNode(PlacementDataNode node, File structureDirectory) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

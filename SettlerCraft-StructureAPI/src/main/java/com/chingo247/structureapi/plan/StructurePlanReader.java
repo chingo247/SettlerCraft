@@ -262,6 +262,7 @@ public class StructurePlanReader {
         @Override
         protected Placement compute() {
             String type = placeableNode.getType();
+            
             XMLPlacementHandler handler = XMLPlacementHandlerFactory.getInstance().getHandler(type);
 
             if (handler == null) {

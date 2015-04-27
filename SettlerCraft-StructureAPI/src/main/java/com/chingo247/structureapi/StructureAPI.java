@@ -25,12 +25,8 @@ import com.chingo247.structureapi.menu.StructurePlanMenuReader;
 import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerDAO;
 import com.chingo247.settlercraft.core.persistence.dao.world.DefaultWorldFactory;
 import com.chingo247.settlercraft.core.persistence.neo4j.Neo4jHelper;
-import com.chingo247.structureapi.persistence.dao.placement.PlacementDataNode;
-import com.chingo247.structureapi.persistence.dao.placement.PlacementRelTypes;
 import com.chingo247.structureapi.persistence.dao.structure.StructureDAO;
 import com.chingo247.structureapi.persistence.dao.structure.StructureNode;
-import com.chingo247.structureapi.persistence.dao.structure.StructureOwnerType;
-import com.chingo247.structureapi.persistence.dao.structure.StructureWorldNode;
 import com.chingo247.structureapi.platforms.bukkit.IConfigProvider;
 import com.chingo247.structureapi.construction.asyncworldedit.AsyncDemolishingPlacement;
 import com.chingo247.structureapi.plan.placement.Placement;
@@ -38,20 +34,23 @@ import com.chingo247.structureapi.plan.StructurePlan;
 import com.chingo247.structureapi.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.structureapi.construction.asyncworldedit.AsyncPlacementCallback;
 import com.chingo247.structureapi.construction.asyncworldedit.SCJobEntry;
-import com.chingo247.structureapi.construction.options.Options;
 import com.chingo247.structureapi.event.StructureCreateEvent;
 import com.chingo247.structureapi.event.async.StructureJobAddedEvent;
 import com.chingo247.structureapi.event.async.StructureJobCanceledEvent;
 import com.chingo247.structureapi.event.async.StructureJobCompleteEvent;
 import com.chingo247.structureapi.event.async.StructureJobStartedEvent;
-import com.chingo247.structureapi.plan.placement.FilePlacement;
 import com.chingo247.structureapi.plan.StructurePlanManager;
 import com.chingo247.structureapi.plan.SubStructuredPlan;
 import com.chingo247.structureapi.event.StructurePlansLoadedEvent;
 import com.chingo247.structureapi.event.StructurePlansReloadEvent;
+import com.chingo247.structureapi.persistence.dao.placement.PlacementDataNode;
+import com.chingo247.structureapi.persistence.dao.placement.PlacementRelTypes;
+import com.chingo247.structureapi.persistence.dao.structure.StructureOwnerType;
+import com.chingo247.structureapi.persistence.dao.structure.StructureWorldNode;
 import com.chingo247.structureapi.plan.placement.options.PlaceOptions;
 import com.chingo247.structureapi.plan.placement.options.DemolishingOptions;
 import com.chingo247.structureapi.plan.placement.DemolishingPlacement;
+import com.chingo247.structureapi.plan.placement.FilePlacement;
 import com.chingo247.structureapi.plan.placement.node.NodePlacementHandler;
 import com.chingo247.structureapi.plan.placement.node.NodePlacementHandlerFactory;
 import com.chingo247.structureapi.util.PlacementUtil;
@@ -79,7 +78,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.util.com.google.common.collect.Lists;
 import org.dom4j.DocumentException;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -244,15 +242,13 @@ public class StructureAPI {
         if (plan instanceof SubStructuredPlan) {
             //TODO Add Structure Restrictions HERE! 
             System.out.println("Structure is SubstructurePlan!");
-            return createSubstructured(world, (SubStructuredPlan) plan, position, direction, owner);
+            return null;
         } else {
             return createSimpleStructure(world, plan, position, direction, owner);
         }
     }
-    
-     private Structure createSimpleStructure(World world, StructurePlan plan, Vector position, Direction direction, Player owner) throws StructureException {
 
-         
+    private Structure createSimpleStructure(World world, StructurePlan plan, Vector position, Direction direction, Player owner) throws StructureException {
         claimLock.lock();
         Structure structure = null;
         try {
@@ -277,166 +273,72 @@ public class StructureAPI {
                         throw new StructureAPIException("Something went wrong during creation of the 'WorldNode'"); // SHOULD NEVER HAPPEN
                     }
                 }
-                com.chingo247.settlercraft.core.World scWorld = DefaultWorldFactory.instance().createWorld(worldNode);
+                
+                com.chingo247.settlercraft.core.World scWorld = DefaultWorldFactory.instance().makeWorld(worldNode);
                 if (structureDAO.hasStructuresWithin(scWorld, structureRegion)) {
                     tx.success(); // End here
                     throw new StructureException("Structure overlaps another structure...");
                 }
-                ArrayList<StructureNode> created = new ArrayList<>(1);
-                place(tx, plan.getName(), plan.getPrice(), placement, worldNode, position, direction, owner, created);
 
-                if(created.isEmpty()) {
-                    tx.failure();
-                } else {
-                    StructureNode structureNode = created.get(0);
-                    structure = DefaultStructureFactory.instance().makeStructure(structureNode);
-                    tx.success();
+                // Create the StructureNode - Where it all starts...
+                StructureNode structureNode = structureDAO.addStructure(plan.getName(), structureRegion, direction, plan.getPrice());
+                StructureWorldNode structureWorldNode = new StructureWorldNode(worldNode);
+                structureWorldNode.addStructure(structureNode);
+
+                // Add the placement!
+                Node placementNode = graph.createNode(PlacementDataNode.LABEL);
+                NodePlacementHandler handler = NodePlacementHandlerFactory.getInstance().getHandler(placement.getTypeName());
+                placementNode.setProperty(PlacementDataNode.WIDTH_PROPERTY, placement.getWidth());
+                placementNode.setProperty(PlacementDataNode.HEIGHT_PROPERTY, placement.getHeight());
+                placementNode.setProperty(PlacementDataNode.LENGTH_PROPERTY, placement.getLength());
+                placementNode.setProperty(PlacementDataNode.TYPE_PROPERTY, placement.getTypeName());
+                handler.setNodeProperties(placement, placementNode);
+                structureNode.getRawNode().createRelationshipTo(placementNode, DynamicRelationshipType.withName(PlacementRelTypes.USES));
+
+                // Add owner!
+                if (owner != null) {
+                    SettlerNode settler = settlerDAO.find(owner.getUniqueId());
+                    if (settler == null) {
+                        throw new RuntimeException("Settler was null!"); // SHOULD NEVER HAPPEN AS SETTLERS ARE ADDED AT MOMENT OF FIRST LOGIN
+                    }
+                    structureNode.addOwner(settler, StructureOwnerType.MASTER);
                 }
+
+                // Give this structure a directory!
+               
+                File structureDir = new File(getStructuresDirectory(world.getName()), String.valueOf(structureNode.getId()));
+                structureDir.mkdirs();
+                
+                System.out.println("Copying files to " + structureDir.getAbsolutePath());
+
+                // Now copy the resources to that directory
+                if (placement instanceof FilePlacement) {
+                    FilePlacement filePlacement = (FilePlacement) placement;
+                    File[] files = filePlacement.getFiles();
+                    try {
+                        for (File f : files) {
+                            Files.copy(f, new File(structureDir, f.getName()));
+                        }
+                    } catch (IOException ex) {
+                        tx.failure();
+                        Logger.getLogger(StructureAPI.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                
+                tx.success();
+                structure = DefaultStructureFactory.instance().makeStructure(structureNode);
             }
+            
         } finally {
             claimLock.unlock();
         }
 
+        // If not null.. A structre has been created!
         if (structure != null) {
             EventManager.getInstance().getEventBus().post(new StructureCreateEvent(structure));
         }
 
         return structure;
-    }
-
-    private Structure createSubstructured(World world, SubStructuredPlan plan, Vector position, Direction direction, Player owner) throws StructureException {
-        Structure mainstructure = null;
-
-        claimLock.lock();
-        try {
-            System.out.println("Checklocation recursively");
-            checkLocationRecursive(plan, world, position, direction, owner);
-
-            IWorld w = platform.getServer().getWorld(world.getName());
-            try (Transaction tx = graph.beginTx()) {
-
-                // World exists?
-                WorldNode worldNode = worldDAO.find(w.getUUID());
-                if (worldNode == null) {
-                    worldDAO.addWorld(w.getName(), w.getUUID());
-                    worldNode = worldDAO.find(w.getUUID());
-                    if (worldNode == null) {
-                        tx.success(); // End here
-                        throw new StructureAPIException("Something went wrong during creation of the 'WorldNode'"); // SHOULD NEVER HAPPEN
-                    }
-                }
-
-                List<StructureNode> created = Lists.newArrayList();
-                placeRecursively(tx, plan, worldNode, position, direction, owner, created);
-
-                if (!created.isEmpty()) {
-                    mainstructure = DefaultStructureFactory.instance().makeStructure(created.get(0));
-                }
-                tx.success();
-            }
-
-        } finally {
-            claimLock.unlock();
-        }
-        return mainstructure;
-    }
-
-    private void placeRecursively(Transaction tx, SubStructuredPlan plan, WorldNode worldNode, Vector position, Direction direction, Player owner, List<StructureNode> created) throws StructureException {
-        Placement mainPlacement = plan.getPlacement();
-        place(tx, plan.getName(), 0, mainPlacement, worldNode, position, direction, owner, created);
-        int sub = 0;
-        for (Placement p : plan.getSubPlacements()) {
-            place(tx, plan.getName() + "-" + sub++, 0, p, worldNode, position, direction, owner, created);
-        }
-        for (StructurePlan p : plan.getSubStructurePlans()) {
-            if (p instanceof SubStructuredPlan) {
-                placeRecursively(tx, (SubStructuredPlan) p, worldNode, position, direction, owner, created);
-            } else {
-                place(tx, p.getName(), 0,p.getPlacement(), worldNode, position, direction, owner, created);
-            }
-        }
-
-    }
-
-    private void place(Transaction tx, String name, double price, Placement placement, WorldNode worldNode, Vector position, Direction direction, Player owner, List<StructureNode> created) throws StructureException {
-        // Perform area check!
-        Vector min = position.add(placement.getPosition());
-        Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getCuboidRegion().getMaximumPoint());
-        CuboidRegion structureRegion = new CuboidRegion(min, max);
-
-        platform.getConsole().printMessage(COLOR.red() + " overlap is ignored! (commented out)");
-//        com.chingo247.settlercraft.core.World scWorld = DefaultWorldFactory.instance().createWorld(worldNode);
-//        if (structureDAO.hasStructuresWithin(scWorld, structureRegion)) {
-//            tx.failure();// End here
-//            throw new StructureException("Structure overlaps another structure...");
-//        }
-        platform.getConsole().printMessage(COLOR.red() + " default price still 0, fix before release!");
-        // Create the StructureNode - Where it all starts...
-        StructureNode structureNode = structureDAO.addStructure(name, structureRegion, direction, price);
-        StructureWorldNode structureWorldNode = new StructureWorldNode(worldNode);
-        structureWorldNode.addStructure(structureNode);
-
-        // Add the placement!
-        Node placementNode = graph.createNode(PlacementDataNode.LABEL);
-        
-        NodePlacementHandler handler = NodePlacementHandlerFactory.getInstance().getHandler(placement.getTypeName());
-        placementNode.setProperty(PlacementDataNode.WIDTH_PROPERTY, placement.getWidth());
-        placementNode.setProperty(PlacementDataNode.HEIGHT_PROPERTY, placement.getHeight());
-        placementNode.setProperty(PlacementDataNode.LENGTH_PROPERTY, placement.getLength());
-        placementNode.setProperty(PlacementDataNode.TYPE_PROPERTY, placement.getTypeName());
-        handler.setNodeProperties(placement, placementNode);
-        
-        
-        structureNode.getRawNode().createRelationshipTo(placementNode, DynamicRelationshipType.withName(PlacementRelTypes.USES));
-
-        // Add owner!
-        if (owner != null) {
-            SettlerNode settler = settlerDAO.find(owner.getUniqueId());
-            if (settler == null) {
-                throw new RuntimeException("Settler was null!"); // SHOULD NEVER HAPPEN AS SETTLERS ARE ADDED AT MOMENT OF FIRST LOGIN
-            }
-            structureNode.addOwner(settler, StructureOwnerType.MASTER);
-        }
-
-        Structure structure = DefaultStructureFactory.instance().makeStructure(structureNode);
-        File structureDir = new File(getStructuresDirectory(worldNode.getName()), String.valueOf(structure.getId()));
-
-        // Copy resources
-        if (placement instanceof FilePlacement) {
-            FilePlacement filePlacement = (FilePlacement) placement;
-            File[] files = filePlacement.getFiles();
-            try {
-                for (File f : files) {
-                    Files.copy(f, new File(structureDir, f.getName()));
-                }
-            } catch (IOException ex) {
-                tx.failure();
-                Logger.getLogger(StructureAPI.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        System.out.println("created structure #" + structureNode.getId());
-
-        created.add(structureNode);
-
-    }
-
-    private void checkLocationRecursive(SubStructuredPlan plan, World world, Vector position, Direction direction, Player owner) throws StructureException {
-        // Check Self
-        checkLocation(world, plan.getPlacement(), position);
-
-        // Check SubPlacement
-        for (Placement p : plan.getSubPlacements()) {
-            checkLocation(world, p, position);
-        }
-
-        for (StructurePlan p : plan.getSubStructurePlans()) {
-            if (p instanceof SubStructuredPlan) {
-                checkLocationRecursive((SubStructuredPlan) p, world, position, direction, owner);
-            } else {
-                checkLocation(world, p.getPlacement(), position);
-            }
-        }
-
     }
 
     private void checkLocation(World world, Placement p, Vector position) throws StructureException {
@@ -517,7 +419,7 @@ public class StructureAPI {
                 PlayerEntry playerEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(player);
                 tasks.put(structure.getId(), new StructureEntry(-1, false, player));
 
-                AsyncPlacement placement = new AsyncPlacement(playerEntry, structure.getPlan().getPlacement(), new AsyncPlacementCallback() {
+                AsyncPlacement placement = new AsyncPlacement(playerEntry, structure.getPlacement(), new AsyncPlacementCallback() {
 
                     @Override
                     public void onJobAdded(int jobId) {
@@ -536,7 +438,7 @@ public class StructureAPI {
             @Override
             public void run() {
                 PlayerEntry playerEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(player);
-                Placement p = structure.getPlan().getPlacement();
+                Placement p = structure.getPlacement();
                 p.rotate(structure.getDirection());
                 CuboidRegion region = p.getCuboidRegion();
 

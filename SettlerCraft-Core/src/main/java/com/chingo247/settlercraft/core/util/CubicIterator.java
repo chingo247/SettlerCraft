@@ -69,7 +69,7 @@ public class CubicIterator {
      * @param zCubeIndex 
      */
     private CubicIterator(Vector start, Vector size, int cubeX, int cubeY, int cubeZ, Vector current, int xIndex, int yIndex, int zIndex, int xCubeIndex, int yCubeIndex, int zCubeIndex) {
-        this.size = new BlockVector(size);
+        this.size = size;
         this.cubeX = cubeX;
         this.cubeY = cubeY;
         this.cubeZ = cubeZ;
@@ -86,7 +86,13 @@ public class CubicIterator {
     
 
     public Vector next() {
-        Vector v = new BlockVector((xCubeIndex * cubeX) + xIndex, (yCubeIndex * cubeY) + yIndex, (zCubeIndex * cubeZ) + zIndex);
+        if(current == null) {
+             current = new BlockVector((xCubeIndex * cubeX) + xIndex, (yCubeIndex * cubeY) + yIndex, (zCubeIndex * cubeZ) + zIndex);
+        } else {
+            current.setX((xCubeIndex * cubeX) + xIndex);
+            current.setY( (yCubeIndex * cubeY) + yIndex);
+            current.setZ((zCubeIndex * cubeZ) + zIndex);
+        }
 
         // Stop condition!
         if(((cubeY * yCubeIndex) + yIndex) >= size.getBlockY()) {
@@ -120,7 +126,7 @@ public class CubicIterator {
             yCubeIndex++;
         }
         
-        return start.add(v);
+        return start.add(current);
 
     }
     

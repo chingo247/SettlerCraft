@@ -50,18 +50,19 @@ import java.util.zip.GZIPInputStream;
  * @author Chingo
  */
 public class FastClipboard {
-    
+
     private Direction direction;
     private Vector offset;
     private int xMod = 1;
     private int zMod = 1;
-    private final int width;
-    private final int height;
-    private final int length;
+    private int width;
+    private int height;
+    private int length;
+    private final Vector size;
     private final short[] blockIds;
     private final byte[] data;
     private final Map<BlockVector, Map<String, Tag>> tileEntities;
-    
+
     private FastClipboard(int width, int height, int length, short[] blockIds, byte[] data, Map<BlockVector, Map<String, Tag>> tileEntities) {
         this.offset = Vector.ZERO;
         this.tileEntities = tileEntities;
@@ -71,17 +72,88 @@ public class FastClipboard {
         this.blockIds = blockIds;
         this.data = data;
         direction = Direction.EAST;
+        this.size = new BlockVector(width, height, length);
     }
+
+    public BaseBlock getBlock(Vector pos) {
+        return getBlock(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
+    }
+
+//    private int getAngle() {
+//        switch (direction) {
+//            case EAST:
+//                return 0;
+//            case SOUTH:
+//                return -90;
+//            case WEST:
+//                return 180;
+//            case NORTH:
+//                return 90;
+//            default:
+//                throw new AssertionError("unreachable");
+//        }
+//    }
+//    
     
+
+
     public BaseBlock getBlock(int x, int y, int z) {
-        Vector pos = offset.add(x*xMod, y, z*zMod);
-        int index = pos.getBlockY() * width * length + pos.getBlockZ() * width + pos.getBlockX();
-        BaseBlock b = new BaseBlock(blockIds[index], data[index]);
+//        System.out.println(x + " " + y + " " + z);
+
+        int index = (y * width * length) + z * width + x;
         
-        Map<String, Tag> tileMap = tileEntities.get(new BlockVector(pos));
-        if(tileMap != null) {
+//        switch (direction) {
+//            case EAST:
+//                pos = new Vector(x, y, z);
+//                index = (y * width * length) + pos.getBlockZ() * width + pos.getBlockX();
+//                break;
+//                
+//            case WEST:
+//                pos = new Vector(width-1-x, y, length-1-z);
+//                index = (y * width * length) + pos.getBlockZ() * width + pos.getBlockX();
+//                break;
+//            case SOUTH:
+//                pos = new Vector(length-1-z,y,x);
+//                index = (y * width * length) + pos.getBlockZ() * width + pos.getBlockX();
+//                break;
+//            case NORTH:
+//                pos = new Vector(z,y,x);
+//                index = (y * width * length) +  pos.getBlockZ() * width  + pos.getBlockX();
+//                break;
+//            default:throw new AssertionError("unreachable");
+//        }
+        
+//        if(index < 50) {
+//            System.out.println("inc: " + x + " " + y + " " + z + " index: " +  ((y * width * length) + z * width + x));
+//            System.out.println("pos " + pos.getBlockX() + " " + pos.getBlockY() + " " + pos.getBlockZ() + " index: " + index);    
+//            System.out.println("");
+//        }
+//       
+//        
+//        if(index > blockIds.length || index < 0) {
+//            System.out.println("\n");
+//            System.out.println("LOLOLO " + pos.getBlockX() + " " + pos.getBlockY() + " " + pos.getBlockZ() + " index: " + index);    
+//            System.out.println("\n");
+//            return null;
+//        }
+//        
+//
+////        System.out.println("x: " + x + " y: " + y + " z: " + z);
+//
+//        final int angle = getAngle();
+//        final int numRotations = Math.abs((int) Math.floor(angle / 90.0));
+
+        BaseBlock b = new BaseBlock(blockIds[index], data[index]);
+
+        Map<String, Tag> tileMap = tileEntities.get(new BlockVector(x, y, z));
+        if (tileMap != null) {
             b.setNbtData(new CompoundTag(tileMap));
         }
+
+//        for (int i = 0; i < numRotations; i++) {
+//            b.rotate90();
+//        }
+
         return b;
     }
 
@@ -96,38 +168,19 @@ public class FastClipboard {
     public int getWidth() {
         return width;
     }
-    
-    public Direction getDirection() {
-        return direction;
+
+//    public Direction getDirection() {
+//        return direction;
+//    }
+
+    public Vector getSize() {
+        return new Vector(width, height, length);
     }
-    
-    public void setDirection(Direction direction) {
-        switch(direction) {
-            case EAST: 
-                offset = Vector.ZERO;
-                xMod = 1;
-                zMod = 1;
-                break;
-            case WEST:
-                offset = new Vector(width,0,length);
-                xMod = -1;
-                zMod = -1;
-                break;
-            case NORTH:
-                offset = new Vector(0, 0, length);
-                xMod = 1;
-                zMod = -1;
-                break;
-            case SOUTH:
-                offset = new Vector(width, 0, 0);
-                xMod = -1;
-                zMod = 1;
-                break;
-            default:break;
-        }
-        this.direction = direction;
-    }
-    
+
+//    public void setDirection(Direction direction) {
+//        this.direction = direction;
+//    }
+
     /**
      * Get child tag of a NBT structure.
      *
@@ -151,7 +204,7 @@ public class FastClipboard {
         }
         return expected.cast(tag);
     }
-    
+
     public static FastClipboard read(File schematicFile) throws IOException {
         System.out.println("Opening file");
         long start = System.currentTimeMillis();
@@ -171,8 +224,6 @@ public class FastClipboard {
         if (!schematic.containsKey("Blocks")) {
             throw new RuntimeException("Schematic file is missing a \"Blocks\" tag");
         }
-        
-        
 
         // Get information
         short width = getChildTag(schematic, "Width", ShortTag.class).getValue();
@@ -181,16 +232,13 @@ public class FastClipboard {
         byte[] ids = getChildTag(schematic, "Blocks", ByteArrayTag.class).getValue();
         byte[] data = getChildTag(schematic, "Data", ByteArrayTag.class).getValue();
         byte[] addId = new byte[0];
-        
 
         // We support 4096 block IDs using the same method as vanilla Minecraft, where
         // the highest 4 bits are stored in a separate byte array.
         if (schematic.containsKey("AddBlocks")) {
             addId = getChildTag(schematic, "AddBlocks", ByteArrayTag.class).getValue();
         }
-        
-        
-        
+
         // read ids
         short[] blockids = new short[ids.length]; // Have to later combine IDs
         // Combine the AddBlocks data with the first 8-bit block ID
@@ -205,12 +253,12 @@ public class FastClipboard {
                 }
             }
         }
-        
+
         // read data
         byte[] blockData = new byte[data.length];
         for (int index = 0; index < data.length; index++) {
             if ((index >> 1) >= addId.length) { // No corresponding AddBlocks index
-                blockData[index] =  (data[index]);
+                blockData[index] = (data[index]);
             } else {
                 if ((index & 1) == 0) {
                     blockData[index] = (byte) (((addId[index >> 1] & 0x0F) << 8) + (blockData[index]));
@@ -219,15 +267,17 @@ public class FastClipboard {
                 }
             }
         }
-        
+
         // Need to pull out tile entities
         List<Tag> tileEntities = getChildTag(schematic, "TileEntities", ListTag.class)
                 .getValue();
-        Map<BlockVector, Map<String, Tag>> tileEntitiesMap =
-                new HashMap<>();
+        Map<BlockVector, Map<String, Tag>> tileEntitiesMap
+                = new HashMap<>();
 
         for (Tag tag : tileEntities) {
-            if (!(tag instanceof CompoundTag)) continue;
+            if (!(tag instanceof CompoundTag)) {
+                continue;
+            }
             CompoundTag t = (CompoundTag) tag;
 
             int x = 0;
@@ -260,7 +310,7 @@ public class FastClipboard {
         System.out.println("Done in " + (System.currentTimeMillis() - start) + " ms");
         return new FastClipboard(width, height, length, blockids, blockData, tileEntitiesMap);
     }
-    
+
     public static void main(String[] args) {
         try {
             FastClipboard.read(new File("F:\\GAMES\\MineCraftServers\\Bukkit 1.7.10-SettlerCraft-RC4\\plugins\\SettlerCraft-StructureAPI\\plans\\Shiganshina.schematic"));
@@ -268,5 +318,5 @@ public class FastClipboard {
             Logger.getLogger(FastClipboard.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
 }

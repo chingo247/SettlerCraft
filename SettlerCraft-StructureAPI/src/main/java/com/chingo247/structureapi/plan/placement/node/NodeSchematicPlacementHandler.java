@@ -23,7 +23,12 @@
  */
 package com.chingo247.structureapi.plan.placement.node;
 
+import com.chingo247.structureapi.persistence.dao.placement.PlacementDataNode;
+import com.chingo247.structureapi.persistence.dao.schematic.SchematicDataNode;
 import com.chingo247.structureapi.plan.placement.SchematicPlacement;
+import com.chingo247.structureapi.plan.schematic.Schematic;
+import com.chingo247.structureapi.plan.schematic.SchematicManager;
+import java.io.File;
 import org.neo4j.graphdb.Node;
 
 /**
@@ -33,13 +38,18 @@ import org.neo4j.graphdb.Node;
 public class NodeSchematicPlacementHandler extends NodePlacementHandler<SchematicPlacement>{
 
     @Override
-    public SchematicPlacement fromNode(Node node) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public SchematicPlacement fromNode(PlacementDataNode node, File structureDirectory) {
+        Node n =  node.getRawNode();
+        String schematic = (String)n.getProperty(SchematicDataNode.NAME_PROPERTY);
+        File schematicFile = new File(structureDirectory, schematic);
+        Schematic s = SchematicManager.getInstance().getOrLoadSchematic(schematicFile);
+        return new SchematicPlacement(s);
     }
 
     @Override
     public void setNodeProperties(SchematicPlacement placement, Node node) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        node.setProperty(SchematicDataNode.NAME_PROPERTY, placement.getSchematic().getFile().getName());
+        node.setProperty(SchematicDataNode.XXHASH_PROPERTY, placement.getSchematic().getHash());
     }
     
 }

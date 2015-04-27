@@ -23,15 +23,47 @@
  */
 package com.chingo247.structureapi.plan.placement.options;
 
+import com.google.common.base.Preconditions;
+
 /**
  *
  * @author Chingo
  */
 public class PlaceOptions {
-    
+
+    private int xAxisCube = 16;
+    private int yAxisCube = 16;
+    private int zAxisCube = 16;
+
+    public int getxAxisCube() {
+        return xAxisCube;
+    }
+
+    public int getyAxisCube() {
+        return yAxisCube;
+    }
+
+    public int getzAxisCube() {
+        return zAxisCube;
+    }
+
+    public void setxAxisCube(int xAxisCube) {
+        Preconditions.checkArgument(xAxisCube <= 0, "xAxis has to be greater than 0");
+        this.xAxisCube = xAxisCube;
+    }
+
+    public void setyAxisCube(int yAxisCube) {
+        Preconditions.checkArgument(yAxisCube <= 0, "yAxis has to be greater than 0");
+        this.yAxisCube = yAxisCube;
+    }
+
+    public void setzAxisCube(int zAxisCube) {
+        Preconditions.checkArgument(zAxisCube <= 0, "zAxis has to be greater than 0");
+        this.zAxisCube = zAxisCube;
+    }
+
     // To be implemented
     // - Masks
     // - Ignore Air
     // - Shipish? replaces water with air, but only if the block underneath is not water
-    
 }

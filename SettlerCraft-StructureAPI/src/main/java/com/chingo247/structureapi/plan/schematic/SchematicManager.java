@@ -34,9 +34,6 @@ import com.chingo247.structureapi.persistence.dao.schematic.SchematicDataNode;
 import com.chingo247.structureapi.plan.exception.SchematicException;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.data.DataException;
-import com.sk89q.worldedit.schematic.SchematicFormat;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -93,13 +90,13 @@ public class SchematicManager {
             long checksum = hasher.hash64(schematicFile);
             Schematic schematic = getSchematic(checksum);
             if (schematic == null) {
-                CuboidClipboard clipboard = SchematicFormat.MCEDIT.load(schematicFile);
+                FastClipboard clipboard = FastClipboard.read(schematicFile);
                 schematic = new SchematicImpl(schematicFile, clipboard);
                 schematics.put(checksum, schematic);
                 clipboard = null;
             }
             return schematic;
-        } catch (IOException | DataException ex) {
+        } catch (IOException  ex) {
             throw new SchematicException(ex);
         }
 
@@ -217,7 +214,7 @@ public class SchematicManager {
         protected Schematic compute() {
             try {
                 long start = System.currentTimeMillis();
-                CuboidClipboard clipboard = SchematicFormat.MCEDIT.load(schematicFile);
+                FastClipboard clipboard = FastClipboard.read(schematicFile);
                 LOG.print(LogLevel.INFO, schematicFile, "Schematic", System.currentTimeMillis() - start);
                 return new SchematicImpl(schematicFile, clipboard);
             } catch (Exception ex) {

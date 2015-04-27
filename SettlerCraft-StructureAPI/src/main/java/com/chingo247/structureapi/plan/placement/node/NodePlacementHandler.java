@@ -23,7 +23,9 @@
  */
 package com.chingo247.structureapi.plan.placement.node;
 
+import com.chingo247.structureapi.persistence.dao.placement.PlacementDataNode;
 import com.chingo247.structureapi.plan.placement.Placement;
+import java.io.File;
 import org.neo4j.graphdb.Node;
 
 /**
@@ -33,7 +35,7 @@ import org.neo4j.graphdb.Node;
  */
 public abstract class NodePlacementHandler <T extends Placement> {
     
-    public abstract T fromNode(Node node);
+    public abstract T fromNode(PlacementDataNode node, File StructureDirectory);
     
     /**
      * Implementation should set the properties that need to be persisted into the database.

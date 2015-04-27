@@ -30,7 +30,7 @@ public abstract class AbstractWorldFactory<T extends World> {
      * @param node The worldNode
      * @return The world
      */
-    public abstract T createWorld(WorldNode node);
+    public abstract T makeWorld(WorldNode node);
     
     
     

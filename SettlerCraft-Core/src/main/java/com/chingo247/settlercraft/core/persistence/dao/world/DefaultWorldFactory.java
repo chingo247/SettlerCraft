@@ -37,7 +37,7 @@ public class DefaultWorldFactory extends AbstractWorldFactory<World> {
     }
     
     @Override
-    public World createWorld(WorldNode node) {
+    public World makeWorld(WorldNode node) {
         String name = node.getName();
         UUID uuid = node.getUUID();
         return new DefaultWorld(name, uuid);

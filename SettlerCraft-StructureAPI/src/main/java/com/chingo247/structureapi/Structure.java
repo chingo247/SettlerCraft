@@ -23,13 +23,14 @@
  */
 package com.chingo247.structureapi;
 
-import com.chingo247.structureapi.plan.StructurePlan;
 import com.chingo247.structureapi.plan.placement.options.PlaceOptions;
 import com.chingo247.settlercraft.core.Direction;
+import com.chingo247.structureapi.plan.placement.Placement;
 import com.chingo247.structureapi.plan.placement.options.DemolishingOptions;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
+import java.io.File;
 import java.util.Date;
 import java.util.UUID;
 
@@ -78,7 +79,15 @@ public interface Structure {
      * Gets the plan for this structure
      * @return The plan
      */
-    public StructurePlan getPlan();
+    public Placement getPlacement();
+    
+    /**
+     * Returns the directory for this structure
+     * @return The directory
+     */
+    public File getStructureDirectory();
+    
+    
     /**
      * Gets the value/price of this structure 
      * @return The value/price of this structure

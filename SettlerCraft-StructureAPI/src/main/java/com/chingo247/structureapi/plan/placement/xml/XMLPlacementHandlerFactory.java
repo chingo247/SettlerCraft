@@ -51,7 +51,12 @@ public class XMLPlacementHandlerFactory {
     }
     
     public XMLPlacementHandler<?> getHandler(String type) {
-        return handlers.get(type.toLowerCase());
+        type = type.toLowerCase();
+        XMLPlacementHandler handler = handlers.get(type);
+        if(handler == null) {
+            return handlers.get("settlercraft." + type);
+        }
+        return null;
     }
     
     public void registerHandler(String type) {

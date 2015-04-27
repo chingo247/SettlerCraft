@@ -100,7 +100,7 @@ public class StructureDAO {
                 + " RETURN s"
                 + " LIMIT " + limit;
         System.out.println("query: " + query);
-        Result result = graph.execute(query);
+        Result result = graph.execute(query, params);
         System.out.println("getStructuresWithin() in " + (System.currentTimeMillis() - start) + " ms");
         while (result.hasNext()) {
             Map<String, Object> map = result.next();

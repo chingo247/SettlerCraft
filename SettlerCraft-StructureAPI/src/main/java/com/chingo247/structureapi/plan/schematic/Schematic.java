@@ -24,7 +24,6 @@
 package com.chingo247.structureapi.plan.schematic;
 
 import com.chingo247.structureapi.plan.placement.SchematicPlacement;
-import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
 import java.io.File;
 
@@ -35,7 +34,7 @@ import java.io.File;
 public interface Schematic {
     
     public long getHash();
-    public CuboidClipboard getClipboard();
+    public FastClipboard getClipboard();
     public SchematicPlacement createPlacement();
     public Vector getSize();
     public int getWidth();

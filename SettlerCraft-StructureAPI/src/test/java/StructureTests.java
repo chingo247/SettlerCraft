@@ -168,7 +168,7 @@ public class StructureTests {
             StructureNode structureNode = structureDAO.addStructure("test", new CuboidRegion(Vector.ZERO, Vector.ONE), Direction.NORTH, 0);
             StructureWorldNode structureWorldNode = new StructureWorldNode(worldNode);
             structureWorldNode.addStructure(structureNode);
-            World defaultWorld = DefaultWorldFactory.instance().createWorld(structureWorldNode);
+            World defaultWorld = DefaultWorldFactory.instance().makeWorld(structureWorldNode);
             
             boolean hasWithin = structureDAO.hasStructuresWithin(defaultWorld, new CuboidRegion(Vector.ZERO, Vector.ONE));
             

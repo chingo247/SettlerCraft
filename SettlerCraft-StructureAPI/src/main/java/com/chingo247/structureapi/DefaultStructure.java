@@ -25,12 +25,14 @@ package com.chingo247.structureapi;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.structureapi.construction.asyncworldedit.AsyncWorldEditUtil;
-import com.chingo247.structureapi.plan.StructurePlan;
-import com.chingo247.structureapi.plan.StructurePlanReader;
 import com.chingo247.structureapi.plan.placement.options.PlaceOptions;
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
+import com.chingo247.structureapi.persistence.dao.placement.PlacementDataNode;
 import com.chingo247.structureapi.persistence.dao.structure.StructureNode;
+import com.chingo247.structureapi.plan.placement.Placement;
+import com.chingo247.structureapi.plan.placement.node.NodePlacementHandler;
+import com.chingo247.structureapi.plan.placement.node.NodePlacementHandlerFactory;
 import com.chingo247.structureapi.plan.placement.options.DemolishingOptions;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.entity.Player;
@@ -59,6 +61,7 @@ public class DefaultStructure implements Structure {
     private final Date removedAt;
     private final Date completedAt;
     private final double price;
+    private final Placement placement;
     
     DefaultStructure(StructureNode structureNode) {
         this.id = structureNode.getId();
@@ -73,6 +76,15 @@ public class DefaultStructure implements Structure {
         this.direction = structureNode.getDirection();
         this.price = structureNode.getPrice();
         this.completedAt = structureNode.getCompletedAt();
+        
+        PlacementDataNode node = structureNode.getPlacementData();
+        NodePlacementHandler handler = NodePlacementHandlerFactory.getInstance().getHandler(node.getType());
+        if(handler == null) {
+            throw new RuntimeException("No node handler was registered to handle type '"+node.getType()+"'");
+        }
+        
+        
+        this.placement = handler.fromNode(node, getStructureDirectory());
     }
 
     @Override
@@ -165,15 +177,6 @@ public class DefaultStructure implements Structure {
     }
 
     
-    @Override
-    public StructurePlan getPlan() {
-        StructureAPI structureAPI = StructureAPI.getInstance();
-        File planFile = new File(structureAPI.getStructuresDirectory(getWorld()).getAbsolutePath() + "//" + String.valueOf(getId()) + "//" + StructureAPI.STRUCTURE_PLAN_FILE_NAME);
-        StructurePlanReader reader = new StructurePlanReader();
-        StructurePlan plan = reader.readFile(planFile);
-        return plan;
-    }
-    
     private AsyncEditSession getSession(UUID playerId) {
         Player ply = SettlerCraft.getInstance().getPlayer(playerId);
         World w = SettlerCraft.getInstance().getWorld(world);
@@ -184,6 +187,17 @@ public class DefaultStructure implements Structure {
             editSession = (AsyncEditSession) AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(w, -1, ply);
         }
         return editSession;
+    }
+
+    @Override
+    public Placement getPlacement() {
+        return placement;
+    }
+
+    @Override
+    public final File getStructureDirectory() {
+        File worldStructureFolder = StructureAPI.getInstance().getStructuresDirectory(world);
+        return new File(worldStructureFolder, String.valueOf(id));
     }
 
     
