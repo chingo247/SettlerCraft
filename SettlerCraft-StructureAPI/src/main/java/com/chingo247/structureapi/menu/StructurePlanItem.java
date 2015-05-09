@@ -50,7 +50,7 @@ import com.chingo247.menuapi.menu.item.TradeItem;
 import com.chingo247.menuapi.menu.util.ShopUtil;
 import com.chingo247.xplatform.core.AItemStack;
 import com.chingo247.xplatform.core.APlatform;
-import com.chingo247.xplatform.core.IColor;
+import com.chingo247.xplatform.core.IColors;
 import com.sk89q.worldedit.blocks.ItemID;
 import java.util.Arrays;
 
@@ -111,7 +111,7 @@ public class StructurePlanItem implements CategoryTradeItem {
         AItemStack item = platform.createItemStack(ItemID.PAPER);
         item.setName(name);
         
-        IColor color = platform.getChatColors();
+        IColors color = platform.getChatColors();
         
         item.setLore(Arrays.asList(
                 "Description: " + ((description == null || description.trim().isEmpty()) ? "-" : color.gold() + description),

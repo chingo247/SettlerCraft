@@ -33,7 +33,7 @@ public abstract class APlatform {
     
     public abstract AItemStack createItemStack(int material);
     
-    public abstract IColor getChatColors();
+    public abstract IColors getChatColors();
     
     public IPlayer getPlayer(UUID player) {
         return getServer().getPlayer(player);

@@ -17,28 +17,36 @@
 package com.chingo247.settlercraft.core.util;
 
 import com.sk89q.worldedit.Vector;
+import java.util.Iterator;
 
 /**
  *
  * @author Chingo
  */
-public class TopDownCubicIterator {
+public class TopDownCubicIterator implements Iterator<Vector>, Iterable<Vector>{
     
-    private CubicIterator iterator;
+    private CuboidIterator iterator;
     private Vector start;
 
     public TopDownCubicIterator(Vector size, int cubeX, int cubeY, int cubeZ) {
-        this.iterator = new CubicIterator(size, cubeX, cubeY, cubeZ);
+        this.iterator = new CuboidIterator(size, cubeX, cubeY, cubeZ);
         this.start = new Vector(0,size.getBlockY(),0);
     }
     
+    @Override
     public boolean hasNext() {
         return iterator.hasNext();
     }
     
+    @Override
     public Vector next() {
         Vector next = iterator.next();
         return start.add(next.getBlockX(),-next.getBlockY(),next.getBlockZ()); // If I go up... I GO DOWN!
+    }
+
+    @Override
+    public Iterator<Vector> iterator() {
+        return this;
     }
     
     

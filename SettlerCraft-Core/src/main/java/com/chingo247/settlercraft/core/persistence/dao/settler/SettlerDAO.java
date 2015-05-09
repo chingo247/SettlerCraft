@@ -29,7 +29,7 @@ import org.neo4j.graphdb.Transaction;
  *
  * @author Chingo
  */
-public class SettlerDAO {
+public class SettlerDAO implements ISettlerDAO{
     
     private final GraphDatabaseService graph;
     private final Logger LOG = Logger.getLogger(getClass().getCanonicalName());
@@ -39,6 +39,7 @@ public class SettlerDAO {
         
     }
 
+    @Override
     public SettlerNode find(UUID settlerId) {
         SettlerNode settlerNode = null;
         try (Transaction tx = graph.beginTx()) {
@@ -55,6 +56,7 @@ public class SettlerDAO {
         return settlerNode;
     }
     
+    @Override
     public void addSettler(String settlerName, UUID settlerUUID) {
         Transaction tx = graph.beginTx();
         try {

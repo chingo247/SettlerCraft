@@ -19,7 +19,7 @@ package com.chingo247.xplatform.platforms.bukkit;
 import com.chingo247.xplatform.core.AInventory;
 import com.chingo247.xplatform.core.AItemStack;
 import com.chingo247.xplatform.core.APlatform;
-import com.chingo247.xplatform.core.IColor;
+import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IConsole;
 import com.chingo247.xplatform.core.IServer;
 import java.io.File;
@@ -64,7 +64,7 @@ public class BukkitPlatform extends APlatform {
     }
 
     @Override
-    public IColor getChatColors() {
+    public IColors getChatColors() {
         return BukkitChatColors.instance();
     }
 

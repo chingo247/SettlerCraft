@@ -93,9 +93,6 @@ public class KeyPool<T> {
             } catch(Exception e) {
                Logger.getLogger(getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
             } finally {
-                
-                
-                
                 synchronized (tasks.get(t)) {
                     // Remove yourself from the Queue
                     tasks.get(t).poll();

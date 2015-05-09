@@ -27,8 +27,8 @@ import com.chingo247.menuapi.menu.CategoryMenu;
 import com.chingo247.menuapi.menu.DefaultCategoryMenu;
 import com.chingo247.menuapi.menu.MenuAPI;
 import com.chingo247.xplatform.core.APlatform;
-import com.chingo247.structureapi.plan.placement.Placement;
-import com.chingo247.structureapi.plan.StructurePlan;
+import com.chingo247.structureapi.structure.plan.placement.Placement;
+import com.chingo247.structureapi.structure.plan.StructurePlan;
 import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.regions.CuboidRegion;
 

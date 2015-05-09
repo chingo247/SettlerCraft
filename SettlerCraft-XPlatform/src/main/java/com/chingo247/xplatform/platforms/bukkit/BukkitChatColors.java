@@ -23,14 +23,14 @@
  */
 package com.chingo247.xplatform.platforms.bukkit;
 
-import com.chingo247.xplatform.core.IColor;
+import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.util.ChatColors;
 
 /**
  *
  * @author Chingo
  */
-public class BukkitChatColors implements IColor {
+public class BukkitChatColors implements IColors {
     
     private BukkitChatColors(){}
     

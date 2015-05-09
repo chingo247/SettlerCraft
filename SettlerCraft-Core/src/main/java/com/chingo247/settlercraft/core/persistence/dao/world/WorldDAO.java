@@ -26,7 +26,7 @@ import org.neo4j.graphdb.Result;
  *
  * @author Chingo
  */
-public class WorldDAO {
+public class WorldDAO implements IWorldDAO{
 
     private GraphDatabaseService graph;
 
@@ -36,6 +36,7 @@ public class WorldDAO {
 
     }
 
+    @Override
     public WorldNode find(UUID worldUUID) {
         WorldNode worldNode = null;
 
@@ -50,15 +51,12 @@ public class WorldDAO {
         }
         return worldNode;
     }
-
+   
+    @Override
     public void addWorld(String worldName, UUID worldUUID) {
         Node worldNode = graph.createNode(WorldNode.LABEL);
         worldNode.setProperty(WorldNode.NAME_PROPERTY, worldName);
         worldNode.setProperty(WorldNode.ID_PROPERTY, worldUUID.toString());
-    }
-
-    public WorldNode makeWorldNode(Node node) {
-        return new WorldNode(node);
     }
 
 }

@@ -28,7 +28,7 @@ import com.chingo247.menuapi.menu.CategoryMenu;
 import com.chingo247.xplatform.platforms.bukkit.BukkitPlayer;
 import com.chingo247.structureapi.platforms.bukkit.BKPermissionManager;
 import com.chingo247.structureapi.platforms.bukkit.BKStructureAPIPlugin;
-import com.chingo247.structureapi.StructureAPI;
+import com.chingo247.structureapi.structure.StructureAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandException;

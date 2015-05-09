@@ -30,7 +30,7 @@ import com.chingo247.settlercraft.core.exception.SettlerCraftException;
 import com.chingo247.structureapi.platforms.bukkit.listener.PlanListener;
 import com.chingo247.settlercraft.core.exception.CommandException;
 import com.chingo247.structureapi.commands.StructureCommands;
-import com.chingo247.structureapi.StructureAPI;
+import com.chingo247.structureapi.structure.StructureAPI;
 import com.chingo247.xplatform.core.ICommandSender;
 import com.chingo247.xplatform.platforms.bukkit.BukkitConsoleSender;
 import com.chingo247.xplatform.platforms.bukkit.BukkitPlayer;

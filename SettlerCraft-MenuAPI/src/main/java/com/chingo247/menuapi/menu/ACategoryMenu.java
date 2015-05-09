@@ -26,7 +26,7 @@ package com.chingo247.menuapi.menu;
 import com.chingo247.xplatform.core.AInventory;
 import com.chingo247.xplatform.core.AItemStack;
 import com.chingo247.xplatform.core.APlatform;
-import com.chingo247.xplatform.core.IColor;
+import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IPlayer;
 import com.chingo247.settlercraft.core.services.IEconomyProvider;
 import com.chingo247.menuapi.menu.item.TradeItem;
@@ -67,7 +67,7 @@ public abstract class ACategoryMenu {
     private final SlotFactory slotFactory;
     private final APlatform platform;
     private final MenuAPI menuAPI;
-    private final IColor color;
+    private final IColors color;
 
     protected final String title, defaultCategory;
     private boolean noCosts;
@@ -105,7 +105,7 @@ public abstract class ACategoryMenu {
         return view.clone();
     }
 
-    private IColor getColor() {
+    private IColors getColor() {
         return platform.getChatColors();
     }
 
@@ -245,7 +245,7 @@ public abstract class ACategoryMenu {
 
     private void resetInventory() {
         inventory.clear();
-        IColor colors = getColor();
+        IColors colors = getColor();
         for (int i = 0; i < MENU_SIZE; i++) {
             MenuSlot slot = view.getSlot(i);
             if (slot != null && !slot.isNoneSlot()) {
