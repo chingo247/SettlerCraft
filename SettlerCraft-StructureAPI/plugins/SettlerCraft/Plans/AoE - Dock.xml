@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<StructurePlan>
-  <Name>AoE - Dock</Name>
-  <Placement>
-		<Type>Schematic</Type>
-		<Schematic>AoE - Dock.schematic</Schematic>
-  </Placement>
-  <Price>14503</Price>
-</StructurePlan>

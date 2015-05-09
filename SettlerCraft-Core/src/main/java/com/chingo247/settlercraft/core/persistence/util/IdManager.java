@@ -17,6 +17,7 @@
 package com.chingo247.settlercraft.core.persistence.util;
 
 import com.chingo247.settlercraft.core.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.core.persistence.util.QIdGenerator;
 import com.mysema.query.jpa.hibernate.HibernateQuery;
 import org.hibernate.Session;
 

@@ -22,8 +22,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.jpountz.xxhash.StreamingXXHash32;
 import net.jpountz.xxhash.StreamingXXHash64;
 import net.jpountz.xxhash.XXHashFactory;
@@ -76,21 +74,6 @@ public class XXHasher {
      */
     public long hash64(File f) throws IOException {
         return hash64(f, 8192);
-    }
-
-    public static void main(String[] args) {
-        File f = new File("F:\\GAMES\\MineCraftServers\\Bukkit 1.7.10-SettlerCraft-RC4\\plugins\\SettlerCraft-StructureAPI\\plans\\");
-
-        XXHasher hasher = new XXHasher();
-        for (File file : f.listFiles()) {
-            long hash;
-            try {
-                hash = hasher.hash64(file);
-                System.out.println(file.getName() + ": \t" + hash);
-            } catch (IOException ex) {
-                Logger.getLogger(XXHasher.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
     }
 
     public int hash32String(String string) {
