@@ -10,6 +10,7 @@ import com.chingo247.xplatform.platforms.bukkit.BukkitPlugin;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.core.event.PlayerSubscriber;
+import com.chingo247.settlercraft.core.persistence.hibernate.HibernateUtil;
 import com.google.common.eventbus.EventBus;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -45,6 +46,15 @@ public class BKSettlerCraftCorePlugin extends JavaPlugin {
 //            HSQLServer hSQLServer = new HSQLServer(PORT, HOST, new File(getDataFolder(), "databases//HSQL//SettlerCraft"), HOST);
 //            hSQLServer.start();
 //        }
+        
+        SettlerCraft.getInstance().getExecutor().submit(new Runnable() {
+
+            @Override
+            public void run() {
+                 HibernateUtil.getSession().close();
+            }
+        });
+       
         
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 

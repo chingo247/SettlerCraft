@@ -23,6 +23,8 @@
  */
 package com.chingo247.settlercraft.structureapi.event.async;
 
+import com.sk89q.worldedit.world.World;
+
 /**
  *
  * @author Chingo
@@ -31,14 +33,20 @@ public class StructureJobEvent  {
     
     private final int jobId;
     private final long structure;
+    private final World world;
 
-    public StructureJobEvent(long structure, int jobid) {
+    public StructureJobEvent(World world, long structure, int jobid) {
         this.jobId = jobid;
         this.structure = structure;
+        this.world = world;
     }
 
     public final long getStructure() {
         return structure;
+    }
+
+    public World getWorld() {
+        return world;
     }
     
     

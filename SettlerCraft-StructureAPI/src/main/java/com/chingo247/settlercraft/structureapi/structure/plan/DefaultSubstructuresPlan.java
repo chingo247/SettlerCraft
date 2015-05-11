@@ -24,15 +24,11 @@ package com.chingo247.settlercraft.structureapi.structure.plan;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
-
 import com.chingo247.settlercraft.structureapi.structure.plan.exception.PlanException;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
-import com.chingo247.settlercraft.structureapi.structure.plan.util.RegionUtil;
 import com.google.common.collect.Sets;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -40,77 +36,46 @@ import java.util.Set;
  * @author Chingo
  */
 public final class DefaultSubstructuresPlan extends AbstractStructurePlan implements SubStructuresPlan {
-    
+
     private final DefaultSubstructuresPlan parent;
-    private final Placement placement;
-    private final Set<StructurePlan> internalPlans;  // Substructure - plan
-    private final Set<StructurePlan> externalPlans;
-    private final Set<Placement> external; // Substructure - placeable
-    private final Set<Placement> internal;
+    private final Placement mainPlacement;
+    private final Set<StructurePlan> plans;
+    private final Set<Placement> placements; // Substructure - placeable
 
     protected DefaultSubstructuresPlan(String id, File structurePlanFile, DefaultSubstructuresPlan parent, Placement placement) {
         super(id, structurePlanFile);
         this.parent = parent;
-        this.placement = placement;
-        this.internal = Sets.newHashSet();
-        this.external = Sets.newHashSet();
-        this.internalPlans = Sets.newHashSet();
-        this.externalPlans = Sets.newHashSet();
+        this.mainPlacement = placement;
+        this.placements = Sets.newHashSet();
+        this.plans = Sets.newHashSet();
     }
 
-    
-    @Override
-    public boolean isTopLevel() {
-        if(parent == null) {
-            return true;
-        // StructurePlan is referenced in a parent, but outside
-        } else if(!RegionUtil.isDimensionWithin(parent.placement.getCuboidRegion(), placement.getCuboidRegion())) {
-            // If the parent isTopLevel then this child is also toplevel, because it was outside it's parent
-            return parent.isTopLevel();
-        } else {
-            return false;
-        }
-    }
-    
     @Override
     public boolean removePlacement(Placement placement) {
-        if(!internal.remove(placement)) {
-            return external.remove(placement);
-        }
-        return true;
+        return placements.remove(placement);
     }
-    
+
     @Override
     public void addPlacement(Placement placement) {
-        if(RegionUtil.isDimensionWithin(this.placement.getCuboidRegion(), placement.getCuboidRegion())) {
-            internal.add(placement);
-        } else {
-            external.add(placement);
-        }
+        placements.add(placement);
     }
-    
+
     @Override
     public void addStructurePlan(StructurePlan plan) {
-        if(matchesAnyAncestors(plan.getFile())) throw new PlanException("Plans may not be equal to any of its ancestors.");
-        if(RegionUtil.isDimensionWithin(placement.getCuboidRegion(), plan.getPlacement().getCuboidRegion())) {
-            internalPlans.add(plan);
-        } else {
-            externalPlans.add(plan);
+        if (matchesParentRecursively(plan.getFile())) {
+            throw new PlanException("Plans may not be equal to any of its ancestors.");
         }
-        
+        plans.add(plan);
     }
-    
+
     @Override
     public boolean removeStructurePlan(StructurePlan plan) {
-        if(!internalPlans.remove(plan)) {
-            return externalPlans.remove(plan);
-        }
-        return true;
+        return plans.remove(plan);
     }
 
     @Override
     public Placement getPlacement() {
-        return placement;
+        return mainPlacement;
     }
 
     @Override
@@ -119,39 +84,26 @@ public final class DefaultSubstructuresPlan extends AbstractStructurePlan implem
     }
 
     @Override
-    public List<Placement> getExternalPlacments() {
-        return new ArrayList<>(external);
-    }
-
-    @Override
-    public List<Placement> getInternalPlacements() {
-        return new ArrayList<>(internal);
-    }
-
-    @Override
-    public List<Placement> getSubPlacements() {
-        List<Placement> placements = new ArrayList<>(external);
-        placements.addAll(internal);
+    public Collection<Placement> getSubPlacements() {
         return placements;
     }
 
     @Override
-    public List<StructurePlan> getSubStructurePlans() {
-        List<StructurePlan> pls =  new ArrayList<>(internalPlans);
-        pls.addAll(externalPlans);
-        return pls;
+    public Collection<StructurePlan> getSubStructurePlans() {
+        return plans;
     }
-    
+
     /**
      * Will check if the corresponding plan matches any Ancestors (recursively)
+     *
      * @param plan The StructurePlan to check
      * @return True if it matches any ancestors
      */
-    boolean matchesAnyAncestors(File file) {
-        if(hash(file).equals(getPathHash())) {
+    boolean matchesParentRecursively(File file) {
+        if (hash(file).equals(getPathHash())) {
             return true;
-        } else if(parent != null) {
-            return parent.matchesAnyAncestors(file);
+        } else if (parent != null) {
+            return parent.matchesParentRecursively(file);
         } else {
             return false;
         }

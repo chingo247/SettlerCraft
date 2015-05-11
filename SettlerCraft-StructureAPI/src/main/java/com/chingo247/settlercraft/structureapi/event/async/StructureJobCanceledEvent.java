@@ -24,6 +24,7 @@
 package com.chingo247.settlercraft.structureapi.event.async;
 
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
+import com.sk89q.worldedit.world.World;
 
 /**
  * Fired when a StructureJob is canceled. A Structure Job is a Build/Demolish Operation for a structure
@@ -32,8 +33,8 @@ import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
  */
 public class StructureJobCanceledEvent extends StructureJobEvent{
 
-    public StructureJobCanceledEvent(long structure, int jobid) {
-        super(structure, jobid);
+    public StructureJobCanceledEvent(World w, long structure, int jobid) {
+        super(w, structure, jobid);
     }
     
 }

@@ -36,7 +36,7 @@ public class DefaultStructureFactory implements StructureFactory<Structure>{
     
     private DefaultStructureFactory() {}
     
-    public static StructureFactory instance(){
+    public static StructureFactory getInstance(){
         if(instance == null) {
             instance = new DefaultStructureFactory();
         }

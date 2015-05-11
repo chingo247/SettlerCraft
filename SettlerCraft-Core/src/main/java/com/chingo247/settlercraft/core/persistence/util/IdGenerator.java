@@ -16,47 +16,92 @@
  */
 package com.chingo247.settlercraft.core.persistence.util;
 
-import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import org.hibernate.annotations.Index;
+import com.chingo247.settlercraft.core.persistence.hibernate.HibernateUtil;
+import com.mysema.query.jpa.hibernate.HibernateQuery;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
  *
  * @author Chingo
  */
-@Entity
-public class IdGenerator implements Serializable {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
-    
-    @Index(name = "generatorName")
-    @Column(unique = true, nullable = false)
-    private String name;
+public class IdGenerator {
 
-    private int idNumber;
-    
-    /**
-     * JPA Constructor
-     */
-    protected IdGenerator() {}
-    
-    IdGenerator(String name) {
-        this.name = name;
-        this.idNumber = 0;
+    private final String generatorName;
+
+    public IdGenerator(String generatorName) {
+        this.generatorName = generatorName;
     }
 
-    int incrementAndGet() {
-        idNumber++;
-        return idNumber;
+    public synchronized Long nextId() {
+        Session session = null;
+        Transaction tx = null;
+        Long id = null;
+
+        try {
+            session = HibernateUtil.getSession();
+            tx = session.beginTransaction();
+            HibernateQuery query = new HibernateQuery(session);
+            QIdGeneratorEntity qig = QIdGeneratorEntity.idGeneratorEntity;
+            IdGeneratorEntity generator = query.from(qig).where(qig.name.eq(generatorName)).uniqueResult(qig);
+            System.out.println("Generator: " + generator);
+            id = generator.incrementAndGet();
+            session.save(generator);
+            tx.commit();
+
+        } catch (HibernateException exception) {
+            try {
+                if (tx != null) {
+                    tx.rollback();
+                }
+            } catch (HibernateException rbe) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Couldn't rollback transaction", rbe);
+            }
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+
+        return id;
     }
-    
-    
-    
-    
+
+    synchronized void createIfNotExist() {
+
+        Session session = null;
+        Transaction tx = null;
+
+        try {
+            session = HibernateUtil.getSession();
+            tx = session.beginTransaction();
+            HibernateQuery query = new HibernateQuery(session);
+            QIdGeneratorEntity qig = QIdGeneratorEntity.idGeneratorEntity;
+            boolean exists = query.from(qig).where(qig.name.eq(generatorName)).exists();
+            System.out.println("Exist? : " + exists);
+            if (!exists) {
+                IdGeneratorEntity generator = new IdGeneratorEntity(generatorName);
+                session.save(generator);
+            }
+            tx.commit();
+
+        } catch (HibernateException exception) {
+            try {
+                if (tx != null) {
+                    tx.rollback();
+                }
+            } catch (HibernateException rbe) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Couldn't rollback transaction", rbe);
+            }
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+
+        
+    }
+
 }

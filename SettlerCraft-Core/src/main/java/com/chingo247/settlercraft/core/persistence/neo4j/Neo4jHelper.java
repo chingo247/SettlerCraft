@@ -63,5 +63,14 @@ public class Neo4jHelper {
             graph.schema().indexFor(label).on(property).create();
         }
     }
+    
+    public static void createUniqueIndexIfNotExist(GraphDatabaseService graph, Label label, String property) {
+        Preconditions.checkNotNull(graph, "Graph was null");
+        Preconditions.checkNotNull(label, "Label was null");
+        Preconditions.checkNotNull(property, "Property was null");
+        if(!hasUniqueConstraint(graph, label, property) && !hasIndex(graph, label, property)) {
+            graph.schema().constraintFor(label).assertPropertyIsUnique(property).create();
+        }
+    }
 
 }

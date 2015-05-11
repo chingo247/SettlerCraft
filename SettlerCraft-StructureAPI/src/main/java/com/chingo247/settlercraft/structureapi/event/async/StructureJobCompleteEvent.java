@@ -23,6 +23,8 @@
  */
 package com.chingo247.settlercraft.structureapi.event.async;
 
+import com.sk89q.worldedit.world.World;
+
 /**
  * Fired when a StructureJob has been completed, a StructureJob is a Build/Demolish operation 
  * that has been added to the AsyncWorldEdit's BlockPlacer's queue
@@ -31,8 +33,8 @@ package com.chingo247.settlercraft.structureapi.event.async;
  */
 public class StructureJobCompleteEvent extends StructureJobEvent {
 
-    public StructureJobCompleteEvent(long structure, int jobid) {
-        super(structure, jobid);
+    public StructureJobCompleteEvent(World w, long structure, int jobid) {
+        super(w, structure, jobid);
     }
     
 }

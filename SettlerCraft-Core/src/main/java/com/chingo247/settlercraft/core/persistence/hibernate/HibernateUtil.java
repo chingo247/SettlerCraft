@@ -26,7 +26,7 @@ package com.chingo247.settlercraft.core.persistence.hibernate;
  */
 
 
-import com.chingo247.settlercraft.core.persistence.util.IdGenerator;
+import com.chingo247.settlercraft.core.persistence.util.IdGeneratorEntity;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;
@@ -45,7 +45,7 @@ public class HibernateUtil {
     static {
         try {
             AnnotationConfiguration configuration = new AnnotationConfiguration();
-            configuration.addAnnotatedClass(IdGenerator.class);
+            configuration.addAnnotatedClass(IdGeneratorEntity.class);
             configuration = (AnnotationConfiguration) configuration.configure("com/chingo247/settlercraft/resources/hibernate.cfg.xml");
             sessionFactory = configuration.buildSessionFactory();
         } catch (Throwable ex) {

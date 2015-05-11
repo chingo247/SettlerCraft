@@ -24,6 +24,7 @@
 package com.chingo247.settlercraft.structureapi.event.async;
 
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
+import com.sk89q.worldedit.world.World;
 
 /**
  * Fired when a structure-construction operation is added to the AsyncWorldEdit blockplacer Queue.
@@ -32,8 +33,8 @@ import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
  */
 public class StructureJobAddedEvent extends StructureJobEvent {
     
-    public StructureJobAddedEvent(long structure, int jobid, boolean isDemolishing) {
-        super(structure, jobid);
+    public StructureJobAddedEvent(World world, long structure, int jobid, boolean isDemolishing) {
+        super(world, structure, jobid);
     }
 
     

@@ -155,7 +155,7 @@ public class StructurePlanReader {
                                 // Perform recursion check here!
                                 // Fully check branch for matchin types!
                                 File f = handleEmbeddedPlan(structurePlanFile, subStructureElement);
-                                if (plan.matchesAnyAncestors(f)) {
+                                if (plan.matchesParentRecursively(f)) {
                                     throw new PlanException("Element <" + subStructureElement.getElementName() + "> on line " + subStructureElement.getLine()
                                             + " matches a plan in his branch!");
                                 }

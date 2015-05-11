@@ -35,6 +35,7 @@ import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.ICommandSender;
 import com.chingo247.xplatform.core.IPlayer;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.world.World;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -117,62 +118,108 @@ public class StructureCommands {
 
     private boolean build(IPlayer player, String[] commandArgs) throws CommandException {
         System.out.println("Build Command");
-        argumentsInRange(1, 2, commandArgs);
+        argumentsInRange(2, 3, commandArgs);
         
-        String structureIdArg = commandArgs[0];
+        World w;
+        Structure structure;
+        
+        // /stt build [world][structureId][force]
+        
+        String worldArg = commandArgs[0];
+        if(worldArg.equals(".")) {
+            w = SettlerCraft.getInstance().getWorld(player.getWorld().getName());
+        } else {
+            w = SettlerCraft.getInstance().getWorld(worldArg);
+            if(w == null) {
+                throw new CommandException("Couldn't find world for name '"+worldArg+"'");
+            }
+        }
+        
+        String structureIdArg = commandArgs[1];
         if(!NumberUtils.isNumber(structureIdArg)) {
             throw new CommandException("Expected a number but got '"+structureIdArg+"'");
         }
         
-        String force = commandArgs.length == 2 ? commandArgs[1] : null;
+        long id = Long.parseLong(structureIdArg);
+        try(Transaction tx = graph.beginTx()) {
+            StructureNode structureNode = structureDAO.find(w, id);
+            
+            if(structureNode == null) {
+                tx.success();
+                throw new CommandException("Couldn't find a structure for #" + structureIdArg + " within world '"+w.getName()+"'");
+            }
+            
+            if(!structureNode.isOwner(player.getUniqueId()) && !player.isOP()) {
+                tx.success();
+                throw new CommandException("You don't own this structure...");
+            }
+            
+            structure = DefaultStructureFactory.getInstance().makeStructure(structureNode);
+            tx.success();
+        }
+        
+         
+        String force = commandArgs.length == 3 ? commandArgs[1] : null;
         if(force != null && !(force.equals("force") && force.equals("f"))) {
             throw new CommandException("Unknown second argument '"+force+"' ");
         } 
         boolean useForce = force != null && (force.equals("f") || force.equals("force"));
         
-        long id = Long.parseLong(structureIdArg);
-        Structure structure;
-        try(Transaction tx = graph.beginTx()) {
-            StructureNode structureNode = structureDAO.find(id);
-            if(!structureNode.isOwner(player.getUniqueId())) {
-                if( !(player.isOP() && useForce)) {
-                    throw new CommandException("You don't own this structure...");
-                }
-            }
-            structure = DefaultStructureFactory.instance().makeStructure(structureNode);
-            tx.success();
-        }
+        
         structure.build(SettlerCraft.getInstance().getPlayer(player.getUniqueId()), new PlaceOptions(), useForce);
         return true;
     }
 
     private boolean demolish(IPlayer player, String[] commandArgs) throws CommandException {
         System.out.println("Demolish Command");
-        argumentsInRange(1, 2, commandArgs);
+        argumentsInRange(2, 3, commandArgs);
         
-        String structureIdArg = commandArgs[0];
+        World w;
+        Structure structure;
+        
+        // /stt build [world][structureId][force]
+        
+        String worldArg = commandArgs[0];
+        if(worldArg.equals(".")) {
+            w = SettlerCraft.getInstance().getWorld(player.getWorld().getName());
+        } else {
+            w = SettlerCraft.getInstance().getWorld(worldArg);
+            if(w == null) {
+                throw new CommandException("Couldn't find world for name '"+worldArg+"'");
+            }
+        }
+        
+        String structureIdArg = commandArgs[1];
         if(!NumberUtils.isNumber(structureIdArg)) {
             throw new CommandException("Expected a number but got '"+structureIdArg+"'");
         }
         
-        String force = commandArgs.length == 2 ? commandArgs[1] : null;
+        long id = Long.parseLong(structureIdArg);
+        try(Transaction tx = graph.beginTx()) {
+            StructureNode structureNode = structureDAO.find(w, id);
+            
+            if(structureNode == null) {
+                tx.success();
+                throw new CommandException("Couldn't find a structure for #" + structureIdArg + " within world '"+w.getName()+"'");
+            }
+            
+            if(!structureNode.isOwner(player.getUniqueId()) && !player.isOP()) {
+                tx.success();
+                throw new CommandException("You don't own this structure...");
+            }
+            
+            structure = DefaultStructureFactory.getInstance().makeStructure(structureNode);
+            tx.success();
+        }
+        
+         
+        String force = commandArgs.length == 3 ? commandArgs[1] : null;
         if(force != null && !(force.equals("force") && force.equals("f"))) {
             throw new CommandException("Unknown second argument '"+force+"' ");
         } 
         boolean useForce = force != null && (force.equals("f") || force.equals("force"));
         
-        long id = Long.parseLong(structureIdArg);
-        Structure structure;
-        try(Transaction tx = graph.beginTx()) {
-            StructureNode structureNode = structureDAO.find(id);
-            if(!structureNode.isOwner(player.getUniqueId())) {
-                if( !(player.isOP() && useForce)) {
-                    throw new CommandException("You don't own this structure...");
-                }
-            }
-            structure = DefaultStructureFactory.instance().makeStructure(structureNode);
-            tx.success();
-        }
+        
         
         structure.demolish(SettlerCraft.getInstance().getPlayer(player.getUniqueId()), new DemolishingOptions(), useForce);
         return true;
@@ -180,31 +227,54 @@ public class StructureCommands {
 
     private boolean stop(IPlayer player, String[] commandArgs) throws CommandException {
         System.out.println("Stop Command");
-        argumentsInRange(1, 2, commandArgs);
+        argumentsInRange(2, 3, commandArgs);
         
-        String structureIdArg = commandArgs[0];
+        World w;
+        Structure structure;
+        
+        // /stt build [world][structureId][force]
+        
+        String worldArg = commandArgs[0];
+        if(worldArg.equals(".")) {
+            w = SettlerCraft.getInstance().getWorld(player.getWorld().getName());
+        } else {
+            w = SettlerCraft.getInstance().getWorld(worldArg);
+            if(w == null) {
+                throw new CommandException("Couldn't find world for name '"+worldArg+"'");
+            }
+        }
+        
+        String structureIdArg = commandArgs[1];
         if(!NumberUtils.isNumber(structureIdArg)) {
             throw new CommandException("Expected a number but got '"+structureIdArg+"'");
         }
         
-        String force = commandArgs.length == 2 ? commandArgs[1] : null;
+        long id = Long.parseLong(structureIdArg);
+        try(Transaction tx = graph.beginTx()) {
+            StructureNode structureNode = structureDAO.find(w, id);
+            
+            if(structureNode == null) {
+                tx.success();
+                throw new CommandException("Couldn't find a structure for #" + structureIdArg + " within world '"+w.getName()+"'");
+            }
+            
+            if(!structureNode.isOwner(player.getUniqueId()) && !player.isOP()) {
+                tx.success();
+                throw new CommandException("You don't own this structure...");
+            }
+            
+            structure = DefaultStructureFactory.getInstance().makeStructure(structureNode);
+            tx.success();
+        }
+        
+         
+        String force = commandArgs.length == 3 ? commandArgs[1] : null;
         if(force != null && !(force.equals("force") && force.equals("f"))) {
             throw new CommandException("Unknown second argument '"+force+"' ");
         } 
         boolean useForce = force != null && (force.equals("f") || force.equals("force"));
         
-        long id = Long.parseLong(structureIdArg);
-        Structure structure;
-        try(Transaction tx = graph.beginTx()) {
-            StructureNode structureNode = structureDAO.find(id);
-            if(!structureNode.isOwner(player.getUniqueId())) {
-                if( !(player.isOP() && useForce)) {
-                    throw new CommandException("You don't own this structure...");
-                }
-            }
-            structure = DefaultStructureFactory.instance().makeStructure(structureNode);
-            tx.success();
-        }
+        
         
         structure.stop(useForce);
         return true;

@@ -47,7 +47,7 @@ import org.neo4j.graphdb.Relationship;
 public class StructureNode {
 
     public static final Label LABEL = DynamicLabel.label("Structure");
-    public static final String ID_PROPERTY = "id";
+    public static final String ID_PROPERTY = "structureId";
     public static final String NAME_PROPERTY = "name";
     public static final String DIRECTION_PROPERTY = "direction";
 //    public static final String WORLD_PROPERTY = "world";
@@ -56,7 +56,7 @@ public class StructureNode {
     public static final String MIN_X_PROPERTY = "minX", MIN_Y_PROPERTY = "minY", MIN_Z_PROPERTY = "minZ", MAX_X_PROPERTY = "maxX", MAX_Y_PROPERTY = "maxY", MAX_Z_PROPERTY = "MAX_Z";
     public static final String CREATED_AT_PROPERTY = "createdAt", DELETED_AT_PROPERTY = "deletedAt", COMPLETED_AT_PROPERTY = "completedAt";
     public static final String PRICE_PROPERTY = "price";
-    public static final String STAND_ALONE_PROPERTY = "stand_alone";
+    public static final String SIZE_PROPERTY = "size";
     public static final String PLACEMENT_TYPE_PROPERTY = "placementType";
     
     
@@ -69,19 +69,10 @@ public class StructureNode {
     }
 
     public Long getId() {
-        return underlyingNode.getId();
+        Object o = underlyingNode.getProperty(ID_PROPERTY);
+        return o != null ? (Long) o : null;
     }
     
-    public boolean isStandalone() {
-        if(underlyingNode.hasProperty(STAND_ALONE_PROPERTY)) {
-            return (Boolean) underlyingNode.getProperty(STAND_ALONE_PROPERTY);
-        }
-        return false;
-    }
-
-    public void setStandalone(boolean isStandalone) {
-        underlyingNode.setProperty(STAND_ALONE_PROPERTY, isStandalone);
-    }
     
     /**
      * Gets the actual node
@@ -95,6 +86,15 @@ public class StructureNode {
     public Double getPrice() {
         Object o = underlyingNode.getProperty(PRICE_PROPERTY);
         return o != null ? (Double) o : 0;
+    }
+    
+    public Integer getSize() {
+        Object o = underlyingNode.getProperty(SIZE_PROPERTY);
+        return o != null ? (int) o : null;
+    }
+    
+    public void setSize(int size) {
+        underlyingNode.setProperty(SIZE_PROPERTY, size);
     }
 
     public String getName() {

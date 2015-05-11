@@ -26,6 +26,7 @@ import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IColors;
 import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.world.World;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -67,12 +68,12 @@ public class PlayerSessionImpl implements PlayerSession{
     }
 
     @Override
-    public void selectStructure(long id) {
+    public void selectStructure(World w, long id) {
         Structure structure = null;
         try(Transaction tx = graph.beginTx()) {
-            StructureNode structureNode = structureDAO.find(id);
+            StructureNode structureNode = structureDAO.find(w, id);
             if(structureNode != null) {
-                structure = DefaultStructureFactory.instance().makeStructure(structureNode);
+                structure = DefaultStructureFactory.getInstance().makeStructure(structureNode);
             }
             tx.success();
         }

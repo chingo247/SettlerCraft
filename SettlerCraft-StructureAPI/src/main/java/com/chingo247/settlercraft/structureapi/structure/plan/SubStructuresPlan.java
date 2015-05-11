@@ -25,7 +25,7 @@ package com.chingo247.settlercraft.structureapi.structure.plan;
  */
 
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
-import java.util.List;
+import java.util.Collection;
 
 /**
  *
@@ -61,37 +61,17 @@ public interface SubStructuresPlan extends StructurePlan {
     
     
     /**
-     * Gets all external placements. A placement is external when it's outside or doesn't reside within the 'Main Placement' of the StructurePlan
-     * Which can be called by retrieved by calling {@link StructurePlan#getPlacement()}
-     * @return The placements that are internal
-     */
-    public List<? extends Placement> getExternalPlacments();
-
-    /**
-     * Gets all internal placements. A placement is internal when it completely resides within the 'Main Placement' of the StructurePlan
-     * Which can be called by retrieved by calling {@link StructurePlan#getPlacement()}
-     * @return The placements that are internal
-     */
-    public List<? extends Placement> getInternalPlacements();
-    
-    /**
      * Gets all the SubstructurePlans of this StructurePlan.
      * @return The SubstructurePlans
      */
-    public List<? extends StructurePlan> getSubStructurePlans();
+    public Collection<? extends StructurePlan> getSubStructurePlans();
     
     /**
      * Gets all the SubPlacement of this StructurePlan
      * @return The SubPlacements
      */
-    public List<? extends Placement> getSubPlacements();
+    public Collection<? extends Placement> getSubPlacements();
     
-   /**
-     * Checks if this StructurePlan is Top-Level, where TopLevel means the StructurePlan has no parent or the StructurePlan's
-     * parent is TopLevel but this StructurePlan is Outside his parent. 
-     * @return True if StructurePlan is Top-Level
-     */
-    public boolean isTopLevel();
     
     /**
      * 

@@ -25,7 +25,7 @@ import net.minecraft.util.com.google.common.collect.Maps;
  */
 public class IdGeneratorFactory {
     
-    private final Map<String, IdManager> generators;
+    private final Map<String, IdGenerator> generators;
     private static IdGeneratorFactory instance;
 
     private IdGeneratorFactory() {
@@ -45,14 +45,15 @@ public class IdGeneratorFactory {
      * @param name The name of the generator
      * @return 
      */
-    public IdManager getIdGeneratorForName(String name) {
+    public IdGenerator getIdGeneratorForName(String name) {
         synchronized(generators) {
-            IdManager idManager = generators.get(name);
-            if(idManager == null) {
-                idManager = new IdManager(name);
-                generators.put(name, idManager);
+            IdGenerator idGenerator = generators.get(name);
+            if(idGenerator == null) {
+                idGenerator = new IdGenerator(name);
+                idGenerator.createIfNotExist();
+                generators.put(name, idGenerator);
             }
-            return idManager;
+            return idGenerator;
         }
     }
     

@@ -20,6 +20,7 @@ import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.settlercraft.structureapi.structure.options.DemolishingOptions;
 import com.chingo247.settlercraft.structureapi.structure.options.PlaceOptions;
 import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.world.World;
 
 /**
  *
@@ -31,7 +32,7 @@ public interface PlayerSession {
     
     public Structure getSelectedStructure();
     
-    public void selectStructure(long id);
+    public void selectStructure(World w, long id);
     
     public void selectStructure(Structure structure);
     

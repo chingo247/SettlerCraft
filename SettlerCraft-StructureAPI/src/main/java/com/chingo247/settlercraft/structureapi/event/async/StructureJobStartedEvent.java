@@ -24,6 +24,7 @@
 package com.chingo247.settlercraft.structureapi.event.async;
 
 import com.chingo247.settlercraft.structureapi.event.async.StructureJobEvent;
+import com.sk89q.worldedit.world.World;
 
 /**
  *
@@ -31,8 +32,8 @@ import com.chingo247.settlercraft.structureapi.event.async.StructureJobEvent;
  */
 public class StructureJobStartedEvent extends StructureJobEvent {
 
-    public StructureJobStartedEvent(long structure, int jobid) {
-        super(structure, jobid);
+    public StructureJobStartedEvent(World w, long structure, int jobid) {
+        super(w,structure, jobid);
     }
     
 }
