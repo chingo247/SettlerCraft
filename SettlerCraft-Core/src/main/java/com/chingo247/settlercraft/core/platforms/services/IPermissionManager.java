@@ -1,3 +1,5 @@
+package com.chingo247.settlercraft.core.platforms.services;
+
 /*
  * The MIT License
  *
@@ -21,38 +23,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structureapi.structure.restriction;
 
-import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
-import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.world.World;
+import com.chingo247.xplatform.core.IPlayer;
 
 /**
  *
  * @author Chingo
  */
-public class PlacementPlaceAction {
+public interface IPermissionManager {
     
-    private final Player player;
-    private final World world;
-    private final Placement placement;
-
-    public PlacementPlaceAction(Player player, World world, Placement placement) {
-        this.player = player;
-        this.world = world;
-        this.placement = placement;
-    }
-
-    public Placement getPlacement() {
-        return placement;
-    }
-
-    public Player getPlayer() {
-        return player;
-    }
-
-    public World getWorld() {
-        return world;
-    }
+    public boolean isAllowed(IPlayer player, String permission);
     
 }

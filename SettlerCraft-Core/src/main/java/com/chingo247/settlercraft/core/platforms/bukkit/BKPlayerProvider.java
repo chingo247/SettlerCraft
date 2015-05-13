@@ -5,7 +5,7 @@
  */
 package com.chingo247.settlercraft.core.platforms.bukkit;
 
-import com.chingo247.settlercraft.core.platforms.IPlayerProvider;
+import com.chingo247.settlercraft.core.platforms.services.IPlayerProvider;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.entity.Player;
 import java.util.UUID;

@@ -25,9 +25,11 @@ package com.chingo247.settlercraft.structureapi.structure;
 
 import com.chingo247.settlercraft.structureapi.structure.options.PlaceOptions;
 import com.chingo247.settlercraft.core.Direction;
+import com.chingo247.settlercraft.structureapi.exception.ConstructionException;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.options.DemolishingOptions;
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import java.io.File;
@@ -55,6 +57,13 @@ public interface Structure {
      * @return The world
      */
     public String getWorld();
+
+    /**
+     * Gets the position of this Structure
+     * @return The position
+     */
+    public Vector getPosition();
+    
     /**
      * Gets the world id of this structure
      * @return The world id
@@ -115,42 +124,56 @@ public interface Structure {
      * @param options The placeOptions
      * @param force whether building should be enforced by ignoring the current construction status
      */
-    public void build(Player player, PlaceOptions options, boolean force);
+    public void build(Player player, PlaceOptions options, boolean force) throws ConstructionException;
     /**
      * Builds the structure
      * @param session The EditSession
      * @param options The placeOptions
      * @param force whether building should be enforced by ignoring the current construction status
      */
-    public void build(EditSession session, PlaceOptions options, boolean force);
+    public void build(EditSession session, PlaceOptions options, boolean force) throws ConstructionException;
     /**
      * Demolishes the structure with the given player to host the EditSession
      * @param player The player
      * @param options The option for demolishing
      * @param force whether to force the demolition by ignoring the current construction status
      */
-    public void demolish(Player player, DemolishingOptions options, boolean force);
+    public void demolish(Player player, DemolishingOptions options, boolean force) throws ConstructionException;
     /**
      * Demolishes the structure
      * @param session The EditSession
      * @param options The Options
      * @param force Whether to force the demolition by ignoring the current construction status
      */
-    public void demolish(EditSession session, DemolishingOptions options, boolean force);
+    public void demolish(EditSession session, DemolishingOptions options, boolean force) throws ConstructionException;
     
     /**
      * Stops the construction, if the structure was being constructed
      * @param useForce Whether to use force
      */
-    public void stop(boolean useForce);
+    public void stop(boolean useForce) throws ConstructionException;
 
     /**
      * Stops the construction, if the structure was being constructed
      * @param player The player
      * @param useForce Whether to use force by ignoring the current construction status
      */
-    public void stop(Player player, boolean useForce);
+    public void stop(Player player, boolean useForce) throws ConstructionException;
     
+    /**
+     * Checks if this Structure is the most upper parent
+     * @return True if this Structure has no parent
+     */
     public boolean isRoot();
+    
+    /**
+     * Will add the offset to the structure's origin, which is always the front left corner of a
+     * structure.
+     *
+     * @param offset The offset
+     * @return the location
+     */
+    public Vector translateRelativeLocation(Vector offset);
+    
     
 }

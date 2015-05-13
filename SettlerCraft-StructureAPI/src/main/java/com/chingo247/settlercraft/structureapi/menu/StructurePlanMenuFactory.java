@@ -25,7 +25,7 @@ package com.chingo247.settlercraft.structureapi.menu;
 
 import com.chingo247.menuapi.menu.CategoryMenu;
 import com.chingo247.menuapi.menu.DefaultCategoryMenu;
-import com.chingo247.menuapi.menu.MenuAPI;
+import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
@@ -65,11 +65,12 @@ public class StructurePlanMenuFactory {
         
         double price = plan.getPrice();
         
+        
         menu.addItem(new StructurePlanItem(platform, id, name, category, price, width, height, length, description));
     }
 
     public CategoryMenu createPlanMenu() {
-        return new DefaultCategoryMenu(MenuAPI.getInstance().getEconomyProvider(),menu.getTitle(), menu.getView(), menu.getAllItems());
+        return new DefaultCategoryMenu(SettlerCraft.getInstance().getEconomyProvider(),menu.getTitle(), menu.getView(), menu.getAllItems());
     }
     
     

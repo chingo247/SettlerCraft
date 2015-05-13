@@ -19,7 +19,7 @@ package com.chingo247.menuapi.menu;
 
 import com.chingo247.xplatform.core.AInventory;
 import com.chingo247.xplatform.core.IPlayer;
-import com.chingo247.settlercraft.core.services.IEconomyProvider;
+import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.menuapi.menu.item.CategoryTradeItem;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;

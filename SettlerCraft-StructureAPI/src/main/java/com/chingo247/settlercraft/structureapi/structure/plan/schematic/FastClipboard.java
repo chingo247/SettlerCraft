@@ -16,7 +16,6 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan.schematic;
 
-import com.chingo247.settlercraft.core.Direction;
 import com.sk89q.jnbt.ByteArrayTag;
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.jnbt.IntTag;
@@ -42,7 +41,6 @@ import java.util.zip.GZIPInputStream;
  */
 public class FastClipboard {
 
-    private Direction direction;
     private Vector offset;
     private int width;
     private int height;
@@ -59,7 +57,6 @@ public class FastClipboard {
         this.length = length;
         this.blockIds = blockIds;
         this.data = data;
-        direction = Direction.EAST;
     }
 
     public BaseBlock getBlock(Vector pos) {
@@ -119,14 +116,12 @@ public class FastClipboard {
     }
 
     public static FastClipboard read(File schematicFile) throws IOException {
-        System.out.println("Opening file");
         long start = System.currentTimeMillis();
         NBTInputStream nbtStream = new NBTInputStream(
                 new GZIPInputStream(new FileInputStream(schematicFile)));
 
         Tag rootTag = nbtStream.readTag();
 
-        System.out.println(rootTag.getName());
         if (!rootTag.getName().equalsIgnoreCase("Schematic")) {
             throw new RuntimeException("Tag 'Schematic' does not exist or is not first");
         }
@@ -165,6 +160,7 @@ public class FastClipboard {
                     blockids[index] = (short) (((addId[index >> 1] & 0xF0) << 4) + (ids[index] & 0xFF));
                 }
             }
+            
         }
 
         // read data

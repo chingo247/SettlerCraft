@@ -22,9 +22,9 @@
  * THE SOFTWARE.
  */
 package com.chingo247.menuapi.menu;
-
-import com.chingo247.settlercraft.core.services.IEconomyProvider;
+import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.menuapi.menu.item.CategoryTradeItem;
+import com.chingo247.settlercraft.core.SettlerCraft;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,11 +43,11 @@ public class DefaultCategoryMenu extends CategoryMenu{
      * @param menuView The menuView, NOTE: the menuview will be cloned
      */
     public DefaultCategoryMenu(String title, MenuView menuView) {
-        this(MenuAPI.getInstance().getEconomyProvider(), title, menuView, new HashMap<String,List<CategoryTradeItem>>());
+        this(SettlerCraft.getInstance().getEconomyProvider(), title, menuView, new HashMap<String,List<CategoryTradeItem>>());
     }
     
     public DefaultCategoryMenu(IEconomyProvider economyProvider,String title, MenuView menuView, Map<String,List<CategoryTradeItem>> items) {
-        super(MenuAPI.getInstance().getEconomyProvider(), 
+        super(SettlerCraft.getInstance().getEconomyProvider(), 
                 title, 
                 MenuAPI.getInstance().getPlatform().createInventory(title, MENU_SIZE), 
                 "All", 

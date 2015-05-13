@@ -24,7 +24,6 @@
  */
 package com.chingo247.settlercraft.structureapi.persistence.legacy;
 
-import com.chingo247.xplatform.util.ChatColors;
 import com.chingo247.settlercraft.core.Direction;
 import static com.chingo247.settlercraft.core.Direction.EAST;
 import static com.chingo247.settlercraft.core.Direction.NORTH;
@@ -393,12 +392,6 @@ public class Structure implements Serializable {
         return translateRelativeLocation(new Vector(x, y, z));
     }
 
-    @Override
-    public String toString() {
-        return ChatColors.RESET + "#" + ChatColors.GOLD + id + " " + ChatColors.BLUE + name + ChatColors.RESET;
-
-    }
-    
     public String stringValue() {
         return "#"+ id + " " + name;
     }

@@ -17,11 +17,11 @@
 package com.chingo247.settlercraft.structureapi.commands;
 
 import com.chingo247.menuapi.menu.CategoryMenu;
-import com.chingo247.menuapi.menu.MenuAPI;
 import com.chingo247.menuapi.menu.util.ShopUtil;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.exception.CommandException;
-import com.chingo247.settlercraft.core.platforms.IPermissionManager;
+import com.chingo247.settlercraft.core.platforms.services.IPermissionManager;
+import com.chingo247.settlercraft.structureapi.exception.ConstructionException;
 import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
 import com.chingo247.settlercraft.structureapi.platforms.util.Permissions;
@@ -31,15 +31,19 @@ import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
 import com.chingo247.settlercraft.structureapi.structure.options.PlaceOptions;
 import com.chingo247.settlercraft.structureapi.structure.options.DemolishingOptions;
+import com.chingo247.settlercraft.structureapi.structure.plan.util.PlanGenerator;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.ICommandSender;
 import com.chingo247.xplatform.core.IPlayer;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.world.World;
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang.math.NumberUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -78,6 +82,16 @@ public class StructureCommands {
         System.out.println("issued: " + commandArg + " " + Arrays.toString(commandArgs));
 
         switch (commandArg) {
+            case "generate":
+                if(sender instanceof IPlayer) {
+                    IPlayer ply = (IPlayer) sender;
+                    if(!ply.isOP()) {
+                        ply.sendMessage("You're not allowed to use this command, OP only");
+                        return true;
+                    }
+                }
+                File generationDirectory = StructureAPI.getInstance().getGenerationDirectory();
+                PlanGenerator.generate(generationDirectory);
             case "info":
                 return info(sender, commandArgs);
             case "build":
@@ -166,7 +180,11 @@ public class StructureCommands {
         boolean useForce = force != null && (force.equals("f") || force.equals("force"));
         
         
-        structure.build(SettlerCraft.getInstance().getPlayer(player.getUniqueId()), new PlaceOptions(), useForce);
+        try {
+            structure.build(SettlerCraft.getInstance().getPlayer(player.getUniqueId()), new PlaceOptions(), useForce);
+        } catch (ConstructionException ex) {
+            Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return true;
     }
 
@@ -221,7 +239,11 @@ public class StructureCommands {
         
         
         
-        structure.demolish(SettlerCraft.getInstance().getPlayer(player.getUniqueId()), new DemolishingOptions(), useForce);
+        try {
+            structure.demolish(SettlerCraft.getInstance().getPlayer(player.getUniqueId()), new DemolishingOptions(), useForce);
+        } catch (ConstructionException ex) {
+            Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return true;
     }
 
@@ -273,10 +295,11 @@ public class StructureCommands {
             throw new CommandException("Unknown second argument '"+force+"' ");
         } 
         boolean useForce = force != null && (force.equals("f") || force.equals("force"));
-        
-        
-        
-        structure.stop(useForce);
+        try {
+            structure.stop(useForce);
+        } catch (ConstructionException ex) {
+            Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return true;
     }
 
@@ -289,7 +312,7 @@ public class StructureCommands {
      * @throws CommandException
      */
     private boolean openMenu(IPlayer player, String[] commandArgs, boolean isFree) throws CommandException {
-        if (!isFree && MenuAPI.getInstance().getEconomyProvider() == null) {
+        if (!isFree && SettlerCraft.getInstance().getEconomyProvider() == null) {
             throw new CommandException("No economy plugin available");
         }
 

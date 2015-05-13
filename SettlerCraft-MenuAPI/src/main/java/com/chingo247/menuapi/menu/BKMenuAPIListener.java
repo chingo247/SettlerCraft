@@ -81,7 +81,7 @@ public class BKMenuAPIListener  implements Listener {
             }
             
             
-            if(MenuAPI.getInstance().onPlayerClick(ice.getRawSlot(), player.getUniqueId(), click, BukkitPlatform.wrapItem(ice.getCurrentItem()))) {
+            if(MenuAPI.getInstance().onPlayerClick(ice.getRawSlot(), player.getUniqueId(), click, BukkitPlatform.wrapItem(ice.getCurrentItem()), BukkitPlatform.wrapItem(ice.getCursor()))) {
                 if(ice.getRawSlot() < 54) {
                     ice.setCancelled(true); // cancel this event
                 }

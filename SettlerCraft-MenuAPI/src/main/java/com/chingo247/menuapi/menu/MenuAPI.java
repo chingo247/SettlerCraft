@@ -17,11 +17,9 @@
 
 package com.chingo247.menuapi.menu;
 
-import com.chingo247.menuapi.menu.exception.MenuAPIException;
 import com.chingo247.xplatform.core.AItemStack;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.settlercraft.core.services.IEconomyProvider;
 import com.google.common.collect.Maps;
 import java.util.Iterator;
 import java.util.Map;
@@ -34,7 +32,6 @@ import java.util.UUID;
 public class MenuAPI {
     
     private final Map<UUID, ACategoryMenu> openMenus;
-    private  IEconomyProvider economyProvider;
     private  APlatform platform;
     
     private static MenuAPI instance;
@@ -52,12 +49,6 @@ public class MenuAPI {
         return instance;
     }
     
-    public void registerEconomyService(IEconomyProvider iEconomyProvider) throws MenuAPIException {
-        if(economyProvider != null) {
-            throw new MenuAPIException("Already registered an Economy Provider!");
-        }
-        this.economyProvider = iEconomyProvider;
-    }
     
     public APlatform getPlatform() {
         return platform;
@@ -82,9 +73,7 @@ public class MenuAPI {
         }
     }
 
-    public IEconomyProvider getEconomyProvider() {
-        return economyProvider;
-    }
+    
     
     protected final void onPlayerLeave(UUID player) {
         unRegisterMenu(player);
@@ -100,12 +89,12 @@ public class MenuAPI {
         }
     }
     
-    protected final boolean onPlayerClick(int slot, UUID player, int clickType, AItemStack clicked) {
+    protected final boolean onPlayerClick(int slot, UUID player, int clickType, AItemStack clicked, AItemStack itemOnCursor) {
         if(clicked == null) return false;
         
         ACategoryMenu menu = openMenus.get(player);
         if(menu != null) {
-            return menu.onMenuSlotClicked(slot, clickType, clicked);
+            return menu.onMenuSlotClicked(slot, clickType, clicked, itemOnCursor);
         } else {
             return false;
         }

@@ -43,4 +43,8 @@ public interface IColors {
     
     public String reset();
     
+    public String white();
+    
+    public String stripColor(String s);
+    
 }

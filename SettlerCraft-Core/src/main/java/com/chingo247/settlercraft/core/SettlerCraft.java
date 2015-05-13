@@ -24,6 +24,7 @@
 package com.chingo247.settlercraft.core;
 
 import com.chingo247.settlercraft.core.event.EventManager;
+import com.chingo247.settlercraft.core.exception.SettlerCraftException;
 import com.chingo247.settlercraft.core.persistence.neo4j.Neo4jDatabase;
 import com.chingo247.settlercraft.core.persistence.neo4j.Neo4jHelper;
 import com.chingo247.xplatform.core.APlatform;
@@ -32,7 +33,8 @@ import com.chingo247.xplatform.core.IWorld;
 import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerDAO;
 import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
 import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
-import com.chingo247.settlercraft.core.platforms.IPlayerProvider;
+import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
+import com.chingo247.settlercraft.core.platforms.services.IPlayerProvider;
 import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.entity.Player;
@@ -63,6 +65,7 @@ public class SettlerCraft {
     private IPlayerProvider playerProvider;
     private GraphDatabaseService graph;
     private SettlerDAO settlerDAO;
+    private IEconomyProvider economyProvider;
 
     private SettlerCraft() {
         this.service = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 30L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
@@ -101,6 +104,17 @@ public class SettlerCraft {
             instance = new SettlerCraft();
         }
         return instance;
+    }
+
+    public IEconomyProvider getEconomyProvider() {
+        return economyProvider;
+    }
+    
+    public void registerEconomyService(IEconomyProvider iEconomyProvider) throws SettlerCraftException {
+        if(economyProvider != null) {
+            throw new SettlerCraftException("Already registered an Economy Provider!");
+        }
+        this.economyProvider = iEconomyProvider;
     }
 
     public void registerPlugin(IPlugin plugin) {

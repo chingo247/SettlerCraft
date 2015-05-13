@@ -53,6 +53,11 @@ public class BukkitScheduler implements IScheduler {
     public void runLaterAsync(int delay, Runnable runnable) {
         scheduler.runTaskLaterAsynchronously(plugin, runnable, delay);
     }
+
+    @Override
+    public void runSync(Runnable runnable) {
+        scheduler.scheduleSyncDelayedTask(plugin, runnable);
+    }
     
     
     

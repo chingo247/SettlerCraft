@@ -28,12 +28,15 @@ import com.chingo247.settlercraft.structureapi.structure.construction.asyncworld
 import com.chingo247.settlercraft.structureapi.structure.options.PlaceOptions;
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
+import com.chingo247.settlercraft.structureapi.exception.ConstructionException;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureRelTypes;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlanReader;
 import com.chingo247.settlercraft.structureapi.structure.options.DemolishingOptions;
+import com.chingo247.settlercraft.structureapi.util.WorldUtil;
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
@@ -62,6 +65,7 @@ public class DefaultStructure implements Structure {
     private final Date completedAt;
     private final double price;
     private final boolean isRoot;
+    private final Vector position;
     
     DefaultStructure(StructureNode structureNode) {
         this.id = structureNode.getId();
@@ -76,6 +80,7 @@ public class DefaultStructure implements Structure {
         this.direction = structureNode.getDirection();
         this.price = structureNode.getPrice();
         this.completedAt = structureNode.getCompletedAt();
+        this.position = new Vector(structureNode.getX(), structureNode.getY(), structureNode.getZ());
         this.isRoot = structureNode.getRawNode().hasRelationship(org.neo4j.graphdb.Direction.INCOMING, DynamicRelationshipType.withName(StructureRelTypes.RELATION_SUBSTRUCTURE)) == false;
     }
 
@@ -84,6 +89,11 @@ public class DefaultStructure implements Structure {
         return id;
     }
 
+    @Override
+    public Vector getPosition() {
+        return position;
+    }
+    
     @Override
     public double getPrice() {
         return price;
@@ -139,33 +149,33 @@ public class DefaultStructure implements Structure {
     }
 
     @Override
-    public void build(Player player, PlaceOptions options, boolean force) {
+    public void build(Player player, PlaceOptions options, boolean force) throws ConstructionException {
         ConstructionManager.getInstance().build(this, player.getUniqueId(), getSession(player.getUniqueId()), options, force);
     }
 
     @Override
-    public void build(EditSession session, PlaceOptions options, boolean force) {
+    public void build(EditSession session, PlaceOptions options, boolean force) throws ConstructionException {
         ConstructionManager.getInstance().build(this, PlayerEntry.CONSOLE.getUUID(), session, options, force);
     }
 
     @Override
-    public void demolish(Player player, DemolishingOptions options, boolean force) {
+    public void demolish(Player player, DemolishingOptions options, boolean force) throws ConstructionException {
         ConstructionManager.getInstance().demolish(this, player.getUniqueId(), getSession(player.getUniqueId()), options, force);
     }
 
     @Override
-    public void demolish(EditSession session, DemolishingOptions options, boolean force) {
+    public void demolish(EditSession session, DemolishingOptions options, boolean force) throws ConstructionException {
         ConstructionManager.getInstance().demolish(this, PlayerEntry.CONSOLE.getUUID(), session, options, force);
     }
 
     @Override
-    public void stop(boolean force) {
-        ConstructionManager.getInstance().stop(this, force);
+    public void stop(boolean force) throws ConstructionException {
+        ConstructionManager.getInstance().stop(this, true, force);
     }
     
     @Override
-    public void stop(Player player, boolean useForce) {
-        ConstructionManager.getInstance().stop(player, this, useForce);
+    public void stop(Player player, boolean useForce) throws ConstructionException {
+        ConstructionManager.getInstance().stop(player, this, true, useForce);
     }
 
     
@@ -202,7 +212,17 @@ public class DefaultStructure implements Structure {
         return isRoot;
     }
 
-    
+    /**
+     * Will add the offset to the structure's origin, which is always the front left corner of a
+     * structure.
+     *
+     * @param offset The offset
+     * @return the location
+     */
+    public Vector translateRelativeLocation(Vector offset) {
+        Vector p = WorldUtil.translateLocation(getPosition(), direction, offset.getX(), offset.getY(), offset.getZ());
+        return new Vector(p.getBlockX(), p.getBlockY(), p.getBlockZ());
+    }
     
     
 }

@@ -19,7 +19,6 @@ package com.chingo247.settlercraft.structureapi.event.handlers;
 import com.chingo247.xplatform.core.AInventory;
 import com.chingo247.xplatform.core.AItemStack;
 import com.chingo247.xplatform.core.IPlayer;
-import com.chingo247.xplatform.util.ChatColors;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.structureapi.exception.StructureException;
 import com.chingo247.settlercraft.core.util.KeyPool;
@@ -27,7 +26,7 @@ import com.chingo247.settlercraft.structureapi.util.WorldUtil;
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.core.services.IEconomyProvider;
+import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureRelTypes;
 import com.chingo247.settlercraft.structureapi.selection.CUISelectionManager;
@@ -70,13 +69,13 @@ public class StructurePlaceHandler {
     private final KeyPool<UUID> playerPool;
     private final IEconomyProvider economyProvider;
     private final IStructureAPI structureAPI;
-    private final IColors COLOR;
+    private final IColors color;
 
     public StructurePlaceHandler(IEconomyProvider economyProvider) {
         this.playerPool = new KeyPool<>(SettlerCraft.getInstance().getExecutor());
         this.economyProvider = economyProvider;
         this.structureAPI = StructureAPI.getInstance();
-        this.COLOR = structureAPI.getPlatform().getChatColors();
+        this.color = structureAPI.getPlatform().getChatColors();
     }
 
     public void handle(final AItemStack planItem, final Player player, final World world, final Vector pos) {
@@ -119,7 +118,7 @@ public class StructurePlaceHandler {
 
                     if (plan == null) {
                         if (structureAPI.isLoading()) {
-                            player.print(COLOR.red() + "Plans are not loaded yet... please wait...");
+                            player.print(color.red() + "Plans are not loaded yet... please wait...");
                             return;
                         }
 //                    player.print(COLOR.red() + "The plan has become invalid, reason: data was not found");
@@ -168,13 +167,13 @@ public class StructurePlaceHandler {
         // If player has NOT selected anything yet... make a new selection
         if (!selectionManager.hasSelection(player)) {
             selectionManager.select(player, pos1, pos2);
-            player.print(COLOR.yellow() + "Left-Click " + COLOR.reset() + " in the " + COLOR.green() + " green " + COLOR.reset() + "square to " + COLOR.yellow() + "confirm");
-            player.print(COLOR.yellow() + "Right-Click " + COLOR.reset() + "to" + COLOR.yellow() + " deselect");
+            player.print(color.yellow() + "Left-Click " + color.reset() + " in the " + color.green() + " green " + color.reset() + "square to " + color.yellow() + "confirm");
+            player.print(color.yellow() + "Right-Click " + color.reset() + "to" + color.yellow() + " deselect");
         } else if (selectionManager.matchesCurrentSelection(player, pos1, pos2)) {
 
             if (toLeft) {
                 // Fix WTF HOW?!!1?
-                pos1 = WorldUtil.translateLocation(pos1, direction, (-(plan.getPlacement().getCuboidRegion().getMaximumPoint().getBlockX() - 1)), 0, 0);
+                pos1 = WorldUtil.translateLocation(pos1, direction, (-(plan.getPlacement().getCuboidRegion().getMaximumPoint().getBlockZ() - 1)), 0, 0);
             }
 
             if (canPlace(player, world, pos1, direction, plan)) {
@@ -182,7 +181,6 @@ public class StructurePlaceHandler {
                 try {
                     // Create Structure using the SettlerCraft restrictions
                     CuboidRegion region = new CuboidRegion(pos1, pos2);
-                    System.out.println("before: " + region.getMinimumPoint() + ", " + region.getMaximumPoint());
 
                     Structure possibleParentStructure = getSmallestOverlappingStructure(world, pos1);
                     
@@ -204,7 +202,7 @@ public class StructurePlaceHandler {
                         structure.build(player, new PlaceOptions(), false);
                     }
                 } catch (StructureException ex) {
-                    player.print(ChatColors.RED + ex.getMessage());
+                    player.print(color.red() + ex.getMessage());
                 } catch (Exception ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
                 }
@@ -215,8 +213,8 @@ public class StructurePlaceHandler {
         } else {
             selectionManager.deselect(player);
             selectionManager.select(player, pos1, pos2);
-            player.print(ChatColors.YELLOW + "Left-Click " + ChatColors.RESET + " in the " + ChatColors.GREEN + " green " + ChatColors.RESET + "square to " + ChatColors.YELLOW + "confirm");
-            player.print(ChatColors.YELLOW + "Right-Click " + ChatColors.RESET + "to" + ChatColors.YELLOW + " deselect");
+            player.print(color.yellow() + "Left-Click " + color.reset() + " in the " + color.green() + " green " + color.reset() + "square to " + color.yellow() + "confirm");
+            player.print(color.yellow() + "Right-Click " + color.reset() + "to" + color.yellow() + " deselect");
         }
 
     }
@@ -245,7 +243,6 @@ public class StructurePlaceHandler {
                     + " ORDER BY s." + StructureNode.SIZE_PROPERTY + " ASC "
                     + " LIMIT 1";
 
-            System.out.println("query: " + query);
             Result result = graph.execute(query, params);
             System.out.println("getSmallestOverlapping() in " + (System.currentTimeMillis() - start) + " ms");
             while (result.hasNext()) {

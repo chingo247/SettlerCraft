@@ -28,7 +28,7 @@ import com.chingo247.xplatform.core.AItemStack;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IPlayer;
-import com.chingo247.settlercraft.core.services.IEconomyProvider;
+import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.menuapi.menu.item.TradeItem;
 import com.chingo247.menuapi.menu.slots.ActionSlot;
 import com.chingo247.menuapi.menu.slots.CategorySlot;
@@ -230,6 +230,8 @@ public abstract class ACategoryMenu {
                 player.sendMessage("You got: " + getColor().blue() + item.getName());
             }
             return true;
+        } else {
+            player.sendMessage(color.red() + "You don't have enough money...");
         }
         // Not enough money
         return false;
@@ -379,7 +381,7 @@ public abstract class ACategoryMenu {
      * @param slot
      * @param clickType
      */
-    boolean onMenuSlotClicked(int slot, int clickType, AItemStack stack) {
+    boolean onMenuSlotClicked(int slot, int clickType, AItemStack stack, AItemStack cursor) {
         boolean disable = false;
         if (clickType == RIGHT_CLICK
                 || clickType == SHIFT_RIGHT
@@ -391,7 +393,7 @@ public abstract class ACategoryMenu {
         }
 
         if (slot < MENU_SIZE && slot >= 0) {
-
+            
             if (stack != null
                     && stack.getMaterial() != 0
                     && stack.getAmount() > 0) {
@@ -475,5 +477,7 @@ public abstract class ACategoryMenu {
         }
 
     }
+    
+    
 
 }

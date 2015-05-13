@@ -54,6 +54,7 @@ public class StructureNode {
 //    public static final String WORLD_ID_PROPERTY = "worldId";
     public static final String CONSTRUCTION_STATUS_PROPERTY = "constructionStatus";
     public static final String MIN_X_PROPERTY = "minX", MIN_Y_PROPERTY = "minY", MIN_Z_PROPERTY = "minZ", MAX_X_PROPERTY = "maxX", MAX_Y_PROPERTY = "maxY", MAX_Z_PROPERTY = "MAX_Z";
+    public static final String POS_X_PROPERTY = "x", POS_Y_PROPERTY = "y", POS_Z_PROPERTY = "z";
     public static final String CREATED_AT_PROPERTY = "createdAt", DELETED_AT_PROPERTY = "deletedAt", COMPLETED_AT_PROPERTY = "completedAt";
     public static final String PRICE_PROPERTY = "price";
     public static final String SIZE_PROPERTY = "size";
@@ -82,10 +83,29 @@ public class StructureNode {
     public Node getRawNode() {
         return underlyingNode;
     }
+    
+    public Integer getX() {
+        Object o = underlyingNode.getProperty(POS_X_PROPERTY);
+        return (Integer) o;
+    }
+    
+    public Integer getY() {
+        Object o = underlyingNode.getProperty(POS_Y_PROPERTY);
+        return (Integer) o;
+    }
+    
+    public Integer getZ() {
+        Object o = underlyingNode.getProperty(POS_Z_PROPERTY);
+        return (Integer) o;
+    }
 
     public Double getPrice() {
         Object o = underlyingNode.getProperty(PRICE_PROPERTY);
         return o != null ? (Double) o : 0;
+    }
+    
+    public void setPrice(double price) {
+        underlyingNode.setProperty(PRICE_PROPERTY, price);
     }
     
     public Integer getSize() {
@@ -135,6 +155,13 @@ public class StructureNode {
         if (getConstructionStatus() != status) {
             //TODO FIRE STATE CHANGE EVENT!
             underlyingNode.setProperty(CONSTRUCTION_STATUS_PROPERTY, status.getStatusId());
+            
+            if(status == ConstructionStatus.COMPLETED) {
+                underlyingNode.setProperty(COMPLETED_AT_PROPERTY, System.currentTimeMillis());
+            } else if (status == ConstructionStatus.REMOVED) {
+                underlyingNode.setProperty(DELETED_AT_PROPERTY, System.currentTimeMillis());
+            }
+            
         }
     }
 

@@ -70,7 +70,7 @@ public class StructurePlanDocument extends LineElement {
     }
     
     public String getReferenceId() {
-        Node idNode = doc.selectSingleNode(StructurePlanXMLConstants.STRUCTURE_PLAN_ID_ELEMENT);
+        Node idNode = doc.selectSingleNode(StructurePlanXMLConstants.STRUCTURE_PLAN_ROOT_ELEMENT + "/" + StructurePlanXMLConstants.STRUCTURE_PLAN_ID_ELEMENT);
         if(idNode == null) {
             String path = file.getAbsolutePath();
             return String.valueOf(new XXHasher().hash32String(path));
@@ -81,7 +81,7 @@ public class StructurePlanDocument extends LineElement {
     }
     
     public String getDescription() {
-        Node descNode = doc.selectSingleNode(StructurePlanXMLConstants.STRUCTURE_PLAN_DESCRIPTION_ELEMENT);
+        Node descNode = doc.selectSingleNode(StructurePlanXMLConstants.STRUCTURE_PLAN_ROOT_ELEMENT + "/" + StructurePlanXMLConstants.STRUCTURE_PLAN_DESCRIPTION_ELEMENT);
         if(descNode == null) {
             return  "None";
         }
@@ -91,7 +91,7 @@ public class StructurePlanDocument extends LineElement {
     }
     
     public String getName() {
-        Node nameNode = doc.selectSingleNode(StructurePlanXMLConstants.STRUCTURE_PLAN_NAME_ELEMENT);
+        Node nameNode = doc.selectSingleNode(StructurePlanXMLConstants.STRUCTURE_PLAN_ROOT_ELEMENT + "/" + StructurePlanXMLConstants.STRUCTURE_PLAN_NAME_ELEMENT);
         if(nameNode == null) {
             return  FilenameUtils.getBaseName(file.getName());
         }
@@ -101,7 +101,7 @@ public class StructurePlanDocument extends LineElement {
     }
     
     public double getPrice() {
-        Node priceNode = doc.selectSingleNode(StructurePlanXMLConstants.STRUCTURE_PLAN_PRICE_ELEMENT);
+        Node priceNode = doc.selectSingleNode(StructurePlanXMLConstants.STRUCTURE_PLAN_ROOT_ELEMENT + "/" + StructurePlanXMLConstants.STRUCTURE_PLAN_PRICE_ELEMENT);
         if(priceNode == null) {
             return 0.0;
         } 
@@ -122,7 +122,7 @@ public class StructurePlanDocument extends LineElement {
     }
 
     public String getCategory() {
-        Node categoryNode = doc.selectSingleNode(StructurePlanXMLConstants.STRUCTURE_PLAN_CATEGORY_ELEMENT);
+        Node categoryNode = doc.selectSingleNode(StructurePlanXMLConstants.STRUCTURE_PLAN_ROOT_ELEMENT + "/" + StructurePlanXMLConstants.STRUCTURE_PLAN_CATEGORY_ELEMENT);
         if(categoryNode == null) {
             return  null;
         }

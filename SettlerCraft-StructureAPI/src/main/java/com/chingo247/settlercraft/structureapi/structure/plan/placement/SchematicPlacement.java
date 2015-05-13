@@ -47,8 +47,9 @@ public class SchematicPlacement extends DirectionalPlacement<PlaceOptions> imple
     private static final int PRIORITY_LIQUID = 3;
     private static final int PRIORITY_LATER = 2;
     private static final int PRIORITY_FINAL = 1;
-    private static final int BLOCK_BETWEEN = 1000;
-    private static final int MAX_PLACE_LATER_TO_PLACE = 10;
+    
+    private final int BLOCK_BETWEEN;
+    private final int MAX_PLACE_LATER_TO_PLACE = 10;
 
     private final Vector position;
     private final Schematic schematic;
@@ -64,6 +65,8 @@ public class SchematicPlacement extends DirectionalPlacement<PlaceOptions> imple
         this.position = position;
         this.direction = direction;
         this.schematic = schematic;
+        
+        this.BLOCK_BETWEEN = Math.round((float) ((schematic.getHeight() * schematic.getLength() * schematic.getWidth()) * 0.001));
     }
 
     public Schematic getSchematic() {
@@ -119,10 +122,16 @@ public class SchematicPlacement extends DirectionalPlacement<PlaceOptions> imple
 
     @Override
     public void place(EditSession editSession, Vector pos, PlaceOptions o) {
+        
+        
+        
         FastClipboard clipboard = schematic.getClipboard();
+        System.out.println("Blocks between: " + BLOCK_BETWEEN);
+        
+        
         Vector size = clipboard.getSize();
         int x = o.getxAxisCube() <= 0 ? 16 : o.getxAxisCube();
-        int y = o.getyAxisCube() <= 0 ? size.getBlockY() : o.getyAxisCube();
+        int y = o.getyAxisCube() <= 0 ? size.getBlockY() : size.getBlockY();
         int z = o.getzAxisCube() <= 0 ? 16 : o.getzAxisCube();
 
         CuboidIterator traversal = new CuboidIterator(clipboard.getSize(), x, y, z);
@@ -149,18 +158,28 @@ public class SchematicPlacement extends DirectionalPlacement<PlaceOptions> imple
                 placeLater.add(new StructureBlock(v, clipboardBlock));
             }
 
-            // For every 10 place intensive blocks, place 100 normal blocks
-            if (placeLaterPause > 0) {
+            // For every 10 place intensive blocks
+            if (placeLaterPause > 0 && clipboardBlock.getId() != 0) {
                 placeLaterPause--;
             } else {
 
                 // only place these when having a greater xz-cubevalue to avoid placing torches etc in air and break them later
                 while (placeLater.peek() != null
-                        && (getCube(placeLater.peek().getPosition().getBlockZ(), o.getzAxisCube()) + 1 < (getCube(v.getBlockZ(), o.getzAxisCube())))
-                        && (getCube(placeLater.peek().getPosition().getBlockX(), o.getxAxisCube()) + 1 < (getCube(v.getBlockX(), o.getxAxisCube())))) {
+                        && placeLater.peek().getPosition().getBlockY() < v.getBlockY()) {
                     StructureBlock plb = placeLater.poll();
                     doblock(editSession, plb.getBlock(), plb.getPosition(), pos);
-                    placeLaterPlaced++;
+                    
+                   
+                    
+                    if(plb.getPriority() != PRIORITY_LIQUID) {
+                        
+                        placeLaterPlaced++;
+                        if(BlockType.emitsLight(plb.getBlock().getId())) {
+                            placeLaterPlaced++;
+                        }
+                        
+                    }
+                    
                     if (placeLaterPlaced >= MAX_PLACE_LATER_TO_PLACE) {
                         placeLaterPause = BLOCK_BETWEEN;
                         placeLaterPlaced = 0;
@@ -211,15 +230,6 @@ public class SchematicPlacement extends DirectionalPlacement<PlaceOptions> imple
                 throw new AssertionError("unreachable");
         }
 
-//        try {
-//            BaseBlock worldBlock = session.getBlock(p);
-//            if (worldBlock.getId() == b.getId()) {
-//                return; // already done don't use up more space in the AWE Queue
-//            }
-//        } catch (Exception e) {
-//            System.out.println("[SettlerCraft]: an error was thrown " + e.getClass().getName() + ", we will ignore it");
-//        }
-
         session.rawSetBlock(p, b);
     }
 
@@ -228,9 +238,11 @@ public class SchematicPlacement extends DirectionalPlacement<PlaceOptions> imple
             return PRIORITY_LIQUID;
         }
 
-        if (BlockType.shouldPlaceLast(block.getId())) {
+        if (BlockType.shouldPlaceLast(block.getId()) || BlockType.emitsLight(block.getId())) {
             return PRIORITY_LATER;
         }
+        
+        
 
         if (BlockType.shouldPlaceFinal(block.getId())) {
             return PRIORITY_FINAL;
@@ -284,29 +296,6 @@ public class SchematicPlacement extends DirectionalPlacement<PlaceOptions> imple
     @Override
     public File[] getFiles() {
         return new File[]{schematic.getFile()};
-    }
-
-    /**
-     * Returns an int[] with length 2, where the first element is the x modifier
-     * and the second the z modifier
-     *
-     * @param direction The direction
-     * @return int[2] where first element is x modifier and second the z
-     * modifier
-     */
-    private int[] getModifiers(Direction direction) {
-        switch (direction) {
-            case NORTH:
-                return new int[]{-1, 1};
-            case EAST:
-                return new int[]{1, 1};
-            case SOUTH:
-                return new int[]{1, -1};
-            case WEST:
-                return new int[]{-1, -1};
-            default:
-                throw new AssertionError("Unreachable");
-        }
     }
 
 }

@@ -34,6 +34,10 @@ public class BukkitPlugin implements IPlugin {
         this.plugin = plugin;
     }
 
+    public Plugin getPlugin() {
+        return plugin;
+    }
+    
     @Override
     public File getDataFolder() {
         return plugin.getDataFolder();

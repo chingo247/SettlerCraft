@@ -25,7 +25,7 @@ package com.chingo247.settlercraft.structureapi.platforms.bukkit.listener;
  */
 import com.chingo247.xplatform.core.AItemStack;
 import com.chingo247.xplatform.platforms.bukkit.BukkitPlatform;
-import com.chingo247.settlercraft.core.services.IEconomyProvider;
+import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.settlercraft.structureapi.platforms.bukkit.util.BKWorldEditUtil;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.structureapi.event.handlers.StructurePlaceHandler;

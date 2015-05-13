@@ -24,7 +24,7 @@
 package com.chingo247.xplatform.platforms.bukkit;
 
 import com.chingo247.xplatform.core.IColors;
-import com.chingo247.xplatform.util.ChatColors;
+import org.bukkit.ChatColor;
 
 /**
  *
@@ -45,37 +45,47 @@ public class BukkitChatColors implements IColors {
 
     @Override
     public String blue() {
-        return ChatColors.BLUE;
+        return ChatColor.BLUE.toString();
     }
 
     @Override
     public String red() {
-       return ChatColors.RED;
+       return ChatColor.RED.toString();
     }
 
     @Override
     public String gold() {
-        return ChatColors.GOLD;
+        return ChatColor.GOLD.toString();
     }
 
     @Override
     public String purple() {
-        return ChatColors.DARK_PURPLE;
+        return ChatColor.DARK_PURPLE.toString();
     }
 
     @Override
     public String green() {
-        return ChatColors.GREEN;
+        return ChatColor.GREEN.toString();
     }
 
     @Override
     public String yellow() {
-        return ChatColors.YELLOW;
+        return ChatColor.YELLOW.toString();
     }
     
     @Override
     public String reset() {
-        return ChatColors.RESET;
+        return ChatColor.RESET.toString();
+    }
+
+    @Override
+    public String stripColor(String s) {
+        return ChatColor.stripColor(s);
+    }
+
+    @Override
+    public String white() {
+        return ChatColor.WHITE.toString();
     }
     
 }

@@ -17,6 +17,8 @@
 package com.chingo247.xplatform.platforms.bukkit;
 
 import com.chingo247.xplatform.core.IPlayer;
+import com.chingo247.xplatform.core.IPlugin;
+import com.chingo247.xplatform.core.IScheduler;
 import com.chingo247.xplatform.core.IServer;
 import com.chingo247.xplatform.core.IWorld;
 import java.util.ArrayList;
@@ -86,6 +88,16 @@ public class BukkitServer implements IServer {
     public IPlayer getPlayer(String player) {
         Player ply = Bukkit.getPlayer(player);
         return ply != null ? new BukkitPlayer(ply) : null;
+    }
+
+    @Override
+    public IScheduler getScheduler(IPlugin plugin) {
+        return new BukkitScheduler(server, ((BukkitPlugin) plugin).getPlugin());
+    }
+
+    @Override
+    public IPlugin getPlugin(String plugin) {
+        return new BukkitPlugin(server.getPluginManager().getPlugin(plugin));
     }
 
     

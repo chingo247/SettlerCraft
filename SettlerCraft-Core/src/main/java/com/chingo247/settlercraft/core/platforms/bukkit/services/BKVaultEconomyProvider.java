@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.menuapi.platforms.bukkit;
+package com.chingo247.settlercraft.core.platforms.bukkit.services;
 
-import com.chingo247.settlercraft.core.services.IEconomyProvider;
+import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import java.util.UUID;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;

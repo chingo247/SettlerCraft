@@ -22,6 +22,7 @@ import com.chingo247.settlercraft.structureapi.platforms.bukkit.IConfigProvider;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlanManager;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
+import com.chingo247.settlercraft.structureapi.structure.restriction.StructureRestriction;
 import com.chingo247.settlercraft.structureapi.structure.session.PlayerSessionManager;
 import com.chingo247.xplatform.core.APlatform;
 import com.sk89q.worldedit.Vector;
@@ -171,6 +172,13 @@ public interface IStructureAPI {
     public File getPlanDirectory();
     
     /**
+     * The directory where plans are generated from schematics
+     * @return The directory
+     */
+    public File getGenerationDirectory();
+    
+    
+    /**
      * Gets the Structures directory for a world
      * @param world The world 
      * @return The structures directory
@@ -184,5 +192,17 @@ public interface IStructureAPI {
      * @return The PlanMenu
      */
     public CategoryMenu createPlanMenu();
+    
+    /**
+     * Adds a restriction that will be added as check when placing structures
+     * @param structureRestriction 
+     */
+    public void addRestriction(StructureRestriction structureRestriction);
+    
+    /**
+     * Removes a restriction for placing structures
+     * @param structureRestriction 
+     */
+    public void removeRestriction(StructureRestriction structureRestriction);
     
 }

@@ -26,6 +26,8 @@ public interface IScheduler {
     
     public void run(Runnable runnable);
     
+    public void runSync(Runnable runnable);
+    
     public void runLater(int delay, Runnable runnable);
     
     public void runLaterAsync(int delay, Runnable runnable);

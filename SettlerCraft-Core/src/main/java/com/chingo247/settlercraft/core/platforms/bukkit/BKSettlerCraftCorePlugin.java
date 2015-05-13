@@ -10,8 +10,12 @@ import com.chingo247.xplatform.platforms.bukkit.BukkitPlugin;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.core.event.PlayerSubscriber;
+import com.chingo247.settlercraft.core.exception.SettlerCraftException;
 import com.chingo247.settlercraft.core.persistence.hibernate.HibernateUtil;
+import com.chingo247.settlercraft.core.platforms.bukkit.services.BKVaultEconomyProvider;
 import com.google.common.eventbus.EventBus;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -54,7 +58,7 @@ public class BKSettlerCraftCorePlugin extends JavaPlugin {
                  HibernateUtil.getSession().close();
             }
         });
-       
+        
         
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 
@@ -65,7 +69,13 @@ public class BKSettlerCraftCorePlugin extends JavaPlugin {
         }));
         
         
-       
+        BKVaultEconomyProvider economyProvider = new BKVaultEconomyProvider();
+        try {
+            SettlerCraft.getInstance().registerEconomyService(economyProvider);
+        } catch (SettlerCraftException ex) {
+            Logger.getLogger(BKSettlerCraftCorePlugin.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         
         
         

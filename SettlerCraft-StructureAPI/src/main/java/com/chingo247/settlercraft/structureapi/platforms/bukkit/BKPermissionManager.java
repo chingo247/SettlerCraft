@@ -27,7 +27,7 @@ import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IPlayer;
 import com.chingo247.xplatform.platforms.PlatformFactory;
 import com.chingo247.xplatform.platforms.bukkit.BukkitPlayer;
-import com.chingo247.settlercraft.core.platforms.IPermissionManager;
+import com.chingo247.settlercraft.core.platforms.services.IPermissionManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;

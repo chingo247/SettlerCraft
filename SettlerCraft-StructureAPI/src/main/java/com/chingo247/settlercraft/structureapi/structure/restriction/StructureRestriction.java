@@ -24,6 +24,10 @@
 package com.chingo247.settlercraft.structureapi.structure.restriction;
 
 import com.chingo247.settlercraft.structureapi.exception.StructureException;
+import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.world.World;
+import java.util.Objects;
 
 /**
  * StructureRestriction class is used to determine if a Structure may be build in a certain area
@@ -64,21 +68,54 @@ public abstract class StructureRestriction {
     
      /**
      * Used to check if a Structure may be build on a specified location.
-     * @param placeAction The placeAction
-     * @return should return true if placeaction has been 'approved' by this restriction
+     * @param whoPlaces
+     * @param world
+     * @param affectedArea
+     * @return should return true if the action is approved
      */
-    public abstract boolean test(PlacementPlaceAction placeAction);
+    public abstract boolean evaluate(Player whoPlaces, World world, CuboidRegion affectedArea);
     
     /**
      * Used to check if a Structure may be build on a specified location.
-     * @param placeAction The placeAction
+     * @param whoPlaces
+     * @param world
+     * @param affectedArea
      * @throws com.chingo247.settlercraft.structureapi.exception.StructureException
      */
-    public final void allow(PlacementPlaceAction placeAction) throws StructureException {
-        if(!test(placeAction)) {
+    public final void allow(Player whoPlaces, World world, CuboidRegion affectedArea) throws StructureException {
+        if(!evaluate(whoPlaces, world, affectedArea)) {
             throw new StructureException(message);
         }
     }
+
+   
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 43 * hash + Objects.hashCode(this.plugin);
+        hash = 43 * hash + Objects.hashCode(this.restrictionName);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final StructureRestriction other = (StructureRestriction) obj;
+        if (!Objects.equals(this.plugin, other.plugin)) {
+            return false;
+        }
+        if (!Objects.equals(this.restrictionName, other.restrictionName)) {
+            return false;
+        }
+        return true;
+    }
+    
     
     
     

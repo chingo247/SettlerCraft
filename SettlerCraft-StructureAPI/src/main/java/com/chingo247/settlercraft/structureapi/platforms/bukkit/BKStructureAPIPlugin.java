@@ -23,18 +23,27 @@ package com.chingo247.settlercraft.structureapi.platforms.bukkit;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import com.chingo247.menuapi.platforms.bukkit.BKVaultEconomyProvider;
 import com.chingo247.settlercraft.core.SettlerCraft;
+import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.xplatform.core.IPlugin;
 import com.chingo247.settlercraft.core.exception.SettlerCraftException;
 import com.chingo247.settlercraft.structureapi.platforms.bukkit.listener.PlanListener;
 import com.chingo247.settlercraft.core.exception.CommandException;
+import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.settlercraft.structureapi.commands.StructureCommands;
+import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
+import com.chingo247.settlercraft.structureapi.platforms.bukkit.services.holograms.HolographicDisplaysHologramProvider;
+import com.chingo247.settlercraft.structureapi.platforms.bukkit.services.holograms.StructureHologramManager;
+import com.chingo247.settlercraft.structureapi.platforms.bukkit.services.worldguard.WorldGuardHelper;
+import com.chingo247.settlercraft.structureapi.platforms.bukkit.services.worldguard.WorldGuardStructureListener;
+import com.chingo247.settlercraft.structureapi.platforms.bukkit.structure.restriction.WorldGuardRestriction;
 import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
+import com.chingo247.settlercraft.structureapi.structure.plan.util.PlanGenerator;
 import com.chingo247.xplatform.core.ICommandSender;
 import com.chingo247.xplatform.platforms.bukkit.BukkitConsoleSender;
 import com.chingo247.xplatform.platforms.bukkit.BukkitPlayer;
 import com.chingo247.xplatform.platforms.bukkit.BukkitPlugin;
+import java.io.File;
 
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
@@ -55,7 +64,7 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
 
     public static final String MSG_PREFIX = ChatColor.YELLOW + "[SettlerCraft]: ";
     private static final Logger LOGGER = Logger.getLogger(BKStructureAPIPlugin.class);
-    private BKVaultEconomyProvider economyProvider;
+    private IEconomyProvider economyProvider;
     private BKConfigProvider configProvider;
     private static BKStructureAPIPlugin instance;
     private StructureCommands structureCommands;
@@ -87,6 +96,10 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
             return;
         }
         
+        
+        
+        
+        
         // Register Config
         configProvider = new BKConfigProvider();
         try {
@@ -96,6 +109,8 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
             setEnabled(false);
             return;
         }
+        
+        
 
         // Register plugin & ConfigProvider
         StructureAPI structureAPI = (StructureAPI) StructureAPI.getInstance();
@@ -112,9 +127,29 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
             return;
         }
         
+        economyProvider = SettlerCraft.getInstance().getEconomyProvider();
+        
         Bukkit.getPluginManager().registerEvents(new PlanListener(economyProvider), this);
+        
+        File generationDirectory = StructureAPI.getInstance().getGenerationDirectory();
+        generationDirectory.mkdirs();
+        PlanGenerator.generate(generationDirectory);
 
         graph = SettlerCraft.getInstance().getNeo4j();
+        
+        // Enable WorldGuard
+        if(Bukkit.getPluginManager().getPlugin("WorldGuard") != null) {
+            WorldGuardHelper worldGuardHelper = new WorldGuardHelper(graph, new StructureDAO(graph));
+            EventManager.getInstance().getEventBus().register(new WorldGuardStructureListener(worldGuardHelper));
+            StructureAPI.getInstance().addRestriction(new WorldGuardRestriction());
+            worldGuardHelper.processStructuresWithoutRegion();
+        }
+        
+        if(Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null) {
+            StructureHologramManager.getInstance().setHologramProvider(new HolographicDisplaysHologramProvider());
+            EventManager.getInstance().getEventBus().register(StructureHologramManager.getInstance());
+        }
+        
         structureCommands = new StructureCommands(StructureAPI.getInstance(), new BKPermissionManager(), SettlerCraft.getInstance().getExecutor(), graph);
     }
 

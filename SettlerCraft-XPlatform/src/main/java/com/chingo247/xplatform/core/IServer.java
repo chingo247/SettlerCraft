@@ -25,6 +25,8 @@ import java.util.UUID;
  */
 public interface IServer {
     
+    public IPlugin getPlugin(String plugin);
+    
     public List<IPlayer> getPlayers();
     
     public List<IWorld> getWorlds();
@@ -34,6 +36,8 @@ public interface IServer {
     public IWorld getWorld(String world);
     
     public IWorld getWorld(UUID worldUUID);
+    
+    public IScheduler getScheduler(IPlugin plugin);
 
     @Deprecated
     public IPlayer getPlayer(String player);

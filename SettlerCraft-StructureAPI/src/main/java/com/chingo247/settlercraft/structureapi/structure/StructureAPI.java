@@ -47,6 +47,7 @@ import com.chingo247.settlercraft.structureapi.persistence.entities.structure.St
 import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.structureapi.structure.plan.DefaultStructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.FilePlacement;
+import com.chingo247.settlercraft.structureapi.structure.restriction.StructureRestriction;
 import com.chingo247.settlercraft.structureapi.structure.session.PlayerSessionManager;
 import com.chingo247.settlercraft.structureapi.util.PlacementUtil;
 import com.chingo247.xplatform.core.IColors;
@@ -63,12 +64,13 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.minecraft.util.com.google.common.collect.Sets;
 import org.apache.commons.io.FilenameUtils;
 import org.dom4j.DocumentException;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -96,13 +98,14 @@ public class StructureAPI implements IStructureAPI {
     private final Lock loadLock = new ReentrantLock();
     private final Lock structureLock = new ReentrantLock();
     private StructurePlanMenuFactory planMenuFactory;
-    private final ExecutorService executor;
 
     private CategoryMenu planMenu;
     private final GraphDatabaseService graph;
 
     private boolean isLoadingPlans = false;
     private static StructureAPI instance;
+    
+    private final Set<StructureRestriction> restrictions;
 
     private final Logger LOG = Logger.getLogger(getClass().getName());
 
@@ -110,9 +113,9 @@ public class StructureAPI implements IStructureAPI {
 //    private final SubstructureHandler substructureHandler;
 
     private StructureAPI() {
-        this.executor = SettlerCraft.getInstance().getExecutor();
         this.platform = SettlerCraft.getInstance().getPlatform();
         this.graph = SettlerCraft.getInstance().getNeo4j();
+        this.restrictions = Sets.newHashSet();
 
         // Now register the GlobalPlanManager
         this.structureDAO = new StructureDAO(graph);
@@ -176,6 +179,8 @@ public class StructureAPI implements IStructureAPI {
         }
 
     }
+    
+    
 
     @Override
     public boolean isLoading() {
@@ -224,7 +229,7 @@ public class StructureAPI implements IStructureAPI {
                 }
 
                 // Create the StructureNode - Where it all starts...
-                StructureNode structureNode = structureDAO.addStructure(plan.getName(), world, structureRegion, direction, plan.getPrice());
+                StructureNode structureNode = structureDAO.addStructure(plan.getName(), world, position, structureRegion, direction, plan.getPrice());
                 StructureWorldNode structureWorldNode = new StructureWorldNode(worldNode);
                 structureWorldNode.addStructure(structureNode);
 
@@ -300,7 +305,7 @@ public class StructureAPI implements IStructureAPI {
                 }
 
                 // Create the StructureNode - Where it all starts...
-                StructureNode structureNode = structureDAO.addStructure(placement.getClass().getSimpleName(), world, structureRegion, direction, 0.0);
+                StructureNode structureNode = structureDAO.addStructure(placement.getClass().getSimpleName(), world, position, structureRegion, direction, 0.0);
                 StructureWorldNode structureWorldNode = new StructureWorldNode(worldNode);
                 structureWorldNode.addStructure(structureNode);
 
@@ -365,7 +370,7 @@ public class StructureAPI implements IStructureAPI {
             CuboidRegion structureRegion = new CuboidRegion(pos1, pos2);
 
             if (!(parentRegion.contains(pos1) && parentRegion.contains(pos2))) {
-                throw new StructureException("Structure is not within structure #" + parentStructure.getId());
+                throw new StructureException("Structure overlaps structure #" + parentStructure.getId() + ", but does not fit within it's boundaries");
             }
 
             boolean hasWithin;
@@ -377,7 +382,6 @@ public class StructureAPI implements IStructureAPI {
                 throw new StructureException("Structure overlaps another structure...");
             }
             
-            System.out.println("Checking deep overlap");
 
             // Deep check overlap
             ThreadSafeEditSession editSession = AsyncWorldEditUtil.getAsyncSessionFactory().getThreadSafeEditSession(world, -1);
@@ -385,17 +389,14 @@ public class StructureAPI implements IStructureAPI {
             Vector min = structureRegion.getMinimumPoint();
             Vector max = structureRegion.getMaximumPoint();
             
-            System.out.println("Min: " + min + ", Max: " + max);
             for (int y = min.getBlockY() + 1; y < max.getBlockY(); y++) {
                 for (int x = min.getBlockX(); x < max.getBlockX(); x++) {
                     for (int z = min.getBlockZ(); z < max.getBlockZ(); z++) {
                         Vector pos = new Vector(x,y,z);
                         BaseBlock b = editSession.getBlock(pos);
-                        System.out.println("Block: " + b);
                         if (b == null || b.getId() == 0) {
                             continue;
                         }
-                        System.out.println(pos + " " + b.getId() + " " + b.getId());
                         throw new StructureException("Can't substructure overlaps blocks of #" + parentStructure.getId() + " " + parentStructure.getName());
                     }
                 }
@@ -404,7 +405,7 @@ public class StructureAPI implements IStructureAPI {
             try (Transaction tx = graph.beginTx()) {
 
                 // Create the StructureNode - Where it all starts...
-                StructureNode structureNode = structureDAO.addStructure(plan.getName(), world, structureRegion, direction, plan.getPrice());
+                StructureNode structureNode = structureDAO.addStructure(plan.getName(), world, position, structureRegion, direction, plan.getPrice());
                 StructureWorldNode structureWorldNode = new StructureWorldNode(worldNode);
                 structureWorldNode.addStructure(structureNode);
                 
@@ -581,6 +582,25 @@ public class StructureAPI implements IStructureAPI {
     @Override
     public IConfigProvider getConfig() {
         return config;
+    }
+
+    @Override
+    public File getGenerationDirectory() {
+        return new File(getWorkingDirectory(), "generate");
+    }
+
+    @Override
+    public void addRestriction(StructureRestriction structureRestriction) {
+        synchronized(restrictions) {
+            this.restrictions.add(structureRestriction);
+        }
+    }
+
+    @Override
+    public void removeRestriction(StructureRestriction structureRestriction) {
+        synchronized(restrictions) {
+            this.restrictions.remove(structureRestriction);
+        }
     }
 
     private class StructurePlanManagerHandler {

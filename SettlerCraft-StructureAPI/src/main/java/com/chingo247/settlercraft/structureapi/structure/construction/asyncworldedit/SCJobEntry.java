@@ -66,7 +66,6 @@ package com.chingo247.settlercraft.structureapi.structure.construction.asyncworl
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
 import com.chingo247.settlercraft.structureapi.event.async.StructureJobCompleteEvent;
 import com.chingo247.settlercraft.structureapi.event.async.StructureJobStartedEvent;
-import com.chingo247.xplatform.util.ChatColors;
 import com.sk89q.worldedit.world.World;
 import java.util.ArrayList;
 import java.util.List;
@@ -246,7 +245,7 @@ public class SCJobEntry extends JobEntry {
     
     @Override
     public String toString() {
-        return ChatColors.WHITE + "[" + getJobId() + "] " + getName();
+        return  "[" + getJobId() + "] " + getName();
     }
 
     @Override
