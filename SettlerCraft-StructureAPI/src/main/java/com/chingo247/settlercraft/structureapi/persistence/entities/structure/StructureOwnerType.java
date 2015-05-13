@@ -29,7 +29,28 @@ package com.chingo247.settlercraft.structureapi.persistence.entities.structure;
  */
 public enum StructureOwnerType {
     
-    MEMBER,
-    MASTER
+    MEMBER(0),
+    OWNER(1),
+    MASTER(2);
+    
+    private final int id;
+
+    private StructureOwnerType(int id) {
+        this.id = id;
+    }
+
+    public int getTypeId() {
+        return id;
+    }
+    
+    public static StructureOwnerType match(int id) {
+        switch(id) {
+            case 0: return MEMBER;
+            case 1: return OWNER;
+            case 2: return MASTER;
+            default: throw new AssertionError("Unreachable");
+        }
+        
+    }
     
 }

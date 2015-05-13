@@ -31,7 +31,6 @@ import com.chingo247.settlercraft.structureapi.event.async.StructureJobStartedEv
 import com.chingo247.settlercraft.structureapi.persistence.dao.IStructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
 import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncDemolishingPlacement;
 import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncPlacementCallback;
@@ -83,7 +82,7 @@ public class ConstructionManager {
     private final IStructureDAO structureDAO;
     private final IColors colors;
     
-    private Map<String, Map<Long, StructureJob>> tasks;
+    private Map<Long, StructureJob> tasks;
     private static ConstructionManager instance;
 
     private ConstructionManager() {
@@ -109,13 +108,12 @@ public class ConstructionManager {
                     // I FIRED THIS JOB!
                     SCJobEntry jobEntry = (SCJobEntry) je;
                     
-                    String world = jobEntry.getWorld().getName();
                     boolean isCanceled = false;
                     jobLock.lock();
                     try {
                         
                         
-                        StructureJob entry = tasks.get(world).get(jobEntry.getTaskID());
+                        StructureJob entry = tasks.get(jobEntry.getTaskID());
                         if (entry != null) {
                             isCanceled = entry.isCanceled();
                             if (isCanceled) {
@@ -137,14 +135,6 @@ public class ConstructionManager {
             }
         });
         AsyncEventManager.getInstance().register(new ConstructionEventHandler());
-    }
-    
-    private void putWorldIfAbsent(String world) {
-        synchronized(tasks) {
-            if(tasks.get(world) == null) {
-                tasks.put(world, new HashMap<Long, StructureJob>());
-            }
-        }
     }
     
     public static ConstructionManager getInstance() {
@@ -184,9 +174,8 @@ public class ConstructionManager {
                 // Check if task already added
                 // If so check if the task was building!
                 // If so continue, otherwise recursively stop
-                putWorldIfAbsent(structure.getWorld());
 
-                StructureJob currentEntry = tasks.get(structure.getWorld()).get(structure.getId());
+                StructureJob currentEntry = tasks.get(structure.getId());
                 if (currentEntry != null) {
                     try {
                         stop(structure, false, true);
@@ -202,7 +191,7 @@ public class ConstructionManager {
                         
                         
                         
-                        tasks.get(structure.getWorld()).put(structure.getId(), new StructureJob(-1, false, player));
+                        tasks.put(structure.getId(), new StructureJob(-1, false, player));
                         final World w = SettlerCraft.getInstance().getWorld(structure.getWorld());
                         if(w == null) {
                             return;
@@ -249,9 +238,8 @@ public class ConstructionManager {
             @Override
             public void run() {
                 PlayerEntry playerEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(player);
-                putWorldIfAbsent(structure.getWorld());
                 
-                StructureJob currentEntry = tasks.get(structure.getWorld()).get(structure.getId());
+                StructureJob currentEntry = tasks.get(structure.getId());
                 if (currentEntry != null) {
                     try {
                         stop(structure, false, true);
@@ -271,7 +259,7 @@ public class ConstructionManager {
                 
                 DemolishingPlacement dp = new DemolishingPlacement(region.getMaximumPoint());
                 
-                tasks.get(structure.getWorld()).put(structure.getId(), new StructureJob(-1, true, player));
+                tasks.put(structure.getId(), new StructureJob(-1, true, player));
                 AsyncDemolishingPlacement placement = new AsyncDemolishingPlacement(playerEntry, dp, new AsyncPlacementCallback() {
 
                     @Override
@@ -310,8 +298,7 @@ public class ConstructionManager {
 
                 jobLock.lock();
                 try {
-                    putWorldIfAbsent(structure.getWorld());
-                    StructureJob entry = tasks.get(structure.getWorld()).get(structure.getId());
+                    StructureJob entry = tasks.get(structure.getId());
                     if (entry == null) {
                         return;
                     } else {
@@ -424,7 +411,7 @@ public class ConstructionManager {
             jobLock.lock();
             try {
                 int jobId = jobAddedEvent.getJobId();
-                StructureJob entry = tasks.get(w.getName()).get(structureId);
+                StructureJob entry = tasks.get(structureId);
                 entry.setJobId(jobId);
                 uuid = entry.getWhoStarted();
             } finally {
@@ -433,7 +420,7 @@ public class ConstructionManager {
 
             Structure structure;
             try (Transaction tx = graph.beginTx()) {
-                StructureNode structureNode = structureDAO.find(w, structureId);
+                StructureNode structureNode = structureDAO.find(structureId);
                 structureNode.setConstructionStatus(ConstructionStatus.QUEUED);
                 structure = DefaultStructureFactory.getInstance().makeStructure(structureNode);
                 tx.success();
@@ -455,11 +442,10 @@ public class ConstructionManager {
         @AllowConcurrentEvents
         public void onJobCanceledEvent(StructureJobCanceledEvent jobCanceledEvent) {
             long structureId = jobCanceledEvent.getStructure();
-            World w = jobCanceledEvent.getWorld();
             
             jobLock.lock();
             try {
-                tasks.get(w.getName()).remove(structureId);
+                tasks.remove(structureId);
             } finally {
                 jobLock.unlock();
             }
@@ -467,7 +453,7 @@ public class ConstructionManager {
             Structure structure;
             List<IPlayer> owners = new ArrayList<>();
             try (Transaction tx = graph.beginTx()) {
-                StructureNode structureNode = structureDAO.find(w, structureId);
+                StructureNode structureNode = structureDAO.find(structureId);
                 structureNode.setConstructionStatus(ConstructionStatus.STOPPED);
                 structure = DefaultStructureFactory.getInstance().makeStructure(structureNode);
                 List<SettlerNode> settlers = structureNode.getOwners();
@@ -496,12 +482,12 @@ public class ConstructionManager {
             
             jobLock.lock();
             try {
-                StructureJob job = tasks.get(w.getName()).get(structureId);
+                StructureJob job = tasks.get(structureId);
                 if(job == null) {
                     return;
                 }
                 isDemolishing = job.isDemolishing;
-                tasks.get(w.getName()).remove(structureId);
+                tasks.remove(structureId);
             } finally {
                 jobLock.unlock();
             }
@@ -511,7 +497,7 @@ public class ConstructionManager {
             List<IPlayer> owners = new ArrayList<>();
             StructureNode structureNode;
             try (Transaction tx = graph.beginTx()) {
-                structureNode = structureDAO.find(w, structureId);
+                structureNode = structureDAO.find(structureId);
                 if (isDemolishing) {
                     structureNode.setConstructionStatus(ConstructionStatus.REMOVED);
                     
@@ -519,7 +505,7 @@ public class ConstructionManager {
                     double price = structureNode.getPrice();
                     IEconomyProvider economyProvider = SettlerCraft.getInstance().getEconomyProvider();
                     if(economyProvider != null && price > 0) {
-                        SettlerNode settler = structureDAO.getOwnerForStructure(w, structureId, StructureOwnerType.MASTER);
+                        SettlerNode settler = structureDAO.getMasterOwnerForStructure(structureId);
                         if(settler != null) {
                             IPlayer player = platform.getPlayer(settler.getId());
                             if(player != null) {
@@ -563,7 +549,7 @@ public class ConstructionManager {
             boolean isDemolishing = false;
             jobLock.lock();
             try {
-                StructureJob entry = tasks.get(w.getName()).get(structureId);
+                StructureJob entry = tasks.get(structureId);
                 isDemolishing = entry.isDemolishing();
             } finally {
                 jobLock.unlock();
@@ -573,7 +559,7 @@ public class ConstructionManager {
             Structure structure;
             List<IPlayer> owners = new ArrayList<>();
             try (Transaction tx = graph.beginTx()) {
-                StructureNode structureNode = structureDAO.find(w, structureId);
+                StructureNode structureNode = structureDAO.find(structureId);
                 if (isDemolishing) {
                     structureNode.setConstructionStatus(ConstructionStatus.DEMOLISHING);
                 } else {

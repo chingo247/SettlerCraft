@@ -9,7 +9,6 @@ import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
 import com.chingo247.settlercraft.structureapi.persistence.dao.IStructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
 import com.chingo247.settlercraft.structureapi.platforms.bukkit.util.WorldGuardUtil;
 import com.chingo247.settlercraft.structureapi.structure.ConstructionStatus;
 import com.chingo247.settlercraft.structureapi.structure.DefaultStructureFactory;
@@ -72,7 +71,7 @@ public class WorldGuardHelper {
         );
         
         try(Transaction tx = graph.beginTx()) {
-            SettlerNode settler = structureDAO.getOwnerForStructure(SettlerCraft.getInstance().getWorld(world.getName()), structure.getId(), StructureOwnerType.MASTER);
+            SettlerNode settler = structureDAO.getMasterOwnerForStructure(structure.getId());
             
             if(settler != null) {
                 LocalPlayer localPlayer = WorldGuardUtil.getWorldGuard().wrapPlayer(Bukkit.getPlayer(settler.getId()));
@@ -86,7 +85,7 @@ public class WorldGuardHelper {
                 tx.failure();
             }
             
-            StructureNode structureNode = structureDAO.find(SettlerCraft.getInstance().getWorld(structure.getWorld()),structure.getId());
+            StructureNode structureNode = structureDAO.find(structure.getId());
             structureNode.getRawNode().setProperty("worldguard_region", id);
             tx.success();
             

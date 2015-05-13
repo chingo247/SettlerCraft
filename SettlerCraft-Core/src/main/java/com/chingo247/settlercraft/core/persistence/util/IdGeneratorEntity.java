@@ -19,7 +19,6 @@ package com.chingo247.settlercraft.core.persistence.util;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import org.hibernate.annotations.Index;
 
@@ -31,9 +30,6 @@ import org.hibernate.annotations.Index;
 public class IdGeneratorEntity implements Serializable {
     
     @Id
-    @GeneratedValue
-    private Long id;
-    
     @Index(name = "generatorName")
     @Column(unique = true, nullable = false)
     private String name;

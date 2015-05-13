@@ -216,7 +216,6 @@ public class FastClipboard {
             BlockVector vec = new BlockVector(x, y, z);
             tileEntitiesMap.put(vec, values);
         }
-        System.out.println("Done in " + (System.currentTimeMillis() - start) + " ms");
         return new FastClipboard(width, height, length, blockids, blockData, tileEntitiesMap);
     }
 

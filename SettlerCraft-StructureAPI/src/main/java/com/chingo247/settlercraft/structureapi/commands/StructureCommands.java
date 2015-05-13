@@ -36,7 +36,6 @@ import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.ICommandSender;
 import com.chingo247.xplatform.core.IPlayer;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -132,22 +131,12 @@ public class StructureCommands {
 
     private boolean build(IPlayer player, String[] commandArgs) throws CommandException {
         System.out.println("Build Command");
-        argumentsInRange(2, 3, commandArgs);
+        argumentsInRange(1, 2, commandArgs);
         
-        World w;
         Structure structure;
         
-        // /stt build [world][structureId][force]
+        // /stt build [structureId][force]
         
-        String worldArg = commandArgs[0];
-        if(worldArg.equals(".")) {
-            w = SettlerCraft.getInstance().getWorld(player.getWorld().getName());
-        } else {
-            w = SettlerCraft.getInstance().getWorld(worldArg);
-            if(w == null) {
-                throw new CommandException("Couldn't find world for name '"+worldArg+"'");
-            }
-        }
         
         String structureIdArg = commandArgs[1];
         if(!NumberUtils.isNumber(structureIdArg)) {
@@ -156,11 +145,11 @@ public class StructureCommands {
         
         long id = Long.parseLong(structureIdArg);
         try(Transaction tx = graph.beginTx()) {
-            StructureNode structureNode = structureDAO.find(w, id);
+            StructureNode structureNode = structureDAO.find(id);
             
             if(structureNode == null) {
                 tx.success();
-                throw new CommandException("Couldn't find a structure for #" + structureIdArg + " within world '"+w.getName()+"'");
+                throw new CommandException("Couldn't find a structure for #" + structureIdArg);
             }
             
             if(!structureNode.isOwner(player.getUniqueId()) && !player.isOP()) {
@@ -173,7 +162,7 @@ public class StructureCommands {
         }
         
          
-        String force = commandArgs.length == 3 ? commandArgs[1] : null;
+        String force = commandArgs.length == 2 ? commandArgs[1] : null;
         if(force != null && !(force.equals("force") && force.equals("f"))) {
             throw new CommandException("Unknown second argument '"+force+"' ");
         } 
@@ -190,22 +179,11 @@ public class StructureCommands {
 
     private boolean demolish(IPlayer player, String[] commandArgs) throws CommandException {
         System.out.println("Demolish Command");
-        argumentsInRange(2, 3, commandArgs);
+        argumentsInRange(1, 2, commandArgs);
         
-        World w;
         Structure structure;
         
-        // /stt build [world][structureId][force]
         
-        String worldArg = commandArgs[0];
-        if(worldArg.equals(".")) {
-            w = SettlerCraft.getInstance().getWorld(player.getWorld().getName());
-        } else {
-            w = SettlerCraft.getInstance().getWorld(worldArg);
-            if(w == null) {
-                throw new CommandException("Couldn't find world for name '"+worldArg+"'");
-            }
-        }
         
         String structureIdArg = commandArgs[1];
         if(!NumberUtils.isNumber(structureIdArg)) {
@@ -214,11 +192,11 @@ public class StructureCommands {
         
         long id = Long.parseLong(structureIdArg);
         try(Transaction tx = graph.beginTx()) {
-            StructureNode structureNode = structureDAO.find(w, id);
+            StructureNode structureNode = structureDAO.find(id);
             
             if(structureNode == null) {
                 tx.success();
-                throw new CommandException("Couldn't find a structure for #" + structureIdArg + " within world '"+w.getName()+"'");
+                throw new CommandException("Couldn't find a structure for #" + structureIdArg);
             }
             
             if(!structureNode.isOwner(player.getUniqueId()) && !player.isOP()) {
@@ -231,7 +209,7 @@ public class StructureCommands {
         }
         
          
-        String force = commandArgs.length == 3 ? commandArgs[1] : null;
+        String force = commandArgs.length == 2 ? commandArgs[1] : null;
         if(force != null && !(force.equals("force") && force.equals("f"))) {
             throw new CommandException("Unknown second argument '"+force+"' ");
         } 
@@ -249,22 +227,9 @@ public class StructureCommands {
 
     private boolean stop(IPlayer player, String[] commandArgs) throws CommandException {
         System.out.println("Stop Command");
-        argumentsInRange(2, 3, commandArgs);
+        argumentsInRange(1, 2, commandArgs);
         
-        World w;
         Structure structure;
-        
-        // /stt build [world][structureId][force]
-        
-        String worldArg = commandArgs[0];
-        if(worldArg.equals(".")) {
-            w = SettlerCraft.getInstance().getWorld(player.getWorld().getName());
-        } else {
-            w = SettlerCraft.getInstance().getWorld(worldArg);
-            if(w == null) {
-                throw new CommandException("Couldn't find world for name '"+worldArg+"'");
-            }
-        }
         
         String structureIdArg = commandArgs[1];
         if(!NumberUtils.isNumber(structureIdArg)) {
@@ -273,11 +238,11 @@ public class StructureCommands {
         
         long id = Long.parseLong(structureIdArg);
         try(Transaction tx = graph.beginTx()) {
-            StructureNode structureNode = structureDAO.find(w, id);
+            StructureNode structureNode = structureDAO.find(id);
             
             if(structureNode == null) {
                 tx.success();
-                throw new CommandException("Couldn't find a structure for #" + structureIdArg + " within world '"+w.getName()+"'");
+                throw new CommandException("Couldn't find a structure for #" + structureIdArg);
             }
             
             if(!structureNode.isOwner(player.getUniqueId()) && !player.isOP()) {
@@ -290,7 +255,7 @@ public class StructureCommands {
         }
         
          
-        String force = commandArgs.length == 3 ? commandArgs[1] : null;
+        String force = commandArgs.length == 2 ? commandArgs[1] : null;
         if(force != null && !(force.equals("force") && force.equals("f"))) {
             throw new CommandException("Unknown second argument '"+force+"' ");
         } 

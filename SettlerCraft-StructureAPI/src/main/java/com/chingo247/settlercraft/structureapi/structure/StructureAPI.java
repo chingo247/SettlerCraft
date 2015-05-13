@@ -409,7 +409,7 @@ public class StructureAPI implements IStructureAPI {
                 StructureWorldNode structureWorldNode = new StructureWorldNode(worldNode);
                 structureWorldNode.addStructure(structureNode);
                 
-                StructureNode parentStructureNode = structureDAO.find(world, parentStructure.getId());
+                StructureNode parentStructureNode = structureDAO.find(parentStructure.getId());
                 parentStructureNode.addSubstructure(structureNode);
                 
 

@@ -19,7 +19,6 @@ package com.chingo247.settlercraft.structureapi.persistence.dao;
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -33,7 +32,7 @@ import java.util.UUID;
  */
 public interface IStructureDAO {
     
-    public StructureNode find(World world, long id);
+    public StructureNode find(long id);
     
     public StructureNode addStructure(String name, World world, Vector position, CuboidRegion dimension, Direction direction, double price);
 
@@ -51,7 +50,7 @@ public interface IStructureDAO {
     
     public boolean hasSubstructuresWithin(Structure parent, World world, CuboidRegion region);
      
-    public SettlerNode getOwnerForStructure(World world, long structureId, StructureOwnerType ownerType); 
+    public SettlerNode getMasterOwnerForStructure(long structureId); 
     
 //    public List<StructureNode> findSiblingsWithConstructionStatus(UUID world, long id, ConstructionStatus status);
 //    

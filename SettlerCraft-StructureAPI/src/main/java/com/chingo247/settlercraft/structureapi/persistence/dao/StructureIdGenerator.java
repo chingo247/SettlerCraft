@@ -7,7 +7,6 @@ package com.chingo247.settlercraft.structureapi.persistence.dao;
 
 import com.chingo247.settlercraft.core.persistence.util.IdGenerator;
 import com.chingo247.settlercraft.core.persistence.util.IdGeneratorFactory;
-import java.util.UUID;
 
 /**
  *
@@ -15,8 +14,8 @@ import java.util.UUID;
  */
 class StructureIdGenerator {
     
-    public static synchronized Long nextId(UUID world) {
-        IdGenerator idGenerator = IdGeneratorFactory.getInstance().getIdGeneratorForName("Structure-" + world.toString());
+    public static synchronized Long nextId() {
+        IdGenerator idGenerator = IdGeneratorFactory.getInstance().getIdGeneratorForName("Structure");
         return idGenerator.nextId();
     }
     

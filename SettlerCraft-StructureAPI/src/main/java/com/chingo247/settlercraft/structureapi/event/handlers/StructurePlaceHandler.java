@@ -27,6 +27,7 @@ import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
+import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureRelTypes;
 import com.chingo247.settlercraft.structureapi.selection.CUISelectionManager;
@@ -46,7 +47,6 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.blocks.ItemType;
 import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.util.List;
 import java.util.Map;
@@ -70,12 +70,14 @@ public class StructurePlaceHandler {
     private final IEconomyProvider economyProvider;
     private final IStructureAPI structureAPI;
     private final IColors color;
+    private final StructureDAO structureDAO;
 
     public StructurePlaceHandler(IEconomyProvider economyProvider) {
         this.playerPool = new KeyPool<>(SettlerCraft.getInstance().getExecutor());
         this.economyProvider = economyProvider;
         this.structureAPI = StructureAPI.getInstance();
         this.color = structureAPI.getPlatform().getChatColors();
+        this.structureDAO = new StructureDAO(SettlerCraft.getInstance().getNeo4j());
     }
 
     public void handle(final AItemStack planItem, final Player player, final World world, final Vector pos) {
@@ -180,19 +182,19 @@ public class StructurePlaceHandler {
                 Structure structure;
                 try {
                     // Create Structure using the SettlerCraft restrictions
-                    CuboidRegion region = new CuboidRegion(pos1, pos2);
-
-                    Structure possibleParentStructure = getSmallestOverlappingStructure(world, pos1);
-                    
+                    Structure possibleParentStructure;
+                    try {
+                    possibleParentStructure = getAndCheckSmallestOverlappingStructure(player,world, pos1);
+                    } catch (StructureException ex) {
+                        player.printError(ex.getMessage());
+                        selectionManager.deselect(player);
+                        return;
+                    }
                     if(possibleParentStructure != null) {
-//                        pos1.add(0, 1, 0);
                         structure = structureAPI.createSubstructure(possibleParentStructure, plan, world, pos1, direction, player);
-                        
                     } else {
                         structure = structureAPI.createStructure(plan, world, pos1, direction, player);
                     }
-                    
-                    
                     
                     if (structure != null) {
 //                        AItemStack clone = item.clone();
@@ -219,10 +221,11 @@ public class StructurePlaceHandler {
 
     }
 
-    private Structure getSmallestOverlappingStructure(World world, Vector position) {
+    private Structure getAndCheckSmallestOverlappingStructure(Player player, World world, Vector position) throws StructureException {
 
         GraphDatabaseService graph = SettlerCraft.getInstance().getNeo4j();
         Structure structure = null;
+        boolean isOwner = false;
         try (Transaction tx = graph.beginTx()) {
 
             IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
@@ -250,8 +253,18 @@ public class StructurePlaceHandler {
                 Node n = (Node) map.get("structure");
                 structure = DefaultStructureFactory.getInstance().makeStructure(new StructureNode(n));
             }
+            
+            if(structure != null) {
+                isOwner = structureDAO.isOwnerOfStructure(structure.getId(), player);
+            }
+            
             tx.success();
         }
+        
+        if(structure != null && !isOwner) {
+            throw new StructureException("Structure will overlap another structure you don't own!");
+        }
+        
         return structure;
     }
 

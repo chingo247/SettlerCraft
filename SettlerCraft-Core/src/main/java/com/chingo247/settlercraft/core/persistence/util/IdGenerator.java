@@ -44,10 +44,7 @@ public class IdGenerator {
         try {
             session = HibernateUtil.getSession();
             tx = session.beginTransaction();
-            HibernateQuery query = new HibernateQuery(session);
-            QIdGeneratorEntity qig = QIdGeneratorEntity.idGeneratorEntity;
-            IdGeneratorEntity generator = query.from(qig).where(qig.name.eq(generatorName)).uniqueResult(qig);
-            System.out.println("Generator: " + generator);
+            IdGeneratorEntity generator = (IdGeneratorEntity) session.get(IdGeneratorEntity.class, generatorName);
             id = generator.incrementAndGet();
             session.save(generator);
             tx.commit();
@@ -80,7 +77,6 @@ public class IdGenerator {
             HibernateQuery query = new HibernateQuery(session);
             QIdGeneratorEntity qig = QIdGeneratorEntity.idGeneratorEntity;
             boolean exists = query.from(qig).where(qig.name.eq(generatorName)).exists();
-            System.out.println("Exist? : " + exists);
             if (!exists) {
                 IdGeneratorEntity generator = new IdGeneratorEntity(generatorName);
                 session.save(generator);

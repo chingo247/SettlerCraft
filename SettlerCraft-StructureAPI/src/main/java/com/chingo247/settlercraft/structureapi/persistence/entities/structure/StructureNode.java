@@ -196,7 +196,7 @@ public class StructureNode {
 
     public void addOwner(SettlerNode node, StructureOwnerType type) {
         Relationship relationship = underlyingNode.createRelationshipTo(node.getRawNode(), DynamicRelationshipType.withName("OwnedBy"));
-        relationship.setProperty("Type", type.name());
+        relationship.setProperty("Type", type.getTypeId());
     }
 
     public boolean isOwner(UUID possibleOwner) {

@@ -34,6 +34,7 @@ import com.chingo247.settlercraft.structureapi.persistence.entities.structure.St
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.xplatform.core.IWorld;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.util.ArrayList;
@@ -62,18 +63,14 @@ public class StructureDAO implements IStructureDAO{
     }
 
     @Override
-    public StructureNode find(World world, long id) {
-        IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
+    public StructureNode find(long id) {
         StructureNode structure = null;
         Map<String,Object> params = Maps.newHashMap();
-        params.put("worldId", w.getUUID().toString());
         params.put("structureId", id);
         
        
-        String query = 
-                   "MATCH (world:"+WorldNode.LABEL.name()+" { "+WorldNode.ID_PROPERTY+": {worldId} })"
-                + " WITH world "
-                + " MATCH (world)<-[:" + StructureRelTypes.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + " { "+StructureNode.ID_PROPERTY+": {structureId} })"
+        String query =
+                  " MATCH (world)<-[:" + StructureRelTypes.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + " { "+StructureNode.ID_PROPERTY+": {structureId} })"
                 + " RETURN s as structure";
         
         Result result = graph.execute(query, params);
@@ -93,7 +90,7 @@ public class StructureDAO implements IStructureDAO{
     @Override
     public StructureNode addStructure(String name, World world, Vector position, CuboidRegion region, Direction direction, double price) {
         IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
-        long id = StructureIdGenerator.nextId(w.getUUID());
+        long id = StructureIdGenerator.nextId();
         
         
         Node stNode = graph.createNode(StructureNode.LABEL);
@@ -261,7 +258,8 @@ public class StructureDAO implements IStructureDAO{
 
     @Override
     public void delete(Long id) {
-        Node n = graph.getNodeById(id);
+        StructureNode structureNode = find(id);
+        Node n = structureNode.getRawNode();
         for(Relationship rel : n.getRelationships()) {
             rel.delete();
         }
@@ -291,22 +289,17 @@ public class StructureDAO implements IStructureDAO{
 //    }
 
     @Override
-    public SettlerNode getOwnerForStructure(World world, long structureId, StructureOwnerType ownerType) {
-        IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
+    public SettlerNode getMasterOwnerForStructure(long structureId) {
         long start = System.currentTimeMillis();
       
         Map<String,Object> params = Maps.newHashMap();
-        params.put("worldId", w.getUUID().toString());
         params.put("structureId", structureId);
-        params.put("ownerType", ownerType.name());
         SettlerNode settlerNode = null;
        
         String query = 
-                   "MATCH (world:"+WorldNode.LABEL.name()+" { "+WorldNode.ID_PROPERTY+": {worldId} })"
-                + " WITH world "
-                + " MATCH (world)<-[:" + StructureRelTypes.RELATION_WITHIN + "]-(structure:" + StructureNode.LABEL.name() + " { "+StructureNode.ID_PROPERTY+": {structureId} })"
+                  " MATCH (structure:" + StructureNode.LABEL.name() + " { "+StructureNode.ID_PROPERTY+": {structureId} })"
                 + " WITH structure "
-                + " MATCH (structure)-[:"+StructureRelTypes.RELATION_OWNED_BY+" { Type: {ownerType} } ]->(owner:" + SettlerNode.LABEL.name() + ")"
+                + " MATCH (structure)-[:"+StructureRelTypes.RELATION_OWNED_BY+" { Type: "+StructureOwnerType.MASTER.getTypeId()+" } ]->(owner:" + SettlerNode.LABEL.name() + ")"
                 + " RETURN owner as theOwner";
         Result result = graph.execute(query, params);
         System.out.println("getOwnerForStructure() in " + (System.currentTimeMillis() - start) + " ms");
@@ -317,6 +310,33 @@ public class StructureDAO implements IStructureDAO{
             break;
         }
         return settlerNode;
+    }
+    
+    public boolean isOwnerOfStructure(long structureId, Player player) {
+        Map<String,Object> params = Maps.newHashMap();
+        params.put("structureId", structureId);
+        params.put("playerId", player.getUniqueId());
+       
+        long start = System.currentTimeMillis();
+        
+        String query = 
+                  " MATCH (world)<-[:" + StructureRelTypes.RELATION_WITHIN + "]-(structure:" + StructureNode.LABEL.name() + " { "+StructureNode.ID_PROPERTY+": {structureId} })"
+                + " WITH structure "
+                + " MATCH (structure)"
+                + "-[:"+StructureRelTypes.RELATION_OWNED_BY+" { Type: {"+StructureOwnerType.MASTER.getTypeId()+"} } ]->"
+                + " (owner:" + SettlerNode.LABEL.name() + " { "+SettlerNode.ID_PROPERTY+": {playerId} })"
+                + " RETURN owner as theOwner"
+                + " LIMIT 1";
+        Result result = graph.execute(query, params);
+        System.out.println("isOwnerOfStructure() in " + (System.currentTimeMillis() - start) + " ms");
+        
+        while (result.hasNext()) {
+            Map<String, Object> map = result.next();
+            Node n = (Node) map.get("theOwner");
+            SettlerNode settlerNode = new SettlerNode(n);
+            return settlerNode.getId().equals(player.getUniqueId());
+        }
+        return false;
     }
 
 }
