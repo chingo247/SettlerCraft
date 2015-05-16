@@ -215,8 +215,10 @@ public class StructureAPI implements IStructureAPI {
 //            // Check the default restrictions first
             Placement placement = plan.getPlacement();
             checkDefaultRestrictions(placement, world, position, direction);
+            
             WorldNode worldNode = registerWorld(world);
-
+            
+            
             try (Transaction tx = graph.beginTx()) {
 
                 // Check for overlap with other structures

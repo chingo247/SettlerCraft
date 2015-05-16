@@ -17,7 +17,7 @@
 package com.chingo247.settlercraft.structureapi.structure.plan.xml.handlers;
 
 import com.chingo247.settlercraft.core.Direction;
-import com.chingo247.settlercraft.structureapi.structure.plan.placement.DirectionalPlacement;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.RotationalPlacement;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
 import com.chingo247.settlercraft.structureapi.structure.plan.xml.PlacementXMLConstants;
 import com.sk89q.worldedit.Vector;
@@ -51,8 +51,8 @@ public abstract class AbstractPlacementXMLHandler<T extends Placement> implement
             placementRoot.add(zElement);
         }
 
-        if (placement instanceof DirectionalPlacement) {
-            Direction direction = ((DirectionalPlacement) placement).getDirection();
+        if (placement instanceof RotationalPlacement) {
+            Direction direction = ((RotationalPlacement) placement).getDirection();
             Element directionElement = new BaseElement(PlacementXMLConstants.PLACEMENT_DIRECTION_ELEMENT);
             directionElement.setText(direction.name());
             placementRoot.add(directionElement);

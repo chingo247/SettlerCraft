@@ -175,5 +175,5 @@ public interface Structure {
      */
     public Vector translateRelativeLocation(Vector offset);
     
-    
+    public Vector getRelativePosition(Vector worldPosition);
 }

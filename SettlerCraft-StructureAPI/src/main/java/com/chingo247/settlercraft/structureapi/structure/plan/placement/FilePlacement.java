@@ -29,7 +29,7 @@ import java.io.File;
  *
  * @author Chingo
  */
-public interface FilePlacement {
+public interface FilePlacement<T> extends Placement<T> {
     
     public File[] getFiles();
     

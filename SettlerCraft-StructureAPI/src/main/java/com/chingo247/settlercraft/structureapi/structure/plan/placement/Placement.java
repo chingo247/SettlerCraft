@@ -24,83 +24,32 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan.placement;
 
-import com.chingo247.settlercraft.core.Direction;
-import com.chingo247.settlercraft.structureapi.util.WorldUtil;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
-import java.util.Objects;
-import java.util.UUID;
 
 /**
  *
  * @author Chingo
  * @param <T>
  */
-public abstract class Placement<T> {
+public interface Placement<T> {
     
-    private final UUID id;
-
-    public Placement() {
-        this.id = UUID.randomUUID();
-    }
+    public void place(EditSession session, Vector pos, T option);
     
-   
-
-    /**
-     * A unique id generated for this placement. This will change every server startup...
-     * @return The unique id
-     */
-    private UUID getId() {
-        return id;
-    }
+    public Vector getPosition();
     
-   
-
-    public void rotate(int yaw) {
-        if(!(yaw % 90 == 0)) throw new IllegalArgumentException("Value must be a multiple of 90");
-        rotate(WorldUtil.getDirection(yaw));
-    }
+    public void move(Vector offset);
     
-    public abstract void place(EditSession session, Vector pos, T option);
+    public int getWidth();
     
-    public abstract Vector getPosition();
+    public int getHeight();
     
-    public abstract void rotate(Direction direction);
+    public int getLength();
     
-    public abstract void move(Vector offset);
+    public String getTypeName();
     
-    public abstract int getWidth();
-    
-    public abstract int getHeight();
-    
-    public abstract int getLength();
-    
-    public abstract String getTypeName();
-    
-    public abstract CuboidRegion getCuboidRegion();
-    
-
-     @Override
-    public final int hashCode() {
-        int hash = 7;
-        hash = 53 * hash + Objects.hashCode(this.id);
-        return hash;
-    }
-    
-    @Override
-    public final boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Placement other = (Placement) obj;
-        if (!Objects.equals(this.id, other.getId())) {
-            return false;
-        }
-        return true;
-    }
+    public CuboidRegion getCuboidRegion();
+     
 
 }

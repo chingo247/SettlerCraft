@@ -83,7 +83,7 @@ public class MenuAPI {
         for(Iterator<ACategoryMenu> it = openMenus.values().iterator(); it.hasNext();) {
             ACategoryMenu menu = it.next();
             if(menu != null) {
-                menu.close("Server is reloading...");
+                menu.close("[SettlerCraft-Menu] Closing menus, server is reloading...");
                 it.remove();
             }
         }

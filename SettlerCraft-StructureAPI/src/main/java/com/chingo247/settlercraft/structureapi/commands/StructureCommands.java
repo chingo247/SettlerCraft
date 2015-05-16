@@ -138,7 +138,7 @@ public class StructureCommands {
         // /stt build [structureId][force]
         
         
-        String structureIdArg = commandArgs[1];
+        String structureIdArg = commandArgs[0];
         if(!NumberUtils.isNumber(structureIdArg)) {
             throw new CommandException("Expected a number but got '"+structureIdArg+"'");
         }
@@ -185,7 +185,7 @@ public class StructureCommands {
         
         
         
-        String structureIdArg = commandArgs[1];
+        String structureIdArg = commandArgs[0];
         if(!NumberUtils.isNumber(structureIdArg)) {
             throw new CommandException("Expected a number but got '"+structureIdArg+"'");
         }
@@ -231,7 +231,7 @@ public class StructureCommands {
         
         Structure structure;
         
-        String structureIdArg = commandArgs[1];
+        String structureIdArg = commandArgs[0];
         if(!NumberUtils.isNumber(structureIdArg)) {
             throw new CommandException("Expected a number but got '"+structureIdArg+"'");
         }

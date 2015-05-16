@@ -24,6 +24,7 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan.placement;
 
+import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.structureapi.structure.options.PlaceOptions;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
@@ -34,13 +35,16 @@ import com.sk89q.worldedit.Vector;
  */
 public class StructureLotPlacement extends AbstractCuboidPlacement<PlaceOptions> {
     
-
-    public StructureLotPlacement(int width, int height, int length) {
-        this(null, width, height, length);
-    }
-
+    private int width;
+    private int height;
+    private int length;
+    
+    
     public StructureLotPlacement(Vector position, int width, int height, int length) {
-        super(position, width, height, length);
+        super(Direction.EAST, position);
+        this.width = width;
+        this.length = length;
+        this.height = height;
     }
 
     @Override
@@ -51,6 +55,23 @@ public class StructureLotPlacement extends AbstractCuboidPlacement<PlaceOptions>
     @Override
     public String getTypeName() {
         return PlacementTypes.STRUCTURE_LOT;
+    }
+
+    
+
+    @Override
+    public int getWidth() {
+        return width;
+    }
+
+    @Override
+    public int getHeight() {
+        return height;
+    }
+
+    @Override
+    public int getLength() {
+        return length;
     }
 
    

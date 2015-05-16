@@ -173,7 +173,6 @@ public class SchematicManager {
                 int width = newData.getWidth();
                 int height = newData.getHeight();
                 int length = newData.getLength();
-                System.out.println("[SettlerCraft]: Imported " + name + " data to database");
                 schematicDAO.addSchematic(name, xxhash, width, height, length, System.currentTimeMillis());
             }
             

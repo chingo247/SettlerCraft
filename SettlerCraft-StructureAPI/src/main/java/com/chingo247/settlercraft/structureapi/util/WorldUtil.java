@@ -51,7 +51,6 @@ public class WorldUtil {
         if(yaw > 360) {
             int times = (int)((ya - (ya % 360)) / 360);
             int normalizer = times * 360;
-            
             ya -= normalizer;
         } else if (yaw < -360) {
             ya = Math.abs(ya);
@@ -63,11 +62,7 @@ public class WorldUtil {
     } 
     
     public static Direction getDirection(float yaw) {
-        
         yaw = normalizeYaw(yaw);
-        
-        System.out.println("YAW: " + yaw);
-        
         if (yaw >= 45f && yaw < 135f || yaw >= -315f && yaw < -225f) {
             return Direction.WEST;
         } else if (yaw >= 135f && yaw < 225f || yaw >= -225f && yaw < -135f) {

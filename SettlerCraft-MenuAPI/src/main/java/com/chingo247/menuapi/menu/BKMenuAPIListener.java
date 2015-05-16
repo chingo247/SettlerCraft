@@ -44,8 +44,8 @@ public class BKMenuAPIListener  implements Listener {
     
     @EventHandler
     public void onServerReloadEvent(PluginDisableEvent disableEvent) {
-        if (disableEvent.getPlugin().getName().equals("SettlerCraft")) {
-            LOG.info("Disable event!");
+        if (disableEvent.getPlugin().getName().equals("SettlerCraft-MenuAPI")) {
+            LOG.info("Disabling menus!");
             MenuAPI.getInstance().onServerReload();
         }
     }

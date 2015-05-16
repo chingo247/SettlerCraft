@@ -219,9 +219,42 @@ public class DefaultStructure implements Structure {
      * @param offset The offset
      * @return the location
      */
+    @Override
     public Vector translateRelativeLocation(Vector offset) {
         Vector p = WorldUtil.translateLocation(getPosition(), direction, offset.getX(), offset.getY(), offset.getZ());
         return new Vector(p.getBlockX(), p.getBlockY(), p.getBlockZ());
+    }
+
+    @Override
+    public Vector getRelativePosition(Vector worldPosition) {
+        switch (direction) {
+            case NORTH:
+                return new Vector(
+                        worldPosition.getBlockX() - this.getPosition().getX(),
+                        worldPosition.getBlockY() - this.getPosition().getY(),
+                        this.getPosition().getZ() - worldPosition.getBlockZ()
+                );
+            case SOUTH:
+                return new Vector(
+                        this.getPosition().getX() - worldPosition.getBlockX(),
+                        worldPosition.getBlockY() - this.getPosition().getY(),
+                        worldPosition.getBlockZ() - this.getPosition().getZ()
+                );
+            case EAST:
+                return new Vector(
+                        worldPosition.getBlockZ() - this.getPosition().getZ(),
+                        worldPosition.getBlockY() - this.getPosition().getY(),
+                        worldPosition.getBlockX() - this.getPosition().getX()
+                );
+            case WEST:
+                return new Vector(
+                        this.getPosition().getZ() - worldPosition.getBlockZ(),
+                        worldPosition.getBlockY() - this.getPosition().getY(),
+                        this.getPosition().getX() - worldPosition.getBlockX()
+                );
+            default:
+                throw new AssertionError("Unreachable");
+        }
     }
     
     

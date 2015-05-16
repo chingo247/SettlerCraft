@@ -33,15 +33,14 @@ import com.chingo247.settlercraft.core.Direction;
  * @author Chingo
  * @param <T>
  */
-public abstract class DirectionalPlacement<T> extends Placement<T> {
+public interface RotationalPlacement<T> extends Placement<T> {
     
-    private int rotation = -90;
+    public int getRotation();
     
-
-    protected int getRotation() {
-        return rotation;
-    }
+    public void rotate(int rotation);
     
-    public abstract Direction getDirection();
+    public void rotate(Direction direction);
+    
+    public Direction getDirection();
     
 }

@@ -24,6 +24,8 @@ import com.chingo247.menuapi.menu.item.CategoryTradeItem;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,13 @@ import java.util.Map;
  */
 public class CategoryMenu extends ACategoryMenu {
     
+    private static Comparator<CategoryTradeItem> ALPHABETICAL = new Comparator<CategoryTradeItem>() {
+
+        @Override
+        public int compare(CategoryTradeItem t, CategoryTradeItem t1) {
+            return t.getName().toLowerCase().compareTo(t1.getName().toLowerCase());
+        }
+    };
     private Map<String, List<CategoryTradeItem>> items;
     
     
@@ -86,6 +95,8 @@ public class CategoryMenu extends ACategoryMenu {
         } else if(items.get(category) != null) {
             tradeItems = items.get(category);
         }
+        
+        Collections.sort(tradeItems, ALPHABETICAL);
         
         
         Preconditions.checkNotNull(tradeItems); // May NEVER be null at this point

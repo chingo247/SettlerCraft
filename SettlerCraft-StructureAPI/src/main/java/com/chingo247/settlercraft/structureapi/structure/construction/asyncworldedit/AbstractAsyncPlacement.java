@@ -23,8 +23,6 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit;
 
-import com.chingo247.settlercraft.core.Direction;
-import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
@@ -41,7 +39,7 @@ import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
  * @param <T> Options
  * @param <P> The placement
  */
-public abstract class AbstractAsyncPlacement<T, P extends Placement> extends Placement<T> {
+public abstract class AbstractAsyncPlacement<T, P extends Placement> implements Placement<T> {
     
     protected final AsyncWorldEditMain awe;
     protected final BlockPlacer placer;
@@ -71,10 +69,7 @@ public abstract class AbstractAsyncPlacement<T, P extends Placement> extends Pla
         return placement.getPosition();
     }
 
-    @Override
-    public void rotate(Direction direction) {
-        placement.rotate(direction);
-    }
+    
 
     @Override
     public void move(Vector offset) {

@@ -135,8 +135,9 @@ public class StructurePlaceHandler {
 
                         return;
                     }
-
+                    long start = System.currentTimeMillis();
                     handlePlace(plan, planItem, player, world, pos, slm);
+                    System.out.println("Place() handled in " + (System.currentTimeMillis() - start) + " ms");
 
                 } catch (Exception ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -147,6 +148,7 @@ public class StructurePlaceHandler {
     }
 
     private void handlePlace(StructurePlan plan, AItemStack item, Player player, World world, Vector pos1, ISelectionManager selectionManager) {
+        
         IPlayer iPlayer = SettlerCraft.getInstance().getPlatform().getPlayer(player.getUniqueId());
 
         Direction direction = WorldUtil.getDirection(iPlayer.getYaw());
@@ -190,10 +192,15 @@ public class StructurePlaceHandler {
                         selectionManager.deselect(player);
                         return;
                     }
+                    
+                    long start = System.currentTimeMillis();
+                    
                     if(possibleParentStructure != null) {
                         structure = structureAPI.createSubstructure(possibleParentStructure, plan, world, pos1, direction, player);
+                        System.out.println("Substructure placed in " + (System.currentTimeMillis() - start) + " ms");
                     } else {
                         structure = structureAPI.createStructure(plan, world, pos1, direction, player);
+                        System.out.println("Structure placed in " + (System.currentTimeMillis() - start)  + " ms");
                     }
                     
                     if (structure != null) {

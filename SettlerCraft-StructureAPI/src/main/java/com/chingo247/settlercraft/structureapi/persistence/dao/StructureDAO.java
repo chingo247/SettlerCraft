@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 import net.minecraft.util.com.google.common.collect.Maps;
+import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -195,8 +196,13 @@ public class StructureDAO implements IStructureDAO{
         
         Map<String,Object> params = Maps.newHashMap();
         params.put("ownerId", settler.toString());
-        params.put("skip", skip);
-        params.put("limit", limit);
+        if(skip > 0) {
+            params.put("skip", skip);
+        }
+        
+        if(limit > 0) {
+            params.put("limit", limit);
+        }
         
             String query =
                     "   MATCH (settler:"+SettlerNode.LABEL.name()+" {"+SettlerNode.ID_PROPERTY+"}: {ownerId})"
@@ -213,7 +219,7 @@ public class StructureDAO implements IStructureDAO{
                 query += " LIMIT {limit}";
             }
 
-            Result result = graph.execute(query);
+            Result result = graph.execute(query, params);
             while (result.hasNext()) {
                 for (Object o : result.next().values()) {
                     StructureNode structureNode = new StructureNode((Node) o);
@@ -315,7 +321,7 @@ public class StructureDAO implements IStructureDAO{
     public boolean isOwnerOfStructure(long structureId, Player player) {
         Map<String,Object> params = Maps.newHashMap();
         params.put("structureId", structureId);
-        params.put("playerId", player.getUniqueId());
+        params.put("playerId", player.getUniqueId().toString());
        
         long start = System.currentTimeMillis();
         
@@ -323,8 +329,8 @@ public class StructureDAO implements IStructureDAO{
                   " MATCH (world)<-[:" + StructureRelTypes.RELATION_WITHIN + "]-(structure:" + StructureNode.LABEL.name() + " { "+StructureNode.ID_PROPERTY+": {structureId} })"
                 + " WITH structure "
                 + " MATCH (structure)"
-                + "-[:"+StructureRelTypes.RELATION_OWNED_BY+" { Type: {"+StructureOwnerType.MASTER.getTypeId()+"} } ]->"
-                + " (owner:" + SettlerNode.LABEL.name() + " { "+SettlerNode.ID_PROPERTY+": {playerId} })"
+                + "-[:"+StructureRelTypes.RELATION_OWNED_BY+"]->"
+                + "(owner:" + SettlerNode.LABEL.name() + " { "+SettlerNode.ID_PROPERTY+": {playerId} })"
                 + " RETURN owner as theOwner"
                 + " LIMIT 1";
         Result result = graph.execute(query, params);
@@ -337,6 +343,19 @@ public class StructureDAO implements IStructureDAO{
             return settlerNode.getId().equals(player.getUniqueId());
         }
         return false;
+    }
+
+    @Override
+    public boolean hasSubstructures(long id) {
+        StructureNode node = find(id);
+        Node n = node.getRawNode();
+        return n.hasRelationship(org.neo4j.graphdb.Direction.INCOMING, DynamicRelationshipType.withName(StructureRelTypes.RELATION_SUBSTRUCTURE));
+    }
+
+    @Override
+    public List<StructureNode> getSubstructures(long id) {
+        StructureNode node = find(id);
+        return node.getSubstructures();
     }
 
 }

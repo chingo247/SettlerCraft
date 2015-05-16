@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structureapi.structure.plan.placement;
+package com.chingo247.settlercraft.structureapi.structure.plan.placement.demolish;
 
 import com.chingo247.settlercraft.structureapi.structure.options.DemolishingOptions;
 import com.chingo247.settlercraft.core.util.TopDownCubicIterator;
@@ -38,9 +38,15 @@ import com.sk89q.worldedit.blocks.BlockType;
  * @author Chingo
  */
 public class DemolishingPlacement extends AbstractCuboidPlacement<DemolishingOptions> {
+    
+    private int width;
+    private int height;
+    private int length;
 
     public DemolishingPlacement(Vector size) {
-        super(size.getBlockX(), size.getBlockY(), size.getBlockZ());
+        this.width = size.getBlockX();
+        this.height = size.getBlockY();
+        this.length = size.getBlockZ();
     }
 
     @Override
@@ -49,6 +55,8 @@ public class DemolishingPlacement extends AbstractCuboidPlacement<DemolishingOpt
        
         while(topDownCubicIterator.hasNext()) {
             Vector relativePosition = topDownCubicIterator.next();
+            
+            
             Vector worldPosition = relativePosition.add(pos);
             
             BaseBlock currentBlock = session.getWorld().getBlock(worldPosition);
@@ -73,10 +81,26 @@ public class DemolishingPlacement extends AbstractCuboidPlacement<DemolishingOpt
         }
         
     }
-    
-    private boolean shouldRemove(BaseBlock b) {
-        return !BlockType.isNaturalTerrainBlock(b);
+
+    @Override
+    public int getWidth() {
+        return width;
     }
+
+    @Override
+    public int getHeight() {
+        return height;
+    }
+
+    @Override
+    public int getLength() {
+        return length;
+    }
+
+   
+    
+    
+    
 
     
     /**

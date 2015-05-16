@@ -24,7 +24,7 @@
 package com.chingo247.settlercraft.structureapi.structure.plan.placement;
 
 import com.chingo247.settlercraft.core.Direction;
-import com.google.common.base.Preconditions;
+import com.chingo247.settlercraft.structureapi.util.WorldUtil;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
 
@@ -33,40 +33,26 @@ import com.sk89q.worldedit.regions.CuboidRegion;
  * @author Chingo
  * @param <T>
  */
-public abstract class AbstractCuboidPlacement<T> extends Placement<T> {
+public abstract class AbstractCuboidPlacement<T> implements Placement<T>, RotationalPlacement<T> {
     
     public final Vector position;
-    public int width, height, length;
+    private Direction direction;
+    private int rotation = -90;
 
-    public AbstractCuboidPlacement(int width, int height, int length) {
-        this(Vector.ZERO, width, height, length);
+    public AbstractCuboidPlacement() {
+        this(Direction.EAST, Vector.ZERO);
     }
 
-    public AbstractCuboidPlacement(Vector position, int width, int height, int length) {
-        Preconditions.checkArgument(width > 0);
-        Preconditions.checkArgument(height > 0);
-        Preconditions.checkArgument(length > 0);
+    public AbstractCuboidPlacement(Direction direction, Vector position) {
+        this.direction = direction;
+        this.rotation = WorldUtil.getYaw(direction);
+        
+        System.out.println("Rotation in constructor: " + rotation);
+        
         this.position = position;
-        this.width = width;
-        this.height = height;
-        this.length = length;
     }
 
-    @Override
-    public int getHeight() {
-        return height;
-    }
-
-    @Override
-    public int getLength() {
-        return length;
-    }
-
-    @Override
-    public int getWidth() {
-        return width;
-    }
-
+    
     @Override
     public Vector getPosition() {
         return position;
@@ -76,14 +62,36 @@ public abstract class AbstractCuboidPlacement<T> extends Placement<T> {
     public void rotate(Direction direction) {
         switch(direction) {
             case EAST:
-            case WEST: break;
+                break;
+            case WEST: 
+                rotation += 180;
+                break;
             case NORTH:
+                rotation -= 90;
+                break;
             case SOUTH:
-            int temp = width;
-            width = length;
-            length = temp;
+                rotation += 90;
+            break;
+            default:break;
         }
+        
+        System.out.println("Current rotation: " + rotation);
+        
+        // If the amount is bigger than 360, then remove turn back 360
+        if (rotation >= 360) {
+            rotation = - 360;
+        }
+        this.direction = WorldUtil.getDirection(rotation);
+        System.out.println("Current direction: " + direction);
+        
+        
     }
+    
+     @Override
+    public void rotate(int rotation) {
+        rotate(WorldUtil.getDirection(rotation));
+    }
+
 
     @Override
     public void move(Vector offset) {
@@ -92,7 +100,17 @@ public abstract class AbstractCuboidPlacement<T> extends Placement<T> {
 
     @Override
     public CuboidRegion getCuboidRegion() {
-        return new CuboidRegion(position, new Vector(width, height, length));
+        return new CuboidRegion(position, new Vector(getWidth(), getHeight(), getLength()));
+    }
+    
+    @Override
+    public Direction getDirection() {
+        return direction;
+    }
+    
+    @Override
+    public int getRotation() {
+        return WorldUtil.getYaw(direction);
     }
     
 }

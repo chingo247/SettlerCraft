@@ -23,7 +23,6 @@ import static com.chingo247.settlercraft.core.Direction.EAST;
 import static com.chingo247.settlercraft.core.Direction.NORTH;
 import static com.chingo247.settlercraft.core.Direction.SOUTH;
 import static com.chingo247.settlercraft.core.Direction.WEST;
-import com.chingo247.settlercraft.structureapi.util.WorldUtil;
 import com.chingo247.settlercraft.structureapi.structure.construction.StructureBlock;
 import com.chingo247.settlercraft.structureapi.structure.plan.schematic.Schematic;
 import com.chingo247.settlercraft.core.util.CuboidIterator;
@@ -41,7 +40,7 @@ import java.util.PriorityQueue;
  *
  * @author Chingo
  */
-public class SchematicPlacement extends DirectionalPlacement<PlaceOptions> implements FilePlacement {
+public class SchematicPlacement extends AbstractCuboidPlacement<PlaceOptions> implements FilePlacement<PlaceOptions>, BlockPlacement<PlaceOptions> {
 
     private static final int PRIORITY_FIRST = 4;
     private static final int PRIORITY_LIQUID = 3;
@@ -53,19 +52,18 @@ public class SchematicPlacement extends DirectionalPlacement<PlaceOptions> imple
 
     private final Vector position;
     private final Schematic schematic;
-    private Direction direction;
-    private int rotation;
+    
+    private FastClipboard clipboard;
 
     public SchematicPlacement(Schematic schematic) {
         this(schematic, Direction.EAST, Vector.ZERO);
     }
 
     public SchematicPlacement(Schematic schematic, Direction direction, Vector position) {
-        this.rotation = -90;
+        super(direction, position);
         this.position = position;
-        this.direction = direction;
         this.schematic = schematic;
-        
+        this.clipboard = schematic.getClipboard();
         this.BLOCK_BETWEEN = Math.round((float) ((schematic.getHeight() * schematic.getLength() * schematic.getWidth()) * 0.001));
     }
 
@@ -73,78 +71,47 @@ public class SchematicPlacement extends DirectionalPlacement<PlaceOptions> imple
         return schematic;
     }
 
-    @Override
-    public Direction getDirection() {
-        return direction;
-    }
-
-    @Override
-    public Vector getPosition() {
-        return position;
-    }
-
-    /**
-     * Flips the Schematic, note that this method will fake the flip operation
-     * and only sets the direction of this Schematic internally as opposed to
-     * other flip operations where huge amount of blocks are swapped. This
-     * method is therefore a VERY LIGHT operation.
-     *
-     * @param direction
-     */
-    @Override
-    public void rotate(Direction direction) {
-        switch (direction) {
-            case EAST:
-                break;
-            case SOUTH:
-                rotation += 90;
-                break;
-            case WEST:
-                rotation += 180;
-                break;
-            case NORTH:
-                rotation += 270;
-                break;
-            default:
-                throw new AssertionError("unreachable");
-        }
-        // If the amount is bigger than 360, then remove turn back 360
-        if (rotation >= 360) {
-            rotation = - 360;
-        }
-        this.direction = WorldUtil.getDirection(rotation);
-    }
-
-    @Override
-    public void move(Vector offset) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 
     @Override
     public void place(EditSession editSession, Vector pos, PlaceOptions o) {
         
         
         
-        FastClipboard clipboard = schematic.getClipboard();
         System.out.println("Blocks between: " + BLOCK_BETWEEN);
+        System.out.println("Pos");
         
+        System.out.println("Direction on place: " + getDirection());
         
         Vector size = clipboard.getSize();
-        int x = o.getxAxisCube() <= 0 ? 16 : o.getxAxisCube();
-        int y = o.getyAxisCube() <= 0 ? size.getBlockY() : size.getBlockY();
-        int z = o.getzAxisCube() <= 0 ? 16 : o.getzAxisCube();
+        int xCube = o.getxAxisCube() <= 0 ? 16 : o.getxAxisCube();
+        int yCube = o.getyAxisCube() <= 0 ? size.getBlockY() : o.getyAxisCube();
+        int zCube = o.getzAxisCube() <= 0 ? 16 : o.getzAxisCube();
+        
+        
+        if(xCube > getWidth()) {
+            xCube = getWidth();
+        }
+        
+        if(yCube > getHeight()) {
+            yCube = getHeight();
+        }
+        
+        if(zCube > getLength()) {
+            zCube = getLength();
+        }
 
-        CuboidIterator traversal = new CuboidIterator(clipboard.getSize(), x, y, z);
+        CuboidIterator traversal = new CuboidIterator(size, xCube, yCube, zCube);
         PriorityQueue<StructureBlock> placeLater = new PriorityQueue<>();
         
         int placeLaterPlaced = 0;
         int placeLaterPause = 0;
-
+        
         // Cube traverse this clipboard
         while (traversal.hasNext()) {
-            Vector v = traversal.next();
             
-            BaseBlock clipboardBlock = clipboard.getBlock(v);
+            
+            Vector v = traversal.next();
+            BaseBlock clipboardBlock = getBlock(v);
             
             if (clipboardBlock == null) {
                 continue;
@@ -196,20 +163,12 @@ public class SchematicPlacement extends DirectionalPlacement<PlaceOptions> imple
 
     }
 
-    private int getCube(int index, int cube) {
-        if (index % cube == 0) {
-            return index / cube;
-        } else {
-            index -= (index % cube);
-            return index / cube;
-        }
-    }
-
     private void doblock(EditSession session, BaseBlock b, Vector blockPos, Vector pos) {
 
         Vector p;
-
-        switch (direction) {
+        
+        
+        switch (getDirection()) {
             case EAST:
                 p = pos.add(blockPos);
                 break;
@@ -274,6 +233,25 @@ public class SchematicPlacement extends DirectionalPlacement<PlaceOptions> imple
     }
 
     @Override
+    public String getTypeName() {
+        return PlacementTypes.SCHEMATIC;
+    }
+
+    @Override
+    public File[] getFiles() {
+        return new File[]{schematic.getFile()};
+    }
+
+    @Override
+    public BaseBlock getBlock(Vector position) {
+        if(new CuboidRegion(Vector.ZERO, getSchematic().getSize()).contains(position)) {
+            BaseBlock b = clipboard.getBlock(position);
+            return b;
+        }
+        return null;
+    }
+
+    @Override
     public int getWidth() {
         return schematic.getWidth();
     }
@@ -288,14 +266,7 @@ public class SchematicPlacement extends DirectionalPlacement<PlaceOptions> imple
         return schematic.getLength();
     }
 
-    @Override
-    public String getTypeName() {
-        return PlacementTypes.SCHEMATIC;
-    }
-
-    @Override
-    public File[] getFiles() {
-        return new File[]{schematic.getFile()};
-    }
+    
+    
 
 }
