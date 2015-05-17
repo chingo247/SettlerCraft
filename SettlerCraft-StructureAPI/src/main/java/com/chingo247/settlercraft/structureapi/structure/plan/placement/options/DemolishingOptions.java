@@ -21,51 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structureapi.structure.options;
-
-import com.google.common.base.Preconditions;
+package com.chingo247.settlercraft.structureapi.structure.plan.placement.options;
 
 /**
  *
  * @author Chingo
  */
-public class DemolishingOptions  {
+public class DemolishingOptions extends PlacementOptions {
+
+    // To be implemented
+
     
-    private int xAxisCube = 5;
-    private int yAxisCube = 5;
-    private int zAxisCube = 5;
-
-    public DemolishingOptions() {
-    }
-
-    public int getxAxisCube() {
-        return xAxisCube;
-    }
-
-    public int getyAxisCube() {
-        return yAxisCube;
-    }
-
-    public int getzAxisCube() {
-        return zAxisCube;
-    }
-
-    public void setxAxisCube(int xAxisCube) {
-        Preconditions.checkArgument(xAxisCube <= 0, "xAxis has to be greater than 0");
-        this.xAxisCube = xAxisCube;
-    }
-
-    public void setyAxisCube(int yAxisCube) {
-        Preconditions.checkArgument(yAxisCube <= 0, "yAxis has to be greater than 0");
-        this.yAxisCube = yAxisCube;
-    }
-
-    public void setzAxisCube(int zAxisCube) {
-        Preconditions.checkArgument(zAxisCube <= 0, "zAxis has to be greater than 0");
-        this.zAxisCube = zAxisCube;
-    }
-    
-    
-
-
 }

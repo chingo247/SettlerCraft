@@ -29,8 +29,8 @@ import com.chingo247.settlercraft.structureapi.structure.DefaultStructureFactory
 import com.chingo247.settlercraft.structureapi.structure.IStructureAPI;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
-import com.chingo247.settlercraft.structureapi.structure.options.PlaceOptions;
-import com.chingo247.settlercraft.structureapi.structure.options.DemolishingOptions;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BuildOptions;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.DemolishingOptions;
 import com.chingo247.settlercraft.structureapi.structure.plan.util.PlanGenerator;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.ICommandSender;
@@ -170,7 +170,7 @@ public class StructureCommands {
         
         
         try {
-            structure.build(SettlerCraft.getInstance().getPlayer(player.getUniqueId()), new PlaceOptions(), useForce);
+            structure.build(SettlerCraft.getInstance().getPlayer(player.getUniqueId()), new BuildOptions(), useForce);
         } catch (ConstructionException ex) {
             Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, null, ex);
         }

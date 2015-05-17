@@ -24,7 +24,7 @@
 package com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit;
 
 import com.chingo247.settlercraft.structureapi.structure.Structure;
-import com.chingo247.settlercraft.structureapi.structure.options.PlaceOptions;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BuildOptions;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
@@ -38,7 +38,7 @@ import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
  *
  * @author Chingo
  */
-public class AsyncPlacement extends AbstractAsyncPlacement<PlaceOptions, Placement> {
+public class AsyncPlacement extends AbstractAsyncPlacement<BuildOptions, Placement> {
 
     private final AsyncPlacementCallback callback;
     private final long structureId;
@@ -64,7 +64,7 @@ public class AsyncPlacement extends AbstractAsyncPlacement<PlaceOptions, Placeme
     
 
     @Override
-    public void place(EditSession editSession, final Vector pos, final PlaceOptions options) {
+    public void place(EditSession editSession, final Vector pos, final BuildOptions options) {
 
         final int jobId = getJobId();
         final EditSession session;
@@ -117,6 +117,11 @@ public class AsyncPlacement extends AbstractAsyncPlacement<PlaceOptions, Placeme
     @Override
     public String getTypeName() {
         return placement.getTypeName();
+    }
+
+    @Override
+    public Vector getSize() {
+        return placement.getSize();
     }
 
     

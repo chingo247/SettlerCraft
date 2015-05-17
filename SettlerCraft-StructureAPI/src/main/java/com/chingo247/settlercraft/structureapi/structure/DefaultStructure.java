@@ -25,7 +25,7 @@ package com.chingo247.settlercraft.structureapi.structure;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncWorldEditUtil;
-import com.chingo247.settlercraft.structureapi.structure.options.PlaceOptions;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BuildOptions;
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
 import com.chingo247.settlercraft.structureapi.exception.ConstructionException;
@@ -33,7 +33,7 @@ import com.chingo247.settlercraft.structureapi.persistence.entities.structure.St
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureRelTypes;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlanReader;
-import com.chingo247.settlercraft.structureapi.structure.options.DemolishingOptions;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.DemolishingOptions;
 import com.chingo247.settlercraft.structureapi.util.WorldUtil;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
@@ -149,12 +149,12 @@ public class DefaultStructure implements Structure {
     }
 
     @Override
-    public void build(Player player, PlaceOptions options, boolean force) throws ConstructionException {
+    public void build(Player player, BuildOptions options, boolean force) throws ConstructionException {
         ConstructionManager.getInstance().build(this, player.getUniqueId(), getSession(player.getUniqueId()), options, force);
     }
 
     @Override
-    public void build(EditSession session, PlaceOptions options, boolean force) throws ConstructionException {
+    public void build(EditSession session, BuildOptions options, boolean force) throws ConstructionException {
         ConstructionManager.getInstance().build(this, PlayerEntry.CONSOLE.getUUID(), session, options, force);
     }
 

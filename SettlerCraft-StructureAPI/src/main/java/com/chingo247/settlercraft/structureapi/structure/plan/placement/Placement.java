@@ -24,6 +24,7 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan.placement;
 
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.PlacementOptions;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -33,13 +34,15 @@ import com.sk89q.worldedit.regions.CuboidRegion;
  * @author Chingo
  * @param <T>
  */
-public interface Placement<T> {
+public interface Placement<T extends PlacementOptions> {
     
     public void place(EditSession session, Vector pos, T option);
     
     public Vector getPosition();
     
     public void move(Vector offset);
+    
+    public Vector getSize();
     
     public int getWidth();
     
@@ -50,6 +53,8 @@ public interface Placement<T> {
     public String getTypeName();
     
     public CuboidRegion getCuboidRegion();
+    
+    
      
 
 }

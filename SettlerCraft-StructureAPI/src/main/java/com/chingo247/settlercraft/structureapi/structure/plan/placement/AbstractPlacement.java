@@ -24,6 +24,7 @@
 package com.chingo247.settlercraft.structureapi.structure.plan.placement;
 
 import com.chingo247.settlercraft.core.Direction;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.PlacementOptions;
 import com.chingo247.settlercraft.structureapi.util.WorldUtil;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -33,26 +34,34 @@ import com.sk89q.worldedit.regions.CuboidRegion;
  * @author Chingo
  * @param <T>
  */
-public abstract class AbstractCuboidPlacement<T> implements Placement<T>, RotationalPlacement<T> {
+public abstract class AbstractPlacement<T extends PlacementOptions> implements Placement<T>, RotationalPlacement<T> {
     
     public final Vector position;
     private Direction direction;
     private int rotation = -90;
+    private int width;
+    private int height;
+    private int length;
 
-    public AbstractCuboidPlacement() {
-        this(Direction.EAST, Vector.ZERO);
-    }
-
-    public AbstractCuboidPlacement(Direction direction, Vector position) {
-        this.direction = direction;
-        this.rotation = WorldUtil.getYaw(direction);
-        
-        System.out.println("Rotation in constructor: " + rotation);
-        
-        this.position = position;
+    public AbstractPlacement(int width, int height, int length) {
+        this(Direction.EAST, Vector.ZERO, width, height, length);
     }
 
     
+    public AbstractPlacement(Direction direction, Vector relativePosition, int width, int height, int length) {
+        this.direction = direction;
+        this.rotation = WorldUtil.getYaw(direction);
+        this.position = relativePosition;
+        this.length = length;
+        this.height = height;
+        this.width = width;
+    }
+    
+    @Override
+    public CuboidRegion getCuboidRegion() {
+        return new CuboidRegion(Vector.ZERO, new Vector(width, height, length));
+    }
+
     @Override
     public Vector getPosition() {
         return position;
@@ -60,6 +69,14 @@ public abstract class AbstractCuboidPlacement<T> implements Placement<T>, Rotati
 
     @Override
     public void rotate(Direction direction) {
+//        if(((direction == Direction.EAST || direction == Direction.WEST) && (this.direction == Direction.NORTH || this.direction == Direction.NORTH))
+//                || ((direction == Direction.NORTH || direction == Direction.SOUTH) && (this.direction == Direction.WEST || this.direction == Direction.EAST))) {
+//            int temp = width;
+//            width = length;
+//            length = temp;
+//        }
+        
+        
         switch(direction) {
             case EAST:
                 break;
@@ -74,17 +91,11 @@ public abstract class AbstractCuboidPlacement<T> implements Placement<T>, Rotati
             break;
             default:break;
         }
-        
-        System.out.println("Current rotation: " + rotation);
-        
         // If the amount is bigger than 360, then remove turn back 360
         if (rotation >= 360) {
             rotation = - 360;
         }
         this.direction = WorldUtil.getDirection(rotation);
-        System.out.println("Current direction: " + direction);
-        
-        
     }
     
      @Override
@@ -99,9 +110,10 @@ public abstract class AbstractCuboidPlacement<T> implements Placement<T>, Rotati
     }
 
     @Override
-    public CuboidRegion getCuboidRegion() {
-        return new CuboidRegion(position, new Vector(getWidth(), getHeight(), getLength()));
+    public Vector getSize() {
+        return new Vector(width, height, length);
     }
+    
     
     @Override
     public Direction getDirection() {
@@ -111,6 +123,21 @@ public abstract class AbstractCuboidPlacement<T> implements Placement<T>, Rotati
     @Override
     public int getRotation() {
         return WorldUtil.getYaw(direction);
+    }
+
+    @Override
+    public int getHeight() {
+        return height;
+    }
+
+    @Override
+    public int getLength() {
+        return length;
+    }
+
+    @Override
+    public int getWidth() {
+        return width;
     }
     
 }

@@ -1,4 +1,4 @@
-package com.chingo247.settlercraft.core.util;
+package com.chingo247.settlercraft.structureapi.structure.plan.placement.traversal;
 
 
 /*
@@ -35,14 +35,14 @@ import java.util.Iterator;
  *
  * @author Chingo
  */
-public class CuboidRegionIterator implements Iterator<CuboidRegion>, Iterable<CuboidRegion>{
+public class CuboidRegionTraversal implements Iterator<CuboidRegion>, Iterable<CuboidRegion>{
 
     private final CuboidRegion region;
     private Vector currentStart, currentEnd;
     private int minX, minY, minZ;
     private final int xRange, yRange, zRange;
 
-    public CuboidRegionIterator(CuboidRegion region, int xRange, int yRange, int zRange) {
+    public CuboidRegionTraversal(CuboidRegion region, int xRange, int yRange, int zRange) {
         Preconditions.checkNotNull(region);
         this.region = region;
         this.minX = this.region.getMinimumPoint().getBlockX();
@@ -62,7 +62,7 @@ public class CuboidRegionIterator implements Iterator<CuboidRegion>, Iterable<Cu
      * @param yRange
      * @param zRange 
      */
-    private CuboidRegionIterator(CuboidRegion dimension, Vector currentStart, Vector currentEnd, int xRange, int yRange, int zRange, int minX, int minY, int minZ) {
+    private CuboidRegionTraversal(CuboidRegion dimension, Vector currentStart, Vector currentEnd, int xRange, int yRange, int zRange, int minX, int minY, int minZ) {
         this.region = dimension;
         this.currentStart = currentStart;
         this.currentEnd = currentEnd;
@@ -127,8 +127,8 @@ public class CuboidRegionIterator implements Iterator<CuboidRegion>, Iterable<Cu
 //                && region.getMaxZ() < region.getMaxZ() && v.getBlockZ() > region.getMinZ();
     }
     
-    public CuboidRegionIterator copy() {
-        return new CuboidRegionIterator(region, currentStart, currentEnd, xRange, yRange, zRange, minX, minY, minZ);
+    public CuboidRegionTraversal copy() {
+        return new CuboidRegionTraversal(region, currentStart, currentEnd, xRange, yRange, zRange, minX, minY, minZ);
     }
     
     @Override

@@ -25,5 +25,6 @@ public class PlacementTypes {
     public static final String SCHEMATIC = "schematic";
     public static final String STRUCTURE_LOT = "structurelot";
     public static final String EMBEDDED = "embedded";
+    public static final String DEMOLISHING = "demolishing";
     
 }

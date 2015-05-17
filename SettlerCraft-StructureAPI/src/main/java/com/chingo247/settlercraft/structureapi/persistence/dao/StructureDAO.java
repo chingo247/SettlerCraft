@@ -58,6 +58,7 @@ public class StructureDAO implements IStructureDAO{
 
     private static final Logger LOG = Logger.getLogger(StructureDAO.class.getSimpleName());
     private final GraphDatabaseService graph;
+    private boolean checked = false;
 
     public StructureDAO(GraphDatabaseService graph) {
         this.graph = graph;
@@ -87,12 +88,34 @@ public class StructureDAO implements IStructureDAO{
     }
     
     
+    private long nextId() {
+        if(!checked) {
+            Result r = graph.execute("MATCH (sid: ID_GENERATOR) "
+                        + "RETURN sid "
+                        + "LIMIT 1");
+            if(!r.hasNext()) {
+                graph.execute("CREATE (sid: ID_GENERATOR {name:'STRUCTURE_ID', nextId: 1})");
+                checked = true;
+                return 1;
+            }
+            checked = true;
+        }
+        
+        // Work-around for getting the next Id
+        // Sets the lock at this node by removing a non-existent property
+        String idQuery = "MATCH (sid:ID_GENERATOR {name:'STRUCTURE_ID'}) "
+                        +"REMOVE sid.lock " // NON-EXISTENT PROPERTY
+                        +"SET sid.nextId = sid.nextId + 1 "
+                        +"RETURN sid.nextId as nextId";
+        Result r = graph.execute(idQuery);
+        long id = (long) r.next().get("nextId");
+        
+        return id;
+    }
 
     @Override
     public StructureNode addStructure(String name, World world, Vector position, CuboidRegion region, Direction direction, double price) {
-        IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
-        long id = StructureIdGenerator.nextId();
-        
+        long id = nextId();
         
         Node stNode = graph.createNode(StructureNode.LABEL);
         stNode.setProperty(StructureNode.ID_PROPERTY, id);

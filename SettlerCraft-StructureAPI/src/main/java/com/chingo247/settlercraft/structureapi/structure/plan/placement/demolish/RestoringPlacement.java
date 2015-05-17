@@ -5,14 +5,14 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan.placement.demolish;
 
-import com.chingo247.settlercraft.core.util.TopDownCubicIterator;
-import com.chingo247.settlercraft.structureapi.structure.options.DemolishingOptions;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.DemolishingOptions;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.BlockPlacement;
-import com.sk89q.worldedit.BlockVector;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.iterator.TopDownCuboidIterator;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.regions.CuboidRegion;
+import java.util.Iterator;
 
 /**
  *
@@ -31,10 +31,10 @@ public class RestoringPlacement extends DemolishingPlacement {
     
     @Override
     public void place(EditSession session, Vector pos, DemolishingOptions option) {
-        TopDownCubicIterator topDownCubicIterator = new TopDownCubicIterator(new BlockVector(toRestore.getMaximumPoint().getBlockX(), toRestore.getMaximumPoint().getBlockY(), toRestore.getMaximumPoint().getBlockZ()), option.getxAxisCube(), option.getyAxisCube(), option.getzAxisCube());
+        Iterator<Vector> iterator = new TopDownCuboidIterator(option.getCubeX(), option.getCubeY(), option.getCubeZ()).iterate(toRestore.getMaximumPoint());
        
-        while(topDownCubicIterator.hasNext()) {
-            Vector relativePosition = topDownCubicIterator.next();
+        while(iterator.hasNext()) {
+            Vector relativePosition = iterator.next();
             relativePosition = relativePosition.add(toRestore.getMinimumPoint());
             
             Vector worldPosition = relativePosition.add(pos);
@@ -44,7 +44,6 @@ public class RestoringPlacement extends DemolishingPlacement {
                 continue;
             }
             
-           
             session.rawSetBlock(worldPosition, nextBlock);
         }
         

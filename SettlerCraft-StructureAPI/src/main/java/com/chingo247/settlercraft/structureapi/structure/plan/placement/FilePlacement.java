@@ -23,13 +23,15 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan.placement;
 
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.PlacementOptions;
 import java.io.File;
 
 /**
  *
  * @author Chingo
+ * @param <T> The placement options
  */
-public interface FilePlacement<T> extends Placement<T> {
+public interface FilePlacement<T extends PlacementOptions> extends Placement<T> {
     
     public File[] getFiles();
     

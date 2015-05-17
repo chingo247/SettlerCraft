@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.core.util;
+package com.chingo247.settlercraft.structureapi.structure.plan.placement.traversal;
 
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.traversal.CuboidTraversal;
 import com.sk89q.worldedit.Vector;
 import java.util.Iterator;
 
@@ -23,13 +24,13 @@ import java.util.Iterator;
  *
  * @author Chingo
  */
-public class TopDownCubicIterator implements Iterator<Vector>, Iterable<Vector>{
+public class TopDownCuboidTraversal implements Iterator<Vector>, Iterable<Vector>{
     
-    private CuboidIterator iterator;
+    private CuboidTraversal iterator;
     private Vector start;
 
-    public TopDownCubicIterator(Vector size, int cubeX, int cubeY, int cubeZ) {
-        this.iterator = new CuboidIterator(size, cubeX, cubeY, cubeZ);
+    public TopDownCuboidTraversal(Vector size, int cubeX, int cubeY, int cubeZ) {
+        this.iterator = new CuboidTraversal(size, cubeX, cubeY, cubeZ);
         this.start = new Vector(0,size.getBlockY(),0);
     }
     

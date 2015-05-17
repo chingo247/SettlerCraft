@@ -17,8 +17,8 @@
 package com.chingo247.settlercraft.structureapi.structure.session;
 
 import com.chingo247.settlercraft.structureapi.structure.Structure;
-import com.chingo247.settlercraft.structureapi.structure.options.DemolishingOptions;
-import com.chingo247.settlercraft.structureapi.structure.options.PlaceOptions;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.DemolishingOptions;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BuildOptions;
 import com.sk89q.worldedit.entity.Player;
 
 /**
@@ -35,7 +35,7 @@ public interface PlayerSession {
     
     public void selectStructure(Structure structure);
     
-    public PlaceOptions getPlaceOptions();
+    public BuildOptions getPlaceOptions();
     
     public DemolishingOptions getDemolishOptions();
     

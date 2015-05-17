@@ -23,38 +23,35 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan.placement.demolish;
 
-import com.chingo247.settlercraft.structureapi.structure.options.DemolishingOptions;
-import com.chingo247.settlercraft.core.util.TopDownCubicIterator;
-import com.chingo247.settlercraft.structureapi.structure.plan.placement.AbstractCuboidPlacement;
-import com.sk89q.worldedit.BlockVector;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.DemolishingOptions;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.AbstractPlacement;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.PlacementTypes;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.iterator.CuboidIterator;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.blocks.BlockType;
+import java.util.Iterator;
 
 /**
  *
  * @author Chingo
  */
-public class DemolishingPlacement extends AbstractCuboidPlacement<DemolishingOptions> {
+public class DemolishingPlacement extends AbstractPlacement<DemolishingOptions> {
     
-    private int width;
-    private int height;
-    private int length;
 
     public DemolishingPlacement(Vector size) {
-        this.width = size.getBlockX();
-        this.height = size.getBlockY();
-        this.length = size.getBlockZ();
+        super(size.getBlockX(), size.getBlockY(), size.getBlockZ());
     }
 
     @Override
     public void place(EditSession session, Vector pos, DemolishingOptions option) {
-        TopDownCubicIterator topDownCubicIterator = new TopDownCubicIterator(new BlockVector(width, height, length), option.getxAxisCube(), option.getyAxisCube(), option.getzAxisCube());
+        CuboidIterator cit = new CuboidIterator(option.getCubeX(), option.getCubeY(), option.getCubeZ());
+        Iterator<Vector> traversal = cit.iterate(getSize());
        
-        while(topDownCubicIterator.hasNext()) {
-            Vector relativePosition = topDownCubicIterator.next();
+        while(traversal.hasNext()) {
+            Vector relativePosition = traversal.next();
             
             
             Vector worldPosition = relativePosition.add(pos);
@@ -75,41 +72,12 @@ public class DemolishingPlacement extends AbstractCuboidPlacement<DemolishingOpt
             } else {
                 session.rawSetBlock(worldPosition, new BaseBlock(BlockID.AIR));
             }
-            
-            
-                   
         }
-        
     }
-
-    @Override
-    public int getWidth() {
-        return width;
-    }
-
-    @Override
-    public int getHeight() {
-        return height;
-    }
-
-    @Override
-    public int getLength() {
-        return length;
-    }
-
-   
     
-    
-    
-
-    
-    /**
-     * Not allowed, doesn't have a type
-     * @throws UnsupportedOperationException when called...
-     */
     @Override
     public String getTypeName() {
-        throw new UnsupportedOperationException("Not allowed...");
+        return PlacementTypes.DEMOLISHING;
     }
 
     

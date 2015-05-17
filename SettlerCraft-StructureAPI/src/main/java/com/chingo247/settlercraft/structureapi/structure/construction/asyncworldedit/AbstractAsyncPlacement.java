@@ -24,7 +24,7 @@
 package com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit;
 
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
-import com.sk89q.worldedit.EditSession;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.PlacementOptions;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import org.bukkit.Bukkit;
@@ -39,7 +39,7 @@ import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
  * @param <T> Options
  * @param <P> The placement
  */
-public abstract class AbstractAsyncPlacement<T, P extends Placement> implements Placement<T> {
+public abstract class AbstractAsyncPlacement<T extends PlacementOptions, P extends Placement> implements Placement<T> {
     
     protected final AsyncWorldEditMain awe;
     protected final BlockPlacer placer;
@@ -61,8 +61,7 @@ public abstract class AbstractAsyncPlacement<T, P extends Placement> implements 
         this.scheduler = Bukkit.getScheduler();
     }
 
-    @Override
-    public  abstract void place(EditSession editSession, final Vector pos, final T options);
+   
 
     @Override
     public Vector getPosition() {

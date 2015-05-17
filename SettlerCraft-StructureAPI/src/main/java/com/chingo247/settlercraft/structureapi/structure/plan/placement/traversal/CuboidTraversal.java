@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.chingo247.settlercraft.core.util;
+package com.chingo247.settlercraft.structureapi.structure.plan.placement.traversal;
 
 import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.BlockVector;
@@ -26,7 +26,7 @@ import java.util.Iterator;
  * Traverse the given area in a cubic-way from bottom to top
  * @author Chingo
  */
-public class CuboidIterator implements Iterator<Vector>, Iterable<Vector> {
+public class CuboidTraversal implements Iterator<Vector>, Iterable<Vector> {
 
     private final Vector size, start;
     private final int cubeX, cubeY, cubeZ;
@@ -35,7 +35,7 @@ public class CuboidIterator implements Iterator<Vector>, Iterable<Vector> {
     private Vector current;
     
 
-    public CuboidIterator(Vector size, int cubeX, int cubeY, int cubeZ) {
+    public CuboidTraversal(Vector size, int cubeX, int cubeY, int cubeZ) {
         Preconditions.checkArgument(cubeX > 0, "cubeX has to be greater than 0");
         Preconditions.checkArgument(cubeY > 0, "cubeY has to be greater than 0");
         Preconditions.checkArgument(cubeZ > 0, "cubeZ has to be greater than 0");
@@ -64,7 +64,7 @@ public class CuboidIterator implements Iterator<Vector>, Iterable<Vector> {
      * @param yCubeIndex
      * @param zCubeIndex 
      */
-    private CuboidIterator(Vector start, Vector size, int cubeX, int cubeY, int cubeZ, Vector current, int xIndex, int yIndex, int zIndex, int xCubeIndex, int yCubeIndex, int zCubeIndex) {
+    private CuboidTraversal(Vector start, Vector size, int cubeX, int cubeY, int cubeZ, Vector current, int xIndex, int yIndex, int zIndex, int xCubeIndex, int yCubeIndex, int zCubeIndex) {
         this.size = size;
         this.cubeX = cubeX;
         this.cubeY = cubeY;
@@ -126,14 +126,14 @@ public class CuboidIterator implements Iterator<Vector>, Iterable<Vector> {
         return this.copy().next() != null;
     }
     
-    public CuboidIterator copy() {
-        return new CuboidIterator(start, size, cubeX, cubeY, cubeZ, current, xIndex, yIndex, zIndex, xCubeIndex, yCubeIndex, zCubeIndex);
+    public CuboidTraversal copy() {
+        return new CuboidTraversal(start, size, cubeX, cubeY, cubeZ, current, xIndex, yIndex, zIndex, xCubeIndex, yCubeIndex, zCubeIndex);
     }
 
     @Override
     public Iterator<Vector> iterator() {
         return this;
     }
-    
+
   
 }

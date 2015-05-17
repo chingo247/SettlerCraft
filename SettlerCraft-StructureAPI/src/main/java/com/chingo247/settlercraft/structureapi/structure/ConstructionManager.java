@@ -35,8 +35,8 @@ import com.chingo247.settlercraft.structureapi.structure.construction.asyncworld
 import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncPlacementCallback;
 import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.SCJobEntry;
-import com.chingo247.settlercraft.structureapi.structure.options.DemolishingOptions;
-import com.chingo247.settlercraft.structureapi.structure.options.PlaceOptions;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.DemolishingOptions;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BuildOptions;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.BlockPlacement;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.demolish.DemolishingPlacement;
@@ -160,7 +160,7 @@ public class ConstructionManager {
      * @param force whether the current construction state should be ignored.
      * Therefore forcefully stops and starts a build operation
      */
-    public void build(final Structure structure, final UUID player, final EditSession session, final PlaceOptions options, boolean force) throws ConstructionException {
+    public void build(final Structure structure, final UUID player, final EditSession session, final BuildOptions options, boolean force) throws ConstructionException {
         Preconditions.checkNotNull(structure, "Structure may not be null");
         Preconditions.checkNotNull(player, "UUID may not be null");
         Preconditions.checkNotNull(session, "EditSession may not be null");

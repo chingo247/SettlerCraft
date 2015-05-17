@@ -25,6 +25,7 @@
 package com.chingo247.settlercraft.structureapi.structure.plan.placement;
 
 import com.chingo247.settlercraft.core.Direction;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.PlacementOptions;
 
 
 
@@ -33,7 +34,7 @@ import com.chingo247.settlercraft.core.Direction;
  * @author Chingo
  * @param <T>
  */
-public interface RotationalPlacement<T> extends Placement<T> {
+public interface RotationalPlacement<T extends PlacementOptions> extends Placement<T> {
     
     public int getRotation();
     

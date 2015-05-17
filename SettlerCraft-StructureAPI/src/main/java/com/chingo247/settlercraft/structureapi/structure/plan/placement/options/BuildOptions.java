@@ -14,44 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.core.persistence.util;
-
-import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import org.hibernate.annotations.Index;
+package com.chingo247.settlercraft.structureapi.structure.plan.placement.options;
 
 /**
  *
  * @author Chingo
  */
-@Entity
-public class IdGeneratorEntity implements Serializable {
-    
-    @Id
-    @Index(name = "generatorName")
-    @Column(unique = true, nullable = false)
-    private String name;
+public class BuildOptions extends PlacementOptions {
 
-    private long latestId;
-    
-    /**
-     * JPA Constructor
-     */
-    protected IdGeneratorEntity() {}
-    
-    IdGeneratorEntity(String name) {
-        this.name = name;
-        this.latestId = 0;
-    }
-
-    long incrementAndGet() {
-        latestId = latestId + 1;
-        return latestId;
-    }
-    
-    
+    // To be implemented
+    // - Masks
+    // - Ignore Air
+    // - Shipish? replaces water with air, but only if the block underneath is not water
     
     
 }

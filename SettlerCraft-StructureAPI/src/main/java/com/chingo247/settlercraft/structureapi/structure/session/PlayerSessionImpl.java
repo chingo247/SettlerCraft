@@ -20,8 +20,8 @@ import com.chingo247.settlercraft.structureapi.persistence.dao.IStructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
 import com.chingo247.settlercraft.structureapi.structure.DefaultStructureFactory;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
-import com.chingo247.settlercraft.structureapi.structure.options.DemolishingOptions;
-import com.chingo247.settlercraft.structureapi.structure.options.PlaceOptions;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.DemolishingOptions;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BuildOptions;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IColors;
 import com.google.common.base.Preconditions;
@@ -42,7 +42,7 @@ public class PlayerSessionImpl implements PlayerSession{
     private final IColors colors;
 
     private Structure currentStructure;
-    private PlaceOptions currentPlaceOptions;
+    private BuildOptions currentPlaceOptions;
     private DemolishingOptions currentDemolishingOptions;
     
     
@@ -92,7 +92,7 @@ public class PlayerSessionImpl implements PlayerSession{
     }
 
     @Override
-    public PlaceOptions getPlaceOptions() {
+    public BuildOptions getPlaceOptions() {
         return currentPlaceOptions;
     }
 

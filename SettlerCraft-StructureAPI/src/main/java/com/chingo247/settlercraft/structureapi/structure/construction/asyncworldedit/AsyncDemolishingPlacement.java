@@ -25,7 +25,7 @@ package com.chingo247.settlercraft.structureapi.structure.construction.asyncworl
 
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
-import com.chingo247.settlercraft.structureapi.structure.options.DemolishingOptions;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.DemolishingOptions;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.demolish.DemolishingPlacement;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
@@ -116,6 +116,11 @@ public class AsyncDemolishingPlacement extends AbstractAsyncPlacement<Demolishin
     @Override
     public String getTypeName() {
         return placement.getTypeName();
+    }
+
+    @Override
+    public Vector getSize() {
+        return placement.getSize();
     }
 
 }

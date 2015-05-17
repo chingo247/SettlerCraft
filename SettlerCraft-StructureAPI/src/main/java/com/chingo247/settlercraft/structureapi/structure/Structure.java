@@ -23,11 +23,11 @@
  */
 package com.chingo247.settlercraft.structureapi.structure;
 
-import com.chingo247.settlercraft.structureapi.structure.options.PlaceOptions;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BuildOptions;
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.structureapi.exception.ConstructionException;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structureapi.structure.options.DemolishingOptions;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.DemolishingOptions;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
@@ -124,14 +124,14 @@ public interface Structure {
      * @param options The placeOptions
      * @param force whether building should be enforced by ignoring the current construction status
      */
-    public void build(Player player, PlaceOptions options, boolean force) throws ConstructionException;
+    public void build(Player player, BuildOptions options, boolean force) throws ConstructionException;
     /**
      * Builds the structure
      * @param session The EditSession
      * @param options The placeOptions
      * @param force whether building should be enforced by ignoring the current construction status
      */
-    public void build(EditSession session, PlaceOptions options, boolean force) throws ConstructionException;
+    public void build(EditSession session, BuildOptions options, boolean force) throws ConstructionException;
     /**
      * Demolishes the structure with the given player to host the EditSession
      * @param player The player
