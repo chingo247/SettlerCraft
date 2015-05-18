@@ -38,11 +38,11 @@ import com.chingo247.settlercraft.structureapi.structure.construction.asyncworld
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.DemolishingOptions;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BuildOptions;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
-import com.chingo247.settlercraft.structureapi.structure.plan.placement.BlockPlacement;
-import com.chingo247.settlercraft.structureapi.structure.plan.placement.demolish.DemolishingPlacement;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.AbstractBlockPlacement;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.DemolishingPlacement;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.RotationalPlacement;
-import com.chingo247.settlercraft.structureapi.structure.plan.placement.demolish.RestoringPlacement;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.RestoringPlacement;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IPlayer;
@@ -197,10 +197,10 @@ public class ConstructionManager {
                         if (w == null) {
                             return;
                         }
-                        
+
                         Placement p = structure.getStructurePlan().getPlacement();
                         System.out.println("Should rotate?");
-                        if(p instanceof RotationalPlacement) {
+                        if (p instanceof RotationalPlacement) {
                             System.out.println("Rotate!");
                             RotationalPlacement rt = (RotationalPlacement) p;
                             rt.rotate(structure.getDirection());
@@ -213,10 +213,10 @@ public class ConstructionManager {
                                 AsyncEventManager.getInstance().post(new StructureJobAddedEvent(w, structure.getId(), jobId, false));
                             }
                         }, structure);
-                        
+
                         System.out.println("Min point: " + structure.getCuboidRegion().getMinimumPoint());
                         System.out.println("Max point: " + structure.getCuboidRegion().getMaximumPoint());
-                        
+
                         placement.place(session, structure.getCuboidRegion().getMinimumPoint(), options);
 
                     } catch (Exception exception) {
@@ -263,7 +263,7 @@ public class ConstructionManager {
                     if (hasSubstructures) {
                         if (player != null) {
                             Player ply = SettlerCraft.getInstance().getPlayer(player);
-                            String errorMessage = "[SettlerCraft]: Please remove Substructures before removing #" + structure.getId() + " " + structure.getName();
+                            String errorMessage = "Please remove Substructures before removing #" + structure.getId() + " " + structure.getName();
                             if (ply != null) {
                                 ply.printError(errorMessage);
                             } else {
@@ -275,8 +275,11 @@ public class ConstructionManager {
                         return;
                     }
                     StructureNode node = structureDAO.find(structure.getId());
+
                     StructureNode parentNode = node.getParent();
-                    if (parent != null) {
+
+                    System.out.println("Parent: " + parentNode);
+                    if (parentNode != null) {
                         parent = DefaultStructureFactory.getInstance().makeStructure(parentNode);
                     }
 
@@ -294,39 +297,47 @@ public class ConstructionManager {
 
                 tasks.put(structure.getId(), new StructureJob(-1, true, player));
                 DemolishingPlacement dp;
-                
-                if (parent == null || (!(parent.getStructurePlan().getPlacement() instanceof BlockPlacement))) {
-                    Placement p = structure.getStructurePlan().getPlacement();
-                    if(p instanceof RotationalPlacement) {
-                        RotationalPlacement rt = (RotationalPlacement) p ;
-                        rt.rotate(structure.getDirection());
-                    }
+
+                if (parent == null || (!(parent.getStructurePlan().getPlacement() instanceof AbstractBlockPlacement))) {
                     
-                    CuboidRegion region = p.getCuboidRegion();
-                    dp = new DemolishingPlacement(region.getMaximumPoint());
+                    CuboidRegion region = structure.getCuboidRegion();
+                    Vector size = region.getMaximumPoint().subtract(region.getMinimumPoint()).add(1, 1, 1);
+                    
+                    dp = new DemolishingPlacement(size);
+                    AsyncDemolishingPlacement placement = new AsyncDemolishingPlacement(playerEntry, dp, new AsyncPlacementCallback() {
+
+                        @Override
+                        public void onJobAdded(int jobId) {
+                            AsyncEventManager.getInstance().post(new StructureJobAddedEvent(w, structure.getId(), jobId, true));
+                        }
+                    }, structure);
+                    placement.place(session, structure.getCuboidRegion().getMinimumPoint(), options);
                 } else {
                     StructurePlan plan = parent.getStructurePlan();
-                    Placement p = plan.getPlacement();
-                    if(p instanceof RotationalPlacement) {
-                        RotationalPlacement rt = (RotationalPlacement) p ;
-                        rt.rotate(structure.getDirection());
+                    Placement parentPlacement = plan.getPlacement();
+
+                    if (parentPlacement instanceof RotationalPlacement) {
+                        System.out.println("Rotate!");
+                        RotationalPlacement rt = (RotationalPlacement) parentPlacement;
+                        rt.rotate(parent.getDirection());
                     }
 
+                    // Get Area of the child placement
                     CuboidRegion childRegion = structure.getCuboidRegion();
-                    Vector min = parent.getRelativePosition(childRegion.getMinimumPoint());
-                    Vector max = parent.getRelativePosition(childRegion.getMaximumPoint());
+                    
+                    System.out.println("Min: " + childRegion.getMinimumPoint());
+                    System.out.println("Max: " + childRegion.getMaximumPoint());
 
-                    dp = new RestoringPlacement((BlockPlacement)p, new CuboidRegion(min, max));
+                    dp = new RestoringPlacement((AbstractBlockPlacement) parentPlacement, childRegion);
+                    AsyncDemolishingPlacement placement = new AsyncDemolishingPlacement(playerEntry, dp, new AsyncPlacementCallback() {
+
+                        @Override
+                        public void onJobAdded(int jobId) {
+                            AsyncEventManager.getInstance().post(new StructureJobAddedEvent(w, structure.getId(), jobId, true));
+                        }
+                    }, structure);
+                    placement.place(session, parent.getCuboidRegion().getMinimumPoint(), options);
                 }
-
-                AsyncDemolishingPlacement placement = new AsyncDemolishingPlacement(playerEntry, dp, new AsyncPlacementCallback() {
-
-                    @Override
-                    public void onJobAdded(int jobId) {
-                        AsyncEventManager.getInstance().post(new StructureJobAddedEvent(w, structure.getId(), jobId, true));
-                    }
-                }, structure);
-                placement.place(session, structure.getCuboidRegion().getMinimumPoint(), options);
 
                 // Set Negative MASK
                 // Set Negative not natural MASK

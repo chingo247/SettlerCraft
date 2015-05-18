@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structureapi.structure.options;
+package com.chingo247.settlercraft.structureapi.structure.plan.placement.options;
 
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
@@ -28,9 +28,10 @@ public interface BlockPredicate {
     /**
      * Evaluates the position
      * @param position The relative position to evaluate
+     * @param worldPosition
      * @param block The block to evaluate
      * @return true if evaluation expression is true
      */
-    public boolean evaluate(Vector position, BaseBlock block);
+    public boolean evaluate(Vector position, Vector worldPosition, BaseBlock block);
     
 }

@@ -186,7 +186,7 @@ public class StructureNode {
     }
 
     public StructureNode getParent() {
-        Relationship rel = underlyingNode.getSingleRelationship(DynamicRelationshipType.withName(StructureRelTypes.RELATION_SUBSTRUCTURE), org.neo4j.graphdb.Direction.INCOMING);
+        Relationship rel = underlyingNode.getSingleRelationship(DynamicRelationshipType.withName(StructureRelTypes.RELATION_SUBSTRUCTURE), org.neo4j.graphdb.Direction.OUTGOING);
         if (rel != null) {
             Node parentNode = rel.getOtherNode(underlyingNode);
             return new StructureNode(parentNode);

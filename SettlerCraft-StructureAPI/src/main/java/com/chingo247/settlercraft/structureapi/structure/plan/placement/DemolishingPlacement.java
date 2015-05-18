@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.structureapi.structure.plan.placement.demolish;
+package com.chingo247.settlercraft.structureapi.structure.plan.placement;
 
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.DemolishingOptions;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.AbstractPlacement;

@@ -8,6 +8,8 @@ package com.chingo247.settlercraft.structureapi.structure.plan.placement;
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.structureapi.structure.construction.StructureBlock;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.iterator.CuboidIterator;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BlockMask;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BlockPredicate;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.PlacementOptions;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
@@ -68,7 +70,7 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
             int priority = getPriority(clipboardBlock);
 
             if (priority == PRIORITY_FIRST) {
-                doBlock(editSession, pos, v, clipboardBlock);
+                doBlock(editSession, pos, v, clipboardBlock, option);
             } else {
                 placeLater.add(new StructureBlock(v, clipboardBlock));
             }
@@ -82,7 +84,7 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
                 while (placeLater.peek() != null
                         && placeLater.peek().getPosition().getBlockY() < v.getBlockY()) {
                     StructureBlock plb = placeLater.poll();
-                    doBlock(editSession, pos, plb.getPosition(), plb.getBlock());
+                    doBlock(editSession, pos, plb.getPosition(), plb.getBlock(), option);
                     
                    
                     
@@ -106,7 +108,7 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
         // Empty the queue
         while (placeLater.peek() != null) {
             StructureBlock plb = placeLater.poll();
-            doBlock(editSession, pos, plb.getPosition(), plb.getBlock());
+            doBlock(editSession, pos, plb.getPosition(), plb.getBlock(), option);
         }
     }
     
@@ -148,7 +150,7 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
     @Override
     public abstract BaseBlock getBlock(Vector position);
     
-    protected void doBlock(EditSession editSession, Vector position, Vector blockPosition, BaseBlock block) {
+    protected void doBlock(EditSession editSession, Vector position, Vector blockPosition, BaseBlock block, T option) {
         Vector p;
         switch (getDirection()) {
             case EAST:
@@ -170,6 +172,22 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
             default:
                 throw new AssertionError("unreachable");
         }
+        
+        for(BlockPredicate bp : option.getIgnore()) {
+            if(bp.evaluate(blockPosition, p, block)) {
+                return;
+            }
+        }
+        
+        for(BlockMask bm : option.getBlockMasks()) {
+            block = bm.apply(blockPosition, p, block);
+            if(block == null) {
+                return;
+            }
+        }
+        
+        
+//        System.out.println("set: " + p + " " + block.getId() + " " + block.getData());
         
         editSession.rawSetBlock(p, block);
         

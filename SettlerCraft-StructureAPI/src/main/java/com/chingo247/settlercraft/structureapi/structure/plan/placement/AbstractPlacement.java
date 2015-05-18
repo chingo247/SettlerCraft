@@ -36,7 +36,7 @@ import com.sk89q.worldedit.regions.CuboidRegion;
  */
 public abstract class AbstractPlacement<T extends PlacementOptions> implements Placement<T>, RotationalPlacement<T> {
     
-    public final Vector position;
+    protected final Vector position;
     private Direction direction;
     private int rotation = -90;
     private int width;

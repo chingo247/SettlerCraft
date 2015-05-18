@@ -16,7 +16,6 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan.placement.traversal;
 
-import com.chingo247.settlercraft.structureapi.structure.plan.placement.traversal.CuboidTraversal;
 import com.sk89q.worldedit.Vector;
 import java.util.Iterator;
 
@@ -42,7 +41,7 @@ public class TopDownCuboidTraversal implements Iterator<Vector>, Iterable<Vector
     @Override
     public Vector next() {
         Vector next = iterator.next();
-        return start.add(next.getBlockX(),-next.getBlockY(),next.getBlockZ()); // If I go up... I GO DOWN!
+        return start.add(next.getBlockX(),-(next.getBlockY()+1),next.getBlockZ()); // If I go up... I GO DOWN!
     }
 
     @Override

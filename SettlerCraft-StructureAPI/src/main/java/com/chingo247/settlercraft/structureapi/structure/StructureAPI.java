@@ -44,7 +44,6 @@ import com.chingo247.settlercraft.structureapi.event.StructurePlansReloadEvent;
 import com.chingo247.settlercraft.structureapi.persistence.dao.IStructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureWorldNode;
-import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.structureapi.structure.plan.DefaultStructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.FilePlacement;
 import com.chingo247.settlercraft.structureapi.structure.restriction.StructureRestriction;
@@ -58,7 +57,6 @@ import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.io.Files;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
@@ -75,7 +73,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.dom4j.DocumentException;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
 
 /**
  *
@@ -386,23 +383,23 @@ public class StructureAPI implements IStructureAPI {
             
 
             // Deep check overlap
-            ThreadSafeEditSession editSession = AsyncWorldEditUtil.getAsyncSessionFactory().getThreadSafeEditSession(world, -1);
-            
-            Vector min = structureRegion.getMinimumPoint();
-            Vector max = structureRegion.getMaximumPoint();
-            
-            for (int y = min.getBlockY() + 1; y < max.getBlockY(); y++) {
-                for (int x = min.getBlockX(); x < max.getBlockX(); x++) {
-                    for (int z = min.getBlockZ(); z < max.getBlockZ(); z++) {
-                        Vector pos = new Vector(x,y,z);
-                        BaseBlock b = editSession.getBlock(pos);
-                        if (b == null || b.getId() == 0) {
-                            continue;
-                        }
-                        throw new StructureException("Can't substructure overlaps blocks of #" + parentStructure.getId() + " " + parentStructure.getName());
-                    }
-                }
-            }
+//            ThreadSafeEditSession editSession = AsyncWorldEditUtil.getAsyncSessionFactory().getThreadSafeEditSession(world, -1);
+//            
+//            Vector min = structureRegion.getMinimumPoint();
+//            Vector max = structureRegion.getMaximumPoint();
+//            
+//            for (int y = min.getBlockY() + 1; y < max.getBlockY(); y++) {
+//                for (int x = min.getBlockX(); x < max.getBlockX(); x++) {
+//                    for (int z = min.getBlockZ(); z < max.getBlockZ(); z++) {
+//                        Vector pos = new Vector(x,y,z);
+//                        BaseBlock b = editSession.getBlock(pos);
+//                        if (b == null || b.getId() == 0) {
+//                            continue;
+//                        }
+//                        throw new StructureException("Can't substructure overlaps blocks of #" + parentStructure.getId() + " " + parentStructure.getName());
+//                    }
+//                }
+//            }
 
             try (Transaction tx = graph.beginTx()) {
 
