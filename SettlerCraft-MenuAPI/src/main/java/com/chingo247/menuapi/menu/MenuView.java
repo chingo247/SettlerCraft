@@ -24,6 +24,7 @@
 package com.chingo247.menuapi.menu;
 
 import static com.chingo247.menuapi.menu.ACategoryMenu.MENU_SIZE;
+import com.chingo247.menuapi.menu.slots.ItemSlot;
 import com.chingo247.menuapi.menu.slots.MenuSlot;
 import com.chingo247.menuapi.menu.slots.SlotFactory;
 import com.google.common.collect.Maps;
@@ -64,7 +65,7 @@ public class MenuView {
     public int getFreeSlots() {
         int count = 0;
         for(int i = 0; i < MENU_SIZE; i++) {
-            if(slots.get(i) == null) count++;
+            if(slots.get(i) == null || (slots.get(i) instanceof ItemSlot)) count++;
         }
         return count;
     }

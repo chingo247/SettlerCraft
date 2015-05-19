@@ -180,10 +180,7 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
         }
         
         for(BlockMask bm : option.getBlockMasks()) {
-            block = bm.apply(blockPosition, p, block);
-            if(block == null) {
-                return;
-            }
+            bm.apply(blockPosition, p, block);
         }
         
         

@@ -10,7 +10,6 @@ import com.chingo247.settlercraft.structureapi.structure.plan.placement.iterator
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.regions.CuboidRegion;
 import java.util.Iterator;
 
 /**
@@ -19,13 +18,11 @@ import java.util.Iterator;
  */
 public class RestoringPlacement extends DemolishingPlacement {
     
-    private AbstractBlockPlacement parent;
-    private final CuboidRegion toPlace;
+    private final AbstractBlockPlacement parent;
 
-    public RestoringPlacement(AbstractBlockPlacement parent, CuboidRegion toPlace) {
+    public RestoringPlacement(AbstractBlockPlacement parent) {
         super(parent.getCuboidRegion().getMaximumPoint().subtract(parent.getCuboidRegion().getMinimumPoint()).add(1, 1, 1));
         this.parent = parent;
-        this.toPlace = toPlace;
     }
     
     
@@ -35,10 +32,6 @@ public class RestoringPlacement extends DemolishingPlacement {
         
         while(traversal.hasNext()) {
             Vector blockPosition = traversal.next();
-            if(!toPlace.contains(blockPosition.add(pos))) {
-                continue;
-            }
-          
             BaseBlock nextBlock = parent.getBlock(blockPosition);
             
             if (nextBlock == null) {

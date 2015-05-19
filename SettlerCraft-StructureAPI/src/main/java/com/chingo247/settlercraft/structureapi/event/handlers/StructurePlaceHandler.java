@@ -196,6 +196,7 @@ public class StructurePlaceHandler {
                     long start = System.currentTimeMillis();
                     
                     if(possibleParentStructure != null) {
+                        System.out.println("Possible parent: " + possibleParentStructure.getId());
                         structure = structureAPI.createSubstructure(possibleParentStructure, plan, world, pos1, direction, player);
                         System.out.println("Substructure placed in " + (System.currentTimeMillis() - start) + " ms");
                     } else {
@@ -263,6 +264,7 @@ public class StructurePlaceHandler {
             
             if(structure != null) {
                 isOwner = structureDAO.isOwnerOfStructure(structure.getId(), player);
+                System.out.println("Overlapping structure: " + structure.getId());
             }
             
             tx.success();

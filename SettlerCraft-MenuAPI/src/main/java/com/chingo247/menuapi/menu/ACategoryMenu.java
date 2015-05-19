@@ -356,7 +356,7 @@ public abstract class ACategoryMenu {
     }
 
     protected boolean hasNext() {
-        return !getItems(title, currentPage, player).isEmpty();
+        return !getItems(currentCategory, currentPage + 1, player).isEmpty();
     }
 
     protected boolean hasPrev() {
@@ -424,7 +424,7 @@ public abstract class ACategoryMenu {
                         case "previous":
                             if (hasPrev()) {
                                 updateMenu(currentCategory, currentPage - 1, true);
-                            }
+                            } 
                             break;
                         default:
                             break;

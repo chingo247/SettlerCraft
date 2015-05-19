@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 import net.minecraft.util.com.google.common.collect.Maps;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -185,6 +184,7 @@ public class StructureDAO implements IStructureDAO{
                 + " WHERE s." + StructureNode.DELETED_AT_PROPERTY + " IS NULL"
                 + " AND NOT s." + StructureNode.ID_PROPERTY + " = " + parent.getId()
                 + " AND NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId()
+                + " AND s." + StructureNode.SIZE_PROPERTY  + " <= " + parent.getCuboidRegion().getArea()
                 + " AND s." + StructureNode.MAX_X_PROPERTY + " >= " + region.getMinimumPoint().getBlockX() + " AND s." + StructureNode.MIN_X_PROPERTY + " <= " + region.getMaximumPoint().getBlockX()
                 + " AND s." + StructureNode.MAX_Y_PROPERTY + " >= " + region.getMinimumPoint().getBlockY() + " AND s." + StructureNode.MIN_Y_PROPERTY + " <= " + region.getMaximumPoint().getBlockY()
                 + " AND s." + StructureNode.MAX_Z_PROPERTY + " >= " + region.getMinimumPoint().getBlockZ() + " AND s." + StructureNode.MIN_Z_PROPERTY + " <= " + region.getMaximumPoint().getBlockZ()
@@ -197,6 +197,10 @@ public class StructureDAO implements IStructureDAO{
             for (Object o : map.values()) {
                 structures.add(new StructureNode((Node) o));
             }
+        }
+        
+        for(StructureNode st : structures) {
+            System.out.println("Overlaps... " + st.getId());
         }
 
         return structures;
@@ -368,17 +372,7 @@ public class StructureDAO implements IStructureDAO{
         return false;
     }
 
-    @Override
-    public boolean hasSubstructures(long id) {
-        StructureNode node = find(id);
-        Node n = node.getRawNode();
-        return n.hasRelationship(org.neo4j.graphdb.Direction.INCOMING, DynamicRelationshipType.withName(StructureRelTypes.RELATION_SUBSTRUCTURE));
-    }
+    
 
-    @Override
-    public List<StructureNode> getSubstructures(long id) {
-        StructureNode node = find(id);
-        return node.getSubstructures();
-    }
 
 }

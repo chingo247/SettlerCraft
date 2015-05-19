@@ -94,6 +94,8 @@ public class MenuAPI {
         
         ACategoryMenu menu = openMenus.get(player);
         if(menu != null) {
+            
+            
             return menu.onMenuSlotClicked(slot, clickType, clicked, itemOnCursor);
         } else {
             return false;

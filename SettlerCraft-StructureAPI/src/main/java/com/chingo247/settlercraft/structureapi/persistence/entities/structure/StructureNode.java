@@ -244,12 +244,25 @@ public class StructureNode {
     }
 
     public List<StructureNode> getSubstructures() {
-        Iterable<Relationship> relationships = underlyingNode.getRelationships(DynamicRelationshipType.withName(StructureRelTypes.RELATION_SUBSTRUCTURE), org.neo4j.graphdb.Direction.OUTGOING);
+        Iterable<Relationship> relationships = underlyingNode.getRelationships(DynamicRelationshipType.withName(StructureRelTypes.RELATION_SUBSTRUCTURE), org.neo4j.graphdb.Direction.INCOMING);
         List<StructureNode> substructures = Lists.newArrayList();
         for (Relationship rel : relationships) {
-            substructures.add(new StructureNode(rel.getOtherNode(underlyingNode)));
+            StructureNode sno = new StructureNode(rel.getOtherNode(underlyingNode));
+            if(sno.getConstructionStatus() != ConstructionStatus.REMOVED) {
+                substructures.add(new StructureNode(rel.getOtherNode(underlyingNode)));
+            }
         }
         return substructures;
+    }
+    
+    public boolean hasSubstructures() {
+        for(Relationship s : underlyingNode.getRelationships(org.neo4j.graphdb.Direction.INCOMING, DynamicRelationshipType.withName(StructureRelTypes.RELATION_SUBSTRUCTURE))) {
+            StructureNode sn = new StructureNode(s.getOtherNode(underlyingNode));
+            if(sn.getConstructionStatus() != ConstructionStatus.REMOVED) {
+                return true;
+            }
+        }
+        return false;
     }
     
     public void addSubstructure(StructureNode otherNode) {

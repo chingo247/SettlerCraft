@@ -43,6 +43,7 @@ import com.chingo247.settlercraft.structureapi.structure.plan.placement.Demolish
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.RotationalPlacement;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.RestoringPlacement;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BlockPredicate;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IPlayer;
@@ -51,6 +52,7 @@ import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
@@ -169,7 +171,7 @@ public class ConstructionManager {
         if (structure.getConstructionStatus() == ConstructionStatus.REMOVED) {
             throw new ConstructionException("Can't build a removed structure");
         }
-
+        
         pool.execute(structure.getId(), new Runnable() {
 
             @Override
@@ -189,6 +191,30 @@ public class ConstructionManager {
 
                 try (Transaction tx = graph.beginTx()) {
                     try {
+                        StructureNode node = structureDAO.find(structure.getId());
+                        
+                        
+                        
+                        if(node == null) {
+                            tx.success();
+                            return;
+                        }
+                        System.out.println("Building: " + node.getId());
+                        
+                        List<StructureNode> substructures = node.getSubstructures();
+                        for(StructureNode s : substructures) {
+                            final CuboidRegion region = s.getCuboidRegion();
+                            System.out.println("Ignoring: " + s.getId() + ", " + region.getMinimumPoint() + ", " + region.getMaximumPoint());
+                            
+                            options.addIgnore(new BlockPredicate() {
+
+                                @Override
+                                public boolean evaluate(Vector position, Vector worldPosition, BaseBlock block) {
+                                    return region.contains(worldPosition);
+                                }
+                            });
+                        }
+                        
 
                         PlayerEntry playerEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(player);
 
@@ -259,11 +285,12 @@ public class ConstructionManager {
                 Structure parent = null;
 
                 try (Transaction tx = graph.beginTx()) {
-                    boolean hasSubstructures = structureDAO.hasSubstructures(structure.getId());
+                    StructureNode node = structureDAO.find(structure.getId());
+                    boolean hasSubstructures = node.hasSubstructures();
                     if (hasSubstructures) {
                         if (player != null) {
                             Player ply = SettlerCraft.getInstance().getPlayer(player);
-                            String errorMessage = "Please remove Substructures before removing #" + structure.getId() + " " + structure.getName();
+                            String errorMessage = "Substructures need to be removed before removing #" + structure.getId() + " " + structure.getName();
                             if (ply != null) {
                                 ply.printError(errorMessage);
                             } else {
@@ -274,7 +301,6 @@ public class ConstructionManager {
                         tx.success();
                         return;
                     }
-                    StructureNode node = structureDAO.find(structure.getId());
 
                     StructureNode parentNode = node.getParent();
 
@@ -317,18 +343,21 @@ public class ConstructionManager {
                     Placement parentPlacement = plan.getPlacement();
 
                     if (parentPlacement instanceof RotationalPlacement) {
-                        System.out.println("Rotate!");
                         RotationalPlacement rt = (RotationalPlacement) parentPlacement;
                         rt.rotate(parent.getDirection());
                     }
 
                     // Get Area of the child placement
-                    CuboidRegion childRegion = structure.getCuboidRegion();
-                    
-                    System.out.println("Min: " + childRegion.getMinimumPoint());
-                    System.out.println("Max: " + childRegion.getMaximumPoint());
+                    final CuboidRegion childRegion = structure.getCuboidRegion();
+                    options.addIgnore(new BlockPredicate() {
 
-                    dp = new RestoringPlacement((AbstractBlockPlacement) parentPlacement, childRegion);
+                        @Override
+                        public boolean evaluate(Vector position, Vector worldPosition, BaseBlock block) {
+                            return !childRegion.contains(worldPosition);
+                        }
+                    });
+                    
+                    dp = new RestoringPlacement((AbstractBlockPlacement) parentPlacement);
                     AsyncDemolishingPlacement placement = new AsyncDemolishingPlacement(playerEntry, dp, new AsyncPlacementCallback() {
 
                         @Override

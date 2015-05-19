@@ -442,7 +442,7 @@ public class StructureAPI implements IStructureAPI {
 
         // If not null.. A structre has been created!
         if (substructure != null) {
-            EventManager.getInstance().getEventBus().post(new StructureCreateEvent(parentStructure));
+            EventManager.getInstance().getEventBus().post(new StructureCreateEvent(substructure));
         }
 
         return substructure;

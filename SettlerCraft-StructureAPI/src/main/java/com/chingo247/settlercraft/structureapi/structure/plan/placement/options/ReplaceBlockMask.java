@@ -24,7 +24,7 @@ import com.sk89q.worldedit.blocks.BaseBlock;
  * @author Chingo
  */
 public class ReplaceBlockMask implements BlockMask {
-    
+
     private final BlockPredicate predicate;
     private final int replacingMaterial;
     private final int replacingData;
@@ -33,21 +33,26 @@ public class ReplaceBlockMask implements BlockMask {
         this.predicate = predicate;
         this.replacingMaterial = material;
         this.replacingData = data;
+        
+        
     }
 
     @Override
-    public BaseBlock apply(final Vector relativePosition, final Vector worldPosition, final BaseBlock block) {
-        if(predicate.evaluate(relativePosition, worldPosition, block)) {
-            if(replacingMaterial >= 0) {
-                block.setId(replacingMaterial);
-            }
-            if(replacingData >= 0) {
-                block.setData(replacingData);
+    public BaseBlock apply(final Vector relativePosition, final Vector worldPosition, BaseBlock block) {
+        if (predicate.evaluate(relativePosition, worldPosition, block)) {
+            if (block == null) {
+                block = new BaseBlock(replacingMaterial, replacingData);
+            } else {
+
+                if (replacingMaterial >= 0) {
+                    block.setId(replacingMaterial);
+                }
+                if (replacingData >= 0) {
+                    block.setData(replacingData);
+                }
             }
         }
         return block;
     }
-    
-    
 
 }

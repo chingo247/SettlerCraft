@@ -19,7 +19,7 @@ public interface BlockMask {
      * @param relativePosition The relative position
      * @param worldPosition The position in the world
      * @param block The block that will be placed
-     * @return The BaseBlock that has been applied or null
+     * @return The BaseBlock that has been applied
      */
     public BaseBlock apply(Vector relativePosition, Vector worldPosition, BaseBlock block);
     

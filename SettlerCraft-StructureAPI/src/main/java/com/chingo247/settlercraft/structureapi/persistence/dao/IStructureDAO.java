@@ -40,10 +40,6 @@ public interface IStructureDAO {
 
     public boolean hasStructuresWithin(World world, CuboidRegion region);
     
-    public boolean hasSubstructures(long id);
-    
-    public List<StructureNode> getSubstructures(long id);
-
     public List<StructureNode> getStructuresForSettler(UUID settler, int skip, int limit);
 
     public long getStructureCountForSettler(UUID settler);

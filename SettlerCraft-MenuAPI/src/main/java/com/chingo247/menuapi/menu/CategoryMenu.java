@@ -103,6 +103,7 @@ public class CategoryMenu extends ACategoryMenu {
         int slotsToFill = getFreeSlots();
         int min = Math.min(page * slotsToFill, tradeItems.size());
         int max = Math.min(min + slotsToFill, tradeItems.size());
+        
         return tradeItems.subList(min, max);
     }
 

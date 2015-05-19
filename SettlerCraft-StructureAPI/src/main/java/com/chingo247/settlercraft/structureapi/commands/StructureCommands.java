@@ -41,8 +41,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.lang.math.NumberUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -172,7 +170,7 @@ public class StructureCommands {
         try {
             structure.build(SettlerCraft.getInstance().getPlayer(player.getUniqueId()), new BuildOptions(), useForce);
         } catch (ConstructionException ex) {
-            Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, null, ex);
+            player.sendMessage(COLOR.red() + ex.getMessage());
         }
         return true;
     }
@@ -220,7 +218,7 @@ public class StructureCommands {
         try {
             structure.demolish(SettlerCraft.getInstance().getPlayer(player.getUniqueId()), new DemolishingOptions(), useForce);
         } catch (ConstructionException ex) {
-            Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, null, ex);
+            player.sendMessage(COLOR.red() + ex.getMessage());
         }
         return true;
     }
@@ -263,7 +261,7 @@ public class StructureCommands {
         try {
             structure.stop(useForce);
         } catch (ConstructionException ex) {
-            Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, null, ex);
+            player.sendMessage(COLOR.red() + ex.getMessage());
         }
         return true;
     }
