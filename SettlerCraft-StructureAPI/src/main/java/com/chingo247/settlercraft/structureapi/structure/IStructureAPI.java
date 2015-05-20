@@ -147,6 +147,11 @@ public interface IStructureAPI {
      */
     public void reload();
     
+//    public List<IStructureProtector> getStructureProtectors();
+//    
+//    public void addStructureProtector(IStructureProtector protector) ;
+    
+    
     /**
      * Checks if StructureAPI is loading (plans, schematics, etc)
      * @return True if StructureAPI is loadings

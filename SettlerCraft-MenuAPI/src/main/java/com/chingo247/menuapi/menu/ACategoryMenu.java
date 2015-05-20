@@ -225,7 +225,7 @@ public abstract class ACategoryMenu {
             economyProvider.withdraw(player.getUniqueId(), price);
             if (price > 0) {
                 player.sendMessage("You bought: " + getColor().blue() + item.getName());
-                player.sendMessage("Your new balance is: " + getColor().gold() + economyProvider.getBalance(player.getUniqueId()));
+                player.sendMessage("Your new balance is: " + getColor().gold() + ShopUtil.valueString(economyProvider.getBalance(player.getUniqueId())));
             } else {
                 player.sendMessage("You got: " + getColor().blue() + item.getName());
             }

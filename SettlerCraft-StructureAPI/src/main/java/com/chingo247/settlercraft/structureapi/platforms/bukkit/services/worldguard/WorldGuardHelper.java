@@ -10,6 +10,7 @@ import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
 import com.chingo247.settlercraft.structureapi.persistence.dao.IStructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
 import com.chingo247.settlercraft.structureapi.platforms.bukkit.util.WorldGuardUtil;
+import com.chingo247.settlercraft.structureapi.platforms.services.protection.IStructureProtector;
 import com.chingo247.settlercraft.structureapi.structure.ConstructionStatus;
 import com.chingo247.settlercraft.structureapi.structure.DefaultStructureFactory;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
@@ -36,8 +37,9 @@ import org.neo4j.graphdb.Transaction;
  *
  * @author Chingo
  */
-public class WorldGuardHelper {
+public class WorldGuardHelper implements IStructureProtector {
     
+    public static String WORLD_GUARD_REGION_PROPERTY = "WGRegion";
     private GraphDatabaseService graph;
     private IStructureDAO structureDAO;
 
@@ -46,7 +48,8 @@ public class WorldGuardHelper {
         this.structureDAO = structureDAO;
     }
     
-    public String createRegionForStructure(Structure structure) {
+    @Override
+    public void protect(Structure structure) {
         World world = Bukkit.getWorld(structure.getWorld());
         CuboidRegion dimension = structure.getCuboidRegion();
         
@@ -58,7 +61,7 @@ public class WorldGuardHelper {
 
         Vector p1 = dimension.getMinimumPoint();
         Vector p2 = dimension.getMaximumPoint();
-        String id = "sc_stt_"+world.getName()+"_"+structure.getId();
+        String id = getRegionId(structure);
 
         if (WorldGuardUtil.regionExists(world, id)) {
             mgr.removeRegion(id);
@@ -86,11 +89,14 @@ public class WorldGuardHelper {
             }
             
             StructureNode structureNode = structureDAO.find(structure.getId());
-            structureNode.getRawNode().setProperty("worldguard_region", id);
+            structureNode.getRawNode().setProperty(WORLD_GUARD_REGION_PROPERTY, id);
             tx.success();
             
         }
-        return id;
+    }
+    
+    private String getRegionId(Structure structure) {
+        return "sc_stt_"+structure.getWorld().replaceAll("\\s", "_")+"_"+structure.getId();
     }
     
     public void processStructuresWithoutRegion() {
@@ -123,16 +129,42 @@ public class WorldGuardHelper {
 
             @Override
             public void run() {
-                int index = 0;
-                int total = structures.size();
                 for(Structure s : structures) {
-                    String region = createRegionForStructure(s);
-                    index++;
-                    System.out.println("Create worldguard region '" + region + "' for Structure #" + s.getId() + " ("+index+"/"+total+")");
+                    protect(s);
+                    System.out.println("Protected structure #" + s.getId() + " with 'WorldGuard'");
+//                    System.out.println("Create worldguard region '" + region + "' for Structure #" + s.getId() + " ("+index+"/"+total+")");
                 }
             }
         });
         
+    }
+
+    @Override
+    public String getName() {
+        return "WorldGuard";
+    }
+
+    @Override
+    public void removeProtection(Structure structure) {
+        World world = Bukkit.getWorld(structure.getWorld());
+        RegionManager mgr = WorldGuardUtil.getRegionManager(world);
+        String region = getRegionId(structure);
+        if(mgr.hasRegion(region)) {
+            mgr.removeRegion(region);
+            try {
+                mgr.save();
+            } catch (StorageException ex) {
+                Logger.getLogger(WorldGuardHelper.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    @Override
+    public boolean hasProtection(Structure structure) {
+        World world = Bukkit.getWorld(structure.getWorld());
+        RegionManager mgr = WorldGuardUtil.getRegionManager(world);
+        String region = getRegionId(structure);
+        return mgr.hasRegion(region);
     }
     
 }

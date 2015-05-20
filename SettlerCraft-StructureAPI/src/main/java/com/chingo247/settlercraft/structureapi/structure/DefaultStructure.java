@@ -30,7 +30,6 @@ import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
 import com.chingo247.settlercraft.structureapi.exception.ConstructionException;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureRelTypes;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlanReader;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.DemolishingOptions;
@@ -43,7 +42,6 @@ import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.util.Date;
 import java.util.UUID;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
@@ -64,7 +62,7 @@ public class DefaultStructure implements Structure {
     private final Date removedAt;
     private final Date completedAt;
     private final double price;
-    private final boolean isRoot;
+    private final boolean hasParent;
     private final Vector position;
     
     DefaultStructure(StructureNode structureNode) {
@@ -81,7 +79,7 @@ public class DefaultStructure implements Structure {
         this.price = structureNode.getPrice();
         this.completedAt = structureNode.getCompletedAt();
         this.position = new Vector(structureNode.getX(), structureNode.getY(), structureNode.getZ());
-        this.isRoot = structureNode.getRawNode().hasRelationship(org.neo4j.graphdb.Direction.INCOMING, DynamicRelationshipType.withName(StructureRelTypes.RELATION_SUBSTRUCTURE)) == false;
+        this.hasParent = structureNode.getParent() != null;
     }
 
     @Override
@@ -208,8 +206,8 @@ public class DefaultStructure implements Structure {
     }
 
     @Override
-    public boolean isRoot() {
-        return isRoot;
+    public boolean hasParent() {
+        return hasParent;
     }
 
     /**

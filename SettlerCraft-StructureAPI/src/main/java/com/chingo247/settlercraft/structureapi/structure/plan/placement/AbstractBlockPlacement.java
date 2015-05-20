@@ -24,12 +24,12 @@ import java.util.PriorityQueue;
  * @author Chingo
  */
 public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends AbstractPlacement<T> implements BlockPlacement<T> {
-    
+
     private static final int PRIORITY_FIRST = 4;
     private static final int PRIORITY_LIQUID = 3;
     private static final int PRIORITY_LATER = 2;
     private static final int PRIORITY_FINAL = 1;
-    
+
     private final int BLOCK_BETWEEN;
     private final int MAX_PLACE_LATER_TO_PLACE = 10;
 
@@ -47,22 +47,24 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
     public final int getBlocks() {
         return getWidth() * getHeight() * getLength();
     }
-    
-    
 
     @Override
     public final void place(EditSession editSession, Vector pos, T option) {
-        Iterator<Vector> traversal = new CuboidIterator(option.getCubeX(), option.getCubeY(), option.getCubeZ()).iterate(getSize());
+        Iterator<Vector> traversal = new CuboidIterator(
+                option.getCubeX() < 0 ? getSize().getBlockX() : option.getCubeX(),
+                option.getCubeY() < 0 ? getSize().getBlockY() : option.getCubeY(),
+                option.getCubeZ() < 0 ? getSize().getBlockZ() : option.getCubeZ()
+        ).iterate(getSize());
         PriorityQueue<StructureBlock> placeLater = new PriorityQueue<>();
-        
+
         int placeLaterPlaced = 0;
         int placeLaterPause = 0;
-        
+
         // Cube traverse this clipboard
         while (traversal.hasNext()) {
             Vector v = traversal.next();
             BaseBlock clipboardBlock = getBlock(v);
-            
+
             if (clipboardBlock == null) {
                 continue;
             }
@@ -85,18 +87,16 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
                         && placeLater.peek().getPosition().getBlockY() < v.getBlockY()) {
                     StructureBlock plb = placeLater.poll();
                     doBlock(editSession, pos, plb.getPosition(), plb.getBlock(), option);
-                    
-                   
-                    
-                    if(plb.getPriority() != PRIORITY_LIQUID) {
-                        
+
+                    if (plb.getPriority() != PRIORITY_LIQUID) {
+
                         placeLaterPlaced++;
-                        if(BlockType.emitsLight(plb.getBlock().getId())) {
+                        if (BlockType.emitsLight(plb.getBlock().getId())) {
                             placeLaterPlaced++;
                         }
-                        
+
                     }
-                    
+
                     if (placeLaterPlaced >= MAX_PLACE_LATER_TO_PLACE) {
                         placeLaterPause = BLOCK_BETWEEN;
                         placeLaterPlaced = 0;
@@ -111,7 +111,7 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
             doBlock(editSession, pos, plb.getPosition(), plb.getBlock(), option);
         }
     }
-    
+
     private int getPriority(BaseBlock block) {
         if (isWater(block) || isLava(block)) {
             return PRIORITY_LIQUID;
@@ -120,8 +120,6 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
         if (BlockType.shouldPlaceLast(block.getId()) || BlockType.emitsLight(block.getId())) {
             return PRIORITY_LATER;
         }
-        
-        
 
         if (BlockType.shouldPlaceFinal(block.getId())) {
             return PRIORITY_FINAL;
@@ -149,7 +147,7 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
 
     @Override
     public abstract BaseBlock getBlock(Vector position);
-    
+
     protected void doBlock(EditSession editSession, Vector position, Vector blockPosition, BaseBlock block, T option) {
         Vector p;
         switch (getDirection()) {
@@ -172,22 +170,20 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
             default:
                 throw new AssertionError("unreachable");
         }
-        
-        for(BlockPredicate bp : option.getIgnore()) {
-            if(bp.evaluate(blockPosition, p, block)) {
+
+        for (BlockPredicate bp : option.getIgnore()) {
+            if (bp.evaluate(blockPosition, p, block)) {
                 return;
             }
         }
-        
-        for(BlockMask bm : option.getBlockMasks()) {
+
+        for (BlockMask bm : option.getBlockMasks()) {
             bm.apply(blockPosition, p, block);
         }
-        
-        
-//        System.out.println("set: " + p + " " + block.getId() + " " + block.getData());
+
         
         editSession.rawSetBlock(p, block);
-        
+
     }
-    
+
 }

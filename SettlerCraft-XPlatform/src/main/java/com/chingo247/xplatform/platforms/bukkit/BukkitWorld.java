@@ -56,5 +56,5 @@ public class BukkitWorld implements IWorld {
         Location location = world.getSpawnLocation();
         return new BukkitLocation(w, location.getBlockX(), location.getBlockY(), location.getBlockZ());
     }
-    
+
 }

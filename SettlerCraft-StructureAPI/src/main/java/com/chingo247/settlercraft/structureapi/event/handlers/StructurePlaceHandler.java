@@ -33,6 +33,7 @@ import com.chingo247.settlercraft.structureapi.persistence.entities.structure.St
 import com.chingo247.settlercraft.structureapi.selection.CUISelectionManager;
 import com.chingo247.settlercraft.structureapi.selection.ISelectionManager;
 import com.chingo247.settlercraft.structureapi.selection.NoneSelectionManager;
+import com.chingo247.settlercraft.structureapi.structure.ConstructionStatus;
 import com.chingo247.settlercraft.structureapi.structure.DefaultStructureFactory;
 import com.chingo247.settlercraft.structureapi.structure.IStructureAPI;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
@@ -196,6 +197,11 @@ public class StructurePlaceHandler {
                     long start = System.currentTimeMillis();
                     
                     if(possibleParentStructure != null) {
+                        if(possibleParentStructure.getConstructionStatus() != ConstructionStatus.COMPLETED) {
+                            player.printError("Status of #" + possibleParentStructure.getId() + " must complete before structure can be placed inside");
+                            return;
+                        }
+                        
                         System.out.println("Possible parent: " + possibleParentStructure.getId());
                         structure = structureAPI.createSubstructure(possibleParentStructure, plan, world, pos1, direction, player);
                         System.out.println("Substructure placed in " + (System.currentTimeMillis() - start) + " ms");

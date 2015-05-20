@@ -18,13 +18,20 @@ package com.chingo247.settlercraft.structureapi.commands;
 
 import com.chingo247.menuapi.menu.CategoryMenu;
 import com.chingo247.menuapi.menu.util.ShopUtil;
+import com.chingo247.settlercraft.core.Settler;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.exception.CommandException;
+import com.chingo247.settlercraft.core.persistence.dao.settler.DefaultSettlerFactory;
+import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
+import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
 import com.chingo247.settlercraft.core.platforms.services.IPermissionManager;
+import com.chingo247.settlercraft.core.util.KeyPool;
 import com.chingo247.settlercraft.structureapi.exception.ConstructionException;
 import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
+import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureRelTypes;
 import com.chingo247.settlercraft.structureapi.platforms.util.Permissions;
+import com.chingo247.settlercraft.structureapi.structure.ConstructionStatus;
 import com.chingo247.settlercraft.structureapi.structure.DefaultStructureFactory;
 import com.chingo247.settlercraft.structureapi.structure.IStructureAPI;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
@@ -34,15 +41,24 @@ import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.
 import com.chingo247.settlercraft.structureapi.structure.plan.util.PlanGenerator;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.ICommandSender;
+import com.chingo247.xplatform.core.ILocation;
 import com.chingo247.xplatform.core.IPlayer;
+import com.chingo247.xplatform.core.IWorld;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import net.minecraft.util.com.google.common.collect.Maps;
 import org.apache.commons.lang.math.NumberUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
 /**
@@ -58,6 +74,8 @@ public class StructureCommands {
     private final ExecutorService executorService;
     private final StructureDAO structureDAO;
     private final GraphDatabaseService graph;
+    private final UUID console;
+    private final KeyPool<UUID> playerPool;
 
     public StructureCommands(IStructureAPI structureAPI, IPermissionManager permissionManager, ExecutorService executorService, GraphDatabaseService graph) {
         this.structureAPI = structureAPI;
@@ -66,203 +84,385 @@ public class StructureCommands {
         this.executorService = executorService;
         this.structureDAO = new StructureDAO(graph);
         this.graph = graph;
+        this.console = UUID.randomUUID();
+        this.playerPool = new KeyPool<>(executorService);
     }
 
-    public boolean handle(ICommandSender sender, String command, String[] args) throws CommandException {
+    public boolean handle(final ICommandSender sender, final String command, String[] args) throws CommandException {
         if (args.length == 0) {
             throw new CommandException("Too few arguments!");
         }
 
-        String commandArg = args[0];
-        String[] commandArgs = Arrays.copyOfRange(args, 1, args.length);
+        final String commandArg = args[0];
+        final String[] commandArgs = Arrays.copyOfRange(args, 1, args.length);
 
         System.out.println("issued: " + commandArg + " " + Arrays.toString(commandArgs));
 
-        switch (commandArg) {
-            case "generate":
-                if(sender instanceof IPlayer) {
-                    IPlayer ply = (IPlayer) sender;
-                    if(!ply.isOP()) {
-                        ply.sendMessage("You're not allowed to use this command, OP only");
-                        return true;
-                    }
-                }
-                File generationDirectory = StructureAPI.getInstance().getGenerationDirectory();
-                PlanGenerator.generate(generationDirectory);
-            case "info":
-                return info(sender, commandArgs);
-            case "build":
-                checkIsPlayer(sender);
-                return build((IPlayer)sender, commandArgs);
-            case "demolish":
-                checkIsPlayer(sender);
-                return demolish((IPlayer)sender, commandArgs);
-            case "halt":
-                checkIsPlayer(sender);
-                return stop((IPlayer)sender, commandArgs);
-            case "list":
-                checkIsPlayer(sender);
-                return list((IPlayer) sender, commandArgs);
-            case "location":
-                checkIsPlayer(sender);
-                return location((IPlayer) sender, commandArgs);
-            case "menu":
-                checkIsPlayer(sender);
-                return openMenu((IPlayer) sender, commandArgs, true);
-            case "shop":
-                checkIsPlayer(sender);
-                return openMenu((IPlayer) sender, commandArgs, false);
-            default:
-                throw new CommandException("No action known for '/" + command + " " + commandArg);
+        UUID uuid;
+        if (sender instanceof IPlayer) {
+            IPlayer ply = (IPlayer) sender;
+            uuid = ply.getUniqueId();
+        } else {
+            uuid = console;
         }
+
+        playerPool.execute(uuid, new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    switch (commandArg) {
+                        case "gplans":
+                            if (sender instanceof IPlayer) {
+                                IPlayer ply = (IPlayer) sender;
+                                if (!ply.isOP()) {
+                                    ply.sendMessage("You're not allowed to use this command, OP only");
+                                    return;
+                                }
+                            }
+                            File generationDirectory = StructureAPI.getInstance().getGenerationDirectory();
+                            PlanGenerator.generate(generationDirectory);
+                            break;
+                        case "info":
+                            info(sender, commandArgs);
+                            break;
+                        case "build":
+                            checkIsPlayer(sender);
+                            build((IPlayer) sender, commandArgs);
+                            break;
+                        case "demolish":
+                            checkIsPlayer(sender);
+                            demolish((IPlayer) sender, commandArgs);
+                            break;
+                        case "halt":
+                            checkIsPlayer(sender);
+                            stop((IPlayer) sender, commandArgs);
+                            break;
+                        case "list":
+                            checkIsPlayer(sender);
+                            list((IPlayer) sender, commandArgs);
+                            break;
+                        case "location":
+                            checkIsPlayer(sender);
+                            location((IPlayer) sender, commandArgs);
+                            break;
+                        case "menu":
+                            checkIsPlayer(sender);
+                            openMenu((IPlayer) sender, commandArgs, true);
+                            break;
+                        case "shop":
+                            checkIsPlayer(sender);
+                            openMenu((IPlayer) sender, commandArgs, false);
+                            break;
+                        default:
+                            throw new CommandException("No action known for '/" + command + " " + commandArg);
+                    }
+                } catch (CommandException ex) {
+                    sender.sendMessage(ex.getMessage());
+                } catch (Exception ex) { // Catch everything or disappear it will dissappear in the abyss!
+                    Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                }
+            }
+        });
+        return true;
     }
 
-    private boolean location(IPlayer player, String[] commandArgs) {
+    private boolean location(IPlayer player, String[] commandArgs) throws CommandException {
         System.out.println("Location Command");
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        argumentsInRange(0, 1, commandArgs);
+
+        if (commandArgs.length == 1) {
+            Long id;
+
+            try {
+                id = Long.parseLong(commandArgs[0]);
+            } catch (NumberFormatException nfe) {
+                player.sendMessage("Expected a number but got '" + commandArgs[0] + "'");
+                return true;
+            }
+
+            Structure s = null;
+            try (Transaction tx = graph.beginTx()) {
+                StructureNode node = structureDAO.find(id);
+                if (node != null) {
+                    s = DefaultStructureFactory.getInstance().makeStructure(node);
+                }
+                tx.success();
+            }
+
+            if (s == null) {
+                player.sendMessage(COLOR.red() + "Couldn't find structure for id #" + id);
+                return true;
+            }
+
+            World w = SettlerCraft.getInstance().getWorld(s.getWorld());
+            if (!w.getName().equals(player.getWorld().getName())) {
+                player.sendMessage(COLOR.red() + "Structure must be in the same world...");
+                return true;
+            }
+
+            ILocation loc = player.getLocation();
+            Vector rel = s.getRelativePosition(new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
+
+            player.sendMessage("Your relative position is " + COLOR.yellow() + "x: " + COLOR.reset() + rel.getBlockX() + COLOR.yellow() + " y: " + COLOR.reset() + rel.getBlockY() + COLOR.yellow() + " z: " + COLOR.reset() + rel.getBlockZ());
+
+        } else {
+            IPlayer ply = (IPlayer) player;
+            ILocation loc = ply.getLocation();
+
+            Vector pos = new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+            Structure s = getSmallesStructure(ply.getWorld(), pos);
+
+            if (s == null) {
+                ply.sendMessage(COLOR.red() + " Not within a structure...");
+                return true;
+            }
+
+            World w = SettlerCraft.getInstance().getWorld(s.getWorld());
+            if (!w.getName().equals(player.getWorld().getName())) {
+                player.sendMessage(COLOR.red() + "Structure must be in the same world...");
+                return true;
+            }
+
+            Vector rel = s.getRelativePosition(new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
+
+            player.sendMessage("Your relative position is " + COLOR.yellow() + "x: " + COLOR.reset() + rel.getBlockX() + COLOR.yellow() + " y: " + COLOR.reset() + rel.getBlockY() + COLOR.yellow() + " z: " + COLOR.reset() + rel.getBlockZ());
+
+        }
+
+        return true;
+
     }
 
-    private boolean info(ICommandSender sender, String[] commandArgs) {
+    private boolean info(ICommandSender sender, String[] commandArgs) throws CommandException {
         System.out.println("Info Command");
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        argumentsInRange(0, 1, commandArgs);
+
+        if (commandArgs.length == 1) {
+            Long id;
+
+            try {
+                id = Long.parseLong(commandArgs[0]);
+            } catch (NumberFormatException nfe) {
+                sender.sendMessage("Expected a number but got '" + commandArgs[0] + "'");
+                return true;
+            }
+
+            Structure s = null;
+            try (Transaction tx = graph.beginTx()) {
+                StructureNode node = structureDAO.find(id);
+                if (node != null) {
+                    s = DefaultStructureFactory.getInstance().makeStructure(node);
+                }
+                tx.success();
+            }
+
+            if (s == null) {
+                sender.sendMessage(COLOR.red() + "Couldn't find structure for id #" + id);
+                return true;
+            }
+
+            sender.sendMessage(getInfo(s));
+
+        } else if (sender instanceof IPlayer) {
+            IPlayer ply = (IPlayer) sender;
+            ILocation loc = ply.getLocation();
+
+            Vector pos = new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+            Structure s = getSmallesStructure(ply.getWorld(), pos);
+
+            if (s == null) {
+                ply.sendMessage(COLOR.red() + " Not within a structure...");
+                return true;
+            }
+
+            String info = getInfo(s);
+            sender.sendMessage(info);
+
+        } else {
+            sender.sendMessage(COLOR.red() + " too few arguments", "/stt info [id]");
+        }
+
+        return true;
     }
 
-    private boolean build(IPlayer player, String[] commandArgs) throws CommandException {
+    private String getInfo(Structure structure) {
+        Settler master = null;
+        try (Transaction tx = graph.beginTx()) {
+            SettlerNode setn = structureDAO.getMasterOwnerForStructure(structure.getId());
+            master = DefaultSettlerFactory.getInstance().makeStructureOwner(setn);
+            tx.success();
+        }
+
+        String line = "#" + COLOR.gold() + structure.getId() + " " + COLOR.blue() + structure.getName() + "\n"
+                + COLOR.reset() + "World: " + structure.getWorld() + "\n";
+        
+        Vector position = structure.getPosition();
+        line += "Location: " + COLOR.yellow() + "X: " + COLOR.reset() + position.getX()
+                        + " " + COLOR.yellow() + "Y: " + COLOR.reset() + position.getY()
+                        + " " + COLOR.yellow() + "Z: " + COLOR.reset() + position.getZ() + "\n";
+        
+        line += "Status: " + getStatusString(structure) + "\n";
+
+        if (structure.getPrice() > 0) {
+            line += "Value: " + structure.getPrice() + "\n";
+        }
+        
+        
+
+        if (master != null) {
+            line += "Owner(master): " + master.getName();
+        }
+        return line;
+    }
+
+    private boolean build(final IPlayer player, String[] commandArgs) throws CommandException {
         System.out.println("Build Command");
         argumentsInRange(1, 2, commandArgs);
-        
-        Structure structure;
-        
+
+        final Structure structure;
+
         // /stt build [structureId][force]
-        
-        
         String structureIdArg = commandArgs[0];
-        if(!NumberUtils.isNumber(structureIdArg)) {
-            throw new CommandException("Expected a number but got '"+structureIdArg+"'");
+        if (!NumberUtils.isNumber(structureIdArg)) {
+            throw new CommandException("Expected a number but got '" + structureIdArg + "'");
         }
-        
+
         long id = Long.parseLong(structureIdArg);
-        try(Transaction tx = graph.beginTx()) {
+        try (Transaction tx = graph.beginTx()) {
             StructureNode structureNode = structureDAO.find(id);
-            
-            if(structureNode == null) {
+
+            if (structureNode == null) {
                 tx.success();
                 throw new CommandException("Couldn't find a structure for #" + structureIdArg);
             }
-            
-            if(!structureNode.isOwner(player.getUniqueId()) && !player.isOP()) {
+
+            if (!structureNode.isOwner(player.getUniqueId()) && !player.isOP()) {
                 tx.success();
                 throw new CommandException("You don't own this structure...");
             }
-            
+
             structure = DefaultStructureFactory.getInstance().makeStructure(structureNode);
             tx.success();
         }
-        
-         
+
         String force = commandArgs.length == 2 ? commandArgs[1] : null;
-        if(force != null && !(force.equals("force") && force.equals("f"))) {
-            throw new CommandException("Unknown second argument '"+force+"' ");
-        } 
-        boolean useForce = force != null && (force.equals("f") || force.equals("force"));
-        
-        
-        try {
-            structure.build(SettlerCraft.getInstance().getPlayer(player.getUniqueId()), new BuildOptions(), useForce);
-        } catch (ConstructionException ex) {
-            player.sendMessage(COLOR.red() + ex.getMessage());
+        if (force != null && !(force.equals("force") && force.equals("f"))) {
+            throw new CommandException("Unknown second argument '" + force + "' ");
         }
+        final boolean useForce = force != null && (force.equals("f") || force.equals("force"));
+
+        executorService.execute(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    structure.build(SettlerCraft.getInstance().getPlayer(player.getUniqueId()), new BuildOptions(), useForce);
+                } catch (ConstructionException ex) {
+                    player.sendMessage(COLOR.red() + ex.getMessage());
+                }
+            }
+        });
+
         return true;
     }
 
-    private boolean demolish(IPlayer player, String[] commandArgs) throws CommandException {
+    private boolean demolish(final IPlayer player, String[] commandArgs) throws CommandException {
         System.out.println("Demolish Command");
         argumentsInRange(1, 2, commandArgs);
-        
-        Structure structure;
-        
-        
-        
+
+        final Structure structure;
+
         String structureIdArg = commandArgs[0];
-        if(!NumberUtils.isNumber(structureIdArg)) {
-            throw new CommandException("Expected a number but got '"+structureIdArg+"'");
+        if (!NumberUtils.isNumber(structureIdArg)) {
+            throw new CommandException("Expected a number but got '" + structureIdArg + "'");
         }
-        
+
         long id = Long.parseLong(structureIdArg);
-        try(Transaction tx = graph.beginTx()) {
+        try (Transaction tx = graph.beginTx()) {
             StructureNode structureNode = structureDAO.find(id);
-            
-            if(structureNode == null) {
+
+            if (structureNode == null) {
                 tx.success();
                 throw new CommandException("Couldn't find a structure for #" + structureIdArg);
             }
-            
-            if(!structureNode.isOwner(player.getUniqueId()) && !player.isOP()) {
+
+            if (!structureNode.isOwner(player.getUniqueId()) && !player.isOP()) {
                 tx.success();
                 throw new CommandException("You don't own this structure...");
             }
-            
+
             structure = DefaultStructureFactory.getInstance().makeStructure(structureNode);
             tx.success();
         }
-        
-         
+
         String force = commandArgs.length == 2 ? commandArgs[1] : null;
-        if(force != null && !(force.equals("force") && force.equals("f"))) {
-            throw new CommandException("Unknown second argument '"+force+"' ");
-        } 
-        boolean useForce = force != null && (force.equals("f") || force.equals("force"));
-        
-        
-        
-        try {
-            structure.demolish(SettlerCraft.getInstance().getPlayer(player.getUniqueId()), new DemolishingOptions(), useForce);
-        } catch (ConstructionException ex) {
-            player.sendMessage(COLOR.red() + ex.getMessage());
+        if (force != null && !(force.equals("force") && force.equals("f"))) {
+            throw new CommandException("Unknown second argument '" + force + "' ");
         }
+        final boolean useForce = force != null && (force.equals("f") || force.equals("force"));
+
+        executorService.execute(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    structure.demolish(SettlerCraft.getInstance().getPlayer(player.getUniqueId()), new DemolishingOptions(), useForce);
+                } catch (ConstructionException ex) {
+                    player.sendMessage(COLOR.red() + ex.getMessage());
+                }
+            }
+        });
+
         return true;
     }
 
-    private boolean stop(IPlayer player, String[] commandArgs) throws CommandException {
+    private boolean stop(final IPlayer player, String[] commandArgs) throws CommandException {
         System.out.println("Stop Command");
         argumentsInRange(1, 2, commandArgs);
-        
-        Structure structure;
-        
+
+        final Structure structure;
+
         String structureIdArg = commandArgs[0];
-        if(!NumberUtils.isNumber(structureIdArg)) {
-            throw new CommandException("Expected a number but got '"+structureIdArg+"'");
+        if (!NumberUtils.isNumber(structureIdArg)) {
+            throw new CommandException("Expected a number but got '" + structureIdArg + "'");
         }
-        
+
         long id = Long.parseLong(structureIdArg);
-        try(Transaction tx = graph.beginTx()) {
+        try (Transaction tx = graph.beginTx()) {
             StructureNode structureNode = structureDAO.find(id);
-            
-            if(structureNode == null) {
+
+            if (structureNode == null) {
                 tx.success();
                 throw new CommandException("Couldn't find a structure for #" + structureIdArg);
             }
-            
-            if(!structureNode.isOwner(player.getUniqueId()) && !player.isOP()) {
+
+            if (!structureNode.isOwner(player.getUniqueId()) && !player.isOP()) {
                 tx.success();
                 throw new CommandException("You don't own this structure...");
             }
-            
+
             structure = DefaultStructureFactory.getInstance().makeStructure(structureNode);
             tx.success();
         }
-        
-         
+
         String force = commandArgs.length == 2 ? commandArgs[1] : null;
-        if(force != null && !(force.equals("force") && force.equals("f"))) {
-            throw new CommandException("Unknown second argument '"+force+"' ");
-        } 
-        boolean useForce = force != null && (force.equals("f") || force.equals("force"));
-        try {
-            structure.stop(useForce);
-        } catch (ConstructionException ex) {
-            player.sendMessage(COLOR.red() + ex.getMessage());
+        if (force != null && !(force.equals("force") && force.equals("f"))) {
+            throw new CommandException("Unknown second argument '" + force + "' ");
         }
+        final boolean useForce = force != null && (force.equals("f") || force.equals("force"));
+        executorService.execute(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    structure.stop(useForce);
+                } catch (ConstructionException ex) {
+                    player.sendMessage(COLOR.red() + ex.getMessage());
+                }
+            }
+        });
+
         return true;
     }
 
@@ -293,11 +493,11 @@ public class StructureCommands {
 
         CategoryMenu planmenu = StructureAPI.getInstance().createPlanMenu();
         if (planmenu == null) {
-            throw new org.bukkit.command.CommandException("Planmenu is initialized yet, please wait...");
+            throw new CommandException("Planmenu is initialized yet, please wait...");
         }
 
         if (!planmenu.isEnabled()) {
-            throw new org.bukkit.command.CommandException("Planmenu is not ready yet, please wait");
+            throw new CommandException("Planmenu is not ready yet, please wait");
         }
         planmenu.setNoCosts(isFree);
         planmenu.openMenu(player);
@@ -353,47 +553,163 @@ public class StructureCommands {
         }
 
         final int p = page;
-        executorService.submit(new Runnable() {
 
-            @Override
-            public void run() {
-                String[] message = new String[MAX_LINES];
-                int skip = p * MAX_LINES;
-                int limit = skip + MAX_LINES;
+        String[] message = new String[MAX_LINES];
+        int skip = p * (MAX_LINES-1);
+        int limit = (MAX_LINES-1);
+        
+        System.out.println("skip: " + skip);
+        System.out.println("limit: " + limit);
 
-                try (Transaction tx = graph.beginTx()) {
-                    long totalStructures = structureDAO.getStructureCountForSettler(playerId);
-                    long totalPages = Math.round(Math.ceil(totalStructures / (MAX_LINES - 1)));
-                    List<StructureNode> structures = structureDAO.getStructuresForSettler(playerId, skip, limit);
-                    if (p > totalPages || p < 0) {
-                        iPlayer.sendMessage(COLOR.red() + "Page " + p + " out of " + totalPages + "...");
-                        return;
-                    }
-                    
-                    int lineNumber = 0;
-                    message[0] = "-----------(Page: " + p + "/" + totalPages + ", Structures: " + totalStructures + ")-----------";
-                    for (StructureNode structure : structures) {
-                        lineNumber++;
-                        Vector position = structure.getCuboidRegion().getMinimumPoint();
-                        String line = "#" + COLOR.gold() + structure.getId() + " " + COLOR.blue() + structure.getName()
-                                + " " + COLOR.yellow() + "X: " + COLOR.reset() + position.getX()
-                                + " " + COLOR.yellow() + "Y: " + COLOR.reset() + position.getY()
-                                + " " + COLOR.yellow() + "Z: " + COLOR.reset() + position.getZ();
-                                if(structure.getPrice() > 0.0d) {
-                                    line += " " + COLOR.reset() + COLOR.yellow() + "Value: " + ShopUtil.valueString(structure.getPrice());
-                                }
-                        message[lineNumber] = line;
-                    }
-                    tx.success();
-                }
-                iPlayer.sendMessage(message);
+        try (Transaction tx = graph.beginTx()) {
+            long totalStructures = structureDAO.getStructureCountForSettler(playerId);
+            System.out.println("Total: " + totalStructures);
+            long totalPages = Math.round(Math.ceil(totalStructures / (MAX_LINES - 1)));
+            List<StructureNode> structures = structureDAO.getStructuresForSettler(playerId, skip, limit);
+            if (p > totalPages || p < 0) {
+                iPlayer.sendMessage(COLOR.red() + "Page " + p + " out of " + totalPages + "...");
+                return true;
             }
-        });
+            
+            System.out.println("Structures: " + structures.size());
+
+            int lineNumber = 0;
+            message[0] = "-----------(Page: " + p + "/" + totalPages + ", Structures: " + totalStructures + ")---------------";
+            lineNumber++;
+            for (StructureNode structureNode : structures) {
+//                
+                
+                String line;
+                double price = structureNode.getPrice();
+                if (price > 0.0d) { 
+                    line = String.format("#%-1s%-10d%-3s%-40s%-15s%-1s%-5s", COLOR.gold() , structureNode.getId(), COLOR.blue() , structureNode.getName(), getStatusString(structureNode), COLOR.yellow() , ShopUtil.valueString(price));
+                } else {
+                    line = String.format("#%-1s%-10d%-3s%-40s%-15s", COLOR.gold() , structureNode.getId(), COLOR.blue() , structureNode.getName(), getStatusString(structureNode));
+                }
+                
+                
+                message[lineNumber] = line;
+                lineNumber++;
+            }
+            tx.success();
+        }
+        iPlayer.sendMessage(message);
 
         return true;
 
     }
+
+    private Structure getSmallesStructure(IWorld world, Vector position) {
+
+        Structure structure = null;
+        try (Transaction tx = graph.beginTx()) {
+
+            IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
+            long start = System.currentTimeMillis();
+
+            Map<String, Object> params = Maps.newHashMap();
+            params.put("worldId", w.getUUID().toString());
+
+            String query
+                    = "MATCH (world:" + WorldNode.LABEL.name() + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
+                    + " WITH world "
+                    + " MATCH (world)<-[:" + StructureRelTypes.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
+                    + " WHERE NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId()
+                    + " AND s." + StructureNode.MAX_X_PROPERTY + " >= " + position.getBlockX() + " AND s." + StructureNode.MIN_X_PROPERTY + " <= " + position.getBlockX()
+                    + " AND s." + StructureNode.MAX_Y_PROPERTY + " >= " + position.getBlockY() + " AND s." + StructureNode.MIN_Y_PROPERTY + " <= " + position.getBlockY()
+                    + " AND s." + StructureNode.MAX_Z_PROPERTY + " >= " + position.getBlockZ() + " AND s." + StructureNode.MIN_Z_PROPERTY + " <= " + position.getBlockZ()
+                    + " RETURN s as structure"
+                    + " ORDER BY s." + StructureNode.SIZE_PROPERTY + " ASC "
+                    + " LIMIT 1";
+
+            Result result = graph.execute(query, params);
+            System.out.println("getSmallestOverlapping() in " + (System.currentTimeMillis() - start) + " ms");
+            while (result.hasNext()) {
+                Map<String, Object> map = result.next();
+                Node n = (Node) map.get("structure");
+                structure = DefaultStructureFactory.getInstance().makeStructure(new StructureNode(n));
+            }
+
+            tx.success();
+        }
+
+        return structure;
+    }
     
-  
+        /**
+         * Sends the status of this structure to given player
+         *
+         * @param structure The structure
+         * @param player The player to tell
+         */
+        private String getStatusString(Structure structure) {
+            String statusString;
+            ConstructionStatus status = structure.getConstructionStatus();
+            switch (status) {
+                case BUILDING:
+                    statusString = COLOR.yellow() + "BUILDING";
+                    break;
+                case DEMOLISHING:
+                    statusString = COLOR.yellow() + "DEMOLISHING";
+                    break;
+                case COMPLETED:
+                    statusString = COLOR.green() + "COMPLETE";
+                    break;
+                case ON_HOLD:
+                    statusString = COLOR.red() + "ON HOLD";
+                    break;
+                case QUEUED:
+                    statusString = COLOR.yellow() + "QUEUED";
+                    break;
+                case REMOVED:
+                    statusString = COLOR.red() + "REMOVED";
+                    break;
+                case STOPPED:
+                    statusString = COLOR.red() + "STOPPED";
+                    break;
+                default:
+                    statusString = status.name();
+            }
+            return statusString;
+        }
+        
+        /**
+         * Sends the status of this structure to given player
+         *
+         * @param structure The structure
+         * @param player The player to tell
+         */
+        private String getStatusString(StructureNode structure) {
+            String statusString;
+            ConstructionStatus status = structure.getConstructionStatus();
+            switch (status) {
+                case BUILDING:
+                    statusString = COLOR.yellow() + "BUILDING";
+                    break;
+                case DEMOLISHING:
+                    statusString = COLOR.yellow() + "DEMOLISHING";
+                    break;
+                case COMPLETED:
+                    statusString = COLOR.green() + "COMPLETE";
+                    break;
+                case ON_HOLD:
+                    statusString = COLOR.red() + "ON HOLD";
+                    break;
+                case QUEUED:
+                    statusString = COLOR.yellow() + "QUEUED";
+                    break;
+                case REMOVED:
+                    statusString = COLOR.red() + "REMOVED";
+                    break;
+                case STOPPED:
+                    statusString = COLOR.red() + "STOPPED";
+                    break;
+                default:
+                    statusString = status.name();
+            }
+            return statusString;
+        }
+        
+        
 
 }

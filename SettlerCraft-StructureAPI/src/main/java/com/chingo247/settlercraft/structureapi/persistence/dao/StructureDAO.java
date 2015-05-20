@@ -71,7 +71,7 @@ public class StructureDAO implements IStructureDAO{
         
        
         String query =
-                  " MATCH (world)<-[:" + StructureRelTypes.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + " { "+StructureNode.ID_PROPERTY+": {structureId} })"
+                  " MATCH (s:" + StructureNode.LABEL.name() + " { "+StructureNode.ID_PROPERTY+": {structureId} })"
                 + " RETURN s as structure";
         
         Result result = graph.execute(query, params);
@@ -232,9 +232,10 @@ public class StructureDAO implements IStructureDAO{
         }
         
             String query =
-                    "   MATCH (settler:"+SettlerNode.LABEL.name()+" {"+SettlerNode.ID_PROPERTY+"}: {ownerId})"
+                    "   MATCH (settler:"+SettlerNode.LABEL.name()+" {"+SettlerNode.ID_PROPERTY+": {ownerId} })"
                     + " WITH settler"
                     + " MATCH (settler)<-[:" + StructureRelTypes.RELATION_OWNED_BY + "]-(s: " + StructureNode.LABEL.name() + ")"
+                    + " WHERE NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId()
                     + " RETURN s"
                     + " ORDER BY s." + StructureNode.CREATED_AT_PROPERTY + " DESC ";
 
@@ -268,12 +269,13 @@ public class StructureDAO implements IStructureDAO{
             params.put("ownerId", settler.toString());
         
             String query =
-                       "MATCH (settler:"+SettlerNode.LABEL.name()+" {"+SettlerNode.ID_PROPERTY+"}: {ownerId})"
+                       "MATCH (settler:"+SettlerNode.LABEL.name()+" {"+SettlerNode.ID_PROPERTY+": {ownerId} })"
                     + " WITH settler"
-                    + " MATCH (settler)<-[:" + StructureRelTypes.RELATION_OWNED_BY + "]-(s: " + StructureNode.LABEL.name() + ")"
+                    + " MATCH (settler)<-[:" + StructureRelTypes.RELATION_OWNED_BY + "]-(s: " + StructureNode.LABEL.name() + ") "
+                    + " WHERE NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId()
                     + " RETURN COUNT(s) as count ";
 
-            Result result = graph.execute(query);
+            Result result = graph.execute(query, params);
 
             System.out.println("getAmountOfStructuresForSettler() in " + (System.currentTimeMillis() - start) + "ms");
             while (result.hasNext()) {
@@ -323,26 +325,14 @@ public class StructureDAO implements IStructureDAO{
 
     @Override
     public SettlerNode getMasterOwnerForStructure(long structureId) {
-        long start = System.currentTimeMillis();
-      
-        Map<String,Object> params = Maps.newHashMap();
-        params.put("structureId", structureId);
-        SettlerNode settlerNode = null;
-       
-        String query = 
-                  " MATCH (structure:" + StructureNode.LABEL.name() + " { "+StructureNode.ID_PROPERTY+": {structureId} })"
-                + " WITH structure "
-                + " MATCH (structure)-[:"+StructureRelTypes.RELATION_OWNED_BY+" { Type: "+StructureOwnerType.MASTER.getTypeId()+" } ]->(owner:" + SettlerNode.LABEL.name() + ")"
-                + " RETURN owner as theOwner";
-        Result result = graph.execute(query, params);
-        System.out.println("getOwnerForStructure() in " + (System.currentTimeMillis() - start) + " ms");
-        while (result.hasNext()) {
-            Map<String, Object> map = result.next();
-            Node n = (Node) map.get("theOwner");
-            settlerNode = new SettlerNode(n);
-            break;
+        StructureNode node = find(structureId);
+        
+        List<SettlerNode> nodes = node.getOwners(StructureOwnerType.MASTER);
+        if(nodes.isEmpty()) {
+            return null;
         }
-        return settlerNode;
+        
+        return nodes.get(0);
     }
     
     public boolean isOwnerOfStructure(long structureId, Player player) {

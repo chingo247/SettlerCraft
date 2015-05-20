@@ -29,7 +29,16 @@ package com.chingo247.settlercraft.structureapi.persistence.entities.structure;
  */
 public class StructureRelTypes {
     
+    /**
+     * Should point to it's container
+     */
     public static final String RELATION_WITHIN = "Within";
+    /**
+     * Should point to it's parent
+     */
     public static final String RELATION_SUBSTRUCTURE = "SubstructureOf";
+    /**
+     * Should point to it's owner
+     */
     public static final String RELATION_OWNED_BY = "OwnedBy";
 }

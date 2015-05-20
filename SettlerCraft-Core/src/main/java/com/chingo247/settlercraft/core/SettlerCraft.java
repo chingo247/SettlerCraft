@@ -71,7 +71,7 @@ public class SettlerCraft {
         this.service = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 30L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     }
 
-    private void setupDatabase() {
+    private void setupNeo4j() {
         File databaseDir = new File(plugin.getDataFolder().getAbsolutePath() + "//databases//Neo4J");
         databaseDir.mkdirs();
         this.graph = new Neo4jDatabase(databaseDir, "SettlerCraft", 512).getGraph();
@@ -98,7 +98,7 @@ public class SettlerCraft {
         SettlerRegister structureOwnerRegister = new SettlerRegister(settlerDAO, service, graph);
         EventManager.getInstance().getEventBus().register(structureOwnerRegister);
     }
-
+    
     public static SettlerCraft getInstance() {
         if (instance == null) {
             instance = new SettlerCraft();
@@ -123,7 +123,7 @@ public class SettlerCraft {
             throw new RuntimeException("Can't register '" + plugin.getName() + "' already registered a plugin!");
         }
         this.plugin = plugin;
-        setupDatabase();
+        setupNeo4j();
     }
 
     public void registerPlatform(APlatform platform) throws RuntimeException {

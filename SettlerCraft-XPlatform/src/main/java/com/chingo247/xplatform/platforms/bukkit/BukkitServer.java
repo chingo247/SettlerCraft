@@ -21,6 +21,7 @@ import com.chingo247.xplatform.core.IPlugin;
 import com.chingo247.xplatform.core.IScheduler;
 import com.chingo247.xplatform.core.IServer;
 import com.chingo247.xplatform.core.IWorld;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -98,6 +99,16 @@ public class BukkitServer implements IServer {
     @Override
     public IPlugin getPlugin(String plugin) {
         return new BukkitPlugin(server.getPluginManager().getPlugin(plugin));
+    }
+
+    @Override
+    public File getWorldFolder(String world) {
+        return new File(world);
+    }
+
+    @Override
+    public File getWorldRegionFolder(String world) {
+        return new File(getWorldFolder(world), "region");
     }
 
     

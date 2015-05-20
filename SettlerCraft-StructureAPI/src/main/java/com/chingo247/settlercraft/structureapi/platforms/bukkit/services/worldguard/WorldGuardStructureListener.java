@@ -24,7 +24,7 @@ public class WorldGuardStructureListener {
     @Subscribe
     public void onStructureCreate(StructureCreateEvent structureCreateEvent) {
         Structure structure = structureCreateEvent.getStructure();
-        worldGuardHelper.createRegionForStructure(structure);
+        worldGuardHelper.protect(structure);
     }
     
 }

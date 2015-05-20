@@ -24,6 +24,18 @@ import java.util.UUID;
  * @author Chingo
  */
 public class DefaultSettlerFactory extends AbstractSettlerFactory<Settler>{
+    
+    private static DefaultSettlerFactory instance;
+
+    private DefaultSettlerFactory() {
+    }
+    
+    public static DefaultSettlerFactory getInstance() {
+        if(instance == null) {
+            instance = new DefaultSettlerFactory();
+        }
+        return instance;
+    }
 
     @Override
     public Settler makeStructureOwner(SettlerNode structureOwnerNode) {

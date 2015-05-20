@@ -29,7 +29,13 @@ package com.chingo247.settlercraft.structureapi.structure.plan.placement.options
  */
 public class DemolishingOptions extends PlacementOptions {
 
+    public DemolishingOptions() {
+        setCubeY(-1); // Default for demolishing
+    }
+
     // To be implemented
+    
+    
 
     
 }

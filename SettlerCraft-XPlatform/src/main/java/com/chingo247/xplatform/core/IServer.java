@@ -16,6 +16,7 @@
  */
 package com.chingo247.xplatform.core;
 
+import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,5 +42,9 @@ public interface IServer {
 
     @Deprecated
     public IPlayer getPlayer(String player);
+    
+    public File getWorldFolder(String world);
+    
+    public File getWorldRegionFolder(String world);
     
 }

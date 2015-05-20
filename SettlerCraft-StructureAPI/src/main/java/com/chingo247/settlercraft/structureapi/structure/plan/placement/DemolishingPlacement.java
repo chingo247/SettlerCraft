@@ -26,7 +26,7 @@ package com.chingo247.settlercraft.structureapi.structure.plan.placement;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.DemolishingOptions;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.AbstractPlacement;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.PlacementTypes;
-import com.chingo247.settlercraft.structureapi.structure.plan.placement.iterator.CuboidIterator;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.iterator.TopDownCuboidIterator;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
@@ -47,15 +47,16 @@ public class DemolishingPlacement extends AbstractPlacement<DemolishingOptions> 
 
     @Override
     public void place(EditSession session, Vector pos, DemolishingOptions option) {
-        CuboidIterator cit = new CuboidIterator(option.getCubeX(), option.getCubeY(), option.getCubeZ());
+        TopDownCuboidIterator cit = new TopDownCuboidIterator(
+                option.getCubeX() < 0 ? getSize().getBlockX() : option.getCubeX(),
+                option.getCubeY() < 0 ? getSize().getBlockY() : option.getCubeY(), 
+                option.getCubeZ() < 0 ? getSize().getBlockZ() : option.getCubeZ()
+        );
         Iterator<Vector> traversal = cit.iterate(getSize());
        
         while(traversal.hasNext()) {
             Vector relativePosition = traversal.next();
-            
-            
             Vector worldPosition = relativePosition.add(pos);
-            
             BaseBlock currentBlock = session.getWorld().getBlock(worldPosition);
             
             if (currentBlock.isAir()  || currentBlock.getId() == BlockID.BEDROCK) {

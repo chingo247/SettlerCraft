@@ -29,4 +29,5 @@ public interface IWorld {
     public int getMaxHeight();
     public ILocation getSpawn();
     
+    
 }

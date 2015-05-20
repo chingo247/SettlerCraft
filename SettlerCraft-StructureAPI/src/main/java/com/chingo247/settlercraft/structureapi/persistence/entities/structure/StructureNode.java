@@ -30,6 +30,7 @@ import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -39,6 +40,7 @@ import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.traversal.TraversalDescription;
 
 /**
  *
@@ -53,13 +55,13 @@ public class StructureNode {
 //    public static final String WORLD_PROPERTY = "world";
 //    public static final String WORLD_ID_PROPERTY = "worldId";
     public static final String CONSTRUCTION_STATUS_PROPERTY = "constructionStatus";
-    public static final String MIN_X_PROPERTY = "minX", MIN_Y_PROPERTY = "minY", MIN_Z_PROPERTY = "minZ", MAX_X_PROPERTY = "maxX", MAX_Y_PROPERTY = "maxY", MAX_Z_PROPERTY = "MAX_Z";
+    public static final String MIN_X_PROPERTY = "minX", MIN_Y_PROPERTY = "minY", MIN_Z_PROPERTY = "minZ", MAX_X_PROPERTY = "maxX", MAX_Y_PROPERTY = "maxY", MAX_Z_PROPERTY = "maxZ";
     public static final String POS_X_PROPERTY = "x", POS_Y_PROPERTY = "y", POS_Z_PROPERTY = "z";
     public static final String CREATED_AT_PROPERTY = "createdAt", DELETED_AT_PROPERTY = "deletedAt", COMPLETED_AT_PROPERTY = "completedAt";
     public static final String PRICE_PROPERTY = "price";
     public static final String SIZE_PROPERTY = "size";
     public static final String PLACEMENT_TYPE_PROPERTY = "placementType";
-    
+    public static final String AUTO_REMOVED_PROPERTY = "autoremoved";
     
 
     // RelationShips
@@ -72,6 +74,33 @@ public class StructureNode {
     public Long getId() {
         Object o = underlyingNode.getProperty(ID_PROPERTY);
         return o != null ? (Long) o : null;
+    }
+    
+    public void setCompletedAt(Long date) {
+        if(date != null) {
+            underlyingNode.setProperty(COMPLETED_AT_PROPERTY, date);
+        } else if(underlyingNode.hasProperty(COMPLETED_AT_PROPERTY)) {
+            underlyingNode.removeProperty(COMPLETED_AT_PROPERTY);
+        }
+    }
+    
+    public void setAutoremoved(boolean removed) {
+        underlyingNode.setProperty(AUTO_REMOVED_PROPERTY, removed);
+    }
+    
+    public boolean isAutoremoved() {
+        if(underlyingNode.hasProperty(AUTO_REMOVED_PROPERTY)) {
+            return (Boolean) underlyingNode.getProperty(AUTO_REMOVED_PROPERTY);
+        }
+        return false;
+     }
+    
+    public void setDeletedAt(Long date) {
+        if(date != null) {
+            underlyingNode.setProperty(DELETED_AT_PROPERTY, date);
+        } else if(underlyingNode.hasProperty(DELETED_AT_PROPERTY)) {
+            underlyingNode.removeProperty(DELETED_AT_PROPERTY);
+        }
     }
     
     
@@ -233,8 +262,8 @@ public class StructureNode {
         List<SettlerNode> owners = Lists.newArrayList();
         for (Relationship rel : underlyingNode.getRelationships(DynamicRelationshipType.withName("OwnedBy"))) {
             if (rel.hasProperty("Type")) {
-                String type = (String) rel.getProperty("Type");
-                if (StructureOwnerType.valueOf(type) == ownerType) {
+                Integer type = (Integer) rel.getProperty("Type");
+                if (StructureOwnerType.match(type) == ownerType) {
                     SettlerNode ownerNode = new SettlerNode(rel.getOtherNode(underlyingNode));
                     owners.add(ownerNode);
                 }
@@ -242,7 +271,7 @@ public class StructureNode {
         }
         return owners;
     }
-
+    
     public List<StructureNode> getSubstructures() {
         Iterable<Relationship> relationships = underlyingNode.getRelationships(DynamicRelationshipType.withName(StructureRelTypes.RELATION_SUBSTRUCTURE), org.neo4j.graphdb.Direction.INCOMING);
         List<StructureNode> substructures = Lists.newArrayList();
@@ -263,6 +292,23 @@ public class StructureNode {
             }
         }
         return false;
+    }
+    
+    public StructureNode getRoot() {
+        TraversalDescription traversalDescription = underlyingNode.getGraphDatabase().traversalDescription();
+        Iterator<Node> nodeIt = traversalDescription.relationships(DynamicRelationshipType.withName(StructureRelTypes.RELATION_SUBSTRUCTURE), org.neo4j.graphdb.Direction.OUTGOING)
+                .depthFirst()
+                .traverse(underlyingNode)
+                .nodes()
+                .iterator();
+        while(nodeIt.hasNext()) {
+            Node n = nodeIt.next();
+            if(!nodeIt.hasNext()) {
+                return new StructureNode(n);
+            }
+            
+        }
+        return this;
     }
     
     public void addSubstructure(StructureNode otherNode) {

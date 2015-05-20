@@ -164,7 +164,7 @@ public interface Structure {
      * Checks if this Structure is the most upper parent
      * @return True if this Structure has no parent
      */
-    public boolean isRoot();
+    public boolean hasParent();
     
     /**
      * Will add the offset to the structure's origin, which is always the front left corner of a
