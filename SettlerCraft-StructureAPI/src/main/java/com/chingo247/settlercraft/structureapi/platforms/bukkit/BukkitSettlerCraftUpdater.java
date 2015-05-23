@@ -32,6 +32,7 @@ import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.PlacementTypes;
 import com.chingo247.settlercraft.structureapi.structure.plan.xml.PlacementXMLConstants;
 import com.chingo247.settlercraft.structureapi.structure.plan.xml.StructurePlanXMLConstants;
+import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -78,7 +79,6 @@ class BukkitSettlerCraftUpdater {
     private final File oldStructuresDirectory;
     private final ExecutorService executorService;
     private Map<String,StructurePlan> plans;
-    private boolean success = true;
 
     public BukkitSettlerCraftUpdater(GraphDatabaseService graph, IStructureAPI structureAPI) {
         this.graph = graph;
@@ -101,17 +101,23 @@ class BukkitSettlerCraftUpdater {
             System.out.println(PREFIX + "This might take a while...");
         }
 
-        long start = System.currentTimeMillis();
         System.out.println(PREFIX + "Retrieving structures...");
+       
+        
         List<Structure> structures = getStructures();
-        System.out.println(PREFIX + "Retrieved in " + (System.currentTimeMillis() - start));
+        if(structures.isEmpty()) {
+            System.out.println(PREFIX + "There are no structures that need updating...");
+            return;
+        }
+        
+        System.out.println(PREFIX + "Updating a total of " + total + " structures");
         
         System.out.println(PREFIX + "Preparing structures");
-        start = System.currentTimeMillis();
         prepareStructures(structures);
-        System.out.println(PREFIX + "Prepared in " + (System.currentTimeMillis() - start));
         
         int startIndex = 0;
+        
+        System.out.println(PREFIX + "Copying updating structures");
         
         while(startIndex < total) {
             processStructures(structures.listIterator(startIndex));
@@ -120,10 +126,8 @@ class BukkitSettlerCraftUpdater {
         
         System.out.println(PREFIX + "Update complete");
         
-        if(success) {
-            File file = new File("plugins//SettlerCraft");
-            file.renameTo(new File("SettlerCraft-OLD"));
-        }
+        HibernateUtil.shutdown();
+        
 
         executorService.shutdown();
     }
@@ -133,7 +137,8 @@ class BukkitSettlerCraftUpdater {
         try (Transaction tx = graph.beginTx()) {
             Map<String, StructureWorldNode> worlds = Maps.newHashMap();
 
-            while(structureIterator.hasNext()) {
+            List<Structure> structures = Lists.newArrayList();
+             while(structureIterator.hasNext()) {
                 Structure s = structureIterator.next();
                 if (!worldsProcessed.contains(s.getWorldName())) {
                     WorldNode w = registerWorld(s.getWorldName());
@@ -147,15 +152,15 @@ class BukkitSettlerCraftUpdater {
                 StructureWorldNode w = worlds.get(s.getWorldName());
                 try {
                     processStructure(s, w);
+                    structures.add(s);
                 } catch (IOException ex) {
                     Logger.getLogger(BukkitSettlerCraftUpdater.class.getName()).log(Level.SEVERE, null, ex);
                     tx.failure();
-                    success = false;
                     return;
                 }
             }
             
-            bulkDelete(structureIterator);
+            bulkDelete(structures);
             
             tx.success();
         }
@@ -238,7 +243,6 @@ class BukkitSettlerCraftUpdater {
             worldDAO.addWorld(w.getName(), w.getUUID());
             worldNode = worldDAO.find(w.getUUID());
             if (worldNode == null) {
-                success = false;
                 System.out.println("Something went wrong during creation of the 'WorldNode' for " + world); // SHOULD NEVER HAPPEN
                 return null;
             }
@@ -255,15 +259,14 @@ class BukkitSettlerCraftUpdater {
         return structure;
     }
 
-    private void bulkDelete(Iterator<Structure> structureIterator) {
+    private void bulkDelete(List<Structure> structures) {
         org.hibernate.Transaction tx = null;
         Session session = null;
         try {
             session = HibernateUtil.getSession();
             tx = session.beginTransaction();
 
-            while(structureIterator.hasNext()) {
-                Structure s = structureIterator.next();
+            for(Structure s : structures) {
                 session.delete(s);
             }
             
@@ -329,7 +332,6 @@ class BukkitSettlerCraftUpdater {
                     if(!structurePlanFile.exists()) {
                         System.out.println(PREFIX + "Missing 'StructurePlan.xml' within " + structurePlanFile.getAbsolutePath());
                         System.out.println(PREFIX + "Please resolve the issue or remove the directory");
-                        success = false;
                         return;
                     }
                     
@@ -340,7 +342,6 @@ class BukkitSettlerCraftUpdater {
                         if(schematicNode == null) {
                             System.out.println(PREFIX + "Missing 'Schematic' element in " + structurePlanFile.getAbsolutePath());
                             System.out.println(PREFIX + "Please resolve the issue or remove the directory");
-                            success = false;
                             return;
                         }
                         
@@ -348,7 +349,6 @@ class BukkitSettlerCraftUpdater {
                         if(!schematicFile.exists()) {
                             System.out.println(PREFIX + "Missing schematic file '" + schematicFile.getName() + " within " + oldDirectory.getAbsolutePath());
                             System.out.println(PREFIX + "Please resolve the issue or remove the directory");
-                            success = false;
                             return;
                         }
                         
@@ -392,22 +392,18 @@ class BukkitSettlerCraftUpdater {
                             Files.copy(schematicFile, new File(tempDirectory, schematicFile.getName()));
                         } catch (UnsupportedEncodingException ex) {
                             Logger.getLogger(BukkitSettlerCraftUpdater.class.getName()).log(Level.SEVERE, null, ex);
-                            success = false;
                         } catch (IOException ex) {
-                            success = false;
                             Logger.getLogger(BukkitSettlerCraftUpdater.class.getName()).log(Level.SEVERE, null, ex);
                         } finally {
                             if(writer != null) {
                                 try {
                                     writer.close();
                                 } catch (IOException ex) {
-                                    success = false;
                                     Logger.getLogger(BukkitSettlerCraftUpdater.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                             }
                         }
                     } catch (DocumentException ex) {
-                        success = false;
                         Logger.getLogger(BukkitSettlerCraftUpdater.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     

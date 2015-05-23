@@ -61,6 +61,22 @@ public class StructureHologramManager {
         this.hologramsProvider = hologramsProvider;
     }
 
+    public void registerStructureHologram(Structure structure, Hologram hologram) {
+        if (holograms.get(structure.getId()) == null) {
+            holograms.put(structure.getId(), new ArrayList<Hologram>());
+        }
+        
+        hologram.addLine("#" + color.gold() + String.valueOf(structure.getId()));
+        hologram.addLine(color.blue() + structure.getName());
+        hologram.addLine(getStatusString(structure));
+        synchronized (holograms) {
+            List<Hologram> holos = holograms.get(structure.getId());
+            synchronized (holos) {
+                holos.add(hologram);
+            }
+        }
+    }
+
     @Subscribe
     @AllowConcurrentEvents
     public void onStructureCreate(StructureCreateEvent structureCreateEvent) {
@@ -70,9 +86,7 @@ public class StructureHologramManager {
 
         final Structure structure = structureCreateEvent.getStructure();
 
-        if (holograms.get(structure.getId()) == null) {
-            holograms.put(structure.getId(), new ArrayList<Hologram>());
-        }
+        
 
         // Assures non-async behavior - Fixes concurrent exceptions that could be thrown
         scheduler.runSync(new Runnable() {
@@ -80,16 +94,8 @@ public class StructureHologramManager {
             @Override
             public void run() {
                 World w = SettlerCraft.getInstance().getWorld(structure.getWorld());
-                Hologram hologram = hologramsProvider.createHologram(PLUGIN, w, structure.translateRelativeLocation(new Vector(0, 2, 0)));
-                hologram.addLine("#" + color.gold() + String.valueOf(structure.getId()));
-                hologram.addLine(color.blue() + structure.getName());
-                hologram.addLine(getStatusString(structure));
-                synchronized (holograms) {
-                    List<Hologram> holos = holograms.get(structure.getId());
-                    synchronized (holos) {
-                        holos.add(hologram);
-                    }
-                }
+                Hologram hologram = hologramsProvider.createHologram(PLUGIN, w, structure.translateRelativeLocation(new Vector(0, 2, 0)), structure);
+                registerStructureHologram(structure, hologram);
             }
         });
 
@@ -107,7 +113,7 @@ public class StructureHologramManager {
 
             @Override
             public void run() {
-                
+
                 List<Hologram> holos = holograms.get(structure.getId());
                 if (holos != null && !holos.isEmpty()) {
                     synchronized (holos) {

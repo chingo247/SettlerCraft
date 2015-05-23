@@ -48,6 +48,14 @@ public class TopDownCuboidTraversal implements Iterator<Vector>, Iterable<Vector
     public Iterator<Vector> iterator() {
         return this;
     }
+
+    /**
+     * Does nothing at the moment
+     */
+    @Override
+    public void remove() {
+        // Do nothing
+    }
     
     
     

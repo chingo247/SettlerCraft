@@ -134,5 +134,13 @@ public class CuboidTraversal implements Iterator<Vector>, Iterable<Vector> {
         return this;
     }
 
+    @Override
+    /**
+     * Does nothing at the moment
+     */
+    public void remove() {
+        // Do nothing...
+    }
+
   
 }

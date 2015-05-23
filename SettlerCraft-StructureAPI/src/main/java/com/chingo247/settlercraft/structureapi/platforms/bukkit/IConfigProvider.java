@@ -36,10 +36,8 @@ public interface IConfigProvider {
 
     public boolean isPlanShopEnabled();
 
-    public int getBuildMode();
-    
-    public int getDemolisionMode();
-
     public double getRefundPercentage();
+    
+    public boolean useHolograms();
     
 }

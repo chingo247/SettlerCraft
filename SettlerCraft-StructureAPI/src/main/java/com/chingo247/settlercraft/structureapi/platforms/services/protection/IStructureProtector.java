@@ -5,13 +5,14 @@
  */
 package com.chingo247.settlercraft.structureapi.platforms.services.protection;
 
+import com.chingo247.settlercraft.structureapi.platforms.services.Service;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 
 /**
  * An interface for plugins that protect regions (e.g. worldguard)
  * @author Chingo
  */
-public interface IStructureProtector {
+public interface IStructureProtector extends Service {
     
     /**
      * Name of the plugin/service that will protect the structure

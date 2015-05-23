@@ -6,14 +6,17 @@
 package com.chingo247.settlercraft.structureapi.platforms.bukkit.services.worldguard;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
+import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
 import com.chingo247.settlercraft.structureapi.persistence.dao.IStructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
+import com.chingo247.settlercraft.structureapi.platforms.bukkit.structure.restriction.WorldGuardRestriction;
 import com.chingo247.settlercraft.structureapi.platforms.bukkit.util.WorldGuardUtil;
 import com.chingo247.settlercraft.structureapi.platforms.services.protection.IStructureProtector;
 import com.chingo247.settlercraft.structureapi.structure.ConstructionStatus;
 import com.chingo247.settlercraft.structureapi.structure.DefaultStructureFactory;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
+import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -39,13 +42,16 @@ import org.neo4j.graphdb.Transaction;
  */
 public class WorldGuardHelper implements IStructureProtector {
     
+    private static final String PREFIX = "SC_REG_";
     public static String WORLD_GUARD_REGION_PROPERTY = "WGRegion";
     private GraphDatabaseService graph;
     private IStructureDAO structureDAO;
+    private StructureAPI structureAPI;
 
-    public WorldGuardHelper(GraphDatabaseService graph, IStructureDAO structureDAO) {
+    public WorldGuardHelper(GraphDatabaseService graph, IStructureDAO structureDAO, StructureAPI structureAPI) {
         this.graph = graph;
         this.structureDAO = structureDAO;
+        this.structureAPI = structureAPI;
     }
     
     @Override
@@ -96,7 +102,7 @@ public class WorldGuardHelper implements IStructureProtector {
     }
     
     private String getRegionId(Structure structure) {
-        return "sc_stt_"+structure.getWorld().replaceAll("\\s", "_")+"_"+structure.getId();
+        return PREFIX+structure.getId();
     }
     
     public void processStructuresWithoutRegion() {
@@ -165,6 +171,14 @@ public class WorldGuardHelper implements IStructureProtector {
         RegionManager mgr = WorldGuardUtil.getRegionManager(world);
         String region = getRegionId(structure);
         return mgr.hasRegion(region);
+    }
+
+    @Override
+    public void initialize() {
+        EventManager.getInstance().getEventBus().register(new WorldGuardStructureListener(this));
+        StructureAPI.getInstance().addRestriction(new WorldGuardRestriction());
+        processStructuresWithoutRegion();
+        structureAPI.addStructureProtector(this);
     }
     
 }

@@ -35,8 +35,6 @@ import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.structureapi.platforms.bukkit.services.holograms.HolographicDisplaysHologramProvider;
 import com.chingo247.settlercraft.structureapi.platforms.bukkit.services.holograms.StructureHologramManager;
 import com.chingo247.settlercraft.structureapi.platforms.bukkit.services.worldguard.WorldGuardHelper;
-import com.chingo247.settlercraft.structureapi.platforms.bukkit.services.worldguard.WorldGuardStructureListener;
-import com.chingo247.settlercraft.structureapi.platforms.bukkit.structure.restriction.WorldGuardRestriction;
 import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
 import com.chingo247.settlercraft.structureapi.structure.StructureInvalidator;
 import com.chingo247.settlercraft.structureapi.structure.plan.util.PlanGenerator;
@@ -111,9 +109,7 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         // Get GraphDatabase
         graph = SettlerCraft.getInstance().getNeo4j();
         
-        
-        
-        // Register Config
+        // Initialize Config
         configProvider = new BKConfigProvider();
         try {
             configProvider.load();
@@ -122,22 +118,16 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
             setEnabled(false);
             return;
         }
-        
-        
 
         // Register plugin & ConfigProvider
         StructureAPI structureAPI = (StructureAPI) StructureAPI.getInstance();
-        
         structureAPI.registerStructureAPIPlugin(new BukkitPlugin(this));
         structureAPI.registerConfigProvider(configProvider);
         
          // Enable WorldGuard
         if(Bukkit.getPluginManager().getPlugin("WorldGuard") != null) {
-            WorldGuardHelper worldGuardHelper = new WorldGuardHelper(graph, new StructureDAO(graph));
-            EventManager.getInstance().getEventBus().register(new WorldGuardStructureListener(worldGuardHelper));
-            StructureAPI.getInstance().addRestriction(new WorldGuardRestriction());
-            worldGuardHelper.processStructuresWithoutRegion();
-            structureAPI.addStructureProtector(worldGuardHelper);
+            WorldGuardHelper worldGuardHelper = new WorldGuardHelper(graph, new StructureDAO(graph), structureAPI);
+            worldGuardHelper.initialize();
         }
         
         economyProvider = SettlerCraft.getInstance().getEconomyProvider();
@@ -172,9 +162,10 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         PlanGenerator.generate(generationDirectory);
         
         // Setup HolographicDisplays (if available)
-        if(Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null) {
-            StructureHologramManager.getInstance().setHologramProvider(new HolographicDisplaysHologramProvider());
-            EventManager.getInstance().getEventBus().register(StructureHologramManager.getInstance());
+        if(configProvider.useHolograms() && Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null) {
+            HolographicDisplaysHologramProvider hologramProvider = new HolographicDisplaysHologramProvider(graph, SettlerCraft.getInstance().getPlatform(), new BukkitPlugin(this));
+            hologramProvider.initialize();
+            EventManager.getInstance().getEventBus().register(StructureHologramManager.getInstance()); // Should be registered once...
         }
         
         // Setup Commands

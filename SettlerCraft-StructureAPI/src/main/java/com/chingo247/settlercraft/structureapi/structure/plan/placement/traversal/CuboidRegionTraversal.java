@@ -141,4 +141,12 @@ public class CuboidRegionTraversal implements Iterator<CuboidRegion>, Iterable<C
         return this;
     }
 
+    /**
+     * Does nothing at the moment
+     */
+    @Override
+    public void remove() {
+        
+    }
+
 }

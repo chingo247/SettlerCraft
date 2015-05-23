@@ -62,6 +62,7 @@ public class StructureNode {
     public static final String SIZE_PROPERTY = "size";
     public static final String PLACEMENT_TYPE_PROPERTY = "placementType";
     public static final String AUTO_REMOVED_PROPERTY = "autoremoved";
+    public static final String CHECKED_HOLOGRAM_PROPERTY = "checkedHologram";
     
 
     // RelationShips

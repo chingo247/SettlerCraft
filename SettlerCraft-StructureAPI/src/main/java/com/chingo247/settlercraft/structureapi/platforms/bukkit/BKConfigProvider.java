@@ -43,15 +43,12 @@ import org.bukkit.configuration.file.YamlConfiguration;
  */
 public class BKConfigProvider implements IConfigProvider {
 
+    
     private boolean menuEnabled = false;
     private boolean shopEnabled = false;
     private double refundPercentage;
-    private int buildingMode = 0;
-    private int demolisionMode = 0;
     private boolean useHolograms = false;
-    private boolean defaultHolograms = false;
     private HashMap<Flag, Object> defaultFlags;
-    private int port;
 
     private final File file = new File(BKStructureAPIPlugin.getInstance().getDataFolder(), "config.yml");
 
@@ -65,22 +62,15 @@ public class BKConfigProvider implements IConfigProvider {
         if (refundPercentage < 0) {
             throw new SettlerCraftException("refund node in config was negative");
         }
-        this.buildingMode = config.getInt("structure.mode.building");
-        this.demolisionMode = config.getInt("structure.mode.building");
-        if (buildingMode < 0 || buildingMode > 2) {
-            throw new SettlerCraftException("Invalid building node in config");
+        if(refundPercentage > 1.0) {
+            throw new SettlerCraftException("value for 'refund' in config must be between 0 - 1.0");
         }
-        if (demolisionMode < 0 || demolisionMode > 2) {
-            throw new SettlerCraftException("Invalid demolision node in config");
-        }
+        
         this.useHolograms = config.getBoolean("structure.holograms.enabled");
-        this.defaultHolograms = config.getBoolean("structure.holograms.default-hologram");
         this.defaultFlags = getDefaultFlags(config);
     }
 
-    public boolean isDefaultHolograms() {
-        return defaultHolograms;
-    }
+  
 
     private HashMap<Flag, Object> getDefaultFlags(FileConfiguration config) throws SettlerCraftException {
         HashMap<Flag, Object> df = new HashMap<>();
@@ -120,15 +110,6 @@ public class BKConfigProvider implements IConfigProvider {
     }
 
     @Override
-    public int getBuildMode() {
-        return buildingMode;
-    }
-
-    @Override
-    public int getDemolisionMode() {
-        return demolisionMode;
-    }
-
     public boolean useHolograms() {
         return useHolograms;
     }
@@ -138,8 +119,6 @@ public class BKConfigProvider implements IConfigProvider {
         return refundPercentage;
     }
 
-    public boolean useDefaultHolograms() {
-        return defaultHolograms;
-    }
+   
 
 }
