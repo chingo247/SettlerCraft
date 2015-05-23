@@ -558,12 +558,9 @@ public class StructureCommands {
         int skip = p * (MAX_LINES-1);
         int limit = (MAX_LINES-1);
         
-        System.out.println("skip: " + skip);
-        System.out.println("limit: " + limit);
 
         try (Transaction tx = graph.beginTx()) {
             long totalStructures = structureDAO.getStructureCountForSettler(playerId);
-            System.out.println("Total: " + totalStructures);
             long totalPages = Math.round(Math.ceil(totalStructures / (MAX_LINES - 1)));
             List<StructureNode> structures = structureDAO.getStructuresForSettler(playerId, skip, limit);
             if (p > totalPages || p < 0) {
@@ -571,7 +568,6 @@ public class StructureCommands {
                 return true;
             }
             
-            System.out.println("Structures: " + structures.size());
 
             int lineNumber = 0;
             message[0] = "-----------(Page: " + p + "/" + totalPages + ", Structures: " + totalStructures + ")---------------";
@@ -623,7 +619,7 @@ public class StructureCommands {
                     + " LIMIT 1";
 
             Result result = graph.execute(query, params);
-            System.out.println("getSmallestOverlapping() in " + (System.currentTimeMillis() - start) + " ms");
+//            System.out.println("getSmallestOverlapping() in " + (System.currentTimeMillis() - start) + " ms");
             while (result.hasNext()) {
                 Map<String, Object> map = result.next();
                 Node n = (Node) map.get("structure");

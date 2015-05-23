@@ -59,8 +59,9 @@ public class SettlerDAO implements ISettlerDAO{
     @Override
     public void addSettler(String settlerName, UUID settlerUUID) {
         Transaction tx = graph.beginTx();
+        Node settlerNode = null;
         try {
-            Node settlerNode = graph.createNode(com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode.LABEL);
+            settlerNode = graph.createNode(com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode.LABEL);
             settlerNode.setProperty(com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode.ID_PROPERTY, settlerUUID.toString());
             settlerNode.setProperty(com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode.NAME_PROPERTY, settlerName);
             tx.success();

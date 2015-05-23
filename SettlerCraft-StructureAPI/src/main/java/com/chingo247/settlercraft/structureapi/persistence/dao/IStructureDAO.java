@@ -34,7 +34,7 @@ public interface IStructureDAO {
     
     public StructureNode find(long id);
     
-    public StructureNode addStructure(String name, World world, Vector position, CuboidRegion dimension, Direction direction, double price);
+    public StructureNode addStructure(String name, Vector position, CuboidRegion dimension, Direction direction, double price);
 
     public List<StructureNode> getStructuresWithin(World world, CuboidRegion region, int limit);
 

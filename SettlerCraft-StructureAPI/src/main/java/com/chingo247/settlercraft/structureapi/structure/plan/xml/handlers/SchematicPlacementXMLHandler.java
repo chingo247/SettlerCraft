@@ -32,7 +32,7 @@ public class SchematicPlacementXMLHandler extends AbstractPlacementXMLHandler<Sc
        Element placementRoot = super.handle(placement);
        
        // add the schematic
-       Element schematicElement = new BaseElement(PlacementXMLConstants.PLACEMENT_SCHEMATIC_ELEMENT);
+       Element schematicElement = new BaseElement(PlacementXMLConstants.SCHEMATIC_ELEMENT);
        schematicElement.setText(placement.getSchematic().getFile().getName());
        placementRoot.add(schematicElement);
        return placementRoot;

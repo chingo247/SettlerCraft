@@ -149,11 +149,8 @@ public class StructurePlaceHandler {
     }
 
     private void handlePlace(StructurePlan plan, AItemStack item, Player player, World world, Vector pos1, ISelectionManager selectionManager) {
-        
         IPlayer iPlayer = SettlerCraft.getInstance().getPlatform().getPlayer(player.getUniqueId());
-
         Direction direction = WorldUtil.getDirection(iPlayer.getYaw());
-
         Vector pos2;
 
         boolean toLeft = iPlayer.isSneaking();
@@ -261,7 +258,7 @@ public class StructurePlaceHandler {
                     + " LIMIT 1";
 
             Result result = graph.execute(query, params);
-            System.out.println("getSmallestOverlapping() in " + (System.currentTimeMillis() - start) + " ms");
+            System.out.println("getAndCheckSmallestOverlappingStructure() in " + (System.currentTimeMillis() - start) + " ms");
             while (result.hasNext()) {
                 Map<String, Object> map = result.next();
                 Node n = (Node) map.get("structure");

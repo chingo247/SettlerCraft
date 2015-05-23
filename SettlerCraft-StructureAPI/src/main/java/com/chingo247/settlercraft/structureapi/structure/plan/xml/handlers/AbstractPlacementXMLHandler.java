@@ -33,14 +33,14 @@ public abstract class AbstractPlacementXMLHandler<T extends Placement> implement
 
     @Override
     public Element handle(T placement) {
-        Element placementRoot = new BaseElement(PlacementXMLConstants.PLACEMENT_ROOT_ELEMENT);
+        Element placementRoot = new BaseElement(PlacementXMLConstants.ROOT_ELEMENT);
 //        d.add(placementRoot);
 
         Vector v = placement.getPosition();
         if (!v.equals(Vector.ZERO)) { // Not equal to default
-            Element xElement = new BaseElement(PlacementXMLConstants.PLACEMENT_X_ELEMENT);
-            Element yElement = new BaseElement(PlacementXMLConstants.PLACEMENT_Y_ELEMENT);
-            Element zElement = new BaseElement(PlacementXMLConstants.PLACEMENT_Z_ELEMENT);
+            Element xElement = new BaseElement(PlacementXMLConstants.X_ELEMENT);
+            Element yElement = new BaseElement(PlacementXMLConstants.Y_ELEMENT);
+            Element zElement = new BaseElement(PlacementXMLConstants.Z_ELEMENT);
 
             xElement.setText(String.valueOf(v.getBlockX()));
             yElement.setText(String.valueOf(v.getBlockY()));
@@ -53,12 +53,12 @@ public abstract class AbstractPlacementXMLHandler<T extends Placement> implement
 
         if (placement instanceof RotationalPlacement) {
             Direction direction = ((RotationalPlacement) placement).getDirection();
-            Element directionElement = new BaseElement(PlacementXMLConstants.PLACEMENT_DIRECTION_ELEMENT);
+            Element directionElement = new BaseElement(PlacementXMLConstants.DIRECTION_ELEMENT);
             directionElement.setText(direction.name());
             placementRoot.add(directionElement);
         }
         
-        Element typeElement = new BaseElement(PlacementXMLConstants.PLACEMENT_TYPE_ELEMENT);
+        Element typeElement = new BaseElement(PlacementXMLConstants.TYPE_ELEMENT);
         typeElement.setText(placement.getTypeName());
         placementRoot.add(typeElement);
         

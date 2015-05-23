@@ -44,7 +44,6 @@ public class CuboidTraversal implements Iterator<Vector>, Iterable<Vector> {
         this.cubeY = cubeY;
         this.cubeZ = cubeZ;
         this.start = Vector.ZERO;
-        System.out.println("start: " + size);
     }
 
     

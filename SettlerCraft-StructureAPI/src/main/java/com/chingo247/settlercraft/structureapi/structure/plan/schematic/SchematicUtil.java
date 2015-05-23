@@ -48,7 +48,6 @@ public class SchematicUtil {
 
         Tag rootTag = nbtStream.readTag();
 
-        System.out.println(rootTag.getName());
         if (!rootTag.getName().equalsIgnoreCase("Schematic")) {
             throw new RuntimeException("Tag 'Schematic' does not exist or is not first");
         }
@@ -66,16 +65,12 @@ public class SchematicUtil {
         short height = getChildTag(schematic, "Height", ShortTag.class).getValue();
         byte[] blockId = getChildTag(schematic, "Blocks", ByteArrayTag.class).getValue();
 
-        System.out.println(schematicFile.getName() + " - " + width + " - " + height + " - " + length);
-        System.out.println("Blocks: " + blockId.length);
 
         Map<String, Object> attributes = Maps.newHashMap();
         attributes.put("blocks", blockId.length);
         attributes.put("length", length);
         attributes.put("width", width);
         attributes.put("height", height);
-
-        System.out.println("Time: " + (System.currentTimeMillis() - start) + " ms");
 
         return attributes;
     }

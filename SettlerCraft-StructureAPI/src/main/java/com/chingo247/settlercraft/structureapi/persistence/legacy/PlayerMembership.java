@@ -73,7 +73,10 @@ public class PlayerMembership implements Serializable {
         this.playerMembershipId = new PlayerMembershipId(structure.getId(), player.getUniqueId());
     }
 
-   
+    public String getName() {
+        return name;
+    }
+
 
     public UUID getUUID() {
         return uuid;

@@ -85,7 +85,7 @@ public class AsyncDemolishingPlacement extends AbstractAsyncPlacement<Demolishin
             callback.onJobAdded(jobId);
         }
 
-        scheduler.runTaskAsynchronously(awe, new AsyncPlacementTask(placement, session, playerEntry, null, placer, job) {
+        scheduler.runAsync(new AsyncPlacementTask(placement, session, playerEntry, null, placer, job) {
 
             @Override
             public void task(Placement placement) throws MaxChangedBlocksException {

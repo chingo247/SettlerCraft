@@ -23,12 +23,12 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit;
 
+import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.PlacementOptions;
+import com.chingo247.xplatform.core.IScheduler;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
-import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
@@ -43,7 +43,7 @@ public abstract class AbstractAsyncPlacement<T extends PlacementOptions, P exten
     
     protected final AsyncWorldEditMain awe;
     protected final BlockPlacer placer;
-    protected final BukkitScheduler scheduler;
+    protected final IScheduler scheduler;
     protected final Placement placement;
     protected final PlayerEntry playerEntry;
 
@@ -58,7 +58,7 @@ public abstract class AbstractAsyncPlacement<T extends PlacementOptions, P exten
         this.awe = AsyncWorldEditMain.getInstance();
         this.placer = awe.getBlockPlacer();
         this.placement = placement;
-        this.scheduler = Bukkit.getScheduler();
+        this.scheduler = SettlerCraft.getInstance().getPlatform().getServer().getScheduler(SettlerCraft.getInstance().getPlugin());
     }
 
    

@@ -145,6 +145,10 @@ public class SettlerCraft {
     public APlatform getPlatform() {
         return platform;
     }
+    
+    public IPlugin getPlugin() {
+        return plugin;
+    }
 
     public File getWorkingDirectory() {
         return plugin.getDataFolder();

@@ -61,10 +61,10 @@ public class PlanGenerator {
         
         Element placementElment = new BaseElement(StructurePlanXMLConstants.STRUCTURE_PLAN_PLACEMENT);
         
-        Element typeElement = new BaseElement(PlacementXMLConstants.PLACEMENT_TYPE_ELEMENT);
+        Element typeElement = new BaseElement(PlacementXMLConstants.TYPE_ELEMENT);
         typeElement.setText(PlacementTypes.SCHEMATIC);
         
-        Element schematicElement = new BaseElement(PlacementXMLConstants.PLACEMENT_SCHEMATIC_ELEMENT);
+        Element schematicElement = new BaseElement(PlacementXMLConstants.SCHEMATIC_ELEMENT);
         schematicElement.setText(file.getName());
         
         placementElment.add(typeElement);

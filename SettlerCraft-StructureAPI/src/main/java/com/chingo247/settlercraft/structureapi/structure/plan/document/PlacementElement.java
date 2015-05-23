@@ -61,15 +61,15 @@ public class PlacementElement extends LineElement {
     }
 
     public String getType() {
-        checkNotNull(PlacementXMLConstants.PLACEMENT_TYPE_ELEMENT);
-        Node n = le.selectSingleNode(PlacementXMLConstants.PLACEMENT_TYPE_ELEMENT);
+        checkNotNull(PlacementXMLConstants.TYPE_ELEMENT);
+        Node n = le.selectSingleNode(PlacementXMLConstants.TYPE_ELEMENT);
         LineElement simpleElement = new LineElement(getFile(), (Element) n);
         simpleElement.checkNotEmpty();
         return simpleElement.getTextValue().trim();
     }
 
     public Direction getDirection() {
-        Node dirNode = le.selectSingleNode(PlacementXMLConstants.PLACEMENT_DIRECTION_ELEMENT);
+        Node dirNode = le.selectSingleNode(PlacementXMLConstants.DIRECTION_ELEMENT);
         if (dirNode != null) {
             LineElement dirElement = new LineElement(getFile(), (Element) dirNode);
             dirElement.checkNotEmpty();
@@ -91,7 +91,7 @@ public class PlacementElement extends LineElement {
     }
 
     public Vector getPosition() {
-        Node posNode = le.selectSingleNode(PlacementXMLConstants.PLACEMENT_POSITION_ELEMENT);
+        Node posNode = le.selectSingleNode(PlacementXMLConstants.POSITION_ELEMENT);
         if (posNode != null) {
             PositionElement posElement = new PositionElement(getFile(), (Element) posNode);
             return posElement.getPosition();
@@ -100,7 +100,7 @@ public class PlacementElement extends LineElement {
     }
 
     public String getSchematic() {
-        Node schematicNode = le.selectSingleNode(PlacementXMLConstants.PLACEMENT_SCHEMATIC_ELEMENT);
+        Node schematicNode = le.selectSingleNode(PlacementXMLConstants.SCHEMATIC_ELEMENT);
         if (schematicNode == null) {
             return null;
         }

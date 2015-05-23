@@ -76,6 +76,16 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
     @Override
     public void onEnable() {
         instance = this;
+        if(Bukkit.getPluginManager().getPlugin("SettlerCraft") != null) {
+            Bukkit.getConsoleSender().sendMessage(new String[] {
+                    ChatColor.RED + "[SettlerCraft]: Please remove the old jar of SettlerCraft!",
+                    ChatColor.RED + "[SettlerCraft]: This should be named something like 'SettlerCraft-1.0-RC3.jar'" ,
+                    ChatColor.RED + "[SettlerCraft]: Or something like 'SettlerCraft-1.0-RC4-1.jar'",
+                    ChatColor.RED + "[SettlerCraft]: and needs to be removed!",
+                }
+            );
+            return;
+        }
         
         if(Bukkit.getPluginManager().getPlugin("SettlerCraft-Core") == null) {
            System.out.println(MSG_PREFIX + " SettlerCraft-Core NOT FOUND!!! Disabling...");
@@ -136,6 +146,7 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         StructureInvalidator invalidator = new StructureInvalidator(new BukkitServer(Bukkit.getServer()), SettlerCraft.getInstance().getExecutor(), graph, economyProvider);
         invalidator.invalidate();
         
+        // Initialize the StructureAPI
         try {
             structureAPI.initialize();
         } catch (DocumentException | SettlerCraftException ex) {
@@ -143,24 +154,30 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
             System.out.println(MSG_PREFIX + "Disabling SettlerCraft-StructureAPI");
             return;
         }
+        // Check if we need to UPDATE from old version
+        File f = new File("plugins//SettlerCraft//Database");
+        if(f.exists()) {
+            BukkitSettlerCraftUpdater updater = new BukkitSettlerCraftUpdater(graph, structureAPI);
+            updater.update();
+        }
         
         
         
+        // Register Listeners
         Bukkit.getPluginManager().registerEvents(new PlanListener(economyProvider), this);
         
+        // Generate Plans 
         File generationDirectory = StructureAPI.getInstance().getGenerationDirectory();
         generationDirectory.mkdirs();
         PlanGenerator.generate(generationDirectory);
-
         
-        
-        
-        
+        // Setup HolographicDisplays (if available)
         if(Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null) {
             StructureHologramManager.getInstance().setHologramProvider(new HolographicDisplaysHologramProvider());
             EventManager.getInstance().getEventBus().register(StructureHologramManager.getInstance());
         }
         
+        // Setup Commands
         structureCommands = new StructureCommands(StructureAPI.getInstance(), new BKPermissionManager(), SettlerCraft.getInstance().getExecutor(), graph);
     }
 

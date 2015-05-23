@@ -22,16 +22,16 @@ package com.chingo247.settlercraft.structureapi.structure.plan.xml;
  */
 public class PlacementXMLConstants {
     
-    public static final String PLACEMENT_ROOT_ELEMENT = "Placement";
-    public static final String PLACEMENT_POSITION_ELEMENT = "Position";
-    public static final String PLACEMENT_X_ELEMENT = "X";
-    public static final String PLACEMENT_Y_ELEMENT = "Y";
-    public static final String PLACEMENT_Z_ELEMENT = "Z";
-    public static final String PLACEMENT_WIDTH_ELEMENT = "Width";
-    public static final String PLACEMENT_HEIGHT_ELEMENT = "Height";
-    public static final String PLACEMENT_LENGTH_ELEMENT = "Length";
-    public static final String PLACEMENT_DIRECTION_ELEMENT = "Direction";
-    public static final String PLACEMENT_TYPE_ELEMENT = "Type";
-    public static final String PLACEMENT_SCHEMATIC_ELEMENT = "Schematic";
+    public static final String ROOT_ELEMENT =  "Placement";
+    public static final String POSITION_ELEMENT = "Position";
+    public static final String X_ELEMENT = "X";
+    public static final String Y_ELEMENT = "Y";
+    public static final String Z_ELEMENT = "Z";
+    public static final String WIDTH_ELEMENT = "Width";
+    public static final String HEIGHT_ELEMENT = "Height";
+    public static final String LENGTH_ELEMENT = "Length";
+    public static final String DIRECTION_ELEMENT = "Direction";
+    public static final String TYPE_ELEMENT = "Type";
+    public static final String SCHEMATIC_ELEMENT = "Schematic";
     
 }

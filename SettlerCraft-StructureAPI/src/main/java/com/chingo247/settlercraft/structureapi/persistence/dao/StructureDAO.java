@@ -113,7 +113,7 @@ public class StructureDAO implements IStructureDAO{
     }
 
     @Override
-    public StructureNode addStructure(String name, World world, Vector position, CuboidRegion region, Direction direction, double price) {
+    public StructureNode addStructure(String name, Vector position, CuboidRegion region, Direction direction, double price) {
         long id = nextId();
         
         Node stNode = graph.createNode(StructureNode.LABEL);
@@ -199,10 +199,6 @@ public class StructureDAO implements IStructureDAO{
             }
         }
         
-        for(StructureNode st : structures) {
-            System.out.println("Overlaps... " + st.getId());
-        }
-
         return structures;
     }
     

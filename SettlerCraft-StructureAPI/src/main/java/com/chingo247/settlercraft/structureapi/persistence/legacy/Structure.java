@@ -207,6 +207,10 @@ public class Structure implements Serializable {
         }
     }
 
+    public Set<PlayerMembership> getMemberships() {
+        return memberships;
+    }
+    
     public State getState() {
         return state;
     }

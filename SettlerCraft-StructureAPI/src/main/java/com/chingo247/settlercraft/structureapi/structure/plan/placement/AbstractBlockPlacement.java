@@ -25,6 +25,7 @@ import java.util.PriorityQueue;
  */
 public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends AbstractPlacement<T> implements BlockPlacement<T> {
 
+    private static final int PRIORITY_REDSTONE = 5;
     private static final int PRIORITY_FIRST = 4;
     private static final int PRIORITY_LIQUID = 3;
     private static final int PRIORITY_LATER = 2;
@@ -116,7 +117,7 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
         if (isWater(block) || isLava(block)) {
             return PRIORITY_LIQUID;
         }
-
+        
         if (BlockType.shouldPlaceLast(block.getId()) || BlockType.emitsLight(block.getId())) {
             return PRIORITY_LATER;
         }

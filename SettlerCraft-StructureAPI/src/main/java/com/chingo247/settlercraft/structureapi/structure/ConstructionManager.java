@@ -199,12 +199,10 @@ public class ConstructionManager {
                             tx.success();
                             return;
                         }
-                        System.out.println("Building: " + node.getId());
                         
                         List<StructureNode> substructures = node.getSubstructures();
                         for(StructureNode s : substructures) {
                             final CuboidRegion region = s.getCuboidRegion();
-                            System.out.println("Ignoring: " + s.getId() + ", " + region.getMinimumPoint() + ", " + region.getMaximumPoint());
                             
                             options.addIgnore(new BlockPredicate() {
 
@@ -225,9 +223,7 @@ public class ConstructionManager {
                         }
 
                         Placement p = structure.getStructurePlan().getPlacement();
-                        System.out.println("Should rotate?");
                         if (p instanceof RotationalPlacement) {
-                            System.out.println("Rotate!");
                             RotationalPlacement rt = (RotationalPlacement) p;
                             rt.rotate(structure.getDirection());
                         }
@@ -240,8 +236,6 @@ public class ConstructionManager {
                             }
                         }, structure);
 
-                        System.out.println("Min point: " + structure.getCuboidRegion().getMinimumPoint());
-                        System.out.println("Max point: " + structure.getCuboidRegion().getMaximumPoint());
 
                         placement.place(session, structure.getCuboidRegion().getMinimumPoint(), options);
 
@@ -304,7 +298,6 @@ public class ConstructionManager {
 
                     StructureNode parentNode = node.getParent();
 
-                    System.out.println("Parent: " + parentNode);
                     if (parentNode != null) {
                         parent = DefaultStructureFactory.getInstance().makeStructure(parentNode);
                     }

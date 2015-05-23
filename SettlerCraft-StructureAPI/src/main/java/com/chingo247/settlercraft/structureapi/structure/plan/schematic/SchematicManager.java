@@ -100,9 +100,7 @@ public class SchematicManager {
     }
 
     public synchronized void load(File directory) {
-        System.out.println("Directory: " + directory.getAbsolutePath());
         Preconditions.checkArgument(directory.isDirectory());
-        System.out.println("Searching for schematics in: " + directory.getAbsolutePath());
 
         ForkJoinPool pool;
         Iterator<File> fit = FileUtils.iterateFiles(directory, new String[]{"schematic"}, true);

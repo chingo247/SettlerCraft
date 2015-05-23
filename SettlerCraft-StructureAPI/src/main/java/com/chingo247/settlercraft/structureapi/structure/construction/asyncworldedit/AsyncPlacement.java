@@ -86,7 +86,7 @@ public class AsyncPlacement extends AbstractAsyncPlacement<BuildOptions, Placeme
             callback.onJobAdded(jobId);
         }
         
-        scheduler.runTaskAsynchronously(awe, new AsyncPlacementTask(placement, session, playerEntry, null, placer, job) {
+        scheduler.runAsync(new AsyncPlacementTask(placement, session, playerEntry, null, placer, job) {
 
             @Override
             public void task(Placement placement) throws MaxChangedBlocksException {

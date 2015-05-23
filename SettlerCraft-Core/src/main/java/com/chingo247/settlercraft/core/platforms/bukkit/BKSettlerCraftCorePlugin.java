@@ -11,7 +11,6 @@ import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.core.event.PlayerSubscriber;
 import com.chingo247.settlercraft.core.exception.SettlerCraftException;
-import com.chingo247.settlercraft.core.persistence.hibernate.HibernateUtil;
 import com.chingo247.settlercraft.core.platforms.bukkit.services.BKVaultEconomyProvider;
 import com.google.common.eventbus.EventBus;
 import java.util.logging.Level;
@@ -51,13 +50,13 @@ public class BKSettlerCraftCorePlugin extends JavaPlugin {
 //            hSQLServer.start();
 //        }
         
-        SettlerCraft.getInstance().getExecutor().submit(new Runnable() {
-
-            @Override
-            public void run() {
-                 HibernateUtil.getSession().close();
-            }
-        });
+//        SettlerCraft.getInstance().getExecutor().submit(new Runnable() {
+//
+//            @Override
+//            public void run() {
+//                 HibernateUtil.getSession().close();
+//            }
+//        });
         
         
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {

@@ -98,6 +98,9 @@ public class StructurePlanManager {
         synchronized (plans) {
             plans.clear();
         }
+        
+        // Make dirs if not exist!
+        planDirectory.mkdirs();
 
         EventManager.getInstance().getEventBus().post(new StructurePlansReloadEvent());
 
