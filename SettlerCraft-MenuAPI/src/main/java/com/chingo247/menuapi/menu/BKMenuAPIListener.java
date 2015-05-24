@@ -23,8 +23,6 @@
  */
 package com.chingo247.menuapi.menu;
 
-import com.chingo247.menuapi.menu.ACategoryMenu;
-import com.chingo247.menuapi.menu.MenuAPI;
 import com.chingo247.xplatform.platforms.bukkit.BukkitPlatform;
 import org.apache.log4j.Logger;
 import org.bukkit.entity.Player;
@@ -45,7 +43,6 @@ public class BKMenuAPIListener  implements Listener {
     @EventHandler
     public void onServerReloadEvent(PluginDisableEvent disableEvent) {
         if (disableEvent.getPlugin().getName().equals("SettlerCraft-MenuAPI")) {
-            LOG.info("Disabling menus!");
             MenuAPI.getInstance().onServerReload();
         }
     }

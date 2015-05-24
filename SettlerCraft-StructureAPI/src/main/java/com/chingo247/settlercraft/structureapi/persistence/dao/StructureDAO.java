@@ -157,7 +157,6 @@ public class StructureDAO implements IStructureDAO{
                 + " RETURN s"
                 + " LIMIT " + limit;
         Result result = graph.execute(query, params);
-        System.out.println("getStructuresWithin() in " + (System.currentTimeMillis() - start) + " ms");
         while (result.hasNext()) {
             Map<String, Object> map = result.next();
             for (Object o : map.values()) {
@@ -191,7 +190,6 @@ public class StructureDAO implements IStructureDAO{
                 + " RETURN s"
                 + " LIMIT " + limit;
         Result result = graph.execute(query, params);
-        System.out.println("getSubStructuresWithinStructure() in " + (System.currentTimeMillis() - start) + " ms");
         while (result.hasNext()) {
             Map<String, Object> map = result.next();
             for (Object o : map.values()) {
@@ -250,7 +248,6 @@ public class StructureDAO implements IStructureDAO{
                     structures.add(structureNode);
                 }
             }
-        System.out.println("getStructuresForOwner() in " + (System.currentTimeMillis() - start) + "ms");
 
         return structures;
     }
@@ -273,7 +270,6 @@ public class StructureDAO implements IStructureDAO{
 
             Result result = graph.execute(query, params);
 
-            System.out.println("getAmountOfStructuresForSettler() in " + (System.currentTimeMillis() - start) + "ms");
             while (result.hasNext()) {
                 Map<String, Object> map = result.next();
                 count = (long) map.get("count");
@@ -347,7 +343,6 @@ public class StructureDAO implements IStructureDAO{
                 + " RETURN owner as theOwner"
                 + " LIMIT 1";
         Result result = graph.execute(query, params);
-        System.out.println("isOwnerOfStructure() in " + (System.currentTimeMillis() - start) + " ms");
         
         while (result.hasNext()) {
             Map<String, Object> map = result.next();

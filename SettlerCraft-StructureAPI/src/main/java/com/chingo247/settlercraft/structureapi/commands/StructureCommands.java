@@ -30,6 +30,7 @@ import com.chingo247.settlercraft.structureapi.exception.ConstructionException;
 import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureRelTypes;
+import com.chingo247.settlercraft.structureapi.platforms.bukkit.services.worldguard.WorldGuardHelper;
 import com.chingo247.settlercraft.structureapi.platforms.util.Permissions;
 import com.chingo247.settlercraft.structureapi.structure.ConstructionStatus;
 import com.chingo247.settlercraft.structureapi.structure.DefaultStructureFactory;
@@ -95,8 +96,6 @@ public class StructureCommands {
 
         final String commandArg = args[0];
         final String[] commandArgs = Arrays.copyOfRange(args, 1, args.length);
-
-        System.out.println("issued: " + commandArg + " " + Arrays.toString(commandArgs));
 
         UUID uuid;
         if (sender instanceof IPlayer) {
@@ -168,7 +167,6 @@ public class StructureCommands {
     }
 
     private boolean location(IPlayer player, String[] commandArgs) throws CommandException {
-        System.out.println("Location Command");
         argumentsInRange(0, 1, commandArgs);
 
         if (commandArgs.length == 1) {
@@ -211,23 +209,27 @@ public class StructureCommands {
             ILocation loc = ply.getLocation();
 
             Vector pos = new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
-            Structure s = getSmallesStructure(ply.getWorld(), pos);
+            try (Transaction tx = graph.beginTx()) {
+                StructureNode sn = getSmallesStructure(ply.getWorld(), pos);
 
-            if (s == null) {
-                ply.sendMessage(COLOR.red() + " Not within a structure...");
-                return true;
+                if (sn == null) {
+                    ply.sendMessage(COLOR.red() + " Not within a structure...");
+                    return true;
+                }
+
+                Structure s = DefaultStructureFactory.getInstance().makeStructure(sn);
+
+                World w = SettlerCraft.getInstance().getWorld(s.getWorld());
+                if (!w.getName().equals(player.getWorld().getName())) {
+                    player.sendMessage(COLOR.red() + "Structure must be in the same world...");
+                    return true;
+                }
+
+                Vector rel = s.getRelativePosition(new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
+
+                player.sendMessage("Your relative position is " + COLOR.yellow() + "x: " + COLOR.reset() + rel.getBlockX() + COLOR.yellow() + " y: " + COLOR.reset() + rel.getBlockY() + COLOR.yellow() + " z: " + COLOR.reset() + rel.getBlockZ());
+                tx.success();
             }
-
-            World w = SettlerCraft.getInstance().getWorld(s.getWorld());
-            if (!w.getName().equals(player.getWorld().getName())) {
-                player.sendMessage(COLOR.red() + "Structure must be in the same world...");
-                return true;
-            }
-
-            Vector rel = s.getRelativePosition(new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
-
-            player.sendMessage("Your relative position is " + COLOR.yellow() + "x: " + COLOR.reset() + rel.getBlockX() + COLOR.yellow() + " y: " + COLOR.reset() + rel.getBlockY() + COLOR.yellow() + " z: " + COLOR.reset() + rel.getBlockZ());
-
         }
 
         return true;
@@ -235,7 +237,6 @@ public class StructureCommands {
     }
 
     private boolean info(ICommandSender sender, String[] commandArgs) throws CommandException {
-        System.out.println("Info Command");
         argumentsInRange(0, 1, commandArgs);
 
         if (commandArgs.length == 1) {
@@ -248,36 +249,37 @@ public class StructureCommands {
                 return true;
             }
 
-            Structure s = null;
             try (Transaction tx = graph.beginTx()) {
                 StructureNode node = structureDAO.find(id);
-                if (node != null) {
-                    s = DefaultStructureFactory.getInstance().makeStructure(node);
+
+                if (node == null) {
+                    sender.sendMessage(COLOR.red() + "Couldn't find structure for id #" + id);
+                    tx.success();
+                    return true;
                 }
+
+                sender.sendMessage(getInfo(node));
                 tx.success();
             }
-
-            if (s == null) {
-                sender.sendMessage(COLOR.red() + "Couldn't find structure for id #" + id);
-                return true;
-            }
-
-            sender.sendMessage(getInfo(s));
 
         } else if (sender instanceof IPlayer) {
             IPlayer ply = (IPlayer) sender;
             ILocation loc = ply.getLocation();
 
             Vector pos = new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
-            Structure s = getSmallesStructure(ply.getWorld(), pos);
+            try (Transaction tx = graph.beginTx()) {
+                StructureNode s = getSmallesStructure(ply.getWorld(), pos);
 
-            if (s == null) {
-                ply.sendMessage(COLOR.red() + " Not within a structure...");
-                return true;
+                if (s == null) {
+                    ply.sendMessage(COLOR.red() + " Not within a structure...");
+                    tx.success();
+                    return true;
+                }
+
+                String info = getInfo(s);
+                sender.sendMessage(info);
+                tx.success();
             }
-
-            String info = getInfo(s);
-            sender.sendMessage(info);
 
         } else {
             sender.sendMessage(COLOR.red() + " too few arguments", "/stt info [id]");
@@ -286,7 +288,7 @@ public class StructureCommands {
         return true;
     }
 
-    private String getInfo(Structure structure) {
+    private String getInfo(StructureNode structure) {
         Settler master = null;
         try (Transaction tx = graph.beginTx()) {
             SettlerNode setn = structureDAO.getMasterOwnerForStructure(structure.getId());
@@ -295,29 +297,31 @@ public class StructureCommands {
         }
 
         String line = "#" + COLOR.gold() + structure.getId() + " " + COLOR.blue() + structure.getName() + "\n"
-                + COLOR.reset() + "World: " + structure.getWorld() + "\n";
-        
+                + COLOR.yellow() + "World: " + COLOR.reset() + structure.getWorld().getName() + "\n";
+
         Vector position = structure.getPosition();
         line += "Location: " + COLOR.yellow() + "X: " + COLOR.reset() + position.getX()
-                        + " " + COLOR.yellow() + "Y: " + COLOR.reset() + position.getY()
-                        + " " + COLOR.yellow() + "Z: " + COLOR.reset() + position.getZ() + "\n";
-        
-        line += "Status: " + getStatusString(structure) + "\n";
+                + " " + COLOR.yellow() + "Y: " + COLOR.reset() + position.getY()
+                + " " + COLOR.yellow() + "Z: " + COLOR.reset() + position.getZ() + "\n";
+
+        line += COLOR.yellow() + "Status: " + COLOR.reset() + structure.getConstructionStatus().name() + "\n";
 
         if (structure.getPrice() > 0) {
-            line += "Value: " + structure.getPrice() + "\n";
+            line += COLOR.yellow() + "Value: " + COLOR.reset() + structure.getPrice() + "\n";
         }
-        
-        
 
         if (master != null) {
-            line += "Owner(master): " + master.getName();
+            line += COLOR.yellow() + "Owner(master): " + COLOR.reset() + master.getName() + "\n";
         }
+
+        if (structure.getRawNode().hasProperty(WorldGuardHelper.WORLD_GUARD_REGION_PROPERTY)) {
+            line += COLOR.yellow() + "WorldGuard-Region: " + COLOR.reset() + structure.getRawNode().getProperty(WorldGuardHelper.WORLD_GUARD_REGION_PROPERTY);
+        }
+
         return line;
     }
 
     private boolean build(final IPlayer player, String[] commandArgs) throws CommandException {
-        System.out.println("Build Command");
         argumentsInRange(1, 2, commandArgs);
 
         final Structure structure;
@@ -368,7 +372,6 @@ public class StructureCommands {
     }
 
     private boolean demolish(final IPlayer player, String[] commandArgs) throws CommandException {
-        System.out.println("Demolish Command");
         argumentsInRange(1, 2, commandArgs);
 
         final Structure structure;
@@ -418,7 +421,6 @@ public class StructureCommands {
     }
 
     private boolean stop(final IPlayer player, String[] commandArgs) throws CommandException {
-        System.out.println("Stop Command");
         argumentsInRange(1, 2, commandArgs);
 
         final Structure structure;
@@ -555,9 +557,8 @@ public class StructureCommands {
         final int p = page;
 
         String[] message = new String[MAX_LINES];
-        int skip = p * (MAX_LINES-1);
-        int limit = (MAX_LINES-1);
-        
+        int skip = p * (MAX_LINES - 1);
+        int limit = (MAX_LINES - 1);
 
         try (Transaction tx = graph.beginTx()) {
             long totalStructures = structureDAO.getStructureCountForSettler(playerId);
@@ -567,23 +568,21 @@ public class StructureCommands {
                 iPlayer.sendMessage(COLOR.red() + "Page " + p + " out of " + totalPages + "...");
                 return true;
             }
-            
 
             int lineNumber = 0;
             message[0] = "-----------(Page: " + p + "/" + totalPages + ", Structures: " + totalStructures + ")---------------";
             lineNumber++;
             for (StructureNode structureNode : structures) {
 //                
-                
+
                 String line;
                 double price = structureNode.getPrice();
-                if (price > 0.0d) { 
-                    line = String.format("#%-1s%-10d%-3s%-40s%-15s%-1s%-5s", COLOR.gold() , structureNode.getId(), COLOR.blue() , structureNode.getName(), getStatusString(structureNode), COLOR.yellow() , ShopUtil.valueString(price));
+                if (price > 0.0d) {
+                    line = String.format("#%-1s%-10d%-3s%-40s%-15s%-1s%-5s", COLOR.gold(), structureNode.getId(), COLOR.blue(), structureNode.getName(), getStatusString(structureNode), COLOR.yellow(), ShopUtil.valueString(price));
                 } else {
-                    line = String.format("#%-1s%-10d%-3s%-40s%-15s", COLOR.gold() , structureNode.getId(), COLOR.blue() , structureNode.getName(), getStatusString(structureNode));
+                    line = String.format("#%-1s%-10d%-3s%-40s%-15s", COLOR.gold(), structureNode.getId(), COLOR.blue(), structureNode.getName(), getStatusString(structureNode));
                 }
-                
-                
+
                 message[lineNumber] = line;
                 lineNumber++;
             }
@@ -595,117 +594,106 @@ public class StructureCommands {
 
     }
 
-    private Structure getSmallesStructure(IWorld world, Vector position) {
+    private StructureNode getSmallesStructure(IWorld world, Vector position) {
+        StructureNode structure = null;
+        IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("worldId", w.getUUID().toString());
 
-        Structure structure = null;
-        try (Transaction tx = graph.beginTx()) {
+        String query
+                = "MATCH (world:" + WorldNode.LABEL.name() + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
+                + " WITH world "
+                + " MATCH (world)<-[:" + StructureRelTypes.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
+                + " WHERE NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId()
+                + " AND s." + StructureNode.MAX_X_PROPERTY + " >= " + position.getBlockX() + " AND s." + StructureNode.MIN_X_PROPERTY + " <= " + position.getBlockX()
+                + " AND s." + StructureNode.MAX_Y_PROPERTY + " >= " + position.getBlockY() + " AND s." + StructureNode.MIN_Y_PROPERTY + " <= " + position.getBlockY()
+                + " AND s." + StructureNode.MAX_Z_PROPERTY + " >= " + position.getBlockZ() + " AND s." + StructureNode.MIN_Z_PROPERTY + " <= " + position.getBlockZ()
+                + " RETURN s as structure"
+                + " ORDER BY s." + StructureNode.SIZE_PROPERTY + " ASC "
+                + " LIMIT 1";
 
-            IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
-            long start = System.currentTimeMillis();
-
-            Map<String, Object> params = Maps.newHashMap();
-            params.put("worldId", w.getUUID().toString());
-
-            String query
-                    = "MATCH (world:" + WorldNode.LABEL.name() + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
-                    + " WITH world "
-                    + " MATCH (world)<-[:" + StructureRelTypes.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
-                    + " WHERE NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId()
-                    + " AND s." + StructureNode.MAX_X_PROPERTY + " >= " + position.getBlockX() + " AND s." + StructureNode.MIN_X_PROPERTY + " <= " + position.getBlockX()
-                    + " AND s." + StructureNode.MAX_Y_PROPERTY + " >= " + position.getBlockY() + " AND s." + StructureNode.MIN_Y_PROPERTY + " <= " + position.getBlockY()
-                    + " AND s." + StructureNode.MAX_Z_PROPERTY + " >= " + position.getBlockZ() + " AND s." + StructureNode.MIN_Z_PROPERTY + " <= " + position.getBlockZ()
-                    + " RETURN s as structure"
-                    + " ORDER BY s." + StructureNode.SIZE_PROPERTY + " ASC "
-                    + " LIMIT 1";
-
-            Result result = graph.execute(query, params);
-//            System.out.println("getSmallestOverlapping() in " + (System.currentTimeMillis() - start) + " ms");
-            while (result.hasNext()) {
-                Map<String, Object> map = result.next();
-                Node n = (Node) map.get("structure");
-                structure = DefaultStructureFactory.getInstance().makeStructure(new StructureNode(n));
-            }
-
-            tx.success();
+        Result result = graph.execute(query, params);
+        while (result.hasNext()) {
+            Map<String, Object> map = result.next();
+            Node n = (Node) map.get("structure");
+            structure = new StructureNode(n);
         }
 
         return structure;
     }
-    
-        /**
-         * Sends the status of this structure to given player
-         *
-         * @param structure The structure
-         * @param player The player to tell
-         */
-        private String getStatusString(Structure structure) {
-            String statusString;
-            ConstructionStatus status = structure.getConstructionStatus();
-            switch (status) {
-                case BUILDING:
-                    statusString = COLOR.yellow() + "BUILDING";
-                    break;
-                case DEMOLISHING:
-                    statusString = COLOR.yellow() + "DEMOLISHING";
-                    break;
-                case COMPLETED:
-                    statusString = COLOR.green() + "COMPLETE";
-                    break;
-                case ON_HOLD:
-                    statusString = COLOR.red() + "ON HOLD";
-                    break;
-                case QUEUED:
-                    statusString = COLOR.yellow() + "QUEUED";
-                    break;
-                case REMOVED:
-                    statusString = COLOR.red() + "REMOVED";
-                    break;
-                case STOPPED:
-                    statusString = COLOR.red() + "STOPPED";
-                    break;
-                default:
-                    statusString = status.name();
-            }
-            return statusString;
+
+    /**
+     * Sends the status of this structure to given player
+     *
+     * @param structure The structure
+     * @param player The player to tell
+     */
+    private String getStatusString(Structure structure) {
+        String statusString;
+        ConstructionStatus status = structure.getConstructionStatus();
+        switch (status) {
+            case BUILDING:
+                statusString = COLOR.yellow() + "BUILDING";
+                break;
+            case DEMOLISHING:
+                statusString = COLOR.yellow() + "DEMOLISHING";
+                break;
+            case COMPLETED:
+                statusString = COLOR.green() + "COMPLETE";
+                break;
+            case ON_HOLD:
+                statusString = COLOR.red() + "ON HOLD";
+                break;
+            case QUEUED:
+                statusString = COLOR.yellow() + "QUEUED";
+                break;
+            case REMOVED:
+                statusString = COLOR.red() + "REMOVED";
+                break;
+            case STOPPED:
+                statusString = COLOR.red() + "STOPPED";
+                break;
+            default:
+                statusString = status.name();
         }
-        
-        /**
-         * Sends the status of this structure to given player
-         *
-         * @param structure The structure
-         * @param player The player to tell
-         */
-        private String getStatusString(StructureNode structure) {
-            String statusString;
-            ConstructionStatus status = structure.getConstructionStatus();
-            switch (status) {
-                case BUILDING:
-                    statusString = COLOR.yellow() + "BUILDING";
-                    break;
-                case DEMOLISHING:
-                    statusString = COLOR.yellow() + "DEMOLISHING";
-                    break;
-                case COMPLETED:
-                    statusString = COLOR.green() + "COMPLETE";
-                    break;
-                case ON_HOLD:
-                    statusString = COLOR.red() + "ON HOLD";
-                    break;
-                case QUEUED:
-                    statusString = COLOR.yellow() + "QUEUED";
-                    break;
-                case REMOVED:
-                    statusString = COLOR.red() + "REMOVED";
-                    break;
-                case STOPPED:
-                    statusString = COLOR.red() + "STOPPED";
-                    break;
-                default:
-                    statusString = status.name();
-            }
-            return statusString;
+        return statusString;
+    }
+
+    /**
+     * Sends the status of this structure to given player
+     *
+     * @param structure The structure
+     * @param player The player to tell
+     */
+    private String getStatusString(StructureNode structure) {
+        String statusString;
+        ConstructionStatus status = structure.getConstructionStatus();
+        switch (status) {
+            case BUILDING:
+                statusString = COLOR.yellow() + "BUILDING";
+                break;
+            case DEMOLISHING:
+                statusString = COLOR.yellow() + "DEMOLISHING";
+                break;
+            case COMPLETED:
+                statusString = COLOR.green() + "COMPLETE";
+                break;
+            case ON_HOLD:
+                statusString = COLOR.red() + "ON HOLD";
+                break;
+            case QUEUED:
+                statusString = COLOR.yellow() + "QUEUED";
+                break;
+            case REMOVED:
+                statusString = COLOR.red() + "REMOVED";
+                break;
+            case STOPPED:
+                statusString = COLOR.red() + "STOPPED";
+                break;
+            default:
+                statusString = status.name();
         }
-        
-        
+        return statusString;
+    }
 
 }

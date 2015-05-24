@@ -42,13 +42,8 @@ public class StructureHologramDAO {
     
     public List<StructureHologramNode> findAll() {
         String query = "MATCH (h:"+StructureHologramNode.LABEL.name()+") RETURN h";
-        
-        System.out.println("Find all query: " + query);
-        
         Result r = graph.execute(query);
-        
         List<StructureHologramNode> holograms = Lists.newArrayList();
-      
         
         while(r.hasNext()) {
             Map<String,Object> map = r.next();
@@ -58,8 +53,6 @@ public class StructureHologramDAO {
                 holograms.add(shn);
             }
         }
-        System.out.println("Found a total of " + holograms.size() + " holograms");
-        
         return holograms;
     }
     

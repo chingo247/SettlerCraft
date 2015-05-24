@@ -78,9 +78,7 @@ public class StructurePlanExporter {
 //                    e.setName(StructurePlanXMLConstants.STRUCTURE_PLAN_SUBSTRUCTURE);
 //                    substructuresElement.add(e);
 //                } catch (PlacementException ex) {
-//                    System.out.print("Error: ");
 //                    System.err.println(ex.getMessage());
-//                    System.out.println("Skipping...");
 //                }
 //            }
 //            
@@ -91,9 +89,6 @@ public class StructurePlanExporter {
 //                try {
 //                    export(plan, destinationDirectory, exportPlan.getName(), prettyPrint);
 //                } catch (Exception e){
-//                    System.out.println("Error occured during export of: " + p.getFile().getAbsolutePath());
-//                    System.out.println("Error: " + e.getMessage());
-//                    System.out.println("Skipping it...");
 //                    continue;
 //                }
 //                

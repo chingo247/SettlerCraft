@@ -138,7 +138,6 @@ public class WorldGuardHelper implements IStructureProtector {
                 for(Structure s : structures) {
                     protect(s);
                     System.out.println("Protected structure #" + s.getId() + " with 'WorldGuard'");
-//                    System.out.println("Create worldguard region '" + region + "' for Structure #" + s.getId() + " ("+index+"/"+total+")");
                 }
             }
         });

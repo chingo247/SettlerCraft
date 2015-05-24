@@ -8,12 +8,19 @@ package com.chingo247.settlercraft.structureapi.platforms.bukkit.services.hologr
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.structureapi.event.StructureCreateEvent;
 import com.chingo247.settlercraft.structureapi.event.StructureStateChangeEvent;
+import com.chingo247.settlercraft.structureapi.persistence.entities.features.hologram.StructureHologram;
+import com.chingo247.settlercraft.structureapi.persistence.entities.features.hologram.StructureHologramDAO;
+import com.chingo247.settlercraft.structureapi.persistence.entities.features.hologram.StructureHologramFactory;
+import com.chingo247.settlercraft.structureapi.persistence.entities.features.hologram.StructureHologramNode;
+import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
 import com.chingo247.settlercraft.structureapi.platforms.services.holograms.Hologram;
 import com.chingo247.settlercraft.structureapi.platforms.services.holograms.HologramsProvider;
 import com.chingo247.settlercraft.structureapi.structure.ConstructionStatus;
+import com.chingo247.settlercraft.structureapi.structure.DefaultStructureFactory;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IColors;
+import com.chingo247.xplatform.core.IPlugin;
 import com.chingo247.xplatform.core.IScheduler;
 import com.google.common.base.Preconditions;
 import com.google.common.eventbus.AllowConcurrentEvents;
@@ -23,8 +30,19 @@ import com.sk89q.worldedit.world.World;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import net.minecraft.util.com.google.common.collect.Lists;
+import net.minecraft.util.com.google.common.collect.Maps;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.Transaction;
 
 /**
  *
@@ -40,6 +58,9 @@ public class StructureHologramManager {
     private final APlatform platform;
     private final IColors color;
     private final IScheduler scheduler;
+    private final GraphDatabaseService graph;
+    private final StructureHologramDAO structureHologramDAO;
+    private IPlugin plugin;
 
     private HologramsProvider hologramsProvider;
 
@@ -47,6 +68,8 @@ public class StructureHologramManager {
         this.platform = SettlerCraft.getInstance().getPlatform();
         this.color = platform.getChatColors();
         this.scheduler = platform.getServer().getScheduler(platform.getServer().getPlugin(PLUGIN));
+        this.graph = SettlerCraft.getInstance().getNeo4j();
+        this.structureHologramDAO = new StructureHologramDAO(graph);
     }
 
     public static StructureHologramManager getInstance() {
@@ -55,13 +78,20 @@ public class StructureHologramManager {
         }
         return instance;
     }
+    
+    public void inititialize(IPlugin plugin) {
+        this.plugin = plugin;
+        invalidate();
+        setupUnchecked();
+        initHolos();
+    }
 
     public void setHologramProvider(HologramsProvider hologramsProvider) {
         Preconditions.checkNotNull(hologramsProvider);
         this.hologramsProvider = hologramsProvider;
     }
 
-    public void registerStructureHologram(Structure structure, Hologram hologram) {
+    private void registerStructureHologram(Structure structure, Hologram hologram) {
         if (holograms.get(structure.getId()) == null) {
             holograms.put(structure.getId(), new ArrayList<Hologram>());
         }
@@ -86,16 +116,13 @@ public class StructureHologramManager {
 
         final Structure structure = structureCreateEvent.getStructure();
 
-        
-
         // Assures non-async behavior - Fixes concurrent exceptions that could be thrown
         scheduler.runSync(new Runnable() {
 
             @Override
             public void run() {
                 World w = SettlerCraft.getInstance().getWorld(structure.getWorld());
-                Hologram hologram = hologramsProvider.createHologram(PLUGIN, w, structure.translateRelativeLocation(new Vector(0, 2, 0)), structure);
-                registerStructureHologram(structure, hologram);
+                createHologramForStructure(PLUGIN, w, structure.translateRelativeLocation(new Vector(0, 2, 0)), structure);
             }
         });
 
@@ -167,4 +194,134 @@ public class StructureHologramManager {
         return statusString;
     }
 
+    private void initHolos() {
+        final Queue<StructureHologram> hologramQueue = new LinkedList<>();
+        try (Transaction tx = graph.beginTx()) {
+            List<StructureHologramNode> hologramNodes = structureHologramDAO.findAll();
+
+            StructureHologramFactory hologramFactory = new StructureHologramFactory();
+
+            for (StructureHologramNode shn : hologramNodes) {
+                if (shn.getStructure() != null) {
+                    hologramQueue.add(hologramFactory.makeStructureHologram(shn));
+                } 
+            }
+
+            tx.success();
+        }
+
+        int count = 0;
+        while (hologramQueue.peek() != null) {
+            if (count % 100 == 0) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(HolographicDisplaysHologramProvider.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+            final StructureHologram hologram = hologramQueue.poll();
+            final Structure structure = hologram.getStructure();
+            final Vector position = structure.translateRelativeLocation(new Vector(hologram.getRelativeX(), hologram.getRelativeY(), hologram.getRelativeZ()));
+            final World w = SettlerCraft.getInstance().getWorld(hologram.getStructure().getWorld());
+
+            scheduler.runSync(new Runnable() {
+
+                @Override
+                public void run() {
+                    hologramsProvider.createHologram(plugin.getName(), w, position);
+                }
+            });
+            count++;
+        }
+
+    }
+
+    private void setupUnchecked() {
+
+        // Find unchecked structures without holos
+        List<Structure> structures = Lists.newArrayList();
+        try (Transaction tx = graph.beginTx()) {
+
+            Map<String, Object> params = Maps.newHashMap();
+            params.put("checkedHolograms", true);
+
+            String query = "MATCH (s:" + StructureNode.LABEL.name() + ") "
+                    + "WHERE NOT s." + StructureNode.CHECKED_HOLOGRAM_PROPERTY + " = {checkedHolograms} "
+                    + "RETURN s";
+
+            Result r = graph.execute(query, params);
+
+            while (r.hasNext()) {
+                Map<String, Object> map = r.next();
+                for (Object o : map.values()) {
+                    Node sn = (Node) o;
+                    StructureNode structureNode = new StructureNode(sn);
+                    structures.add(DefaultStructureFactory.getInstance().makeStructure(structureNode));
+                }
+            }
+            tx.success();
+        }
+
+        try (Transaction tx = graph.beginTx()) {
+
+            for (Structure structure : structures) {
+                World w = SettlerCraft.getInstance().getWorld(structure.getWorld());
+                Vector position = structure.translateRelativeLocation(Vector.ZERO.add(0, 2, 0));
+                createWithoutTransactionHologram(plugin.getName(), w, position, structure);
+            }
+            tx.success();
+        }
+
+    }
+    
+    private Hologram createHologramForStructure(String plugin, World world, Vector position, Structure structure) {
+        Hologram h;
+        try (Transaction tx = graph.beginTx()) {
+            h = createWithoutTransactionHologram(plugin, world, position, structure);
+            tx.success();
+        }
+        StructureHologramManager.getInstance().registerStructureHologram(structure, h);
+        
+        return h;
+    }
+
+    private Hologram createWithoutTransactionHologram(String plugin, World world, Vector position, Structure structure) {
+        structureHologramDAO.addHologram(structure, structure.getRelativePosition(position));
+        return hologramsProvider.createHologram(plugin, world, position);
+    }
+    
+     private void invalidate() {
+        try (Transaction tx = graph.beginTx()) {
+            String query = "MATCH (h:Hologram)<-[r:" + StructureHologramNode.RELATION_HAS_HOLOGRAM.name() + "]-(:" + StructureNode.LABEL.name() + ") "
+                    + "WHERE r is null "
+                    + "RETURN h";
+
+            Result r = graph.execute(query);
+            while (r.hasNext()) {
+                Map<String, Object> map = r.next();
+                for (Object o : map.values()) {
+                    Node n = (Node) o;
+                    for (Relationship rel : n.getRelationships()) {
+                        rel.delete();
+                    }
+                    n.delete();
+                }
+            }
+
+            tx.success();
+        }
+    }
+     
+    /**
+     * Removes all active holograms 
+     */
+    public void shutdown() {
+        for(List<Hologram> hl : holograms.values()) {
+            for(Hologram h : hl) {
+                h.delete();
+            }
+        }
+    }
+    
 }

@@ -29,6 +29,7 @@ import com.chingo247.xplatform.core.IPlugin;
 import com.chingo247.settlercraft.core.exception.SettlerCraftException;
 import com.chingo247.settlercraft.structureapi.platforms.bukkit.listener.PlanListener;
 import com.chingo247.settlercraft.core.exception.CommandException;
+import com.chingo247.settlercraft.core.persistence.hsql.HSQLServer;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.settlercraft.structureapi.commands.StructureCommands;
 import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
@@ -44,6 +45,7 @@ import com.chingo247.xplatform.platforms.bukkit.BukkitPlayer;
 import com.chingo247.xplatform.platforms.bukkit.BukkitPlugin;
 import com.chingo247.xplatform.platforms.bukkit.BukkitServer;
 import java.io.File;
+import java.util.concurrent.ExecutorService;
 
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
@@ -69,6 +71,7 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
     private static BKStructureAPIPlugin instance;
     private StructureCommands structureCommands;
     private GraphDatabaseService graph;
+    private ExecutorService executor;
     
 
     @Override
@@ -108,6 +111,7 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         
         // Get GraphDatabase
         graph = SettlerCraft.getInstance().getNeo4j();
+        executor = SettlerCraft.getInstance().getExecutor();
         
         // Initialize Config
         configProvider = new BKConfigProvider();
@@ -147,8 +151,14 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         // Check if we need to UPDATE from old version
         File f = new File("plugins//SettlerCraft//Database");
         if(f.exists()) {
+            if(!HSQLServer.isRunning("localhost", 9005)) {
+            HSQLServer server = new HSQLServer(9005, "localhost", new File("plugins//SettlerCraft//Database//SettlerCraft"), "SettlerCraft");
+            server.start();
+             
+            
             BukkitSettlerCraftUpdater updater = new BukkitSettlerCraftUpdater(graph, structureAPI);
             updater.update();
+            } 
         }
         
         
@@ -163,9 +173,11 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         
         // Setup HolographicDisplays (if available)
         if(configProvider.useHolograms() && Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null) {
+            
             HolographicDisplaysHologramProvider hologramProvider = new HolographicDisplaysHologramProvider(graph, SettlerCraft.getInstance().getPlatform(), new BukkitPlugin(this));
             hologramProvider.initialize();
             EventManager.getInstance().getEventBus().register(StructureHologramManager.getInstance()); // Should be registered once...
+            StructureHologramManager.getInstance().inititialize(new BukkitPlugin(this));
         }
         
         // Setup Commands
@@ -194,6 +206,7 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
     @Override
     public void onDisable() {
         super.onDisable(); //To change body of generated methods, choose Tools | Templates.
+        StructureHologramManager.getInstance().shutdown();
     }
     
     

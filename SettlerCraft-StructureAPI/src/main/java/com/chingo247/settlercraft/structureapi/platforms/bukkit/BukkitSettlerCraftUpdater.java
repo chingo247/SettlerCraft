@@ -126,9 +126,6 @@ class BukkitSettlerCraftUpdater {
         
         System.out.println(PREFIX + "Update complete");
         
-        HibernateUtil.shutdown();
-        
-
         executorService.shutdown();
     }
 

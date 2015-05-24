@@ -161,10 +161,26 @@ public class StructureAPI implements IStructureAPI {
      * @throws SettlerCraftException
      */
     public void initialize() throws DocumentException, SettlerCraftException {
+        // Set states back to stopped... if not completed or removed
+        resetStates();
+        // Load StructurePlans
         StructurePlanMenuReader reader = new StructurePlanMenuReader();
         planMenu = reader.read(new File(getWorkingDirectory(), "menu.xml"));
         planMenuFactory = new StructurePlanMenuFactory(platform, planMenu);
         reload();
+    }
+    
+    private void resetStates() {
+        try(Transaction tx = graph.beginTx()) {
+            
+            String query = "MATCH (s:" +StructureNode.LABEL.name() + ") "
+                         + "WHERE NOT s." +StructureNode.CONSTRUCTION_STATUS_PROPERTY + " =  " + ConstructionStatus.COMPLETED.getStatusId() + " "
+                         + "AND NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId() + " "
+                         + "SET s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.STOPPED.getStatusId();
+            graph.execute(query);
+            
+            tx.success();
+        }
     }
 
     /**
@@ -232,14 +248,11 @@ public class StructureAPI implements IStructureAPI {
 //            // Check the default restrictions first
             long start = System.currentTimeMillis();
             Placement placement = plan.getPlacement();
-            System.out.println("Placement loaded in " + (System.currentTimeMillis() - start) + " ms");
             
             checkDefaultRestrictions(placement, world, position, direction);
             
             start = System.currentTimeMillis();
             WorldNode worldNode = registerWorld(world);
-            System.out.println("Registering world in " + (System.currentTimeMillis() - start) + " ms");
-            
             
             try (Transaction tx = graph.beginTx()) {
 
@@ -258,13 +271,11 @@ public class StructureAPI implements IStructureAPI {
                 StructureNode structureNode = structureDAO.addStructure(plan.getName(), position, structureRegion, direction, plan.getPrice());
                 StructureWorldNode structureWorldNode = new StructureWorldNode(worldNode);
                 structureWorldNode.addStructure(structureNode);
-                System.out.println("Structure added in " + (System.currentTimeMillis() - start) + " ms");
 
                 // Add owner!
                 if (owner != null) {
                     start = System.currentTimeMillis();
                     SettlerNode settler = settlerDAO.find(owner.getUniqueId());
-                    System.out.println("Owner found in " + (System.currentTimeMillis() - start));
                     
                     if (settler == null) {
                         tx.failure();
@@ -276,7 +287,6 @@ public class StructureAPI implements IStructureAPI {
                 try {
                     start = System.currentTimeMillis();
                     moveResources(worldNode, structureNode, plan);
-                    System.out.println("Moved resources in " + (System.currentTimeMillis() - start));
                 } catch (IOException ex) {
                     // rollback...
                     File structureDir = getDirectoryForStructure(worldNode, structureNode);
@@ -289,7 +299,6 @@ public class StructureAPI implements IStructureAPI {
 
                 start = System.currentTimeMillis();
                 structure = DefaultStructureFactory.getInstance().makeStructure(structureNode);
-                System.out.println("Make structure in " + (System.currentTimeMillis() - start));
             }
         } finally {
             structureLock.unlock();
@@ -387,7 +396,6 @@ public class StructureAPI implements IStructureAPI {
         Preconditions.checkNotNull(position);
         Preconditions.checkArgument(parentStructure.getWorld().equals(world.getName()), "Structure must be in the same world...");
         
-        System.out.println("Create substructure");
 
         Structure substructure;
         structureLock.lock();

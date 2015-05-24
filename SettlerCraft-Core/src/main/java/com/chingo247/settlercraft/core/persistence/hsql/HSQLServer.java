@@ -50,6 +50,7 @@ public class HSQLServer {
         server.setAddress(host);
         server.setPort(port);
         
+        System.out.println("Setting up database '" + database + "' within '" + directory.getAbsolutePath() + "'");
         server.setDatabaseName(0, database);
         server.setDatabasePath(0, directory.getAbsolutePath());
     

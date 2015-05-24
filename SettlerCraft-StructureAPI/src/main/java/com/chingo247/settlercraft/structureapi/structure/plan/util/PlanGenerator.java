@@ -35,14 +35,14 @@ public class PlanGenerator {
         while(fileIterator.hasNext()) {
             File schemaFile = fileIterator.next();
             try {
-                generatePlanFromSchematic(schemaFile);
+                generatePlanFromSchematic(schemaFile, directory);
             } catch (IOException ex) {
                 Logger.getLogger(PlanGenerator.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
     
-    private static void generatePlanFromSchematic(File file) throws IOException {
+    private static void generatePlanFromSchematic(File file, File rootDirectory) throws IOException {
         String name = FilenameUtils.getBaseName(file.getName());
         File directory = file.getParentFile();
         
@@ -57,7 +57,9 @@ public class PlanGenerator {
         root.add(nameElement);
         
         Element categoryElement = new BaseElement(StructurePlanXMLConstants.STRUCTURE_PLAN_CATEGORY_ELEMENT);
-        categoryElement.setText("Default");
+        String category = rootDirectory.getName().equals(directory.getName()) ? "Default" : directory.getName();
+        categoryElement.setText(category);
+        root.add(categoryElement);
         
         Element placementElment = new BaseElement(StructurePlanXMLConstants.STRUCTURE_PLAN_PLACEMENT);
         

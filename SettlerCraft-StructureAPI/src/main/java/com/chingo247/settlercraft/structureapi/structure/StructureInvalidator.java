@@ -187,7 +187,6 @@ public class StructureInvalidator {
                     + " WHERE s." + StructureNode.CREATED_AT_PROPERTY + " > {date}"
                     + " RETURN s";
 
-            System.out.println("query: " + query);
 
             Result r = graph.execute(query, params);
 

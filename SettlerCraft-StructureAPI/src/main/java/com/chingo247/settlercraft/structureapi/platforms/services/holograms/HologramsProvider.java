@@ -6,7 +6,6 @@
 package com.chingo247.settlercraft.structureapi.platforms.services.holograms;
 
 import com.chingo247.settlercraft.structureapi.platforms.services.Service;
-import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.world.World;
 
@@ -17,7 +16,5 @@ import com.sk89q.worldedit.world.World;
 public interface HologramsProvider extends Service {
     
     public Hologram createHologram(String plugin, World world, Vector position);
-    
-    public Hologram createHologram(String plugin, World world, Vector position, Structure structure);
     
 }

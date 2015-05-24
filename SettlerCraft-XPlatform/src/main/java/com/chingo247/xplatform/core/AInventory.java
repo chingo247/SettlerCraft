@@ -26,8 +26,6 @@ public abstract class AInventory {
     
     public abstract void removeItem(AItemStack item);
     
-    
-    
     public abstract void addItem(AItemStack itemStack);
     
     public abstract void setItem(int index, AItemStack itemstack);          

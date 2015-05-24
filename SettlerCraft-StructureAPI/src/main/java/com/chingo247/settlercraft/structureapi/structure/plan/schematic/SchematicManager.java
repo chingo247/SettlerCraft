@@ -18,8 +18,6 @@ package com.chingo247.settlercraft.structureapi.structure.plan.schematic;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.util.XXHasher;
-import com.chingo247.settlercraft.core.util.LogLevel;
-import com.chingo247.settlercraft.core.util.SCLogger;
 import com.chingo247.settlercraft.structureapi.persistence.dao.SchematicDataDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.schematic.SchematicData;
 import com.chingo247.settlercraft.structureapi.persistence.entities.schematic.SchematicDataFactory;
@@ -50,7 +48,7 @@ import org.neo4j.graphdb.Transaction;
  */
 public class SchematicManager {
 
-    private final SCLogger LOG = new SCLogger();
+//    private final SCLogger LOG = new SCLogger();
     private final Map<Long, Schematic> schematics;
     private static SchematicManager instance;
     private final SchematicDataDAO schematicDAO;
@@ -176,7 +174,7 @@ public class SchematicManager {
             
             // Delete unused
             for(SchematicDataNode sdn : schematicDAO.findSchematicsBeforeDate(TWO_DAYS)) {
-                System.out.println("[SettlerCraft]: Deleted " + sdn.getName() + " last import was " + new Date(sdn.getLastImport()).toString());
+                System.out.println("[SettlerCraft]: Deleted " + sdn.getName() + " from cache,  last import was " + new Date(sdn.getLastImport()).toString());
                 sdn.delete();
             }
             tx.success();
@@ -205,7 +203,7 @@ public class SchematicManager {
             try {
                 long start = System.currentTimeMillis();
                 FastClipboard clipboard = FastClipboard.read(schematicFile);
-                LOG.print(LogLevel.INFO, schematicFile, "Schematic", System.currentTimeMillis() - start);
+//                LOG.print(LogLevel.INFO, schematicFile, "Schematic", System.currentTimeMillis() - start);
                 return new SchematicImpl(schematicFile, clipboard);
             } catch (Exception ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);

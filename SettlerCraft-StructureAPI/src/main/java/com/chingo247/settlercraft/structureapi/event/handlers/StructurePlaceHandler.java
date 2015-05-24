@@ -124,22 +124,19 @@ public class StructurePlaceHandler {
                             player.print(color.red() + "Plans are not loaded yet... please wait...");
                             return;
                         }
-//                    player.print(COLOR.red() + "The plan has become invalid, reason: data was not found");
-//                    int amount = inventory.getAmount(planItem);
-//                    double value = getValue(planItem);
-//                    if (value > 0.0d) {
-//                        economyProvider.give(player.getUniqueId(), value * amount);
-//                        iPlayer.getInventory().removeItem(planItem);
-//                        
-//                        player.print(COLOR.red() + "Invalid StructurePlans have been removed and you've been refunded: " + (value * amount));
-//                    }
+                    player.print(color.red() + "The plan has become invalid, reason: data was not found");
+                    int amount = planItem.getAmount();
+                    double value = getValue(planItem);
+                    if (value > 0.0d) {
+                        economyProvider.give(player.getUniqueId(), value * amount);
+                        iPlayer.getInventory().removeItem(planItem);
+                        
+                        player.print(color.red() + "Invalid StructurePlans have been removed and you've been refunded: " + (value * amount));
+                    }
 
                         return;
                     }
-                    long start = System.currentTimeMillis();
                     handlePlace(plan, planItem, player, world, pos, slm);
-                    System.out.println("Place() handled in " + (System.currentTimeMillis() - start) + " ms");
-
                 } catch (Exception ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
                 }
@@ -199,12 +196,9 @@ public class StructurePlaceHandler {
                             return;
                         }
                         
-                        System.out.println("Possible parent: " + possibleParentStructure.getId());
                         structure = structureAPI.createSubstructure(possibleParentStructure, plan, world, pos1, direction, player);
-                        System.out.println("Substructure placed in " + (System.currentTimeMillis() - start) + " ms");
                     } else {
                         structure = structureAPI.createStructure(plan, world, pos1, direction, player);
-                        System.out.println("Structure placed in " + (System.currentTimeMillis() - start)  + " ms");
                     }
                     
                     if (structure != null) {
@@ -258,7 +252,6 @@ public class StructurePlaceHandler {
                     + " LIMIT 1";
 
             Result result = graph.execute(query, params);
-            System.out.println("getAndCheckSmallestOverlappingStructure() in " + (System.currentTimeMillis() - start) + " ms");
             while (result.hasNext()) {
                 Map<String, Object> map = result.next();
                 Node n = (Node) map.get("structure");
@@ -267,7 +260,6 @@ public class StructurePlaceHandler {
             
             if(structure != null) {
                 isOwner = structureDAO.isOwnerOfStructure(structure.getId(), player);
-                System.out.println("Overlapping structure: " + structure.getId());
             }
             
             tx.success();
@@ -342,7 +334,7 @@ public class StructurePlaceHandler {
     }
 
     private boolean canPlace(Player player, World world, Vector pos1, Direction direction, StructurePlan plan) {
-        System.out.println("Still have to implement canPlace() in " + this.getClass().getName());
+        System.out.println(color.red() + "Still have to implement canPlace() in " + this.getClass().getName());
         return true;
     }
 

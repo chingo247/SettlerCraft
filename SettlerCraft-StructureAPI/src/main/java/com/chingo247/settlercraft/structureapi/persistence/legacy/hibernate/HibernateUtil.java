@@ -52,15 +52,15 @@ public class HibernateUtil {
             AnnotationConfiguration configuration = new AnnotationConfiguration();
             configuration.setProperty("hibernate.bytecode.use_reflection_optimizer", "false");
             configuration.setProperty("hibernate.connection.driver_class", "org.hsqldb.jdbcDriver");
-            configuration.setProperty("hibernate.connection.url", "jdbc:hsqldb:file:plugins/SettlerCraft/Database/SettlerCraft;hsqldb.write_delay=false;hsqldb.nio_max_size=512");
+            configuration.setProperty("hibernate.connection.url", "jdbc:hsqldb:hsql://localhost:9005/SettlerCraft");
             configuration.setProperty("hibernate.cache.provider_class", "org.hibernate.cache.EhCacheProvider");
             configuration.setProperty("hibernate.cache.use_query_cache", "true");
             configuration.setProperty("hibernate.connection.username", "SA");
             configuration.setProperty("hibernate.connection.password", "");
             configuration.setProperty("hibernate.connection.pool_size", "20");
             configuration.setProperty("hibernate.jdbc.batch_size", "5000");
-            configuration.setProperty("dialect", "org.hibernate.dialect.HSQLDialect");
-            configuration.setProperty("show_sql", "false");
+            configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
+            configuration.setProperty("hibernate.show_sql", "false");
             configuration.setProperty("hibernate.hbm2ddl.auto", "update");
 //            configuration = (AnnotationConfiguration) configuration.configure();
             configuration.addAnnotatedClass(Structure.class);
@@ -69,6 +69,8 @@ public class HibernateUtil {
             configuration.addAnnotatedClass(PlayerOwnership.class);
             configuration.addAnnotatedClass(PlayerOwnershipId.class);
             configuration.addAnnotatedClass(StructureLog.class);
+            
+            
             
             sessionFactory = configuration.buildSessionFactory();
         } catch (Throwable ex) {
@@ -87,7 +89,7 @@ public class HibernateUtil {
     }
 
     
-    public static void shutdown() {
+    public static void close() {
         sessionFactory.close();
     }
 }

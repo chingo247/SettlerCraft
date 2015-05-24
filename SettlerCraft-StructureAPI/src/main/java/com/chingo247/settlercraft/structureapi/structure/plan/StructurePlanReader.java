@@ -195,7 +195,7 @@ public class StructurePlanReader {
 //                StructurePlanUtil.validate(plan);
                     }
 
-                    LOG.print(LogLevel.INFO, structurePlanFile, "StructurePlan", System.currentTimeMillis() - start);
+//                    LOG.print(LogLevel.INFO, structurePlanFile, "StructurePlan", System.currentTimeMillis() - start);
                     return plan;
 
                 } else {
@@ -204,7 +204,7 @@ public class StructurePlanReader {
                     plan.setPrice(price);
                     plan.setDescription(description);
                     plan.setCategory(category);
-                    LOG.print(LogLevel.INFO, structurePlanFile, "StructurePlan", System.currentTimeMillis() - start);
+//                    LOG.print(LogLevel.INFO, structurePlanFile, "StructurePlan", System.currentTimeMillis() - start);
                     return plan;
                 }
 

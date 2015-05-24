@@ -85,6 +85,10 @@ public class StructureNode {
         }
     }
     
+    public Vector getPosition() {
+        return new Vector(getX(), getY(), getZ());
+    }
+    
     public void setAutoremoved(boolean removed) {
         underlyingNode.setProperty(AUTO_REMOVED_PROPERTY, removed);
     }
