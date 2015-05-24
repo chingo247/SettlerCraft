@@ -140,9 +140,9 @@ public abstract class ACategoryMenu {
             throw new RuntimeException("Category already exists!");
         }
         synchronized (categories) {
-            Category cat = new Category(title);
+            Category cat = new Category(categorySlot.getName());
             cat.addAliasses(categorySlot.getAliases());
-            categories.put(title, cat);
+            categories.put(categorySlot.getName(), cat);
             setSlot(slot, categorySlot);
         }
     }
@@ -440,11 +440,11 @@ public abstract class ACategoryMenu {
 
     private class Category {
 
-        private String categoryName;
+        private String name;
         private Set<String> aliases;
 
         public Category(String categoryName) {
-            this.categoryName = categoryName;
+            this.name = categoryName.toLowerCase();
             this.aliases = new HashSet<>();
         }
 
@@ -469,7 +469,7 @@ public abstract class ACategoryMenu {
         }
 
         public boolean matches(String categoryName) {
-            if (categoryName.equals(categoryName.toLowerCase())) {
+            if (this.name.equalsIgnoreCase(categoryName.toLowerCase())) {
                 return true;
             } else {
                 return aliases.contains(categoryName.toLowerCase());
