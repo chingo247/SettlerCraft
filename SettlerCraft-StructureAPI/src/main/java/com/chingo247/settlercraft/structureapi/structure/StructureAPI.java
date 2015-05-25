@@ -54,6 +54,7 @@ import com.chingo247.xplatform.core.ILocation;
 import com.chingo247.xplatform.core.IWorld;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.io.Files;
@@ -65,6 +66,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
@@ -124,7 +126,7 @@ public class StructureAPI implements IStructureAPI {
         this.worldDAO = new WorldDAO(graph);
         this.settlerDAO = new SettlerDAO(graph);
         this.COLORS = platform.getChatColors();
-
+        
         EventManager.getInstance().getEventBus().register(new StructurePlanManagerHandler());
 
         setupSchema();
@@ -172,11 +174,17 @@ public class StructureAPI implements IStructureAPI {
     private void resetStates() {
         try(Transaction tx = graph.beginTx()) {
             
+            Map<String,Object> params = Maps.newHashMap();
+            // Enforce integers
+            params.put("completed", (Integer) ConstructionStatus.COMPLETED.getStatusId());
+            params.put("removed", (Integer) ConstructionStatus.REMOVED.getStatusId());
+            params.put("stopped", (Integer) ConstructionStatus.COMPLETED.getStatusId());
+            
             String query = "MATCH (s:" +StructureNode.LABEL.name() + ") "
-                         + "WHERE NOT s." +StructureNode.CONSTRUCTION_STATUS_PROPERTY + " =  " + ConstructionStatus.COMPLETED.getStatusId() + " "
-                         + "AND NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId() + " "
-                         + "SET s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.STOPPED.getStatusId();
-            graph.execute(query);
+                         + "WHERE NOT s." +StructureNode.CONSTRUCTION_STATUS_PROPERTY + " =  {completed} "
+                         + "AND NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " =  {removed}"
+                         + "SET s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " =  {stopped}";
+            graph.execute(query, params);
             
             tx.success();
         }
@@ -241,12 +249,10 @@ public class StructureAPI implements IStructureAPI {
         structureLock.lock();
         try {
 //            // Check the default restrictions first
-            long start = System.currentTimeMillis();
             Placement placement = plan.getPlacement();
             
             checkDefaultRestrictions(placement, world, position, direction);
             
-            start = System.currentTimeMillis();
             WorldNode worldNode = registerWorld(world);
             
             try (Transaction tx = graph.beginTx()) {
@@ -262,14 +268,12 @@ public class StructureAPI implements IStructureAPI {
 
                 // Create the StructureNode - Where it all starts...
                 
-                start = System.currentTimeMillis();
                 StructureNode structureNode = structureDAO.addStructure(plan.getName(), position, structureRegion, direction, plan.getPrice());
                 StructureWorldNode structureWorldNode = new StructureWorldNode(worldNode);
                 structureWorldNode.addStructure(structureNode);
 
                 // Add owner!
                 if (owner != null) {
-                    start = System.currentTimeMillis();
                     SettlerNode settler = settlerDAO.find(owner.getUniqueId());
                     
                     if (settler == null) {
@@ -280,7 +284,6 @@ public class StructureAPI implements IStructureAPI {
                 }
 
                 try {
-                    start = System.currentTimeMillis();
                     moveResources(worldNode, structureNode, plan);
                 } catch (IOException ex) {
                     // rollback...
@@ -292,7 +295,6 @@ public class StructureAPI implements IStructureAPI {
 
                 tx.success();
 
-                start = System.currentTimeMillis();
                 structure = DefaultStructureFactory.getInstance().makeStructure(structureNode);
             }
         } finally {

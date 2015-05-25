@@ -87,6 +87,7 @@ public class BKSettlerCraftCorePlugin extends JavaPlugin {
     @Override
     public void onDisable() {
          SettlerCraft.getInstance().getNeo4j().shutdown();
+         SettlerCraft.getInstance().getExecutor().shutdown();
     }
     
     

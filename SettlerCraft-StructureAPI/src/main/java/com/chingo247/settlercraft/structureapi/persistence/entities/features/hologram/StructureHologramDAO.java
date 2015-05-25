@@ -7,8 +7,10 @@ package com.chingo247.settlercraft.structureapi.persistence.entities.features.ho
 
 import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
+import com.chingo247.settlercraft.structureapi.structure.ConstructionStatus;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.sk89q.worldedit.Vector;
 import java.util.List;
 import java.util.Map;
@@ -41,8 +43,15 @@ public class StructureHologramDAO {
     }
     
     public List<StructureHologramNode> findAll() {
-        String query = "MATCH (h:"+StructureHologramNode.LABEL.name()+") RETURN h";
-        Result r = graph.execute(query);
+        Map<String,Object> params = Maps.newHashMap();
+        params.put("removed", (Integer) ConstructionStatus.REMOVED.getStatusId());
+        
+        String query = "MATCH (h:"+StructureHologramNode.LABEL.name()+")"
+                + "<-[r:"+StructureHologramNode.RELATION_HAS_HOLOGRAM.name()+"]-"
+                + "(s:"+StructureNode.LABEL.name()+") "
+                + "WHERE NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = {removed}"
+                + "RETURN h";
+        Result r = graph.execute(query, params);
         List<StructureHologramNode> holograms = Lists.newArrayList();
         
         while(r.hasNext()) {

@@ -110,7 +110,7 @@ public class WorldGuardHelper implements IStructureProtector {
         try(Transaction tx = graph.beginTx()) {
             
             String query = "MATCH(s:" + StructureNode.LABEL.name() + ") "
-                    + "WHERE s.worldguard_region IS NULL "
+                    + "WHERE s."+WORLD_GUARD_REGION_PROPERTY+" IS NULL "
                     + "AND NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId() + " "
                     + "RETURN s";
             

@@ -24,7 +24,6 @@ package com.chingo247.settlercraft.structureapi.platforms.bukkit;
  * THE SOFTWARE.
  */
 import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.xplatform.core.IPlugin;
 import com.chingo247.settlercraft.core.exception.SettlerCraftException;
 import com.chingo247.settlercraft.structureapi.platforms.bukkit.listener.PlanListener;
@@ -173,11 +172,11 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         
         // Setup HolographicDisplays (if available)
         if(configProvider.useHolograms() && Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null) {
-            
-            HolographicDisplaysHologramProvider hologramProvider = new HolographicDisplaysHologramProvider(graph, SettlerCraft.getInstance().getPlatform(), new BukkitPlugin(this));
-            hologramProvider.initialize();
-            EventManager.getInstance().getEventBus().register(StructureHologramManager.getInstance()); // Should be registered once...
+            HolographicDisplaysHologramProvider holographicDisplays = new HolographicDisplaysHologramProvider();
+            StructureHologramManager.getInstance().setHologramProvider(holographicDisplays);
             StructureHologramManager.getInstance().inititialize(new BukkitPlugin(this));
+            
+            
         }
         
         // Setup Commands

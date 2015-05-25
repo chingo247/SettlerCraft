@@ -6,6 +6,7 @@
 package com.chingo247.settlercraft.structureapi.platforms.bukkit.services.holograms;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
+import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.structureapi.event.StructureCreateEvent;
 import com.chingo247.settlercraft.structureapi.event.StructureStateChangeEvent;
 import com.chingo247.settlercraft.structureapi.persistence.entities.features.hologram.StructureHologram;
@@ -84,6 +85,7 @@ public class StructureHologramManager {
         invalidate();
         setupUnchecked();
         initHolos();
+        EventManager.getInstance().getEventBus().register(this); // Should be registered once...
     }
 
     public void setHologramProvider(HologramsProvider hologramsProvider) {
@@ -100,10 +102,7 @@ public class StructureHologramManager {
         hologram.addLine(color.blue() + structure.getName());
         hologram.addLine(getStatusString(structure));
         synchronized (holograms) {
-            List<Hologram> holos = holograms.get(structure.getId());
-            synchronized (holos) {
-                holos.add(hologram);
-            }
+            holograms.get(structure.getId()).add(hologram);
         }
     }
 
@@ -209,6 +208,7 @@ public class StructureHologramManager {
 
             tx.success();
         }
+        
 
         int count = 0;
         while (hologramQueue.peek() != null) {
@@ -229,7 +229,8 @@ public class StructureHologramManager {
 
                 @Override
                 public void run() {
-                    hologramsProvider.createHologram(plugin.getName(), w, position);
+                    Hologram h = hologramsProvider.createHologram(plugin.getName(), w, position);
+                    registerStructureHologram(structure, h);
                 }
             });
             count++;
