@@ -125,6 +125,10 @@ public class StructureCommands {
                         case "info":
                             info(sender, commandArgs);
                             break;
+//                        case "mask":
+//                            checkIsPlayer(sender);
+//                            mask((IPlayer) sender, commandArgs);
+//                            break;
                         case "build":
                             checkIsPlayer(sender);
                             build((IPlayer) sender, commandArgs);
@@ -157,13 +161,96 @@ public class StructureCommands {
                             throw new CommandException("No action known for '/" + command + " " + commandArg);
                     }
                 } catch (CommandException ex) {
-                    sender.sendMessage(ex.getMessage());
+                    sender.sendMessage(ex.getPlayerErrorMessage());
                 } catch (Exception ex) { // Catch everything or disappear it will dissappear in the abyss!
                     Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
                 }
             }
+
         });
         return true;
+    }
+
+//    private void mask(IPlayer iPlayer, String[] commandArgs) throws CommandException {
+//        if (commandArgs.length == 0) {
+//            throw new CommandException("Too few arguments!");
+//        }
+//        String method = commandArgs[0];
+//
+//
+//        switch (method.toLowerCase()) {
+//            case "replace":
+//                // /stt mask replace [currentMaterial][currentData][newMaterial][newData]
+//
+//                String helpReplace = "/stt mask replace [currentMaterial][currentData][newMaterial][newData]|<ignoreMaterial>";
+//
+//                if (commandArgs.length < 5) {
+//                    throw new CommandException("Too few arguments!", helpReplace);
+//                }
+//
+//                final int currentMat = getInt(commandArgs[1], "currentMaterial", helpReplace);
+//                final int currentData = getInt(commandArgs[2], "currentData", helpReplace);
+//                final int newMaterial = getInt(commandArgs[3], "newMaterial", helpReplace);
+//                final int newData = getInt(commandArgs[4], "newData", helpReplace);
+//                
+//                final int ignore = commandArgs.length == 6 ? getInt(commandArgs[5], "<ignoreMaterial>", helpReplace) : -1;
+//                
+//
+//                BuildOptions options = session.getPlaceOptions();
+//                options.addBlockMask(new BlockMask() {
+//
+//                    @Override
+//                    public BaseBlock apply(Vector relativePosition, Vector worldPosition, BaseBlock block) {
+//                        if(ignore != -1 && block.getId() == ignore) {
+//                            return block;
+//                        }
+//                        
+//                        
+//                        if ((currentMat < 0 || currentMat == block.getId()) && (currentData < 0 || currentData == block.getData())) {
+//
+//                                block.setId(newMaterial);
+//                                block.setData(newData);
+//
+//                        }
+//                        return block;
+//                    }
+//                });
+//
+//                break;
+//            case "ignore":
+//
+//                // /stt mask replace [currentMaterial][currentData][newMaterial][newData]
+//                String helpIgnore = "/stt mask ignore [material][data]";
+//
+//                if (commandArgs.length < 5) {
+//                    throw new CommandException("Too few arguments!", helpIgnore);
+//                }
+//
+//                final int matIgnore = getInt(commandArgs[1], "material", helpIgnore);
+//                final int datIgnore = getInt(commandArgs[2], "data", helpIgnore);
+//
+//                BuildOptions options2 = session.getPlaceOptions();
+//                options2.addIgnore(new BlockPredicate() {
+//
+//                    @Override
+//                    public boolean evaluate(Vector position, Vector worldPosition, BaseBlock block) {
+//                        return ((matIgnore < 0 || matIgnore == block.getId()) && (datIgnore < -1 || datIgnore == block.getData()));
+//                    }
+//                });
+//
+//                break;
+//        }
+//
+//    }
+
+    private int getInt(String number, String argumentName, String help) throws CommandException {
+        int num;
+        try {
+            num = Integer.parseInt(number);
+        } catch (NumberFormatException nfe) {
+            throw new CommandException("Expected a number for " + argumentName + " but got " + number, help);
+        }
+        return num;
     }
 
     private boolean location(IPlayer player, String[] commandArgs) throws CommandException {

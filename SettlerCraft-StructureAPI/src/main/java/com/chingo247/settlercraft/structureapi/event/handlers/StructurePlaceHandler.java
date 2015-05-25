@@ -38,8 +38,8 @@ import com.chingo247.settlercraft.structureapi.structure.DefaultStructureFactory
 import com.chingo247.settlercraft.structureapi.structure.IStructureAPI;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
-import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BuildOptions;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlanManager;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BuildOptions;
 import com.chingo247.settlercraft.structureapi.util.PlacementUtil;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IWorld;
@@ -206,6 +206,7 @@ public class StructurePlaceHandler {
 //                        clone.setAmount(1);
 //                        iPlayer.getInventory().removeItem(clone);
 //                        iPlayer.updateInventory();
+                        
                         structure.build(player, new BuildOptions(), false);
                     }
                 } catch (StructureException ex) {

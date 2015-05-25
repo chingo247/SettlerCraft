@@ -48,7 +48,6 @@ import com.chingo247.settlercraft.structureapi.platforms.services.protection.ISt
 import com.chingo247.settlercraft.structureapi.structure.plan.DefaultStructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.FilePlacement;
 import com.chingo247.settlercraft.structureapi.structure.restriction.StructureRestriction;
-import com.chingo247.settlercraft.structureapi.structure.session.PlayerSessionManager;
 import com.chingo247.settlercraft.structureapi.util.PlacementUtil;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.ILocation;
@@ -225,10 +224,6 @@ public class StructureAPI implements IStructureAPI {
         return ConstructionManager.getInstance();
     }
 
-    @Override
-    public PlayerSessionManager getPlayerSessionManager() {
-        return PlayerSessionManager.getInstance();
-    }
 
     @Override
     public StructurePlanManager getStructurePlanManager() {

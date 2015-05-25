@@ -23,7 +23,6 @@ import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlanManager;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
 import com.chingo247.settlercraft.structureapi.structure.restriction.StructureRestriction;
-import com.chingo247.settlercraft.structureapi.structure.session.PlayerSessionManager;
 import com.chingo247.xplatform.core.APlatform;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
@@ -130,11 +129,7 @@ public interface IStructureAPI {
      */
     public ConstructionManager getConstructionManager();
     
-    /**
-     * Gets the PlayerSessionManager, alternatively {@link PlayerSessionManager#getInstance() } may be used
-     * @return The PlayerSessionManager 
-     */
-    public PlayerSessionManager getPlayerSessionManager();
+  
     
     /**
      * Gets the StructurePlanManager, alternatively {@link StructurePlanManager#getInstance() } may be used
