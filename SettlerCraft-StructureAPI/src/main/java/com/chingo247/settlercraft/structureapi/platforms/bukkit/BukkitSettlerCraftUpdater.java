@@ -294,7 +294,7 @@ class BukkitSettlerCraftUpdater {
 
     private SettlerNode addSettler(String playerName, UUID playerUUID) {
         Node settlerNode = graph.createNode(com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode.LABEL);
-        settlerNode.setProperty(com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode.ID_PROPERTY, playerUUID.toString());
+        settlerNode.setProperty(com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode.UUID_PROPERTY, playerUUID.toString());
         settlerNode.setProperty(com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode.NAME_PROPERTY, playerName);
         return new SettlerNode(settlerNode);
     }

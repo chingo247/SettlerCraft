@@ -16,6 +16,7 @@
  */
 package com.chingo247.settlercraft.structureapi.structure;
 
+import com.chingo247.menuapi.menu.util.ShopUtil;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
@@ -31,6 +32,8 @@ import com.chingo247.settlercraft.structureapi.event.async.StructureJobStartedEv
 import com.chingo247.settlercraft.structureapi.persistence.dao.IStructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
+import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerNode;
+import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
 import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncDemolishingPlacement;
 import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncPlacementCallback;
@@ -171,7 +174,7 @@ public class ConstructionManager {
         if (structure.getConstructionStatus() == ConstructionStatus.REMOVED) {
             throw new ConstructionException("Can't build a removed structure");
         }
-        
+
         pool.execute(structure.getId(), new Runnable() {
 
             @Override
@@ -192,18 +195,16 @@ public class ConstructionManager {
                 try (Transaction tx = graph.beginTx()) {
                     try {
                         StructureNode node = structureDAO.find(structure.getId());
-                        
-                        
-                        
-                        if(node == null) {
+
+                        if (node == null) {
                             tx.success();
                             return;
                         }
-                        
+
                         List<StructureNode> substructures = node.getSubstructures();
-                        for(StructureNode s : substructures) {
+                        for (StructureNode s : substructures) {
                             final CuboidRegion region = s.getCuboidRegion();
-                            
+
                             options.addIgnore(new BlockPredicate() {
 
                                 @Override
@@ -212,7 +213,6 @@ public class ConstructionManager {
                                 }
                             });
                         }
-                        
 
                         PlayerEntry playerEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(player);
 
@@ -235,7 +235,6 @@ public class ConstructionManager {
                                 AsyncEventManager.getInstance().post(new StructureJobAddedEvent(w, structure.getId(), jobId, false));
                             }
                         }, structure);
-
 
                         placement.place(session, structure.getCuboidRegion().getMinimumPoint(), options);
 
@@ -318,10 +317,10 @@ public class ConstructionManager {
                 DemolishingPlacement dp;
 
                 if (parent == null || (!(parent.getStructurePlan().getPlacement() instanceof AbstractBlockPlacement))) {
-                    
+
                     CuboidRegion region = structure.getCuboidRegion();
                     Vector size = region.getMaximumPoint().subtract(region.getMinimumPoint()).add(1, 1, 1);
-                    
+
                     dp = new DemolishingPlacement(size);
                     AsyncDemolishingPlacement placement = new AsyncDemolishingPlacement(playerEntry, dp, new AsyncPlacementCallback() {
 
@@ -349,7 +348,7 @@ public class ConstructionManager {
                             return !childRegion.contains(worldPosition);
                         }
                     });
-                    
+
                     dp = new RestoringPlacement((AbstractBlockPlacement) parentPlacement);
                     AsyncDemolishingPlacement placement = new AsyncDemolishingPlacement(playerEntry, dp, new AsyncPlacementCallback() {
 
@@ -548,9 +547,9 @@ public class ConstructionManager {
                 StructureNode structureNode = structureDAO.find(structureId);
                 structureNode.setConstructionStatus(ConstructionStatus.STOPPED);
                 structure = DefaultStructureFactory.getInstance().makeStructure(structureNode);
-                List<SettlerNode> settlers = structureNode.getOwners();
+                List<StructureOwnerNode> settlers = structureNode.getOwners();
                 for (SettlerNode settlerNode : settlers) {
-                    IPlayer player = platform.getPlayer(settlerNode.getId());
+                    IPlayer player = platform.getPlayer(settlerNode.getUUID());
                     owners.add(player);
                 }
                 tx.success();
@@ -596,24 +595,28 @@ public class ConstructionManager {
                     double price = structureNode.getPrice();
                     IEconomyProvider economyProvider = SettlerCraft.getInstance().getEconomyProvider();
                     if (economyProvider != null && price > 0) {
-                        SettlerNode settler = structureDAO.getMasterOwnerForStructure(structureId);
-                        if (settler != null) {
-                            IPlayer player = platform.getPlayer(settler.getId());
-                            if (player != null) {
-                                economyProvider.give(player.getUniqueId(), price);
-                                player.sendMessage("You've been refunded " + colors.gold() + price);
-                                structureNode.setPrice(0);
+                        List<StructureOwnerNode> settlers = structureNode.getOwners(StructureOwnerType.MASTER);
+                        double refundValue = price / settlers.size();
+                        if (!settlers.isEmpty()) {
+                            for (StructureOwnerNode settler : settlers) {
+                                IPlayer player = platform.getPlayer(settler.getUUID());
+                                if (player != null) {
+                                    economyProvider.give(player.getUniqueId(), refundValue);
+                                    double newBalance = economyProvider.getBalance(player.getUniqueId());
+                                    player.sendMessage("You've been refunded " + colors.gold() + refundValue, "Your new balance is " + colors.gold()+ ShopUtil.valueString(newBalance));
+                                }
                             }
                         }
+                        structureNode.setPrice(0);
                     }
 
                 } else {
                     structureNode.setConstructionStatus(ConstructionStatus.COMPLETED);
                 }
                 structure = DefaultStructureFactory.getInstance().makeStructure(structureNode);
-                List<SettlerNode> settlers = structureNode.getOwners();
+                List<StructureOwnerNode> settlers = structureNode.getOwners();
                 for (SettlerNode settlerNode : settlers) {
-                    IPlayer player = platform.getPlayer(settlerNode.getId());
+                    IPlayer player = platform.getPlayer(settlerNode.getUUID());
                     owners.add(player);
                 }
 
@@ -656,9 +659,9 @@ public class ConstructionManager {
                 }
                 structure = DefaultStructureFactory.getInstance().makeStructure(structureNode);
 
-                List<SettlerNode> settlers = structureNode.getOwners();
+                List<StructureOwnerNode> settlers = structureNode.getOwners();
                 for (SettlerNode settlerNode : settlers) {
-                    IPlayer ply = platform.getPlayer(settlerNode.getId());
+                    IPlayer ply = platform.getPlayer(settlerNode.getUUID());
                     owners.add(ply);
                 }
                 tx.success();

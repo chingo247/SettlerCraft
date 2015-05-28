@@ -63,7 +63,6 @@ public class StructureNode {
     public static final String PLACEMENT_TYPE_PROPERTY = "placementType";
     public static final String AUTO_REMOVED_PROPERTY = "autoremoved";
     public static final String CHECKED_HOLOGRAM_PROPERTY = "checkedHologram";
-    
 
     // RelationShips
     private final Node underlyingNode;
@@ -76,39 +75,38 @@ public class StructureNode {
         Object o = underlyingNode.getProperty(ID_PROPERTY);
         return o != null ? (Long) o : null;
     }
-    
+
     public void setCompletedAt(Long date) {
-        if(date != null) {
+        if (date != null) {
             underlyingNode.setProperty(COMPLETED_AT_PROPERTY, date);
-        } else if(underlyingNode.hasProperty(COMPLETED_AT_PROPERTY)) {
+        } else if (underlyingNode.hasProperty(COMPLETED_AT_PROPERTY)) {
             underlyingNode.removeProperty(COMPLETED_AT_PROPERTY);
         }
     }
-    
+
     public Vector getPosition() {
         return new Vector(getX(), getY(), getZ());
     }
-    
+
     public void setAutoremoved(boolean removed) {
         underlyingNode.setProperty(AUTO_REMOVED_PROPERTY, removed);
     }
-    
+
     public boolean isAutoremoved() {
-        if(underlyingNode.hasProperty(AUTO_REMOVED_PROPERTY)) {
+        if (underlyingNode.hasProperty(AUTO_REMOVED_PROPERTY)) {
             return (Boolean) underlyingNode.getProperty(AUTO_REMOVED_PROPERTY);
         }
         return false;
-     }
-    
+    }
+
     public void setDeletedAt(Long date) {
-        if(date != null) {
+        if (date != null) {
             underlyingNode.setProperty(DELETED_AT_PROPERTY, date);
-        } else if(underlyingNode.hasProperty(DELETED_AT_PROPERTY)) {
+        } else if (underlyingNode.hasProperty(DELETED_AT_PROPERTY)) {
             underlyingNode.removeProperty(DELETED_AT_PROPERTY);
         }
     }
-    
-    
+
     /**
      * Gets the actual node
      *
@@ -117,17 +115,17 @@ public class StructureNode {
     public Node getRawNode() {
         return underlyingNode;
     }
-    
+
     public Integer getX() {
         Object o = underlyingNode.getProperty(POS_X_PROPERTY);
         return (Integer) o;
     }
-    
+
     public Integer getY() {
         Object o = underlyingNode.getProperty(POS_Y_PROPERTY);
         return (Integer) o;
     }
-    
+
     public Integer getZ() {
         Object o = underlyingNode.getProperty(POS_Z_PROPERTY);
         return (Integer) o;
@@ -137,16 +135,16 @@ public class StructureNode {
         Object o = underlyingNode.getProperty(PRICE_PROPERTY);
         return o != null ? (Double) o : 0;
     }
-    
+
     public void setPrice(double price) {
         underlyingNode.setProperty(PRICE_PROPERTY, price);
     }
-    
+
     public Integer getSize() {
         Object o = underlyingNode.getProperty(SIZE_PROPERTY);
         return o != null ? (int) o : null;
     }
-    
+
     public void setSize(int size) {
         underlyingNode.setProperty(SIZE_PROPERTY, size);
     }
@@ -189,13 +187,13 @@ public class StructureNode {
         if (getConstructionStatus() != status) {
             //TODO FIRE STATE CHANGE EVENT!
             underlyingNode.setProperty(CONSTRUCTION_STATUS_PROPERTY, status.getStatusId());
-            
-            if(status == ConstructionStatus.COMPLETED) {
+
+            if (status == ConstructionStatus.COMPLETED) {
                 underlyingNode.setProperty(COMPLETED_AT_PROPERTY, System.currentTimeMillis());
             } else if (status == ConstructionStatus.REMOVED) {
                 underlyingNode.setProperty(DELETED_AT_PROPERTY, System.currentTimeMillis());
             }
-            
+
         }
     }
 
@@ -227,78 +225,110 @@ public class StructureNode {
         }
         return null;
     }
+    
+    public StructureOwnerNode findOwner(UUID possibleOwner) {
+        for (Relationship rel : underlyingNode.getRelationships(DynamicRelationshipType.withName(StructureRelTypes.RELATION_OWNED_BY), org.neo4j.graphdb.Direction.OUTGOING)) {
+            SettlerNode ownerNode = new SettlerNode(rel.getOtherNode(underlyingNode));
+            if (ownerNode.getUUID().equals(possibleOwner)) {
+                Integer typeId = (Integer) rel.getProperty("Type");
+                StructureOwnerType type = StructureOwnerType.match(typeId);
+                return new StructureOwnerNode(ownerNode.getRawNode(), type);
+            }
+        }
+        return null;
+    }
 
-    public void addOwner(SettlerNode node, StructureOwnerType type) {
-        Relationship relationship = underlyingNode.createRelationshipTo(node.getRawNode(), DynamicRelationshipType.withName("OwnedBy"));
+    public boolean addOwner(SettlerNode node, StructureOwnerType type) {
+        for (Relationship rel : underlyingNode.getRelationships(DynamicRelationshipType.withName(StructureRelTypes.RELATION_OWNED_BY), org.neo4j.graphdb.Direction.OUTGOING)) {
+            SettlerNode ownerNode = new SettlerNode(rel.getOtherNode(underlyingNode));
+            if (ownerNode.getUUID().equals(node.getUUID())) {
+                Integer typeId = (Integer) rel.getProperty("Type");
+                if(typeId < type.getTypeId()) {
+                    rel.setProperty("Type", type.getTypeId());
+                    return true;
+                }
+                return false;
+            }
+            
+        }
+        Relationship relationship = underlyingNode.createRelationshipTo(node.getRawNode(), DynamicRelationshipType.withName(StructureRelTypes.RELATION_OWNED_BY));
         relationship.setProperty("Type", type.getTypeId());
+        return true;
     }
 
     public boolean isOwner(UUID possibleOwner) {
-        for (Relationship rel : underlyingNode.getRelationships(DynamicRelationshipType.withName("OwnedBy"))) {
-            SettlerNode ownerNode = new SettlerNode(rel.getOtherNode(underlyingNode));
-            if (ownerNode.getId().equals(possibleOwner)) {
-                return true;
-            }
+        return findOwner(possibleOwner) == null;
+    }
+    
+    public boolean isOwner(UUID possibleMaster, StructureOwnerType type) {
+        StructureOwnerNode owner = findOwner(possibleMaster);
+        if(owner == null) {
+            return false;
         }
-        return false;
+        return owner.getType() == type;
     }
 
     public void removeOwner(UUID owner) {
-        for (Relationship rel : underlyingNode.getRelationships(DynamicRelationshipType.withName("OwnedBy"))) {
+        for (Relationship rel : underlyingNode.getRelationships(DynamicRelationshipType.withName(StructureRelTypes.RELATION_OWNED_BY), org.neo4j.graphdb.Direction.OUTGOING)) {
             SettlerNode ownerNode = new SettlerNode(rel.getOtherNode(underlyingNode));
-            if (ownerNode.getId().equals(owner)) {
+            if (ownerNode.getUUID().equals(owner)) {
                 rel.delete();
                 break;
             }
         }
     }
 
-    public List<SettlerNode> getOwners() {
-        List<SettlerNode> owners = Lists.newArrayList();
-        for (Relationship rel : underlyingNode.getRelationships(DynamicRelationshipType.withName("OwnedBy"))) {
-            SettlerNode ownerNode = new SettlerNode(rel.getOtherNode(underlyingNode));
-            owners.add(ownerNode);
+    public List<StructureOwnerNode> getOwners() {
+        List<StructureOwnerNode> owners = Lists.newArrayList();
+        for (Relationship rel : underlyingNode.getRelationships(DynamicRelationshipType.withName(StructureRelTypes.RELATION_OWNED_BY), org.neo4j.graphdb.Direction.OUTGOING)) {
+            if (rel.hasProperty("Type")) {
+                Integer typeProp = (Integer) rel.getProperty("Type");
+                StructureOwnerType type = StructureOwnerType.match(typeProp);
+                StructureOwnerNode ownerNode = new StructureOwnerNode(rel.getOtherNode(underlyingNode), type);
+                owners.add(ownerNode);
+            }
         }
         return owners;
     }
 
-    public List<SettlerNode> getOwners(StructureOwnerType ownerType) {
+    public List<StructureOwnerNode> getOwners(StructureOwnerType ownerType) {
         Preconditions.checkNotNull(ownerType, "owner type can not be null, use getOwners() instead");
-        List<SettlerNode> owners = Lists.newArrayList();
-        for (Relationship rel : underlyingNode.getRelationships(DynamicRelationshipType.withName("OwnedBy"))) {
+        List<StructureOwnerNode> owners = Lists.newArrayList();
+        for (Relationship rel : underlyingNode.getRelationships(DynamicRelationshipType.withName(StructureRelTypes.RELATION_OWNED_BY), org.neo4j.graphdb.Direction.OUTGOING)) {
             if (rel.hasProperty("Type")) {
-                Integer type = (Integer) rel.getProperty("Type");
-                if (StructureOwnerType.match(type) == ownerType) {
-                    SettlerNode ownerNode = new SettlerNode(rel.getOtherNode(underlyingNode));
+                Integer typeId = (Integer) rel.getProperty("Type");
+                StructureOwnerType type = StructureOwnerType.match(typeId);
+                if (type == ownerType) {
+                    StructureOwnerNode ownerNode = new StructureOwnerNode(rel.getOtherNode(underlyingNode), type);
                     owners.add(ownerNode);
                 }
             }
         }
         return owners;
     }
-    
+
     public List<StructureNode> getSubstructures() {
         Iterable<Relationship> relationships = underlyingNode.getRelationships(DynamicRelationshipType.withName(StructureRelTypes.RELATION_SUBSTRUCTURE), org.neo4j.graphdb.Direction.INCOMING);
         List<StructureNode> substructures = Lists.newArrayList();
         for (Relationship rel : relationships) {
             StructureNode sno = new StructureNode(rel.getOtherNode(underlyingNode));
-            if(sno.getConstructionStatus() != ConstructionStatus.REMOVED) {
+            if (sno.getConstructionStatus() != ConstructionStatus.REMOVED) {
                 substructures.add(new StructureNode(rel.getOtherNode(underlyingNode)));
             }
         }
         return substructures;
     }
-    
+
     public boolean hasSubstructures() {
-        for(Relationship s : underlyingNode.getRelationships(org.neo4j.graphdb.Direction.INCOMING, DynamicRelationshipType.withName(StructureRelTypes.RELATION_SUBSTRUCTURE))) {
+        for (Relationship s : underlyingNode.getRelationships(org.neo4j.graphdb.Direction.INCOMING, DynamicRelationshipType.withName(StructureRelTypes.RELATION_SUBSTRUCTURE))) {
             StructureNode sn = new StructureNode(s.getOtherNode(underlyingNode));
-            if(sn.getConstructionStatus() != ConstructionStatus.REMOVED) {
+            if (sn.getConstructionStatus() != ConstructionStatus.REMOVED) {
                 return true;
             }
         }
         return false;
     }
-    
+
     public StructureNode getRoot() {
         TraversalDescription traversalDescription = underlyingNode.getGraphDatabase().traversalDescription();
         Iterator<Node> nodeIt = traversalDescription.relationships(DynamicRelationshipType.withName(StructureRelTypes.RELATION_SUBSTRUCTURE), org.neo4j.graphdb.Direction.OUTGOING)
@@ -306,24 +336,25 @@ public class StructureNode {
                 .traverse(underlyingNode)
                 .nodes()
                 .iterator();
-        while(nodeIt.hasNext()) {
+
+        while (nodeIt.hasNext()) {
             Node n = nodeIt.next();
-            if(!nodeIt.hasNext()) {
+            if (!nodeIt.hasNext()) {
                 return new StructureNode(n);
             }
-            
+
         }
         return this;
     }
-    
+
     public void addSubstructure(StructureNode otherNode) {
         otherNode.getRawNode().createRelationshipTo(underlyingNode, DynamicRelationshipType.withName(StructureRelTypes.RELATION_SUBSTRUCTURE));
     }
-    
+
     public String getPlacementType() {
-       return (String) underlyingNode.getProperty(PLACEMENT_TYPE_PROPERTY);
+        return (String) underlyingNode.getProperty(PLACEMENT_TYPE_PROPERTY);
     }
-    
+
     @Override
     public int hashCode() {
         int hash = 3;

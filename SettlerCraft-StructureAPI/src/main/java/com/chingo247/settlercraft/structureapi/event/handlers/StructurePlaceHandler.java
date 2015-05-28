@@ -253,14 +253,16 @@ public class StructurePlaceHandler {
                     + " LIMIT 1";
 
             Result result = graph.execute(query, params);
+            StructureNode node = null;
             while (result.hasNext()) {
                 Map<String, Object> map = result.next();
                 Node n = (Node) map.get("structure");
-                structure = DefaultStructureFactory.getInstance().makeStructure(new StructureNode(n));
+                node = new StructureNode(n);
+                structure = DefaultStructureFactory.getInstance().makeStructure(node);
             }
             
-            if(structure != null) {
-                isOwner = structureDAO.isOwnerOfStructure(structure.getId(), player);
+            if(node != null) {
+                isOwner = node.isOwner(player.getUniqueId());
             }
             
             tx.success();

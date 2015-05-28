@@ -86,12 +86,12 @@ public class SettlerCraft {
             }
         }
         try (Transaction tx = graph.beginTx()) {
-            if(!Neo4jHelper.hasUniqueConstraint(graph, SettlerNode.LABEL, SettlerNode.ID_PROPERTY)) {
-                graph.schema().constraintFor(SettlerNode.LABEL)
-                    .assertPropertyIsUnique(SettlerNode.ID_PROPERTY)
-                    .create();
-                tx.success();
-            }
+            Neo4jHelper.createUniqueIndexIfNotExist(graph, SettlerNode.LABEL, SettlerNode.UUID_PROPERTY);
+            tx.success();
+        }
+        try (Transaction tx = graph.beginTx()) {
+            Neo4jHelper.createUniqueIndexIfNotExist(graph, SettlerNode.LABEL, SettlerNode.ID_PROPERTY);
+            tx.success();
         }
         
         

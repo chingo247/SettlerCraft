@@ -28,9 +28,9 @@ import org.neo4j.graphdb.Node;
 public class SettlerNode {
     
     public static final Label LABEL = DynamicLabel.label("Settler");
-    public static final String ID_PROPERTY = "uuid";
+    public static final String UUID_PROPERTY = "uuid";
     public static final String NAME_PROPERTY = "name";
-    
+    public static final String ID_PROPERTY = "settlerId";
     
     private final Node underlyingNode;
 
@@ -42,14 +42,18 @@ public class SettlerNode {
         this.underlyingNode = underlyingNode;
     }
     
-    public UUID getId() {
-        String uuidString = (String)underlyingNode.getProperty(ID_PROPERTY);
+    public UUID getUUID() {
+        String uuidString = (String)underlyingNode.getProperty(UUID_PROPERTY);
         return UUID.fromString(uuidString);
     }
     
     public String getName() {
         String name = (String) underlyingNode.getProperty(NAME_PROPERTY);
         return name;
+    }
+    
+    public Long getId() {
+        return underlyingNode.hasProperty(ID_PROPERTY) ? (Long) underlyingNode.getProperty(ID_PROPERTY) : null;
     }
     
     

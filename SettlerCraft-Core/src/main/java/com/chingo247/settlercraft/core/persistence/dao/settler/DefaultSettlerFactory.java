@@ -40,7 +40,7 @@ public class DefaultSettlerFactory extends AbstractSettlerFactory<Settler>{
     @Override
     public Settler makeStructureOwner(SettlerNode structureOwnerNode) {
         String name = structureOwnerNode.getName();
-        UUID uuid = structureOwnerNode.getId();
+        UUID uuid = structureOwnerNode.getUUID();
         return new DefaultSettler(name, uuid);
     }
     

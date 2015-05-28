@@ -76,7 +76,10 @@ import java.util.logging.Logger;
 import net.minecraft.util.com.google.common.collect.Sets;
 import org.apache.commons.io.FilenameUtils;
 import org.dom4j.DocumentException;
+import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 
 /**
@@ -106,7 +109,7 @@ public class StructureAPI implements IStructureAPI {
 
     private boolean isLoadingPlans = false;
     private static StructureAPI instance;
-    
+
     private final Set<StructureRestriction> restrictions;
 
     private final Logger LOG = Logger.getLogger(getClass().getName());
@@ -126,7 +129,7 @@ public class StructureAPI implements IStructureAPI {
         this.worldDAO = new WorldDAO(graph);
         this.settlerDAO = new SettlerDAO(graph);
         this.COLORS = platform.getChatColors();
-        
+
         EventManager.getInstance().getEventBus().register(new StructurePlanManagerHandler());
 
         setupSchema();
@@ -138,7 +141,7 @@ public class StructureAPI implements IStructureAPI {
         try (Transaction tx = graph.beginTx()) {
             Neo4jHelper.createIndexIfNotExist(graph, StructureNode.LABEL, StructureNode.DELETED_AT_PROPERTY);
             Neo4jHelper.createUniqueIndexIfNotExist(graph, StructureNode.LABEL, StructureNode.ID_PROPERTY);
-            
+
             tx.success();
         }
     }
@@ -170,22 +173,22 @@ public class StructureAPI implements IStructureAPI {
         planMenuFactory = new StructurePlanMenuFactory(platform, planMenu);
         reload();
     }
-    
+
     private void resetStates() {
-        try(Transaction tx = graph.beginTx()) {
-            
-            Map<String,Object> params = Maps.newHashMap();
+        try (Transaction tx = graph.beginTx()) {
+
+            Map<String, Object> params = Maps.newHashMap();
             // Enforce integers
             params.put("completed", (Integer) ConstructionStatus.COMPLETED.getStatusId());
             params.put("removed", (Integer) ConstructionStatus.REMOVED.getStatusId());
             params.put("stopped", (Integer) ConstructionStatus.COMPLETED.getStatusId());
-            
-            String query = "MATCH (s:" +StructureNode.LABEL.name() + ") "
-                         + "WHERE NOT s." +StructureNode.CONSTRUCTION_STATUS_PROPERTY + " =  {completed} "
-                         + "AND NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " =  {removed}"
-                         + "SET s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " =  {stopped}";
+
+            String query = "MATCH (s:" + StructureNode.LABEL.name() + ") "
+                    + "WHERE NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " =  {completed} "
+                    + "AND NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " =  {removed}"
+                    + "SET s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " =  {stopped}";
             graph.execute(query, params);
-            
+
             tx.success();
         }
     }
@@ -211,16 +214,13 @@ public class StructureAPI implements IStructureAPI {
     }
 
     public void addStructureProtector(IStructureProtector protector) {
-        for(IStructureProtector p : protectors) {
-            if(p.getName().equals(p.getName())) {
+        for (IStructureProtector p : protectors) {
+            if (p.getName().equals(p.getName())) {
                 throw new RuntimeException("Already have a protector named '" + protector.getName() + "'");
             }
         }
         protectors.add(protector);
     }
-    
-    
-    
 
     @Override
     public boolean isLoading() {
@@ -231,7 +231,6 @@ public class StructureAPI implements IStructureAPI {
     public ConstructionManager getConstructionManager() {
         return ConstructionManager.getInstance();
     }
-
 
     @Override
     public StructurePlanManager getStructurePlanManager() {
@@ -250,11 +249,11 @@ public class StructureAPI implements IStructureAPI {
         try {
 //            // Check the default restrictions first
             Placement placement = plan.getPlacement();
-            
+
             checkDefaultRestrictions(placement, world, position, direction);
-            
+
             WorldNode worldNode = registerWorld(world);
-            
+
             try (Transaction tx = graph.beginTx()) {
 
                 // Check for overlap with other structures
@@ -267,7 +266,6 @@ public class StructureAPI implements IStructureAPI {
                 }
 
                 // Create the StructureNode - Where it all starts...
-                
                 StructureNode structureNode = structureDAO.addStructure(plan.getName(), position, structureRegion, direction, plan.getPrice());
                 StructureWorldNode structureWorldNode = new StructureWorldNode(worldNode);
                 structureWorldNode.addStructure(structureNode);
@@ -275,7 +273,7 @@ public class StructureAPI implements IStructureAPI {
                 // Add owner!
                 if (owner != null) {
                     SettlerNode settler = settlerDAO.find(owner.getUniqueId());
-                    
+
                     if (settler == null) {
                         tx.failure();
                         throw new RuntimeException("Settler was null!"); // SHOULD NEVER HAPPEN AS SETTLERS ARE ADDED AT MOMENT OF FIRST LOGIN
@@ -392,7 +390,6 @@ public class StructureAPI implements IStructureAPI {
         Preconditions.checkNotNull(direction);
         Preconditions.checkNotNull(position);
         Preconditions.checkArgument(parentStructure.getWorld().equals(world.getName()), "Structure must be in the same world...");
-        
 
         Structure substructure;
         structureLock.lock();
@@ -420,7 +417,6 @@ public class StructureAPI implements IStructureAPI {
             if (hasWithin) {
                 throw new StructureException("Structure overlaps another structure...");
             }
-            
 
             // Deep check overlap
 //            ThreadSafeEditSession editSession = AsyncWorldEditUtil.getAsyncSessionFactory().getThreadSafeEditSession(world, -1);
@@ -440,17 +436,15 @@ public class StructureAPI implements IStructureAPI {
 //                    }
 //                }
 //            }
-
             try (Transaction tx = graph.beginTx()) {
 
                 // Create the StructureNode - Where it all starts...
-                StructureNode structureNode = structureDAO.addStructure(plan.getName(), position, structureRegion, direction, plan.getPrice());
+                StructureNode substructureNode = structureDAO.addStructure(plan.getName(), position, structureRegion, direction, plan.getPrice());
                 StructureWorldNode structureWorldNode = new StructureWorldNode(worldNode);
-                structureWorldNode.addStructure(structureNode);
-                
+                structureWorldNode.addStructure(substructureNode);
+
                 StructureNode parentStructureNode = structureDAO.find(parentStructure.getId());
-                parentStructureNode.addSubstructure(structureNode);
-                
+                parentStructureNode.addSubstructure(substructureNode);
 
                 // Add owner!
                 if (owner != null) {
@@ -459,14 +453,28 @@ public class StructureAPI implements IStructureAPI {
                         tx.failure();
                         throw new RuntimeException("Settler was null!"); // SHOULD NEVER HAPPEN AS SETTLERS ARE ADDED AT MOMENT OF FIRST LOGIN
                     }
-                    structureNode.addOwner(settler, StructureOwnerType.MASTER);
+                    substructureNode.addOwner(settler, StructureOwnerType.MASTER);
+                }
+                
+                // Inherit ownership
+                Node rawNode = substructureNode.getRawNode();
+                for (Relationship rel : rawNode.getRelationships(DynamicRelationshipType.withName("OwnedBy"))) {
+                    Node n = rel.getOtherNode(rawNode);
+                    if(!n.hasLabel(SettlerNode.LABEL)) {
+                        continue;
+                    }
+                    
+                    SettlerNode ownerNode = new SettlerNode(n);
+                    Integer typeId = (Integer) rel.getProperty("Type");
+                    StructureOwnerType type = StructureOwnerType.match(typeId);
+                    substructureNode.addOwner(ownerNode, type);
                 }
 
                 try {
-                    moveResources(worldNode, structureNode, plan);
+                    moveResources(worldNode, substructureNode, plan);
                 } catch (IOException ex) {
                     // rollback...
-                    File structureDir = getDirectoryForStructure(worldNode, structureNode);
+                    File structureDir = getDirectoryForStructure(worldNode, substructureNode);
                     structureDir.delete();
                     tx.failure();
                     Logger.getLogger(StructureAPI.class.getName()).log(Level.SEVERE, "Error occured during structure creation... rolling back changes made", ex);
@@ -474,7 +482,7 @@ public class StructureAPI implements IStructureAPI {
 
                 tx.success();
 
-                substructure = DefaultStructureFactory.getInstance().makeStructure(structureNode);
+                substructure = DefaultStructureFactory.getInstance().makeStructure(substructureNode);
             }
         } finally {
             structureLock.unlock();
@@ -489,18 +497,108 @@ public class StructureAPI implements IStructureAPI {
     }
 
     @Override
-    public Structure createSubstructure(Structure structure, StructurePlan plan, World world, Vector position, Direction direction) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Structure createSubstructure(Structure parentStructure, StructurePlan plan, World world, Vector position, Direction direction) throws StructureException {
+        return createSubstructure(parentStructure, plan, world, position, direction, null);
     }
 
     @Override
-    public Structure createSubstructure(Structure structure, Placement placement, World world, Vector position, Direction direction, Player owner) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Structure createSubstructure(Structure parentStructure, Placement placement, World world, Vector position, Direction direction, Player owner) throws StructureException {
+        Preconditions.checkNotNull(world);
+        Preconditions.checkNotNull(placement);
+        Preconditions.checkNotNull(direction);
+        Preconditions.checkNotNull(position);
+
+        Structure substructure;
+        structureLock.lock();
+        try {
+//            // Check the default restrictions first
+            checkDefaultRestrictions(placement, world, position, direction);
+            WorldNode worldNode = registerWorld(world);
+
+            CuboidRegion parentRegion = parentStructure.getCuboidRegion();
+
+            Vector pos1 = position;
+            Vector pos2 = PlacementUtil.getPoint2Right(pos1, direction, placement.getCuboidRegion().getMaximumPoint());
+            CuboidRegion structureRegion = new CuboidRegion(pos1, pos2);
+
+            if (!(parentRegion.contains(pos1) && parentRegion.contains(pos2))) {
+                throw new StructureException("Structure overlaps structure #" + parentStructure.getId() + ", but does not fit within it's boundaries");
+            }
+
+            boolean hasWithin;
+            try (Transaction tx = graph.beginTx()) {
+                hasWithin = structureDAO.hasSubstructuresWithin(parentStructure, world, structureRegion);
+                tx.success(); // End here
+            }
+            if (hasWithin) {
+                throw new StructureException("Structure overlaps another structure...");
+            }
+
+            try (Transaction tx = graph.beginTx()) {
+
+                // Create the StructureNode - Where it all starts...
+                StructureNode substructureNode = structureDAO.addStructure(placement.getClass().getSimpleName(), position, structureRegion, direction, 0.0);
+                StructureWorldNode structureWorldNode = new StructureWorldNode(worldNode);
+                structureWorldNode.addStructure(substructureNode);
+
+                StructureNode parentStructureNode = structureDAO.find(parentStructure.getId());
+                parentStructureNode.addSubstructure(substructureNode);
+
+                // Add owner!
+                if (owner != null) {
+                    SettlerNode settler = settlerDAO.find(owner.getUniqueId());
+                    if (settler == null) {
+                        tx.failure();
+                        throw new RuntimeException("Settler was null!"); // SHOULD NEVER HAPPEN AS SETTLERS ARE ADDED AT MOMENT OF FIRST LOGIN
+                    }
+                    substructureNode.addOwner(settler, StructureOwnerType.MASTER);
+                }
+                
+                // Inherit ownership
+                Node rawNode = substructureNode.getRawNode();
+                for (Relationship rel : rawNode.getRelationships(DynamicRelationshipType.withName("OwnedBy"))) {
+                    Node n = rel.getOtherNode(rawNode);
+                    if(!n.hasLabel(SettlerNode.LABEL)) {
+                        continue;
+                    }
+                    
+                    SettlerNode ownerNode = new SettlerNode(n);
+                    Integer typeId = (Integer) rel.getProperty("Type");
+                    StructureOwnerType type = StructureOwnerType.match(typeId);
+                    substructureNode.addOwner(ownerNode, type);
+                }
+                
+
+                File structureDir = getDirectoryForStructure(worldNode, substructureNode);
+                try {
+                    File placementPlanFile = new File(structureDir, "structureplan.xml");
+                    PlacementPlan plan = new PlacementPlan(UUID.randomUUID().toString(), placementPlanFile, placement);
+                    moveResources(worldNode, substructureNode, plan);
+                } catch (IOException ex) {
+                    // rollback...
+                    structureDir.delete();
+                    tx.failure();
+                    Logger.getLogger(StructureAPI.class.getName()).log(Level.SEVERE, "Error occured during structure creation... rolling back changes made", ex);
+                }
+
+                tx.success();
+
+                substructure = DefaultStructureFactory.getInstance().makeStructure(substructureNode);
+            }
+        } finally {
+            structureLock.unlock();
+        }
+
+        // If not null.. A structre has been created!
+        if (substructure != null) {
+            EventManager.getInstance().getEventBus().post(new StructureCreateEvent(substructure));
+        }
+        return substructure;
     }
 
     @Override
-    public Structure createSubstructure(Structure structure, Placement placement, World world, Vector position, Direction direction) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Structure createSubstructure(Structure structure, Placement placement, World world, Vector position, Direction direction) throws StructureException {
+        return createSubstructure(structure, placement, world, position, direction, null);
     }
 
     @Override
@@ -630,14 +728,14 @@ public class StructureAPI implements IStructureAPI {
 
     @Override
     public void addRestriction(StructureRestriction structureRestriction) {
-        synchronized(restrictions) {
+        synchronized (restrictions) {
             this.restrictions.add(structureRestriction);
         }
     }
 
     @Override
     public void removeRestriction(StructureRestriction structureRestriction) {
-        synchronized(restrictions) {
+        synchronized (restrictions) {
             this.restrictions.remove(structureRestriction);
         }
     }

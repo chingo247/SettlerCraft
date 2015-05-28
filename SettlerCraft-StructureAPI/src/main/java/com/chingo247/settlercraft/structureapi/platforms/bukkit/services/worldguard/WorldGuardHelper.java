@@ -10,6 +10,7 @@ import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
 import com.chingo247.settlercraft.structureapi.persistence.dao.IStructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
+import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
 import com.chingo247.settlercraft.structureapi.platforms.bukkit.structure.restriction.WorldGuardRestriction;
 import com.chingo247.settlercraft.structureapi.platforms.bukkit.util.WorldGuardUtil;
 import com.chingo247.settlercraft.structureapi.platforms.services.protection.IStructureProtector;
@@ -20,19 +21,22 @@ import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.managers.storage.StorageException;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.minecraft.util.com.google.common.collect.Lists;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
@@ -55,7 +59,7 @@ public class WorldGuardHelper implements IStructureProtector {
     }
     
     @Override
-    public void protect(Structure structure) {
+    public synchronized void protect(Structure structure) {
         World world = Bukkit.getWorld(structure.getWorld());
         CuboidRegion dimension = structure.getCuboidRegion();
         
@@ -80,12 +84,26 @@ public class WorldGuardHelper implements IStructureProtector {
         );
         
         try(Transaction tx = graph.beginTx()) {
-            SettlerNode settler = structureDAO.getMasterOwnerForStructure(structure.getId());
+            StructureNode structureNode = structureDAO.find(structure.getId());
             
-            if(settler != null) {
-                LocalPlayer localPlayer = WorldGuardUtil.getWorldGuard().wrapPlayer(Bukkit.getPlayer(settler.getId()));
-                region.getOwners().addPlayer(localPlayer);
-            }
+            Node rawNode = structureNode.getRawNode();
+                for (Relationship rel : rawNode.getRelationships(DynamicRelationshipType.withName("OwnedBy"))) {
+                    Node n = rel.getOtherNode(rawNode);
+                    if(!n.hasLabel(SettlerNode.LABEL)) {
+                        continue;
+                    }
+                    
+                    SettlerNode ownerNode = new SettlerNode(n);
+                    Integer typeId = (Integer) rel.getProperty("Type");
+                    StructureOwnerType type = StructureOwnerType.match(typeId);
+                    if(type == StructureOwnerType.MEMBER) {
+                        region.getMembers().addPlayer(ownerNode.getUUID());
+                    } else {
+                       region.getOwners().addPlayer(ownerNode.getUUID());
+                    }
+                    
+                }
+            
             mgr.addRegion(region);
             try {
                 mgr.save();
@@ -94,7 +112,6 @@ public class WorldGuardHelper implements IStructureProtector {
                 tx.failure();
             }
             
-            StructureNode structureNode = structureDAO.find(structure.getId());
             structureNode.getRawNode().setProperty(WORLD_GUARD_REGION_PROPERTY, id);
             tx.success();
             
@@ -174,10 +191,70 @@ public class WorldGuardHelper implements IStructureProtector {
 
     @Override
     public void initialize() {
-        EventManager.getInstance().getEventBus().register(new WorldGuardStructureListener(this));
+        EventManager.getInstance().getEventBus().register(new WorldGuardStructureListener(this, graph));
         StructureAPI.getInstance().addRestriction(new WorldGuardRestriction());
         processStructuresWithoutRegion();
         structureAPI.addStructureProtector(this);
+    }
+    
+    public void addMember(UUID player, Structure structure) {
+        World world = Bukkit.getWorld(structure.getWorld());
+        RegionManager mgr = WorldGuardUtil.getRegionManager(world);
+        String regionId = getRegionId(structure);
+        ProtectedRegion region = mgr.getRegion(regionId);
+        if(region != null) {
+            region.getMembers().addPlayer(player);
+            try {
+                mgr.save();
+            } catch (StorageException ex) {
+                Logger.getLogger(WorldGuardHelper.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
+    public void addOwner(UUID player, Structure structure) {
+        World world = Bukkit.getWorld(structure.getWorld());
+        RegionManager mgr = WorldGuardUtil.getRegionManager(world);
+        String regionId = getRegionId(structure);
+        ProtectedRegion region = mgr.getRegion(regionId);
+        if(region != null) {
+            region.getOwners().addPlayer(player);
+            try {
+                mgr.save();
+            } catch (StorageException ex) {
+                Logger.getLogger(WorldGuardHelper.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
+    public void removeOwner(UUID player, Structure structure) {
+        World world = Bukkit.getWorld(structure.getWorld());
+        RegionManager mgr = WorldGuardUtil.getRegionManager(world);
+        String regionId = getRegionId(structure);
+        ProtectedRegion region = mgr.getRegion(regionId);
+        if(region != null) {
+            region.getOwners().removePlayer(player);
+            try {
+                mgr.save();
+            } catch (StorageException ex) {
+                Logger.getLogger(WorldGuardHelper.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
+    public void removeMember(UUID player, Structure structure) {
+        World world = Bukkit.getWorld(structure.getWorld());
+        RegionManager mgr = WorldGuardUtil.getRegionManager(world);
+        String regionId = getRegionId(structure);
+        ProtectedRegion region = mgr.getRegion(regionId);
+        if(region != null) {
+            region.getMembers().removePlayer(player);
+            try {
+                mgr.save();
+            } catch (StorageException ex) {
+                Logger.getLogger(WorldGuardHelper.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
     
 }

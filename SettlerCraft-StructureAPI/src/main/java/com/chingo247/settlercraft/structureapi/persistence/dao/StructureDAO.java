@@ -29,12 +29,10 @@ import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
 import com.chingo247.settlercraft.structureapi.structure.ConstructionStatus;
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureRelTypes;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.xplatform.core.IWorld;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.util.ArrayList;
@@ -226,7 +224,7 @@ public class StructureDAO implements IStructureDAO{
         }
         
             String query =
-                    "   MATCH (settler:"+SettlerNode.LABEL.name()+" {"+SettlerNode.ID_PROPERTY+": {ownerId} })"
+                    "   MATCH (settler:"+SettlerNode.LABEL.name()+" {"+SettlerNode.UUID_PROPERTY+": {ownerId} })"
                     + " WITH settler"
                     + " MATCH (settler)<-[:" + StructureRelTypes.RELATION_OWNED_BY + "]-(s: " + StructureNode.LABEL.name() + ")"
                     + " WHERE NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId()
@@ -262,7 +260,7 @@ public class StructureDAO implements IStructureDAO{
             params.put("ownerId", settler.toString());
         
             String query =
-                       "MATCH (settler:"+SettlerNode.LABEL.name()+" {"+SettlerNode.ID_PROPERTY+": {ownerId} })"
+                       "MATCH (settler:"+SettlerNode.LABEL.name()+" {"+SettlerNode.UUID_PROPERTY+": {ownerId} })"
                     + " WITH settler"
                     + " MATCH (settler)<-[:" + StructureRelTypes.RELATION_OWNED_BY + "]-(s: " + StructureNode.LABEL.name() + ") "
                     + " WHERE NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId()
@@ -294,66 +292,6 @@ public class StructureDAO implements IStructureDAO{
     }
 
    
-
-//    @Override
-//    public List<StructureNode> findSiblingsWithConstructionStatus(UUID world, long structureId, ConstructionStatus status) {
-//        Map<String,Object> params = Maps.newHashMap();
-//        params.put("worldId", world.toString());
-//        params.put("structureId", structureId);
-//        params.put("constructionStatus", status.getStatusId());
-//        
-//        String query = "MATCH (world:"+WorldNode.LABEL.name()+" { "+WorldNode.ID_PROPERTY+": {worldId} })"
-//                     + "WITH world "
-//                     + "MATCH (structure { "+StructureNode.ID_PROPERTY+" : {structureId} })"
-//                     + "<-[:"+StructureRelTypes.RELATION_SUBSTRUCTURE+"]-"
-//                     + "(:"+StructureNode.LABEL.name()+")"
-//                     + "-[:"+StructureRelTypes.RELATION_SUBSTRUCTURE+"]->";
-//    }
-//
-//    @Override
-//    public List<StructureNode> findSubstructuresConstructionStatus(UUID world, long id, ConstructionStatus status) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//    }
-
-    @Override
-    public SettlerNode getMasterOwnerForStructure(long structureId) {
-        StructureNode node = find(structureId);
-        
-        List<SettlerNode> nodes = node.getOwners(StructureOwnerType.MASTER);
-        if(nodes.isEmpty()) {
-            return null;
-        }
-        
-        return nodes.get(0);
-    }
-    
-    public boolean isOwnerOfStructure(long structureId, Player player) {
-        Map<String,Object> params = Maps.newHashMap();
-        params.put("structureId", structureId);
-        params.put("playerId", player.getUniqueId().toString());
-       
-        long start = System.currentTimeMillis();
-        
-        String query = 
-                  " MATCH (world)<-[:" + StructureRelTypes.RELATION_WITHIN + "]-(structure:" + StructureNode.LABEL.name() + " { "+StructureNode.ID_PROPERTY+": {structureId} })"
-                + " WITH structure "
-                + " MATCH (structure)"
-                + "-[:"+StructureRelTypes.RELATION_OWNED_BY+"]->"
-                + "(owner:" + SettlerNode.LABEL.name() + " { "+SettlerNode.ID_PROPERTY+": {playerId} })"
-                + " RETURN owner as theOwner"
-                + " LIMIT 1";
-        Result result = graph.execute(query, params);
-        
-        while (result.hasNext()) {
-            Map<String, Object> map = result.next();
-            Node n = (Node) map.get("theOwner");
-            SettlerNode settlerNode = new SettlerNode(n);
-            return settlerNode.getId().equals(player.getUniqueId());
-        }
-        return false;
-    }
-
-    
 
 
 }

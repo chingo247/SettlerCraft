@@ -13,6 +13,7 @@ import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.settlercraft.core.util.XXHasher;
 import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
+import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerNode;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureRelTypes;
 import com.chingo247.settlercraft.structureapi.platforms.services.protection.IStructureProtector;
@@ -216,10 +217,10 @@ public class StructureInvalidator {
                 System.out.println("[SettlerCraft]: Refunding players which own invalid structures within " + world.getName());
                 for (StructureNode sn : structureNodes) {
                     if (sn.getPrice() > 0 && !sn.isAutoremoved()) {
-                        List<SettlerNode> masters = sn.getOwners(StructureOwnerType.MASTER);
+                        List<StructureOwnerNode> masters = sn.getOwners(StructureOwnerType.MASTER);
                         double pricePerOwner = sn.getPrice() / masters.size();
                         for (SettlerNode settler : masters) {
-                            economy.give(settler.getId(), pricePerOwner);
+                            economy.give(settler.getUUID(), pricePerOwner);
                             System.out.println("[SettlerCraft]: Refunded " + ShopUtil.valueString(pricePerOwner) + " to " + settler.getName()
                                     + " for structure #" + sn.getId() + " (" + ShopUtil.valueString(sn.getPrice()) + ")");
                         }
