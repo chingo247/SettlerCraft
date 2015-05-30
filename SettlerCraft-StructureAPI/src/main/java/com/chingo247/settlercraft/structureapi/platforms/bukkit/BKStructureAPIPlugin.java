@@ -29,12 +29,11 @@ import com.chingo247.settlercraft.core.exception.SettlerCraftException;
 import com.chingo247.settlercraft.structureapi.platforms.bukkit.listener.PlanListener;
 import com.chingo247.settlercraft.core.exception.CommandException;
 import com.chingo247.settlercraft.core.persistence.hsql.HSQLServer;
+import com.chingo247.settlercraft.core.platforms.bukkit.BKPermissionRegistry;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.settlercraft.structureapi.commands.StructureCommands;
-import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
-import com.chingo247.settlercraft.structureapi.platforms.bukkit.services.holograms.HolographicDisplaysHologramProvider;
-import com.chingo247.settlercraft.structureapi.platforms.bukkit.services.holograms.StructureHologramManager;
-import com.chingo247.settlercraft.structureapi.platforms.bukkit.services.worldguard.WorldGuardHelper;
+import com.chingo247.settlercraft.structureapi.platforms.services.PermissionManager;
+import com.chingo247.settlercraft.structureapi.platforms.services.holograms.StructureHologramManager;
 import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
 import com.chingo247.settlercraft.structureapi.structure.StructureInvalidator;
 import com.chingo247.settlercraft.structureapi.structure.plan.util.PlanGenerator;
@@ -44,7 +43,6 @@ import com.chingo247.xplatform.platforms.bukkit.BukkitPlayer;
 import com.chingo247.xplatform.platforms.bukkit.BukkitPlugin;
 import com.chingo247.xplatform.platforms.bukkit.BukkitServer;
 import java.io.File;
-import java.util.concurrent.ExecutorService;
 
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
@@ -70,7 +68,6 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
     private static BKStructureAPIPlugin instance;
     private StructureCommands structureCommands;
     private GraphDatabaseService graph;
-    private ExecutorService executor;
     
 
     @Override
@@ -110,7 +107,6 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         
         // Get GraphDatabase
         graph = SettlerCraft.getInstance().getNeo4j();
-        executor = SettlerCraft.getInstance().getExecutor();
         
         // Initialize Config
         configProvider = new BKConfigProvider();
@@ -127,11 +123,7 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         structureAPI.registerStructureAPIPlugin(new BukkitPlugin(this));
         structureAPI.registerConfigProvider(configProvider);
         
-         // Enable WorldGuard
-        if(Bukkit.getPluginManager().getPlugin("WorldGuard") != null) {
-            WorldGuardHelper worldGuardHelper = new WorldGuardHelper(graph, new StructureDAO(graph), structureAPI);
-            worldGuardHelper.initialize();
-        }
+        
         
         economyProvider = SettlerCraft.getInstance().getEconomyProvider();
         
@@ -147,6 +139,9 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
             System.out.println(MSG_PREFIX + "Disabling SettlerCraft-StructureAPI");
             return;
         }
+        structureAPI.registerAsyncEditSesionFactoryProvider(new BKAsyncEditSessionFactoryProvider());
+        
+        
         // Check if we need to UPDATE from old version
         File f = new File("plugins//SettlerCraft//Database");
         if(f.exists()) {
@@ -170,17 +165,18 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         generationDirectory.mkdirs();
         PlanGenerator.generate(generationDirectory);
         
-        // Setup HolographicDisplays (if available)
-        if(configProvider.useHolograms() && Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null) {
-            HolographicDisplaysHologramProvider holographicDisplays = new HolographicDisplaysHologramProvider();
-            StructureHologramManager.getInstance().setHologramProvider(holographicDisplays);
-            StructureHologramManager.getInstance().inititialize(new BukkitPlugin(this));
-            
-            
-        }
+//        // Setup HolographicDisplays (if available)
+//        if(configProvider.useHolograms() && Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null) {
+//            HolographicDisplaysHologramProvider holographicDisplays = new HolographicDisplaysHologramProvider();
+//            StructureHologramManager.getInstance().setHologramProvider(holographicDisplays);
+              StructureHologramManager.getInstance().inititialize(new BukkitPlugin(this));
+//        }
+        
+        // Register permissions
+        PermissionManager.getInstance().registerPermissions(new BKPermissionRegistry());
         
         // Setup Commands
-        structureCommands = new StructureCommands(StructureAPI.getInstance(), new BKPermissionManager(), SettlerCraft.getInstance().getExecutor(), graph);
+        structureCommands = new StructureCommands(StructureAPI.getInstance(), SettlerCraft.getInstance().getExecutor(), graph);
     }
 
     @Override

@@ -46,6 +46,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -73,6 +74,10 @@ public class SettlerCraft {
 
     private void setupNeo4j() {
         File databaseDir = new File(plugin.getDataFolder().getAbsolutePath() + "//databases//Neo4J");
+        if(!databaseDir.exists()) {
+            System.out.println(MSG_PREFIX + "Setting up Neo4j Database for the first time, this might take a while");
+        }
+        
         databaseDir.mkdirs();
         this.graph = new Neo4jDatabase(databaseDir, "SettlerCraft", 512).getGraph();
         this.settlerDAO = new SettlerDAO(graph);
@@ -91,6 +96,10 @@ public class SettlerCraft {
         }
         try (Transaction tx = graph.beginTx()) {
             Neo4jHelper.createUniqueIndexIfNotExist(graph, SettlerNode.LABEL, SettlerNode.ID_PROPERTY);
+            tx.success();
+        }
+        try (Transaction tx = graph.beginTx()) {
+            Neo4jHelper.createUniqueIndexIfNotExist(graph, DynamicLabel.label("ID_GENERATOR"), "name");
             tx.success();
         }
         

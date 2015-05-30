@@ -30,6 +30,7 @@ import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureRelTypes;
+import com.chingo247.settlercraft.structureapi.platforms.services.PermissionManager;
 import com.chingo247.settlercraft.structureapi.selection.CUISelectionManager;
 import com.chingo247.settlercraft.structureapi.selection.ISelectionManager;
 import com.chingo247.settlercraft.structureapi.selection.NoneSelectionManager;
@@ -87,6 +88,13 @@ public class StructurePlaceHandler {
 
     public void handle(final AItemStack planItem, final Player player, final World world, final Vector pos, ISelectionManager selectionManager) {
         if (!isStructurePlan(planItem)) {
+            return;
+        }
+        
+        
+        
+        if(!PermissionManager.getInstance().isAllowed(player, PermissionManager.Perms.PLACE_STRUCTURE)) {
+            player.printError("You have no permission to place structures");
             return;
         }
 

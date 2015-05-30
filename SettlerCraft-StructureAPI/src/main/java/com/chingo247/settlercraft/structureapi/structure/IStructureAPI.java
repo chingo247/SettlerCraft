@@ -22,12 +22,14 @@ import com.chingo247.settlercraft.structureapi.platforms.bukkit.IConfigProvider;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlanManager;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.SchematicPlacement;
 import com.chingo247.settlercraft.structureapi.structure.restriction.StructureRestriction;
 import com.chingo247.xplatform.core.APlatform;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.world.World;
 import java.io.File;
+import java.io.IOException;
 
 /**
  *
@@ -142,10 +144,6 @@ public interface IStructureAPI {
      */
     public void reload();
     
-//    public List<IStructureProtector> getStructureProtectors();
-//    
-//    public void addStructureProtector(IStructureProtector protector) ;
-    
     
     /**
      * Checks if StructureAPI is loading (plans, schematics, etc)
@@ -195,7 +193,7 @@ public interface IStructureAPI {
     
     /**
      * Adds a restriction that will be added as check when placing structures
-     * @param structureRestriction 
+     * @param structureRestriction The restriction
      */
     public void addRestriction(StructureRestriction structureRestriction);
     
@@ -204,5 +202,9 @@ public interface IStructureAPI {
      * @param structureRestriction 
      */
     public void removeRestriction(StructureRestriction structureRestriction);
+    
+    public SchematicPlacement loadSchematic(File schematicFile) throws IOException ;
+    
+    
     
 }

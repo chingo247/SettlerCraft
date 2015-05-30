@@ -69,10 +69,10 @@ import com.chingo247.settlercraft.structureapi.event.async.StructureJobStartedEv
 import com.sk89q.worldedit.world.World;
 import java.util.ArrayList;
 import java.util.List;
-import org.primesoft.asyncworldedit.PlayerEntry;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.blockPlacer.IJobEntryListener;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.blockPlacer.IJobEntryListener;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
 /**
@@ -249,7 +249,7 @@ public class SCJobEntry extends JobEntry {
     }
 
     @Override
-    public boolean Process(BlockPlacer bp) {
+    public boolean process(IBlockPlacer bp) {
         final PlayerEntry player = m_player;
         
         

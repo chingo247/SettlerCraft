@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.settlercraft.structureapi.platforms.bukkit.services.worldguard;
+package com.chingo247.settlercraft.worldguard.protecttion;
 
 import com.chingo247.settlercraft.structureapi.event.StructureAddOwnerEvent;
 import com.chingo247.settlercraft.structureapi.event.StructureCreateEvent;
+import com.chingo247.settlercraft.structureapi.event.StructureRemoveEvent;
 import com.chingo247.settlercraft.structureapi.event.StructureRemoveOwnerEvent;
 import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
@@ -35,6 +36,12 @@ public class WorldGuardStructureListener {
     public void onStructureCreate(StructureCreateEvent structureCreateEvent) {
         Structure structure = structureCreateEvent.getStructure();
         worldGuardHelper.protect(structure);
+    }
+    
+    @Subscribe
+    public void onStructureRemove(StructureRemoveEvent structureRemoveEvent) {
+        Structure structure = structureRemoveEvent.getStructure();
+        worldGuardHelper.removeProtection(structure);
     }
     
     @Subscribe

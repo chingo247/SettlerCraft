@@ -35,8 +35,9 @@ import org.hsqldb.Server;
 /**
  *
  * @author Chingo
+ * @deprecated This class may be removed in future releases
  */
-
+@Deprecated
 public class HSQLServer {
 
     private static final Logger LOG = Logger.getLogger(HSQLServer.class.getName());
@@ -50,7 +51,6 @@ public class HSQLServer {
         server.setAddress(host);
         server.setPort(port);
         
-        System.out.println("Setting up database '" + database + "' within '" + directory.getAbsolutePath() + "'");
         server.setDatabaseName(0, database);
         server.setDatabasePath(0, directory.getAbsolutePath());
     

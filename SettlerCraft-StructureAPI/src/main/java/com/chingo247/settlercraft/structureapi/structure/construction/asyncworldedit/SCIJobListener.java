@@ -23,7 +23,7 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit;
 
-import org.primesoft.asyncworldedit.blockPlacer.IJobEntryListener;
+import org.primesoft.asyncworldedit.api.blockPlacer.IJobEntryListener;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 
 /**

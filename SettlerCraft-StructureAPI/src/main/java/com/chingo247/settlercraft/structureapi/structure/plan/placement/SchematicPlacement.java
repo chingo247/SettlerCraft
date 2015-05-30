@@ -34,6 +34,7 @@ public class SchematicPlacement extends AbstractBlockPlacement<BuildOptions> imp
 
     private final Schematic schematic;
     private FastClipboard clipboard;
+    private CuboidRegion region;
 
     public SchematicPlacement(Schematic schematic) {
         this(schematic, Direction.EAST, Vector.ZERO);
@@ -43,6 +44,7 @@ public class SchematicPlacement extends AbstractBlockPlacement<BuildOptions> imp
         super(direction, position, schematic.getWidth(), schematic.getHeight(), schematic.getLength());
         this.schematic = schematic;
         this.clipboard = schematic.getClipboard();
+        this.region = new CuboidRegion(Vector.ZERO, schematic.getSize());
     }
 
     public Schematic getSchematic() {
@@ -61,7 +63,7 @@ public class SchematicPlacement extends AbstractBlockPlacement<BuildOptions> imp
 
     @Override
     public BaseBlock getBlock(Vector position) {
-        if(new CuboidRegion(Vector.ZERO, getSchematic().getSize()).contains(position)) {
+        if(region.contains(position)) {
             BaseBlock b = clipboard.getBlock(position);
             return b;
         }

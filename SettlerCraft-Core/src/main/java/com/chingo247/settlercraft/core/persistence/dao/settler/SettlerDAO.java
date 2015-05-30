@@ -42,11 +42,11 @@ public class SettlerDAO implements ISettlerDAO{
     
     private long nextId() {
         if(!checked) {
-            Result r = graph.execute("MATCH (sid: ID_GENERATOR) "
+            Result r = graph.execute("MATCH (sid: ID_GENERATOR {name:'SETTLER_ID'}) "
                         + "RETURN sid "
                         + "LIMIT 1");
             if(!r.hasNext()) {
-                graph.execute("CREATE (sid: ID_GENERATOR {name:'SETTLER_ID', nextId: 1})");
+                graph.execute("CREATE (sid: ID_GENERATOR {name:'SETTLER_ID', nextId: 1 })");
                 checked = true;
                 return 1;
             }

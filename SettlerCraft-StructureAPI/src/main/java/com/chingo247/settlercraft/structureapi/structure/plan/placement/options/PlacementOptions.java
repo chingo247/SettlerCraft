@@ -22,7 +22,7 @@ public abstract class PlacementOptions {
 
     public PlacementOptions() {
         this.cubeX = 16;
-        this.cubeY = 16;
+        this.cubeY = -1;
         this.cubeZ = 16;
         this.toIgnore = new ArrayList<>();
         this.masks = new ArrayList<>();

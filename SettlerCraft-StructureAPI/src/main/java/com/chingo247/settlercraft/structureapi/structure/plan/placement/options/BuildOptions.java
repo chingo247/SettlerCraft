@@ -25,7 +25,6 @@ public class BuildOptions extends PlacementOptions {
     // To be implemented
     // - Masks
     // - Ignore Air
-    // - Shipish? replaces water with air, but only if the block underneath is not water
     
     
 }

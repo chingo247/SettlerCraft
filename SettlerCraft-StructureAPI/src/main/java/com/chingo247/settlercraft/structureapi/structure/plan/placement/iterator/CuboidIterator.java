@@ -19,12 +19,6 @@ public class CuboidIterator implements AreaIterator {
     private int cubeY;
     private int cubeZ;
 
-    public CuboidIterator() {
-        this.cubeX = 16;
-        this.cubeY = 16;
-        this.cubeZ = 16;
-    }
-    
     public CuboidIterator(int cubeX, int cubeY, int cubeZ) {
         this.cubeX = cubeX;
         this.cubeY = cubeY;
@@ -34,8 +28,8 @@ public class CuboidIterator implements AreaIterator {
     @Override
     public Iterator<Vector> iterate(Vector size) {
         int cubx = Math.min(size.getBlockX(), cubeX);
-        int cuby = Math.min(size.getBlockX(), cubeX);
-        int cubz = Math.min(size.getBlockX(), cubeX);
+        int cuby = Math.min(size.getBlockY(), cubeY);
+        int cubz = Math.min(size.getBlockZ(), cubeZ);
         return new CuboidTraversal(size, cubx, cuby, cubz);
     }
     

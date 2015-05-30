@@ -25,7 +25,6 @@ import org.hibernate.Session;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import com.chingo247.settlercraft.structureapi.persistence.legacy.*;
-import com.chingo247.settlercraft.structureapi.platforms.bukkit.services.worldguard.WorldGuardHelper;
 import com.chingo247.settlercraft.structureapi.structure.ConstructionStatus;
 import com.chingo247.settlercraft.structureapi.structure.IStructureAPI;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
@@ -175,7 +174,7 @@ class BukkitSettlerCraftUpdater {
 
         StructureNode sn = structureDAO.addStructure(structure.getName(), position, region, structure.getDirection(), structure.getRefundValue());
         if (structure.getStructureRegion() != null) {
-            sn.getRawNode().setProperty(WorldGuardHelper.WORLD_GUARD_REGION_PROPERTY, structure.getStructureRegion());
+            sn.getRawNode().setProperty("WGRegion", structure.getStructureRegion()); // Set worldguardregion
         }
 
         worldNode.addStructure(sn);

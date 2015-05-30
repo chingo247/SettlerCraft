@@ -29,7 +29,7 @@ import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placemen
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
-import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.utils.WaitFor;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;

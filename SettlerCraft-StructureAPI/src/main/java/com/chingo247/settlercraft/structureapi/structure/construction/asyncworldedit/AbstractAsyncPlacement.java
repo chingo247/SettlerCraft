@@ -30,8 +30,8 @@ import com.chingo247.xplatform.core.IScheduler;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.PlayerEntry;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 
 /**
  *
@@ -42,7 +42,7 @@ import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 public abstract class AbstractAsyncPlacement<T extends PlacementOptions, P extends Placement> implements Placement<T> {
     
     protected final AsyncWorldEditMain awe;
-    protected final BlockPlacer placer;
+    protected final IBlockPlacer placer;
     protected final IScheduler scheduler;
     protected final Placement placement;
     protected final PlayerEntry playerEntry;

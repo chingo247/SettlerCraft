@@ -16,7 +16,6 @@ import com.chingo247.settlercraft.structureapi.persistence.entities.structure.St
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerNode;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureRelTypes;
-import com.chingo247.settlercraft.structureapi.platforms.services.protection.IStructureProtector;
 import com.chingo247.xplatform.core.IServer;
 import com.chingo247.xplatform.core.IWorld;
 import com.google.common.collect.Maps;
@@ -113,7 +112,6 @@ public class StructureInvalidator {
             processDeletedAfter(world, date);
             processCreatedAfter(world, date);
         }
-        System.out.println("[SettlerCraft]: Invalidated in " + (System.currentTimeMillis() - start) + " ms");
     }
 
     private void processDeletedAfter(IWorld world, long date) {
@@ -153,16 +151,16 @@ public class StructureInvalidator {
                 return;
             }
 
-            // Re-protect from structures
-            List<IStructureProtector> protectors = ((StructureAPI) StructureAPI.getInstance()).getStructureProtectors();
-            for (IStructureProtector protector : protectors) {
-                for (Structure s : structures) {
-                    if (protector.hasProtection(s)) {
-                        System.out.println("[SettlerCraft]: Restored and protected structure #" + s.getId() + " with '" + protector.getName() + "'");
-                        protector.protect(s);
-                    }
-                }
-            }
+//            // Re-protect from structures
+//            List<IStructureProtector> protectors = ((StructureAPI) StructureAPI.getInstance()).getStructureProtectors();
+//            for (IStructureProtector protector : protectors) {
+//                for (Structure s : structures) {
+//                    if (protector.hasProtection(s)) {
+//                        System.out.println("[SettlerCraft]: Restored and protected structure #" + s.getId() + " with '" + protector.getName() + "'");
+//                        protector.protect(s);
+//                    }
+//                }
+//            }
 
             for (StructureNode n : structureNodes) {
                 n.setConstructionStatus(ConstructionStatus.ON_HOLD);
@@ -228,16 +226,16 @@ public class StructureInvalidator {
                 }
             }
 
-            // Remove protection from structures
-            List<IStructureProtector> protectors = ((StructureAPI) StructureAPI.getInstance()).getStructureProtectors();
-            for (IStructureProtector protector : protectors) {
-                for (Structure s : structures) {
-                    if (protector.hasProtection(s)) {
-                        System.out.println("[SettlerCraft]: Removed '" + protector.getName() + "' protection from structure #" + s.getId());
-                        protector.removeProtection(s);
-                    }
-                }
-            }
+//            // Remove protection from structures
+//            List<IStructureProtector> protectors = ((StructureAPI) StructureAPI.getInstance()).getStructureProtectors();
+//            for (IStructureProtector protector : protectors) {
+//                for (Structure s : structures) {
+//                    if (protector.hasProtection(s)) {
+//                        System.out.println("[SettlerCraft]: Removed '" + protector.getName() + "' protection from structure #" + s.getId());
+//                        protector.removeProtection(s);
+//                    }
+//                }
+//            }
 
             for (StructureNode n : structureNodes) {
                 n.setConstructionStatus(ConstructionStatus.REMOVED);

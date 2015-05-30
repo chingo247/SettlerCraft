@@ -72,10 +72,10 @@ import java.util.logging.Logger;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.PlayerEntry;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.blockPlacer.IBlockPlacerListener;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerListener;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 
 /**
  *
@@ -283,13 +283,10 @@ public class ConstructionManager {
                     if (hasSubstructures) {
                         if (player != null) {
                             Player ply = SettlerCraft.getInstance().getPlayer(player);
-                            String errorMessage = "Substructures need to be removed before removing #" + structure.getId() + " " + structure.getName();
+                            String errorMessage = "[SettlerCraft]: Substructures need to be removed before removing #" + structure.getId() + " " + structure.getName();
                             if (ply != null) {
                                 ply.printError(errorMessage);
-                            } else {
-                                System.out.println(errorMessage);
-                            }
-
+                            } 
                         }
                         tx.success();
                         return;
@@ -405,7 +402,7 @@ public class ConstructionManager {
                 if (uuid != null && jobId != null) {
                     PlayerEntry entry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(uuid);
                     if (entry != null) {
-                        BlockPlacer blockPlacer = AsyncWorldEditMain.getInstance().getBlockPlacer();
+                        IBlockPlacer blockPlacer = AsyncWorldEditMain.getInstance().getBlockPlacer();
                         blockPlacer.cancelJob(entry, jobId);
                         if (talk && player != null) {
                             player.print("Stopping structure #" + structure.getId());

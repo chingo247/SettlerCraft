@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.settlercraft.structureapi.platforms.bukkit.services.holograms;
+package com.chingo247.settlercraft.structureapi.platforms.services.holograms;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.event.EventManager;
@@ -14,8 +14,6 @@ import com.chingo247.settlercraft.structureapi.persistence.entities.features.hol
 import com.chingo247.settlercraft.structureapi.persistence.entities.features.hologram.StructureHologramFactory;
 import com.chingo247.settlercraft.structureapi.persistence.entities.features.hologram.StructureHologramNode;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
-import com.chingo247.settlercraft.structureapi.platforms.services.holograms.Hologram;
-import com.chingo247.settlercraft.structureapi.platforms.services.holograms.HologramsProvider;
 import com.chingo247.settlercraft.structureapi.structure.ConstructionStatus;
 import com.chingo247.settlercraft.structureapi.structure.DefaultStructureFactory;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
@@ -24,6 +22,8 @@ import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IPlugin;
 import com.chingo247.xplatform.core.IScheduler;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import com.sk89q.worldedit.Vector;
@@ -37,8 +37,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.util.com.google.common.collect.Lists;
-import net.minecraft.util.com.google.common.collect.Maps;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -84,13 +82,16 @@ public class StructureHologramManager {
         this.plugin = plugin;
         invalidate();
         setupUnchecked();
-        initHolos();
+        
         EventManager.getInstance().getEventBus().register(this); // Should be registered once...
     }
 
     public void setHologramProvider(HologramsProvider hologramsProvider) {
         Preconditions.checkNotNull(hologramsProvider);
-        this.hologramsProvider = hologramsProvider;
+        if(this.hologramsProvider == null) {
+            this.hologramsProvider = hologramsProvider;
+            initHolos();
+        } 
     }
 
     private void registerStructureHologram(Structure structure, Hologram hologram) {
@@ -216,7 +217,7 @@ public class StructureHologramManager {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(HolographicDisplaysHologramProvider.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(StructureHologramManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -264,15 +265,15 @@ public class StructureHologramManager {
             tx.success();
         }
 
-        try (Transaction tx = graph.beginTx()) {
-
-            for (Structure structure : structures) {
-                World w = SettlerCraft.getInstance().getWorld(structure.getWorld());
-                Vector position = structure.translateRelativeLocation(Vector.ZERO.add(0, 2, 0));
-                createWithoutTransactionHologram(plugin.getName(), w, position, structure);
-            }
-            tx.success();
-        }
+//        try (Transaction tx = graph.beginTx()) {
+//
+//            for (Structure structure : structures) {
+//                World w = SettlerCraft.getInstance().getWorld(structure.getWorld());
+//                Vector position = structure.translateRelativeLocation(Vector.ZERO.add(0, 2, 0));
+//                createWithoutTransactionHologram(plugin.getName(), w, position, structure);
+//            }
+//            tx.success();
+//        }
 
     }
     

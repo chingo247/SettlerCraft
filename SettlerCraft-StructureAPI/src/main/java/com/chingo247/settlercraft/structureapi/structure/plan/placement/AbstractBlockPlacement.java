@@ -41,7 +41,7 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
 
     public AbstractBlockPlacement(Direction direction, Vector relativePosition, int width, int height, int length) {
         super(direction, relativePosition, width, height, length);
-        this.BLOCK_BETWEEN = Math.round((float) ((getBlocks() * 0.001)));
+        this.BLOCK_BETWEEN = Math.round((float) ((getBlocks() * 0.01)));
     }
 
     @Override
@@ -52,9 +52,9 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
     @Override
     public final void place(EditSession editSession, Vector pos, T option) {
         Iterator<Vector> traversal = new CuboidIterator(
-                option.getCubeX() < 0 ? getSize().getBlockX() : option.getCubeX(),
-                option.getCubeY() < 0 ? getSize().getBlockY() : option.getCubeY(),
-                option.getCubeZ() < 0 ? getSize().getBlockZ() : option.getCubeZ()
+                option.getCubeX() <= 0 ? getSize().getBlockX() : option.getCubeX(),
+                option.getCubeY() <= 0 ? getSize().getBlockY() : option.getCubeY(),
+                option.getCubeZ() <= 0 ? getSize().getBlockZ() : option.getCubeZ()
         ).iterate(getSize());
         PriorityQueue<StructureBlock> placeLater = new PriorityQueue<>();
 
@@ -78,7 +78,7 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
                 placeLater.add(new StructureBlock(v, clipboardBlock));
             }
 
-            // For every 10 place intensive blocks
+            // For every X place intensive blocks
             if (placeLaterPause > 0 && clipboardBlock.getId() != 0) {
                 placeLaterPause--;
             } else {
@@ -89,13 +89,11 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
                     StructureBlock plb = placeLater.poll();
                     doBlock(editSession, pos, plb.getPosition(), plb.getBlock(), option);
 
-                    if (plb.getPriority() != PRIORITY_LIQUID) {
-
+                    placeLaterPlaced++;
+                    
+                    
+                    if (plb.getPriority() == PRIORITY_LIQUID || BlockType.emitsLight(plb.getBlock().getId())) {
                         placeLaterPlaced++;
-                        if (BlockType.emitsLight(plb.getBlock().getId())) {
-                            placeLaterPlaced++;
-                        }
-
                     }
 
                     if (placeLaterPlaced >= MAX_PLACE_LATER_TO_PLACE) {

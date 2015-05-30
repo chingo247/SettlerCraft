@@ -24,16 +24,7 @@ package com.chingo247.settlercraft.structureapi.platforms.bukkit;
  * THE SOFTWARE.
  */
 import com.chingo247.settlercraft.core.exception.SettlerCraftException;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import com.sk89q.worldguard.protection.flags.DefaultFlag;
-import com.sk89q.worldguard.protection.flags.Flag;
-import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -48,7 +39,7 @@ public class BKConfigProvider implements IConfigProvider {
     private boolean shopEnabled = false;
     private double refundPercentage;
     private boolean useHolograms = false;
-    private HashMap<Flag, Object> defaultFlags;
+   
 
     private final File file = new File(BKStructureAPIPlugin.getInstance().getDataFolder(), "config.yml");
 
@@ -67,33 +58,12 @@ public class BKConfigProvider implements IConfigProvider {
         }
         
         this.useHolograms = config.getBoolean("structure.holograms.enabled");
-        this.defaultFlags = getDefaultFlags(config);
+       
     }
 
   
 
-    private HashMap<Flag, Object> getDefaultFlags(FileConfiguration config) throws SettlerCraftException {
-        HashMap<Flag, Object> df = new HashMap<>();
-        if (config.getConfigurationSection("structure.default-flags") != null) {
-            Map<String, Object> flags = config.getConfigurationSection("structure.default-flags").getValues(false);
-            for (Map.Entry<String, Object> entry : flags.entrySet()) {
-                Flag foundFlag = DefaultFlag.fuzzyMatchFlag(entry.getKey());
-                if (foundFlag == null) {
-                    throw new SettlerCraftException("Error in SettlerCraft config.yml: Flag '" + entry.getKey() + "' doesn't exist!");
-                } else {
-                    try {
-                        df.put(foundFlag, foundFlag.parseInput(WorldGuardPlugin.inst(), Bukkit.getConsoleSender(), String.valueOf(entry.getValue())));
-                    } catch (InvalidFlagFormat ex) {
-                        Bukkit.getConsoleSender().sendMessage("Error in: " + file.getAbsolutePath());
-                        Logger.getLogger(BKConfigProvider.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-
-                }
-            }
-        }
-
-        return df;
-    }
+    
 
     @Override
     public boolean isPlanMenuEnabled() {
@@ -105,9 +75,7 @@ public class BKConfigProvider implements IConfigProvider {
         return shopEnabled;
     }
 
-    public HashMap<Flag, Object> getDefaultRegionFlags() {
-        return defaultFlags;
-    }
+    
 
     @Override
     public boolean useHolograms() {

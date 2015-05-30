@@ -66,10 +66,10 @@ package com.chingo247.settlercraft.structureapi.structure.construction.asyncworl
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.primesoft.asyncworldedit.PlayerEntry;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
@@ -108,7 +108,7 @@ public abstract class SCBaseTask extends BukkitRunnable {
     /**
      * The blocks placer
      */
-    protected final BlockPlacer m_blockPlacer;
+    protected final IBlockPlacer m_blockPlacer;
 
     /**
      * Job instance
@@ -122,7 +122,7 @@ public abstract class SCBaseTask extends BukkitRunnable {
     
 
     public SCBaseTask(final EditSession editSession, final PlayerEntry player,
-            final String commandName, BlockPlacer blocksPlacer, SCJobEntry job) {
+            final String commandName, IBlockPlacer blocksPlacer, SCJobEntry job) {
 
         m_editSession = editSession;
         m_cancelableEditSession = (editSession instanceof CancelabeEditSession) ? (CancelabeEditSession) editSession : null;

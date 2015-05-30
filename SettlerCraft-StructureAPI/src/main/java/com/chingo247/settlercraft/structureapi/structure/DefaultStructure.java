@@ -24,7 +24,6 @@
 package com.chingo247.settlercraft.structureapi.structure;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncWorldEditUtil;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BuildOptions;
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
@@ -42,7 +41,7 @@ import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.util.Date;
 import java.util.UUID;
-import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
@@ -181,10 +180,12 @@ public class DefaultStructure implements Structure {
         Player ply = SettlerCraft.getInstance().getPlayer(playerId);
         World w = SettlerCraft.getInstance().getWorld(world);
         AsyncEditSession editSession;
+        StructureAPI api = (StructureAPI) StructureAPI.getInstance();
+        
         if (ply == null) {
-            editSession = (AsyncEditSession) AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(w, -1);
+            editSession = (AsyncEditSession) api.getSessionFactory().getEditSession(w, -1);
         } else {
-            editSession = (AsyncEditSession) AsyncWorldEditUtil.getAsyncSessionFactory().getEditSession(w, -1, ply);
+            editSession = (AsyncEditSession) api.getSessionFactory().getEditSession(w, -1, ply);
         }
         return editSession;
     }

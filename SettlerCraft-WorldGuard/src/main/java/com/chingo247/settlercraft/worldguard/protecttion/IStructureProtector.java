@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.settlercraft.structureapi.platforms.services.protection;
+package com.chingo247.settlercraft.worldguard.protecttion;
 
 import com.chingo247.settlercraft.structureapi.platforms.services.Service;
 import com.chingo247.settlercraft.structureapi.structure.Structure;

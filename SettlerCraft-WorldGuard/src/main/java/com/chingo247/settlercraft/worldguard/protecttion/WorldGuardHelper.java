@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.settlercraft.structureapi.platforms.bukkit.services.worldguard;
+package com.chingo247.settlercraft.worldguard.protecttion;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.event.EventManager;
@@ -11,16 +11,20 @@ import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
 import com.chingo247.settlercraft.structureapi.persistence.dao.IStructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
-import com.chingo247.settlercraft.structureapi.platforms.bukkit.structure.restriction.WorldGuardRestriction;
-import com.chingo247.settlercraft.structureapi.platforms.bukkit.util.WorldGuardUtil;
-import com.chingo247.settlercraft.structureapi.platforms.services.protection.IStructureProtector;
+import com.chingo247.settlercraft.worldguard.restriction.WorldGuardRestriction;
 import com.chingo247.settlercraft.structureapi.structure.ConstructionStatus;
 import com.chingo247.settlercraft.structureapi.structure.DefaultStructureFactory;
+import com.chingo247.settlercraft.structureapi.structure.IStructureAPI;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldguard.LocalPlayer;
+import com.sk89q.worldguard.bukkit.WGBukkit;
+import com.sk89q.worldguard.bukkit.WorldConfiguration;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.bukkit.permission.RegionPermissionModel;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.managers.storage.StorageException;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
@@ -33,6 +37,7 @@ import java.util.logging.Logger;
 import net.minecraft.util.com.google.common.collect.Lists;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -50,9 +55,9 @@ public class WorldGuardHelper implements IStructureProtector {
     public static String WORLD_GUARD_REGION_PROPERTY = "WGRegion";
     private GraphDatabaseService graph;
     private IStructureDAO structureDAO;
-    private StructureAPI structureAPI;
+    private IStructureAPI structureAPI;
 
-    public WorldGuardHelper(GraphDatabaseService graph, IStructureDAO structureDAO, StructureAPI structureAPI) {
+    public WorldGuardHelper(GraphDatabaseService graph, IStructureDAO structureDAO, IStructureAPI structureAPI) {
         this.graph = graph;
         this.structureDAO = structureDAO;
         this.structureAPI = structureAPI;
@@ -67,13 +72,13 @@ public class WorldGuardHelper implements IStructureProtector {
         // Get world guard flags
         // StructurePlan plan = structure.getStructurePlan();
         
-        RegionManager mgr = WorldGuardUtil.getRegionManager(world);
+        RegionManager mgr = getRegionManager(world);
 
         Vector p1 = dimension.getMinimumPoint();
         Vector p2 = dimension.getMaximumPoint();
         String id = getRegionId(structure);
 
-        if (WorldGuardUtil.regionExists(world, id)) {
+        if (regionExists(world, id)) {
             mgr.removeRegion(id);
         }
         
@@ -122,7 +127,8 @@ public class WorldGuardHelper implements IStructureProtector {
         return PREFIX+structure.getId();
     }
     
-    public void processStructuresWithoutRegion() {
+    
+    private void processStructuresWithoutRegion() {
         final List<Structure> structures = Lists.newArrayList();
         try(Transaction tx = graph.beginTx()) {
             
@@ -154,7 +160,7 @@ public class WorldGuardHelper implements IStructureProtector {
             public void run() {
                 for(Structure s : structures) {
                     protect(s);
-                    System.out.println("Protected structure #" + s.getId() + " with 'WorldGuard'");
+                    System.out.println("[SettlerCraft]: Protected structure #" + s.getId() + " with 'WorldGuard'");
                 }
             }
         });
@@ -169,7 +175,7 @@ public class WorldGuardHelper implements IStructureProtector {
     @Override
     public void removeProtection(Structure structure) {
         World world = Bukkit.getWorld(structure.getWorld());
-        RegionManager mgr = WorldGuardUtil.getRegionManager(world);
+        RegionManager mgr = getRegionManager(world);
         String region = getRegionId(structure);
         if(mgr.hasRegion(region)) {
             mgr.removeRegion(region);
@@ -184,7 +190,7 @@ public class WorldGuardHelper implements IStructureProtector {
     @Override
     public boolean hasProtection(Structure structure) {
         World world = Bukkit.getWorld(structure.getWorld());
-        RegionManager mgr = WorldGuardUtil.getRegionManager(world);
+        RegionManager mgr = getRegionManager(world);
         String region = getRegionId(structure);
         return mgr.hasRegion(region);
     }
@@ -194,12 +200,12 @@ public class WorldGuardHelper implements IStructureProtector {
         EventManager.getInstance().getEventBus().register(new WorldGuardStructureListener(this, graph));
         StructureAPI.getInstance().addRestriction(new WorldGuardRestriction());
         processStructuresWithoutRegion();
-        structureAPI.addStructureProtector(this);
+        processInvalidStructures();
     }
     
     public void addMember(UUID player, Structure structure) {
         World world = Bukkit.getWorld(structure.getWorld());
-        RegionManager mgr = WorldGuardUtil.getRegionManager(world);
+        RegionManager mgr = getRegionManager(world);
         String regionId = getRegionId(structure);
         ProtectedRegion region = mgr.getRegion(regionId);
         if(region != null) {
@@ -214,7 +220,7 @@ public class WorldGuardHelper implements IStructureProtector {
     
     public void addOwner(UUID player, Structure structure) {
         World world = Bukkit.getWorld(structure.getWorld());
-        RegionManager mgr = WorldGuardUtil.getRegionManager(world);
+        RegionManager mgr = getRegionManager(world);
         String regionId = getRegionId(structure);
         ProtectedRegion region = mgr.getRegion(regionId);
         if(region != null) {
@@ -229,7 +235,7 @@ public class WorldGuardHelper implements IStructureProtector {
     
     public void removeOwner(UUID player, Structure structure) {
         World world = Bukkit.getWorld(structure.getWorld());
-        RegionManager mgr = WorldGuardUtil.getRegionManager(world);
+        RegionManager mgr = getRegionManager(world);
         String regionId = getRegionId(structure);
         ProtectedRegion region = mgr.getRegion(regionId);
         if(region != null) {
@@ -244,7 +250,7 @@ public class WorldGuardHelper implements IStructureProtector {
     
     public void removeMember(UUID player, Structure structure) {
         World world = Bukkit.getWorld(structure.getWorld());
-        RegionManager mgr = WorldGuardUtil.getRegionManager(world);
+        RegionManager mgr = getRegionManager(world);
         String regionId = getRegionId(structure);
         ProtectedRegion region = mgr.getRegion(regionId);
         if(region != null) {
@@ -255,6 +261,108 @@ public class WorldGuardHelper implements IStructureProtector {
                 Logger.getLogger(WorldGuardHelper.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+    
+    public static WorldGuardPlugin getWorldGuard() {
+        return WorldGuardPlugin.inst();
+    }
+
+    public static boolean overlaps(World world, BlockVector pos1, BlockVector pos2) {
+        return getWorldGuard().getRegionManager(world)
+                .getApplicableRegions(new ProtectedCuboidRegion(null, pos1, pos2)).size() > 0;
+    }
+
+    public static boolean hasRegion(World world, String id) {
+        return getRegionManager(world).hasRegion(id);
+    }
+
+    public static WorldConfiguration getWorldConfiguration(World world) {
+        return getWorldGuard().getGlobalStateManager().get(world);
+    }
+
+    public static LocalPlayer getLocalPlayer(Player player) {
+        return getWorldGuard().wrapPlayer(player);
+    }
+
+    public static boolean hasReachedMaxRegionCount(World world, Player player) {
+        int maxRegionCount = getWorldConfiguration(world).getMaxRegionCount(player);
+        return maxRegionCount >= 0
+                && getRegionManager(world).getRegionCountOfPlayer(getLocalPlayer(player)) >= maxRegionCount;
+    }
+
+    public static RegionManager getRegionManager(World world) {
+        return WGBukkit.getRegionManager(world);
+    }
+
+    public static RegionPermissionModel getRegionPermissionModel(Player player) {
+        return new RegionPermissionModel(getWorldGuard(), player);
+    }
+    
+     /**
+     * Checks wheter the region exists.
+     * @param world The world
+     * @param id The region's id
+     * @return True if regions exists, otherwise false.
+     */
+    public static boolean regionExists(World world, String id) {
+        return getRegionManager(world).hasRegion(id);
+    }
+    
+    public static boolean mayClaim(Player player) {
+        RegionPermissionModel permissionModel = getRegionPermissionModel(player);
+        return permissionModel.mayClaim();
+    }
+    
+    /**
+     * Checks whether the player can claim a region within a world
+     * @param player The player
+     * @param world The world
+     * @return True if player can claim, false if region count was exceeded or when there is no region manager for the specified world
+     */
+    public static boolean canClaim(Player player, World world) {
+        WorldConfiguration wcfg = getWorldGuard().getGlobalStateManager().get(player.getWorld());
+        RegionPermissionModel permissionModel = getRegionPermissionModel(player);
+        RegionManager mgr = getWorldGuard().getRegionManager(world);
+        if(mgr == null) {
+            return false;
+        }
+
+        // Check whether the player has created too many regions
+        if (!permissionModel.mayClaimRegionsUnbounded()) {
+            int maxRegionCount = wcfg.getMaxRegionCount(player);
+            if (maxRegionCount >= 0
+                    && mgr.getRegionCountOfPlayer(getLocalPlayer(player)) >= maxRegionCount) {
+
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void processInvalidStructures() {
+        
+        String query = "MATCH(s:"+StructureNode.LABEL.name() + ") "
+                     + "WHERE s."+WORLD_GUARD_REGION_PROPERTY + " IS NOT NULL "
+                     + "AND s."+StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId() + " "
+                     + "RETURN s";
+        
+        try(Transaction tx = graph.beginTx()) {
+            Result r = graph.execute(query);
+            
+            while(r.hasNext()) {
+                for(Object o : r.next().values()) {
+                    Node n = (Node) o;
+                    Structure structure = DefaultStructureFactory.getInstance().makeStructure(new StructureNode(n));
+                    removeProtection(structure);
+                    n.removeProperty(WORLD_GUARD_REGION_PROPERTY);
+                    System.out.println("[SettlerCraft-WorldGuard]: Removed protection from structure #"+structure.getId()+" because structure was removed");
+                }
+            }
+            
+            
+            tx.success();
+        }
+        
     }
     
 }

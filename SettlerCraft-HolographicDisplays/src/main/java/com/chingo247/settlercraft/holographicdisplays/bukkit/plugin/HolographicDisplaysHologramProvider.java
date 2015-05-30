@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.settlercraft.structureapi.platforms.bukkit.services.holograms;
+package com.chingo247.settlercraft.holographicdisplays.bukkit.plugin;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.structureapi.platforms.services.holograms.Hologram;
@@ -19,7 +19,7 @@ import org.bukkit.plugin.Plugin;
  *
  * @author Chingo
  */
-public class HolographicDisplaysHologramProvider implements HologramsProvider {
+class HolographicDisplaysHologramProvider implements HologramsProvider {
 
 
 

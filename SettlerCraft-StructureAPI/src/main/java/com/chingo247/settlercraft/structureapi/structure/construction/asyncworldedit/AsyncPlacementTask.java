@@ -26,8 +26,8 @@ package com.chingo247.settlercraft.structureapi.structure.construction.asyncworl
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import org.primesoft.asyncworldedit.PlayerEntry;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 
 /**
  *
@@ -37,7 +37,7 @@ public abstract class AsyncPlacementTask extends SCBaseTask {
     
     private Placement placement;
 
-    public AsyncPlacementTask(Placement placement, EditSession editSession, PlayerEntry player, String commandName, BlockPlacer blocksPlacer, SCJobEntry job) {
+    public AsyncPlacementTask(Placement placement, EditSession editSession, PlayerEntry player, String commandName, IBlockPlacer blocksPlacer, SCJobEntry job) {
         super(editSession, player, commandName, blocksPlacer, job);
         this.placement = placement;
     }

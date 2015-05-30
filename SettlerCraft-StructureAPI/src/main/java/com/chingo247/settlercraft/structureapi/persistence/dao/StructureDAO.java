@@ -87,7 +87,7 @@ public class StructureDAO implements IStructureDAO{
     
     private long nextId() {
         if(!checked) {
-            Result r = graph.execute("MATCH (sid: ID_GENERATOR) "
+            Result r = graph.execute("MATCH (sid: ID_GENERATOR {name:'STRUCTURE_ID'}) "
                         + "RETURN sid "
                         + "LIMIT 1");
             if(!r.hasNext()) {

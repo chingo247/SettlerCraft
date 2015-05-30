@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.settlercraft.structureapi.platforms.bukkit.structure.restriction;
+package com.chingo247.settlercraft.worldguard.restriction;
 
-import com.chingo247.settlercraft.structureapi.platforms.bukkit.util.WorldGuardUtil;
 import com.chingo247.settlercraft.structureapi.structure.restriction.StructureRestriction;
+import com.chingo247.settlercraft.worldguard.protecttion.WorldGuardHelper;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
@@ -32,10 +32,10 @@ public class WorldGuardRestriction extends StructureRestriction {
     public boolean evaluate(Player whoPlaces, World world, CuboidRegion affectedArea) {
         LocalPlayer localPlayer = null;
         if (whoPlaces != null) {
-            localPlayer = WorldGuardUtil.getLocalPlayer(Bukkit.getPlayer(whoPlaces.getUniqueId()));
+            localPlayer = WorldGuardHelper.getLocalPlayer(Bukkit.getPlayer(whoPlaces.getUniqueId()));
         }
 
-        RegionManager mgr = WorldGuardUtil.getRegionManager(Bukkit.getWorld(world.getName()));
+        RegionManager mgr = WorldGuardHelper.getRegionManager(Bukkit.getWorld(world.getName()));
 
         Vector p1 = affectedArea.getMinimumPoint();
         Vector p2 = affectedArea.getMaximumPoint();

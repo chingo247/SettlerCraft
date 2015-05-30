@@ -66,10 +66,8 @@ public class SettlerRegister {
                     try(Transaction tx = graph.beginTx()) {
                         if (ownerRepository.find(player.getUniqueId()) == null) {
                             ownerRepository.addSettler(player.getName(), player.getUniqueId());
-                            System.out.println("registered: " + player.getName());
                         }
                         cached.add(player.getUniqueId());
-                        System.out.println("cached: " + player.getName() + " cache size: " + cached.size());
                         tx.success();
                     }
                 }

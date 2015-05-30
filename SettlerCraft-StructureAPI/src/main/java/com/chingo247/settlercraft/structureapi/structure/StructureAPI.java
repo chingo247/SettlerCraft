@@ -44,16 +44,18 @@ import com.chingo247.settlercraft.structureapi.event.StructurePlansReloadEvent;
 import com.chingo247.settlercraft.structureapi.persistence.dao.IStructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureWorldNode;
-import com.chingo247.settlercraft.structureapi.platforms.services.protection.IStructureProtector;
+import com.chingo247.settlercraft.structureapi.platforms.services.AsyncEditSessionFactoryProvider;
 import com.chingo247.settlercraft.structureapi.structure.plan.DefaultStructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.FilePlacement;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.SchematicPlacement;
+import com.chingo247.settlercraft.structureapi.structure.plan.schematic.Schematic;
+import com.chingo247.settlercraft.structureapi.structure.plan.schematic.SchematicManager;
 import com.chingo247.settlercraft.structureapi.structure.restriction.StructureRestriction;
 import com.chingo247.settlercraft.structureapi.util.PlacementUtil;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.ILocation;
 import com.chingo247.xplatform.core.IWorld;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
@@ -64,8 +66,6 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -81,6 +81,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
+import org.primesoft.asyncworldedit.worldedit.AsyncEditSessionFactory;
 
 /**
  *
@@ -103,6 +104,7 @@ public class StructureAPI implements IStructureAPI {
     private final Lock loadLock = new ReentrantLock();
     private final Lock structureLock = new ReentrantLock();
     private StructurePlanMenuFactory planMenuFactory;
+    private AsyncEditSessionFactoryProvider sessionFactoryProvider;
 
     private CategoryMenu planMenu;
     private final GraphDatabaseService graph;
@@ -115,14 +117,12 @@ public class StructureAPI implements IStructureAPI {
     private final Logger LOG = Logger.getLogger(getClass().getName());
 
     private final IColors COLORS;
-    private List<IStructureProtector> protectors;
 //    private final SubstructureHandler substructureHandler;
 
     private StructureAPI() {
         this.platform = SettlerCraft.getInstance().getPlatform();
         this.graph = SettlerCraft.getInstance().getNeo4j();
         this.restrictions = Sets.newHashSet();
-        this.protectors = Lists.newArrayList();
 
         // Now register the GlobalPlanManager
         this.structureDAO = new StructureDAO(graph);
@@ -207,19 +207,6 @@ public class StructureAPI implements IStructureAPI {
 
         }
 
-    }
-
-    public List<IStructureProtector> getStructureProtectors() {
-        return new ArrayList<>(protectors);
-    }
-
-    public void addStructureProtector(IStructureProtector protector) {
-        for (IStructureProtector p : protectors) {
-            if (p.getName().equals(p.getName())) {
-                throw new RuntimeException("Already have a protector named '" + protector.getName() + "'");
-            }
-        }
-        protectors.add(protector);
     }
 
     @Override
@@ -771,5 +758,23 @@ public class StructureAPI implements IStructureAPI {
         }
 
     }
+    
+    public void registerAsyncEditSesionFactoryProvider(AsyncEditSessionFactoryProvider provider) {
+        Preconditions.checkNotNull(provider, "Provider was null");
+        Preconditions.checkArgument(sessionFactoryProvider == null, "Already registered a AsyncEditSessionFactoryProvider");
+        this.sessionFactoryProvider = provider;
+    }
+    
+    public AsyncEditSessionFactory getSessionFactory() {
+        return sessionFactoryProvider.getFactory();
+    }
+
+    @Override
+    public SchematicPlacement loadSchematic(File schematicFile) throws IOException {
+        Schematic schematic = SchematicManager.getInstance().getOrLoadSchematic(schematicFile);
+        return new SchematicPlacement(schematic);
+    }
+    
+    
 
 }

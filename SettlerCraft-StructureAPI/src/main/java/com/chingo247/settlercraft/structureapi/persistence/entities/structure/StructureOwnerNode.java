@@ -18,6 +18,7 @@ public class StructureOwnerNode extends SettlerNode {
     
     StructureOwnerNode(Node node, StructureOwnerType type) {
         super(node);
+        this.type = type;
     }
 
     public StructureOwnerType getType() {
