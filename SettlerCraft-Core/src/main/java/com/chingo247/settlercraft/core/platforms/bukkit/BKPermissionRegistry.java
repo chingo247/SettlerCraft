@@ -33,7 +33,7 @@ public class BKPermissionRegistry implements IPermissionRegistry {
         }
         
         
-        Bukkit.getPluginManager().removePermission(new org.bukkit.permissions.Permission(permission.getName(), defaultValue));
+        Bukkit.getPluginManager().addPermission(new org.bukkit.permissions.Permission(permission.getName(), defaultValue));
     }
     
 }
