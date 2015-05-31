@@ -28,7 +28,6 @@ import com.google.common.collect.Lists;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -37,7 +36,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.util.com.google.common.collect.Maps;
+import com.google.common.collect.Maps;
 import org.apache.commons.io.FileUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -173,10 +172,15 @@ public class SchematicManager {
             }
             
             // Delete unused
-            for(SchematicDataNode sdn : schematicDAO.findSchematicsBeforeDate(TWO_DAYS)) {
-                System.out.println("[SettlerCraft]: Deleted " + sdn.getName() + " from cache,  last import was " + new Date(sdn.getLastImport()).toString());
+            int removed = 0;
+            for(SchematicDataNode sdn : schematicDAO.findSchematicsBeforeDate(System.currentTimeMillis() - TWO_DAYS)) {
                 sdn.delete();
+                removed++;
             }
+            if(removed > 0) {
+                System.out.println("[SettlerCraft]: Deleted " + removed + " schematics from cache");
+            }
+            
             tx.success();
         }
         

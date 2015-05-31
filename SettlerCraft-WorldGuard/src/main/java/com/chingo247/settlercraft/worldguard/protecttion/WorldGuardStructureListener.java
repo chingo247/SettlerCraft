@@ -52,6 +52,7 @@ public class WorldGuardStructureListener {
         if(type == StructureOwnerType.MEMBER) {
             worldGuardHelper.addMember(player, structure);
         } else {
+            worldGuardHelper.removeMember(player, structure);
             worldGuardHelper.addOwner(player, structure);
         }
     }

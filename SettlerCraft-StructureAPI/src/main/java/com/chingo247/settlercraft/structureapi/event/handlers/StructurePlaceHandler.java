@@ -44,18 +44,19 @@ import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.
 import com.chingo247.settlercraft.structureapi.util.PlacementUtil;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IWorld;
+import com.google.common.collect.Maps;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.blocks.ItemType;
 import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.util.com.google.common.collect.Maps;
 import org.bukkit.ChatColor;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -81,6 +82,24 @@ public class StructurePlaceHandler {
         this.color = structureAPI.getPlatform().getChatColors();
         this.structureDAO = new StructureDAO(SettlerCraft.getInstance().getNeo4j());
     }
+    
+    public void handleDeselect(Player player, ISelectionManager selectionManager) {
+        LocalSession session = WorldEdit.getInstance().getSession(player);
+        
+        final ISelectionManager slm;
+        // Set the SelectionManager if null...
+        if (selectionManager == null) {
+            if (session.hasCUISupport()) {
+                slm = CUISelectionManager.getInstance();
+            } else {
+                slm = NoneSelectionManager.getInstance();
+            }
+        } else {
+            slm = selectionManager;
+        }
+        slm.deselect(player);
+        
+    }
 
     public void handle(final AItemStack planItem, final Player player, final World world, final Vector pos) {
         handle(planItem, player, world, pos, null);
@@ -90,10 +109,8 @@ public class StructurePlaceHandler {
         if (!isStructurePlan(planItem)) {
             return;
         }
-        
-        
-        
-        if(!PermissionManager.getInstance().isAllowed(player, PermissionManager.Perms.PLACE_STRUCTURE)) {
+
+        if (!PermissionManager.getInstance().isAllowed(player, PermissionManager.Perms.PLACE_STRUCTURE)) {
             player.printError("You have no permission to place structures");
             return;
         }
@@ -132,15 +149,17 @@ public class StructurePlaceHandler {
                             player.print(color.red() + "Plans are not loaded yet... please wait...");
                             return;
                         }
-                    player.print(color.red() + "The plan has become invalid, reason: data was not found");
-                    int amount = planItem.getAmount();
-                    double value = getValue(planItem);
-                    if (value > 0.0d) {
-                        economyProvider.give(player.getUniqueId(), value * amount);
-                        iPlayer.getInventory().removeItem(planItem);
+                        player.print(color.red() + "The plan has become invalid, reason: data was not found");
+                        int amount = planItem.getAmount();
+                        double value = getValue(planItem);
+                        if (economyProvider != null && value > 0.0d) {
+                            economyProvider.give(player.getUniqueId(), value * amount);
+                            player.print(color.red() + "Invalid StructurePlans have been removed and you've been refunded: " + (value * amount));
+                        } else {
+                            player.print(color.red() + "Removed invalid structure plans from your inventory");
+                        }
                         
-                        player.print(color.red() + "Invalid StructurePlans have been removed and you've been refunded: " + (value * amount));
-                    }
+                        iPlayer.getInventory().removeItem(planItem);
 
                         return;
                     }
@@ -165,12 +184,10 @@ public class StructurePlaceHandler {
         } else {
             pos2 = PlacementUtil.getPoint2Right(pos1, direction, plan.getPlacement().getCuboidRegion().getMaximumPoint());
         }
-        
-        
+
 //        if(possibleParentStructure != null) {
 ////            pos1 = pos1.add(0, 1, 0); // Move one up by default?
 //        }
-
         // If player has NOT selected anything yet... make a new selection
         if (!selectionManager.hasSelection(player)) {
             selectionManager.select(player, pos1, pos2);
@@ -183,37 +200,40 @@ public class StructurePlaceHandler {
                 pos1 = WorldUtil.translateLocation(pos1, direction, (-(plan.getPlacement().getCuboidRegion().getMaximumPoint().getBlockZ() - 1)), 0, 0);
             }
 
-            if (canPlace(player, world, pos1, direction, plan)) {
+            Structure possibleParentStructure;
+            try {
+                possibleParentStructure = getAndCheckSmallestOverlappingStructure(player, world, pos1);
+            } catch (StructureException ex) {
+                player.printError(ex.getMessage());
+                selectionManager.deselect(player);
+                return;
+            }
+
+            if (canPlace(possibleParentStructure, player, world, pos1, direction, plan)) {
                 Structure structure;
                 try {
                     // Create Structure using the SettlerCraft restrictions
-                    Structure possibleParentStructure;
-                    try {
-                    possibleParentStructure = getAndCheckSmallestOverlappingStructure(player,world, pos1);
-                    } catch (StructureException ex) {
-                        player.printError(ex.getMessage());
-                        selectionManager.deselect(player);
-                        return;
-                    }
-                    
-                    long start = System.currentTimeMillis();
-                    
-                    if(possibleParentStructure != null) {
-                        if(possibleParentStructure.getConstructionStatus() != ConstructionStatus.COMPLETED) {
-                            player.printError("Status of #" + possibleParentStructure.getId() + " must complete before structure can be placed inside");
+
+                    if (possibleParentStructure != null) {
+                        
+                        
+                        if (possibleParentStructure.getConstructionStatus() != ConstructionStatus.COMPLETED) {
+                            player.printError("Status of #" + possibleParentStructure.getId() + " must not be in progress before substructures can be placed inside");
                             return;
                         }
-                        
+
                         structure = structureAPI.createSubstructure(possibleParentStructure, plan, world, pos1, direction, player);
                     } else {
                         structure = structureAPI.createStructure(plan, world, pos1, direction, player);
                     }
-                    
+
                     if (structure != null) {
-//                        AItemStack clone = item.clone();
-//                        clone.setAmount(1);
-//                        iPlayer.getInventory().removeItem(clone);
-//                        iPlayer.updateInventory();
+                        
+                        AItemStack clone = item.clone();
+                        clone.setAmount(1);
+                        
+                        iPlayer.getInventory().removeItem(clone);
+                        iPlayer.updateInventory();
                         
                         structure.build(player, new BuildOptions(), false);
                     }
@@ -243,7 +263,6 @@ public class StructurePlaceHandler {
         try (Transaction tx = graph.beginTx()) {
 
             IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
-            long start = System.currentTimeMillis();
 
             Map<String, Object> params = Maps.newHashMap();
             params.put("worldId", w.getUUID().toString());
@@ -268,18 +287,22 @@ public class StructurePlaceHandler {
                 node = new StructureNode(n);
                 structure = DefaultStructureFactory.getInstance().makeStructure(node);
             }
-            
-            if(node != null) {
+
+            if (node != null) {
                 isOwner = node.isOwner(player.getUniqueId());
             }
-            
+
             tx.success();
         }
         
-        if(structure != null && !isOwner) {
+        if(structure != null && !structureAPI.getConfig().isSubstructuresAllowed()) {
+            throw new StructureException("Placing substructures is disabled");
+        }
+
+        if (structure != null && !isOwner) {
             throw new StructureException("Structure will overlap another structure you don't own!");
         }
-        
+
         return structure;
     }
 
@@ -331,12 +354,26 @@ public class StructurePlaceHandler {
                     if (s.contains("FREE")) {
                         return 0;
                     }
-
+                    
+                    
+                    int modifier = 1;
                     try {
+                        System.out.println("String: " + s);
+                        if(s.contains("M")) {
+                            s = s.substring(0, s.indexOf("M"));
+                            modifier = 1_000_000;
+                        } else if (s.contains("K")) {
+                            s = s.substring(0, s.indexOf("K"));
+                            modifier = 1_000;
+                        }
+                        System.out.println("String2: " + s);
                         price = Double.parseDouble(s.trim());
+                        price *= modifier;
                     } catch (NumberFormatException nfe) {
+                        System.out.println("NFE! ");
                         return 0;
                     }
+                    System.out.println("PRICE: " + price);
                     return price;
                 }
             }
@@ -344,8 +381,40 @@ public class StructurePlaceHandler {
         return price;
     }
 
-    private boolean canPlace(Player player, World world, Vector pos1, Direction direction, StructurePlan plan) {
-        System.out.println(color.red() + "Still have to implement canPlace() in " + this.getClass().getName());
+    private boolean canPlace(Structure possibleParent, Player player, World world, Vector pos1, Direction direction, StructurePlan plan) {
+        // Check for overlap with other structures
+        Vector min = pos1;
+        Vector max = PlacementUtil.getPoint2Right(min, direction, plan.getPlacement().getCuboidRegion().getMaximumPoint());
+        GraphDatabaseService graph = SettlerCraft.getInstance().getNeo4j();
+
+        StructureAPI sapi = (StructureAPI) StructureAPI.getInstance();
+        try {
+            sapi.checkStructureRestrictions(player, world, new CuboidRegion(min, max));
+        } catch (StructureException ex) {
+            player.printError(ex.getMessage());
+            return false;
+        }
+
+        try (Transaction tx = graph.beginTx()) {
+            List<StructureNode> overlappingStructure;
+            if (possibleParent != null) {
+                overlappingStructure = structureDAO.getSubStructuresWithinStructure(possibleParent, world, new CuboidRegion(min, max), 1);
+            } else {
+                overlappingStructure = structureDAO.getStructuresWithin(world, new CuboidRegion(min, max), 1);
+            }
+
+            if (overlappingStructure != null && !overlappingStructure.isEmpty()) {
+                StructureNode n = overlappingStructure.get(0);
+                CuboidRegion overlappingArea = n.getCuboidRegion();
+                player.printError("Can't place structure, structure would overlap structure #" + n.getId() + " - " + n.getName() + "\n"
+                        + "Located at min: " + overlappingArea.getMinimumPoint() + ", max: " + overlappingArea.getMaximumPoint());
+                tx.success();
+                return false;
+            }
+
+            tx.success();
+        }
+
         return true;
     }
 

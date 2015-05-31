@@ -87,8 +87,22 @@ public class BukkitInventory extends AInventory {
 
     @Override
     public void removeItem(AItemStack item) {
-        BukkitItemStack bkis = (BukkitItemStack) item;
-        inventory.remove(bkis.getStack());
+//        BukkitItemStack bkis = (BukkitItemStack) item;
+        
+        for(int i = 0; i < inventory.getSize(); i++) {
+            ItemStack stack = inventory.getItem(i);
+            if(stack != null && stack.getType().getId() == item.getMaterial() 
+                    && stack.getItemMeta() != null 
+                    && stack.getItemMeta().getDisplayName().equals(item.getName())
+                    && stack.getItemMeta().getLore().equals(item.getLore())
+                    ) {
+                int amountToRemove = item.getAmount();
+                stack.setAmount(Math.max(0, stack.getAmount() - amountToRemove));
+                inventory.setItem(i, stack);
+            }
+        }
+        
+//        inventory.remove(bkis.getStack().clone());
     }
-
+    
 }

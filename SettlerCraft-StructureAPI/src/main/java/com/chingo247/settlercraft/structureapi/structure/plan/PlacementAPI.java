@@ -33,7 +33,7 @@ import com.chingo247.settlercraft.structureapi.structure.plan.xml.parser.Structu
 import com.chingo247.settlercraft.structureapi.structure.plan.xml.handlers.PlacementXMLHandler;
 import java.io.File;
 import java.util.Map;
-import net.minecraft.util.com.google.common.collect.Maps;
+import com.google.common.collect.Maps;
 import org.dom4j.Document;
 import org.dom4j.Element;
 

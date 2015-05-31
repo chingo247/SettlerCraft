@@ -19,6 +19,7 @@ package com.chingo247.settlercraft.structureapi.structure;
 import com.chingo247.menuapi.menu.CategoryMenu;
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.structureapi.platforms.bukkit.IConfigProvider;
+import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlanManager;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
@@ -30,6 +31,7 @@ import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
 
 /**
  *
@@ -203,8 +205,22 @@ public interface IStructureAPI {
      */
     public void removeRestriction(StructureRestriction structureRestriction);
     
+    /**
+     * Loads a schematic file
+     * @param schematicFile The schematic file to load
+     * @return The schematicPlacement
+     * @throws IOException 
+     */
     public SchematicPlacement loadSchematic(File schematicFile) throws IOException ;
     
-    
+    /**
+     * Makes a placement Async
+     * @param player The player UUID or null, The UUID specifies the Queue for AsyncWorldEdit
+     * A null value means that the UUID was issued by PlayerEntry.CONSOLE. 
+     * Note that the UUID does not have to be of a real player.
+     * @param placement The placement
+     * @return The AsyncPlacement
+     */
+    public AsyncPlacement makeAsync(UUID player, Placement placement);
     
 }

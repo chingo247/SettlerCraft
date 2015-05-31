@@ -17,10 +17,10 @@
 package com.chingo247.settlercraft.structureapi.persistence.dao;
 
 import com.chingo247.settlercraft.structureapi.persistence.entities.schematic.SchematicDataNode;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.util.com.google.common.collect.Lists;
-import net.minecraft.util.com.google.common.collect.Maps;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;

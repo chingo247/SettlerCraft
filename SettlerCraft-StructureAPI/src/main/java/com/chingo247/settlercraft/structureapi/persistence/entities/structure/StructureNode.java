@@ -27,6 +27,7 @@ import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
 import com.chingo247.settlercraft.structureapi.structure.ConstructionStatus;
 import com.chingo247.settlercraft.core.Direction;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import java.util.Date;
@@ -34,7 +35,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import net.minecraft.util.com.google.common.collect.Lists;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Label;
@@ -242,11 +242,6 @@ public class StructureNode {
         for (Relationship rel : underlyingNode.getRelationships(DynamicRelationshipType.withName(StructureRelTypes.RELATION_OWNED_BY), org.neo4j.graphdb.Direction.OUTGOING)) {
             SettlerNode ownerNode = new SettlerNode(rel.getOtherNode(underlyingNode));
             if (ownerNode.getUUID().equals(node.getUUID())) {
-                Integer typeId = (Integer) rel.getProperty("Type");
-                if(typeId < type.getTypeId()) {
-                    rel.setProperty("Type", type.getTypeId());
-                    return true;
-                }
                 return false;
             }
             

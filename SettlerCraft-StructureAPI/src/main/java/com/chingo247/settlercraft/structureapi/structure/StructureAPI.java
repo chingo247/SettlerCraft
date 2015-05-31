@@ -45,6 +45,7 @@ import com.chingo247.settlercraft.structureapi.persistence.dao.IStructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureWorldNode;
 import com.chingo247.settlercraft.structureapi.platforms.services.AsyncEditSessionFactoryProvider;
+import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.settlercraft.structureapi.structure.plan.DefaultStructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.FilePlacement;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.SchematicPlacement;
@@ -73,7 +74,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.util.com.google.common.collect.Sets;
+import com.google.common.collect.Sets;
 import org.apache.commons.io.FilenameUtils;
 import org.dom4j.DocumentException;
 import org.neo4j.graphdb.DynamicRelationshipType;
@@ -81,6 +82,8 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSessionFactory;
 
 /**
@@ -238,15 +241,17 @@ public class StructureAPI implements IStructureAPI {
             Placement placement = plan.getPlacement();
 
             checkDefaultRestrictions(placement, world, position, direction);
+            
+            Vector min = position;
+            Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getCuboidRegion().getMaximumPoint());
+            CuboidRegion structureRegion = new CuboidRegion(min, max);
+            checkStructureRestrictions(owner, world, structureRegion);
 
-            WorldNode worldNode = registerWorld(world);
+            WorldNode worldNode = findWorld(world);
 
             try (Transaction tx = graph.beginTx()) {
 
                 // Check for overlap with other structures
-                Vector min = position;
-                Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getCuboidRegion().getMaximumPoint());
-                CuboidRegion structureRegion = new CuboidRegion(min, max);
                 if (structureDAO.hasStructuresWithin(world, structureRegion)) {
                     tx.success(); // End here
                     throw new StructureException("Structure overlaps another structure...");
@@ -316,14 +321,17 @@ public class StructureAPI implements IStructureAPI {
         try {
 //            // Check the default restrictions first
             checkDefaultRestrictions(placement, world, position, direction);
-            WorldNode worldNode = registerWorld(world);
+            Vector min = position;
+            Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getCuboidRegion().getMaximumPoint());
+            CuboidRegion structureRegion = new CuboidRegion(min, max);
+            checkStructureRestrictions(owner, world, structureRegion);
+            
+            
+            WorldNode worldNode = findWorld(world);
 
             try (Transaction tx = graph.beginTx()) {
 
                 // Check for overlap with other structures
-                Vector min = position;
-                Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getCuboidRegion().getMaximumPoint());
-                CuboidRegion structureRegion = new CuboidRegion(min, max);
                 if (structureDAO.hasStructuresWithin(world, structureRegion)) {
                     tx.success(); // End here
                     throw new StructureException("Structure overlaps another structure...");
@@ -384,26 +392,30 @@ public class StructureAPI implements IStructureAPI {
 //            // Check the default restrictions first
             Placement placement = plan.getPlacement();
             checkDefaultRestrictions(placement, world, position, direction);
-            WorldNode worldNode = registerWorld(world);
+            
+            Vector min = position;
+            Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getCuboidRegion().getMaximumPoint());
+            CuboidRegion structureRegion = new CuboidRegion(min, max);
+            checkStructureRestrictions(owner, world, structureRegion);
+            
+            
+            WorldNode worldNode = findWorld(world);
 
             CuboidRegion parentRegion = parentStructure.getCuboidRegion();
 
-            Vector pos1 = position;
-            Vector pos2 = PlacementUtil.getPoint2Right(pos1, direction, placement.getCuboidRegion().getMaximumPoint());
-            CuboidRegion structureRegion = new CuboidRegion(pos1, pos2);
 
-            if (!(parentRegion.contains(pos1) && parentRegion.contains(pos2))) {
+            if (!(parentRegion.contains(min) && parentRegion.contains(max))) {
                 throw new StructureException("Structure overlaps structure #" + parentStructure.getId() + ", but does not fit within it's boundaries");
             }
 
             boolean hasWithin;
             try (Transaction tx = graph.beginTx()) {
                 hasWithin = structureDAO.hasSubstructuresWithin(parentStructure, world, structureRegion);
-                tx.success(); // End here
-            }
-            if (hasWithin) {
-                throw new StructureException("Structure overlaps another structure...");
-            }
+                if (hasWithin) {
+                    tx.success(); // End here
+                    throw new StructureException("Structure overlaps another structure...");
+                }
+            
 
             // Deep check overlap
 //            ThreadSafeEditSession editSession = AsyncWorldEditUtil.getAsyncSessionFactory().getThreadSafeEditSession(world, -1);
@@ -423,7 +435,6 @@ public class StructureAPI implements IStructureAPI {
 //                    }
 //                }
 //            }
-            try (Transaction tx = graph.beginTx()) {
 
                 // Create the StructureNode - Where it all starts...
                 StructureNode substructureNode = structureDAO.addStructure(plan.getName(), position, structureRegion, direction, plan.getPrice());
@@ -500,28 +511,29 @@ public class StructureAPI implements IStructureAPI {
         try {
 //            // Check the default restrictions first
             checkDefaultRestrictions(placement, world, position, direction);
-            WorldNode worldNode = registerWorld(world);
-
+            
+            Vector min = position;
+            Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getCuboidRegion().getMaximumPoint());
+            CuboidRegion structureRegion = new CuboidRegion(min, max);
+            checkStructureRestrictions(owner, world, structureRegion);
+            
+            WorldNode worldNode = findWorld(world);
             CuboidRegion parentRegion = parentStructure.getCuboidRegion();
 
-            Vector pos1 = position;
-            Vector pos2 = PlacementUtil.getPoint2Right(pos1, direction, placement.getCuboidRegion().getMaximumPoint());
-            CuboidRegion structureRegion = new CuboidRegion(pos1, pos2);
-
-            if (!(parentRegion.contains(pos1) && parentRegion.contains(pos2))) {
+            if (!(parentRegion.contains(min) && parentRegion.contains(max))) {
                 throw new StructureException("Structure overlaps structure #" + parentStructure.getId() + ", but does not fit within it's boundaries");
             }
 
             boolean hasWithin;
             try (Transaction tx = graph.beginTx()) {
                 hasWithin = structureDAO.hasSubstructuresWithin(parentStructure, world, structureRegion);
-                tx.success(); // End here
-            }
-            if (hasWithin) {
-                throw new StructureException("Structure overlaps another structure...");
-            }
+                if (hasWithin) {
+                    tx.success(); // End here
+                    throw new StructureException("Structure overlaps another structure...");
+                }
+                
+           
 
-            try (Transaction tx = graph.beginTx()) {
 
                 // Create the StructureNode - Where it all starts...
                 StructureNode substructureNode = structureDAO.addStructure(placement.getClass().getSimpleName(), position, structureRegion, direction, 0.0);
@@ -639,6 +651,7 @@ public class StructureAPI implements IStructureAPI {
         Vector min = p.getCuboidRegion().getMinimumPoint().add(position);
         Vector max = min.add(p.getCuboidRegion().getMaximumPoint());
         CuboidRegion placementDimension = new CuboidRegion(min, max);
+        
 
         // Below the world?s
         if (placementDimension.getMinimumPoint().getBlockY() <= 1) {
@@ -657,9 +670,18 @@ public class StructureAPI implements IStructureAPI {
         if (placementDimension.contains(spawnPos)) {
             throw new StructureException("Structure overlaps the world's spawn...");
         }
+        
+        
+        
+    }
+    
+    public void checkStructureRestrictions(Player player, World world, CuboidRegion region) throws StructureException {
+        for(StructureRestriction structureRestriction : restrictions) {
+            structureRestriction.check(player, world, region);
+        }
     }
 
-    protected void moveResources(WorldNode worldNode, StructureNode structureNode, StructurePlan plan) throws IOException {
+    protected final void moveResources(WorldNode worldNode, StructureNode structureNode, StructurePlan plan) throws IOException {
         // Give this structure a directory!
         File structureDir = getDirectoryForStructure(worldNode, structureNode);
         structureDir.mkdirs();
@@ -677,13 +699,13 @@ public class StructureAPI implements IStructureAPI {
         }
     }
 
-    protected File getDirectoryForStructure(WorldNode worldNode, StructureNode structureNode) {
+    protected final File getDirectoryForStructure(WorldNode worldNode, StructureNode structureNode) {
         File structuresDirectory = getStructuresDirectory(worldNode.getName());
         File structureDir = new File(structuresDirectory, String.valueOf(structureNode.getId()));
         return structureDir;
     }
 
-    protected WorldNode registerWorld(World world) {
+    protected final WorldNode findWorld(World world) {
         IWorld w = getPlatform().getServer().getWorld(world.getName());
         if (w == null) {
             throw new RuntimeException("World was null");
@@ -773,6 +795,14 @@ public class StructureAPI implements IStructureAPI {
     public SchematicPlacement loadSchematic(File schematicFile) throws IOException {
         Schematic schematic = SchematicManager.getInstance().getOrLoadSchematic(schematicFile);
         return new SchematicPlacement(schematic);
+    }
+    
+    
+    public AsyncPlacement makeAsync(UUID player, Placement placement) {
+        if(player == null) {
+            return new AsyncPlacement(PlayerEntry.CONSOLE, placement);
+        }
+        return new AsyncPlacement(AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(player), placement);
     }
     
     

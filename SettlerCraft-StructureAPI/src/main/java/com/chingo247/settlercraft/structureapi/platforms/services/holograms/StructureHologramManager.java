@@ -17,6 +17,7 @@ import com.chingo247.settlercraft.structureapi.persistence.entities.structure.St
 import com.chingo247.settlercraft.structureapi.structure.ConstructionStatus;
 import com.chingo247.settlercraft.structureapi.structure.DefaultStructureFactory;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
+import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IPlugin;
@@ -88,11 +89,12 @@ public class StructureHologramManager {
 
     public void setHologramProvider(HologramsProvider hologramsProvider) {
         Preconditions.checkNotNull(hologramsProvider);
-        if(this.hologramsProvider == null) {
+        if(this.hologramsProvider == null && StructureAPI.getInstance().getConfig().useHolograms()) {
             this.hologramsProvider = hologramsProvider;
             initHolos();
         } 
     }
+    
 
     private void registerStructureHologram(Structure structure, Hologram hologram) {
         if (holograms.get(structure.getId()) == null) {
@@ -110,7 +112,7 @@ public class StructureHologramManager {
     @Subscribe
     @AllowConcurrentEvents
     public void onStructureCreate(StructureCreateEvent structureCreateEvent) {
-        if (hologramsProvider == null) {
+        if (hologramsProvider == null || !StructureAPI.getInstance().getConfig().useHolograms()) {
             return;
         }
 
@@ -131,7 +133,7 @@ public class StructureHologramManager {
     @Subscribe
     @AllowConcurrentEvents
     public void onStructureStateChange(StructureStateChangeEvent changeEvent) {
-        if (hologramsProvider == null) {
+        if (hologramsProvider == null || !StructureAPI.getInstance().getConfig().useHolograms()) {
             return;
         }
 

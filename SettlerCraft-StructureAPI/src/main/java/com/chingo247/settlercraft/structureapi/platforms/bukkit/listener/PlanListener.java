@@ -36,6 +36,7 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 /**
@@ -43,9 +44,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
  * @author Chingo
  */
 public class PlanListener implements Listener {
-    
-    private final StructurePlaceHandler placeHandler;
 
+    private final StructurePlaceHandler placeHandler;
 
     public PlanListener(IEconomyProvider provider) {
         this.placeHandler = new StructurePlaceHandler(provider);
@@ -53,24 +53,27 @@ public class PlanListener implements Listener {
 
     @EventHandler
     public void onPlayerUsePlan(final PlayerInteractEvent pie) {
-        if(pie.getItem() == null) return;
-        if(pie.getClickedBlock() == null) return;
-        
-        AItemStack stack = BukkitPlatform.wrapItem(pie.getItem());
-        if(StructurePlaceHandler.isStructurePlan(stack)) {
-            pie.setCancelled(true);
+        if (pie.getItem() == null) {
+            return;
         }
         
+
+        AItemStack stack = BukkitPlatform.wrapItem(pie.getItem());
+        if (StructurePlaceHandler.isStructurePlan(stack)) {
+            pie.setCancelled(true);
+        }
+
         WorldEditPlugin plugin = BKWorldEditUtil.getWorldEditPlugin();
         Player player = plugin.wrapPlayer(pie.getPlayer());
         Block block = pie.getClickedBlock();
-        if(block !=  null) { 
-            Location loc = block.getLocation();
-            placeHandler.handle(stack, player, SettlerCraft.getInstance().getWorld(player.getWorld().getName()), new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
+
+        if (block == null || pie.getAction().equals(Action.RIGHT_CLICK_AIR) || pie.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+            placeHandler.handleDeselect(player, null);
+            return;
         }
+
+        Location loc = block.getLocation();
+        placeHandler.handle(stack, player, SettlerCraft.getInstance().getWorld(player.getWorld().getName()), new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
     }
 
-
-
-  
 }

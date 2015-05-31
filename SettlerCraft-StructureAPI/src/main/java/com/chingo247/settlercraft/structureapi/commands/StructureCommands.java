@@ -48,6 +48,8 @@ import com.chingo247.xplatform.core.ICommandSender;
 import com.chingo247.xplatform.core.ILocation;
 import com.chingo247.xplatform.core.IPlayer;
 import com.chingo247.xplatform.core.IWorld;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.world.World;
 import java.io.File;
@@ -60,8 +62,6 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.util.com.google.common.collect.Maps;
-import net.minecraft.util.com.google.common.collect.Sets;
 import org.apache.commons.lang.math.NumberUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -189,10 +189,18 @@ public class StructureCommands {
                             break;
                         case "menu":
                             checkIsPlayer(sender);
+                            if(!structureAPI.getConfig().isPlanMenuEnabled()) {
+                                sender.sendMessage(COLOR.red() + "Plan menu is not enabled");
+                                return;
+                            }
                             openMenu((IPlayer) sender, commandArgs, true);
                             break;
                         case "shop":
                             checkIsPlayer(sender);
+                            if(!structureAPI.getConfig().isPlanMenuEnabled()) {
+                                sender.sendMessage(COLOR.red() + "Plan shop is not enabled");
+                                return;
+                            }
                             openMenu((IPlayer) sender, commandArgs, false);
                             break;
                         default:
@@ -643,12 +651,15 @@ public class StructureCommands {
      */
     private boolean openMenu(IPlayer player, String[] commandArgs, boolean isFree) throws CommandException {
         if (!isFree && SettlerCraft.getInstance().getEconomyProvider() == null) {
-            throw new CommandException("No economy plugin available");
+            throw new CommandException("Plan shop is not available (no economy plugin)");
+        }
+        
+        if (structureAPI.isLoading()) {
+            player.sendMessage(COLOR.red() + "Plans are not loaded yet... please wait...");
+            return true;
         }
 
-        if (!structureAPI.getConfig().isPlanShopEnabled()) {
-            throw new CommandException("Planshop is disabled");
-        }
+        
 
         if (isFree) {
             if(!permissionManager.isAllowed(player, PermissionManager.Perms.OPEN_PLAN_MENU)) {
@@ -1014,14 +1025,18 @@ public class StructureCommands {
             Structure structure = DefaultStructureFactory.getInstance().makeStructure(structureNode);
             if (method.equalsIgnoreCase("add")) {
                 SettlerNode settler = settlerDAO.find(ply.getUniqueId());
-                boolean wasOwner = structureNode.isOwner(uuid);
-                if (structureNode.addOwner(settler, requestedType)) {
-                    if (!wasOwner) {
-                        EventManager.getInstance().getEventBus().post(new StructureAddOwnerEvent(uuid, structure, requestedType));
-                        senderPlayer.sendMessage("Successfully added '" + COLOR.green() + ply.getName() + COLOR.reset() + "' to #" + COLOR.gold() + structureId + " " + COLOR.blue() + structureNode.getName() + " as " + COLOR.yellow() + requestedType.name());
-                    } else {
-                        senderPlayer.sendMessage("Upgraded ownership of '" + COLOR.green() + ply.getName() + COLOR.reset() + " " + COLOR.yellow() + requestedType.name());
-                    }
+                
+                StructureOwnerNode owner = structureNode.findOwner(settler.getUUID());
+                if(owner == null) {
+                    structureNode.addOwner(settler, requestedType);
+                    EventManager.getInstance().getEventBus().post(new StructureAddOwnerEvent(uuid, structure, requestedType));
+                    senderPlayer.sendMessage("Successfully added '" + COLOR.green() + ply.getName() + COLOR.reset() + "' to #" + COLOR.gold() + structureId + " " + COLOR.blue() + structureNode.getName() + COLOR.reset() + " as " + COLOR.yellow() + requestedType.name());
+                } else if (owner.getType().getTypeId() < requestedType.getTypeId()) {
+                    structureNode.removeOwner(settler.getUUID());
+                    structureNode.addOwner(settler, requestedType);
+                    EventManager.getInstance().getEventBus().post(new StructureAddOwnerEvent(uuid, structure, requestedType));
+                        senderPlayer.sendMessage("Upgraded ownership of '" + COLOR.green() + ply.getName() + COLOR.reset() + "' to " + COLOR.yellow() + requestedType.name() + COLOR.reset() + " for structure ",
+                                "#" + COLOR.gold() + structure.getId() + " " + COLOR.blue() + structure.getName());
                 } else {
                     throw new CommandException(ply.getName() + " is already an owner of this structure and his ownership couldn't be upgraded");
                 }

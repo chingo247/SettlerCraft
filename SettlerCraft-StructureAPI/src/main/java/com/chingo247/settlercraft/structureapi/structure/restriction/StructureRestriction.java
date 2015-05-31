@@ -68,7 +68,7 @@ public abstract class StructureRestriction {
     
      /**
      * Used to check if a Structure may be build on a specified location.
-     * @param whoPlaces
+     * @param whoPlaces The player who places the structure, value could be null
      * @param world
      * @param affectedArea
      * @return should return true if the action is approved
@@ -82,7 +82,7 @@ public abstract class StructureRestriction {
      * @param affectedArea
      * @throws com.chingo247.settlercraft.structureapi.exception.StructureException
      */
-    public final void allow(Player whoPlaces, World world, CuboidRegion affectedArea) throws StructureException {
+    public final void check(Player whoPlaces, World world, CuboidRegion affectedArea) throws StructureException {
         if(!evaluate(whoPlaces, world, affectedArea)) {
             throw new StructureException(message);
         }

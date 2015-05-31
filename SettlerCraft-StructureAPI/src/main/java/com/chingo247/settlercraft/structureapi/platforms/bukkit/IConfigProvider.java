@@ -36,7 +36,7 @@ public interface IConfigProvider {
 
     public boolean isPlanShopEnabled();
 
-    public double getRefundPercentage();
+    public boolean isSubstructuresAllowed();
     
     public boolean useHolograms();
     

@@ -37,8 +37,8 @@ public class BKConfigProvider implements IConfigProvider {
     
     private boolean menuEnabled = false;
     private boolean shopEnabled = false;
-    private double refundPercentage;
     private boolean useHolograms = false;
+    private boolean allowsSubstructures = false;
    
 
     private final File file = new File(BKStructureAPIPlugin.getInstance().getDataFolder(), "config.yml");
@@ -48,16 +48,8 @@ public class BKConfigProvider implements IConfigProvider {
         final FileConfiguration config = YamlConfiguration.loadConfiguration(file);
         this.menuEnabled = config.getBoolean("menus.planmenu");
         this.shopEnabled = config.getBoolean("menus.planshop");
-
-        this.refundPercentage = config.getDouble("structure.refund");
-        if (refundPercentage < 0) {
-            throw new SettlerCraftException("refund node in config was negative");
-        }
-        if(refundPercentage > 1.0) {
-            throw new SettlerCraftException("value for 'refund' in config must be between 0 - 1.0");
-        }
-        
         this.useHolograms = config.getBoolean("structure.holograms.enabled");
+        this.allowsSubstructures = config.getBoolean("allow-substructures");
        
     }
 
@@ -82,9 +74,11 @@ public class BKConfigProvider implements IConfigProvider {
         return useHolograms;
     }
 
+    
+
     @Override
-    public double getRefundPercentage() {
-        return refundPercentage;
+    public boolean isSubstructuresAllowed() {
+        return allowsSubstructures;
     }
 
    

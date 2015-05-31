@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.util.com.google.common.collect.Lists;
+import com.google.common.collect.Lists;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -209,11 +209,13 @@ public class WorldGuardHelper implements IStructureProtector {
         String regionId = getRegionId(structure);
         ProtectedRegion region = mgr.getRegion(regionId);
         if(region != null) {
-            region.getMembers().addPlayer(player);
-            try {
-                mgr.save();
-            } catch (StorageException ex) {
-                Logger.getLogger(WorldGuardHelper.class.getName()).log(Level.SEVERE, null, ex);
+            if(!region.getMembers().contains(player)) {
+                region.getMembers().addPlayer(player);
+                try {
+                    mgr.save();
+                } catch (StorageException ex) {
+                    Logger.getLogger(WorldGuardHelper.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }
@@ -224,11 +226,13 @@ public class WorldGuardHelper implements IStructureProtector {
         String regionId = getRegionId(structure);
         ProtectedRegion region = mgr.getRegion(regionId);
         if(region != null) {
-            region.getOwners().addPlayer(player);
-            try {
-                mgr.save();
-            } catch (StorageException ex) {
-                Logger.getLogger(WorldGuardHelper.class.getName()).log(Level.SEVERE, null, ex);
+            if(!region.getOwners().contains(player)) {
+                region.getOwners().addPlayer(player);
+                try {
+                    mgr.save();
+                } catch (StorageException ex) {
+                    Logger.getLogger(WorldGuardHelper.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }
@@ -355,7 +359,7 @@ public class WorldGuardHelper implements IStructureProtector {
                     Structure structure = DefaultStructureFactory.getInstance().makeStructure(new StructureNode(n));
                     removeProtection(structure);
                     n.removeProperty(WORLD_GUARD_REGION_PROPERTY);
-                    System.out.println("[SettlerCraft-WorldGuard]: Removed protection from structure #"+structure.getId()+" because structure was removed");
+                    System.out.println("[SettlerCraft-WorldGuard]: Removed protection from structure #"+structure.getId()+" because it was removed");
                 }
             }
             

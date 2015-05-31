@@ -12,7 +12,7 @@ import com.chingo247.settlercraft.core.platforms.services.permission.PermissionD
 import com.chingo247.xplatform.core.IPlayer;
 import com.sk89q.worldedit.entity.Player;
 import java.util.UUID;
-import net.minecraft.util.com.google.common.base.Preconditions;
+import com.google.common.base.Preconditions;
 
 /**
  *

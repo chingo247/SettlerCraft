@@ -166,11 +166,10 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         PlanGenerator.generate(generationDirectory);
         
 //        // Setup HolographicDisplays (if available)
-//        if(configProvider.useHolograms() && Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null) {
-//            HolographicDisplaysHologramProvider holographicDisplays = new HolographicDisplaysHologramProvider();
-//            StructureHologramManager.getInstance().setHologramProvider(holographicDisplays);
-              StructureHologramManager.getInstance().inititialize(new BukkitPlugin(this));
-//        }
+        
+        if(configProvider.useHolograms()) {
+            StructureHologramManager.getInstance().inititialize(new BukkitPlugin(this));
+        }
         
         // Register permissions
         PermissionManager.getInstance().registerPermissions(new BKPermissionRegistry());

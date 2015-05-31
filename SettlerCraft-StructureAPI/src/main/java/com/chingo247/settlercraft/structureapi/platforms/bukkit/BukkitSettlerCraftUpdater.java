@@ -31,6 +31,7 @@ import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.PlacementTypes;
 import com.chingo247.settlercraft.structureapi.structure.plan.xml.PlacementXMLConstants;
 import com.chingo247.settlercraft.structureapi.structure.plan.xml.StructurePlanXMLConstants;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.sk89q.worldedit.Vector;
@@ -49,7 +50,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.util.com.google.common.collect.Maps;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
@@ -272,7 +272,8 @@ class BukkitSettlerCraftUpdater {
                 try {
                     tx.rollback();
                 } catch (Exception e) {
-                    System.out.println("Couldn't rollback transaction");
+                    System.out.println("[SettlerCraft]: Something went wrong during bulkdelete");
+                    System.out.println("[SettlerCraft]: Couldn't rollback transaction");
                 }
             }
         } finally {

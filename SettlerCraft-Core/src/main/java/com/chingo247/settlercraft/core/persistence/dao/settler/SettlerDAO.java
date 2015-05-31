@@ -19,7 +19,7 @@ package com.chingo247.settlercraft.core.persistence.dao.settler;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
-import net.minecraft.util.com.google.common.collect.Maps;
+import com.google.common.collect.Maps;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
