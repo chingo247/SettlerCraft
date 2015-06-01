@@ -586,6 +586,8 @@ public class StructureCommands {
                     structure.demolish(SettlerCraft.getInstance().getPlayer(player.getUniqueId()), new DemolishingOptions(), useForce);
                 } catch (ConstructionException ex) {
                     player.sendMessage(COLOR.red() + ex.getMessage());
+                } catch (Exception ex) { // Catch everything or disappear it will dissappear in the abyss!
+                    Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
                 }
             }
         });
@@ -634,6 +636,8 @@ public class StructureCommands {
                     structure.stop(useForce);
                 } catch (ConstructionException ex) {
                     player.sendMessage(COLOR.red() + ex.getMessage());
+                } catch (Exception ex) { // Catch everything or disappear it will dissappear in the abyss!
+                    Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
                 }
             }
         });

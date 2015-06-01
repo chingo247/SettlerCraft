@@ -57,7 +57,7 @@ public class AsyncDemolishingPlacement extends AbstractAsyncPlacement<Demolishin
 
     @Override
     public void place(EditSession editSession, final Vector pos, final DemolishingOptions options) {
-
+ 
         final int jobId = getJobId();
         final EditSession session;
         final SCJobEntry job;

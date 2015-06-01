@@ -45,9 +45,16 @@ public class TopDownCuboidIterator implements AreaIterator {
 
     @Override
     public Iterator<Vector> iterate(Vector size) {
+        
+        if(cubeX < 1) cubeX = size.getBlockX();
+        if(cubeY < 1) cubeY = size.getBlockY();
+        if(cubeZ < 1) cubeZ = size.getBlockZ();
+        
+        
         int cubx = Math.min(size.getBlockX(), cubeX);
         int cuby = Math.min(size.getBlockX(), cubeY);
         int cubz = Math.min(size.getBlockX(), cubeZ);
+        
         return new TopDownCuboidTraversal(size, cubx, cuby, cubz);
     }
     

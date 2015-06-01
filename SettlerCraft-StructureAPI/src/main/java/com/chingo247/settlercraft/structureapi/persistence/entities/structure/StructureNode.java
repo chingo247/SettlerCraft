@@ -245,7 +245,7 @@ public class StructureNode {
     }
 
     public boolean isOwner(UUID possibleOwner) {
-        return findOwner(possibleOwner) == null;
+        return findOwner(possibleOwner) != null;
     }
     
     public boolean isOwner(UUID possibleMaster, StructureOwnerType type) {

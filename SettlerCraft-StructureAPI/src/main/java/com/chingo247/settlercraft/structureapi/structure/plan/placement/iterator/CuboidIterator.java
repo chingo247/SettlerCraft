@@ -38,6 +38,12 @@ public class CuboidIterator implements AreaIterator {
 
     @Override
     public Iterator<Vector> iterate(Vector size) {
+         
+        if(cubeX < 1) cubeX = size.getBlockX();
+        if(cubeY < 1) cubeY = size.getBlockY();
+        if(cubeZ < 1) cubeZ = size.getBlockZ();
+        
+        
         int cubx = Math.min(size.getBlockX(), cubeX);
         int cuby = Math.min(size.getBlockY(), cubeY);
         int cubz = Math.min(size.getBlockZ(), cubeZ);

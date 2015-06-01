@@ -180,74 +180,80 @@ public class ConstructionManager {
             @Override
             public void run() {
 
+                try {
+
                 // Check if task already added
-                // If so check if the task was building!
-                // If so continue, otherwise recursively stop
-                StructureJob currentEntry = tasks.get(structure.getId());
-                if (currentEntry != null) {
-                    try {
-                        stop(structure, false, true);
-                    } catch (ConstructionException ex) {
-                        // silent
-                    }
-                }
-
-                try (Transaction tx = graph.beginTx()) {
-                    try {
-                        StructureNode node = structureDAO.find(structure.getId());
-
-                        if (node == null) {
-                            tx.success();
-                            return;
+                    // If so check if the task was building!
+                    // If so continue, otherwise recursively stop
+                    StructureJob currentEntry = tasks.get(structure.getId());
+                    if (currentEntry != null) {
+                        try {
+                            stop(structure, false, true);
+                        } catch (ConstructionException ex) {
+                            // silent
                         }
+                    }
 
-                        List<StructureNode> substructures = node.getSubstructures();
-                        for (StructureNode s : substructures) {
-                            final CuboidRegion region = s.getCuboidRegion();
+                    try (Transaction tx = graph.beginTx()) {
+                        try {
+                            StructureNode node = structureDAO.find(structure.getId());
 
-                            options.addIgnore(new BlockPredicate() {
+                            if (node == null) {
+                                tx.success();
+                                return;
+                            }
+
+                            List<StructureNode> substructures = node.getSubstructures();
+                            for (StructureNode s : substructures) {
+                                final CuboidRegion region = s.getCuboidRegion();
+
+                                options.addIgnore(new BlockPredicate() {
+
+                                    @Override
+                                    public boolean evaluate(Vector position, Vector worldPosition, BaseBlock block) {
+                                        return region.contains(worldPosition);
+                                    }
+                                });
+                            }
+
+                            PlayerEntry playerEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(player);
+
+                            tasks.put(structure.getId(), new StructureJob(-1, false, player));
+                            final World w = SettlerCraft.getInstance().getWorld(structure.getWorld());
+                            if (w == null) {
+                                return;
+                            }
+
+                            Placement p = structure.getStructurePlan().getPlacement();
+                            if (p instanceof RotationalPlacement) {
+                                RotationalPlacement rt = (RotationalPlacement) p;
+                                rt.rotate(structure.getDirection());
+                            }
+
+                            AsyncPlacement placement = new AsyncPlacement(playerEntry, p, new AsyncPlacementCallback() {
 
                                 @Override
-                                public boolean evaluate(Vector position, Vector worldPosition, BaseBlock block) {
-                                    return region.contains(worldPosition);
+                                public void onJobAdded(int jobId) {
+                                    AsyncEventManager.getInstance().post(new StructureJobAddedEvent(w, structure.getId(), jobId, false));
                                 }
-                            });
+                            }, structure);
+
+                            placement.place(session, structure.getCuboidRegion().getMinimumPoint(), options);
+
+                        } catch (Exception exception) {
+                            LOG.log(Level.SEVERE, exception.getMessage(), exception);
                         }
+                        tx.success();
+                    }
 
-                        PlayerEntry playerEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(player);
-
-                        tasks.put(structure.getId(), new StructureJob(-1, false, player));
-                        final World w = SettlerCraft.getInstance().getWorld(structure.getWorld());
-                        if (w == null) {
-                            return;
-                        }
-
-                        Placement p = structure.getStructurePlan().getPlacement();
-                        if (p instanceof RotationalPlacement) {
-                            RotationalPlacement rt = (RotationalPlacement) p;
-                            rt.rotate(structure.getDirection());
-                        }
-
-                        AsyncPlacement placement = new AsyncPlacement(playerEntry, p, new AsyncPlacementCallback() {
-
-                            @Override
-                            public void onJobAdded(int jobId) {
-                                AsyncEventManager.getInstance().post(new StructureJobAddedEvent(w, structure.getId(), jobId, false));
-                            }
-                        }, structure);
-
-                        placement.place(session, structure.getCuboidRegion().getMinimumPoint(), options);
+                    try {
 
                     } catch (Exception exception) {
                         LOG.log(Level.SEVERE, exception.getMessage(), exception);
                     }
-                    tx.success();
-                }
 
-                try {
-
-                } catch (Exception exception) {
-                    LOG.log(Level.SEVERE, exception.getMessage(), exception);
+                } catch (Exception ex) { // Catch everything or disappear it will dissappear in the abyss!
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
                 }
 
             }
@@ -263,102 +269,105 @@ public class ConstructionManager {
         if (structure.getConstructionStatus() == ConstructionStatus.REMOVED) {
             throw new ConstructionException("Can't demolish a removed structure");
         }
+        
 
         pool.execute(structure.getId(), new Runnable() {
 
             @Override
             public void run() {
                 PlayerEntry playerEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(player);
+                try {
 
-                final World w = SettlerCraft.getInstance().getWorld(structure.getWorld());
-                if (w == null) {
-                    return;
-                }
-
-                Structure parent = null;
-
-                try (Transaction tx = graph.beginTx()) {
-                    StructureNode node = structureDAO.find(structure.getId());
-                    boolean hasSubstructures = node.hasSubstructures();
-                    if (hasSubstructures) {
-                        if (player != null) {
-                            Player ply = SettlerCraft.getInstance().getPlayer(player);
-                            String errorMessage = "[SettlerCraft]: Substructures need to be removed before removing #" + structure.getId() + " " + structure.getName();
-                            if (ply != null) {
-                                ply.printError(errorMessage);
-                            } 
-                        }
-                        tx.success();
+                    final World w = SettlerCraft.getInstance().getWorld(structure.getWorld());
+                    if (w == null) {
                         return;
                     }
 
-                    StructureNode parentNode = node.getParent();
+                    Structure parent = null;
 
-                    if (parentNode != null) {
-                        parent = DefaultStructureFactory.getInstance().makeStructure(parentNode);
+                    try (Transaction tx = graph.beginTx()) {
+                        StructureNode node = structureDAO.find(structure.getId());
+                        boolean hasSubstructures = node.hasSubstructures();
+                        if (hasSubstructures) {
+                            if (player != null) {
+                                Player ply = SettlerCraft.getInstance().getPlayer(player);
+                                String errorMessage = "[SettlerCraft]: Substructures need to be removed before removing #" + structure.getId() + " " + structure.getName();
+                                if (ply != null) {
+                                    ply.printError(errorMessage);
+                                }
+                            }
+                            tx.success();
+                            return;
+                        }
+
+                        StructureNode parentNode = node.getParent();
+
+                        if (parentNode != null) {
+                            parent = DefaultStructureFactory.getInstance().makeStructure(parentNode);
+                        }
+
+                        tx.success();
                     }
 
-                    tx.success();
-                }
-
-                StructureJob currentEntry = tasks.get(structure.getId());
-                if (currentEntry != null) {
-                    try {
-                        stop(structure, false, true);
-                    } catch (ConstructionException ex) {
-                        // silent
-                    }
-                }
-
-                tasks.put(structure.getId(), new StructureJob(-1, true, player));
-                DemolishingPlacement dp;
-
-                if (parent == null || (!(parent.getStructurePlan().getPlacement() instanceof AbstractBlockPlacement))) {
-
-                    CuboidRegion region = structure.getCuboidRegion();
-                    Vector size = region.getMaximumPoint().subtract(region.getMinimumPoint()).add(1, 1, 1);
-
-                    dp = new DemolishingPlacement(size);
-                    AsyncDemolishingPlacement placement = new AsyncDemolishingPlacement(playerEntry, dp, new AsyncPlacementCallback() {
-
-                        @Override
-                        public void onJobAdded(int jobId) {
-                            AsyncEventManager.getInstance().post(new StructureJobAddedEvent(w, structure.getId(), jobId, true));
+                    StructureJob currentEntry = tasks.get(structure.getId());
+                    if (currentEntry != null) {
+                        try {
+                            stop(structure, false, true);
+                        } catch (ConstructionException ex) {
+                            // silent
                         }
-                    }, structure);
-                    placement.place(session, structure.getCuboidRegion().getMinimumPoint(), options);
-                } else {
-                    StructurePlan plan = parent.getStructurePlan();
-                    Placement parentPlacement = plan.getPlacement();
-
-                    if (parentPlacement instanceof RotationalPlacement) {
-                        RotationalPlacement rt = (RotationalPlacement) parentPlacement;
-                        rt.rotate(parent.getDirection());
                     }
 
-                    // Get Area of the child placement
-                    final CuboidRegion childRegion = structure.getCuboidRegion();
-                    options.addIgnore(new BlockPredicate() {
+                    tasks.put(structure.getId(), new StructureJob(-1, true, player));
+                    DemolishingPlacement dp;
+                    
 
-                        @Override
-                        public boolean evaluate(Vector position, Vector worldPosition, BaseBlock block) {
-                            return !childRegion.contains(worldPosition);
+                    if (parent == null || (!(parent.getStructurePlan().getPlacement() instanceof AbstractBlockPlacement))) {
+                        CuboidRegion region = structure.getCuboidRegion();
+                        Vector size = region.getMaximumPoint().subtract(region.getMinimumPoint()).add(1, 1, 1);
+
+                        dp = new DemolishingPlacement(size);
+                        AsyncDemolishingPlacement placement = new AsyncDemolishingPlacement(playerEntry, dp, new AsyncPlacementCallback() {
+
+                            @Override
+                            public void onJobAdded(int jobId) {
+                                AsyncEventManager.getInstance().post(new StructureJobAddedEvent(w, structure.getId(), jobId, true));
+                            }
+                        }, structure);
+                        placement.place(session, structure.getCuboidRegion().getMinimumPoint(), options);
+                    } else {
+                        StructurePlan plan = parent.getStructurePlan();
+                        Placement parentPlacement = plan.getPlacement();
+
+                        if (parentPlacement instanceof RotationalPlacement) {
+                            RotationalPlacement rt = (RotationalPlacement) parentPlacement;
+                            rt.rotate(parent.getDirection());
                         }
-                    });
 
-                    dp = new RestoringPlacement((AbstractBlockPlacement) parentPlacement);
-                    AsyncDemolishingPlacement placement = new AsyncDemolishingPlacement(playerEntry, dp, new AsyncPlacementCallback() {
+                        // Get Area of the child placement
+                        final CuboidRegion childRegion = structure.getCuboidRegion();
+                        options.addIgnore(new BlockPredicate() {
 
-                        @Override
-                        public void onJobAdded(int jobId) {
-                            AsyncEventManager.getInstance().post(new StructureJobAddedEvent(w, structure.getId(), jobId, true));
-                        }
-                    }, structure);
-                    placement.place(session, parent.getCuboidRegion().getMinimumPoint(), options);
+                            @Override
+                            public boolean evaluate(Vector position, Vector worldPosition, BaseBlock block) {
+                                return !childRegion.contains(worldPosition);
+                            }
+                        });
+
+                        dp = new RestoringPlacement((AbstractBlockPlacement) parentPlacement);
+                        AsyncDemolishingPlacement placement = new AsyncDemolishingPlacement(playerEntry, dp, new AsyncPlacementCallback() {
+
+                            @Override
+                            public void onJobAdded(int jobId) {
+                                AsyncEventManager.getInstance().post(new StructureJobAddedEvent(w, structure.getId(), jobId, true));
+                            }
+                        }, structure);
+                        placement.place(session, parent.getCuboidRegion().getMinimumPoint(), options);
+                    }
+
+                } catch (Exception ex) { // Catch everything or disappear it will dissappear in the abyss!
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
                 }
-
-                // Set Negative MASK
-                // Set Negative not natural MASK
             }
         });
     }
@@ -381,6 +390,8 @@ public class ConstructionManager {
 
             @Override
             public void run() {
+                try {
+                
                 UUID uuid = null;
                 Integer jobId = null;
 
@@ -409,6 +420,10 @@ public class ConstructionManager {
                         }
                     }
                 }
+                } catch (Exception ex) { // Catch everything or disappear it will dissappear in the abyss!
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                }
+                
             }
         });
     }
@@ -600,7 +615,7 @@ public class ConstructionManager {
                                 if (player != null) {
                                     economyProvider.give(player.getUniqueId(), refundValue);
                                     double newBalance = economyProvider.getBalance(player.getUniqueId());
-                                    player.sendMessage("You've been refunded " + colors.gold() + refundValue, "Your new balance is " + colors.gold()+ ShopUtil.valueString(newBalance));
+                                    player.sendMessage("You've been refunded " + colors.gold() + refundValue, "Your new balance is " + colors.gold() + ShopUtil.valueString(newBalance));
                                 }
                             }
                         }

@@ -40,6 +40,10 @@ public class RestoringPlacement extends DemolishingPlacement {
     
     @Override
     public void place(EditSession editSession, Vector pos, DemolishingOptions option) {
+        
+        
+        
+        
         Iterator<Vector> traversal = new TopDownCuboidIterator(option.getCubeX(), option.getCubeY(), option.getCubeZ()).iterate(parent.getSize());
         
         while(traversal.hasNext()) {
@@ -49,6 +53,8 @@ public class RestoringPlacement extends DemolishingPlacement {
             if (nextBlock == null) {
                 continue;
             }
+            
+            
             
             parent.doBlock(editSession, pos, blockPosition, nextBlock, option);
         }

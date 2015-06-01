@@ -63,11 +63,14 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
 
     @Override
     public final void place(EditSession editSession, Vector pos, T option) {
+        
         Iterator<Vector> traversal = new CuboidIterator(
                 option.getCubeX() <= 0 ? getSize().getBlockX() : option.getCubeX(),
                 option.getCubeY() <= 0 ? getSize().getBlockY() : option.getCubeY(),
                 option.getCubeZ() <= 0 ? getSize().getBlockZ() : option.getCubeZ()
         ).iterate(getSize());
+        
+        
         PriorityQueue<StructureBlock> placeLater = new PriorityQueue<>();
 
         int placeLaterPlaced = 0;
