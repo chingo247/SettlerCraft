@@ -1,3 +1,6 @@
+package com.chingo247.settlercraft.structureapi.platforms;
+
+
 /*
  * Copyright (C) 2015 Chingo
  *
@@ -14,20 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.core.event;
 
-import com.google.common.eventbus.Subscribe;
 
 /**
  *
  * @author Chingo
  */
-public class PlayerSubscriber {
+public interface IConfigProvider {
     
-    @Subscribe
-    public void onPlayerLogin(PlayerLoginEvent playerLoginEvent) {
-        
-    }
+    public boolean isPlanMenuEnabled();
+
+    public boolean isPlanShopEnabled();
+
+    public boolean isSubstructuresAllowed();
     
+    public boolean useHolograms();
+    
+    public boolean protectesStructures();
     
 }

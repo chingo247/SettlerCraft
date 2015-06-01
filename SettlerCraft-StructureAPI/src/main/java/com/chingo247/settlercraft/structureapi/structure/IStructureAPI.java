@@ -18,7 +18,7 @@ package com.chingo247.settlercraft.structureapi.structure;
 
 import com.chingo247.menuapi.menu.CategoryMenu;
 import com.chingo247.settlercraft.core.Direction;
-import com.chingo247.settlercraft.structureapi.platforms.bukkit.IConfigProvider;
+import com.chingo247.settlercraft.structureapi.platforms.IConfigProvider;
 import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlanManager;
@@ -32,6 +32,7 @@ import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
+import org.primesoft.asyncworldedit.worldedit.AsyncEditSessionFactory;
 
 /**
  *
@@ -222,5 +223,11 @@ public interface IStructureAPI {
      * @return The AsyncPlacement
      */
     public AsyncPlacement makeAsync(UUID player, Placement placement);
+    
+    /**
+     * Gets an AsyncEditSessionFactory
+     * @return The AsyncEditSessionFactor
+     */
+    public AsyncEditSessionFactory getSessionFactory();
     
 }

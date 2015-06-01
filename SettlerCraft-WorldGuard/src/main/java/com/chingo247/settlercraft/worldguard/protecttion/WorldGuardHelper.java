@@ -1,7 +1,18 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2015 Chingo
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.chingo247.settlercraft.worldguard.protecttion;
 
@@ -63,8 +74,17 @@ public class WorldGuardHelper implements IStructureProtector {
         this.structureAPI = structureAPI;
     }
     
+    /**
+     * Protects a Structure with WorldGuard. Note this will have no effect if 
+     * The config does not have the property 'structure.protected' to 'true'
+     * @param structure The structure to protect
+     */
     @Override
     public synchronized void protect(Structure structure) {
+        if(!structureAPI.getConfig().protectesStructures()) {
+            return;
+        }
+        
         World world = Bukkit.getWorld(structure.getWorld());
         CuboidRegion dimension = structure.getCuboidRegion();
         

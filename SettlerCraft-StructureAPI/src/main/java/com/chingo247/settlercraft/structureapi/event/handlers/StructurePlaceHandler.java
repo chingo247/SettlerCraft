@@ -358,7 +358,6 @@ public class StructurePlaceHandler {
                     
                     int modifier = 1;
                     try {
-                        System.out.println("String: " + s);
                         if(s.contains("M")) {
                             s = s.substring(0, s.indexOf("M"));
                             modifier = 1_000_000;
@@ -366,14 +365,11 @@ public class StructurePlaceHandler {
                             s = s.substring(0, s.indexOf("K"));
                             modifier = 1_000;
                         }
-                        System.out.println("String2: " + s);
                         price = Double.parseDouble(s.trim());
                         price *= modifier;
                     } catch (NumberFormatException nfe) {
-                        System.out.println("NFE! ");
                         return 0;
                     }
-                    System.out.println("PRICE: " + price);
                     return price;
                 }
             }

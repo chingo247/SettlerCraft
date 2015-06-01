@@ -34,7 +34,7 @@ import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
 import com.chingo247.settlercraft.core.persistence.neo4j.Neo4jHelper;
 import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
-import com.chingo247.settlercraft.structureapi.platforms.bukkit.IConfigProvider;
+import com.chingo247.settlercraft.structureapi.platforms.IConfigProvider;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.event.StructureCreateEvent;
@@ -798,6 +798,7 @@ public class StructureAPI implements IStructureAPI {
     }
     
     
+    @Override
     public AsyncPlacement makeAsync(UUID player, Placement placement) {
         if(player == null) {
             return new AsyncPlacement(PlayerEntry.CONSOLE, placement);
