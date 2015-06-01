@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.chingo247</groupId>
+    <artifactId>SettlerCraft-HolographicDisplays</artifactId>
+    <version>2.0.0</version>
+    <packaging>jar</packaging>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+    </properties>
+    
+    <repositories>
+         <!-- ThirdParty Repo-->
+        <repository>
+            <id>Nexus</id>
+            <url>http://chingo247.com:8081/nexus/content/repositories/thirdparty/</url>
+        </repository>
+    </repositories>
+    
+    <dependencies>
+        <!--Bukkit-->
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>1.7.10</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <!--holographicDisplays-->
+        <dependency>
+            <groupId>com.filoghost</groupId>
+            <artifactId>holographic-displays</artifactId>
+            <version>2.1.9</version>
+            <scope>provided</scope>
+        </dependency>
+        
+          <!--WorldEdit-->
+        <dependency>
+            <groupId>com.thirdparty</groupId>
+            <artifactId>worldedit</artifactId>  
+            <version>6.0-3308</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>SettlerCraft-StructureAPI</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>SettlerCraft-Core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+    
+    
+</project>
