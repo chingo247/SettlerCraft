@@ -67,6 +67,15 @@ public class PlanGenerator {
         nameElement.setText(name);
         root.add(nameElement);
         
+        Element priceElement = new BaseElement(StructurePlanXMLConstants.STRUCTURE_PLAN_PRICE_ELEMENT);
+        priceElement.setText("0");
+        root.add(priceElement);
+        
+        Element description = new BaseElement(StructurePlanXMLConstants.STRUCTURE_PLAN_DESCRIPTION_ELEMENT);
+        description.setText("None");
+        root.add(description);
+        
+        
         Element categoryElement = new BaseElement(StructurePlanXMLConstants.STRUCTURE_PLAN_CATEGORY_ELEMENT);
         String category = rootDirectory.getName().equals(directory.getName()) ? "Default" : directory.getName();
         categoryElement.setText(category);
