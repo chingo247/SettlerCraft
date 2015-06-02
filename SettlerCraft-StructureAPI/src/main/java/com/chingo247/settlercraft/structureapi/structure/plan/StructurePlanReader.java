@@ -68,12 +68,17 @@ public class StructurePlanReader {
         }
 
         List<StructurePlan> plans = new ArrayList<>();
-        for (StructurePlanProcessor spp : processors.values()) {
-            StructurePlan plan = spp.join();
-            if (plan != null) {
-                plans.add(plan);
+        try {
+            for (StructurePlanProcessor spp : processors.values()) {
+                StructurePlan plan = spp.get();
+                if (plan != null) {
+                    plans.add(plan);
+                }
             }
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, ex.getMessage(), ex);
         }
+
         return plans;
     }
 
@@ -127,7 +132,7 @@ public class StructurePlanReader {
 
                 if (planDocument.hasSubStructureElements()) {
 
-                    DefaultSubstructuresPlan plan = new DefaultSubstructuresPlan(id, structurePlanFile, parent, placementProcessor.join());
+                    DefaultSubstructuresPlan plan = new DefaultSubstructuresPlan(id, structurePlanFile, parent, placementProcessor.get());
                     plan.setName(name);
                     plan.setPrice(price);
                     plan.setDescription(description);
@@ -174,12 +179,12 @@ public class StructurePlanReader {
                     // Collect the data
                     if (pps != null) {
                         for (PlacementProcessor pp : pps) {
-                            plan.addPlacement(pp.join());
+                            plan.addPlacement(pp.get());
                         }
                     }
                     if (spps != null) {
                         for (StructurePlanProcessor spp : spps) {
-                            plan.addStructurePlan(spp.join());
+                            plan.addStructurePlan(spp.get());
                         }
                     }
 
@@ -192,7 +197,7 @@ public class StructurePlanReader {
                     return plan;
 
                 } else {
-                    DefaultStructurePlan plan = new DefaultStructurePlan(id, structurePlanFile, placementProcessor.join());
+                    DefaultStructurePlan plan = new DefaultStructurePlan(id, structurePlanFile, placementProcessor.get());
                     plan.setName(name);
                     plan.setPrice(price);
                     plan.setDescription(description);

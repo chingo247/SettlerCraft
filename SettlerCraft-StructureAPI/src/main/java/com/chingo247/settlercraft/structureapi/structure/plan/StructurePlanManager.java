@@ -70,7 +70,7 @@ public class StructurePlanManager {
         }
         return instance;
     }
-    
+
     public StructurePlan getPlan(String planId) {
         synchronized (plans) {
             return plans.get(planId);
@@ -91,7 +91,7 @@ public class StructurePlanManager {
         synchronized (plans) {
             plans.clear();
         }
-        
+
         // Make dirs if not exist!
         planDirectory.mkdirs();
 
@@ -111,7 +111,7 @@ public class StructurePlanManager {
                     StructurePlanReader reader = new StructurePlanReader();
                     List<StructurePlan> plansList = reader.readDirectory(planDirectory, verbose, forkJoinPool);
                     for (StructurePlan plan : plansList) {
-                        boolean exists =  getPlan(plan.getId()) != null;
+                        boolean exists = getPlan(plan.getId()) != null;
                         if (exists) {
                             continue; // it's exact the same plan...
                         }
@@ -152,43 +152,50 @@ public class StructurePlanManager {
 
         @Override
         protected Map<String, String> compute() {
+
             Map<String, String> result = Maps.newHashMap();
 
-            List<SearchReferencesTask> tasks = new ArrayList<>();
-            for (File f : searchDirectory.listFiles()) {
+            try {
 
-                if (f.isDirectory()) {
-                    SearchReferencesTask task = new SearchReferencesTask(f);
-                    task.fork();
-                    tasks.add(task);
-                } else {
-                    if (!FilenameUtils.getExtension(f.getName()).equals("xml")) {
-                        continue;
-                    }
-                    try {
-                        if (!isStructurePlan(f)) {
+                List<SearchReferencesTask> tasks = new ArrayList<>();
+                for (File f : searchDirectory.listFiles()) {
+
+                    if (f.isDirectory()) {
+                        SearchReferencesTask task = new SearchReferencesTask(f);
+                        task.fork();
+                        tasks.add(task);
+                    } else {
+                        if (!FilenameUtils.getExtension(f.getName()).equals("xml")) {
                             continue;
                         }
-                    } catch (DocumentException ex) {
-                        Logger.getLogger(StructurePlanManager.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    Map.Entry<String, String> entry = getEntry(f);
-                    if (entry != null) {
-                        result.put(entry.getKey(), entry.getValue());
+                        try {
+                            if (!isStructurePlan(f)) {
+                                continue;
+                            }
+                        } catch (DocumentException ex) {
+                            Logger.getLogger(StructurePlanManager.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        Map.Entry<String, String> entry = getEntry(f);
+                        if (entry != null) {
+                            result.put(entry.getKey(), entry.getValue());
+                        }
                     }
                 }
+
+                for (SearchReferencesTask task : tasks) {
+                    Map<String, String> childReferences = task.get();
+                    for (Map.Entry<String, String> s : childReferences.entrySet()) {
+                        if (result.get(s.getKey()) == null) {
+                            result.put(s.getKey(), s.getValue());
+                        } else {
+                            throw new PlanException("Duplicate id references! StructurePlanFile: " + s.getValue() + " and file " + result.get(s.getKey()) + " have the same id!");
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(StructurePlanManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             }
 
-            for (SearchReferencesTask task : tasks) {
-                Map<String, String> childReferences = task.join();
-                for (Map.Entry<String, String> s : childReferences.entrySet()) {
-                    if (result.get(s.getKey()) == null) {
-                        result.put(s.getKey(), s.getValue());
-                    } else {
-                        throw new PlanException("Duplicate id references! StructurePlanFile: " + s.getValue() + " and file " + result.get(s.getKey()) + " have the same id!");
-                    }
-                }
-            }
             return result;
         }
 

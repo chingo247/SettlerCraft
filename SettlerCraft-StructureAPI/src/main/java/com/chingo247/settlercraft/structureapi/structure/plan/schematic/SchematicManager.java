@@ -146,11 +146,15 @@ public class SchematicManager {
         
         // Wait for the processes the finish and queue them for bulk insert
         List<Schematic> newSchematics = Lists.newArrayList();
-        for (SchematicProcessor sp : tasks) {
-            Schematic schematic = sp.join();
-            if (schematic != null) {
-                newSchematics.add(schematic);
+        try {
+            for (SchematicProcessor sp : tasks) {
+                Schematic schematic = sp.get();
+                if (schematic != null) {
+                    newSchematics.add(schematic);
+                }
             }
+        } catch (Exception ex) {
+            Logger.getLogger(SchematicManager.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         // Close the pool!
