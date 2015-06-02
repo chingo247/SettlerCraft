@@ -61,7 +61,7 @@ public class StructurePlanManager {
         this.plans = Maps.newHashMap();
         this.planDirectoryPath = planDirectory.getAbsolutePath();
         this.idReferences = Maps.newHashMap();
-        this.parallelism = Math.max(1, Runtime.getRuntime().availableProcessors() - 1); // Dont lag server on reload...
+        this.parallelism = Math.max(1, Runtime.getRuntime().availableProcessors() - 2); // Dont lag server on reload...
     }
 
     public static StructurePlanManager getInstance() {
@@ -72,9 +72,7 @@ public class StructurePlanManager {
     }
     
     public StructurePlan getPlan(String planId) {
-        synchronized (plans) {
-            return plans.get(planId);
-        }
+        return plans.get(planId);
     }
 
     public void putPlan(StructurePlan plan) {
@@ -101,6 +99,7 @@ public class StructurePlanManager {
         if (forkJoinPool != null && !forkJoinPool.isShutdown()) {
             forkJoinPool.shutdown();
         }
+        
         forkJoinPool = new ForkJoinPool(parallelism);
 
         SettlerCraft.getInstance().getExecutor().submit(new Runnable() {

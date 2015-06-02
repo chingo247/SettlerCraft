@@ -172,8 +172,10 @@ public class StructureAPI implements IStructureAPI {
         resetStates();
         // Load StructurePlans
         StructurePlanMenuReader reader = new StructurePlanMenuReader();
+        
         planMenu = reader.read(new File(getWorkingDirectory(), "menu.xml"));
         planMenuFactory = new StructurePlanMenuFactory(platform, planMenu);
+        
         reload();
     }
 

@@ -21,6 +21,7 @@ import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.jnbt.IntTag;
 import com.sk89q.jnbt.ListTag;
 import com.sk89q.jnbt.NBTInputStream;
+import com.sk89q.jnbt.NamedTag;
 import com.sk89q.jnbt.ShortTag;
 import com.sk89q.jnbt.Tag;
 import com.sk89q.worldedit.BlockVector;
@@ -120,7 +121,7 @@ public class FastClipboard {
         NBTInputStream nbtStream = new NBTInputStream(
                 new GZIPInputStream(new FileInputStream(schematicFile)));
 
-        Tag rootTag = nbtStream.readTag();
+        NamedTag rootTag = nbtStream.readNamedTag();
 
         if (!rootTag.getName().equalsIgnoreCase("Schematic")) {
             throw new RuntimeException("Tag 'Schematic' does not exist or is not first");
@@ -128,7 +129,7 @@ public class FastClipboard {
         nbtStream.close();
 
         // Check
-        Map<String, Tag> schematic = (Map) rootTag.getValue();
+        Map<String, Tag> schematic = (Map) rootTag.getTag().getValue();
         if (!schematic.containsKey("Blocks")) {
             throw new RuntimeException("Schematic file is missing a \"Blocks\" tag");
         }
