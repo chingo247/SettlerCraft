@@ -343,6 +343,7 @@ public class StructureHologramManager {
         for(List<Hologram> hl : holograms.values()) {
             for(Hologram h : hl) {
                 h.delete();
+                System.out.println("Delete structure hologram");
             }
         }
     }

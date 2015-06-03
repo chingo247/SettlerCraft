@@ -47,7 +47,7 @@ class HolographicDisplaysHologramProvider implements HologramsProvider {
         }
 
         org.bukkit.World w = Bukkit.getWorld(world.getName());
-        com.gmail.filoghost.holographicdisplays.api.Hologram holo = HologramsAPI.createHologram(p, new Location(w, position.getBlockX(), position.getBlockY(), position.getBlockZ()));
+        com.gmail.filoghost.holographicdisplays.api.Hologram holo = HologramsAPI.createHologram(p, new Location(w, position.getX(), position.getY(), position.getZ()));
         return new HolographicDisplaysHologram(holo);
     }
 
@@ -77,7 +77,7 @@ class HolographicDisplaysHologramProvider implements HologramsProvider {
         @Override
         public Vector getPosition() {
             Location location = holo.getLocation();
-            return new Vector(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+            return new Vector(location.getX(), location.getY(), location.getZ());
         }
 
         @Override
@@ -87,7 +87,9 @@ class HolographicDisplaysHologramProvider implements HologramsProvider {
 
         @Override
         public void delete() {
-            holo.delete();
+            if(!holo.isDeleted()) {
+                holo.delete();
+            }
         }
 
     }

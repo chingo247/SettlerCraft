@@ -16,17 +16,12 @@
  */
 package com.chingo247.settlercraft.structureapi.event.handlers;
 
-import com.chingo247.xplatform.core.AInventory;
-import com.chingo247.xplatform.core.AItemStack;
-import com.chingo247.xplatform.core.IPlayer;
-import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.settlercraft.structureapi.exception.StructureException;
-import com.chingo247.settlercraft.core.util.KeyPool;
-import com.chingo247.settlercraft.structureapi.util.WorldUtil;
 import com.chingo247.settlercraft.core.Direction;
+import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
-import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.core.util.KeyPool;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
+import com.chingo247.settlercraft.structureapi.exception.StructureException;
 import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureRelTypes;
@@ -40,10 +35,15 @@ import com.chingo247.settlercraft.structureapi.structure.DefaultStructureFactory
 import com.chingo247.settlercraft.structureapi.structure.IStructureAPI;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
+import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlanManager;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BuildOptions;
 import com.chingo247.settlercraft.structureapi.util.PlacementUtil;
+import com.chingo247.settlercraft.structureapi.util.WorldUtil;
+import com.chingo247.xplatform.core.AInventory;
+import com.chingo247.xplatform.core.AItemStack;
 import com.chingo247.xplatform.core.IColors;
+import com.chingo247.xplatform.core.IPlayer;
 import com.chingo247.xplatform.core.IWorld;
 import com.google.common.collect.Maps;
 import com.sk89q.worldedit.LocalSession;
@@ -84,21 +84,18 @@ public class StructurePlaceHandler {
         this.structureDAO = new StructureDAO(SettlerCraft.getInstance().getNeo4j());
     }
     
-    public void handleDeselect(Player player, ISelectionManager selectionManager) {
-        LocalSession session = WorldEdit.getInstance().getSession(player);
+    public void handleDeselect(Player player) {
         
-        final ISelectionManager slm;
-        // Set the SelectionManager if null...
-        if (selectionManager == null) {
-            if (session.hasCUISupport()) {
-                slm = CUISelectionManager.getInstance();
-            } else {
-                slm = NoneSelectionManager.getInstance();
-            }
-        } else {
-            slm = selectionManager;
+        
+        if(CUISelectionManager.getInstance().hasSelection(player)) {
+            CUISelectionManager.getInstance().deselect(player);
         }
-        slm.deselect(player);
+        if(HologramSelectionManager.getInstance().hasHologramsProvider() && HologramSelectionManager.getInstance().hasSelection(player)) {
+            HologramSelectionManager.getInstance().deselect(player);
+        }
+        if(NoneSelectionManager.getInstance().hasSelection(player)) {
+            NoneSelectionManager.getInstance().deselect(player);
+        }
         
     }
 
@@ -244,9 +241,9 @@ public class StructurePlaceHandler {
                     player.print(color.red() + ex.getMessage());
                 } catch (Exception ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
-                }
-
+                } 
                 selectionManager.deselect(player);
+                
 
             }
         } else {
