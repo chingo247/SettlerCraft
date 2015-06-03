@@ -129,7 +129,8 @@ public class FastClipboard {
         nbtStream.close();
 
         // Check
-        Map<String, Tag> schematic = (Map) rootTag.getTag();
+
+        Map<String, Tag> schematic = (Map) rootTag.getTag().getValue();
         if (!schematic.containsKey("Blocks")) {
             throw new RuntimeException("Schematic file is missing a \"Blocks\" tag");
         }

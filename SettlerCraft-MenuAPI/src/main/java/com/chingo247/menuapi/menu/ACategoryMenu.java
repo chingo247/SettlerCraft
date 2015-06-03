@@ -151,7 +151,7 @@ public abstract class ACategoryMenu {
      */
     public final void setCategorySlot(int slot, String category, int icon, String... aliases) {
         CategorySlot categorySlot = slotFactory.createCategorySlot(category, icon);
-        categorySlot.addAliases(aliases);
+        categorySlot.addSynonyms(aliases);
         setCategorySlot(slot, categorySlot);
     }
 

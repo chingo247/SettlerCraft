@@ -80,6 +80,7 @@ class BukkitSettlerCraftUpdater {
 
     private static final String PREFIX = "[SettlerCraft]: ";
     private static final int BULK_SIZE = 1000;
+    private static final long VERY_LONG = 1000*60*60*24*7*52;
     private final GraphDatabaseService graph;
     private final Set<String> worldsProcessed;
     private final WorldDAO worldDAO;
@@ -213,7 +214,7 @@ class BukkitSettlerCraftUpdater {
         }
         
         sn.setConstructionStatus(getStatus(structure));
-        sn.setCompletedAt(sn.getCompletedAt().getTime());
+        sn.setCreatedAt(structure.getLog().getCreatedAt().getTime());
         
         File structureDirectory = new File(structureAPI.getStructuresDirectory(worldNode.getName()),String.valueOf(sn.getId()));
         File oldTempDirectory = new File(getOldDirectory(structure), "temp");

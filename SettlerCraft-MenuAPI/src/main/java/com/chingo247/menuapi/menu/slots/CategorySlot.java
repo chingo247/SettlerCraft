@@ -55,7 +55,7 @@ public class CategorySlot extends MenuSlot {
         aliases.add(alias);
     }
 
-    public void addAliases(String... alias) {
+    public void addSynonyms(String... alias) {
         aliases.addAll(Arrays.asList(alias));
     }
     

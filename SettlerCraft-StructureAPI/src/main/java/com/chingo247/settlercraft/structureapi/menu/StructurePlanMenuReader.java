@@ -70,7 +70,7 @@ public class StructurePlanMenuReader {
 
                 Node mId = categorySlotNode.selectSingleNode("MaterialID");
                 Node cat = categorySlotNode.selectSingleNode("Category");
-                Node ali = categorySlotNode.selectSingleNode("Aliases");
+//                Node ali = categorySlotNode.selectSingleNode("Aliases");
 
                 if (mId == null) {
                     throw new SettlerCraftException("Missing 'MaterialID' element in 'SlotRow#" + (row + 1) + "' 'Slot#" + (count + 1) + "'");
@@ -85,7 +85,13 @@ public class StructurePlanMenuReader {
                 } catch (NumberFormatException nfe) {
                     throw new SettlerCraftException("Invalid number for 'MaterialID' element in 'SlotRow#" + (row + 1) + "' 'Slot#" + (count + 1) + "'");
                 }
-                String category = cat.getText();
+                
+                Node catNameNode = cat.selectSingleNode("Name");
+                if(catNameNode == null) {
+                    throw new SettlerCraftException("Missing 'Name' element in 'SlotRow#" + (row + 1) + "' 'Slot#" + (count + 1) + "'");
+                }
+                
+                String category = catNameNode.getText();
                 if (category.isEmpty()) {
                     Element catEl = (Element) cat;
                     category = catEl.attributeValue("value");
@@ -95,26 +101,27 @@ public class StructurePlanMenuReader {
                 }
                 category = category.replaceAll(" AND ", "&");
 
+                Node synonymsNode = cat.selectSingleNode("Synonyms");
                 
                 // Set aliases
-                String[] aliases;
-                if (ali == null) {
-                    aliases = new String[0];
+                String[] synonyms;
+                if (synonymsNode == null) {
+                    synonyms = new String[0];
                 } else {
-                    List<Node> aliasNodes = ali.selectNodes("Alias");
-                    aliases = new String[aliasNodes.size()];
-                    for (int j = 0; j < aliasNodes.size(); j++) {
-                        String alias = aliasNodes.get(j).getText();
+                    List<Node> synonymNodes = synonymsNode.selectNodes("Synonym");
+                    synonyms = new String[synonymNodes.size()];
+                    for (int j = 0; j < synonymNodes.size(); j++) {
+                        String synonym = synonymNodes.get(j).getText();
 
-                        if (alias.isEmpty()) {
-                            Element aliasEl = (Element) cat;
-                            alias = aliasEl.attributeValue("value");
+                        if (synonym.isEmpty()) {
+                            Element synoEl = (Element) cat;
+                            synonym = synoEl.attributeValue("value");
                         }
-                        if (alias.trim().isEmpty()) {
-                            throw new SettlerCraftException("Empty 'Alias' element in  'SlotRow#" + (row + 1) + "' and 'Slot#" + (count + 1) + "' and 'Alias#" + (j + 1) + "'");
+                        if (synonym.trim().isEmpty()) {
+                            throw new SettlerCraftException("Empty 'Synonym' element in  'SlotRow#" + (row + 1) + "' and 'Slot#" + (count + 1) + "' and 'Synonym#" + (j + 1) + "'");
                         }
 
-                        aliases[j] = aliasNodes.get(j).getText();
+                        synonyms[j] = synonymNodes.get(j).getText();
                     }
                 }
                 int slot = count;
@@ -126,7 +133,7 @@ public class StructurePlanMenuReader {
                 }
 
                 CategorySlot categorySlot = SlotFactory.getInstance().createCategorySlot(category, id);
-                categorySlot.addAliases(aliases);
+                categorySlot.addSynonyms(synonyms);
                 menu.setCategorySlot((row * 9) + slot, categorySlot);
 
                 count++;

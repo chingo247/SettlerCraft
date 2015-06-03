@@ -99,6 +99,14 @@ public class StructureNode {
             underlyingNode.removeProperty(DELETED_AT_PROPERTY);
         }
     }
+    
+    public void setCreatedAt(Long date) {
+        if (date != null) {
+            underlyingNode.setProperty(CREATED_AT_PROPERTY, date);
+        } else if (underlyingNode.hasProperty(CREATED_AT_PROPERTY)) {
+            underlyingNode.removeProperty(CREATED_AT_PROPERTY);
+        }
+    }
 
     /**
      * Gets the actual node

@@ -57,7 +57,8 @@ public class StructurePlanReader {
         SchematicManager sdm = SchematicManager.getInstance();
         sdm.load(structurePlanDirectory);
 
-        Map<String, StructurePlanProcessor> processors = new HashMap<String, StructurePlanProcessor>();
+
+        Map<String, StructurePlanProcessor> processors = new HashMap<>();
 
         while (fit.hasNext()) {
             File structurePlanFile = fit.next();
@@ -68,6 +69,7 @@ public class StructurePlanReader {
 
         List<StructurePlan> plans = new ArrayList<>();
         try {
+
             for (StructurePlanProcessor spp : processors.values()) {
                 StructurePlan plan = spp.get();
                 if (plan != null) {
@@ -78,6 +80,7 @@ public class StructurePlanReader {
             java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, ex.getMessage(), ex);
         }
 
+        
         return plans;
     }
 
@@ -114,6 +117,7 @@ public class StructurePlanReader {
         protected StructurePlan compute() {
             long start = System.currentTimeMillis();
 
+            
             StructurePlanDocument planDocument = null;
             try {
                 planDocument = StructurePlanDocument.read(structurePlanFile);
