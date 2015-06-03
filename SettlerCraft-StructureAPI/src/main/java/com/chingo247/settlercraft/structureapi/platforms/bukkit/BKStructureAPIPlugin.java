@@ -193,7 +193,6 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
     @Override
     public void onDisable() {
         super.onDisable(); //To change body of generated methods, choose Tools | Templates.
-        StructureHologramManager.getInstance().shutdown();
     }
     
     

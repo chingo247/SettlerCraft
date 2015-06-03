@@ -16,6 +16,7 @@
  */
 package com.chingo247.settlercraft.holographicdisplays.bukkit.plugin;
 
+import com.chingo247.settlercraft.structureapi.platforms.bukkit.selection.HologramSelectionManager;
 import com.chingo247.settlercraft.structureapi.platforms.services.holograms.StructureHologramManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -30,11 +31,30 @@ public class SettlerCraftHolographicDisplaysPlugin extends JavaPlugin {
     public void onEnable() {
         if(Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null) {
             StructureHologramManager.getInstance().setHologramProvider(new HolographicDisplaysHologramProvider());
+            HologramSelectionManager.getInstance().setHologramsProvider(new HolographicDisplaysHologramProvider());
         } else {
             System.out.println("[SettlerCraft-HolographicDisplays]: Couldn't find HolographicDisplays, Disabling SettlerCraft-HolographicDisplays");
             this.setEnabled(false);
         }
     }
+
+    @Override
+    public void onDisable() {
+        if(StructureHologramManager.getInstance().getHologramsProvider() != null 
+                && StructureHologramManager.getInstance().getHologramsProvider().getName().equals("HolographicDisplays")) {
+            
+            StructureHologramManager.getInstance().shutdown();
+        }
+        
+        if(HologramSelectionManager.getInstance().getHologramsProvider() != null 
+                && HologramSelectionManager.getInstance().getHologramsProvider().getName().equals("HolographicDisplays")) {
+            
+            HologramSelectionManager.getInstance().clearAll();
+        }
+        
+    }
+    
+    
     
     
     

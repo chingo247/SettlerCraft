@@ -98,6 +98,14 @@ public class StructureHologramManager {
         EventManager.getInstance().getEventBus().register(this); // Should be registered once...
     }
 
+    public HologramsProvider getHologramsProvider() {
+        return hologramsProvider;
+    }
+    
+    public boolean hasHologramProvider() {
+        return hologramsProvider != null;
+    }
+
     public void setHologramProvider(HologramsProvider hologramsProvider) {
         Preconditions.checkNotNull(hologramsProvider);
         if(this.hologramsProvider == null && StructureAPI.getInstance().getConfig().useHolograms()) {

@@ -25,6 +25,20 @@ import com.sk89q.worldedit.world.World;
  */
 public interface HologramsProvider {
     
+    /**
+     * Gets the name of the HologramProvider
+     * @return The name of the HologramProvider
+     */
+    public String getName();
+    
+    
+    /**
+     * Creates a Hologram using the HologramProvider
+     * @param plugin The plugin to register the hologram
+     * @param world The target world
+     * @param position The position of the Hologram
+     * @return The hologram
+     */
     public Hologram createHologram(String plugin, World world, Vector position);
     
 }

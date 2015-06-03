@@ -32,7 +32,12 @@ import org.bukkit.plugin.Plugin;
  */
 class HolographicDisplaysHologramProvider implements HologramsProvider {
 
+    @Override
+    public String getName() {
+        return "HolographicDisplays";
+    }
 
+    
 
     @Override
     public Hologram createHologram(String plugin, World world, Vector position) {

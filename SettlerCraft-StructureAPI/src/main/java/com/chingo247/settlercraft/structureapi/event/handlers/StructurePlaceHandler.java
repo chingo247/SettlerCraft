@@ -30,6 +30,7 @@ import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
 import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureRelTypes;
+import com.chingo247.settlercraft.structureapi.platforms.bukkit.selection.HologramSelectionManager;
 import com.chingo247.settlercraft.structureapi.platforms.services.PermissionManager;
 import com.chingo247.settlercraft.structureapi.selection.CUISelectionManager;
 import com.chingo247.settlercraft.structureapi.selection.ISelectionManager;
@@ -122,6 +123,8 @@ public class StructurePlaceHandler {
         if (selectionManager == null) {
             if (session.hasCUISupport()) {
                 slm = CUISelectionManager.getInstance();
+            } else if (HologramSelectionManager.getInstance().hasHologramsProvider()) {
+                slm = HologramSelectionManager.getInstance();
             } else {
                 slm = NoneSelectionManager.getInstance();
             }
