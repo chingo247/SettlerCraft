@@ -81,12 +81,9 @@ public class HologramSelectionManager extends ASelectionManager {
     @Override
     public void deselect(Player player) {
         UUID uuid = player.getUniqueId();
-        System.out.println("Has selection?");
         if(hasSelection(player)) {
-            System.out.println("Has selection!");
             HoloSelection selection = (HoloSelection) getSelection(uuid);
             for(Hologram h : selection.holos) {
-                System.out.println("Delete holo!");
                 h.delete();
             }
             removeSelection(selection);
