@@ -61,7 +61,7 @@ public class StructurePlanManager {
         this.plans = Maps.newHashMap();
         this.planDirectoryPath = planDirectory.getAbsolutePath();
         this.idReferences = Maps.newHashMap();
-        this.parallelism = Math.max(1, Runtime.getRuntime().availableProcessors() - 1); // Dont lag server on reload...
+        this.parallelism = Math.max(1, Runtime.getRuntime().availableProcessors() - 2); // Dont lag server on reload...
     }
 
     public static StructurePlanManager getInstance() {

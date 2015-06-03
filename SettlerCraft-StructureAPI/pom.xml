@@ -140,9 +140,9 @@
         </dependency>
            <!--WorldEdit-->
         <dependency>
-            <groupId>com.thirdparty</groupId>
+            <groupId>com.sk89</groupId>
             <artifactId>worldedit</artifactId>  
-            <version>6.0-3308</version>
+            <version>6.1</version>
             <scope>provided</scope>
         </dependency>
         <!--Vault-->

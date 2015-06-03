@@ -31,7 +31,6 @@ import com.chingo247.settlercraft.structureapi.structure.plan.xml.StructurePlanX
 import com.google.common.base.Preconditions;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -58,7 +57,7 @@ public class StructurePlanReader {
         SchematicManager sdm = SchematicManager.getInstance();
         sdm.load(structurePlanDirectory);
 
-        Map<String, StructurePlanProcessor> processors = Collections.synchronizedMap(new HashMap<String, StructurePlanProcessor>());
+        Map<String, StructurePlanProcessor> processors = new HashMap<String, StructurePlanProcessor>();
 
         while (fit.hasNext()) {
             File structurePlanFile = fit.next();
