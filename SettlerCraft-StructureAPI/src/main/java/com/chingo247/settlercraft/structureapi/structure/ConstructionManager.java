@@ -175,23 +175,17 @@ public class ConstructionManager {
             throw new ConstructionException("Can't build a removed structure");
         }
 
+        // Queue a stop
+        // Then Queue a build
         pool.execute(structure.getId(), new Runnable() {
 
             @Override
             public void run() {
 
                 try {
-
-                // Check if task already added
-                    // If so check if the task was building!
-                    // If so continue, otherwise recursively stop
                     StructureJob currentEntry = tasks.get(structure.getId());
                     if (currentEntry != null) {
-                        try {
-                            stop(structure, false, true);
-                        } catch (ConstructionException ex) {
-                            // silent
-                        }
+                        stopSync(null, structure, false, true);
                     }
 
                     try (Transaction tx = graph.beginTx()) {
@@ -269,7 +263,6 @@ public class ConstructionManager {
         if (structure.getConstructionStatus() == ConstructionStatus.REMOVED) {
             throw new ConstructionException("Can't demolish a removed structure");
         }
-        
 
         pool.execute(structure.getId(), new Runnable() {
 
@@ -277,11 +270,15 @@ public class ConstructionManager {
             public void run() {
                 PlayerEntry playerEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(player);
                 try {
+                    
 
                     final World w = SettlerCraft.getInstance().getWorld(structure.getWorld());
                     if (w == null) {
                         return;
                     }
+                    StructureJob currentEntry = tasks.get(structure.getId());
+                    
+                    
 
                     Structure parent = null;
 
@@ -308,19 +305,16 @@ public class ConstructionManager {
 
                         tx.success();
                     }
-
-                    StructureJob currentEntry = tasks.get(structure.getId());
+                    
+                    
                     if (currentEntry != null) {
-                        try {
-                            stop(structure, false, true);
-                        } catch (ConstructionException ex) {
-                            // silent
-                        }
+                        stopSync(null, structure, false, true);
                     }
+
+                   
 
                     tasks.put(structure.getId(), new StructureJob(-1, true, player));
                     DemolishingPlacement dp;
-                    
 
                     if (parent == null || (!(parent.getStructurePlan().getPlacement() instanceof AbstractBlockPlacement))) {
                         CuboidRegion region = structure.getCuboidRegion();
@@ -372,6 +366,38 @@ public class ConstructionManager {
         });
     }
 
+    private void stopSync(final Player player, final Structure structure, final boolean talk, boolean force) {
+
+        UUID uuid = null;
+        Integer jobId = null;
+
+        jobLock.lock();
+        try {
+            StructureJob entry = tasks.get(structure.getId());
+            if (entry == null) {
+                return;
+            } else {
+                entry.setIsCanceled(true);
+            }
+
+            uuid = entry.getWhoStarted();
+            jobId = entry.getJobId();
+        } finally {
+            jobLock.unlock();
+        }
+
+        if (uuid != null && jobId != null) {
+            PlayerEntry entry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(uuid);
+            if (entry != null) {
+                IBlockPlacer blockPlacer = AsyncWorldEditMain.getInstance().getBlockPlacer();
+                blockPlacer.cancelJob(entry, jobId);
+                if (talk && player != null) {
+                    player.print("Stopping structure #" + structure.getId());
+                }
+            }
+        }
+    }
+
     /**
      * Stops a structure Build/Demolish operation
      *
@@ -391,39 +417,11 @@ public class ConstructionManager {
             @Override
             public void run() {
                 try {
-                
-                UUID uuid = null;
-                Integer jobId = null;
-
-                jobLock.lock();
-                try {
-                    StructureJob entry = tasks.get(structure.getId());
-                    if (entry == null) {
-                        return;
-                    } else {
-                        entry.setIsCanceled(true);
-                    }
-
-                    uuid = entry.getWhoStarted();
-                    jobId = entry.getJobId();
-                } finally {
-                    jobLock.unlock();
-                }
-
-                if (uuid != null && jobId != null) {
-                    PlayerEntry entry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(uuid);
-                    if (entry != null) {
-                        IBlockPlacer blockPlacer = AsyncWorldEditMain.getInstance().getBlockPlacer();
-                        blockPlacer.cancelJob(entry, jobId);
-                        if (talk && player != null) {
-                            player.print("Stopping structure #" + structure.getId());
-                        }
-                    }
-                }
+                    stopSync(player, structure, talk, talk);
                 } catch (Exception ex) { // Catch everything or disappear it will dissappear in the abyss!
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
                 }
-                
+
             }
         });
     }
@@ -443,7 +441,9 @@ public class ConstructionManager {
 
         private int currentJobId;
         private boolean isDemolishing;
+        private boolean isPlacingFence;
         private UUID whoStarted;
+        private UUID fenceUUID;
         private boolean isCanceled = false;
         private boolean wasChecked = false;
 
@@ -452,6 +452,24 @@ public class ConstructionManager {
             this.isDemolishing = isDemolishing;
             this.whoStarted = whoStarted;
         }
+
+        public UUID getFenceUUID() {
+            return fenceUUID;
+        }
+
+        public void setFenceUUID(UUID fenceUUID) {
+            this.fenceUUID = fenceUUID;
+        }
+
+        public void setIsPlacingFence(boolean isPlacingFence) {
+            this.isPlacingFence = isPlacingFence;
+        }
+
+        public boolean isPlacingFence() {
+            return isPlacingFence;
+        }
+        
+        
 
         public void setIsCanceled(boolean isCanceled) {
             this.isCanceled = isCanceled;

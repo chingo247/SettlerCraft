@@ -21,20 +21,29 @@ package com.chingo247.settlercraft.structureapi.structure;
  * @author Chingo
  */
 public enum ConstructionStatus {
-    ON_HOLD(0),
-    BUILDING(1),
-    STOPPED(2),
-    DEMOLISHING(3),
-    COMPLETED(4),
-    QUEUED(5),
-    REMOVED(6);
+    ON_HOLD(0,0),
+    STOPPED(2,0),
+    PLACING_FENCE(7,1),
+    QUEUED(5,2),
+    BUILDING(1,3),
+    
+    DEMOLISHING(3,3),
+    COMPLETED(4,4),
+    
+    REMOVED(6,-1);
 
     private final int statusId;
+    private final int phase;
     
-    private ConstructionStatus(int statusId) {
+    private ConstructionStatus(int statusId, int phase) {
         this.statusId = statusId;
+        this.phase = phase;
     }
 
+    public int getPhase() {
+        return phase;
+    }
+    
     public int getStatusId() {
         return statusId;
     }

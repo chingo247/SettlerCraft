@@ -16,14 +16,14 @@
  */
 package com.chingo247.settlercraft.core.persistence.dao.settler;
 
-import com.chingo247.settlercraft.core.Settler;
+import com.chingo247.settlercraft.core.StructureOwner;
 import java.util.UUID;
 
 /**
  *
  * @author Chingo
  */
-public class DefaultSettlerFactory extends AbstractSettlerFactory<Settler>{
+public class DefaultSettlerFactory extends AbstractSettlerFactory<StructureOwner>{
     
     private static DefaultSettlerFactory instance;
 
@@ -38,7 +38,7 @@ public class DefaultSettlerFactory extends AbstractSettlerFactory<Settler>{
     }
 
     @Override
-    public Settler makeStructureOwner(SettlerNode structureOwnerNode) {
+    public StructureOwner makeStructureOwner(SettlerNode structureOwnerNode) {
         String name = structureOwnerNode.getName();
         UUID uuid = structureOwnerNode.getUUID();
         return new DefaultSettler(name, uuid);

@@ -50,6 +50,8 @@ public class BukkitConsoleSender implements ICommandSender{
         commandSender.sendMessage(message);
     }
     
-    
+    public boolean hasPermission(String permission) {
+        return commandSender.hasPermission(permission);
+    }
     
 }

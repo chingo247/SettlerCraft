@@ -16,14 +16,14 @@
  */
 package com.chingo247.settlercraft.core.persistence.dao.settler;
 
-import com.chingo247.settlercraft.core.Settler;
+import com.chingo247.settlercraft.core.StructureOwner;
 import java.util.UUID;
 
 /**
  *
  * @author Chingo
  */
-public class DefaultSettler implements Settler{
+public class DefaultSettler implements StructureOwner{
     
     private final String name;
     private final UUID playerId;

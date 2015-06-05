@@ -39,6 +39,9 @@ import com.chingo247.settlercraft.structureapi.structure.DefaultStructureFactory
 import com.chingo247.settlercraft.structureapi.structure.IStructureAPI;
 import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
+import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.SchematicPlacement;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BuildOptions;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.DemolishingOptions;
 import com.chingo247.settlercraft.structureapi.structure.plan.util.PlanGenerator;
@@ -92,6 +95,7 @@ public class StructureCommands {
     private final UUID console;
     private final KeyPool<UUID> playerPool;
     private final APlatform platform;
+    private CommandHelper commandHelper;
 
     public StructureCommands(IStructureAPI structureAPI, ExecutorService executorService, GraphDatabaseService graph) {
         this.structureAPI = structureAPI;
@@ -104,6 +108,7 @@ public class StructureCommands {
         this.console = UUID.randomUUID();
         this.playerPool = new KeyPool<>(executorService);
         this.platform = structureAPI.getPlatform();
+        this.commandHelper = new CommandHelper(platform);
     }
 
     public boolean handle(final ICommandSender sender, final String command, String[] args) throws CommandException {
@@ -187,6 +192,11 @@ public class StructureCommands {
                             checkIsPlayer(sender);
                             owner((IPlayer)sender, commandArgs, StructureOwnerType.MEMBER);
                             break;
+                        case "schematic":
+                            schematic(sender, commandArgs);
+                            
+                            
+                            break;
                         case "menu":
                             checkIsPlayer(sender);
                             if(!structureAPI.getConfig().isPlanMenuEnabled()) {
@@ -219,8 +229,54 @@ public class StructureCommands {
                 }
             }
 
+            
+
         });
         return true;
+    }
+    
+    private void schematic(ICommandSender sender, String[] commandArgs) throws CommandException {
+        if(sender instanceof IPlayer) {
+            IPlayer player = (IPlayer) sender;
+            if(!PermissionManager.getInstance().isAllowed(player, PermissionManager.Perms.ROTATE_SCHEMATIC)) {
+                sender.sendMessage(COLOR.red() + "You have no permission to do this!");
+                return;
+            }
+        }
+        
+        // /stt schematic [structureid] rotate [degrees]
+        String usage = "/stt rschematic [structure-id][degrees]";
+        commandHelper.argumentsInRange(3, 3, commandArgs, usage);
+        commandHelper.isLong(commandArgs[0], "Expected a number for [structure-id]but got '" + commandArgs[0] + "'", usage);
+        commandHelper.isInt(commandArgs[1], "Expected a number for [degrees] but got '" + commandArgs[1] + "'", usage);
+        
+        Long structureId = Long.parseLong(commandArgs[0]);
+        Integer degrees = Integer.parseInt(commandArgs[1]);
+        
+        commandHelper.isTrue(degrees % 90 == 0, "Argument [degrees] must be a multiple of 90");
+        Structure s = null;
+        try (Transaction tx = graph.beginTx()){
+            
+            StructureNode n = structureDAO.find(structureId);
+            if(n != null) {
+            s = DefaultStructureFactory.getInstance().makeStructure(n);
+            }
+            tx.success();
+        }
+        
+        commandHelper.isFalse(s == null, "Couldn't find structure with id #" + structureId);
+        
+        StructurePlan plan = s.getStructurePlan();
+        Placement p = plan.getPlacement();
+        
+        commandHelper.isTrue(p instanceof SchematicPlacement, "Placement of structure #" + structureId + " is not a schematic");
+        
+        SchematicPlacement schematicPlacement = (SchematicPlacement) p;
+        
+        Long hash = schematicPlacement.getSchematic().getHash();
+        
+        
+        
     }
 
     private void generate(String[] commandArgs) throws CommandException {
@@ -703,6 +759,8 @@ public class StructureCommands {
             throw new CommandException("Too many arguments!");
         }
     }
+    
+    
 
     private boolean list(final IPlayer iPlayer, String[] commandArgs) throws CommandException {
         // /stt list [player][page]

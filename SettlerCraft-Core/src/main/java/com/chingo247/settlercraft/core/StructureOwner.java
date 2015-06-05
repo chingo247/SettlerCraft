@@ -22,7 +22,7 @@ import java.util.UUID;
  *
  * @author Chingo
  */
-public interface Settler {
+public interface StructureOwner {
     
     public UUID getPlayerId();
     public String getName();

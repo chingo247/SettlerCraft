@@ -59,6 +59,7 @@ public class PermissionManager {
     public enum Perms {
         OPEN_PLAN_MENU(new Permission(PREFIX + "settler.open.planmenu", PermissionDefault.OP, "Allows the player to use the plan menu (contains plans for FREE)")),
         OPEN_SHOP_MENU(new Permission(PREFIX + "settler.open.shopmenu", PermissionDefault.TRUE, "Allows the player to use the plan shop")),
+        ROTATE_SCHEMATIC(new Permission(PREFIX + "admin.editor.rotate.schematic", PermissionDefault.FALSE, "Allows rotation of schematics")),
         PLACE_STRUCTURE(new Permission(PREFIX + "settler.place.structure", PermissionDefault.TRUE, "Allows the player to place structures"));
         private Permission permission;
 
@@ -77,7 +78,7 @@ public class PermissionManager {
 
     public boolean isAllowed(IPlayer player, Perms permission) {
         if(player == null) return false;
-        if(player.isOP()) return true;
+        if(player.isOP() && permission.permission.getDefault() != PermissionDefault.FALSE) return true;
         return player.hasPermission(permission.permission.getName());
     }
     

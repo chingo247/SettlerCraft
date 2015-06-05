@@ -16,14 +16,14 @@
  */
 package com.chingo247.settlercraft.core.persistence.dao.settler;
 
-import com.chingo247.settlercraft.core.Settler;
+import com.chingo247.settlercraft.core.StructureOwner;
 
 /**
  *
  * @author Chingo
  * @param <T>
  */
-public abstract class AbstractSettlerFactory<T extends Settler>{
+public abstract class AbstractSettlerFactory<T extends StructureOwner>{
     
     public abstract T makeStructureOwner(SettlerNode settlerNode);
     
