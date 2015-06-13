@@ -20,9 +20,10 @@ import com.chingo247.settlercraft.structureapi.event.StructureAddOwnerEvent;
 import com.chingo247.settlercraft.structureapi.event.StructureCreateEvent;
 import com.chingo247.settlercraft.structureapi.event.StructureRemoveEvent;
 import com.chingo247.settlercraft.structureapi.event.StructureRemoveOwnerEvent;
-import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
+import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureRepository;
 import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerType;
-import com.chingo247.settlercraft.structureapi.model.structure.StructureNode;
+import com.chingo247.settlercraft.structureapi.model.structure.Structure;
+import com.chingo247.settlercraft.structureapi.model.structure.StructureRepository;
 import com.google.common.eventbus.Subscribe;
 import java.util.UUID;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -35,23 +36,23 @@ public class WorldGuardStructureListener {
     
     private final WorldGuardHelper worldGuardHelper;
     private final GraphDatabaseService graph;
-    private final StructureDAO structureDAO;
+    private final IStructureRepository structureDAO;
 
     public WorldGuardStructureListener(WorldGuardHelper worldGuardHelper, GraphDatabaseService graph) {
         this.worldGuardHelper = worldGuardHelper;
         this.graph = graph;
-        this.structureDAO = new StructureDAO(graph);
+        this.structureDAO = new StructureRepository(graph);
     }
     
     @Subscribe
     public void onStructureCreate(StructureCreateEvent structureCreateEvent) {
-        StructureNode structure = structureCreateEvent.getStructure();
+        Structure structure = structureCreateEvent.getStructure();
         worldGuardHelper.protect(structure);
     }
     
     @Subscribe
     public void onStructureRemove(StructureRemoveEvent structureRemoveEvent) {
-        StructureNode structure = structureRemoveEvent.getStructure();
+        Structure structure = structureRemoveEvent.getStructure();
         worldGuardHelper.removeProtection(structure);
     }
     
@@ -59,7 +60,7 @@ public class WorldGuardStructureListener {
     public void onStructureAddOwner(StructureAddOwnerEvent addOwnerEvent) {
         final UUID player = addOwnerEvent.getAddedOwner();
         final StructureOwnerType type = addOwnerEvent.getOwnerType();
-        final StructureNode structure = addOwnerEvent.getStructure();
+        final Structure structure = addOwnerEvent.getStructure();
         if(type == StructureOwnerType.MEMBER) {
             worldGuardHelper.addMember(player, structure);
         } else {
@@ -72,7 +73,7 @@ public class WorldGuardStructureListener {
     public void onStructureRemoveOwner(StructureRemoveOwnerEvent removeOwnerEvent) {
         final UUID player = removeOwnerEvent.getRemovedOwner();
         final StructureOwnerType type = removeOwnerEvent.getOwnerType();
-        final StructureNode structure = removeOwnerEvent.getStructure();
+        final Structure structure = removeOwnerEvent.getStructure();
         if(type == StructureOwnerType.MEMBER)  {
             worldGuardHelper.removeMember(player, structure);
         } else {

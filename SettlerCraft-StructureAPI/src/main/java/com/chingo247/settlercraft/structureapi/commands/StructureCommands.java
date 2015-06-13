@@ -1068,12 +1068,12 @@ public class StructureCommands {
                 
                 if(ownershipToAdd == null) {
                     structure.addOwner(settler, requestedType);
-                    EventManager.getInstance().getEventBus().post(new StructureAddOwnerEvent(uuid, structure, requestedType));
+                    EventManager.getInstance().getEventBus().post(new StructureAddOwnerEvent(uuid, new Structure(structure), requestedType));
                     senderPlayer.sendMessage("Successfully added '" + COLOR.green() + ply.getName() + COLOR.reset() + "' to #" + COLOR.gold() + structureId + " " + COLOR.blue() + structure.getName() + COLOR.reset() + " as " + COLOR.yellow() + requestedType.name());
                 } else if (ownershipToAdd.getOwnerType().getTypeId() < requestedType.getTypeId()) {
                     structure.removeOwner(settler.getUUID());
                     structure.addOwner(settler, requestedType);
-                    EventManager.getInstance().getEventBus().post(new StructureAddOwnerEvent(uuid, structure, requestedType));
+                    EventManager.getInstance().getEventBus().post(new StructureAddOwnerEvent(uuid, new Structure(structure), requestedType));
                         senderPlayer.sendMessage("Upgraded ownership of '" + COLOR.green() + ply.getName() + COLOR.reset() + "' to " + COLOR.yellow() + requestedType.name() + COLOR.reset() + " for structure ",
                                 "#" + COLOR.gold() + ownershipToAdd.getStructure().getId() + " " + COLOR.blue() + ownershipToAdd.getStructure().getName());
                 } else {
@@ -1087,7 +1087,7 @@ public class StructureCommands {
                 }
 
                 structure.removeOwner(uuid);
-                EventManager.getInstance().getEventBus().post(new StructureRemoveOwnerEvent(uuid, structure, requestedType));
+                EventManager.getInstance().getEventBus().post(new StructureRemoveOwnerEvent(uuid, new Structure(structure), requestedType));
                 senderPlayer.sendMessage("Successfully removed '" + COLOR.green() + ply.getName() + COLOR.reset() + "' from #" + COLOR.gold() + structureId + " " + COLOR.blue() + structure.getName() + " as " + COLOR.yellow() + requestedType.name());
 
             }

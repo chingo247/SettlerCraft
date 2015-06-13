@@ -47,7 +47,7 @@ public class SettlerCraftHolographicDisplaysPlugin extends JavaPlugin {
 
         @EventHandler(priority = EventPriority.HIGHEST) // Critical as it needs to be executed on shutdown
         public void onShutdown(PluginDisableEvent disableEvent) {
-            if (disableEvent.getPlugin().getName().equals(SettlerCraftHolographicDisplaysPlugin.this.getName())) {
+            if (disableEvent.getPlugin().getName().equals("HolographicDisplays")) {
                 if (StructureHologramManager.getInstance().getHologramsProvider() != null
                         && StructureHologramManager.getInstance().getHologramsProvider().getName().equals("HolographicDisplays")) {
                     StructureHologramManager.getInstance().shutdown();

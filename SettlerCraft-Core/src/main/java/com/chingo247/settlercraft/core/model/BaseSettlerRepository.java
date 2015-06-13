@@ -16,7 +16,6 @@
  */
 package com.chingo247.settlercraft.core.model;
 
-import com.chingo247.settlercraft.core.model.BaseSettlerNode;
 import com.chingo247.settlercraft.core.model.interfaces.IBaseSettler;
 import com.chingo247.settlercraft.core.model.interfaces.IBaseSettlerRepository;
 import java.util.Map;
