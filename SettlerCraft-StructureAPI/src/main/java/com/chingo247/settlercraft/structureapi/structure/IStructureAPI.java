@@ -18,9 +18,10 @@ package com.chingo247.settlercraft.structureapi.structure;
 
 import com.chingo247.menuapi.menu.CategoryMenu;
 import com.chingo247.settlercraft.core.Direction;
+import com.chingo247.settlercraft.structureapi.model.structure.Structure;
 import com.chingo247.settlercraft.structureapi.platforms.IConfigProvider;
 import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncPlacement;
-import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structureapi.structure.plan.IStructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlanManager;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.SchematicPlacement;
@@ -48,7 +49,7 @@ public interface IStructureAPI {
      * @param direction The direction of the player
      * @return The Structure that has been created
      */
-    public Structure createStructure(StructurePlan plan, World world, Vector position, Direction direction) throws Exception;
+    public Structure createStructure(IStructurePlan plan, World world, Vector position, Direction direction) throws Exception;
     
     /**
      * Creates a structure with the provided plan
@@ -59,7 +60,7 @@ public interface IStructureAPI {
      * @param owner The player that will be assigned as MASTER owner of this structure
      * @return The Structure that has been created
      */
-    public Structure createStructure(StructurePlan plan, World world, Vector position, Direction direction, Player owner) throws Exception;
+    public Structure createStructure(IStructurePlan plan, World world, Vector position, Direction direction, Player owner) throws Exception;
     
      /**
      * Creates a structure with the provided placement
@@ -92,7 +93,7 @@ public interface IStructureAPI {
      * @param owner The player that will be assigned as MASTER owner of this structure
      * @return The Structure that has been created
      */
-    public Structure createSubstructure(Structure structure, StructurePlan plan, World world, Vector position, Direction direction, Player owner) throws Exception;
+    public Structure createSubstructure(Structure structure, IStructurePlan plan, World world, Vector position, Direction direction, Player owner) throws Exception;
     
      /**
      * Creates a substructure for given structure with the provided plan
@@ -103,7 +104,7 @@ public interface IStructureAPI {
      * @param direction The direction of the player
      * @return The Structure that has been created
      */
-    public Structure createSubstructure(Structure structure, StructurePlan plan, World world, Vector position, Direction direction) throws Exception;
+    public Structure createSubstructure(Structure structure, IStructurePlan plan, World world, Vector position, Direction direction) throws Exception;
     
      /**
      * Creates a substructure for given structure with the provided placement
@@ -177,6 +178,12 @@ public interface IStructureAPI {
      * @return The directory
      */
     public File getGenerationDirectory();
+    
+    /**
+     * The directory where plans are generated from schematics
+     * @return The directory
+     */
+    public File getWorkingDirectory();
     
     
     /**

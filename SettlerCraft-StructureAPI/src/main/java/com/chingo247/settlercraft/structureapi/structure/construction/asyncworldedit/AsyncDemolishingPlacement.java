@@ -16,7 +16,6 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit;
 
-import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.DemolishingOptions;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.DemolishingPlacement;
@@ -43,12 +42,12 @@ public class AsyncDemolishingPlacement extends AbstractAsyncPlacement<Demolishin
      * @param playerEntry The PlayerEntry
      * @param placement The placement
      * @param callback
-     * @param structure The id of the structure (or null/-1 if no structure)
+     * @param structureId The id of the structure (or null/-1 if no structure)
      */
-    public AsyncDemolishingPlacement(PlayerEntry playerEntry, DemolishingPlacement placement, AsyncPlacementCallback callback, Structure structure) {
+    public AsyncDemolishingPlacement(PlayerEntry playerEntry, DemolishingPlacement placement, AsyncPlacementCallback callback, Long structureId) {
         super(playerEntry, placement);
         this.callback = callback;
-        this.structureId = structure == null ? -1 : structure.getId();
+        this.structureId = structureId == null ? -1 : structureId;
     }
     
     public AsyncDemolishingPlacement(PlayerEntry playerEntry, DemolishingPlacement placement) {

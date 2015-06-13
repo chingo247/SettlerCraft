@@ -23,7 +23,7 @@ import java.util.Collection;
  *
  * @author Chingo
  */
-public interface SubStructuresPlan extends StructurePlan {
+public interface SubStructuresPlan extends IStructurePlan {
     
     /**
      * Removes a Placement from this StructurePlan
@@ -42,21 +42,21 @@ public interface SubStructuresPlan extends StructurePlan {
      * Adds a StructurePlan to this StructurePlan
      * @param plan The StructurePlan to add
      */
-    public void addStructurePlan(StructurePlan plan);
+    public void addStructurePlan(IStructurePlan plan);
     
     /**
      * Removes a StructurePlan from this StructurePlan
      * @param plan The StructurePlan to remove
      * @return True if StructurePlan was successfully removed
      */
-    public boolean removeStructurePlan(StructurePlan plan);
+    public boolean removeStructurePlan(IStructurePlan plan);
     
     
     /**
      * Gets all the SubstructurePlans of this StructurePlan.
      * @return The SubstructurePlans
      */
-    public Collection<? extends StructurePlan> getSubStructurePlans();
+    public Collection<? extends IStructurePlan> getSubStructurePlans();
     
     /**
      * Gets all the SubPlacement of this StructurePlan

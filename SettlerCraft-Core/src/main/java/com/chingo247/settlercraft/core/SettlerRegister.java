@@ -17,7 +17,8 @@
 package com.chingo247.settlercraft.core;
 
 import com.chingo247.settlercraft.core.event.PlayerLoginEvent;
-import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerDAO;
+import com.chingo247.settlercraft.core.model.BaseSettlerRepository;
+import com.chingo247.settlercraft.core.model.interfaces.IBaseSettler;
 import com.chingo247.xplatform.core.IPlayer;
 import com.google.common.base.Preconditions;
 import com.google.common.eventbus.Subscribe;
@@ -27,45 +28,82 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 
 /**
- *
+ * Meant to register players as Settler for the very first time
  * @author Chingo
  */
 public class SettlerRegister {
 
-    private final SettlerDAO ownerRepository;
+    private final BaseSettlerRepository settlerRepository;
     private final ExecutorService service;
-    private final Set<UUID> cached;
+    private final Set<UUID> cachedPlayers;
     private final GraphDatabaseService graph;
+    private boolean checked = false;
 
-    SettlerRegister(SettlerDAO settlerDAO, ExecutorService service, GraphDatabaseService graph) {
+    SettlerRegister(BaseSettlerRepository settlerDAO, ExecutorService service, GraphDatabaseService graph) {
         Preconditions.checkNotNull(settlerDAO, "settlerDAO was null!");
         Preconditions.checkNotNull(service, "Executor was null!");
-        this.ownerRepository = settlerDAO;
+        this.settlerRepository = settlerDAO;
         this.service = service;
-        this.cached = Collections.synchronizedSet(new HashSet<UUID>());
+        this.cachedPlayers = Collections.synchronizedSet(new HashSet<UUID>());
         this.graph = graph;
     }
 
     @Subscribe
     public void onPlayerLogin(PlayerLoginEvent ple) {
         final IPlayer player = ple.getPlayer();
-        if (!cached.contains(player.getUniqueId())) {
+        if (!cachedPlayers.contains(player.getUniqueId())) { // Only check if not in cache
             service.submit(new Runnable() {
                 @Override
                 public void run() {
                     try(Transaction tx = graph.beginTx()) {
-                        if (ownerRepository.find(player.getUniqueId()) == null) {
-                            ownerRepository.addSettler(player.getName(), player.getUniqueId());
+                        if (settlerRepository.findByUUID(player.getUniqueId()) == null) {
+                            settlerRepository.addSettler(new PlayerSettler(player));
                         }
-                        cached.add(player.getUniqueId());
+                        cachedPlayers.add(player.getUniqueId());
                         tx.success();
                     }
                 }
             });
         }
     }
+    
+    private class PlayerSettler implements IBaseSettler {
+
+        private final IPlayer player;
+        
+        public PlayerSettler(IPlayer player) {
+            this.player = player;
+        }
+        
+        
+        
+
+        @Override
+        public Long getId() {
+            return null;
+        }
+
+        @Override
+        public UUID getUUID() {
+            return player.getUniqueId();
+        }
+
+        @Override
+        public String getName() {
+            return player.getName();
+        }
+
+        @Override
+        public Node getNode() {
+            return null;
+        }
+        
+    }
+    
+    
 
 }

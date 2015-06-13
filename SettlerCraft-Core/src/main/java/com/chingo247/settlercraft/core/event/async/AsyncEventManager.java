@@ -30,7 +30,7 @@ public class AsyncEventManager {
     private final AsyncEventBus asyncEventBus;
     
     private AsyncEventManager() {
-        this.asyncEventBus = new AsyncEventBus("SettlerCraft-EventBus", SettlerCraft.getInstance().getExecutor());
+        this.asyncEventBus = new AsyncEventBus("SettlerCraft-AsyncEventBus", SettlerCraft.getInstance().getExecutor());
     }
     
     public static AsyncEventManager getInstance() {

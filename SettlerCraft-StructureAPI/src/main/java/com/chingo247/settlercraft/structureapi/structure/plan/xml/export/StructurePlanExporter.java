@@ -18,7 +18,7 @@
 package com.chingo247.settlercraft.structureapi.structure.plan.xml.export;
 
 import com.chingo247.settlercraft.structureapi.structure.plan.PlacementAPI;
-import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structureapi.structure.plan.IStructurePlan;
 //import com.chingo247.structureapi.structure.plan.SubStructuresPlan;
 import java.io.File;
 import org.dom4j.Document;
@@ -40,7 +40,7 @@ import org.dom4j.io.XMLWriter;
  */
 public class StructurePlanExporter {
     
-    public void export(StructurePlan plan, File destinationDirectory, String fileName, boolean prettyPrint) {
+    public void export(IStructurePlan plan, File destinationDirectory, String fileName, boolean prettyPrint) {
         Preconditions.checkArgument(destinationDirectory.isDirectory());
         
         Document d = DocumentHelper.createDocument();

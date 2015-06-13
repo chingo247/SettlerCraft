@@ -33,7 +33,7 @@ public final class DefaultSubstructuresPlan extends AbstractStructurePlan implem
 
     private final DefaultSubstructuresPlan parent;
     private final Placement mainPlacement;
-    private final Set<StructurePlan> plans;
+    private final Set<IStructurePlan> plans;
     private final Set<Placement> placements; // Substructure - placeable
 
     protected DefaultSubstructuresPlan(String id, File structurePlanFile, DefaultSubstructuresPlan parent, Placement placement) {
@@ -55,7 +55,7 @@ public final class DefaultSubstructuresPlan extends AbstractStructurePlan implem
     }
 
     @Override
-    public void addStructurePlan(StructurePlan plan) {
+    public void addStructurePlan(IStructurePlan plan) {
         if (matchesParentRecursively(plan.getFile())) {
             throw new PlanException("Plans may not be equal to any of its ancestors.");
         }
@@ -63,7 +63,7 @@ public final class DefaultSubstructuresPlan extends AbstractStructurePlan implem
     }
 
     @Override
-    public boolean removeStructurePlan(StructurePlan plan) {
+    public boolean removeStructurePlan(IStructurePlan plan) {
         return plans.remove(plan);
     }
 
@@ -83,7 +83,7 @@ public final class DefaultSubstructuresPlan extends AbstractStructurePlan implem
     }
 
     @Override
-    public Collection<StructurePlan> getSubStructurePlans() {
+    public Collection<IStructurePlan> getSubStructurePlans() {
         return plans;
     }
 

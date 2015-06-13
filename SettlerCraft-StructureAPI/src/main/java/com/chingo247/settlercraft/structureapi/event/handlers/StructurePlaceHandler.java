@@ -18,34 +18,39 @@ package com.chingo247.settlercraft.structureapi.event.handlers;
 
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
+import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.settlercraft.core.util.KeyPool;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.settlercraft.structureapi.exception.StructureException;
-import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureRelTypes;
+import com.chingo247.settlercraft.structureapi.model.structure.StructureRepository;
+import com.chingo247.settlercraft.structureapi.model.util.StructureRelations;
 import com.chingo247.settlercraft.structureapi.platforms.bukkit.selection.HologramSelectionManager;
 import com.chingo247.settlercraft.structureapi.platforms.services.PermissionManager;
 import com.chingo247.settlercraft.structureapi.selection.CUISelectionManager;
 import com.chingo247.settlercraft.structureapi.selection.ISelectionManager;
 import com.chingo247.settlercraft.structureapi.selection.NoneSelectionManager;
-import com.chingo247.settlercraft.structureapi.structure.ConstructionStatus;
-import com.chingo247.settlercraft.structureapi.structure.DefaultStructureFactory;
+import com.chingo247.settlercraft.structureapi.model.structure.StructureStatus;
+import com.chingo247.settlercraft.structureapi.model.world.StructureWorldRepository;
 import com.chingo247.settlercraft.structureapi.structure.IStructureAPI;
-import com.chingo247.settlercraft.structureapi.structure.Structure;
+import com.chingo247.settlercraft.structureapi.model.structure.StructureNode;
+import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureRepository;
+import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureWorld;
+import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureWorldRepository;
+import com.chingo247.settlercraft.structureapi.model.structure.Structure;
 import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
-import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structureapi.structure.plan.IStructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlanManager;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BuildOptions;
 import com.chingo247.settlercraft.structureapi.util.PlacementUtil;
 import com.chingo247.settlercraft.structureapi.util.WorldUtil;
 import com.chingo247.xplatform.core.AInventory;
 import com.chingo247.xplatform.core.AItemStack;
+import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IPlayer;
 import com.chingo247.xplatform.core.IWorld;
 import com.google.common.collect.Maps;
+import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
@@ -74,14 +79,18 @@ public class StructurePlaceHandler {
     private final IEconomyProvider economyProvider;
     private final IStructureAPI structureAPI;
     private final IColors color;
-    private final StructureDAO structureDAO;
+    private final IStructureRepository structureRepository;
+    private final IStructureWorldRepository structureWorldRepository;
+    private final APlatform platform;
 
     public StructurePlaceHandler(IEconomyProvider economyProvider) {
         this.playerPool = new KeyPool<>(SettlerCraft.getInstance().getExecutor());
         this.economyProvider = economyProvider;
         this.structureAPI = StructureAPI.getInstance();
-        this.color = structureAPI.getPlatform().getChatColors();
-        this.structureDAO = new StructureDAO(SettlerCraft.getInstance().getNeo4j());
+        this.platform = structureAPI.getPlatform();
+        this.color = platform.getChatColors();
+        this.structureRepository = new StructureRepository(SettlerCraft.getInstance().getNeo4j());
+        this.structureWorldRepository = new StructureWorldRepository(SettlerCraft.getInstance().getNeo4j());
     }
     
     public void handleDeselect(Player player) {
@@ -142,7 +151,7 @@ public class StructurePlaceHandler {
                     }
 
                     String planId = getPlanID(planItem);
-                    StructurePlan plan = StructurePlanManager.getInstance().getPlan(planId);
+                    IStructurePlan plan = StructurePlanManager.getInstance().getPlan(planId);
 
                     if (plan == null) {
                         if (structureAPI.isLoading()) {
@@ -172,7 +181,7 @@ public class StructurePlaceHandler {
 
     }
 
-    private void handlePlace(StructurePlan plan, AItemStack item, Player player, World world, Vector pos1, ISelectionManager selectionManager) {
+    private void handlePlace(IStructurePlan plan, AItemStack item, Player player, World world, Vector pos1, ISelectionManager selectionManager) {
         IPlayer iPlayer = SettlerCraft.getInstance().getPlatform().getPlayer(player.getUniqueId());
         Direction direction = WorldUtil.getDirection(iPlayer.getYaw());
         Vector pos2;
@@ -217,7 +226,7 @@ public class StructurePlaceHandler {
                     if (possibleParentStructure != null) {
                         
                         
-                        if (possibleParentStructure.getConstructionStatus() != ConstructionStatus.COMPLETED) {
+                        if (possibleParentStructure.getStatus() != StructureStatus.COMPLETED) {
                             player.printError("Status of #" + possibleParentStructure.getId() + " must not be in progress before substructures can be placed inside");
                             return;
                         }
@@ -234,8 +243,8 @@ public class StructurePlaceHandler {
                         
                         iPlayer.getInventory().removeItem(clone);
                         iPlayer.updateInventory();
-                        
-                        structure.build(player, new BuildOptions(), false);
+                        EditSession session = structureAPI.getSessionFactory().getEditSession(world, -1, player);
+                        structureAPI.getConstructionManager().build(structure, iPlayer.getUniqueId(), session, new BuildOptions(), toLeft);
                     }
                 } catch (StructureException ex) {
                     player.print(color.red() + ex.getMessage());
@@ -270,7 +279,7 @@ public class StructurePlaceHandler {
             String query
                     = "MATCH (world:" + WorldNode.LABEL.name() + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
                     + " WITH world "
-                    + " MATCH (world)<-[:" + StructureRelTypes.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
+                    + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
                     + " WHERE s." + StructureNode.DELETED_AT_PROPERTY + " IS NULL"
                     + " AND s." + StructureNode.MAX_X_PROPERTY + " >= " + position.getBlockX() + " AND s." + StructureNode.MIN_X_PROPERTY + " <= " + position.getBlockX()
                     + " AND s." + StructureNode.MAX_Y_PROPERTY + " >= " + position.getBlockY() + " AND s." + StructureNode.MIN_Y_PROPERTY + " <= " + position.getBlockY()
@@ -284,8 +293,7 @@ public class StructurePlaceHandler {
             while (result.hasNext()) {
                 Map<String, Object> map = result.next();
                 Node n = (Node) map.get("structure");
-                node = new StructureNode(n);
-                structure = DefaultStructureFactory.getInstance().makeStructure(node);
+                structure = new Structure(n);
             }
 
             if (node != null) {
@@ -377,7 +385,7 @@ public class StructurePlaceHandler {
         return price;
     }
 
-    private boolean canPlace(Structure possibleParent, Player player, World world, Vector pos1, Direction direction, StructurePlan plan) {
+    private boolean canPlace(Structure possibleParent, Player player, World world, Vector pos1, Direction direction, IStructurePlan plan) {
         // Check for overlap with other structures
         Vector min = pos1;
         Vector max = PlacementUtil.getPoint2Right(min, direction, plan.getPlacement().getCuboidRegion().getMaximumPoint());
@@ -392,11 +400,15 @@ public class StructurePlaceHandler {
         }
 
         try (Transaction tx = graph.beginTx()) {
-            List<StructureNode> overlappingStructure;
+            List<? extends StructureNode> overlappingStructure;
             if (possibleParent != null) {
-                overlappingStructure = structureDAO.getSubStructuresWithinStructure(possibleParent, world, new CuboidRegion(min, max), 1);
+                Node n = possibleParent.getNode();
+                StructureNode sn = new StructureNode(n);
+                overlappingStructure = sn.getSubStructuresWithin(new CuboidRegion(min, max), 1);
             } else {
-                overlappingStructure = structureDAO.getStructuresWithin(world, new CuboidRegion(min, max), 1);
+                IWorld iw = platform.getServer().getWorld(world.getName());
+                IStructureWorld sw = structureWorldRepository.findByUUID(iw.getUUID());
+                overlappingStructure = sw.getStructuresWithin(new CuboidRegion(min, max), 1);
             }
 
             if (overlappingStructure != null && !overlappingStructure.isEmpty()) {

@@ -17,7 +17,7 @@
 package com.chingo247.settlercraft.worldguard.protecttion;
 
 import com.chingo247.settlercraft.structureapi.platforms.services.Service;
-import com.chingo247.settlercraft.structureapi.structure.Structure;
+import com.chingo247.settlercraft.structureapi.model.structure.StructureNode;
 
 /**
  * An interface for plugins that protect regions (e.g. worldguard)
@@ -35,19 +35,19 @@ public interface IStructureProtector extends Service {
      * Protects a Structure
      * @param structure 
      */
-    public void protect(Structure structure);
+    public void protect(StructureNode structure);
     
     /**
      * Removes protection from a structure
      * @param structure 
      */
-    public void removeProtection(Structure structure);
+    public void removeProtection(StructureNode structure);
     
     /**
      * Checks whether a structure is protected
      * @param structure
      * @return True if Structure was protected
      */
-    public boolean hasProtection(Structure structure);
+    public boolean hasProtection(StructureNode structure);
     
 }

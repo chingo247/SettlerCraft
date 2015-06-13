@@ -21,8 +21,8 @@ import com.chingo247.settlercraft.structureapi.event.StructureCreateEvent;
 import com.chingo247.settlercraft.structureapi.event.StructureRemoveEvent;
 import com.chingo247.settlercraft.structureapi.event.StructureRemoveOwnerEvent;
 import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
-import com.chingo247.settlercraft.structureapi.structure.Structure;
+import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerType;
+import com.chingo247.settlercraft.structureapi.model.structure.StructureNode;
 import com.google.common.eventbus.Subscribe;
 import java.util.UUID;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -45,13 +45,13 @@ public class WorldGuardStructureListener {
     
     @Subscribe
     public void onStructureCreate(StructureCreateEvent structureCreateEvent) {
-        Structure structure = structureCreateEvent.getStructure();
+        StructureNode structure = structureCreateEvent.getStructure();
         worldGuardHelper.protect(structure);
     }
     
     @Subscribe
     public void onStructureRemove(StructureRemoveEvent structureRemoveEvent) {
-        Structure structure = structureRemoveEvent.getStructure();
+        StructureNode structure = structureRemoveEvent.getStructure();
         worldGuardHelper.removeProtection(structure);
     }
     
@@ -59,7 +59,7 @@ public class WorldGuardStructureListener {
     public void onStructureAddOwner(StructureAddOwnerEvent addOwnerEvent) {
         final UUID player = addOwnerEvent.getAddedOwner();
         final StructureOwnerType type = addOwnerEvent.getOwnerType();
-        final Structure structure = addOwnerEvent.getStructure();
+        final StructureNode structure = addOwnerEvent.getStructure();
         if(type == StructureOwnerType.MEMBER) {
             worldGuardHelper.addMember(player, structure);
         } else {
@@ -72,7 +72,7 @@ public class WorldGuardStructureListener {
     public void onStructureRemoveOwner(StructureRemoveOwnerEvent removeOwnerEvent) {
         final UUID player = removeOwnerEvent.getRemovedOwner();
         final StructureOwnerType type = removeOwnerEvent.getOwnerType();
-        final Structure structure = removeOwnerEvent.getStructure();
+        final StructureNode structure = removeOwnerEvent.getStructure();
         if(type == StructureOwnerType.MEMBER)  {
             worldGuardHelper.removeMember(player, structure);
         } else {

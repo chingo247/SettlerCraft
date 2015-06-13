@@ -48,7 +48,7 @@
         </repository>
     </repositories>
     
-     <build>
+    <build>
         <plugins>
             <plugin>
                 <groupId>com.mysema.maven</groupId>

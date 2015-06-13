@@ -23,7 +23,7 @@ import com.chingo247.menuapi.menu.DefaultCategoryMenu;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
-import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structureapi.structure.plan.IStructurePlan;
 import com.google.common.base.Preconditions;
 import com.sk89q.worldedit.regions.CuboidRegion;
 
@@ -44,7 +44,7 @@ public class StructurePlanMenuFactory {
         this.platform = platform;
     }
 
-    public void load(StructurePlan plan) {
+    public void load(IStructurePlan plan) {
         Placement placement = plan.getPlacement();
        
         CuboidRegion region = placement.getCuboidRegion();

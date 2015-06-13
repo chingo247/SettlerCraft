@@ -16,7 +16,6 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit;
 
-import com.chingo247.settlercraft.structureapi.structure.Structure;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BuildOptions;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
 import com.sk89q.worldedit.EditSession;
@@ -42,12 +41,12 @@ public class AsyncPlacement extends AbstractAsyncPlacement<BuildOptions, Placeme
      * @param playerEntry The PlayerEntry
      * @param placement The placement
      * @param callback
-     * @param structure
+     * @param structureId
      */
-    public AsyncPlacement(PlayerEntry playerEntry, Placement placement, AsyncPlacementCallback callback, Structure structure) {
+    public AsyncPlacement(PlayerEntry playerEntry, Placement placement, AsyncPlacementCallback callback, Long structureId) {
         super(playerEntry, placement);
         this.callback = callback;
-        this.structureId = structure == null ? -1 : structure.getId();
+        this.structureId = structureId == null ? -1 : structureId;
     }
     
     public AsyncPlacement(PlayerEntry playerEntry, Placement placement) {

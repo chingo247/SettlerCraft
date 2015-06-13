@@ -16,17 +16,20 @@
  */
 package com.chingo247.settlercraft.structureapi.structure;
 
+import com.chingo247.settlercraft.structureapi.model.structure.StructureStatus;
+import com.chingo247.settlercraft.structureapi.model.structure.StructureNode;
 import com.chingo247.menuapi.menu.util.ShopUtil;
-import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
-import com.chingo247.settlercraft.core.persistence.dao.world.WorldDAO;
-import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
+import com.chingo247.settlercraft.core.model.BaseSettlerNode;
+import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.settlercraft.core.util.XXHasher;
-import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerNode;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureRelTypes;
+import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureRepository;
+import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureWorldRepository;
+import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerNode;
+import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerType;
+import com.chingo247.settlercraft.structureapi.model.structure.StructureRepository;
+import com.chingo247.settlercraft.structureapi.model.util.StructureRelations;
+import com.chingo247.settlercraft.structureapi.model.world.StructureWorldRepository;
 import com.chingo247.xplatform.core.IServer;
 import com.chingo247.xplatform.core.IWorld;
 import com.google.common.collect.Maps;
@@ -52,9 +55,10 @@ public class StructureInvalidator {
     private IServer server;
     private ExecutorService executor;
     private GraphDatabaseService graph;
-    private StructureDAO structureDAO;
+    private IStructureRepository structureRepository;
+    private IStructureWorldRepository structureWorldRepository;
     private IEconomyProvider economy;
-    private WorldDAO worldDAO;
+    
 
     private static String LOCK_DATA = "lockData";
 
@@ -62,9 +66,9 @@ public class StructureInvalidator {
         this.server = server;
         this.executor = executor;
         this.graph = graph;
-        this.structureDAO = new StructureDAO(graph);
+        this.structureRepository = new StructureRepository(graph);
         this.economy = economyProvider;
-        this.worldDAO = new WorldDAO(graph);
+        this.structureWorldRepository = new StructureWorldRepository(graph);
     }
 
     private File getSessionFile(IWorld world) {
@@ -81,9 +85,9 @@ public class StructureInvalidator {
 
         try (Transaction tx = graph.beginTx()) {
             for (IWorld world : server.getWorlds()) {
-                WorldNode w = worldDAO.find(world.getUUID());
+                WorldNode w = structureWorldRepository.findByUUID(world.getUUID());
                 if (w != null) {
-                    Node n = w.getRawNode();
+                    Node n = w.getNode();
                     if (n.hasProperty(LOCK_DATA)) {
                         Long lockData = (Long) n.getProperty(LOCK_DATA);
                         File sessionFile = getSessionFile(world);
@@ -126,9 +130,9 @@ public class StructureInvalidator {
     }
 
     private void processDeletedAfter(IWorld world, long date) {
-        List<Structure> structures = Lists.newArrayList();
-        List<StructureNode> structureNodes = Lists.newArrayList();
+        
         try (Transaction tx = graph.beginTx()) {
+            List<StructureNode> structureNodes = Lists.newArrayList();
 
             Map<String, Object> params = Maps.newHashMap();
             params.put("worldId", world.getUUID().toString());
@@ -136,7 +140,7 @@ public class StructureInvalidator {
 
             String query = "MATCH (world:" + WorldNode.LABEL.name() + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
                     + " WITH world "
-                    + " MATCH (world)<-[:" + StructureRelTypes.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
+                    + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
                     + " WHERE s." + StructureNode.DELETED_AT_PROPERTY + " > {date}"
                     + " RETURN s";
 
@@ -148,8 +152,6 @@ public class StructureInvalidator {
                 for (Object o : map.values()) {
                     Node n = (Node) o;
                     StructureNode sn = new StructureNode(n);
-                    Structure structure = DefaultStructureFactory.getInstance().makeStructure(sn);
-                    structures.add(structure);
                     structureNodes.add(sn);
                 }
             }
@@ -173,9 +175,9 @@ public class StructureInvalidator {
 //                }
 //            }
 
-            for (StructureNode n : structureNodes) {
-                n.setConstructionStatus(ConstructionStatus.ON_HOLD);
-                n.setDeletedAt(null);
+            for (StructureNode structureNode : structureNodes) {
+                structureNode.setStatus(StructureStatus.ON_HOLD);
+                structureNode.setDeletedAt(null);
             }
 
             tx.success();
@@ -183,17 +185,17 @@ public class StructureInvalidator {
     }
 
     private void processCreatedAfter(IWorld world, long date) {
-        List<Structure> structures = Lists.newArrayList();
-        List<StructureNode> structureNodes = Lists.newArrayList();
+       
         try (Transaction tx = graph.beginTx()) {
-
+            List<StructureNode> structureNodes = Lists.newArrayList();
+            
             Map<String, Object> params = Maps.newHashMap();
             params.put("worldId", world.getUUID().toString());
             params.put("date", date);
 
             String query = "MATCH (world:" + WorldNode.LABEL.name() + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
                     + " WITH world "
-                    + " MATCH (world)<-[:" + StructureRelTypes.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
+                    + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
                     + " WHERE s." + StructureNode.CREATED_AT_PROPERTY + " > {date}"
                     + " RETURN s";
 
@@ -206,14 +208,12 @@ public class StructureInvalidator {
                 for (Object o : map.values()) {
                     Node n = (Node) o;
                     StructureNode sn = new StructureNode(n);
-                    Structure structure = DefaultStructureFactory.getInstance().makeStructure(sn);
-                    structures.add(structure);
                     structureNodes.add(sn);
                 }
             }
 
-            if (!structures.isEmpty()) {
-                System.out.println("[SettlerCraft]: Found a total of " + structures.size() + " structures within " + world.getName() + " that are invalid");
+            if (!structureNodes.isEmpty()) {
+                System.out.println("[SettlerCraft]: Found a total of " + structureNodes.size() + " structures within " + world.getName() + " that are invalid");
                 System.out.println("[SettlerCraft]: These structures have been placed after the last world save ");
             } else {
                 System.out.println("[SettlerCraft]: Nothing to invalidate");
@@ -228,7 +228,7 @@ public class StructureInvalidator {
                     if (sn.getPrice() > 0 && !sn.isAutoremoved()) {
                         List<StructureOwnerNode> masters = sn.getOwners(StructureOwnerType.MASTER);
                         double pricePerOwner = sn.getPrice() / masters.size();
-                        for (SettlerNode settler : masters) {
+                        for (BaseSettlerNode settler : masters) {
                             economy.give(settler.getUUID(), pricePerOwner);
                             System.out.println("[SettlerCraft]: Refunded " + ShopUtil.valueString(pricePerOwner) + " to " + settler.getName()
                                     + " for structure #" + sn.getId() + " (" + ShopUtil.valueString(sn.getPrice()) + ")");
@@ -237,19 +237,8 @@ public class StructureInvalidator {
                 }
             }
 
-//            // Remove protection from structures
-//            List<IStructureProtector> protectors = ((StructureAPI) StructureAPI.getInstance()).getStructureProtectors();
-//            for (IStructureProtector protector : protectors) {
-//                for (Structure s : structures) {
-//                    if (protector.hasProtection(s)) {
-//                        System.out.println("[SettlerCraft]: Removed '" + protector.getName() + "' protection from structure #" + s.getId());
-//                        protector.removeProtection(s);
-//                    }
-//                }
-//            }
-
             for (StructureNode n : structureNodes) {
-                n.setConstructionStatus(ConstructionStatus.REMOVED);
+                n.setStatus(StructureStatus.REMOVED);
             }
 
             tx.success();

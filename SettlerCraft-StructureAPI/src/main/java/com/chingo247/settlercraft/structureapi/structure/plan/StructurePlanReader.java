@@ -48,11 +48,11 @@ import org.dom4j.io.SAXReader;
  */
 public class StructurePlanReader {
 
-    public List<StructurePlan> readDirectory(File structurePlanDirectory) {
+    public List<IStructurePlan> readDirectory(File structurePlanDirectory) {
         return readDirectory(structurePlanDirectory, false, new ForkJoinPool());
     }
 
-    public List<StructurePlan> readDirectory(File structurePlanDirectory, boolean printstuff, ForkJoinPool pool) {
+    public List<IStructurePlan> readDirectory(File structurePlanDirectory, boolean printstuff, ForkJoinPool pool) {
         Iterator<File> fit = FileUtils.iterateFiles(structurePlanDirectory, new String[]{"xml"}, true);
         SchematicManager sdm = SchematicManager.getInstance();
         sdm.load(structurePlanDirectory);
@@ -67,11 +67,11 @@ public class StructurePlanReader {
             pool.execute(spp);
         }
 
-        List<StructurePlan> plans = new ArrayList<>();
+        List<IStructurePlan> plans = new ArrayList<>();
         try {
 
             for (StructurePlanProcessor spp : processors.values()) {
-                StructurePlan plan = spp.get();
+                IStructurePlan plan = spp.get();
                 if (plan != null) {
                     plans.add(plan);
                 }
@@ -84,7 +84,7 @@ public class StructurePlanReader {
         return plans;
     }
 
-    public StructurePlan readFile(File structurePlanFile) {
+    public IStructurePlan readFile(File structurePlanFile) {
         SchematicManager sdm = SchematicManager.getInstance();
 
         sdm.load(structurePlanFile.getParentFile());
@@ -96,7 +96,7 @@ public class StructurePlanReader {
      *
      * @author Chingo
      */
-    private class StructurePlanProcessor extends RecursiveTask<StructurePlan> {
+    private class StructurePlanProcessor extends RecursiveTask<IStructurePlan> {
 
         private File structurePlanFile;
         private DefaultSubstructuresPlan parent;
@@ -114,7 +114,7 @@ public class StructurePlanReader {
         }
 
         @Override
-        protected StructurePlan compute() {
+        protected IStructurePlan compute() {
             long start = System.currentTimeMillis();
 
             
