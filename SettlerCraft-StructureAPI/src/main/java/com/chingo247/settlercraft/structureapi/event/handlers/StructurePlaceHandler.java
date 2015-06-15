@@ -22,7 +22,7 @@ import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.settlercraft.core.util.KeyPool;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.settlercraft.structureapi.exception.StructureException;
-import com.chingo247.settlercraft.structureapi.model.structure.StructureRepository;
+import com.chingo247.settlercraft.structureapi.exception.StructureRestrictionViolationException;
 import com.chingo247.settlercraft.structureapi.model.util.StructureRelations;
 import com.chingo247.settlercraft.structureapi.platforms.bukkit.selection.HologramSelectionManager;
 import com.chingo247.settlercraft.structureapi.platforms.services.PermissionManager;
@@ -33,7 +33,6 @@ import com.chingo247.settlercraft.structureapi.model.structure.StructureStatus;
 import com.chingo247.settlercraft.structureapi.model.world.StructureWorldRepository;
 import com.chingo247.settlercraft.structureapi.structure.IStructureAPI;
 import com.chingo247.settlercraft.structureapi.model.structure.StructureNode;
-import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureRepository;
 import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureWorld;
 import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureWorldRepository;
 import com.chingo247.settlercraft.structureapi.model.structure.Structure;
@@ -79,7 +78,6 @@ public class StructurePlaceHandler {
     private final IEconomyProvider economyProvider;
     private final IStructureAPI structureAPI;
     private final IColors color;
-    private final IStructureRepository structureRepository;
     private final IStructureWorldRepository structureWorldRepository;
     private final APlatform platform;
 
@@ -89,7 +87,6 @@ public class StructurePlaceHandler {
         this.structureAPI = StructureAPI.getInstance();
         this.platform = structureAPI.getPlatform();
         this.color = platform.getChatColors();
-        this.structureRepository = new StructureRepository(SettlerCraft.getInstance().getNeo4j());
         this.structureWorldRepository = new StructureWorldRepository(SettlerCraft.getInstance().getNeo4j());
     }
     
@@ -200,8 +197,10 @@ public class StructurePlaceHandler {
         // If player has NOT selected anything yet... make a new selection
         if (!selectionManager.hasSelection(player)) {
             selectionManager.select(player, pos1, pos2);
-            player.print(color.yellow() + "Left-Click " + color.reset() + " in the " + color.green() + " green " + color.reset() + "square to " + color.yellow() + "confirm");
-            player.print(color.yellow() + "Right-Click " + color.reset() + "to" + color.yellow() + " deselect");
+            if(!(selectionManager instanceof NoneSelectionManager)) {
+                player.print(color.yellow() + "Left-Click " + color.reset() + " in the " + color.green() + " green " + color.reset() + "square to " + color.yellow() + "confirm");
+                player.print(color.yellow() + "Right-Click " + color.reset() + "to" + color.yellow() + " deselect");
+            }
         } else if (selectionManager.matchesCurrentSelection(player, pos1, pos2)) {
 
             if (toLeft) {
@@ -258,8 +257,10 @@ public class StructurePlaceHandler {
         } else {
             selectionManager.deselect(player);
             selectionManager.select(player, pos1, pos2);
-            player.print(color.yellow() + "Left-Click " + color.reset() + " in the " + color.green() + " green " + color.reset() + "square to " + color.yellow() + "confirm");
-            player.print(color.yellow() + "Right-Click " + color.reset() + "to" + color.yellow() + " deselect");
+            if(!(selectionManager instanceof NoneSelectionManager)) {
+                player.print(color.yellow() + "Left-Click " + color.reset() + " in the " + color.green() + " green " + color.reset() + "square to " + color.yellow() + "confirm");
+                player.print(color.yellow() + "Right-Click " + color.reset() + "to" + color.yellow() + " deselect");
+            }
         }
 
     }
@@ -393,14 +394,14 @@ public class StructurePlaceHandler {
 
         StructureAPI sapi = (StructureAPI) StructureAPI.getInstance();
         try {
-            sapi.checkStructureRestrictions(player, world, new CuboidRegion(min, max));
-        } catch (StructureException ex) {
+            sapi.checkRestrictions(player, world, new CuboidRegion(min, max));
+        } catch (StructureRestrictionViolationException ex) {
             player.printError(ex.getMessage());
             return false;
         }
 
         try (Transaction tx = graph.beginTx()) {
-            List<? extends StructureNode> overlappingStructure;
+            List<StructureNode> overlappingStructure;
             if (possibleParent != null) {
                 Node n = possibleParent.getNode();
                 StructureNode sn = new StructureNode(n);

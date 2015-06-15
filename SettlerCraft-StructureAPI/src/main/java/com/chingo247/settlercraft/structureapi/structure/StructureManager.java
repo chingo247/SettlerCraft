@@ -1,0 +1,286 @@
+/*
+ * Copyright (C) 2015 Chingo
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package com.chingo247.settlercraft.structureapi.structure;
+
+import com.chingo247.settlercraft.core.Direction;
+import com.chingo247.settlercraft.core.SettlerCraft;
+import com.chingo247.settlercraft.core.model.WorldNode;
+import com.chingo247.settlercraft.structureapi.exception.StructureException;
+import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerNode;
+import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerRepository;
+import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerType;
+import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnershipRelation;
+import com.chingo247.settlercraft.structureapi.model.structure.Structure;
+import com.chingo247.settlercraft.structureapi.model.structure.StructureNode;
+import com.chingo247.settlercraft.structureapi.model.structure.StructureRepository;
+import com.chingo247.settlercraft.structureapi.model.world.StructureWorldNode;
+import com.chingo247.settlercraft.structureapi.model.world.StructureWorldRepository;
+import com.chingo247.settlercraft.structureapi.structure.plan.DefaultStructurePlan;
+import com.chingo247.settlercraft.structureapi.structure.plan.IStructurePlan;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.FilePlacement;
+import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
+import com.chingo247.settlercraft.structureapi.structure.plan.xml.export.PlacementExporter;
+import com.chingo247.settlercraft.structureapi.util.PlacementUtil;
+import com.chingo247.xplatform.core.APlatform;
+import com.chingo247.xplatform.core.ILocation;
+import com.chingo247.xplatform.core.IWorld;
+import com.google.common.io.Files;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.world.World;
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
+
+/**
+ * Manages the creation of Structures. As of version 2.1.0 structures of
+ * different world's no long have to wait on each other. Each world has it's own
+ * StructureManager and serves as monitor for placing structure.
+ *
+ * @since 2.1.0
+ *
+ * @author Chingo
+ */
+public class StructureManager {
+
+    private final Lock lock;
+    private final World world;
+    private final StructureAPI structureAPI;
+    private final APlatform platform;
+    private final StructureWorldRepository structureWorldRepository;
+    private final StructureRepository structureRepository;
+    private final StructureOwnerRepository structureOwnerRepository;
+    private final GraphDatabaseService graph;
+
+    /**
+     * Constructor
+     *
+     * @param world The world this StructureManager will 'Manage'
+     */
+    StructureManager(World world, StructureAPI structureAPI) {
+        this.lock = new ReentrantLock();
+        this.graph = SettlerCraft.getInstance().getNeo4j();
+        this.world = world;
+        this.structureAPI = structureAPI;
+        this.platform = structureAPI.getPlatform();
+        this.structureWorldRepository = new StructureWorldRepository(graph);
+        this.structureRepository = new StructureRepository(graph);
+        this.structureOwnerRepository = new StructureOwnerRepository(graph);
+    }
+
+    /**
+     * Checks if the placement is allowed to be placed. Placement should not
+     * overlap the world's spawn and should also be placed at a height > 1 and
+     * the top may not by higher than the world's max height
+     *
+     * @param p The placement
+     * @param world The world
+     * @param position The position of the placement
+     * @param direction The direction
+     */
+    private void checkWorldRestrictions(Placement p, World world, Vector position, Direction direction) throws StructureException {
+        Vector min = p.getCuboidRegion().getMinimumPoint().add(position);
+        Vector max = min.add(p.getCuboidRegion().getMaximumPoint());
+        CuboidRegion placementDimension = new CuboidRegion(min, max);
+
+        // Below the world?s
+        if (placementDimension.getMinimumPoint().getBlockY() <= 1) {
+            throw new StructureException("Structure must be placed at a minimum height of 1");
+        }
+
+        // Exceeds world height limit?
+        if (placementDimension.getMaximumPoint().getBlockY() > world.getMaxY()) {
+            throw new StructureException("Structure will reach above the world's max height (" + world.getMaxY() + ")");
+        }
+
+        // Check for overlap on the world's 'SPAWN'
+        IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
+        ILocation l = w.getSpawn();
+        Vector spawnPos = new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ());
+        if (placementDimension.contains(spawnPos)) {
+            throw new StructureException("Structure overlaps the world's spawn...");
+        }
+
+    }
+
+    public Structure createStructure(Structure parentStructure, Placement placement, Vector position, Direction direction, Player owner) throws StructureException {
+        IWorld w = platform.getServer().getWorld(world.getName());
+        Structure structure = null;
+        Transaction tx = null;
+        System.out.println("Create structure!");
+        lock.lock();
+        try {
+            tx = graph.beginTx();
+            
+            StructureWorldNode worldNode = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
+            StructureNode structureNode = create(worldNode, structure, placement, position, direction, owner);
+
+            if (structureNode != null) {
+                
+                File structurePlanDirectory = structureAPI.getDirectoryForStructure(worldNode, structureNode);
+                File structurePlanFile = new File(structurePlanDirectory, "structureplan.xml");
+                PlacementExporter exporter = new PlacementExporter();
+                exporter.export(placement, structurePlanFile, "structureplan.xml", true);
+                
+                structure = new Structure(structureNode);
+            }
+        
+        } catch (StructureException ex) {
+            if (tx != null) {
+                tx.failure();
+            }
+            throw ex;
+        } catch (Exception ex) {
+            if (tx != null) {
+                tx.failure();
+            }
+            throw new RuntimeException(ex);
+        } finally {
+            lock.unlock();
+        }
+        System.out.println("structure #" + structure.getId() + " has been created");
+        return structure;
+    }
+
+    public Structure createStructure(Structure parentStructure, IStructurePlan structurePlan, Vector position, Direction direction, Player owner) throws StructureException {
+        IWorld w = platform.getServer().getWorld(world.getName());
+        Structure structure = null;
+        Transaction tx = null;
+        System.out.println("Creating structure");
+        lock.lock();
+        try {
+            tx = graph.beginTx();
+            StructureWorldNode worldNode = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
+            StructureNode structureNode = create(worldNode, structure, structurePlan.getPlacement(), position, direction, owner);
+            
+            try {
+                moveResources(worldNode, structureNode, structurePlan);
+            } catch (IOException ex) {
+                // rollback...
+                File structureDir = structureAPI.getDirectoryForStructure(worldNode, structureNode);
+                structureDir.delete();
+                tx.failure();
+                Logger.getLogger(StructureAPI.class.getName()).log(Level.SEVERE, "Error occured during structure creation... rolling back changes made", ex);
+            }
+
+        if (structureNode != null) {
+            structure = new Structure(structureNode);
+        }
+        
+        } catch (StructureException ex) {
+            if (tx != null) {
+                tx.failure();
+            }
+            throw ex;
+        } catch (Exception ex) {
+            if (tx != null) {
+                tx.failure();
+            }
+            throw new RuntimeException(ex);
+        } finally {
+            lock.unlock();
+        }
+        System.out.println("structure #" + structure.getId() + " has been created");
+        return structure;
+    }
+
+    StructureNode create(StructureWorldNode worldNode, Structure parent, Placement placement, Vector position, Direction direction, Player owner) throws StructureException {
+        checkWorldRestrictions(placement, world, position, direction);
+
+        Vector min = position;
+        Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getCuboidRegion().getMaximumPoint());
+        CuboidRegion structureRegion = new CuboidRegion(min, max);
+        StructureNode structureNode = null;
+
+        StructureNode parentNode = null;
+        if (parent != null) {
+            parentNode = new StructureNode(parent.getNode());
+            CuboidRegion parentRegion = parent.getCuboidRegion();
+            if (!(parentRegion.contains(min) && parentRegion.contains(max))) {
+                throw new StructureException("Structure overlaps structure #" + parent.getId() + ", but does not fit within it's boundaries");
+            }
+        }
+
+        if (parentNode != null) {
+            boolean hasWithin = parentNode.hasSubstructuresWithin(structureRegion);
+            if (hasWithin) {
+                throw new StructureException("Structure overlaps another structure...");
+            }
+            parentNode.addSubstructure(structureNode);
+        }
+
+
+        // Create the StructureNode - Where it all starts...
+        structureNode = structureRepository.addStructure(worldNode, placement.getClass().getSimpleName(), position, structureRegion, direction, 0.0);
+
+        // Add owner!
+        if (owner != null) {
+            StructureOwnerNode settler = structureOwnerRepository.findByUUID(owner.getUniqueId());
+            if (settler == null) {
+                throw new RuntimeException("Settler was null!"); // SHOULD NEVER HAPPEN AS SETTLERS ARE ADDED AT MOMENT OF FIRST LOGIN
+            }
+            structureNode.addOwner(settler, StructureOwnerType.MASTER);
+        }
+
+        // Inherit ownership if there is a parent
+        if (parentNode != null) {
+            for (StructureOwnershipRelation rel : parentNode.getOwnerships()) {
+                structureNode.addOwner(rel.getOwner(), rel.getOwnerType());
+            }
+        }
+
+        return structureNode;
+
+    }
+
+    final void moveResources(WorldNode worldNode, StructureNode structureNode, IStructurePlan plan) throws IOException {
+        // Give this structure a directory!
+        File structureDir = structureAPI.getDirectoryForStructure(worldNode, structureNode);
+        structureDir.mkdirs();
+
+        Files.copy(plan.getFile(), new File(structureDir, "structureplan.xml"));
+        Placement placement = plan.getPlacement();
+
+        // Move the resources if applicable!
+        if (placement instanceof FilePlacement) {
+            FilePlacement filePlacement = (FilePlacement) placement;
+            File[] files = filePlacement.getFiles();
+            for (File f : files) {
+                Files.copy(f, new File(structureDir, f.getName()));
+            }
+        }
+    }
+
+    class PlacementPlan extends DefaultStructurePlan {
+
+        PlacementPlan(String id, File planFile, Placement placement) {
+            super(id, planFile, placement);
+            setCategory("Other");
+            setDescription("None");
+            setPrice(0.0);
+            setName(placement.getClass().getSimpleName());
+        }
+
+    }
+
+}

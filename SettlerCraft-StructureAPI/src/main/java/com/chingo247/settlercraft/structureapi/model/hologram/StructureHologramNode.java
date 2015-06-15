@@ -14,10 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structureapi.model;
+package com.chingo247.settlercraft.structureapi.model.hologram;
 
-import com.chingo247.settlercraft.structureapi.model.structure.StructureNode;
+import com.chingo247.settlercraft.structureapi.model.StructureObject;
 import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureHologram;
+import com.chingo247.settlercraft.structureapi.model.structure.Structure;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.DynamicRelationshipType;
@@ -43,14 +44,14 @@ public class StructureHologramNode extends StructureObject implements IStructure
     }
 
     @Override
-    public StructureNode getStructure() {
-        Node n = getRawNode();
+    public Structure getStructure() {
+        Node n = getNode();
         Relationship r = n.getSingleRelationship(RELATION_HAS_HOLOGRAM, Direction.INCOMING);
         if(r == null) {
             return null;
         }
         Node other = r.getOtherNode(n);
-        return other != null ? new StructureNode(other) : null; // Shouldn't be null...
+        return other != null ? new Structure(other) : null; // Shouldn't be null...
     }
 
     @Override
@@ -58,7 +59,6 @@ public class StructureHologramNode extends StructureObject implements IStructure
         return name;
     }
 
-    @Override
     public void setName(String name) {
         this.name = name;
     }

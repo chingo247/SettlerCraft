@@ -34,7 +34,7 @@ public interface IStructureWorld extends IWorld {
      * Gets the structures residing within this world
      * @return The structures
      */
-    public List<? extends StructureNode> getStructures();
+    public List<StructureNode> getStructures();
     
     /**
      * Gets the structures that have been deleted after the given date
@@ -42,7 +42,7 @@ public interface IStructureWorld extends IWorld {
      * @return The structures that have been deleted after a given date
      * This method is used for structure invalidation
      */
-    public List<? extends StructureNode> getDeletedAfter(long date);
+    public List<StructureNode> getDeletedAfter(long date);
     
     /**
      * Gets the structures that have been created after the given date
@@ -50,7 +50,7 @@ public interface IStructureWorld extends IWorld {
      * @return The structures that have been created after a given date
      * This method is used for structure invalidation
      */
-    public List<? extends StructureNode> getCreatedAfter(long date);
+    public List<StructureNode> getCreatedAfter(long date);
     
     public boolean deleteStructure(long structureId);
     
@@ -58,7 +58,7 @@ public interface IStructureWorld extends IWorld {
     
     public WorldConfig getConfig();
     
-    public List<? extends StructureNode> getStructuresWithin(CuboidRegion region, int limit);
+    public List<StructureNode> getStructuresWithin(CuboidRegion region, int limit);
     
     public boolean hasStructuresWithin(CuboidRegion region);
     

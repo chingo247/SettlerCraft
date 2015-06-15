@@ -52,7 +52,7 @@ public class SettlerCraft {
     public static final String MSG_PREFIX = "[SettlerCraft]: ";
 
     private static SettlerCraft instance;
-    private final ExecutorService service;
+    private final ExecutorService executor;
 
     private APlatform platform;
     private IPlugin plugin;
@@ -62,7 +62,7 @@ public class SettlerCraft {
     private IEconomyProvider economyProvider;
 
     private SettlerCraft() {
-        this.service = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 30L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+        this.executor = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 30L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     }
 
     private void setupNeo4j() {
@@ -97,7 +97,7 @@ public class SettlerCraft {
         }
         
         
-        SettlerRegister structureOwnerRegister = new SettlerRegister(settlerDAO, service, graph);
+        SettlerRegister structureOwnerRegister = new SettlerRegister(settlerDAO, executor, graph);
         EventManager.getInstance().getEventBus().register(structureOwnerRegister);
     }
     
@@ -157,7 +157,7 @@ public class SettlerCraft {
     }
 
     public ExecutorService getExecutor() {
-        return service;
+        return executor;
     }
 
     public Player getPlayer(UUID player) {

@@ -18,6 +18,7 @@ package com.chingo247.settlercraft.structureapi.structure;
 
 import com.chingo247.menuapi.menu.CategoryMenu;
 import com.chingo247.settlercraft.core.Direction;
+import com.chingo247.settlercraft.structureapi.exception.StructureRestrictionViolationException;
 import com.chingo247.settlercraft.structureapi.model.structure.Structure;
 import com.chingo247.settlercraft.structureapi.platforms.IConfigProvider;
 import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncPlacement;
@@ -29,6 +30,7 @@ import com.chingo247.settlercraft.structureapi.structure.restriction.StructureRe
 import com.chingo247.xplatform.core.APlatform;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
@@ -212,6 +214,16 @@ public interface IStructureAPI {
      * @param structureRestriction 
      */
     public void removeRestriction(StructureRestriction structureRestriction);
+    
+    /**
+     * Checks all StructureRestrictions. Each restriction determines if something is allowed to be placed
+     * in a certain area by a certain player.
+     * @param player The player, may be null
+     * @param world The world
+     * @param region The region
+     * @throws com.chingo247.settlercraft.structureapi.exception.StructureRestrictionViolationException Thrown when a restriction was violated
+     */
+    public void checkRestrictions(Player player, World world, CuboidRegion region) throws StructureRestrictionViolationException;
     
     /**
      * Loads a schematic file

@@ -20,7 +20,7 @@ import com.chingo247.settlercraft.structureapi.model.structure.Structure;
 
 
 /**
- *
+ * Fired when a structure was created
  * @author Chingo
  */
 public class StructureCreateEvent extends StructureEvent {

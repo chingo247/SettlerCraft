@@ -5,6 +5,7 @@
  */
 package com.chingo247.settlercraft.structureapi.model.interfaces;
 
+import com.chingo247.settlercraft.structureapi.model.hologram.StructureHologramNode;
 import com.chingo247.settlercraft.structureapi.model.structure.StructureNode;
 import com.sk89q.worldedit.Vector;
 import java.util.List;
@@ -15,9 +16,9 @@ import java.util.List;
  */
 public interface IStructureHologramRepository {
     
-    public IStructureHologram addHologram(StructureNode structure, Vector relativePosition);
+    public StructureHologramNode addHologram(StructureNode structure, Vector relativePosition);
     
-    public List<IStructureHologram> findAll();
+    public List<StructureHologramNode> findAll();
     
     
 }

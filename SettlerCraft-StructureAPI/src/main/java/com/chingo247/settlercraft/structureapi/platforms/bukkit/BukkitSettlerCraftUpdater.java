@@ -192,8 +192,6 @@ class BukkitSettlerCraftUpdater {
             sn.getNode().setProperty("WGRegion", structure.getStructureRegion()); // Set worldguardregion
         }
 
-        world.addStructure(sn);
-
         for (PlayerOwnership owner : structure.getOwnerships()) {
             IBaseSettler settler = settlerDAO.findByUUID(owner.getPlayerUUID());
             if (settler == null) {

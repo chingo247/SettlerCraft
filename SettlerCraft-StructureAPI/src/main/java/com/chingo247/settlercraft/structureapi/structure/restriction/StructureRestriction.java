@@ -16,14 +16,18 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.restriction;
 
-import com.chingo247.settlercraft.structureapi.exception.StructureException;
+import com.chingo247.settlercraft.structureapi.exception.StructureRestrictionViolationException;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.util.Objects;
 
 /**
- * StructureRestriction class is used to determine if a Structure may be build in a certain area
+ * StructureRestriction class is used to determine if a Structure may be build in a certain area.
+ * 
+ * Where is this used?
+ * SettlerCraft-WorldGuard implements this class to determine if a structure doesn't overlap any un-owned regions
+ * SettlerCraft-Towny will follow up and check if a structure may be placed on a TownBlock
  * @author Chingo
  */
 public abstract class StructureRestriction {
@@ -73,11 +77,12 @@ public abstract class StructureRestriction {
      * @param whoPlaces
      * @param world
      * @param affectedArea
-     * @throws com.chingo247.settlercraft.structureapi.exception.StructureException
+     * @throws com.chingo247.settlercraft.structureapi.exception.StructureRestrictionViolationException
+     * 
      */
-    public final void check(Player whoPlaces, World world, CuboidRegion affectedArea) throws StructureException {
+    public final void check(Player whoPlaces, World world, CuboidRegion affectedArea) throws StructureRestrictionViolationException {
         if(!evaluate(whoPlaces, world, affectedArea)) {
-            throw new StructureException(message);
+            throw new StructureRestrictionViolationException(message);
         }
     }
 

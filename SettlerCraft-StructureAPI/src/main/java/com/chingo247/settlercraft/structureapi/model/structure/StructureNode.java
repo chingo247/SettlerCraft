@@ -65,8 +65,6 @@ public class StructureNode extends AbstractStructure {
 
     // Second level cache
     private Long id;
-    private final String worldName;
-    private final UUID worldUUId;
 
     /**
      * The node that provides all the information of the structure
@@ -76,11 +74,6 @@ public class StructureNode extends AbstractStructure {
     public StructureNode(Node underlyingNode) {
         super(underlyingNode);
         this.underlyingNode = underlyingNode;
-
-        this.id = getId();
-        StructureWorldNode world = getWorld();
-        this.worldName = world.getName();
-        this.worldUUId = world.getUUID();
     }
 
     @Override

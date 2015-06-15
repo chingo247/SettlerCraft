@@ -3,11 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.settlercraft.structureapi.model;
+package com.chingo247.settlercraft.structureapi.model.hologram;
 
 import com.chingo247.settlercraft.structureapi.model.structure.StructureStatus;
 import com.chingo247.settlercraft.structureapi.model.structure.StructureNode;
-import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureHologram;
 import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureHologramRepository;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -31,7 +30,7 @@ public class StructureHologramRepository implements IStructureHologramRepository
     }
     
     @Override
-    public IStructureHologram addHologram(StructureNode structure, Vector relativePosition) {
+    public StructureHologramNode addHologram(StructureNode structure, Vector relativePosition) {
         Node n = graph.createNode(StructureHologramNode.LABEL);
         n.setProperty(StructureHologramNode.RELATIVE_X_PROPERTY, relativePosition.getBlockX());
         n.setProperty(StructureHologramNode.RELATIVE_Y_PROPERTY, relativePosition.getBlockY());
@@ -42,7 +41,7 @@ public class StructureHologramRepository implements IStructureHologramRepository
     }
     
     @Override
-    public List<IStructureHologram> findAll() {
+    public List<StructureHologramNode> findAll() {
         Map<String,Object> params = Maps.newHashMap();
         params.put("removed", (Integer) StructureStatus.REMOVED.getStatusId());
         
@@ -52,13 +51,13 @@ public class StructureHologramRepository implements IStructureHologramRepository
                 + "WHERE NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = {removed}"
                 + "RETURN h";
         Result r = graph.execute(query, params);
-        List<IStructureHologram> holograms = Lists.newArrayList();
+        List<StructureHologramNode> holograms = Lists.newArrayList();
         
         while(r.hasNext()) {
             Map<String,Object> map = r.next();
             for(Object o : map.values()) {
                 Node n = (Node) o;
-                IStructureHologram shn = new StructureHologramNode(n);
+                StructureHologramNode shn = new StructureHologramNode(n);
                 holograms.add(shn);
             }
         }

@@ -20,8 +20,9 @@ import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.structureapi.event.StructureCreateEvent;
 import com.chingo247.settlercraft.structureapi.event.StructureStateChangeEvent;
-import com.chingo247.settlercraft.structureapi.model.StructureHologramNode;
-import com.chingo247.settlercraft.structureapi.model.StructureHologramRepository;
+import com.chingo247.settlercraft.structureapi.model.hologram.StructureHologram;
+import com.chingo247.settlercraft.structureapi.model.hologram.StructureHologramNode;
+import com.chingo247.settlercraft.structureapi.model.hologram.StructureHologramRepository;
 import com.chingo247.settlercraft.structureapi.model.structure.StructureStatus;
 import com.chingo247.settlercraft.structureapi.model.structure.StructureNode;
 import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureHologram;
@@ -214,17 +215,21 @@ public class StructureHologramManager {
     }
 
     private void initHolos() {
-        final Queue<IStructureHologram> hologramQueue = new LinkedList<>();
+        final Queue<StructureHologram> hologramQueue = new LinkedList<>();
         try (Transaction tx = graph.beginTx()) {
-            List<IStructureHologram> structureHolograms = structureHologramRepository.findAll();
+            List<StructureHologramNode> structureHolograms = structureHologramRepository.findAll();
 
-            for (IStructureHologram shn : structureHolograms) {
+            for (StructureHologramNode shn : structureHolograms) {
                 if (shn.getStructure() != null) {
-                    hologramQueue.add(shn);
+                    hologramQueue.add(new StructureHologram(shn));
                 }
             }
 
-            int count = 0;
+            
+
+            tx.success();
+        }
+        int count = 0;
             while (hologramQueue.peek() != null) {
                 if (count % 100 == 0) {
                     try {
@@ -235,7 +240,7 @@ public class StructureHologramManager {
                 }
 
                 final IStructureHologram hologram = hologramQueue.poll();
-                final StructureNode structure = hologram.getStructure();
+                final Structure structure = hologram.getStructure();
                 final Vector position = structure.translateRelativeLocation(new Vector(hologram.getRelativeX(), hologram.getRelativeY(), hologram.getRelativeZ()));
                 final World w = SettlerCraft.getInstance().getWorld(hologram.getStructure().getWorld().getUUID());
 
@@ -244,14 +249,12 @@ public class StructureHologramManager {
                     @Override
                     public void run() {
                         Hologram h = hologramsProvider.createHologram(plugin.getName(), w, position);
-                        registerStructureHologram(new Structure(structure), h);
+                        registerStructureHologram(structure, h);
                     }
                 });
                 count++;
             }
-
-            tx.success();
-        }
+        
 
     }
 

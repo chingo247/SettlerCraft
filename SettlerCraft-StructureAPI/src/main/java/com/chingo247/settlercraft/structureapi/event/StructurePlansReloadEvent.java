@@ -17,7 +17,7 @@
 package com.chingo247.settlercraft.structureapi.event;
 
 /**
- *
+ * Fired when StructurePlans are being reloaded
  * @author Chingo
  */
 public class StructurePlansReloadEvent {

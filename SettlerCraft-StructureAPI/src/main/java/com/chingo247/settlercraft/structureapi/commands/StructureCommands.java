@@ -85,6 +85,7 @@ import org.neo4j.graphdb.Transaction;
  */
 public class StructureCommands {
 
+    private static final Logger LOG = Logger.getLogger(StructureCommands.class.getSimpleName());
     private static final int MAX_LINES = 10;
     private static final Comparator<String> ALPHABETICAL_ORDER = new Comparator<String>() {
 
@@ -101,7 +102,6 @@ public class StructureCommands {
     
     private final PermissionManager permissionManager;
     private final IColors COLOR;
-    private final ExecutorService executorService;
     
     private final IBaseSettlerRepository settlerRepository;
     private final GraphDatabaseService graph;
@@ -114,7 +114,6 @@ public class StructureCommands {
         this.structureAPI = structureAPI;
         this.permissionManager = PermissionManager.getInstance();
         this.COLOR = structureAPI.getPlatform().getChatColors();
-        this.executorService = executorService;
         this.structureRepository = new StructureRepository(graph);
         this.worldRepository = new StructureWorldRepository(graph);
         this.settlerRepository = new BaseSettlerRepository(graph);
@@ -124,6 +123,7 @@ public class StructureCommands {
         this.playerPool = new KeyPool<>(executorService);
         this.platform = structureAPI.getPlatform();
         this.commandHelper = new CommandHelper(platform);
+        LOG.setLevel(((StructureAPI) structureAPI).getLogLevel());
     }
 
     public boolean handle(final ICommandSender sender, final String command, String[] args) throws CommandException {
@@ -147,7 +147,9 @@ public class StructureCommands {
             @Override
             public void run() {
                 try {
+                    long start = System.currentTimeMillis();
                     switch (commandArg) {
+                        // /stt me 
                         case "me":
                             checkIsPlayer(sender);
                             IPlayer ply = (IPlayer) sender;
@@ -231,6 +233,9 @@ public class StructureCommands {
                         default:
                             throw new CommandException("No action known for '/" + command + " " + commandArg);
                     }
+                    
+                    LOG.log(Level.INFO, "Executed /stt {0} in {1} ms", new Object[]{commandArg, System.currentTimeMillis() - start});
+                    
                 } catch (CommandException ex) {
                     String[] error = ex.getPlayerErrorMessage();
                     for(int i = 0; i < error.length; i++) {
@@ -401,6 +406,7 @@ public class StructureCommands {
             }
 
             ILocation loc = player.getLocation();
+            long start = System.currentTimeMillis();
             try (Transaction tx = graph.beginTx()) {
                 StructureNode structure = structureRepository.findById(id);
                 if (structure == null) {
@@ -425,6 +431,7 @@ public class StructureCommands {
                 
                 tx.success();
             }
+            LOG.log(Level.INFO, "relative location in {0} ms", (System.currentTimeMillis() - start));
             
             
         } else {
@@ -432,6 +439,7 @@ public class StructureCommands {
             ILocation loc = ply.getLocation();
 
             Vector pos = new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+            long start = System.currentTimeMillis();
             try (Transaction tx = graph.beginTx()) {
                 StructureNode structure = getSmallesStructure(ply.getWorld(), pos);
 
@@ -451,6 +459,7 @@ public class StructureCommands {
                 player.sendMessage("Your relative position is " + COLOR.yellow() + "x: " + COLOR.reset() + rel.getBlockX() + COLOR.yellow() + " y: " + COLOR.reset() + rel.getBlockY() + COLOR.yellow() + " z: " + COLOR.reset() + rel.getBlockZ());
                 tx.success();
             }
+            LOG.log(Level.INFO, "relative location in {0} ms", (System.currentTimeMillis() - start));
         }
 
         return true;
@@ -469,7 +478,7 @@ public class StructureCommands {
                 sender.sendMessage("Expected a number but got '" + commandArgs[0] + "'");
                 return true;
             }
-
+            long start = System.currentTimeMillis();
             try (Transaction tx = graph.beginTx()) {
                 StructureNode structure = structureRepository.findById(id);
 
@@ -482,12 +491,15 @@ public class StructureCommands {
                 sender.sendMessage(getInfo(structure));
                 tx.success();
             }
+            LOG.log(Level.INFO, "info in {0} ms", (System.currentTimeMillis() - start));
 
         } else if (sender instanceof IPlayer) {
             IPlayer ply = (IPlayer) sender;
             ILocation loc = ply.getLocation();
 
             Vector pos = new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+            
+            long start = System.currentTimeMillis();
             try (Transaction tx = graph.beginTx()) {
                 StructureNode s = getSmallesStructure(ply.getWorld(), pos);
 
@@ -501,7 +513,7 @@ public class StructureCommands {
                 sender.sendMessage(info);
                 tx.success();
             }
-
+            LOG.log(Level.INFO, "info in {0} ms", (System.currentTimeMillis() - start));
         } else {
             sender.sendMessage(COLOR.red() + " too few arguments", "/stt info [id]");
         }
@@ -571,6 +583,7 @@ public class StructureCommands {
         }
 
         long id = Long.parseLong(structureIdArg);
+        long start = System.currentTimeMillis();
         try (Transaction tx = graph.beginTx()) {
             StructureNode sn = structureRepository.findById(id);
 
@@ -579,34 +592,28 @@ public class StructureCommands {
                 throw new CommandException("Couldn't find a structure for #" + structureIdArg);
             }
 
-            if (!sn.isOwner(player.getUniqueId()) && !player.isOP()) {
+            if (!sn.isOwner(player.getUniqueId(), StructureOwnerType.MASTER) && !player.isOP()) {
                 tx.success();
-                throw new CommandException("You don't own this structure...");
+                throw new CommandException("You are not the 'MASTER' owner of this structure...");
             }
             structure = new Structure(sn);
             tx.success();
         }
+        LOG.log(Level.INFO, "build in {0} ms", (System.currentTimeMillis() - start));
 
         String force = commandArgs.length == 2 ? commandArgs[1] : null;
-        if (force != null && !(force.equals("force") && force.equals("f"))) {
+        if (force != null && !(force.equals("force") || force.equals("f"))) {
             throw new CommandException("Unknown second argument '" + force + "' ");
         }
         final boolean useForce = force != null && (force.equals("f") || force.equals("force"));
 
-        executorService.execute(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    Player ply = SettlerCraft.getInstance().getPlayer(player.getUniqueId());
-                    structure.build(ply, new BuildOptions(), useForce);
+        Player ply = SettlerCraft.getInstance().getPlayer(player.getUniqueId());
+        try {
+            structure.build(ply, new BuildOptions(), useForce);
+        } catch (ConstructionException ex) {
+            player.sendMessage(COLOR.red() + ex.getMessage());
+        }
                     
-                } catch (ConstructionException ex) {
-                    player.sendMessage(COLOR.red() + ex.getMessage());
-                }
-            }
-        });
-
         return true;
     }
 
@@ -620,44 +627,43 @@ public class StructureCommands {
             throw new CommandException("Expected a number but got '" + structureIdArg + "'");
         }
 
+        // Check structure
         long id = Long.parseLong(structureIdArg);
+        long start = System.currentTimeMillis();
         try (Transaction tx = graph.beginTx()) {
             StructureNode sn = structureRepository.findById(id);
 
+            // Structure not found!
             if (sn == null) {
                 tx.success();
                 throw new CommandException("Couldn't find a structure for #" + structureIdArg);
             }
 
-            if (!sn.isOwner(player.getUniqueId()) && !player.isOP()) {
+            // Player is not the owner!
+            if (!sn.isOwner(player.getUniqueId(), StructureOwnerType.MASTER)&& !player.isOP()) {
                 tx.success();
-                throw new CommandException("You don't own this structure...");
+                throw new CommandException("You are not the 'MASTER' owner of this structure...");
             }
             structure = new Structure(sn);
 
             tx.success();
         }
+        LOG.log(Level.INFO, "demolish in {0} ms", (System.currentTimeMillis() - start));
 
+        
+        // Use force?
         String force = commandArgs.length == 2 ? commandArgs[1] : null;
-        if (force != null && !(force.equals("force") && force.equals("f"))) {
+        if (force != null && !(force.equals("force") || force.equals("f"))) {
             throw new CommandException("Unknown second argument '" + force + "' ");
         }
         final boolean useForce = force != null && (force.equals("f") || force.equals("force"));
-
-        executorService.execute(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    structure.demolish(SettlerCraft.getInstance().getPlayer(player.getUniqueId()), new DemolishingOptions(), useForce);
-                } catch (ConstructionException ex) {
-                    player.sendMessage(COLOR.red() + ex.getMessage());
-                } catch (Exception ex) { // Catch everything or disappear it will dissappear in the abyss!
-                    Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
-                }
-            }
-        });
-
+        
+        // Start demolition
+        try {
+            structure.demolish(SettlerCraft.getInstance().getPlayer(player.getUniqueId()), new DemolishingOptions(), useForce);
+        } catch (ConstructionException ex) {
+            player.sendMessage(COLOR.red() + ex.getMessage());
+        }
         return true;
     }
 
@@ -671,7 +677,9 @@ public class StructureCommands {
             throw new CommandException("Expected a number but got '" + structureIdArg + "'");
         }
 
+        // Retrieve structure and perform checks
         long id = Long.parseLong(structureIdArg);
+        long start = System.currentTimeMillis();
         try (Transaction tx = graph.beginTx()) {
             StructureNode sn = structureRepository.findById(id);
 
@@ -688,25 +696,21 @@ public class StructureCommands {
 
             tx.success();
         }
+        LOG.log(Level.INFO, "stop in {0} ms", (System.currentTimeMillis() - start));
 
+        // Use force?
         String force = commandArgs.length == 2 ? commandArgs[1] : null;
         if (force != null && !(force.equals("force") && force.equals("f"))) {
             throw new CommandException("Unknown second argument '" + force + "' ");
         }
         final boolean useForce = force != null && (force.equals("f") || force.equals("force"));
-        executorService.execute(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    structure.stop(useForce);
-                } catch (ConstructionException ex) {
-                    player.sendMessage(COLOR.red() + ex.getMessage());
-                } catch (Exception ex) { // Catch everything or disappear it will dissappear in the abyss!
-                    Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
-                }
-            }
-        });
+      
+        // Stop current action
+        try {
+            structure.stop(useForce);
+        } catch (ConstructionException ex) {
+            player.sendMessage(COLOR.red() + ex.getMessage());
+        } 
 
         return true;
     }
@@ -812,12 +816,15 @@ public class StructureCommands {
         int skip = p * (MAX_LINES - 1);
         int limit = (MAX_LINES - 1);
 
+        long start = System.currentTimeMillis();
         try (Transaction tx = graph.beginTx()) {
             IStructureOwner structureOwner = structureOwnerRepository.findByUUID(playerId);
             
+            long countStart = System.currentTimeMillis();
             long totalStructures = structureOwner.getStructureCount();
+            LOG.log(Level.INFO, "list count in {0} ms", (System.currentTimeMillis() - countStart));
             long totalPages = Math.round(Math.ceil(totalStructures / (MAX_LINES - 1)));
-            List<StructureNode> structures = structureOwner.getStructures();
+            List<StructureNode> structures = structureOwner.getStructures(skip, limit);
             if (p > totalPages || p < 0) {
                 iPlayer.sendMessage(COLOR.red() + "Page " + p + " out of " + totalPages + "...");
                 return true;
@@ -842,6 +849,7 @@ public class StructureCommands {
             }
             tx.success();
         }
+        LOG.log(Level.INFO, "list structures in {0} ms", (System.currentTimeMillis() - start));
         iPlayer.sendMessage(message);
 
         return true;
@@ -865,14 +873,14 @@ public class StructureCommands {
                 + " RETURN s as structure"
                 + " ORDER BY s." + StructureNode.SIZE_PROPERTY + " ASC "
                 + " LIMIT 1";
-
+        long start = System.currentTimeMillis();
         Result result = graph.execute(query, params);
         while (result.hasNext()) {
             Map<String, Object> map = result.next();
             Node n = (Node) map.get("structure");
             structure = new StructureNode(n);
         }
-
+        LOG.log(Level.INFO, "Smallest structure in {0} ms", (System.currentTimeMillis() - start));
         return structure;
     }
 
@@ -938,6 +946,7 @@ public class StructureCommands {
         if (commandArgs.length == 1) {
             TreeSet<String> ownerships = Sets.newTreeSet(ALPHABETICAL_ORDER);
             String structureName = null;
+            long start = System.currentTimeMillis();
             try (Transaction tx = graph.beginTx()) {
                 StructureNode structure = structureRepository.findById(structureId);
                 if (structure == null) {
@@ -952,6 +961,7 @@ public class StructureCommands {
 
                 tx.success();
             }
+            LOG.log(Level.INFO, "owners in {0} ms", (System.currentTimeMillis() - start));
             String ownershipString = "";
             int size = ownerships.size();
             
@@ -1001,6 +1011,7 @@ public class StructureCommands {
             throw new CommandException("Unknown method '" + method + "', expected 'add' or 'remove'", help);
         }
 
+        long start = System.currentTimeMillis();
         try (Transaction tx = graph.beginTx()) {
             StructureNode structure = structureRepository.findById(structureId);
             if (structure == null) {
@@ -1094,6 +1105,7 @@ public class StructureCommands {
 
             tx.success();
         }
+        LOG.log(Level.INFO, "owners add/remove in {0} ms", (System.currentTimeMillis() - start));
         return true;
     }
 

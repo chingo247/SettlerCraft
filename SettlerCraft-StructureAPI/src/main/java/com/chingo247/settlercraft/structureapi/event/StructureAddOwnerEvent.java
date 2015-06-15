@@ -24,15 +24,14 @@ import java.util.UUID;
  *
  * @author Chingo
  */
-public class StructureAddOwnerEvent {
+public class StructureAddOwnerEvent extends StructureEvent {
     
     private final UUID addedOwner;
-    private final Structure structure;
     private final StructureOwnerType ownerType;
 
     public StructureAddOwnerEvent(UUID addedMember, Structure structure, StructureOwnerType type) {
+        super(structure);
         this.addedOwner = addedMember;
-        this.structure = structure;
         this.ownerType = type;
     }
 
@@ -40,9 +39,7 @@ public class StructureAddOwnerEvent {
         return addedOwner;
     }
 
-    public Structure getStructure() {
-        return structure;
-    }
+   
 
     public StructureOwnerType getOwnerType() {
         return ownerType;

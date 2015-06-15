@@ -5,8 +5,9 @@
  */
 package com.chingo247.settlercraft.structureapi.model.interfaces;
 
-import com.chingo247.settlercraft.structureapi.model.structure.StructureNode;
+import com.chingo247.settlercraft.structureapi.model.structure.Structure;
 import com.sk89q.worldedit.Vector;
+import org.neo4j.graphdb.Node;
 
 /**
  * An object that is related to the structure
@@ -14,11 +15,11 @@ import com.sk89q.worldedit.Vector;
  */
 public interface IStructureObject {
     
-    public StructureNode getStructure();
+    public Structure getStructure();
+    
+    public Node getNode();
     
     public String getName();
-    
-    public void setName(String name);
     
     public double getX();
     

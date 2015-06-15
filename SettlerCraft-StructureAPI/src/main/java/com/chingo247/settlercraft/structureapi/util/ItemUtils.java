@@ -14,10 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structureapi.event;
+package com.chingo247.settlercraft.structureapi.util;
 
 /**
- * Fired when structure plans are loaded
+ *
  * @author Chingo
  */
-public class StructurePlansLoadedEvent {}
+public class ItemUtils {
+    
+    // Is Fuel? [isBurnable or of use in furnace]
+    // Is Edible
+    // Is Food
+    // Is Tool
+    // Is Weapon
+    // Is Metal
+    // Is Mineral
+    // Can be found at depth
+    // Can be found at biome
+    // Can be found at worldType
+    
+    
+   
+    
+}

@@ -16,6 +16,7 @@
  */
 package com.chingo247.settlercraft.structureapi.model.interfaces;
 
+import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerNode;
 import com.chingo247.settlercraft.structureapi.model.structure.StructureNode;
 import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerType;
 import org.neo4j.graphdb.Relationship;
@@ -36,7 +37,7 @@ public interface IStructureOwnership {
      * Gets the owner
      * @return The owner
      */
-    public IStructureOwner getOwner();
+    public StructureOwnerNode getOwner();
     
     /**
      * Gets the ownership type

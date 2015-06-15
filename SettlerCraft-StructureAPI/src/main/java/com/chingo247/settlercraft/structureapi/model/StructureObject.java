@@ -46,13 +46,14 @@ public abstract class StructureObject implements IStructureObject {
         this.underlyingNode = underlyingNode;
     }
 
-    public Node getRawNode() {
+    @Override
+    public Node getNode() {
         return underlyingNode;
     }
     
     private Vector getStructurePosition() {
         if(structurePosition == null) {
-            StructureNode structure = getStructure();
+            StructureNode structure = new StructureNode(getStructure().getNode());
             structurePosition = structure.getOrigin();
         }
         return structurePosition;
@@ -60,7 +61,7 @@ public abstract class StructureObject implements IStructureObject {
     
     private Direction getStructureDirection() {
         if(direction == null) {
-            StructureNode structure = getStructure();
+            StructureNode structure = new StructureNode(getStructure().getNode());
             direction = structure.getDirection();
         }
         return direction;

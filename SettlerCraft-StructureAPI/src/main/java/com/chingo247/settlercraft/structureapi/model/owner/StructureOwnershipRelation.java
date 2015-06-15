@@ -17,7 +17,6 @@
 package com.chingo247.settlercraft.structureapi.model.owner;
 
 import com.chingo247.settlercraft.structureapi.model.structure.StructureNode;
-import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureOwner;
 import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureOwnership;
 import org.neo4j.graphdb.Relationship;
 
@@ -28,10 +27,10 @@ import org.neo4j.graphdb.Relationship;
 public class StructureOwnershipRelation implements IStructureOwnership {
     
     private final StructureNode structure;
-    private final IStructureOwner owner;
+    private final StructureOwnerNode owner;
     private final Relationship rel;
 
-    public StructureOwnershipRelation(StructureNode structure, IStructureOwner owner, Relationship relation) {
+    public StructureOwnershipRelation(StructureNode structure, StructureOwnerNode owner, Relationship relation) {
         this.structure = structure;
         this.owner = owner;
         this.rel = relation;
@@ -45,7 +44,7 @@ public class StructureOwnershipRelation implements IStructureOwnership {
     }
 
     @Override
-    public IStructureOwner getOwner() {
+    public StructureOwnerNode getOwner() {
         return owner;
     }
 

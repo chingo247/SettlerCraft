@@ -29,47 +29,35 @@ import com.chingo247.settlercraft.structureapi.exception.StructureAPIException;
 import com.chingo247.settlercraft.structureapi.exception.StructureException;
 import com.chingo247.settlercraft.structureapi.menu.StructurePlanMenuFactory;
 import com.chingo247.settlercraft.structureapi.menu.StructurePlanMenuReader;
-import com.chingo247.settlercraft.core.model.BaseSettlerNode;
 import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.settlercraft.core.persistence.neo4j.Neo4jHelper;
 import com.chingo247.settlercraft.structureapi.platforms.IConfigProvider;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
 import com.chingo247.settlercraft.structureapi.structure.plan.IStructurePlan;
-import com.chingo247.settlercraft.structureapi.event.StructureCreateEvent;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlanManager;
 import com.chingo247.settlercraft.structureapi.event.StructurePlansLoadedEvent;
 import com.chingo247.settlercraft.structureapi.event.StructurePlansReloadEvent;
+import com.chingo247.settlercraft.structureapi.exception.StructureRestrictionViolationException;
 import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureOwnerRepository;
 import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureRepository;
 import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureWorldRepository;
-import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerNode;
 import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerRepository;
-import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerType;
 import com.chingo247.settlercraft.structureapi.model.structure.Structure;
 import com.chingo247.settlercraft.structureapi.model.structure.StructureRepository;
-import com.chingo247.settlercraft.structureapi.model.util.StructureRelations;
-import com.chingo247.settlercraft.structureapi.model.world.StructureWorldNode;
 import com.chingo247.settlercraft.structureapi.model.world.StructureWorldRepository;
 import com.chingo247.settlercraft.structureapi.platforms.services.AsyncEditSessionFactoryProvider;
 import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncPlacement;
-import com.chingo247.settlercraft.structureapi.structure.plan.DefaultStructurePlan;
-import com.chingo247.settlercraft.structureapi.structure.plan.placement.FilePlacement;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.SchematicPlacement;
 import com.chingo247.settlercraft.structureapi.structure.plan.schematic.Schematic;
 import com.chingo247.settlercraft.structureapi.structure.plan.schematic.SchematicManager;
 import com.chingo247.settlercraft.structureapi.structure.restriction.StructureRestriction;
-import com.chingo247.settlercraft.structureapi.util.PlacementUtil;
 import com.chingo247.xplatform.core.IColors;
-import com.chingo247.xplatform.core.ILocation;
-import com.chingo247.xplatform.core.IWorld;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
-import com.google.common.io.Files;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
@@ -81,12 +69,11 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.google.common.collect.Sets;
-import org.apache.commons.io.FilenameUtils;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import java.util.ArrayList;
+import java.util.List;
 import org.dom4j.DocumentException;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
@@ -126,12 +113,15 @@ public class StructureAPI implements IStructureAPI {
     private final Logger LOG = Logger.getLogger(getClass().getName());
 
     private final IColors COLORS;
+    private Level logLevel;
+    private final Map<String,StructureManager> structureManagers;
 //    private final SubstructureHandler substructureHandler;
 
     private StructureAPI() {
         this.platform = SettlerCraft.getInstance().getPlatform();
         this.graph = SettlerCraft.getInstance().getNeo4j();
         this.restrictions = Sets.newHashSet();
+        this.structureManagers = Maps.newHashMap();
 
         // Now register the GlobalPlanManager
         this.structureRepository = new StructureRepository(graph);
@@ -142,15 +132,32 @@ public class StructureAPI implements IStructureAPI {
         EventManager.getInstance().getEventBus().register(new StructurePlanManagerHandler());
 
         setupSchema();
-
+        this.logLevel = Level.SEVERE;
 //        this.substructureHandler = new SubstructureHandler(graph, worldDAO, structureDAO, settlerDAO, this);
+    }
+    
+    /**
+     * Gets the {@link StructureManager} for a world, never returns null
+     * @param w The world
+     * @return The StructureManager
+     */
+    private synchronized StructureManager getStructureManager(World w) {
+        StructureManager structureManager = structureManagers.get(w.getName());
+        if(structureManager == null) {
+            structureManager = new StructureManager(w, instance);
+            structureManagers.put(w.getName(), structureManager);
+        }
+        return structureManager;
     }
 
     private void setupSchema() {
+        // Create indexes, each index creation needs to be executed in a seperate transaction!
         try (Transaction tx = graph.beginTx()) {
             Neo4jHelper.createIndexIfNotExist(graph, StructureNode.LABEL, StructureNode.DELETED_AT_PROPERTY);
+            tx.success();
+        }
+        try (Transaction tx = graph.beginTx()) {
             Neo4jHelper.createUniqueIndexIfNotExist(graph, StructureNode.LABEL, StructureNode.ID_PROPERTY);
-
             tx.success();
         }
     }
@@ -183,6 +190,13 @@ public class StructureAPI implements IStructureAPI {
         planMenuFactory = new StructurePlanMenuFactory(platform, planMenu);
         
         reload();
+    }
+    
+    @Override
+    public void checkRestrictions(Player player, World world, CuboidRegion region) throws StructureRestrictionViolationException {
+        for(StructureRestriction restriction : restrictions) {
+            restriction.check(player, world, region);
+        }
     }
 
     private void resetStates() {
@@ -237,360 +251,58 @@ public class StructureAPI implements IStructureAPI {
 
     @Override
     public Structure createStructure(IStructurePlan plan, World world, Vector position, Direction direction, Player owner) throws StructureException {
-        Preconditions.checkNotNull(world);
-        Preconditions.checkNotNull(plan);
-        Preconditions.checkNotNull(direction);
-        Preconditions.checkNotNull(position);
-
-        Structure structure;
-        structureLock.lock();
-        try {
-//            // Check the default restrictions first
-            Placement placement = plan.getPlacement();
-
-            checkDefaultRestrictions(placement, world, position, direction);
-            
-            Vector min = position;
-            Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getCuboidRegion().getMaximumPoint());
-            CuboidRegion structureRegion = new CuboidRegion(min, max);
-            checkStructureRestrictions(owner, world, structureRegion);
-
-            IWorld w = platform.getServer().getWorld(world.getName());
-
-            try (Transaction tx = graph.beginTx()) {
-                
-                StructureWorldNode structureWorldNode = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
-
-                // Check for overlap with other structures
-                if (structureWorldNode.hasStructuresWithin(structureRegion)) {
-                    tx.success(); // End here
-                    throw new StructureException("Structure overlaps another structure...");
-                }
-
-                // Create the StructureNode - Where it all starts...
-                StructureNode structureNode = structureRepository.addStructure(structureWorldNode, plan.getName(), position, structureRegion, direction, plan.getPrice());
-                structureWorldNode.addStructure(structureNode);
-
-                // Add owner!
-                if (owner != null) {
-                    StructureOwnerNode settler = structureOwnerRepository.findByUUID(owner.getUniqueId());
-
-                    if (settler == null) {
-                        tx.failure();
-                        throw new RuntimeException("Settler was null!"); // SHOULD NEVER HAPPEN AS SETTLERS ARE ADDED AT MOMENT OF FIRST LOGIN
-                    }
-                    structureNode.addOwner(settler, StructureOwnerType.MASTER);
-                }
-
-                try {
-                    moveResources(structureWorldNode, structureNode, plan);
-                } catch (IOException ex) {
-                    // rollback...
-                    File structureDir = getDirectoryForStructure(structureWorldNode, structureNode);
-                    structureDir.delete();
-                    tx.failure();
-                    Logger.getLogger(StructureAPI.class.getName()).log(Level.SEVERE, "Error occured during structure creation... rolling back changes made", ex);
-                }
-
-                tx.success();
-
-                structure = new Structure(structureNode);
-            }
-        } finally {
-            structureLock.unlock();
-        }
-
-        // If not null.. A structre has been created!
-        if (structure != null) {
-            EventManager.getInstance().getEventBus().post(new StructureCreateEvent(structure));
-        }
-
-        return structure;
+        System.out.println("StructureAPI create Structure()");
+        StructureManager structureManager = getStructureManager(world);
+        return structureManager.createStructure(null, plan, position, direction, owner);
     }
 
     @Override
     public Structure createStructure(IStructurePlan plan, World world, Vector position, Direction direction) throws StructureException {
-        return createStructure(plan, world, position, direction, null);
+        System.out.println("StructureAPI create Structure()");
+        StructureManager structureManager = getStructureManager(world);
+        return structureManager.createStructure(null, plan, position, direction, null);
     }
 
     @Override
     public Structure createStructure(Placement placement, World world, Vector position, Direction direction) throws StructureException {
-        return createStructure(placement, world, position, direction, null);
+        System.out.println("StructureAPI create Structure()");
+        StructureManager structureManager = getStructureManager(world);
+        return structureManager.createStructure(null, placement, position, direction, null);
     }
 
     @Override
     public Structure createStructure(Placement placement, World world, Vector position, Direction direction, Player owner) throws StructureException {
-        Preconditions.checkNotNull(world);
-        Preconditions.checkNotNull(placement);
-        Preconditions.checkNotNull(direction);
-        Preconditions.checkNotNull(position);
-
-        Structure structure;
-        structureLock.lock();
-        try {
-//            // Check the default restrictions first
-            checkDefaultRestrictions(placement, world, position, direction);
-            Vector min = position;
-            Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getCuboidRegion().getMaximumPoint());
-            CuboidRegion structureRegion = new CuboidRegion(min, max);
-            checkStructureRestrictions(owner, world, structureRegion);
-            
-            
-            IWorld w = platform.getServer().getWorld(world.getName());
-
-            try (Transaction tx = graph.beginTx()) {
-                 StructureWorldNode worldNode = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
-
-                // Check for overlap with other structures
-                if (worldNode.hasStructuresWithin(structureRegion)) {
-                    tx.success(); // End here
-                    throw new StructureException("Structure overlaps another structure...");
-                }
-
-                // Create the StructureNode - Where it all starts...
-                StructureNode structureNode = structureRepository.addStructure(worldNode, placement.getClass().getSimpleName(), position, structureRegion, direction, 0.0);
-                worldNode.addStructure(structureNode);
-
-                // Add owner!
-                if (owner != null) {
-                    StructureOwnerNode settler = structureOwnerRepository.findByUUID(owner.getUniqueId());
-                    if (settler == null) {
-                        tx.failure();
-                        throw new RuntimeException("Settler was null!"); // SHOULD NEVER HAPPEN AS SETTLERS ARE ADDED AT MOMENT OF FIRST LOGIN
-                    }
-                    structureNode.addOwner(settler, StructureOwnerType.MASTER);
-                }
-                File structureDir = getDirectoryForStructure(worldNode, structureNode);
-                try {
-                    File placementPlanFile = new File(structureDir, "structureplan.xml");
-                    PlacementPlan plan = new PlacementPlan(UUID.randomUUID().toString(), placementPlanFile, placement);
-                    moveResources(worldNode, structureNode, plan);
-                } catch (IOException ex) {
-                    // rollback...
-                    structureDir.delete();
-                    tx.failure();
-                    Logger.getLogger(StructureAPI.class.getName()).log(Level.SEVERE, "Error occured during structure creation... rolling back changes made", ex);
-                }
-
-                tx.success();
-
-                structure = new Structure(structureNode);
-            }
-        } finally {
-            structureLock.unlock();
-        }
-
-        // If not null.. A structre has been created!
-        if (structure != null) {
-            EventManager.getInstance().getEventBus().post(new StructureCreateEvent(structure));
-        }
-        return structure;
+       System.out.println("StructureAPI create Structure()");
+       StructureManager structureManager = getStructureManager(world);
+       return structureManager.createStructure(null, placement, position, direction, owner);
     }
 
     @Override
-    public Structure createSubstructure(Structure parentStructure, IStructurePlan plan, World world, Vector position, Direction direction, Player owner) throws StructureException {
-        Preconditions.checkNotNull(world);
-        Preconditions.checkNotNull(plan);
-        Preconditions.checkNotNull(direction);
-        Preconditions.checkNotNull(position);
-        Preconditions.checkArgument(parentStructure.getWorld().getName().equals(world.getName()), "Structure must be in the same world...");
-
-        Structure substructure;
-        
-        IWorld w = platform.getServer().getWorld(world.getName());
-        
-        structureLock.lock();
-        try {
-//            // Check the default restrictions first
-            Placement placement = plan.getPlacement();
-            checkDefaultRestrictions(placement, world, position, direction);
-            
-            Vector min = position;
-            Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getCuboidRegion().getMaximumPoint());
-            CuboidRegion structureRegion = new CuboidRegion(min, max);
-            checkStructureRestrictions(owner, world, structureRegion);
-            
-            
-            StructureWorldNode structureWorldNode = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
-
-            CuboidRegion parentRegion = parentStructure.getCuboidRegion();
-
-
-            if (!(parentRegion.contains(min) && parentRegion.contains(max))) {
-                throw new StructureException("Structure overlaps structure #" + parentStructure.getId() + ", but does not fit within it's boundaries");
-            }
-
-            boolean hasWithin;
-            try (Transaction tx = graph.beginTx()) {
-                StructureNode parentNode = new StructureNode(parentStructure.getNode());
-                hasWithin = parentNode.hasSubstructuresWithin(structureRegion);
-                if (hasWithin) {
-                    tx.success(); // End here
-                    throw new StructureException("Structure overlaps another structure...");
-                }
-            
-                // Create the StructureNode - Where it all starts...
-                StructureNode substructureNode = structureRepository.addStructure(structureWorldNode, plan.getName(), position, structureRegion, direction, plan.getPrice());
-                structureWorldNode.addStructure(substructureNode);
-                parentNode.addSubstructure(substructureNode);
-
-                // Add owner!
-                if (owner != null) {
-                    StructureOwnerNode settler = structureOwnerRepository.findByUUID(owner.getUniqueId());
-                    if (settler == null) {
-                        tx.failure();
-                        throw new RuntimeException("Settler was null!"); // SHOULD NEVER HAPPEN AS SETTLERS ARE ADDED AT MOMENT OF FIRST LOGIN
-                    }
-                    substructureNode.addOwner(settler, StructureOwnerType.MASTER);
-                }
-                
-                // Inherit ownership
-                Node rawNode = substructureNode.getNode();
-                for (Relationship rel : rawNode.getRelationships(DynamicRelationshipType.withName(StructureRelations.RELATION_OWNED_BY))) {
-                    Node n = rel.getOtherNode(rawNode);
-                    if(!n.hasLabel(BaseSettlerNode.LABEL)) {
-                        continue;
-                    }
-                    
-                    BaseSettlerNode ownerNode = new BaseSettlerNode(n);
-                    Integer typeId = (Integer) rel.getProperty("Type");
-                    StructureOwnerType type = StructureOwnerType.match(typeId);
-                    substructureNode.addOwner(ownerNode, type);
-                }
-
-                try {
-                    moveResources(structureWorldNode, substructureNode, plan);
-                } catch (IOException ex) {
-                    // rollback...
-                    File structureDir = getDirectoryForStructure(structureWorldNode, substructureNode);
-                    structureDir.delete();
-                    tx.failure();
-                    Logger.getLogger(StructureAPI.class.getName()).log(Level.SEVERE, "Error occured during structure creation... rolling back changes made", ex);
-                }
-
-                tx.success();
-
-                substructure = new Structure(substructureNode);
-            }
-        } finally {
-            structureLock.unlock();
-        }
-
-        // If not null.. A structre has been created!
-        if (substructure != null) {
-            EventManager.getInstance().getEventBus().post(new StructureCreateEvent(substructure));
-        }
-
-        return substructure;
+    public Structure createSubstructure(Structure parent, IStructurePlan plan, World world, Vector position, Direction direction, Player owner) throws StructureException {
+        System.out.println("StructureAPI create Structure()");
+        StructureManager structureManager = getStructureManager(world);
+        return structureManager.createStructure(parent, plan, position, direction, owner);
     }
 
     @Override
-    public Structure createSubstructure(Structure parentStructure, IStructurePlan plan, World world, Vector position, Direction direction) throws StructureException {
-        return createSubstructure(parentStructure, plan, world, position, direction, null);
+    public Structure createSubstructure(Structure parent, IStructurePlan plan, World world, Vector position, Direction direction) throws StructureException {
+        System.out.println("StructureAPI create Structure()");
+        StructureManager structureManager = getStructureManager(world);
+        return structureManager.createStructure(parent, plan, position, direction, null);
     }
 
     @Override
-    public Structure createSubstructure(Structure parentStructure, Placement placement, World world, Vector position, Direction direction, Player owner) throws StructureException {
-        Preconditions.checkNotNull(world);
-        Preconditions.checkNotNull(placement);
-        Preconditions.checkNotNull(direction);
-        Preconditions.checkNotNull(position);
-
-        Structure substructure;
-        structureLock.lock();
-        try {
-//            // Check the default restrictions first
-            checkDefaultRestrictions(placement, world, position, direction);
-            
-            Vector min = position;
-            Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getCuboidRegion().getMaximumPoint());
-            CuboidRegion structureRegion = new CuboidRegion(min, max);
-            checkStructureRestrictions(owner, world, structureRegion);
-            
-            CuboidRegion parentRegion = parentStructure.getCuboidRegion();
-
-            if (!(parentRegion.contains(min) && parentRegion.contains(max))) {
-                throw new StructureException("Structure overlaps structure #" + parentStructure.getId() + ", but does not fit within it's boundaries");
-            }
-            
-            IWorld w = platform.getServer().getWorld(world.getName());
-            
-
-            boolean hasWithin;
-            try (Transaction tx = graph.beginTx()) {
-                
-                StructureNode parentNode = new StructureNode(parentStructure.getNode());
-                
-                hasWithin = parentNode.hasSubstructuresWithin(structureRegion);
-                if (hasWithin) {
-                    tx.success(); // End here
-                    throw new StructureException("Structure overlaps another structure...");
-                }
-                
-                StructureWorldNode structureWorldNode = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
-
-                // Create the StructureNode - Where it all starts...
-                StructureNode substructureNode = structureRepository.addStructure(structureWorldNode, placement.getClass().getSimpleName(), position, structureRegion, direction, 0.0);
-                structureWorldNode.addStructure(substructureNode);
-
-                StructureNode parentStructureNode = structureRepository.findById(parentStructure.getId());
-                parentStructureNode.addSubstructure(substructureNode);
-
-                // Add owner!
-                if (owner != null) {
-                    StructureOwnerNode settler = structureOwnerRepository.findByUUID(owner.getUniqueId());
-                    if (settler == null) {
-                        tx.failure();
-                        throw new RuntimeException("Settler was null!"); // SHOULD NEVER HAPPEN AS SETTLERS ARE ADDED AT MOMENT OF FIRST LOGIN
-                    }
-                    substructureNode.addOwner(settler, StructureOwnerType.MASTER);
-                }
-                
-                // Inherit ownership
-                Node rawNode = substructureNode.getNode();
-                for (Relationship rel : rawNode.getRelationships(DynamicRelationshipType.withName("OwnedBy"))) {
-                    Node n = rel.getOtherNode(rawNode);
-                    if(!n.hasLabel(BaseSettlerNode.LABEL)) {
-                        continue;
-                    }
-                    
-                    BaseSettlerNode ownerNode = new BaseSettlerNode(n);
-                    Integer typeId = (Integer) rel.getProperty("Type");
-                    StructureOwnerType type = StructureOwnerType.match(typeId);
-                    substructureNode.addOwner(ownerNode, type);
-                }
-                
-
-                File structureDir = getDirectoryForStructure(structureWorldNode, substructureNode);
-                try {
-                    File placementPlanFile = new File(structureDir, "structureplan.xml");
-                    PlacementPlan plan = new PlacementPlan(UUID.randomUUID().toString(), placementPlanFile, placement);
-                    moveResources(structureWorldNode, substructureNode, plan);
-                } catch (IOException ex) {
-                    // rollback...
-                    structureDir.delete();
-                    tx.failure();
-                    Logger.getLogger(StructureAPI.class.getName()).log(Level.SEVERE, "Error occured during structure creation... rolling back changes made", ex);
-                }
-
-                tx.success();
-
-                substructure = new Structure(substructureNode);
-            }
-        } finally {
-            structureLock.unlock();
-        }
-
-        // If not null.. A structre has been created!
-        if (substructure != null) {
-            EventManager.getInstance().getEventBus().post(new StructureCreateEvent(substructure));
-        }
-        return substructure;
+    public Structure createSubstructure(Structure parent, Placement placement, World world, Vector position, Direction direction, Player owner) throws StructureException {
+        System.out.println("StructureAPI create Structure()");
+        StructureManager structureManager = getStructureManager(world);
+        return structureManager.createStructure(parent, placement, position, direction, owner);
     }
 
     @Override
-    public Structure createSubstructure(Structure structure, Placement placement, World world, Vector position, Direction direction) throws StructureException {
-        return createSubstructure(structure, placement, world, position, direction, null);
+    public Structure createSubstructure(Structure parent, Placement placement, World world, Vector position, Direction direction) throws StructureException {
+        System.out.println("StructureAPI create Structure()");
+        StructureManager structureManager = getStructureManager(world);
+        return structureManager.createStructure(parent, placement, position, direction, null);
     }
 
     @Override
@@ -630,70 +342,24 @@ public class StructureAPI implements IStructureAPI {
     public void registerConfigProvider(IConfigProvider configProvider) {
         this.config = configProvider;
     }
-
-    /**
-     * Checks if the placement is allowed to be placed. Placement should not
-     * overlap the world's spawn and should also be placed at a height > 1 and
-     * the top may not by higher than the world's max height
-     *
-     * @param p The placement
-     * @param world The world
-     * @param position The position of the placement
-     * @param direction The direction
-     */
-    protected void checkDefaultRestrictions(Placement p, World world, Vector position, Direction direction) throws StructureException {
-        Vector min = p.getCuboidRegion().getMinimumPoint().add(position);
-        Vector max = min.add(p.getCuboidRegion().getMaximumPoint());
-        CuboidRegion placementDimension = new CuboidRegion(min, max);
-        
-
-        // Below the world?s
-        if (placementDimension.getMinimumPoint().getBlockY() <= 1) {
-            throw new StructureException("Structure must be placed at a minimum height of 1");
-        }
-
-        // Exceeds world height limit?
-        if (placementDimension.getMaximumPoint().getBlockY() > world.getMaxY()) {
-            throw new StructureException("Structure will reach above the world's max height (" + world.getMaxY() + ")");
-        }
-
-        // Check for overlap on the world's 'SPAWN'
-        IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
-        ILocation l = w.getSpawn();
-        Vector spawnPos = new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ());
-        if (placementDimension.contains(spawnPos)) {
-            throw new StructureException("Structure overlaps the world's spawn...");
-        }
-        
-        
-        
+    
+    public void setLogLevel(Level level) {
+        this.logLevel = level;
     }
     
-    public void checkStructureRestrictions(Player player, World world, CuboidRegion region) throws StructureException {
-        for(StructureRestriction structureRestriction : restrictions) {
-            structureRestriction.check(player, world, region);
-        }
+    public Level getLogLevel() {
+        return logLevel;
     }
 
-    protected final void moveResources(WorldNode worldNode, StructureNode structureNode, IStructurePlan plan) throws IOException {
-        // Give this structure a directory!
-        File structureDir = getDirectoryForStructure(worldNode, structureNode);
-        structureDir.mkdirs();
-
-        Files.copy(plan.getFile(), new File(structureDir, "structureplan.xml"));
-        Placement placement = plan.getPlacement();
-
-        // Move the resources if applicable!
-        if (placement instanceof FilePlacement) {
-            FilePlacement filePlacement = (FilePlacement) placement;
-            File[] files = filePlacement.getFiles();
-            for (File f : files) {
-                Files.copy(f, new File(structureDir, f.getName()));
-            }
-        }
+    public List<StructureRestriction> getRestrictions() {
+        return new ArrayList<>(restrictions);
     }
+    
+    
 
-    protected final File getDirectoryForStructure(WorldNode worldNode, StructureNode structureNode) {
+    
+
+    final File getDirectoryForStructure(WorldNode worldNode, StructureNode structureNode) {
         File structuresDirectory = getStructuresDirectory(worldNode.getName());
         File structureDir = new File(structuresDirectory, String.valueOf(structureNode.getId()));
         return structureDir;
@@ -745,17 +411,7 @@ public class StructureAPI implements IStructureAPI {
         }
     }
 
-    private class PlacementPlan extends DefaultStructurePlan {
-
-        PlacementPlan(String id, File planFile, Placement placement) {
-            super(id, planFile, placement);
-            setCategory("Other");
-            setDescription("None");
-            setPrice(0.0);
-            setName(FilenameUtils.getBaseName(planFile.getName()));
-        }
-
-    }
+    
     
     public void registerAsyncEditSesionFactoryProvider(AsyncEditSessionFactoryProvider provider) {
         Preconditions.checkNotNull(provider, "Provider was null");

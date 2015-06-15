@@ -14,10 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.structureapi.event;
+package com.chingo247.settlercraft.structureapi.exception;
 
 /**
- * Fired when structure plans are loaded
+ *
  * @author Chingo
  */
-public class StructurePlansLoadedEvent {}
+public class StructureRestrictionViolationException extends Exception {
+
+    public StructureRestrictionViolationException(String message) {
+        super(message);
+    }
+    
+    
+    
+}
