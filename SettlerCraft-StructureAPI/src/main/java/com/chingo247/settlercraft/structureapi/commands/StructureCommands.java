@@ -58,14 +58,17 @@ import com.chingo247.xplatform.core.ICommandSender;
 import com.chingo247.xplatform.core.ILocation;
 import com.chingo247.xplatform.core.IPlayer;
 import com.chingo247.xplatform.core.IWorld;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.world.World;
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
@@ -209,10 +212,8 @@ public class StructureCommands {
                             checkIsPlayer(sender);
                             owner((IPlayer)sender, commandArgs, StructureOwnerType.MEMBER);
                             break;
-                        case "schematic":
+                        case "rp":
                             schematic(sender, commandArgs);
-                            
-                            
                             break;
                         case "menu":
                             checkIsPlayer(sender);
@@ -265,8 +266,8 @@ public class StructureCommands {
         }
         
         // /stt schematic [structureid] rotate [degrees]
-        String usage = "/stt rschematic [structure-id][degrees]";
-        commandHelper.argumentsInRange(3, 3, commandArgs, usage);
+        String usage = "/stt rp [structure-id][degrees]";
+        commandHelper.argumentsInRange(2, 2, commandArgs, usage);
         commandHelper.isLong(commandArgs[0], "Expected a number for [structure-id]but got '" + commandArgs[0] + "'", usage);
         commandHelper.isInt(commandArgs[1], "Expected a number for [degrees] but got '" + commandArgs[1] + "'", usage);
         
@@ -274,26 +275,67 @@ public class StructureCommands {
         Integer degrees = Integer.parseInt(commandArgs[1]);
         
         commandHelper.isTrue(degrees % 90 == 0, "Argument [degrees] must be a multiple of 90");
-        StructureNode s = null;
+        Structure structure = null;
         try (Transaction tx = graph.beginTx()){
             
             StructureNode n = structureRepository.findById(structureId);
-            
+            if(n == null) {
+                sender.sendMessage(COLOR.red() + "unable to find structure with id #" + structureId);
+                tx.success();
+                return;
+            }
+            structure = new Structure(n);
             tx.success();
         }
         
-        commandHelper.isFalse(s == null, "Couldn't find structure with id #" + structureId);
         
-        IStructurePlan plan = s.getStructurePlan();
-        Placement p = plan.getPlacement();
+        IStructurePlan plan = structure.getStructurePlan();
+        Placement placement = plan.getPlacement();
         
-        commandHelper.isTrue(p instanceof SchematicPlacement, "Placement of structure #" + structureId + " is not a schematic");
+        commandHelper.isTrue(placement instanceof SchematicPlacement, "Placement type of structure #" + structureId + " is not a schematic");
         
-        SchematicPlacement schematicPlacement = (SchematicPlacement) p;
+        SchematicPlacement schematicPlacement = (SchematicPlacement) placement;
         
-        Long hash = schematicPlacement.getSchematic().getHash();
+        Iterator<IStructurePlan> planIt = structureAPI.getStructurePlanManager().getPlans().iterator();
+        List<IStructurePlan> matching = Lists.newArrayList();
         
+        long hash = schematicPlacement.getSchematic().getHash();
+        while(planIt.hasNext()) {
+            IStructurePlan p = planIt.next();
+            Placement pl = p.getPlacement();
+            if(pl instanceof SchematicPlacement) {
+                SchematicPlacement sp = (SchematicPlacement) pl;
+                if(hash == sp.getSchematic().getHash()) {
+                    System.out.println("Rotating " + p.getFile().getAbsolutePath());
+                    matching.add(p);
+                    sp.rotate(degrees);
+                    structureAPI.getStructurePlanManager().putPlan(p);
+                    
+                    try {
+                        p.save();
+                    } catch (IOException ex) {
+                        sender.sendMessage(COLOR.red() + "Something went wrong during save of plan");
+                        Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        }
         
+        if(matching.isEmpty()) {
+            sender.sendMessage(COLOR.red() + " Couldn't find plan for structure #" + structureId + ", note: schematic could have changed  if a rotation was performed!");
+        } else if (matching.size() == 1) {
+            sender.sendMessage(COLOR.red() + " Rotated schematic of '"  + COLOR.blue() +matching.get(0).getName() + COLOR.reset() + "' by " + degrees + " degrees");
+        } else {
+            String[] rotatedPlans = new String[matching.size() + 1];
+            for(int i = 0; i < rotatedPlans.length; i++) {
+                if(i == 0) {
+                    rotatedPlans[i] = "The schematics of the following plans have been rotated:";
+                } else {
+                    rotatedPlans[i] = COLOR.blue() + matching.get(i - 1).getName() + COLOR.reset();
+                }
+            }
+            sender.sendMessage(rotatedPlans);
+        }
         
     }
 
@@ -1120,6 +1162,10 @@ public class StructureCommands {
             }
         }
         return true;
+    }
+
+    private void handleSchematicRotation(Integer degrees, File f) {
+        
     }
 
 }

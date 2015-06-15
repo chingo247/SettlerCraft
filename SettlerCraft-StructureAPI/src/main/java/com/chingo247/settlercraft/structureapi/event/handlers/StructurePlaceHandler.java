@@ -134,7 +134,7 @@ public class StructurePlaceHandler {
         } else {
             slm = selectionManager;
         }
-
+        System.out.println("Submitting structure task...");
         playerPool.execute(player.getUniqueId(), new Runnable() {
 
             @Override
@@ -408,7 +408,7 @@ public class StructurePlaceHandler {
                 overlappingStructure = sn.getSubStructuresWithin(new CuboidRegion(min, max), 1);
             } else {
                 IWorld iw = platform.getServer().getWorld(world.getName());
-                IStructureWorld sw = structureWorldRepository.findByUUID(iw.getUUID());
+                IStructureWorld sw = structureWorldRepository.registerWorld(iw.getName(),iw.getUUID());
                 overlappingStructure = sw.getStructuresWithin(new CuboidRegion(min, max), 1);
             }
 

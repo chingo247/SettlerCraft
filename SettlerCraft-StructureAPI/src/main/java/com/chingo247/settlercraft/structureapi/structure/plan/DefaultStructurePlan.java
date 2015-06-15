@@ -17,7 +17,9 @@
 package com.chingo247.settlercraft.structureapi.structure.plan;
 
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
+import com.chingo247.settlercraft.structureapi.structure.plan.xml.export.StructurePlanExporter;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * This class defines StructurePlans that exist of only one placement
@@ -35,6 +37,12 @@ public class DefaultStructurePlan extends AbstractStructurePlan{
     @Override
     public Placement getPlacement() {
         return placement;
+    }
+
+    @Override
+    public synchronized void save() throws IOException {
+        StructurePlanExporter exporter = new StructurePlanExporter();
+        exporter.export(this, getFile().getParentFile(), getName() + ".xml", true);
     }
     
 }

@@ -18,7 +18,9 @@ package com.chingo247.settlercraft.structureapi.structure;
 
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.SettlerCraft;
+import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.core.model.WorldNode;
+import com.chingo247.settlercraft.structureapi.event.StructureCreateEvent;
 import com.chingo247.settlercraft.structureapi.exception.StructureException;
 import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerNode;
 import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerRepository;
@@ -45,10 +47,6 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -63,7 +61,6 @@ import org.neo4j.graphdb.Transaction;
  */
 public class StructureManager {
 
-    private final Lock lock;
     private final World world;
     private final StructureAPI structureAPI;
     private final APlatform platform;
@@ -78,7 +75,6 @@ public class StructureManager {
      * @param world The world this StructureManager will 'Manage'
      */
     StructureManager(World world, StructureAPI structureAPI) {
-        this.lock = new ReentrantLock();
         this.graph = SettlerCraft.getInstance().getNeo4j();
         this.world = world;
         this.structureAPI = structureAPI;
@@ -99,6 +95,7 @@ public class StructureManager {
      * @param direction The direction
      */
     private void checkWorldRestrictions(Placement p, World world, Vector position, Direction direction) throws StructureException {
+        System.out.println("Check world restrictions");
         Vector min = p.getCuboidRegion().getMinimumPoint().add(position);
         Vector max = min.add(p.getCuboidRegion().getMaximumPoint());
         CuboidRegion placementDimension = new CuboidRegion(min, max);
@@ -128,37 +125,51 @@ public class StructureManager {
         Structure structure = null;
         Transaction tx = null;
         System.out.println("Create structure!");
-        lock.lock();
+        File structureDirectory = null;
         try {
             tx = graph.beginTx();
             
             StructureWorldNode worldNode = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
-            StructureNode structureNode = create(worldNode, structure, placement, position, direction, owner);
+            StructureNode structureNode = create(worldNode, structure, placement, placement.getClass().getSimpleName(), position, direction, owner);
 
             if (structureNode != null) {
                 
-                File structurePlanDirectory = structureAPI.getDirectoryForStructure(worldNode, structureNode);
-                File structurePlanFile = new File(structurePlanDirectory, "structureplan.xml");
+                structureDirectory = structureAPI.getDirectoryForStructure(worldNode, structureNode);
+                if(structureDirectory.exists()) {
+                    structureDirectory.delete();
+                }
+                structureDirectory.mkdirs();
+                
+                File structurePlanFile = new File(structureDirectory, "structureplan.xml");
                 PlacementExporter exporter = new PlacementExporter();
                 exporter.export(placement, structurePlanFile, "structureplan.xml", true);
-                
                 structure = new Structure(structureNode);
+                System.out.println("structure #" + structure.getId() + " has been created");
             }
+            tx.success();
+            tx.close();
         
         } catch (StructureException ex) {
             if (tx != null) {
                 tx.failure();
+            }
+            if(structureDirectory != null) {
+                structureDirectory.delete();
             }
             throw ex;
         } catch (Exception ex) {
             if (tx != null) {
                 tx.failure();
             }
+            if(structureDirectory != null) {
+                structureDirectory.delete();
+            }
             throw new RuntimeException(ex);
-        } finally {
-            lock.unlock();
+        } 
+       
+        if(structure != null) {
+            EventManager.getInstance().getEventBus().post(new StructureCreateEvent(structure));
         }
-        System.out.println("structure #" + structure.getId() + " has been created");
         return structure;
     }
 
@@ -167,44 +178,60 @@ public class StructureManager {
         Structure structure = null;
         Transaction tx = null;
         System.out.println("Creating structure");
-        lock.lock();
+        File structureDir = null;
         try {
+            System.out.println("Begin transaction");
             tx = graph.beginTx();
+            System.out.println("Create world node");
             StructureWorldNode worldNode = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
-            StructureNode structureNode = create(worldNode, structure, structurePlan.getPlacement(), position, direction, owner);
-            
-            try {
-                moveResources(worldNode, structureNode, structurePlan);
-            } catch (IOException ex) {
-                // rollback...
-                File structureDir = structureAPI.getDirectoryForStructure(worldNode, structureNode);
-                structureDir.delete();
-                tx.failure();
-                Logger.getLogger(StructureAPI.class.getName()).log(Level.SEVERE, "Error occured during structure creation... rolling back changes made", ex);
+            System.out.println("Create structureNode");
+            StructureNode structureNode = create(worldNode, structure, structurePlan.getPlacement(), structurePlan.getName(), position, direction, owner);
+             
+            System.out.println("Get directory for structure");
+            File structureDirectory = structureAPI.getDirectoryForStructure(worldNode, structureNode);
+            if(structureDirectory.exists()) {
+                structureDirectory.delete();
             }
+            structureDirectory.mkdirs();
+            System.out.println("Moving resources!");
+            moveResources(worldNode, structureNode, structurePlan);
+            
 
         if (structureNode != null) {
             structure = new Structure(structureNode);
+            System.out.println("structure #" + structure.getId() + " has been created");
         }
         
+        tx.success();
+        tx.close();
         } catch (StructureException ex) {
             if (tx != null) {
                 tx.failure();
             }
+            if(structureDir != null) {
+                structureDir.delete();
+            }
             throw ex;
+            
         } catch (Exception ex) {
             if (tx != null) {
                 tx.failure();
             }
+            if(structureDir != null) {
+                structureDir.delete();
+            }
             throw new RuntimeException(ex);
-        } finally {
-            lock.unlock();
         }
-        System.out.println("structure #" + structure.getId() + " has been created");
+        if(structure != null) {
+            EventManager.getInstance().getEventBus().post(new StructureCreateEvent(structure));
+        }
+        
+        
         return structure;
     }
 
-    StructureNode create(StructureWorldNode worldNode, Structure parent, Placement placement, Vector position, Direction direction, Player owner) throws StructureException {
+    synchronized StructureNode create(StructureWorldNode worldNode, Structure parent, Placement placement, String name, Vector position, Direction direction, Player owner) throws StructureException {
+        System.out.println("Call create");
         checkWorldRestrictions(placement, world, position, direction);
 
         Vector min = position;
@@ -212,6 +239,7 @@ public class StructureManager {
         CuboidRegion structureRegion = new CuboidRegion(min, max);
         StructureNode structureNode = null;
 
+        System.out.println("Check parent");
         StructureNode parentNode = null;
         if (parent != null) {
             parentNode = new StructureNode(parent.getNode());
@@ -221,7 +249,9 @@ public class StructureManager {
             }
         }
 
+        System.out.println("Check structures within if parent");
         if (parentNode != null) {
+            
             boolean hasWithin = parentNode.hasSubstructuresWithin(structureRegion);
             if (hasWithin) {
                 throw new StructureException("Structure overlaps another structure...");
@@ -231,9 +261,11 @@ public class StructureManager {
 
 
         // Create the StructureNode - Where it all starts...
-        structureNode = structureRepository.addStructure(worldNode, placement.getClass().getSimpleName(), position, structureRegion, direction, 0.0);
+        System.out.println("Adding structure");
+        structureNode = structureRepository.addStructure(worldNode, name, position, structureRegion, direction, 0.0);
 
         // Add owner!
+        System.out.println("Adding owner");
         if (owner != null) {
             StructureOwnerNode settler = structureOwnerRepository.findByUUID(owner.getUniqueId());
             if (settler == null) {
@@ -242,6 +274,7 @@ public class StructureManager {
             structureNode.addOwner(settler, StructureOwnerType.MASTER);
         }
 
+        System.out.println("Adding owner to substructure from parent");
         // Inherit ownership if there is a parent
         if (parentNode != null) {
             for (StructureOwnershipRelation rel : parentNode.getOwnerships()) {

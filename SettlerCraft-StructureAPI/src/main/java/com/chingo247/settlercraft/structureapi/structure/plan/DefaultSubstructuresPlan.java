@@ -20,8 +20,10 @@ package com.chingo247.settlercraft.structureapi.structure.plan;
 
 import com.chingo247.settlercraft.structureapi.structure.plan.exception.PlanException;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
+import com.chingo247.settlercraft.structureapi.structure.plan.xml.export.StructurePlanExporter;
 import com.google.common.collect.Sets;
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 
@@ -101,6 +103,12 @@ public final class DefaultSubstructuresPlan extends AbstractStructurePlan implem
         } else {
             return false;
         }
+    }
+
+    @Override
+    public synchronized void save() throws IOException {
+        StructurePlanExporter exporter = new StructurePlanExporter();
+        exporter.export(this, getFile().getParentFile(), getName() + ".xml", true);
     }
 
 }

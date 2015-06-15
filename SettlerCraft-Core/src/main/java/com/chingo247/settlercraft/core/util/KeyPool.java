@@ -51,8 +51,10 @@ public class KeyPool<T> {
     }
 
     public Future execute(T key, Runnable task) {
-        lock.lock();
+        System.out.println("Sumitted task");
+        System.out.println("Lock");
         try {
+            lock.lock();
             // Create a new Queue if there is now existing one for this key
             if (tasks.get(key) == null) {
                 tasks.put(key, new LinkedList<KeyRunnable>());
@@ -66,7 +68,6 @@ public class KeyPool<T> {
             execute = tasks.get(key).peek() == null;
             tasks.get(key).add(keyRunnable);
 
-        
             // Return the Future for this Runnable
             if (execute) {
                 return executor.submit(keyRunnable);
@@ -74,6 +75,7 @@ public class KeyPool<T> {
                 return keyRunnable.task;
             }
         } finally {
+            System.out.println("Unlock");
             lock.unlock();
         }
     }
@@ -91,16 +93,17 @@ public class KeyPool<T> {
         @Override
         public void run() {
             try {
+                lock.lock();
                 // Execute the runnable
                 task.run();
                 task.get(); // Will throw the exception which should be catched
-            } catch(Exception e) {
-               Logger.getLogger(getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
+            } catch (Exception e) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
             } finally {
-                synchronized (tasks.get(key)) {
+                try {
                     // Remove yourself from the Queue
                     tasks.get(key).poll();
-                    
+
                     // Check if there is another one waiting at your queue
                     Runnable nextTask = tasks.get(key).peek();
                     if (nextTask != null) {
@@ -110,6 +113,8 @@ public class KeyPool<T> {
                         // remove the whole queue if im the last one 
                         tasks.remove(key);
                     }
+                } finally {
+                    lock.unlock();
                 }
             }
 

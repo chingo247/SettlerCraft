@@ -24,6 +24,7 @@ import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placemen
 import com.chingo247.settlercraft.structureapi.structure.plan.xml.parser.PlacementParser;
 import com.chingo247.settlercraft.structureapi.structure.plan.xml.parser.StructureLotParser;
 import com.chingo247.settlercraft.structureapi.structure.plan.xml.handlers.PlacementXMLHandler;
+import com.chingo247.settlercraft.structureapi.structure.plan.xml.handlers.SchematicPlacementXMLHandler;
 import java.io.File;
 import java.util.Map;
 import com.google.common.collect.Maps;
@@ -46,6 +47,8 @@ public class PlacementAPI {
         // Add Defaults
         this.parsers.put(PlacementTypes.SCHEMATIC, new SchematicPlacementParser());
         this.parsers.put(PlacementTypes.STRUCTURE_LOT, new StructureLotParser());
+        
+        this.writers.put(PlacementTypes.SCHEMATIC, new SchematicPlacementXMLHandler());
     }
     
     public static PlacementAPI getInstance() {

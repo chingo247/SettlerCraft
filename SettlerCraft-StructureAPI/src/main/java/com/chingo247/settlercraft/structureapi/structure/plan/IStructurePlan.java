@@ -18,6 +18,7 @@ package com.chingo247.settlercraft.structureapi.structure.plan;
 
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
 import java.io.File;
+import java.io.IOException;
 
 /**
  *
@@ -92,5 +93,6 @@ public interface IStructurePlan {
      */
     public File getFile();
     
+    public void save() throws IOException;
     
 }
