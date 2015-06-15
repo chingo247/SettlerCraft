@@ -147,8 +147,6 @@ public class StructureManager {
                 System.out.println("structure #" + structure.getId() + " has been created");
             }
             tx.success();
-            tx.close();
-        
         } catch (StructureException ex) {
             if (tx != null) {
                 tx.failure();
@@ -165,7 +163,11 @@ public class StructureManager {
                 structureDirectory.delete();
             }
             throw new RuntimeException(ex);
-        } 
+        } finally {
+            if(tx != null) {
+                tx.close();
+            }
+        }
        
         if(structure != null) {
             EventManager.getInstance().getEventBus().post(new StructureCreateEvent(structure));
@@ -203,7 +205,6 @@ public class StructureManager {
         }
         
         tx.success();
-        tx.close();
         } catch (StructureException ex) {
             if (tx != null) {
                 tx.failure();
@@ -221,8 +222,12 @@ public class StructureManager {
                 structureDir.delete();
             }
             throw new RuntimeException(ex);
+        } finally {
+            if(tx != null) {
+                tx.close();
+            }
         }
-        if(structure != null) {
+         if(structure != null) {
             EventManager.getInstance().getEventBus().post(new StructureCreateEvent(structure));
         }
         
