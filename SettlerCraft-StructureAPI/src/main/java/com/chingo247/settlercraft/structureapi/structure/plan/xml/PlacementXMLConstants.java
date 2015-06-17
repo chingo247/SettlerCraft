@@ -30,7 +30,7 @@ public class PlacementXMLConstants {
     public static final String WIDTH_ELEMENT = "Width";
     public static final String HEIGHT_ELEMENT = "Height";
     public static final String LENGTH_ELEMENT = "Length";
-    public static final String DIRECTION_ELEMENT = "Direction";
+    public static final String ROTATION_ELEMENT = "Rotation";
     public static final String TYPE_ELEMENT = "Type";
     public static final String SCHEMATIC_ELEMENT = "Schematic";
     

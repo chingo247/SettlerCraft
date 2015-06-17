@@ -16,7 +16,6 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan.placement;
 
-import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.PlacementOptions;
 
 
@@ -31,9 +30,5 @@ public interface RotationalPlacement<T extends PlacementOptions> extends Placeme
     public int getRotation();
     
     public void rotate(int rotation);
-    
-    public void rotate(Direction direction);
-    
-    public Direction getDirection();
     
 }

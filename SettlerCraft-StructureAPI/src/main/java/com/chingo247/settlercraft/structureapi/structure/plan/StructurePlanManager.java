@@ -47,7 +47,7 @@ import org.dom4j.io.SAXReader;
  */
 public class StructurePlanManager {
 
-    private final Map<String, String> idReferences;
+    
     private final Map<String, IStructurePlan> plans;
     private final String planDirectoryPath;
     private ForkJoinPool forkJoinPool;
@@ -60,7 +60,6 @@ public class StructurePlanManager {
         this.planDirectory = StructureAPI.getInstance().getPlanDirectory();
         this.plans = Maps.newHashMap();
         this.planDirectoryPath = planDirectory.getAbsolutePath();
-        this.idReferences = Maps.newHashMap();
         this.parallelism = Math.max(1, Runtime.getRuntime().availableProcessors() - 2); // Dont lag server on reload...
     }
 
@@ -70,9 +69,28 @@ public class StructurePlanManager {
         }
         return instance;
     }
+    
+    public void reload(String planId) {
+        IStructurePlan plan = plans.get(planId);
+        if(plan == null) {
+            return;
+        }
+        
+        StructurePlanReader reader = new StructurePlanReader();
+        IStructurePlan newPlan = reader.readFile(plan.getFile());
+        System.out.println("Reloading: " + planId + " - " + plan.getFile().getAbsolutePath());
+        
+        synchronized(plans) {
+            plans.remove(plan.getId());
+            plans.put(newPlan.getId(), newPlan);
+        }
+        
+    }
 
     public IStructurePlan getPlan(String planId) {
-        return plans.get(planId);
+        synchronized(plans) {
+            return plans.get(planId);
+        }
     }
 
     public void putPlan(IStructurePlan plan) {
