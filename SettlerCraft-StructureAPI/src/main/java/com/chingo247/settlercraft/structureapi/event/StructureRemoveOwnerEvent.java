@@ -16,34 +16,37 @@
  */
 package com.chingo247.settlercraft.structureapi.event;
 
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
-import com.chingo247.settlercraft.structureapi.structure.Structure;
+import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerType;
+import com.chingo247.settlercraft.structureapi.model.structure.Structure;
 import java.util.UUID;
 
 /**
- *
+ * Fired when an owner has been removed
  * @author Chingo
  */
-public class StructureRemoveOwnerEvent {
+public class StructureRemoveOwnerEvent extends StructureEvent {
     
     private final UUID removedOwner;
-    private final Structure structure;
     private final StructureOwnerType ownerType;
 
     public StructureRemoveOwnerEvent(UUID removedOwner, Structure structure, StructureOwnerType type) {
+        super(structure);
         this.removedOwner = removedOwner;
-        this.structure = structure;
         this.ownerType = type;
     }
 
+    /**
+     * Gets the owner that has been removed
+     * @return The removed owner
+     */
     public UUID getRemovedOwner() {
         return removedOwner;
     }
 
-    public Structure getStructure() {
-        return structure;
-    }
-
+    /**
+     * Gets the type of the owner
+     * @return The ownertype
+     */
     public StructureOwnerType getOwnerType() {
         return ownerType;
     }

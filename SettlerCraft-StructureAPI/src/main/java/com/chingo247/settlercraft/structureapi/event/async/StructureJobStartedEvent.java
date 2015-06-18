@@ -16,16 +16,14 @@
  */
 package com.chingo247.settlercraft.structureapi.event.async;
 
-import com.sk89q.worldedit.world.World;
-
 /**
  *
  * @author Chingo
  */
 public class StructureJobStartedEvent extends StructureJobEvent {
 
-    public StructureJobStartedEvent(World w, long structure, int jobid) {
-        super(w,structure, jobid);
+    public StructureJobStartedEvent(long structure, int jobid) {
+        super(structure, jobid);
     }
     
 }

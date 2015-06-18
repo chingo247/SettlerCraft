@@ -18,9 +18,11 @@ package com.chingo247.settlercraft.structureapi.structure;
 
 import com.chingo247.menuapi.menu.CategoryMenu;
 import com.chingo247.settlercraft.core.Direction;
+import com.chingo247.settlercraft.structureapi.exception.StructureRestrictionViolationException;
+import com.chingo247.settlercraft.structureapi.model.structure.Structure;
 import com.chingo247.settlercraft.structureapi.platforms.IConfigProvider;
 import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncPlacement;
-import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structureapi.structure.plan.IStructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlanManager;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.SchematicPlacement;
@@ -28,6 +30,7 @@ import com.chingo247.settlercraft.structureapi.structure.restriction.StructureRe
 import com.chingo247.xplatform.core.APlatform;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +51,7 @@ public interface IStructureAPI {
      * @param direction The direction of the player
      * @return The Structure that has been created
      */
-    public Structure createStructure(StructurePlan plan, World world, Vector position, Direction direction) throws Exception;
+    public Structure createStructure(IStructurePlan plan, World world, Vector position, Direction direction) throws Exception;
     
     /**
      * Creates a structure with the provided plan
@@ -59,7 +62,7 @@ public interface IStructureAPI {
      * @param owner The player that will be assigned as MASTER owner of this structure
      * @return The Structure that has been created
      */
-    public Structure createStructure(StructurePlan plan, World world, Vector position, Direction direction, Player owner) throws Exception;
+    public Structure createStructure(IStructurePlan plan, World world, Vector position, Direction direction, Player owner) throws Exception;
     
      /**
      * Creates a structure with the provided placement
@@ -92,7 +95,7 @@ public interface IStructureAPI {
      * @param owner The player that will be assigned as MASTER owner of this structure
      * @return The Structure that has been created
      */
-    public Structure createSubstructure(Structure structure, StructurePlan plan, World world, Vector position, Direction direction, Player owner) throws Exception;
+    public Structure createSubstructure(Structure structure, IStructurePlan plan, World world, Vector position, Direction direction, Player owner) throws Exception;
     
      /**
      * Creates a substructure for given structure with the provided plan
@@ -103,7 +106,7 @@ public interface IStructureAPI {
      * @param direction The direction of the player
      * @return The Structure that has been created
      */
-    public Structure createSubstructure(Structure structure, StructurePlan plan, World world, Vector position, Direction direction) throws Exception;
+    public Structure createSubstructure(Structure structure, IStructurePlan plan, World world, Vector position, Direction direction) throws Exception;
     
      /**
      * Creates a substructure for given structure with the provided placement
@@ -178,6 +181,12 @@ public interface IStructureAPI {
      */
     public File getGenerationDirectory();
     
+    /**
+     * The directory where plans are generated from schematics
+     * @return The directory
+     */
+    public File getWorkingDirectory();
+    
     
     /**
      * Gets the Structures directory for a world
@@ -205,6 +214,16 @@ public interface IStructureAPI {
      * @param structureRestriction 
      */
     public void removeRestriction(StructureRestriction structureRestriction);
+    
+    /**
+     * Checks all StructureRestrictions. Each restriction determines if something is allowed to be placed
+     * in a certain area by a certain player.
+     * @param player The player, may be null
+     * @param world The world
+     * @param region The region
+     * @throws com.chingo247.settlercraft.structureapi.exception.StructureRestrictionViolationException Thrown when a restriction was violated
+     */
+    public void checkRestrictions(Player player, World world, CuboidRegion region) throws StructureRestrictionViolationException;
     
     /**
      * Loads a schematic file

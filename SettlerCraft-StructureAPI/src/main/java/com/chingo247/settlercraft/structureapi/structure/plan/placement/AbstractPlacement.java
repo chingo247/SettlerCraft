@@ -61,7 +61,7 @@ public abstract class AbstractPlacement<T extends PlacementOptions> implements P
     }
 
     @Override
-    public void rotate(Direction direction) {
+    public synchronized void rotate(Direction direction) {
 //        if(((direction == Direction.EAST || direction == Direction.WEST) && (this.direction == Direction.NORTH || this.direction == Direction.NORTH))
 //                || ((direction == Direction.NORTH || direction == Direction.SOUTH) && (this.direction == Direction.WEST || this.direction == Direction.EAST))) {
 //            int temp = width;
@@ -98,7 +98,7 @@ public abstract class AbstractPlacement<T extends PlacementOptions> implements P
 
 
     @Override
-    public void move(Vector offset) {
+    public synchronized  void move(Vector offset) {
         this.position.add(offset);
     }
 

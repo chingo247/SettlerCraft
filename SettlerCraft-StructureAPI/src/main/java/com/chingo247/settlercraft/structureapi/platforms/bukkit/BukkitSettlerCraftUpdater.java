@@ -17,14 +17,12 @@
 package com.chingo247.settlercraft.structureapi.platforms.bukkit;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerDAO;
-import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
-import com.chingo247.settlercraft.core.persistence.dao.world.WorldDAO;
-import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
-import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureWorldNode;
+import com.chingo247.settlercraft.core.model.BaseSettlerRepository;
+import com.chingo247.settlercraft.core.model.BaseSettlerNode;
+import com.chingo247.settlercraft.core.model.WorldNode;
+import com.chingo247.settlercraft.core.model.interfaces.IBaseSettler;
+import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerType;
+import com.chingo247.settlercraft.structureapi.model.structure.StructureRepository;
 import com.chingo247.settlercraft.structureapi.persistence.legacy.Structure;
 import com.chingo247.settlercraft.structureapi.persistence.legacy.hibernate.HibernateUtil;
 import com.chingo247.xplatform.core.IWorld;
@@ -36,9 +34,13 @@ import org.hibernate.Session;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import com.chingo247.settlercraft.structureapi.persistence.legacy.*;
-import com.chingo247.settlercraft.structureapi.structure.ConstructionStatus;
+import com.chingo247.settlercraft.structureapi.model.structure.StructureStatus;
+import com.chingo247.settlercraft.structureapi.model.world.StructureWorldRepository;
+import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureRepository;
+import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureWorldRepository;
+import com.chingo247.settlercraft.structureapi.model.world.StructureWorldNode;
 import com.chingo247.settlercraft.structureapi.structure.IStructureAPI;
-import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structureapi.structure.plan.IStructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.PlacementTypes;
 import com.chingo247.settlercraft.structureapi.structure.plan.xml.PlacementXMLConstants;
 import com.chingo247.settlercraft.structureapi.structure.plan.xml.StructurePlanXMLConstants;
@@ -82,20 +84,20 @@ class BukkitSettlerCraftUpdater {
     private static final int BULK_SIZE = 1000;
     private final GraphDatabaseService graph;
     private final Set<String> worldsProcessed;
-    private final WorldDAO worldDAO;
-    private final StructureDAO structureDAO;
-    private final SettlerDAO settlerDAO;
+    private final IStructureWorldRepository structureWorldRepository;
+    private final IStructureRepository structureRepository;
+    private final BaseSettlerRepository settlerDAO;
     private final IStructureAPI structureAPI;
     private final File oldStructuresDirectory;
     private final ExecutorService executorService;
-    private Map<String,StructurePlan> plans;
+    private final Map<String,IStructurePlan> plans;
 
     public BukkitSettlerCraftUpdater(GraphDatabaseService graph, IStructureAPI structureAPI) {
         this.graph = graph;
         this.worldsProcessed = new HashSet<>();
-        this.worldDAO = new WorldDAO(graph);
-        this.structureDAO = new StructureDAO(graph);
-        this.settlerDAO = new SettlerDAO(graph);
+        this.structureWorldRepository = new StructureWorldRepository(graph);
+        this.structureRepository = new StructureRepository(graph);
+        this.settlerDAO = new BaseSettlerRepository(graph);
         this.structureAPI = structureAPI;
         this.oldStructuresDirectory = new File("plugins//SettlerCraft//Structures");
         this.executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -147,16 +149,18 @@ class BukkitSettlerCraftUpdater {
             List<Structure> structures = Lists.newArrayList();
              while(structureIterator.hasNext()) {
                 Structure s = structureIterator.next();
+                StructureWorldNode w;
                 if (!worldsProcessed.contains(s.getWorldName())) {
-                    WorldNode w = registerWorld(s.getWorldName());
+                    w = registerWorld(s.getWorldName());
                     if (w != null) {
                         worldsProcessed.add(w.getName());
-                        worlds.put(w.getName(), new StructureWorldNode(w));
+                        worlds.put(w.getName(), w);
                     } else {
                         continue;
                     }
                 }
-                StructureWorldNode w = worlds.get(s.getWorldName());
+                
+                w = worlds.get(s.getWorldName());
                 try {
                     processStructure(s, w);
                     structures.add(s);
@@ -177,21 +181,19 @@ class BukkitSettlerCraftUpdater {
     
     
 
-    private void processStructure(Structure structure, StructureWorldNode worldNode) throws IOException {
+    private void processStructure(Structure structure, StructureWorldNode world) throws IOException {
         Vector position = structure.getPosition();
 
         Dimension dim = structure.getDimension();
         CuboidRegion region = new CuboidRegion(dim.getMinPosition(), dim.getMaxPosition());
 
-        StructureNode sn = structureDAO.addStructure(structure.getName(), position, region, structure.getDirection(), structure.getRefundValue());
+        com.chingo247.settlercraft.structureapi.model.structure.StructureNode sn = structureRepository.addStructure(world, structure.getName(), position, region, structure.getDirection(), structure.getRefundValue());
         if (structure.getStructureRegion() != null) {
-            sn.getRawNode().setProperty("WGRegion", structure.getStructureRegion()); // Set worldguardregion
+            sn.getNode().setProperty("WGRegion", structure.getStructureRegion()); // Set worldguardregion
         }
 
-        worldNode.addStructure(sn);
-
         for (PlayerOwnership owner : structure.getOwnerships()) {
-            SettlerNode settler = settlerDAO.find(owner.getPlayerUUID());
+            IBaseSettler settler = settlerDAO.findByUUID(owner.getPlayerUUID());
             if (settler == null) {
                 settler = addSettler(owner.getName(), owner.getPlayerUUID());
             }
@@ -204,7 +206,7 @@ class BukkitSettlerCraftUpdater {
         }
         
         for(PlayerMembership member : structure.getMemberships()) {
-            SettlerNode settler = settlerDAO.find(member.getUUID());
+            IBaseSettler settler = settlerDAO.findByUUID(member.getUUID());
             if (settler == null) {
                 settler = addSettler(member.getName(), member.getUUID());
             }
@@ -212,10 +214,10 @@ class BukkitSettlerCraftUpdater {
             sn.addOwner(settler, StructureOwnerType.MEMBER);
         }
         
-        sn.setConstructionStatus(getStatus(structure));
+        sn.setStatus(getStatus(structure));
         sn.setCreatedAt(structure.getLog().getCreatedAt().getTime());
         
-        File structureDirectory = new File(structureAPI.getStructuresDirectory(worldNode.getName()),String.valueOf(sn.getId()));
+        File structureDirectory = new File(structureAPI.getStructuresDirectory(world.getName()),String.valueOf(sn.getId()));
         File oldTempDirectory = new File(getOldDirectory(structure), "temp");
         if(structureDirectory.exists()) {
             structureDirectory.delete();
@@ -230,31 +232,24 @@ class BukkitSettlerCraftUpdater {
 
     }
     
-    private ConstructionStatus getStatus(Structure structure) {
+    private StructureStatus getStatus(Structure structure) {
         switch(structure.getState()) {
-            case BUILDING : return ConstructionStatus.BUILDING;
-            case COMPLETE : return ConstructionStatus.COMPLETED;
-            case DEMOLISHING : return ConstructionStatus.DEMOLISHING;
-            default: return ConstructionStatus.ON_HOLD;
+            case BUILDING : return StructureStatus.BUILDING;
+            case COMPLETE : return StructureStatus.COMPLETED;
+            case DEMOLISHING : return StructureStatus.DEMOLISHING;
+            default: return StructureStatus.ON_HOLD;
         }
     }
 
-    private WorldNode registerWorld(String world) {
-        IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world);
+    private StructureWorldNode registerWorld(String worldName) {
+        IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(worldName);
         if (w == null) {
             return null;
         }
 
-        WorldNode worldNode = worldDAO.find(w.getUUID());
-        if (worldNode == null) {
-            worldDAO.addWorld(w.getName(), w.getUUID());
-            worldNode = worldDAO.find(w.getUUID());
-            if (worldNode == null) {
-                System.out.println("Something went wrong during creation of the 'WorldNode' for " + world); // SHOULD NEVER HAPPEN
-                return null;
-            }
-        }
-        return worldNode;
+        StructureWorldNode world = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
+        
+        return world;
     }
 
     private List<Structure> getStructures() {
@@ -303,11 +298,11 @@ class BukkitSettlerCraftUpdater {
         return structure;
     }
 
-    private SettlerNode addSettler(String playerName, UUID playerUUID) {
-        Node settlerNode = graph.createNode(com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode.LABEL);
-        settlerNode.setProperty(com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode.UUID_PROPERTY, playerUUID.toString());
-        settlerNode.setProperty(com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode.NAME_PROPERTY, playerName);
-        return new SettlerNode(settlerNode);
+    private BaseSettlerNode addSettler(String playerName, UUID playerUUID) {
+        Node settlerNode = graph.createNode(com.chingo247.settlercraft.core.model.BaseSettlerNode.LABEL);
+        settlerNode.setProperty(com.chingo247.settlercraft.core.model.BaseSettlerNode.UUID_PROPERTY, playerUUID.toString());
+        settlerNode.setProperty(com.chingo247.settlercraft.core.model.BaseSettlerNode.NAME_PROPERTY, playerName);
+        return new BaseSettlerNode(settlerNode);
     }
     
     private File getOldDirectory(Structure structure) {
@@ -429,11 +424,12 @@ class BukkitSettlerCraftUpdater {
         
     }
     
-    
-    protected File getDirectoryForStructure(WorldNode worldNode, StructureNode structureNode) {
+    protected File getDirectoryForStructure(WorldNode worldNode, Structure structureNode) {
         File structuresDirectory = structureAPI.getStructuresDirectory(worldNode.getName());
         File structureDir = new File(structuresDirectory, String.valueOf(structureNode.getId()));
         return structureDir;
     }
+    
+    
     
 }

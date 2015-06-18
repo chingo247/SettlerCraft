@@ -18,15 +18,15 @@ package com.chingo247.settlercraft.worldguard.protecttion;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.event.EventManager;
-import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
-import com.chingo247.settlercraft.structureapi.persistence.dao.IStructureDAO;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
+import com.chingo247.settlercraft.core.model.BaseSettlerNode;
+import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureRepository;
+import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerType;
+import com.chingo247.settlercraft.structureapi.model.structure.Structure;
 import com.chingo247.settlercraft.worldguard.restriction.WorldGuardRestriction;
-import com.chingo247.settlercraft.structureapi.structure.ConstructionStatus;
-import com.chingo247.settlercraft.structureapi.structure.DefaultStructureFactory;
+import com.chingo247.settlercraft.structureapi.model.structure.StructureStatus;
 import com.chingo247.settlercraft.structureapi.structure.IStructureAPI;
-import com.chingo247.settlercraft.structureapi.structure.Structure;
+import com.chingo247.settlercraft.structureapi.model.structure.StructureNode;
+import com.chingo247.settlercraft.structureapi.model.structure.StructureRepository;
 import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
@@ -65,12 +65,12 @@ public class WorldGuardHelper implements IStructureProtector {
     private static final String PREFIX = "SC_REG_";
     public static String WORLD_GUARD_REGION_PROPERTY = "WGRegion";
     private GraphDatabaseService graph;
-    private IStructureDAO structureDAO;
+    private IStructureRepository structureDAO;
     private IStructureAPI structureAPI;
 
-    public WorldGuardHelper(GraphDatabaseService graph, IStructureDAO structureDAO, IStructureAPI structureAPI) {
+    public WorldGuardHelper(GraphDatabaseService graph, IStructureAPI structureAPI) {
         this.graph = graph;
-        this.structureDAO = structureDAO;
+        this.structureDAO = new StructureRepository(graph);
         this.structureAPI = structureAPI;
     }
     
@@ -85,7 +85,7 @@ public class WorldGuardHelper implements IStructureProtector {
             return;
         }
         
-        World world = Bukkit.getWorld(structure.getWorld());
+        World world = Bukkit.getWorld(structure.getWorld().getName());
         CuboidRegion dimension = structure.getCuboidRegion();
         
         
@@ -109,16 +109,16 @@ public class WorldGuardHelper implements IStructureProtector {
         );
         
         try(Transaction tx = graph.beginTx()) {
-            StructureNode structureNode = structureDAO.find(structure.getId());
+            StructureNode structureNode = structureDAO.findById(structure.getId());
             
-            Node rawNode = structureNode.getRawNode();
+            Node rawNode = structureNode.getNode();
                 for (Relationship rel : rawNode.getRelationships(DynamicRelationshipType.withName("OwnedBy"))) {
                     Node n = rel.getOtherNode(rawNode);
-                    if(!n.hasLabel(SettlerNode.LABEL)) {
+                    if(!n.hasLabel(BaseSettlerNode.LABEL)) {
                         continue;
                     }
                     
-                    SettlerNode ownerNode = new SettlerNode(n);
+                    BaseSettlerNode ownerNode = new BaseSettlerNode(n);
                     Integer typeId = (Integer) rel.getProperty("Type");
                     StructureOwnerType type = StructureOwnerType.match(typeId);
                     if(type == StructureOwnerType.MEMBER) {
@@ -137,7 +137,7 @@ public class WorldGuardHelper implements IStructureProtector {
                 tx.failure();
             }
             
-            structureNode.getRawNode().setProperty(WORLD_GUARD_REGION_PROPERTY, id);
+            structureNode.getNode().setProperty(WORLD_GUARD_REGION_PROPERTY, id);
             tx.success();
             
         }
@@ -154,7 +154,7 @@ public class WorldGuardHelper implements IStructureProtector {
             
             String query = "MATCH(s:" + StructureNode.LABEL.name() + ") "
                     + "WHERE s."+WORLD_GUARD_REGION_PROPERTY+" IS NULL "
-                    + "AND NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId() + " "
+                    + "AND NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + StructureStatus.REMOVED.getStatusId() + " "
                     + "RETURN s";
             
             Result r = graph.execute(query);
@@ -162,8 +162,7 @@ public class WorldGuardHelper implements IStructureProtector {
                 Map<String,Object> map = r.next();
                 for(Object o : map.values()) { // all structures
                     Node n = (Node) o;
-                    StructureNode structureNode = new StructureNode(n);
-                    Structure structure = DefaultStructureFactory.getInstance().makeStructure(structureNode);
+                    Structure structure = new Structure(n);
                     structures.add(structure);
                 }
             }
@@ -194,7 +193,7 @@ public class WorldGuardHelper implements IStructureProtector {
 
     @Override
     public void removeProtection(Structure structure) {
-        World world = Bukkit.getWorld(structure.getWorld());
+        World world = Bukkit.getWorld(structure.getWorld().getName());
         RegionManager mgr = getRegionManager(world);
         String region = getRegionId(structure);
         if(mgr.hasRegion(region)) {
@@ -209,7 +208,7 @@ public class WorldGuardHelper implements IStructureProtector {
 
     @Override
     public boolean hasProtection(Structure structure) {
-        World world = Bukkit.getWorld(structure.getWorld());
+        World world = Bukkit.getWorld(structure.getWorld().getName());
         RegionManager mgr = getRegionManager(world);
         String region = getRegionId(structure);
         return mgr.hasRegion(region);
@@ -224,7 +223,7 @@ public class WorldGuardHelper implements IStructureProtector {
     }
     
     public void addMember(UUID player, Structure structure) {
-        World world = Bukkit.getWorld(structure.getWorld());
+        World world = Bukkit.getWorld(structure.getWorld().getName());
         RegionManager mgr = getRegionManager(world);
         String regionId = getRegionId(structure);
         ProtectedRegion region = mgr.getRegion(regionId);
@@ -241,7 +240,7 @@ public class WorldGuardHelper implements IStructureProtector {
     }
     
     public void addOwner(UUID player, Structure structure) {
-        World world = Bukkit.getWorld(structure.getWorld());
+        World world = Bukkit.getWorld(structure.getWorld().getName());
         RegionManager mgr = getRegionManager(world);
         String regionId = getRegionId(structure);
         ProtectedRegion region = mgr.getRegion(regionId);
@@ -258,7 +257,7 @@ public class WorldGuardHelper implements IStructureProtector {
     }
     
     public void removeOwner(UUID player, Structure structure) {
-        World world = Bukkit.getWorld(structure.getWorld());
+        World world = Bukkit.getWorld(structure.getWorld().getName());
         RegionManager mgr = getRegionManager(world);
         String regionId = getRegionId(structure);
         ProtectedRegion region = mgr.getRegion(regionId);
@@ -273,7 +272,7 @@ public class WorldGuardHelper implements IStructureProtector {
     }
     
     public void removeMember(UUID player, Structure structure) {
-        World world = Bukkit.getWorld(structure.getWorld());
+        World world = Bukkit.getWorld(structure.getWorld().getName());
         RegionManager mgr = getRegionManager(world);
         String regionId = getRegionId(structure);
         ProtectedRegion region = mgr.getRegion(regionId);
@@ -367,7 +366,7 @@ public class WorldGuardHelper implements IStructureProtector {
         
         String query = "MATCH(s:"+StructureNode.LABEL.name() + ") "
                      + "WHERE s."+WORLD_GUARD_REGION_PROPERTY + " IS NOT NULL "
-                     + "AND s."+StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId() + " "
+                     + "AND s."+StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + StructureStatus.REMOVED.getStatusId() + " "
                      + "RETURN s";
         
         try(Transaction tx = graph.beginTx()) {
@@ -376,7 +375,7 @@ public class WorldGuardHelper implements IStructureProtector {
             while(r.hasNext()) {
                 for(Object o : r.next().values()) {
                     Node n = (Node) o;
-                    Structure structure = DefaultStructureFactory.getInstance().makeStructure(new StructureNode(n));
+                    Structure structure = new Structure(n);
                     removeProtection(structure);
                     n.removeProperty(WORLD_GUARD_REGION_PROPERTY);
                     System.out.println("[SettlerCraft-WorldGuard]: Removed protection from structure #"+structure.getId()+" because it was removed");

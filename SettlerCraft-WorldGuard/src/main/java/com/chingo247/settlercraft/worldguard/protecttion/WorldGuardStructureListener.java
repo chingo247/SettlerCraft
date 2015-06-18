@@ -20,9 +20,10 @@ import com.chingo247.settlercraft.structureapi.event.StructureAddOwnerEvent;
 import com.chingo247.settlercraft.structureapi.event.StructureCreateEvent;
 import com.chingo247.settlercraft.structureapi.event.StructureRemoveEvent;
 import com.chingo247.settlercraft.structureapi.event.StructureRemoveOwnerEvent;
-import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
-import com.chingo247.settlercraft.structureapi.structure.Structure;
+import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureRepository;
+import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerType;
+import com.chingo247.settlercraft.structureapi.model.structure.Structure;
+import com.chingo247.settlercraft.structureapi.model.structure.StructureRepository;
 import com.google.common.eventbus.Subscribe;
 import java.util.UUID;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -35,12 +36,12 @@ public class WorldGuardStructureListener {
     
     private final WorldGuardHelper worldGuardHelper;
     private final GraphDatabaseService graph;
-    private final StructureDAO structureDAO;
+    private final IStructureRepository structureDAO;
 
     public WorldGuardStructureListener(WorldGuardHelper worldGuardHelper, GraphDatabaseService graph) {
         this.worldGuardHelper = worldGuardHelper;
         this.graph = graph;
-        this.structureDAO = new StructureDAO(graph);
+        this.structureDAO = new StructureRepository(graph);
     }
     
     @Subscribe

@@ -24,7 +24,7 @@ import java.io.File;
  *
  * @author Chingo
  */
-public abstract class AbstractStructurePlan implements StructurePlan {
+public abstract class AbstractStructurePlan implements IStructurePlan {
 
     private final String id;
     private String name, category, description;

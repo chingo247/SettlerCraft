@@ -48,7 +48,7 @@ import org.dom4j.io.SAXReader;
 public class StructurePlanManager {
 
     private final Map<String, String> idReferences;
-    private final Map<String, StructurePlan> plans;
+    private final Map<String, IStructurePlan> plans;
     private final String planDirectoryPath;
     private ForkJoinPool forkJoinPool;
     private final int parallelism;
@@ -71,11 +71,11 @@ public class StructurePlanManager {
         return instance;
     }
 
-    public StructurePlan getPlan(String planId) {
+    public IStructurePlan getPlan(String planId) {
         return plans.get(planId);
     }
 
-    public void putPlan(StructurePlan plan) {
+    public void putPlan(IStructurePlan plan) {
         synchronized (plans) {
             plans.put(plan.getId(), plan);
         }
@@ -108,8 +108,8 @@ public class StructurePlanManager {
             public void run() {
                 try {
                     StructurePlanReader reader = new StructurePlanReader();
-                    List<StructurePlan> plansList = reader.readDirectory(planDirectory, verbose, forkJoinPool);
-                    for (StructurePlan plan : plansList) {
+                    List<IStructurePlan> plansList = reader.readDirectory(planDirectory, verbose, forkJoinPool);
+                    for (IStructurePlan plan : plansList) {
                         boolean exists = getPlan(plan.getId()) != null;
                         if (exists) {
                             continue; // it's exact the same plan...
@@ -132,7 +132,7 @@ public class StructurePlanManager {
         return new File(planDirectoryPath);
     }
 
-    public List<StructurePlan> getPlans() {
+    public List<IStructurePlan> getPlans() {
         synchronized (plans) {
             return new ArrayList<>(plans.values());
         }

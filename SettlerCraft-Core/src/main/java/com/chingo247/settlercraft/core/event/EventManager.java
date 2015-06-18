@@ -27,7 +27,7 @@ import com.google.common.eventbus.EventBus;
 public class EventManager {
     
     private static EventManager instance;
-    private final EventBus eventBus = new EventBus();
+    private final EventBus eventBus = new EventBus("SettlerCraft-EventBus");
 
     private EventManager() {}
     
