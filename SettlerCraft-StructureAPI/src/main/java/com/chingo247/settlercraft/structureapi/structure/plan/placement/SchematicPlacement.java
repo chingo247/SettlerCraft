@@ -17,9 +17,12 @@
 
 package com.chingo247.settlercraft.structureapi.structure.plan.placement;
 
+import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BuildOptions;
 import com.chingo247.settlercraft.structureapi.structure.plan.schematic.Schematic;
 import com.chingo247.settlercraft.structureapi.structure.plan.schematic.FastClipboard;
+import com.chingo247.settlercraft.structureapi.util.WorldUtil;
+import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -34,7 +37,8 @@ public class SchematicPlacement extends AbstractBlockPlacement<BuildOptions> imp
     private final Schematic schematic;
     private FastClipboard clipboard;
     private CuboidRegion clipboardRegion;
-//    private CuboidRegion placementRegion;
+    private CuboidRegion placementRegion;
+    private Vector size;
 
     public SchematicPlacement(Schematic schematic) {
         this(schematic, 0, Vector.ZERO);
@@ -46,31 +50,31 @@ public class SchematicPlacement extends AbstractBlockPlacement<BuildOptions> imp
         this.clipboard = schematic.getClipboard();
        
         
-//        Direction currentDirection = WorldUtil.getDirection(getRotation());
+        Direction currentDirection = WorldUtil.getDirection(getRotation());
         
-//        this.rotate(clipboard.getyAxisOffset());
+        this.rotate(clipboard.getyAxisOffset());
         
-//        Direction newDirection = WorldUtil.getDirection(getRotation());
+        Direction newDirection = WorldUtil.getDirection(getRotation());
         
-//        int width = schematic.getWidth();
-//        int length = schematic.getLength();
-//        int height = schematic.getHeight();
-//        
-//        if(((currentDirection == Direction.EAST || currentDirection == Direction.WEST) && (newDirection == Direction.NORTH || newDirection == Direction.SOUTH))
-//                || ((currentDirection == Direction.NORTH || currentDirection == Direction.SOUTH) && (newDirection == Direction.WEST || newDirection == Direction.EAST))) {
-//            int temp = getWidth();
-//            setWidth(getLength());
-//            setLength(temp);
-//        }
-//        
-        this.clipboardRegion = new CuboidRegion(Vector.ZERO, getSize());
-//        this.placementRegion = new CuboidRegion(Vector.ZERO, new Vector(width, height, length));
+        int width = schematic.getWidth();
+        int length = schematic.getLength();
+        int height = schematic.getHeight();
+        this.size = new BlockVector(width, height, length);
+        
+        if(((currentDirection == Direction.EAST || currentDirection == Direction.WEST) && (newDirection == Direction.NORTH || newDirection == Direction.SOUTH))
+                || ((currentDirection == Direction.NORTH || currentDirection == Direction.SOUTH) && (newDirection == Direction.WEST || newDirection == Direction.EAST))) {
+            int temp = getWidth();
+            setWidth(getLength());
+            setLength(temp);
+        }
+        
+        this.placementRegion = new CuboidRegion(Vector.ZERO, new Vector(width, height, length));
     }
 //
-//    @Override
-//    public CuboidRegion getCuboidRegion() {
-//        return placementRegion;
-//    }
+    @Override
+    public Vector getSize() {
+        return size;
+    }
     
     
 
@@ -90,7 +94,7 @@ public class SchematicPlacement extends AbstractBlockPlacement<BuildOptions> imp
 
     @Override
     public BaseBlock getBlock(Vector position) {
-        if(clipboardRegion.contains(position)) {
+        if(placementRegion.contains(position)) {
             BaseBlock b = clipboard.getBlock(position);
             return b;
         }
