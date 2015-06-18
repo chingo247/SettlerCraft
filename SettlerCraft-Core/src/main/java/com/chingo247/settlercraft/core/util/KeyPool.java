@@ -30,8 +30,6 @@ import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,78 +41,70 @@ public class KeyPool<T> {
 
     private final HashMap<T, Queue<KeyRunnable>> tasks = new HashMap<>();
     private final ExecutorService executor;
-    private final Lock lock;
 
     public KeyPool(ExecutorService executor) {
         this.executor = executor;
-        this.lock = new ReentrantLock();
     }
 
-    public Future execute(T key, Runnable task) {
-        System.out.println("Sumitted task");
-        System.out.println("Lock");
-        try {
-            lock.lock();
-            // Create a new Queue if there is now existing one for this key
-            if (tasks.get(key) == null) {
-                tasks.put(key, new LinkedList<KeyRunnable>());
+    public Future execute(T t, Runnable runnable) {
+        // Create a new Queue if there is now existing one for this key
+        synchronized (tasks) {
+            if (tasks.get(t) == null) {
+                tasks.put(t, new LinkedList<KeyRunnable>());
             }
-            // Determines if the runnable should be submitted to the executor
-            boolean execute;
-            KeyRunnable keyRunnable = new KeyRunnable(key, task);
+        }
+        // Determines if the runnable should be submitted to the executor
+        boolean execute;
+        KeyRunnable keyRunnable = new KeyRunnable(t, runnable);
+        
+        // If this is this first runnable in the queue, then this runnable should be sumbitted to the executor
+        // Otherwise it will wait until the Runnable that is one place next in the queue has finished
+        synchronized (tasks.get(t)) {
+            execute = tasks.get(t).peek() == null;
+            tasks.get(t).add(keyRunnable);
+        }
 
-            // If this is this first runnable in the queue, then this runnable should be sumbitted to the executor
-            // Otherwise it will wait until the Runnable that is one place next in the queue has finished
-            execute = tasks.get(key).peek() == null;
-            tasks.get(key).add(keyRunnable);
-
-            // Return the Future for this Runnable
-            if (execute) {
-                return executor.submit(keyRunnable);
-            } else {
-                return keyRunnable.task;
-            }
-        } finally {
-            System.out.println("Unlock");
-            lock.unlock();
+        
+        // Return the Future for this Runnable
+        if (execute) {
+            return executor.submit(keyRunnable);
+        } else {
+            return keyRunnable.f;
         }
     }
 
     private class KeyRunnable implements Runnable {
 
-        private final T key;
-        private final FutureTask task;
+        private final T t;
+        private final FutureTask f;
 
         public KeyRunnable(T t, Runnable r) {
-            this.key = t;
-            this.task = new FutureTask(r, t);
+            this.t = t;
+            this.f = new FutureTask(r, t);
         }
 
         @Override
         public void run() {
             try {
-                lock.lock();
                 // Execute the runnable
-                task.run();
-                task.get(); // Will throw the exception which should be catched
-            } catch (Exception e) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
+                f.run();
+                f.get(); // Will throw the exception which should be catched
+            } catch(Exception e) {
+               Logger.getLogger(getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
             } finally {
-                try {
+                synchronized (tasks.get(t)) {
                     // Remove yourself from the Queue
-                    tasks.get(key).poll();
-
+                    tasks.get(t).poll();
+                    
                     // Check if there is another one waiting at your queue
-                    Runnable nextTask = tasks.get(key).peek();
+                    Runnable nextTask = tasks.get(t).peek();
                     if (nextTask != null) {
                         // Submit this task to the executor, so it's scheduled to be executed
                         executor.execute(nextTask);
                     } else {
                         // remove the whole queue if im the last one 
-                        tasks.remove(key);
+                        tasks.remove(t);
                     }
-                } finally {
-                    lock.unlock();
                 }
             }
 

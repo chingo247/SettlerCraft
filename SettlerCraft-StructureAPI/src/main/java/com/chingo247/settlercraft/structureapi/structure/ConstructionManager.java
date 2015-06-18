@@ -78,7 +78,6 @@ import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerListener;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
-import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
  *
@@ -140,7 +139,7 @@ public class ConstructionManager {
                     }
 
                     if (isCanceled) {
-                        AsyncEventManager.getInstance().post(new StructureJobCanceledEvent(jobEntry.getWorld(), jobEntry.getTaskID(), jobEntry.getJobId()));
+                        AsyncEventManager.getInstance().post(new StructureJobCanceledEvent(jobEntry.getTaskID(), jobEntry.getJobId()));
                     }
                 }
             }
@@ -198,8 +197,6 @@ public class ConstructionManager {
                         stopSync(SettlerCraft.getInstance().getPlayer(player), structure, false, true);
                     }
 
-                    UUID world;
-                    
                     try (Transaction tx = graph.beginTx()) {
                         try {
                             StructureNode node = structureRepository.findById(structure.getId());
@@ -210,7 +207,6 @@ public class ConstructionManager {
                                 return;
                             }
                             
-                            world = node.getWorld().getUUID();
 
                             // Ignore substructures!
                             List<StructureNode> substructures = node.getSubstructures();
@@ -244,7 +240,7 @@ public class ConstructionManager {
 
                                 @Override
                                 public void onJobAdded(int jobId) {
-                                    AsyncEventManager.getInstance().post(new StructureJobAddedEvent(w, structure.getId(), jobId, false));
+                                    AsyncEventManager.getInstance().post(new StructureJobAddedEvent(structure.getId(), jobId, false));
                                 }
                             }, structure.getId());
 
@@ -254,12 +250,6 @@ public class ConstructionManager {
                             LOG.log(Level.SEVERE, exception.getMessage(), exception);
                         }
                         tx.success();
-                    }
-
-                    try {
-
-                    } catch (Exception exception) {
-                        LOG.log(Level.SEVERE, exception.getMessage(), exception);
                     }
 
                 } catch (Exception ex) { // Catch everything or disappear it will dissappear in the abyss!
@@ -333,7 +323,7 @@ public class ConstructionManager {
 
                                 @Override
                                 public void onJobAdded(int jobId) {
-                                    AsyncEventManager.getInstance().post(new StructureJobAddedEvent(w, structureId, jobId, true));
+                                    AsyncEventManager.getInstance().post(new StructureJobAddedEvent(structureId, jobId, true));
                                 }
                             }, structureId);
                             placement.place(session, region.getMinimumPoint(), options);
@@ -360,7 +350,7 @@ public class ConstructionManager {
 
                                 @Override
                                 public void onJobAdded(int jobId) {
-                                    AsyncEventManager.getInstance().post(new StructureJobAddedEvent(w, structureId, jobId, true));
+                                    AsyncEventManager.getInstance().post(new StructureJobAddedEvent(structureId, jobId, true));
                                 }
                             }, structureId);
                             placement.place(session, parent.getCuboidRegion().getMinimumPoint(), options);
@@ -533,7 +523,6 @@ public class ConstructionManager {
         @AllowConcurrentEvents
         public void onJobAddedEvent(StructureJobAddedEvent jobAddedEvent) {
             long structureId = jobAddedEvent.getStructure();
-            World w = jobAddedEvent.getWorld();
             UUID uuid;
             jobLock.lock();
             try {
@@ -608,7 +597,6 @@ public class ConstructionManager {
         public void onJobCompleteEvent(StructureJobCompleteEvent jobCompleteEvent) {
             boolean isDemolishing;
             long structureId = jobCompleteEvent.getStructure();
-            World w = jobCompleteEvent.getWorld();
 
             jobLock.lock();
             try {
@@ -674,7 +662,6 @@ public class ConstructionManager {
         @AllowConcurrentEvents
         public void onJobStartedEvent(StructureJobStartedEvent jobStartedEvent) {
             long structureId = jobStartedEvent.getStructure();
-            World w = jobStartedEvent.getWorld();
 
             boolean isDemolishing = false;
             jobLock.lock();
@@ -760,18 +747,6 @@ public class ConstructionManager {
 
     }
     
-    private AsyncEditSession getSession(UUID playerId, String world) {
-        Player ply = SettlerCraft.getInstance().getPlayer(playerId);
-        World w = SettlerCraft.getInstance().getWorld(world);
-        AsyncEditSession editSession;
-        StructureAPI api = (StructureAPI) StructureAPI.getInstance();
-        
-        if (ply == null) {
-            editSession = (AsyncEditSession) api.getSessionFactory().getEditSession(w, -1);
-        } else {
-            editSession = (AsyncEditSession) api.getSessionFactory().getEditSession(w, -1, ply);
-        }
-        return editSession;
-    }
+  
 
 }

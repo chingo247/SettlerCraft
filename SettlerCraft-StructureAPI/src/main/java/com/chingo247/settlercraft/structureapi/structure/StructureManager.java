@@ -47,6 +47,8 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -178,12 +180,9 @@ public class StructureManager {
     public Structure createStructure(Structure parentStructure, IStructurePlan structurePlan, Vector position, Direction direction, Player owner) throws StructureException {
         IWorld w = platform.getServer().getWorld(world.getName());
         Structure structure = null;
-        Transaction tx = null;
         System.out.println("Creating structure");
-        File structureDir = null;
-        try {
+        try (Transaction tx = graph.beginTx()){
             System.out.println("Begin transaction");
-            tx = graph.beginTx();
             System.out.println("Create world node");
             StructureWorldNode worldNode = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
             System.out.println("Create structureNode");
@@ -196,7 +195,12 @@ public class StructureManager {
             }
             structureDirectory.mkdirs();
             System.out.println("Moving resources!");
-            moveResources(worldNode, structureNode, structurePlan);
+            try {
+                moveResources(worldNode, structureNode, structurePlan);
+            } catch (IOException ex) {
+                structureDirectory.delete();
+                Logger.getLogger(StructureManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
             
 
         if (structureNode != null) {
@@ -205,31 +209,10 @@ public class StructureManager {
         }
         
         tx.success();
-        } catch (StructureException ex) {
-            if (tx != null) {
-                tx.failure();
-            }
-            if(structureDir != null) {
-                structureDir.delete();
-            }
-            throw ex;
-            
-        } catch (Exception ex) {
-            if (tx != null) {
-                tx.failure();
-            }
-            if(structureDir != null) {
-                structureDir.delete();
-            }
-            throw new RuntimeException(ex);
-        } finally {
-            if(tx != null) {
-                tx.close();
-            }
-        }
-         if(structure != null) {
-            EventManager.getInstance().getEventBus().post(new StructureCreateEvent(structure));
-        }
+        }  
+//         if(structure != null) {
+//            EventManager.getInstance().getEventBus().post(new StructureCreateEvent(structure));
+//        }
         
         
         return structure;

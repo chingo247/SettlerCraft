@@ -38,13 +38,7 @@ import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlanManag
 import com.chingo247.settlercraft.structureapi.event.StructurePlansLoadedEvent;
 import com.chingo247.settlercraft.structureapi.event.StructurePlansReloadEvent;
 import com.chingo247.settlercraft.structureapi.exception.StructureRestrictionViolationException;
-import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureOwnerRepository;
-import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureRepository;
-import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureWorldRepository;
-import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerRepository;
 import com.chingo247.settlercraft.structureapi.model.structure.Structure;
-import com.chingo247.settlercraft.structureapi.model.structure.StructureRepository;
-import com.chingo247.settlercraft.structureapi.model.world.StructureWorldRepository;
 import com.chingo247.settlercraft.structureapi.platforms.services.AsyncEditSessionFactoryProvider;
 import com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.SchematicPlacement;
@@ -89,16 +83,11 @@ public class StructureAPI implements IStructureAPI {
     public static final String PLUGIN_NAME = "SettlerCraft";
     public static final String PLANS_DIRECTORY = "plans";
 
-    private final IStructureRepository structureRepository;
-    private final IStructureWorldRepository structureWorldRepository;
-    private final IStructureOwnerRepository structureOwnerRepository;
-
     private final APlatform platform;
     private IPlugin plugin;
     private IConfigProvider config;
 
     private final Lock loadLock = new ReentrantLock();
-    private final Lock structureLock = new ReentrantLock();
     private StructurePlanMenuFactory planMenuFactory;
     private AsyncEditSessionFactoryProvider sessionFactoryProvider;
 
@@ -124,9 +113,6 @@ public class StructureAPI implements IStructureAPI {
         this.structureManagers = Maps.newHashMap();
 
         // Now register the GlobalPlanManager
-        this.structureRepository = new StructureRepository(graph);
-        this.structureWorldRepository = new StructureWorldRepository(graph);
-        this.structureOwnerRepository = new StructureOwnerRepository(graph);
         this.COLORS = platform.getChatColors();
 
         EventManager.getInstance().getEventBus().register(new StructurePlanManagerHandler());

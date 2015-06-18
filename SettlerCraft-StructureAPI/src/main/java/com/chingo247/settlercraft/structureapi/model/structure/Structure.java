@@ -25,7 +25,6 @@ import com.chingo247.settlercraft.structureapi.structure.ConstructionManager;
 import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BuildOptions;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.DemolishingOptions;
-import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -33,7 +32,7 @@ import java.util.Date;
 import java.util.UUID;
 import org.neo4j.graphdb.Node;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
-import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
+import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
 
 /**
  *
@@ -183,7 +182,7 @@ public class Structure extends AbstractStructure {
         ConstructionManager.getInstance().build(this, player.getUniqueId(), getSession(player.getUniqueId()), options, force);
     }
 
-    public void build(EditSession session, BuildOptions options, boolean force) throws ConstructionException {
+    public void build(ThreadSafeEditSession session, BuildOptions options, boolean force) throws ConstructionException {
         ConstructionManager.getInstance().build(this, PlayerEntry.CONSOLE.getUUID(), session, options, force);
     }
 
@@ -191,7 +190,7 @@ public class Structure extends AbstractStructure {
         ConstructionManager.getInstance().demolish(this, player.getUniqueId(), getSession(player.getUniqueId()), options, force);
     }
 
-    public void demolish(EditSession session, DemolishingOptions options, boolean force) throws ConstructionException {
+    public void demolish(ThreadSafeEditSession session, DemolishingOptions options, boolean force) throws ConstructionException {
         ConstructionManager.getInstance().demolish(this, PlayerEntry.CONSOLE.getUUID(), session, options, force);
     }
 
@@ -203,16 +202,16 @@ public class Structure extends AbstractStructure {
         ConstructionManager.getInstance().stop(player, this, true, useForce);
     }
     
-    private AsyncEditSession getSession(UUID playerId) {
+    private ThreadSafeEditSession getSession(UUID playerId) {
         Player ply = SettlerCraft.getInstance().getPlayer(playerId);
         com.sk89q.worldedit.world.World w = SettlerCraft.getInstance().getWorld(getWorld().getName());
-        AsyncEditSession editSession;
+        ThreadSafeEditSession editSession;
         StructureAPI api = (StructureAPI) StructureAPI.getInstance();
         
         if (ply == null) {
-            editSession = (AsyncEditSession) api.getSessionFactory().getEditSession(w, -1);
+            editSession =  api.getSessionFactory().getThreadSafeEditSession(w, -1);
         } else {
-            editSession = (AsyncEditSession) api.getSessionFactory().getEditSession(w, -1, ply);
+            editSession =  api.getSessionFactory().getThreadSafeEditSession(w, -1, ply);
         }
         return editSession;
     }
