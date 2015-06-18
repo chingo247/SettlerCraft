@@ -22,7 +22,6 @@ import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.
 import com.chingo247.settlercraft.structureapi.structure.plan.schematic.Schematic;
 import com.chingo247.settlercraft.structureapi.structure.plan.schematic.FastClipboard;
 import com.chingo247.settlercraft.structureapi.util.WorldUtil;
-import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -38,7 +37,6 @@ public class SchematicPlacement extends AbstractBlockPlacement<BuildOptions> imp
     private FastClipboard clipboard;
     private CuboidRegion clipboardRegion;
     private CuboidRegion placementRegion;
-    private Vector size;
 
     public SchematicPlacement(Schematic schematic) {
         this(schematic, 0, Vector.ZERO);
@@ -59,21 +57,21 @@ public class SchematicPlacement extends AbstractBlockPlacement<BuildOptions> imp
         int width = schematic.getWidth();
         int length = schematic.getLength();
         int height = schematic.getHeight();
-        this.size = new BlockVector(width, height, length);
         
         if(((currentDirection == Direction.EAST || currentDirection == Direction.WEST) && (newDirection == Direction.NORTH || newDirection == Direction.SOUTH))
                 || ((currentDirection == Direction.NORTH || currentDirection == Direction.SOUTH) && (newDirection == Direction.WEST || newDirection == Direction.EAST))) {
-            int temp = getWidth();
-            setWidth(getLength());
-            setLength(temp);
+            int temp = schematic.getWidth();
+            width = schematic.getLength();
+            length = temp;
         }
         
+        this.clipboardRegion = new CuboidRegion(Vector.ZERO, getSize());
         this.placementRegion = new CuboidRegion(Vector.ZERO, new Vector(width, height, length));
     }
-//
+
     @Override
-    public Vector getSize() {
-        return size;
+    public CuboidRegion getCuboidRegion() {
+        return placementRegion;
     }
     
     
@@ -94,7 +92,7 @@ public class SchematicPlacement extends AbstractBlockPlacement<BuildOptions> imp
 
     @Override
     public BaseBlock getBlock(Vector position) {
-        if(placementRegion.contains(position)) {
+        if(clipboardRegion.contains(position)) {
             BaseBlock b = clipboard.getBlock(position);
             return b;
         }
