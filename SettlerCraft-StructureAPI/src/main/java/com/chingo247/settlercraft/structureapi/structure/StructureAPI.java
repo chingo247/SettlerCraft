@@ -181,6 +181,7 @@ public class StructureAPI implements IStructureAPI {
     @Override
     public void checkRestrictions(Player player, World world, CuboidRegion region) throws StructureRestrictionViolationException {
         for(StructureRestriction restriction : restrictions) {
+            System.out.println("Checking restriction: " + restriction.getPlugin());
             restriction.check(player, world, region);
         }
     }

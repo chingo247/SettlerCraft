@@ -6,7 +6,11 @@
 package com.chingo247.settlercraft.towny.plugin;
 
 import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
+import com.chingo247.settlercraft.towny.debug.TownListener;
 import com.chingo247.settlercraft.towny.restriction.TownyRestriction;
+import com.palmergames.bukkit.towny.TownySettings;
+import com.palmergames.bukkit.towny.object.Coord;
+import com.sk89q.worldedit.Vector2D;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -40,8 +44,16 @@ public class SettlerCraftTowny extends JavaPlugin {
         // Towny Restriction
         StructureAPI.getInstance().addRestriction(new TownyRestriction());
         
+        Bukkit.getPluginManager().registerEvents(new TownListener(), this);
+        
     }
     
+    public static Vector2D translate(Coord coord) {
+        int blockSize = TownySettings.getTownBlockSize();
+        int x = coord.getX() * blockSize;
+        int z = coord.getZ() * blockSize;
+        return new Vector2D(x,z);
+    }
     
     
     
