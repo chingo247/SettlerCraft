@@ -9,15 +9,18 @@ import com.chingo247.settlercraft.structureapi.structure.restriction.StructureRe
 import com.palmergames.bukkit.towny.Towny;
 import com.palmergames.bukkit.towny.TownySettings;
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
+import com.palmergames.bukkit.towny.object.Coord;
 import com.palmergames.bukkit.towny.object.Resident;
+import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownBlock;
 import com.palmergames.bukkit.towny.object.TownyWorld;
-import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
 import org.bukkit.Bukkit;
 
 /**
@@ -25,72 +28,83 @@ import org.bukkit.Bukkit;
  * @author Chingo
  */
 public class TownyRestriction extends StructureRestriction {
-    
+
     private final int blockSize;
-    private static final int TOWN_BLOCK_HEIGHT = 128;
-    
+    private boolean restrictToPlots = false;
+
     private final Towny towny;
 
     public TownyRestriction() {
         super("Towny", "towny.structure.restriction", null);
-        
+
         this.towny = (Towny) Bukkit.getPluginManager().getPlugin("Towny");
         this.blockSize = TownySettings.getTownBlockSize();
-        
+
     }
 
     @Override
     public boolean evaluate(Player whoPlaces, World world, CuboidRegion affectedArea) {
-        if(exceedsTownBlock(affectedArea)) {
-            setMessage("Structure exceeds towny's townblock size");
-            return false;
-        }
-        
-        Set<Vector2D> chunks = affectedArea.getChunks();
-        if(chunks.size() > 1)  {
-            setMessage("Structure overlaps multiple plots");
-            return false;
-        }
-        
-        Iterator<Vector2D> posIt = chunks.iterator();
-        Vector2D townBlockPos;
-        if(posIt.hasNext()) {
-           townBlockPos = posIt.next();
-        } else {
-            setMessage("Unable to retrieve TownBlocks..."); // Possible? 
-            return false;
-        }
-        
+        List<Coord> coords = getCoords(affectedArea);
         TownyWorld townyWorld = towny.getTownyUniverse().getWorldMap().get(world.getName());
-        TownBlock block;
-        try {
-            block = townyWorld.getTownBlock(townBlockPos.getBlockX(), townBlockPos.getBlockZ());
-        } catch (NotRegisteredException ex) {
-            setMessage("Not on TownBlock...");
-            return false;
-        }
         
-        Resident resident;
-        try {
-            resident = block.getResident();
-        } catch (NotRegisteredException ex) {
-            setMessage("You don't own this town block");
-            return false;
-        }
         
-        if(!resident.getName().equals(whoPlaces.getName())) {
-            setMessage("You don't own this town block");
-            return false;
-        }
-        
+        Iterator<Coord> coordIt = coords.iterator();
+            while (coordIt.hasNext()) {
+                Coord nextPos = coordIt.next();
+                TownBlock tb = null;
+
+                if(restrictToPlots) {
+                    try {
+                        tb = townyWorld.getTownBlock(nextPos);
+                    } catch (NotRegisteredException ex) {
+                        setMessage("Not on a plot...");
+                        return false;
+                    }
+                }
+                
+                if(tb != null) {
+                    Town t = null;
+                    try {
+                       t =  tb.getTown();
+                    } catch (NotRegisteredException ex) {}
+                    
+                    Resident resident = null;
+                    try {
+                         resident = tb.getResident();
+                    } catch (NotRegisteredException ex) {}
+                    
+                    
+                    if(resident != null && resident.getName().equals(whoPlaces.getName())) {
+                        setMessage("You don't own this plot");
+                        return false;
+                    }
+                    
+                    if(t != null && !t.getMayor().getName().equals(whoPlaces.getName())) {
+                        setMessage("You are not the mayor of this town, you may only place within the plots");
+                        return false;
+                    }
+                    
+                }
+            }
+
+
+       
         return true;
     }
     
-    private boolean exceedsTownBlock(CuboidRegion affected) {
-        return affected.getLength() > blockSize || affected.getWidth() > blockSize || affected.getHeight() > TOWN_BLOCK_HEIGHT;
+    private List<Coord> getCoords(CuboidRegion region) {
+        Vector min = region.getMinimumPoint();
+        Vector max = region.getMaximumPoint();
+        Coord minCoord = Coord.parseCoord(min.getBlockX(), min.getBlockZ());
+        Coord maxCoord = Coord.parseCoord(max.getBlockX(), max.getBlockZ());
+        
+        List<Coord> coords = new ArrayList<>();
+        for(int x = minCoord.getX(); x < maxCoord.getX(); x += blockSize) {
+            for(int z = minCoord.getZ(); x < maxCoord.getZ(); x += blockSize) {
+                coords.add(new Coord(x, z));
+            }
+        }
+        return coords;
     }
-    
-    
-   
-    
+
 }
