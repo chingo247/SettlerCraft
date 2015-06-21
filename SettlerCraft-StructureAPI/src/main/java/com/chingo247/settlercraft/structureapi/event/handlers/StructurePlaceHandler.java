@@ -126,15 +126,14 @@ public class StructurePlaceHandler {
         if (selectionManager == null) {
             if (session.hasCUISupport()) {
                 slm = CUISelectionManager.getInstance();
-            } else if (HologramSelectionManager.getInstance().hasHologramsProvider()) {
-                slm = HologramSelectionManager.getInstance();
+//            } else if (HologramSelectionManager.getInstance().hasHologramsProvider()) {
+//                slm = HologramSelectionManager.getInstance();
             } else {
                 slm = NoneSelectionManager.getInstance();
             }
         } else {
             slm = selectionManager;
         }
-        System.out.println("Submitting structure task...");
         playerPool.execute(player.getUniqueId(), new Runnable() {
 
             @Override

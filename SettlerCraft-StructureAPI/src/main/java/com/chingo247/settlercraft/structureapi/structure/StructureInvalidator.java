@@ -77,7 +77,6 @@ public class StructureInvalidator {
     }
 
     public void invalidate() {
-        long start = System.currentTimeMillis();
         System.out.println("[SettlerCraft]: Starting structure invalidation...");
         List<IWorld> toCheck = Lists.newArrayList();
 
