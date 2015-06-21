@@ -179,6 +179,7 @@ public class StructurePlaceHandler {
 
     private void handlePlace(IStructurePlan plan, AItemStack item, Player player, World world, Vector pos1, ISelectionManager selectionManager) {
         IPlayer iPlayer = SettlerCraft.getInstance().getPlatform().getPlayer(player.getUniqueId());
+        
         Direction direction = WorldUtil.getDirection(iPlayer.getYaw());
         Vector pos2;
 

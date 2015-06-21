@@ -16,7 +16,6 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan.xml.parser;
 
-import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.SchematicPlacement;
 import com.chingo247.settlercraft.structureapi.structure.plan.document.PlacementElement;
 import com.chingo247.settlercraft.structureapi.structure.plan.exception.PlanException;
@@ -44,8 +43,11 @@ public class SchematicPlacementParser implements PlacementParser<SchematicPlacem
         }
 
         Vector pos = placementElement.getPosition();
-        Direction direction = placementElement.getDirection();
-
+        
+        int direction = placementElement.getRotation();
+        System.out.println("Direction parse: " + direction);
+        
+        
         SchematicManager sdm = SchematicManager.getInstance();
         return new SchematicPlacement(sdm.getOrLoadSchematic(schematicFile), direction, pos);
     }

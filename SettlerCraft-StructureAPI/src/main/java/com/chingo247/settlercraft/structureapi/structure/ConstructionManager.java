@@ -233,7 +233,9 @@ public class ConstructionManager {
                             Placement p = structure.getStructurePlan().getPlacement();
                             if (p instanceof RotationalPlacement) {
                                 RotationalPlacement rt = (RotationalPlacement) p;
-                                rt.rotate(structure.getDirection());
+                                System.out.println("Before rotate: " + rt.getRotation());
+                                rt.rotate(structure.getDirection().getRotation());
+                                System.out.println("After rotate: " + rt.getRotation());
                             }
 
                             AsyncPlacement placement = new AsyncPlacement(playerEntry, p, new AsyncPlacementCallback() {
@@ -332,7 +334,7 @@ public class ConstructionManager {
 
                             if (parentPlacement instanceof RotationalPlacement) {
                                 RotationalPlacement rt = (RotationalPlacement) parentPlacement;
-                                rt.rotate(parent.getDirection());
+                                rt.rotate(parent.getDirection().getRotation());
                             }
 
                             // Get Area of the child placement

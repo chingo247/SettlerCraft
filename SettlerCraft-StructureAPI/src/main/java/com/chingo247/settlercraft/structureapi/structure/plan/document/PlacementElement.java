@@ -16,7 +16,6 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan.document;
 
-import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.structureapi.structure.plan.xml.PlacementXMLConstants;
 import com.chingo247.settlercraft.structureapi.structure.plan.xml.StructurePlanXMLConstants;
 import com.sk89q.worldedit.Vector;
@@ -61,27 +60,31 @@ public class PlacementElement extends LineElement {
         return simpleElement.getTextValue().trim();
     }
 
-    public Direction getDirection() {
-        Node dirNode = le.selectSingleNode(PlacementXMLConstants.DIRECTION_ELEMENT);
+    public int getRotation() {
+        Node dirNode = le.selectSingleNode(PlacementXMLConstants.ROTATION_ELEMENT);
         if (dirNode != null) {
             LineElement dirElement = new LineElement(getFile(), (Element) dirNode);
             dirElement.checkNotEmpty();
-            String direction = dirElement.getTextValue();
-            switch (direction.toLowerCase().trim()) {
-                case "east":
-                    return Direction.EAST;
-                case "west":
-                    return Direction.WEST;
-                case "north":
-                    return Direction.NORTH;
-                case "south":
-                    return Direction.SOUTH;
-                default:
-                    throw new AssertionError("Unreachable");
-            }
+            int direction = dirElement.getIntValue();
+            return direction;
         }
-        return Direction.EAST; // Default
+        return 0; // Default
     }
+    
+    private static float normalizeYaw(float yaw) {
+        float ya = yaw;
+        if(yaw > 360) {
+            int times = (int)((ya - (ya % 360)) / 360);
+            int normalizer = times * 360;
+            ya -= normalizer;
+        } else if (yaw < -360) {
+            ya = Math.abs(ya);
+            int times = (int)((ya - (ya % 360)) / 360);
+            int normalizer = times * 360;
+            ya = yaw + normalizer;
+        }
+        return ya;
+    } 
 
     public Vector getPosition() {
         Node posNode = le.selectSingleNode(PlacementXMLConstants.POSITION_ELEMENT);

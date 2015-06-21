@@ -16,7 +16,6 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan.schematic;
 
-import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.util.XXHasher;
 import com.sk89q.worldedit.Vector;
 import java.io.File;
@@ -104,7 +103,7 @@ public class SchematicImpl implements Schematic {
 
     @Override
     public SchematicPlacement createPlacement() {
-        return new SchematicPlacement(this, Direction.EAST, Vector.ZERO);
+        return new SchematicPlacement(this, 0, Vector.ZERO); // Default settlercraft thinks schematics are stored in natural position
     }
 
 }

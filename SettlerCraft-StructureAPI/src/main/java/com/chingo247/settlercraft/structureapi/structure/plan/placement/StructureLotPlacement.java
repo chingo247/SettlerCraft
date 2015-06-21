@@ -17,7 +17,6 @@
 
 package com.chingo247.settlercraft.structureapi.structure.plan.placement;
 
-import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BuildOptions;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
@@ -29,7 +28,7 @@ import com.sk89q.worldedit.Vector;
 public class StructureLotPlacement extends AbstractPlacement<BuildOptions> {
     
     public StructureLotPlacement(Vector position, int width, int height, int length) {
-        super(Direction.EAST, position, width, height, length);
+        super(0, position, width, height, length);
     }
 
     @Override

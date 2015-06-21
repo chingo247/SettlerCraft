@@ -17,12 +17,12 @@
 
 package com.chingo247.settlercraft.structureapi.structure.plan.placement;
 
-import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.structureapi.structure.construction.StructureBlock;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.iterator.CuboidIterator;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BlockMask;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BlockPredicate;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.PlacementOptions;
+import com.chingo247.settlercraft.structureapi.util.WorldUtil;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
@@ -51,8 +51,8 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
         this.BLOCK_BETWEEN = Math.round((float) ((getBlocks() * 0.001)));
     }
 
-    public AbstractBlockPlacement(Direction direction, Vector relativePosition, int width, int height, int length) {
-        super(direction, relativePosition, width, height, length);
+    public AbstractBlockPlacement(int rotation, Vector relativePosition, int width, int height, int length) {
+        super(rotation, relativePosition, width, height, length);
         this.BLOCK_BETWEEN = Math.round((float) ((getBlocks() * 0.01)));
     }
 
@@ -124,6 +124,8 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
             StructureBlock plb = placeLater.poll();
             doBlock(editSession, pos, plb.getPosition(), plb.getBlock(), option);
         }
+        
+        System.out.println("Placed all!");
     }
 
     private int getPriority(BaseBlock block) {
@@ -164,7 +166,8 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
 
     protected void doBlock(EditSession editSession, Vector position, Vector blockPosition, BaseBlock block, T option) {
         Vector p;
-        switch (getDirection()) {
+        
+        switch (WorldUtil.getDirection(getRotation())) {
             case EAST:
                 p = position.add(blockPosition);
                 break;
