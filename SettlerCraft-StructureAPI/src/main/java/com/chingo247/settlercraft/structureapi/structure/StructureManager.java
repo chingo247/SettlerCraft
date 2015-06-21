@@ -97,7 +97,6 @@ public class StructureManager {
      * @param direction The direction
      */
     private void checkWorldRestrictions(Placement p, World world, Vector position, Direction direction) throws StructureException {
-        System.out.println("Check world restrictions");
         Vector min = p.getCuboidRegion().getMinimumPoint().add(position);
         Vector max = min.add(p.getCuboidRegion().getMaximumPoint());
         CuboidRegion placementDimension = new CuboidRegion(min, max);
@@ -126,7 +125,6 @@ public class StructureManager {
         IWorld w = platform.getServer().getWorld(world.getName());
         Structure structure = null;
         Transaction tx = null;
-        System.out.println("Create structure!");
         File structureDirectory = null;
         try {
             tx = graph.beginTx();
@@ -146,7 +144,6 @@ public class StructureManager {
                 PlacementExporter exporter = new PlacementExporter();
                 exporter.export(placement, structurePlanFile, "structureplan.xml", true);
                 structure = new Structure(structureNode);
-                System.out.println("structure #" + structure.getId() + " has been created");
             }
             tx.success();
         } catch (StructureException ex) {
@@ -180,21 +177,15 @@ public class StructureManager {
     public Structure createStructure(Structure parentStructure, IStructurePlan structurePlan, Vector position, Direction direction, Player owner) throws StructureException {
         IWorld w = platform.getServer().getWorld(world.getName());
         Structure structure = null;
-        System.out.println("Creating structure");
         try (Transaction tx = graph.beginTx()){
-            System.out.println("Begin transaction");
-            System.out.println("Create world node");
             StructureWorldNode worldNode = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
-            System.out.println("Create structureNode");
             StructureNode structureNode = create(worldNode, structure, structurePlan.getPlacement(), structurePlan.getName(), position, direction, owner);
              
-            System.out.println("Get directory for structure");
             File structureDirectory = structureAPI.getDirectoryForStructure(worldNode, structureNode);
             if(structureDirectory.exists()) {
                 structureDirectory.delete();
             }
             structureDirectory.mkdirs();
-            System.out.println("Moving resources!");
             try {
                 moveResources(worldNode, structureNode, structurePlan);
             } catch (IOException ex) {
@@ -205,7 +196,6 @@ public class StructureManager {
 
         if (structureNode != null) {
             structure = new Structure(structureNode);
-            System.out.println("structure #" + structure.getId() + " has been created");
         }
         
         tx.success();
@@ -219,7 +209,6 @@ public class StructureManager {
     }
 
     synchronized StructureNode create(StructureWorldNode worldNode, Structure parent, Placement placement, String name, Vector position, Direction direction, Player owner) throws StructureException {
-        System.out.println("Call create");
         checkWorldRestrictions(placement, world, position, direction);
 
         Vector min = position;
@@ -227,7 +216,6 @@ public class StructureManager {
         CuboidRegion structureRegion = new CuboidRegion(min, max);
         StructureNode structureNode = null;
 
-        System.out.println("Check parent");
         StructureNode parentNode = null;
         if (parent != null) {
             parentNode = new StructureNode(parent.getNode());
@@ -237,7 +225,6 @@ public class StructureManager {
             }
         }
 
-        System.out.println("Check structures within if parent");
         if (parentNode != null) {
             
             boolean hasWithin = parentNode.hasSubstructuresWithin(structureRegion);
@@ -249,11 +236,9 @@ public class StructureManager {
 
 
         // Create the StructureNode - Where it all starts...
-        System.out.println("Adding structure");
         structureNode = structureRepository.addStructure(worldNode, name, position, structureRegion, direction, 0.0);
 
         // Add owner!
-        System.out.println("Adding owner");
         if (owner != null) {
             StructureOwnerNode settler = structureOwnerRepository.findByUUID(owner.getUniqueId());
             if (settler == null) {
@@ -262,7 +247,6 @@ public class StructureManager {
             structureNode.addOwner(settler, StructureOwnerType.MASTER);
         }
 
-        System.out.println("Adding owner to substructure from parent");
         // Inherit ownership if there is a parent
         if (parentNode != null) {
             for (StructureOwnershipRelation rel : parentNode.getOwnerships()) {

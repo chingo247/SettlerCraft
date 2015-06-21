@@ -3,14 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.settlercraft.towny.debug;
+package com.chingo247.settlercraft.towny.listener;
 
 import com.chingo247.settlercraft.towny.plugin.SettlerCraftTowny;
 import com.palmergames.bukkit.towny.TownySettings;
 import com.palmergames.bukkit.towny.event.NewTownEvent;
 import com.palmergames.bukkit.towny.event.TownClaimEvent;
-import com.palmergames.bukkit.towny.object.Coord;
-import static com.palmergames.bukkit.towny.object.Coord.parseCoord;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownBlock;
 import com.sk89q.worldedit.Vector2D;
@@ -27,7 +25,7 @@ import org.bukkit.event.Listener;
  *
  * @author Chingo
  */
-public class TownListener implements Listener {
+public class TownyDebugListener implements Listener {
 
     @EventHandler
     public void onTownCreate(NewTownEvent townEvent) {
@@ -46,7 +44,6 @@ public class TownListener implements Listener {
     }
 
     private void paintBlock(final TownBlock block) {
-        System.out.println("Paint block!");
 
         World w = Bukkit.getWorld(block.getWorld().getName());
 
@@ -54,10 +51,7 @@ public class TownListener implements Listener {
         Vector2D min = SettlerCraftTowny.translate(block.getWorldCoord());
         Vector2D max = min.add(blockSize, blockSize);
 
-        System.out.println("min: " + min.getX() + ", " + min.getZ());
-        System.out.println("max: " + max.getX() + ", " + max.getZ());
 
-        System.out.println("Painting: " + w.getName());
         for (int x = min.getBlockX(); x < max.getBlockX(); x++) {
             for (int z = min.getBlockZ(); z < max.getBlockZ(); z++) {
                 Block b = w.getHighestBlockAt(x, z);
@@ -68,9 +62,6 @@ public class TownListener implements Listener {
 
     }
 
-    public static void main(String[] args) {
-        Coord coord = parseCoord(16, 32);
-        System.out.println(coord.getX() + " " + coord.getZ());
-    }
+    
 
 }

@@ -134,6 +134,9 @@ public class StructureWorldNode extends WorldNode implements IStructureWorld {
       
         Map<String,Object> params = Maps.newHashMap();
         params.put("worldId", w.getUUID().toString());
+        if(limit > 0) {
+            params.put("limit", limit);
+        }
        
         String query = 
                    "MATCH (world:"+WorldNode.LABEL.name()+" { "+WorldNode.ID_PROPERTY+": {worldId} })"
@@ -144,8 +147,12 @@ public class StructureWorldNode extends WorldNode implements IStructureWorld {
                 + " AND s." + StructureNode.MAX_X_PROPERTY + " >= " + region.getMinimumPoint().getBlockX() + " AND s." + StructureNode.MIN_X_PROPERTY + " <= " + region.getMaximumPoint().getBlockX()
                 + " AND s." + StructureNode.MAX_Y_PROPERTY + " >= " + region.getMinimumPoint().getBlockY() + " AND s." + StructureNode.MIN_Y_PROPERTY + " <= " + region.getMaximumPoint().getBlockY()
                 + " AND s." + StructureNode.MAX_Z_PROPERTY + " >= " + region.getMinimumPoint().getBlockZ() + " AND s." + StructureNode.MIN_Z_PROPERTY + " <= " + region.getMaximumPoint().getBlockZ()
-                + " RETURN s"
-                + " LIMIT " + limit;
+                + " RETURN s";
+        
+        if(limit > 0) {
+            query += " LIMIT {limit}";
+        }
+        
         Result result = getNode().getGraphDatabase().execute(query, params);
         while (result.hasNext()) {
             Map<String, Object> map = result.next();
@@ -170,6 +177,10 @@ public class StructureWorldNode extends WorldNode implements IStructureWorld {
         return f;
     }
 
+    /**
+     * Not implemented yet...
+     * @return 
+     */
     @Override
     public WorldConfig getConfig() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

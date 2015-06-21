@@ -5,8 +5,10 @@
  */
 package com.chingo247.settlercraft.towny.plugin;
 
+import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
-import com.chingo247.settlercraft.towny.debug.TownListener;
+import com.chingo247.settlercraft.towny.listener.TownListener;
+import com.chingo247.settlercraft.towny.listener.TownyDebugListener;
 import com.chingo247.settlercraft.towny.restriction.TownyRestriction;
 import com.palmergames.bukkit.towny.TownySettings;
 import com.palmergames.bukkit.towny.object.Coord;
@@ -19,13 +21,6 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author Chingo
  */
 public class SettlerCraftTowny extends JavaPlugin {
-
-    public SettlerCraftTowny() {
-        
-        
-        
-        
-    }
 
     @Override
     public void onEnable() {
@@ -44,7 +39,10 @@ public class SettlerCraftTowny extends JavaPlugin {
         // Towny Restriction
         StructureAPI.getInstance().addRestriction(new TownyRestriction());
         
-        Bukkit.getPluginManager().registerEvents(new TownListener(), this);
+        SettlerCraft settlerCraft = SettlerCraft.getInstance();
+        
+        Bukkit.getPluginManager().registerEvents(new TownyDebugListener(), this);
+        Bukkit.getPluginManager().registerEvents(new TownListener(settlerCraft.getNeo4j(), settlerCraft.getExecutor()), this);
         
     }
     
