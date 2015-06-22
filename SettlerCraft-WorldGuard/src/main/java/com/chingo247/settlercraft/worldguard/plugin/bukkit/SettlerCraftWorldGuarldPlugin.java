@@ -17,10 +17,9 @@
 package com.chingo247.settlercraft.worldguard.plugin.bukkit;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
 import com.chingo247.settlercraft.structureapi.structure.IStructureAPI;
 import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
-import com.chingo247.settlercraft.worldguard.protecttion.WorldGuardHelper;
+import com.chingo247.settlercraft.worldguard.protecttion.SettlerCraftWGService;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -53,7 +52,7 @@ public class SettlerCraftWorldGuarldPlugin extends JavaPlugin {
         
         
         if(Bukkit.getPluginManager().getPlugin("WorldGuard") != null) {
-            WorldGuardHelper worldGuardHelper = new WorldGuardHelper(graph, new StructureDAO(graph), structureAPI);
+            SettlerCraftWGService worldGuardHelper = new SettlerCraftWGService(graph, structureAPI);
             worldGuardHelper.initialize();
         } else {
             System.out.println("[SettlerCraft-WorldGuard]: Couldn't find WorldGuard! Disabling SettlerCraft-WorldGuard");

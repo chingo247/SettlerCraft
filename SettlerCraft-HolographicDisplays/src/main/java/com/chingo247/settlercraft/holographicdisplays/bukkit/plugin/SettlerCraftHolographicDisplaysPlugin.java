@@ -16,8 +16,13 @@
  */
 package com.chingo247.settlercraft.holographicdisplays.bukkit.plugin;
 
+import com.chingo247.settlercraft.structureapi.platforms.bukkit.selection.HologramSelectionManager;
 import com.chingo247.settlercraft.structureapi.platforms.services.holograms.StructureHologramManager;
 import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -28,14 +33,32 @@ public class SettlerCraftHolographicDisplaysPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        if(Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null) {
+        if (Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null) {
             StructureHologramManager.getInstance().setHologramProvider(new HolographicDisplaysHologramProvider());
+            HologramSelectionManager.getInstance().setHologramsProvider(new HolographicDisplaysHologramProvider());
+            Bukkit.getPluginManager().registerEvents(new shutdownListener(), this);
         } else {
             System.out.println("[SettlerCraft-HolographicDisplays]: Couldn't find HolographicDisplays, Disabling SettlerCraft-HolographicDisplays");
             this.setEnabled(false);
         }
     }
-    
-    
-    
+
+    private class shutdownListener implements Listener {
+
+        @EventHandler(priority = EventPriority.HIGHEST) // Critical as it needs to be executed on shutdown
+        public void onShutdown(PluginDisableEvent disableEvent) {
+            if (disableEvent.getPlugin().getName().equals("HolographicDisplays")) {
+                if (StructureHologramManager.getInstance().getHologramsProvider() != null
+                        && StructureHologramManager.getInstance().getHologramsProvider().getName().equals("HolographicDisplays")) {
+                    StructureHologramManager.getInstance().shutdown();
+                }
+
+                if (HologramSelectionManager.getInstance().getHologramsProvider() != null
+                        && HologramSelectionManager.getInstance().getHologramsProvider().getName().equals("HolographicDisplays")) {
+                    HologramSelectionManager.getInstance().clearAll();
+                }
+            }
+        }
+
+    }
 }

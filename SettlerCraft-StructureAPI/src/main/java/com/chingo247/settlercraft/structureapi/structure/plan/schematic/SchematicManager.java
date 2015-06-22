@@ -18,10 +18,9 @@ package com.chingo247.settlercraft.structureapi.structure.plan.schematic;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.util.XXHasher;
-import com.chingo247.settlercraft.structureapi.persistence.dao.SchematicDataDAO;
-import com.chingo247.settlercraft.structureapi.persistence.entities.schematic.SchematicData;
-import com.chingo247.settlercraft.structureapi.persistence.entities.schematic.SchematicDataFactory;
-import com.chingo247.settlercraft.structureapi.persistence.entities.schematic.SchematicDataNode;
+import com.chingo247.settlercraft.structureapi.model.schematic.SchematicDataNode;
+import com.chingo247.settlercraft.structureapi.model.schematic.SchematicRepository;
+import com.chingo247.settlercraft.structureapi.model.interfaces.ISchematicData;
 import com.chingo247.settlercraft.structureapi.structure.plan.exception.SchematicException;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -50,13 +49,13 @@ public class SchematicManager {
 //    private final SCLogger LOG = new SCLogger();
     private final Map<Long, Schematic> schematics;
     private static SchematicManager instance;
-    private final SchematicDataDAO schematicDAO;
+    private final SchematicRepository schematicRepository;
     private final GraphDatabaseService graph;
     private final long TWO_DAYS = 1000 * 60 * 60 * 24 * 2;
 
     private SchematicManager() {
         this.graph = SettlerCraft.getInstance().getNeo4j();
-        this.schematicDAO = new SchematicDataDAO(graph);
+        this.schematicRepository = new SchematicRepository(graph);
         this.schematics = Collections.synchronizedMap(new HashMap<Long, Schematic>());
     }
 
@@ -108,49 +107,52 @@ public class SchematicManager {
         }
         
         
-        Map<Long, SchematicData> alreadyHere = Maps.newHashMap();
-        try(Transaction tx = graph.beginTx()) {
-            List<SchematicDataNode> schematicNodes = schematicDAO.findSchematicsAfterDate(System.currentTimeMillis() - TWO_DAYS);
-            SchematicDataFactory schematicDataFactory = new SchematicDataFactory();
-            for(SchematicDataNode node : schematicNodes) {
-                SchematicData data = schematicDataFactory.make(node);
-                alreadyHere.put(data.getXXHash64(), data);
-            }
-            
-            tx.success();
-        }
-        
-        // Process the schematics that need to be loaded
+        Map<Long, ISchematicData> alreadyHere = Maps.newHashMap();
         List<SchematicProcessor> tasks =  Lists.newArrayList();
         List<Schematic> alreadyDone = Lists.newArrayList();
         XXHasher hasher = new XXHasher();
-        while (fit.hasNext()) {
-            File schematicFile = fit.next();
-            try {
-                long checksum = hasher.hash64(schematicFile);
-                // Only load schematic data that wasn't yet loaded...
-                SchematicData existingData = alreadyHere.get(checksum);
-                if(existingData != null) {
-                    Schematic s = new SchematicImpl(schematicFile, existingData.getWidth(), existingData.getHeight(), existingData.getLength());
-                    alreadyDone.add(s);
-                } else if (getSchematic(checksum) == null) {
-                    SchematicProcessor processor = new SchematicProcessor(schematicFile);
-                    tasks.add(processor);
-                    pool.execute(processor);
-                }
-            } catch (IOException ex) {
-                Logger.getLogger(SchematicManager.class.getName()).log(Level.SEVERE, null, ex);
+        
+        try(Transaction tx = graph.beginTx()) {
+            List<SchematicDataNode> schematicNodes = schematicRepository.findAfterDate(System.currentTimeMillis() - TWO_DAYS);
+            for(SchematicDataNode node : schematicNodes) {
+                alreadyHere.put(node.getXXHash64(), node);
             }
-
+            
+            // Process the schematics that need to be loaded
+            while (fit.hasNext()) {
+                File schematicFile = fit.next();
+                try {
+                    long checksum = hasher.hash64(schematicFile);
+                    // Only load schematic data that wasn't yet loaded...
+                    ISchematicData existingData = alreadyHere.get(checksum);
+                    if(existingData != null) {
+                        Schematic s = new SchematicImpl(schematicFile, existingData.getWidth(), existingData.getHeight(), existingData.getLength());
+                        alreadyDone.add(s);
+                    } else if (getSchematic(checksum) == null) {
+                        SchematicProcessor processor = new SchematicProcessor(schematicFile);
+                        tasks.add(processor);
+                        pool.execute(processor);
+                    }
+                } catch (IOException ex) {
+                    Logger.getLogger(SchematicManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            tx.success();
         }
+        
+        
         
         // Wait for the processes the finish and queue them for bulk insert
         List<Schematic> newSchematics = Lists.newArrayList();
-        for (SchematicProcessor sp : tasks) {
-            Schematic schematic = sp.join();
-            if (schematic != null) {
-                newSchematics.add(schematic);
+        try {
+            for (SchematicProcessor sp : tasks) {
+                Schematic schematic = sp.get();
+                if (schematic != null) {
+                    newSchematics.add(schematic);
+                }
             }
+        } catch (Exception ex) {
+            Logger.getLogger(SchematicManager.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         // Close the pool!
@@ -159,7 +161,7 @@ public class SchematicManager {
         // Update the database
         try(Transaction tx = graph.beginTx()) {
             for(Schematic data : alreadyDone) {
-                SchematicDataNode sdn = schematicDAO.find(data.getHash());
+                SchematicDataNode sdn = schematicRepository.findByHash(data.getHash());
                 sdn.setLastImport(System.currentTimeMillis());
             }
             for(Schematic newData : newSchematics) {
@@ -168,12 +170,12 @@ public class SchematicManager {
                 int width = newData.getWidth();
                 int height = newData.getHeight();
                 int length = newData.getLength();
-                schematicDAO.addSchematic(name, xxhash, width, height, length, System.currentTimeMillis());
+                schematicRepository.addSchematic(name, xxhash, width, height, length, System.currentTimeMillis());
             }
             
             // Delete unused
             int removed = 0;
-            for(SchematicDataNode sdn : schematicDAO.findSchematicsBeforeDate(System.currentTimeMillis() - TWO_DAYS)) {
+            for(SchematicDataNode sdn : schematicRepository.findBeforeDate(System.currentTimeMillis() - TWO_DAYS)) {
                 sdn.delete();
                 removed++;
             }
@@ -181,13 +183,17 @@ public class SchematicManager {
                 System.out.println("[SettlerCraft]: Deleted " + removed + " schematics from cache");
             }
             
+            
             tx.success();
         }
         
+        
         synchronized(schematics) {
-            for(Schematic schematic : newSchematics) schematics.put(schematic.getHash(), schematic);
-            for(Schematic schematic : alreadyDone) schematics.put(schematic.getHash(), schematic);
+                for(Schematic schematic : newSchematics) schematics.put(schematic.getHash(), schematic);
+                for(Schematic schematic : alreadyDone) schematics.put(schematic.getHash(), schematic);
         }
+            
+        
         
 
     }

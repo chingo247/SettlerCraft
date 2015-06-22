@@ -33,4 +33,6 @@ public interface ICommandSender {
     
     public void sendMessage(String message);
     
+    public boolean hasPermission(String permission);
+    
 }

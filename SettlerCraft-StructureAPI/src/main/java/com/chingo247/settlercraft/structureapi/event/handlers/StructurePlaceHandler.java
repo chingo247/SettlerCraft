@@ -16,35 +16,40 @@
  */
 package com.chingo247.settlercraft.structureapi.event.handlers;
 
-import com.chingo247.xplatform.core.AInventory;
-import com.chingo247.xplatform.core.AItemStack;
-import com.chingo247.xplatform.core.IPlayer;
-import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.settlercraft.structureapi.exception.StructureException;
-import com.chingo247.settlercraft.core.util.KeyPool;
-import com.chingo247.settlercraft.structureapi.util.WorldUtil;
 import com.chingo247.settlercraft.core.Direction;
-import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
-import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.core.SettlerCraft;
+import com.chingo247.settlercraft.core.model.WorldNode;
+import com.chingo247.settlercraft.core.util.KeyPool;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
-import com.chingo247.settlercraft.structureapi.persistence.dao.StructureDAO;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureNode;
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureRelTypes;
+import com.chingo247.settlercraft.structureapi.exception.StructureException;
+import com.chingo247.settlercraft.structureapi.exception.StructureRestrictionViolationException;
+import com.chingo247.settlercraft.structureapi.model.util.StructureRelations;
+import com.chingo247.settlercraft.structureapi.platforms.bukkit.selection.HologramSelectionManager;
 import com.chingo247.settlercraft.structureapi.platforms.services.PermissionManager;
 import com.chingo247.settlercraft.structureapi.selection.CUISelectionManager;
 import com.chingo247.settlercraft.structureapi.selection.ISelectionManager;
 import com.chingo247.settlercraft.structureapi.selection.NoneSelectionManager;
-import com.chingo247.settlercraft.structureapi.structure.ConstructionStatus;
-import com.chingo247.settlercraft.structureapi.structure.DefaultStructureFactory;
+import com.chingo247.settlercraft.structureapi.model.structure.StructureStatus;
+import com.chingo247.settlercraft.structureapi.model.world.StructureWorldRepository;
 import com.chingo247.settlercraft.structureapi.structure.IStructureAPI;
-import com.chingo247.settlercraft.structureapi.structure.Structure;
+import com.chingo247.settlercraft.structureapi.model.structure.StructureNode;
+import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureWorld;
+import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureWorldRepository;
+import com.chingo247.settlercraft.structureapi.model.structure.Structure;
 import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
+import com.chingo247.settlercraft.structureapi.structure.plan.IStructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlanManager;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.BuildOptions;
 import com.chingo247.settlercraft.structureapi.util.PlacementUtil;
+import com.chingo247.settlercraft.structureapi.util.WorldUtil;
+import com.chingo247.xplatform.core.AInventory;
+import com.chingo247.xplatform.core.AItemStack;
+import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IColors;
+import com.chingo247.xplatform.core.IPlayer;
 import com.chingo247.xplatform.core.IWorld;
 import com.google.common.collect.Maps;
+import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
@@ -73,31 +78,30 @@ public class StructurePlaceHandler {
     private final IEconomyProvider economyProvider;
     private final IStructureAPI structureAPI;
     private final IColors color;
-    private final StructureDAO structureDAO;
+    private final IStructureWorldRepository structureWorldRepository;
+    private final APlatform platform;
 
     public StructurePlaceHandler(IEconomyProvider economyProvider) {
         this.playerPool = new KeyPool<>(SettlerCraft.getInstance().getExecutor());
         this.economyProvider = economyProvider;
         this.structureAPI = StructureAPI.getInstance();
-        this.color = structureAPI.getPlatform().getChatColors();
-        this.structureDAO = new StructureDAO(SettlerCraft.getInstance().getNeo4j());
+        this.platform = structureAPI.getPlatform();
+        this.color = platform.getChatColors();
+        this.structureWorldRepository = new StructureWorldRepository(SettlerCraft.getInstance().getNeo4j());
     }
     
-    public void handleDeselect(Player player, ISelectionManager selectionManager) {
-        LocalSession session = WorldEdit.getInstance().getSession(player);
+    public void handleDeselect(Player player) {
         
-        final ISelectionManager slm;
-        // Set the SelectionManager if null...
-        if (selectionManager == null) {
-            if (session.hasCUISupport()) {
-                slm = CUISelectionManager.getInstance();
-            } else {
-                slm = NoneSelectionManager.getInstance();
-            }
-        } else {
-            slm = selectionManager;
+        
+        if(CUISelectionManager.getInstance().hasSelection(player)) {
+            CUISelectionManager.getInstance().deselect(player);
         }
-        slm.deselect(player);
+        if(HologramSelectionManager.getInstance().hasHologramsProvider() && HologramSelectionManager.getInstance().hasSelection(player)) {
+            HologramSelectionManager.getInstance().deselect(player);
+        }
+        if(NoneSelectionManager.getInstance().hasSelection(player)) {
+            NoneSelectionManager.getInstance().deselect(player);
+        }
         
     }
 
@@ -122,13 +126,14 @@ public class StructurePlaceHandler {
         if (selectionManager == null) {
             if (session.hasCUISupport()) {
                 slm = CUISelectionManager.getInstance();
+//            } else if (HologramSelectionManager.getInstance().hasHologramsProvider()) {
+//                slm = HologramSelectionManager.getInstance();
             } else {
                 slm = NoneSelectionManager.getInstance();
             }
         } else {
             slm = selectionManager;
         }
-
         playerPool.execute(player.getUniqueId(), new Runnable() {
 
             @Override
@@ -142,7 +147,7 @@ public class StructurePlaceHandler {
                     }
 
                     String planId = getPlanID(planItem);
-                    StructurePlan plan = StructurePlanManager.getInstance().getPlan(planId);
+                    IStructurePlan plan = StructurePlanManager.getInstance().getPlan(planId);
 
                     if (plan == null) {
                         if (structureAPI.isLoading()) {
@@ -172,8 +177,9 @@ public class StructurePlaceHandler {
 
     }
 
-    private void handlePlace(StructurePlan plan, AItemStack item, Player player, World world, Vector pos1, ISelectionManager selectionManager) {
+    private void handlePlace(IStructurePlan plan, AItemStack item, Player player, World world, Vector pos1, ISelectionManager selectionManager) {
         IPlayer iPlayer = SettlerCraft.getInstance().getPlatform().getPlayer(player.getUniqueId());
+        
         Direction direction = WorldUtil.getDirection(iPlayer.getYaw());
         Vector pos2;
 
@@ -191,8 +197,10 @@ public class StructurePlaceHandler {
         // If player has NOT selected anything yet... make a new selection
         if (!selectionManager.hasSelection(player)) {
             selectionManager.select(player, pos1, pos2);
-            player.print(color.yellow() + "Left-Click " + color.reset() + " in the " + color.green() + " green " + color.reset() + "square to " + color.yellow() + "confirm");
-            player.print(color.yellow() + "Right-Click " + color.reset() + "to" + color.yellow() + " deselect");
+            if(!(selectionManager instanceof NoneSelectionManager)) {
+                player.print(color.yellow() + "Left-Click " + color.reset() + " in the " + color.green() + " green " + color.reset() + "square to " + color.yellow() + "confirm");
+                player.print(color.yellow() + "Right-Click " + color.reset() + "to" + color.yellow() + " deselect");
+            }
         } else if (selectionManager.matchesCurrentSelection(player, pos1, pos2)) {
 
             if (toLeft) {
@@ -217,11 +225,10 @@ public class StructurePlaceHandler {
                     if (possibleParentStructure != null) {
                         
                         
-                        if (possibleParentStructure.getConstructionStatus() != ConstructionStatus.COMPLETED) {
+                        if (possibleParentStructure.getStatus() != StructureStatus.COMPLETED) {
                             player.printError("Status of #" + possibleParentStructure.getId() + " must not be in progress before substructures can be placed inside");
                             return;
                         }
-
                         structure = structureAPI.createSubstructure(possibleParentStructure, plan, world, pos1, direction, player);
                     } else {
                         structure = structureAPI.createStructure(plan, world, pos1, direction, player);
@@ -234,23 +241,29 @@ public class StructurePlaceHandler {
                         
                         iPlayer.getInventory().removeItem(clone);
                         iPlayer.updateInventory();
-                        
-                        structure.build(player, new BuildOptions(), false);
+                        EditSession session = structureAPI.getSessionFactory().getEditSession(world, -1, player);
+                        if(!structureAPI.isQueueLocked(player.getUniqueId())) {
+                            structureAPI.getConstructionManager().build(structure, iPlayer.getUniqueId(), session, new BuildOptions(), toLeft);
+                        } else {
+                            player.printError("Your queue is locked at the moment, try '/stt build " + structure.getId() + "' when your queue is unlocked");
+                        }
                     }
                 } catch (StructureException ex) {
                     player.print(color.red() + ex.getMessage());
                 } catch (Exception ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
-                }
-
+                } 
                 selectionManager.deselect(player);
+                
 
             }
         } else {
             selectionManager.deselect(player);
             selectionManager.select(player, pos1, pos2);
-            player.print(color.yellow() + "Left-Click " + color.reset() + " in the " + color.green() + " green " + color.reset() + "square to " + color.yellow() + "confirm");
-            player.print(color.yellow() + "Right-Click " + color.reset() + "to" + color.yellow() + " deselect");
+            if(!(selectionManager instanceof NoneSelectionManager)) {
+                player.print(color.yellow() + "Left-Click " + color.reset() + " in the " + color.green() + " green " + color.reset() + "square to " + color.yellow() + "confirm");
+                player.print(color.yellow() + "Right-Click " + color.reset() + "to" + color.yellow() + " deselect");
+            }
         }
 
     }
@@ -270,7 +283,7 @@ public class StructurePlaceHandler {
             String query
                     = "MATCH (world:" + WorldNode.LABEL.name() + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
                     + " WITH world "
-                    + " MATCH (world)<-[:" + StructureRelTypes.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
+                    + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
                     + " WHERE s." + StructureNode.DELETED_AT_PROPERTY + " IS NULL"
                     + " AND s." + StructureNode.MAX_X_PROPERTY + " >= " + position.getBlockX() + " AND s." + StructureNode.MIN_X_PROPERTY + " <= " + position.getBlockX()
                     + " AND s." + StructureNode.MAX_Y_PROPERTY + " >= " + position.getBlockY() + " AND s." + StructureNode.MIN_Y_PROPERTY + " <= " + position.getBlockY()
@@ -280,16 +293,16 @@ public class StructurePlaceHandler {
                     + " LIMIT 1";
 
             Result result = graph.execute(query, params);
-            StructureNode node = null;
+            StructureNode structureNode = null;
             while (result.hasNext()) {
                 Map<String, Object> map = result.next();
                 Node n = (Node) map.get("structure");
-                node = new StructureNode(n);
-                structure = DefaultStructureFactory.getInstance().makeStructure(node);
+                structureNode = new StructureNode(n);
+                structure = new Structure(n);
             }
 
-            if (node != null) {
-                isOwner = node.isOwner(player.getUniqueId());
+            if (structureNode != null) {
+                isOwner = structureNode.isOwner(player.getUniqueId());
             }
 
             tx.success();
@@ -377,7 +390,7 @@ public class StructurePlaceHandler {
         return price;
     }
 
-    private boolean canPlace(Structure possibleParent, Player player, World world, Vector pos1, Direction direction, StructurePlan plan) {
+    private boolean canPlace(Structure possibleParent, Player player, World world, Vector pos1, Direction direction, IStructurePlan plan) {
         // Check for overlap with other structures
         Vector min = pos1;
         Vector max = PlacementUtil.getPoint2Right(min, direction, plan.getPlacement().getCuboidRegion().getMaximumPoint());
@@ -385,8 +398,8 @@ public class StructurePlaceHandler {
 
         StructureAPI sapi = (StructureAPI) StructureAPI.getInstance();
         try {
-            sapi.checkStructureRestrictions(player, world, new CuboidRegion(min, max));
-        } catch (StructureException ex) {
+            sapi.checkRestrictions(player, world, new CuboidRegion(min, max));
+        } catch (StructureRestrictionViolationException ex) {
             player.printError(ex.getMessage());
             return false;
         }
@@ -394,9 +407,13 @@ public class StructurePlaceHandler {
         try (Transaction tx = graph.beginTx()) {
             List<StructureNode> overlappingStructure;
             if (possibleParent != null) {
-                overlappingStructure = structureDAO.getSubStructuresWithinStructure(possibleParent, world, new CuboidRegion(min, max), 1);
+                Node n = possibleParent.getNode();
+                StructureNode sn = new StructureNode(n);
+                overlappingStructure = sn.getSubStructuresWithin(new CuboidRegion(min, max), 1);
             } else {
-                overlappingStructure = structureDAO.getStructuresWithin(world, new CuboidRegion(min, max), 1);
+                IWorld iw = platform.getServer().getWorld(world.getName());
+                IStructureWorld sw = structureWorldRepository.registerWorld(iw.getName(),iw.getUUID());
+                overlappingStructure = sw.getStructuresWithin(new CuboidRegion(min, max), 1);
             }
 
             if (overlappingStructure != null && !overlappingStructure.isEmpty()) {

@@ -61,7 +61,7 @@ public class PlanListener implements Listener {
         Block block = pie.getClickedBlock();
 
         if (block == null || pie.getAction().equals(Action.RIGHT_CLICK_AIR) || pie.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-            placeHandler.handleDeselect(player, null);
+            placeHandler.handleDeselect(player);
             return;
         }
 

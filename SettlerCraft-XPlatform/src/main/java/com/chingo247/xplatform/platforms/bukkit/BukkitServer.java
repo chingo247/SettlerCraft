@@ -72,17 +72,30 @@ public class BukkitServer implements IServer {
 
     @Override
     public IPlayer getPlayer(UUID playerUUID) {
-        return new BukkitPlayer(server.getPlayer(playerUUID));
+        Player player = server.getPlayer(playerUUID);
+        if(player == null) {
+            return null;
+        }
+        
+        return new BukkitPlayer(player);
     }
 
     @Override
     public IWorld getWorld(String world) {
-        return new BukkitWorld(server.getWorld(world));
+        World w = server.getWorld(world);
+        if(w == null) {
+            return null;
+        }
+        return new BukkitWorld(w);
     }
 
     @Override
     public IWorld getWorld(UUID worldUUID) {
-        return new BukkitWorld(server.getWorld(worldUUID));
+        World w = server.getWorld(worldUUID);
+        if(w == null) {
+            return null;
+        }
+        return new BukkitWorld(w);
     }
 
     @Override
@@ -109,6 +122,11 @@ public class BukkitServer implements IServer {
     @Override
     public File getWorldRegionFolder(String world) {
         return new File(getWorldFolder(world), "region");
+    }
+
+    @Override
+    public void broadcast(String message) {
+        server.broadcastMessage(message);
     }
 
     

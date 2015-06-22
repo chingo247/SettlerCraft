@@ -23,9 +23,9 @@ import com.chingo247.settlercraft.core.persistence.neo4j.Neo4jHelper;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IPlugin;
 import com.chingo247.xplatform.core.IWorld;
-import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerDAO;
-import com.chingo247.settlercraft.core.persistence.dao.settler.SettlerNode;
-import com.chingo247.settlercraft.core.persistence.dao.world.WorldNode;
+import com.chingo247.settlercraft.core.model.BaseSettlerRepository;
+import com.chingo247.settlercraft.core.model.BaseSettlerNode;
+import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.settlercraft.core.platforms.services.IPlayerProvider;
 import com.google.common.base.Preconditions;
@@ -52,17 +52,17 @@ public class SettlerCraft {
     public static final String MSG_PREFIX = "[SettlerCraft]: ";
 
     private static SettlerCraft instance;
-    private final ExecutorService service;
+    private final ExecutorService executor;
 
     private APlatform platform;
     private IPlugin plugin;
     private IPlayerProvider playerProvider;
     private GraphDatabaseService graph;
-    private SettlerDAO settlerDAO;
+    private BaseSettlerRepository settlerDAO;
     private IEconomyProvider economyProvider;
 
     private SettlerCraft() {
-        this.service = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 30L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+        this.executor = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 30L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     }
 
     private void setupNeo4j() {
@@ -73,7 +73,7 @@ public class SettlerCraft {
         
         databaseDir.mkdirs();
         this.graph = new Neo4jDatabase(databaseDir, "SettlerCraft", 512).getGraph();
-        this.settlerDAO = new SettlerDAO(graph);
+        this.settlerDAO = new BaseSettlerRepository(graph);
         
         try (Transaction tx = graph.beginTx()) {
             if (!Neo4jHelper.hasUniqueConstraint(graph, WorldNode.LABEL, WorldNode.ID_PROPERTY)) {
@@ -84,11 +84,11 @@ public class SettlerCraft {
             }
         }
         try (Transaction tx = graph.beginTx()) {
-            Neo4jHelper.createUniqueIndexIfNotExist(graph, SettlerNode.LABEL, SettlerNode.UUID_PROPERTY);
+            Neo4jHelper.createUniqueIndexIfNotExist(graph, BaseSettlerNode.LABEL, BaseSettlerNode.UUID_PROPERTY);
             tx.success();
         }
         try (Transaction tx = graph.beginTx()) {
-            Neo4jHelper.createUniqueIndexIfNotExist(graph, SettlerNode.LABEL, SettlerNode.ID_PROPERTY);
+            Neo4jHelper.createUniqueIndexIfNotExist(graph, BaseSettlerNode.LABEL, BaseSettlerNode.ID_PROPERTY);
             tx.success();
         }
         try (Transaction tx = graph.beginTx()) {
@@ -97,7 +97,7 @@ public class SettlerCraft {
         }
         
         
-        SettlerRegister structureOwnerRegister = new SettlerRegister(settlerDAO, service, graph);
+        SettlerRegister structureOwnerRegister = new SettlerRegister(settlerDAO, executor, graph);
         EventManager.getInstance().getEventBus().register(structureOwnerRegister);
     }
     
@@ -157,7 +157,7 @@ public class SettlerCraft {
     }
 
     public ExecutorService getExecutor() {
-        return service;
+        return executor;
     }
 
     public Player getPlayer(UUID player) {
@@ -166,7 +166,12 @@ public class SettlerCraft {
 
     public World getWorld(UUID world) {
         IWorld w = platform.getServer().getWorld(world);
-        return w == null ? null : getWorld(w.getName());
+        
+        if(w != null) {
+            return getWorld(w.getName());
+        }
+        
+        return null;
     }
 
     public World getWorld(String world) {

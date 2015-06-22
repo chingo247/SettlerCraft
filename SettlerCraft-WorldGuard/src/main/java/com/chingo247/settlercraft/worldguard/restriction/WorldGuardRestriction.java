@@ -17,7 +17,7 @@
 package com.chingo247.settlercraft.worldguard.restriction;
 
 import com.chingo247.settlercraft.structureapi.structure.restriction.StructureRestriction;
-import com.chingo247.settlercraft.worldguard.protecttion.WorldGuardHelper;
+import com.chingo247.settlercraft.worldguard.protecttion.SettlerCraftWGService;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
@@ -43,10 +43,10 @@ public class WorldGuardRestriction extends StructureRestriction {
     public boolean evaluate(Player whoPlaces, World world, CuboidRegion affectedArea) {
         LocalPlayer localPlayer = null;
         if (whoPlaces != null) {
-            localPlayer = WorldGuardHelper.getLocalPlayer(Bukkit.getPlayer(whoPlaces.getUniqueId()));
+            localPlayer = SettlerCraftWGService.getLocalPlayer(Bukkit.getPlayer(whoPlaces.getUniqueId()));
         }
 
-        RegionManager mgr = WorldGuardHelper.getRegionManager(Bukkit.getWorld(world.getName()));
+        RegionManager mgr = SettlerCraftWGService.getRegionManager(Bukkit.getWorld(world.getName()));
 
         Vector p1 = affectedArea.getMinimumPoint();
         Vector p2 = affectedArea.getMaximumPoint();

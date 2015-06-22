@@ -18,7 +18,7 @@
 package com.chingo247.settlercraft.structureapi.structure.plan.xml.export;
 
 import com.chingo247.settlercraft.structureapi.structure.plan.PlacementAPI;
-import com.chingo247.settlercraft.structureapi.structure.plan.StructurePlan;
+import com.chingo247.settlercraft.structureapi.structure.plan.IStructurePlan;
 //import com.chingo247.structureapi.structure.plan.SubStructuresPlan;
 import java.io.File;
 import org.dom4j.Document;
@@ -28,8 +28,6 @@ import com.chingo247.settlercraft.structureapi.structure.plan.xml.StructurePlanX
 import com.google.common.base.Preconditions;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
@@ -40,7 +38,7 @@ import org.dom4j.io.XMLWriter;
  */
 public class StructurePlanExporter {
     
-    public void export(StructurePlan plan, File destinationDirectory, String fileName, boolean prettyPrint) {
+    public void export(IStructurePlan plan, File destinationDirectory, String fileName, boolean prettyPrint) throws IOException {
         Preconditions.checkArgument(destinationDirectory.isDirectory());
         
         Document d = DocumentHelper.createDocument();
@@ -111,7 +109,7 @@ public class StructurePlanExporter {
 //            
 //        }
         
-        try {
+      
             OutputFormat format;
             if(prettyPrint) {
                 format = OutputFormat.createPrettyPrint();
@@ -121,9 +119,7 @@ public class StructurePlanExporter {
             XMLWriter writer = new XMLWriter(new FileWriter(new File(destinationDirectory, fileName)), format);
             writer.write(d);
             writer.close();
-        } catch (IOException ex) {
-            Logger.getLogger(StructurePlanExporter.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        
         
         
     }

@@ -16,9 +16,7 @@
  */
 package com.chingo247.settlercraft.structureapi.structure.plan.placement;
 
-import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.options.PlacementOptions;
-import com.chingo247.settlercraft.structureapi.util.WorldUtil;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
 
@@ -30,23 +28,33 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 public abstract class AbstractPlacement<T extends PlacementOptions> implements Placement<T>, RotationalPlacement<T> {
     
     protected final Vector position;
-    private Direction direction;
-    private int rotation = -90;
+    private int rotation;
     private int width;
     private int height;
     private int length;
 
     public AbstractPlacement(int width, int height, int length) {
-        this(Direction.EAST, Vector.ZERO, width, height, length);
+        this(0, Vector.ZERO, width, height, length);
     }
 
     
-    public AbstractPlacement(Direction direction, Vector relativePosition, int width, int height, int length) {
-        this.direction = direction;
-        this.rotation = WorldUtil.getYaw(direction);
+    public AbstractPlacement(int rotation, Vector relativePosition, int width, int height, int length) {
+        this.rotation = rotation;
         this.position = relativePosition;
         this.length = length;
         this.height = height;
+        this.width = width;
+    }
+
+    protected void setHeight(int height) {
+        this.height = height;
+    }
+
+    protected void setLength(int length) {
+        this.length = length;
+    }
+
+    protected void setWidth(int width) {
         this.width = width;
     }
     
@@ -61,40 +69,26 @@ public abstract class AbstractPlacement<T extends PlacementOptions> implements P
     }
 
     @Override
-    public void rotate(Direction direction) {
-//        if(((direction == Direction.EAST || direction == Direction.WEST) && (this.direction == Direction.NORTH || this.direction == Direction.NORTH))
-//                || ((direction == Direction.NORTH || direction == Direction.SOUTH) && (this.direction == Direction.WEST || this.direction == Direction.EAST))) {
-//            int temp = width;
-//            width = length;
-//            length = temp;
-//        }
-        
-        
-        switch(direction) {
-            case EAST:
-                break;
-            case WEST: 
-                rotation += 180;
-                break;
-            case NORTH:
-                rotation -= 90;
-                break;
-            case SOUTH:
-                rotation += 90;
-            break;
-            default:break;
-        }
-        // If the amount is bigger than 360, then remove turn back 360
-        if (rotation >= 360) {
-            rotation = - 360;
-        }
-        this.direction = WorldUtil.getDirection(rotation);
+    public final void rotate(int rotation) {
+        this.rotation += rotation;
+        this.rotation = (int) (normalizeYaw(this.rotation));
     }
     
-     @Override
-    public void rotate(int rotation) {
-        rotate(WorldUtil.getDirection(rotation));
-    }
+     private static float normalizeYaw(float yaw) {
+        float ya = yaw;
+        if(yaw > 360) {
+            int times = (int)((ya - (ya % 360)) / 360);
+            int normalizer = times * 360;
+            ya -= normalizer;
+        } else if (yaw < -360) {
+            ya = Math.abs(ya);
+            int times = (int)((ya - (ya % 360)) / 360);
+            int normalizer = times * 360;
+            ya = yaw + normalizer;
+        }
+        return ya;
+    } 
+    
 
 
     @Override
@@ -108,14 +102,11 @@ public abstract class AbstractPlacement<T extends PlacementOptions> implements P
     }
     
     
-    @Override
-    public Direction getDirection() {
-        return direction;
-    }
+    
     
     @Override
     public int getRotation() {
-        return WorldUtil.getYaw(direction);
+        return rotation;
     }
 
     @Override

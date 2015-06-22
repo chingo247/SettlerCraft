@@ -17,9 +17,7 @@
 package com.chingo247.settlercraft.structureapi.event;
 
 /**
- *
+ * Fired when structure plans are loaded
  * @author Chingo
  */
-public class StructurePlansLoadedEvent {
-    
-}
+public class StructurePlansLoadedEvent {}

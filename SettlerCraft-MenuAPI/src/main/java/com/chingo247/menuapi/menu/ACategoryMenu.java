@@ -69,6 +69,7 @@ public abstract class ACategoryMenu {
     private int currentPage = 0;
 
     private String currentCategory;
+    private String tag;
 
     public ACategoryMenu(IEconomyProvider economyProvider, String title, AInventory notThePlayersInventory, String defaultCategory, int defaultCategoryIcon, MenuView view) {
         Preconditions.checkNotNull(title);
@@ -90,6 +91,14 @@ public abstract class ACategoryMenu {
         this.color = platform.getChatColors();
     }
 
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+    
     public void setNoCosts(boolean noCosts) {
         this.noCosts = noCosts;
     }

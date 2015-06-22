@@ -27,6 +27,7 @@ import org.dom4j.tree.BaseElement;
  */
 public class SchematicPlacementXMLHandler extends AbstractPlacementXMLHandler<SchematicPlacement> {
 
+    
     @Override
     public Element handle(SchematicPlacement placement) {
        Element placementRoot = super.handle(placement);

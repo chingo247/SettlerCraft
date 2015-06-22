@@ -26,9 +26,9 @@ import java.util.UUID;
  */
 public class Selection {
     
-    private UUID player;
-    private Vector start;
-    private Vector end;
+    protected final  UUID player;
+    protected final  Vector start;
+    protected final  Vector end;
 
     public Selection(UUID player, Vector start, Vector end) {
         this.player = player;

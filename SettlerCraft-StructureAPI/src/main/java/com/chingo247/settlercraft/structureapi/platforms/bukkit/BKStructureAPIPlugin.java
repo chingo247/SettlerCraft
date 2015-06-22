@@ -54,6 +54,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
  */
 public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
 
+    public static final Level LOG_LEVEL = Level.SEVERE;
     public static final String MSG_PREFIX = ChatColor.YELLOW + "[SettlerCraft]: ";
     private static final Logger LOGGER = Logger.getLogger(BKStructureAPIPlugin.class);
     private IEconomyProvider economyProvider;
@@ -115,6 +116,7 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         StructureAPI structureAPI = (StructureAPI) StructureAPI.getInstance();
         structureAPI.registerStructureAPIPlugin(new BukkitPlugin(this));
         structureAPI.registerConfigProvider(configProvider);
+        structureAPI.setLogLevel(LOG_LEVEL);
         
         
         
@@ -169,6 +171,8 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         
         // Setup Commands
         structureCommands = new StructureCommands(StructureAPI.getInstance(), SettlerCraft.getInstance().getExecutor(), graph);
+        
+        
     }
 
     @Override
@@ -193,7 +197,6 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
     @Override
     public void onDisable() {
         super.onDisable(); //To change body of generated methods, choose Tools | Templates.
-        StructureHologramManager.getInstance().shutdown();
     }
     
     

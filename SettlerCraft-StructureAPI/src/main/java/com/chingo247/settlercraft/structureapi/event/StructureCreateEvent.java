@@ -16,11 +16,11 @@
  */
 package com.chingo247.settlercraft.structureapi.event;
 
-import com.chingo247.settlercraft.structureapi.structure.Structure;
+import com.chingo247.settlercraft.structureapi.model.structure.Structure;
 
 
 /**
- *
+ * Fired when a structure was created
  * @author Chingo
  */
 public class StructureCreateEvent extends StructureEvent {

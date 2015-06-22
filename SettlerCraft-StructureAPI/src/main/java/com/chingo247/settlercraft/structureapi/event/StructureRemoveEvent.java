@@ -16,11 +16,11 @@
  */
 package com.chingo247.settlercraft.structureapi.event;
 
-import com.chingo247.settlercraft.structureapi.structure.Structure;
+import com.chingo247.settlercraft.structureapi.model.structure.Structure;
 
 
 /**
- *
+ * Fired when a structure has been removed
  * @author Chingo
  */
 public class StructureRemoveEvent extends StructureEvent {

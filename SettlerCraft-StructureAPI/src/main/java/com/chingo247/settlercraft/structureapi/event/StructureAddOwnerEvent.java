@@ -16,23 +16,22 @@
  */
 package com.chingo247.settlercraft.structureapi.event;
 
-import com.chingo247.settlercraft.structureapi.persistence.entities.structure.StructureOwnerType;
-import com.chingo247.settlercraft.structureapi.structure.Structure;
+import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerType;
+import com.chingo247.settlercraft.structureapi.model.structure.Structure;
 import java.util.UUID;
 
 /**
  *
  * @author Chingo
  */
-public class StructureAddOwnerEvent {
+public class StructureAddOwnerEvent extends StructureEvent {
     
     private final UUID addedOwner;
-    private final Structure structure;
     private final StructureOwnerType ownerType;
 
     public StructureAddOwnerEvent(UUID addedMember, Structure structure, StructureOwnerType type) {
+        super(structure);
         this.addedOwner = addedMember;
-        this.structure = structure;
         this.ownerType = type;
     }
 
@@ -40,9 +39,7 @@ public class StructureAddOwnerEvent {
         return addedOwner;
     }
 
-    public Structure getStructure() {
-        return structure;
-    }
+   
 
     public StructureOwnerType getOwnerType() {
         return ownerType;

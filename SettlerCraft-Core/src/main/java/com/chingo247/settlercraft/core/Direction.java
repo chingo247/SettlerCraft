@@ -21,20 +21,28 @@ package com.chingo247.settlercraft.core;
  * @author Chingo
  */
 public enum Direction {
-    NORTH(0),
-    EAST(1),
-    SOUTH(2),
-    WEST(3);
+    NORTH(0,-180),
+    EAST(1,-90),
+    SOUTH(2,0),
+    WEST(3,-270);
 
     private int id;
+    private int rotation;
     
-    private Direction(int direction) {
+    private Direction(int direction, int rotation) {
         this.id = direction;
+        this.rotation = rotation;
     }
 
     public int getDirectionId() {
         return id;
     }
+
+    public int getRotation() {
+        return rotation;
+    }
+    
+    
     
     
     public static Direction match(int direction) {

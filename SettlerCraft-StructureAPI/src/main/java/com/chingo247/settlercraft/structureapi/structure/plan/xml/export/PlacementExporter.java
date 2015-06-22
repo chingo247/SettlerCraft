@@ -20,6 +20,7 @@ package com.chingo247.settlercraft.structureapi.structure.plan.xml.export;
 import com.chingo247.settlercraft.structureapi.structure.plan.DefaultStructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
 import java.io.File;
+import java.io.IOException;
 
 /**
  *
@@ -27,7 +28,7 @@ import java.io.File;
  */
 public class PlacementExporter {
     
-    public void export(Placement p, File destinationDirectory, String fileName, boolean prettyprint) {
+    public void export(Placement p, File destinationDirectory, String fileName, boolean prettyprint) throws IOException {
         File placementPlanFile = new File(destinationDirectory, fileName);
         DefaultStructurePlan plan = new PlacementPlan(placementPlanFile.getAbsolutePath(), placementPlanFile, p);
         plan.setCategory("Other");

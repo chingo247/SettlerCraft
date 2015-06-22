@@ -16,11 +16,11 @@
  */
 package com.chingo247.settlercraft.structureapi.event;
 
-import com.chingo247.settlercraft.structureapi.structure.Structure;
+import com.chingo247.settlercraft.structureapi.model.structure.Structure;
 
 
 /**
- *
+ * Fired when a structure's state has changed
  * @author Chingo
  */
 public class StructureStateChangeEvent extends StructureEvent {

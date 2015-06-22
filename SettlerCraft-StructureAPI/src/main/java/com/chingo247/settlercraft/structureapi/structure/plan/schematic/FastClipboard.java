@@ -21,6 +21,7 @@ import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.jnbt.IntTag;
 import com.sk89q.jnbt.ListTag;
 import com.sk89q.jnbt.NBTInputStream;
+import com.sk89q.jnbt.NBTOutputStream;
 import com.sk89q.jnbt.NamedTag;
 import com.sk89q.jnbt.ShortTag;
 import com.sk89q.jnbt.Tag;
@@ -30,11 +31,13 @@ import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.data.DataException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  *
@@ -49,8 +52,9 @@ public class FastClipboard {
     private final short[] blockIds;
     private final byte[] data;
     private final Map<BlockVector, Map<String, Tag>> tileEntities;
+    private final int yAxisOffset;
 
-    private FastClipboard(int width, int height, int length, short[] blockIds, byte[] data, Map<BlockVector, Map<String, Tag>> tileEntities) {
+    private FastClipboard(int yAxisOffset, int width, int height, int length, short[] blockIds, byte[] data, Map<BlockVector, Map<String, Tag>> tileEntities) {
         this.offset = Vector.ZERO;
         this.tileEntities = tileEntities;
         this.width = width;
@@ -58,7 +62,18 @@ public class FastClipboard {
         this.length = length;
         this.blockIds = blockIds;
         this.data = data;
+        this.yAxisOffset = yAxisOffset;
     }
+
+    /**
+     * Gets the rotation offset over the y-axis
+     * @return 
+     */
+    public int getyAxisOffset() {
+        return yAxisOffset;
+    }
+    
+    
 
     public BaseBlock getBlock(Vector pos) {
         return getBlock(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
@@ -117,7 +132,6 @@ public class FastClipboard {
     }
 
     public static FastClipboard read(File schematicFile) throws IOException {
-        long start = System.currentTimeMillis();
         NBTInputStream nbtStream = new NBTInputStream(
                 new GZIPInputStream(new FileInputStream(schematicFile)));
 
@@ -129,12 +143,14 @@ public class FastClipboard {
         nbtStream.close();
 
         // Check
+
         Map<String, Tag> schematic = (Map) rootTag.getTag().getValue();
         if (!schematic.containsKey("Blocks")) {
             throw new RuntimeException("Schematic file is missing a \"Blocks\" tag");
         }
 
         // Get information
+        
         short width = getChildTag(schematic, "Width", ShortTag.class).getValue();
         short length = getChildTag(schematic, "Length", ShortTag.class).getValue();
         short height = getChildTag(schematic, "Height", ShortTag.class).getValue();
@@ -217,7 +233,74 @@ public class FastClipboard {
             BlockVector vec = new BlockVector(x, y, z);
             tileEntitiesMap.put(vec, values);
         }
-        return new FastClipboard(width, height, length, blockids, blockData, tileEntitiesMap);
+        
+        Tag tag = schematic.get("SCyAxisOffset");
+        
+        int yAxisOffset;
+        if(tag == null) {
+            yAxisOffset = 0;
+        } else {
+            IntTag yAxisTag = (IntTag) tag;
+            yAxisOffset = yAxisTag.getValue();
+        }
+        
+        return new FastClipboard(yAxisOffset, width, height, length, blockids, blockData, tileEntitiesMap);
     }
+    
+    
+    public static void rotateAndWrite(File schematicFile, int degree) throws IOException {
+        if(degree % 90 != 0) {
+            throw new IllegalArgumentException("Degree must be a multiple of 90");
+        }
+        NBTInputStream nbtStream = new NBTInputStream(
+                new GZIPInputStream(new FileInputStream(schematicFile)));
+
+        NamedTag rootTag = nbtStream.readNamedTag();
+
+        if (!rootTag.getName().equalsIgnoreCase("Schematic")) {
+            throw new RuntimeException("Tag 'Schematic' does not exist or is not first");
+        }
+        nbtStream.close();
+        
+        Map<String, Tag> schematic = (Map) rootTag.getTag().getValue(); // Because this is an unmodifiable instance....
+        Tag currentYOffSetTag = schematic.get("SCyAxisOffset");
+        
+        int currentYOffSet;
+        if(currentYOffSetTag == null) {
+            currentYOffSet = 0;
+        } else {
+            IntTag yAxisTag = (IntTag) currentYOffSetTag;
+            currentYOffSet = yAxisTag.getValue();
+        }
+        
+        Map<String, Tag> copy = new HashMap<>(schematic); // We need to copy here
+        int normalizedYOffset = (int) normalizeYaw(degree + currentYOffSet);
+        copy.put("SCyAxisOffset", new IntTag(normalizedYOffset));
+        
+        CompoundTag tag = new CompoundTag(copy);
+       
+        
+        try(NBTOutputStream outputStream = new NBTOutputStream(new GZIPOutputStream(new FileOutputStream(schematicFile)))) {
+            outputStream.writeNamedTag("Schematic", tag);
+        }
+        
+        
+        
+    }
+    
+    private static float normalizeYaw(float yaw) {
+        float ya = yaw;
+        if(yaw > 360) {
+            int times = (int)((ya - (ya % 360)) / 360);
+            int normalizer = times * 360;
+            ya -= normalizer;
+        } else if (yaw < -360) {
+            ya = Math.abs(ya);
+            int times = (int)((ya - (ya % 360)) / 360);
+            int normalizer = times * 360;
+            ya = yaw + normalizer;
+        }
+        return ya;
+    } 
 
 }
