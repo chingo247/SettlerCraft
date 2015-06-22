@@ -78,7 +78,6 @@ public class StructurePlanManager {
         
         StructurePlanReader reader = new StructurePlanReader();
         IStructurePlan newPlan = reader.readFile(plan.getFile());
-        System.out.println("Reloading: " + planId + " - " + plan.getFile().getAbsolutePath());
         
         synchronized(plans) {
             plans.remove(plan.getId());
@@ -106,6 +105,7 @@ public class StructurePlanManager {
     public void loadPlans(final boolean verbose) {
         synchronized (plans) {
             plans.clear();
+            
         }
 
         // Make dirs if not exist!

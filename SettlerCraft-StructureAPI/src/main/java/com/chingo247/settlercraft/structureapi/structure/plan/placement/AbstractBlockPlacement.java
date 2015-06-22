@@ -125,7 +125,6 @@ public abstract class AbstractBlockPlacement<T extends PlacementOptions> extends
             doBlock(editSession, pos, plb.getPosition(), plb.getBlock(), option);
         }
         
-        System.out.println("Placed all!");
     }
 
     private int getPriority(BaseBlock block) {

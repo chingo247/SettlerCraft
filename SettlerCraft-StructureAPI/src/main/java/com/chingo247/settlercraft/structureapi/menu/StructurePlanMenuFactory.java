@@ -43,6 +43,10 @@ public class StructurePlanMenuFactory {
         this.menu = menu;
         this.platform = platform;
     }
+    
+    public void clearAll() {
+        menu.clearAll();
+    }
 
     public void load(IStructurePlan plan) {
         Placement placement = plan.getPlacement();

@@ -111,6 +111,11 @@ public class BukkitServer implements IServer {
         return new File(getWorldFolder(world), "region");
     }
 
+    @Override
+    public void broadcast(String message) {
+        server.broadcastMessage(message);
+    }
+
     
     
 }

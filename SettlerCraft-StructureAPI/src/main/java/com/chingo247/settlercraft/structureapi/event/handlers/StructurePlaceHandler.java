@@ -243,7 +243,12 @@ public class StructurePlaceHandler {
                         iPlayer.getInventory().removeItem(clone);
                         iPlayer.updateInventory();
                         EditSession session = structureAPI.getSessionFactory().getEditSession(world, -1, player);
-                        structureAPI.getConstructionManager().build(structure, iPlayer.getUniqueId(), session, new BuildOptions(), toLeft);
+                        
+                        if(!structureAPI.isQueueLocked(player.getUniqueId())) {
+                            structureAPI.getConstructionManager().build(structure, iPlayer.getUniqueId(), session, new BuildOptions(), toLeft);
+                        } else {
+                            player.printError("Your queue is locked at the moment, try '/stt build " + structure.getId() + "' when your queue is unlocked");
+                        }
                     }
                 } catch (StructureException ex) {
                     player.print(color.red() + ex.getMessage());

@@ -179,6 +179,9 @@ public class StructureCommands {
                             }
                             generate(commandArgs);
                             break;
+                        case "reload":
+                            reload(sender, commandArgs);
+                            break;
                         case "info":
                             info(sender, commandArgs);
                             break;
@@ -259,6 +262,27 @@ public class StructureCommands {
         return true;
     }
 
+    private void reload(ICommandSender sender, String[] commandArgs) throws CommandException {
+        String help = "Usage: /stt reload plans";
+        commandHelper.argumentsInRange(1, 1, commandArgs, "Usage: /stt reload plans");
+        
+        String reloadArgument = commandArgs[0];
+        // reload plans
+        if(reloadArgument.equals("plans")) {
+            if(!structureAPI.isLoading()) {
+                structureAPI.getStructurePlanManager().loadPlans(false);
+            } else {
+                sender.sendMessage(COLOR.red() + "Already reloading!");
+            }
+        } else {
+            sender.sendMessage(help);
+        }
+//        else if (reloadArgument.equals("config")) {
+//            
+//        }
+        
+    }
+
     private void schematic(ICommandSender sender, String[] commandArgs) throws CommandException {
         if (sender instanceof IPlayer) {
             IPlayer player = (IPlayer) sender;
@@ -299,34 +323,33 @@ public class StructureCommands {
         SchematicPlacement schematicPlacement = (SchematicPlacement) placement;
 
         Iterator<File> it = FileUtils.iterateFiles(structureAPI.getPlanDirectory(), new String[]{"schematic"}, true);
-        
+
         StructurePlanManager spm = StructurePlanManager.getInstance();
         List<IStructurePlan> plans = spm.getPlans();
         List<File> matching = Lists.newArrayList();
         Set<String> done = Sets.newHashSet();
         long hash = schematicPlacement.getSchematic().getHash();
-        for(IStructurePlan p : plans) {
-            if(p.getPlacement() instanceof SchematicPlacement) {
+        for (IStructurePlan p : plans) {
+            if (p.getPlacement() instanceof SchematicPlacement) {
                 SchematicPlacement sp = (SchematicPlacement) p.getPlacement();
                 File nextSchematicFile = sp.getSchematic().getFile();
-                if(sp.getSchematic().getHash() == hash) {
-                    if(!done.contains(nextSchematicFile.getAbsolutePath())) {
-                    matching.add(nextSchematicFile);
-                    try {
-                        FastClipboard.rotateAndWrite(nextSchematicFile, degrees);
-                    } catch (IOException ex) {
-                        if(sender instanceof Player) {
-                            sender.sendMessage(COLOR.red() + "Something went wrong during rotation...");
+                if (sp.getSchematic().getHash() == hash) {
+                    if (!done.contains(nextSchematicFile.getAbsolutePath())) {
+                        matching.add(nextSchematicFile);
+                        try {
+                            FastClipboard.rotateAndWrite(nextSchematicFile, degrees);
+                        } catch (IOException ex) {
+                            if (sender instanceof Player) {
+                                sender.sendMessage(COLOR.red() + "Something went wrong during rotation...");
+                            }
+                            Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                        Logger.getLogger(StructureCommands.class.getName()).log(Level.SEVERE, null, ex);
-                    }
                     }
                     spm.reload(p.getId()); // Reload placement
                 }
-                
+
             }
         }
-
 
         if (matching.isEmpty()) {
             sender.sendMessage(COLOR.red() + "Couldn't find plan for structure #" + structureId);

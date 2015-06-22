@@ -243,7 +243,6 @@ public class FastClipboard {
             IntTag yAxisTag = (IntTag) tag;
             yAxisOffset = yAxisTag.getValue();
         }
-        System.out.println("Read tag: " + yAxisOffset);
         
         return new FastClipboard(yAxisOffset, width, height, length, blockids, blockData, tileEntitiesMap);
     }
@@ -280,7 +279,6 @@ public class FastClipboard {
         
         CompoundTag tag = new CompoundTag(copy);
        
-        System.out.println("Write tag: " + degree);
         
         try(NBTOutputStream outputStream = new NBTOutputStream(new GZIPOutputStream(new FileOutputStream(schematicFile)))) {
             outputStream.writeNamedTag("Schematic", tag);

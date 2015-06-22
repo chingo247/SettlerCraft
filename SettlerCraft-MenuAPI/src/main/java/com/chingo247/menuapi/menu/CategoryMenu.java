@@ -58,6 +58,9 @@ public class CategoryMenu extends ACategoryMenu {
         return Maps.newHashMap(items);
     }
     
+    public void clearAll() {
+        items.clear();
+    }
     
     public void addItem(CategoryTradeItem tradeItem) {
         String category = matchCategoryForName(tradeItem.getCategory());

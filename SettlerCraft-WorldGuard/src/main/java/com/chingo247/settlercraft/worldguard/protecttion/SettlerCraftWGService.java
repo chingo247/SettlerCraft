@@ -60,7 +60,7 @@ import org.neo4j.graphdb.Transaction;
  *
  * @author Chingo
  */
-public class WorldGuardHelper implements IStructureProtector {
+public class SettlerCraftWGService implements IStructureProtector {
     
     private static final String PREFIX = "SC_REG_";
     public static String WORLD_GUARD_REGION_PROPERTY = "WGRegion";
@@ -68,7 +68,7 @@ public class WorldGuardHelper implements IStructureProtector {
     private IStructureRepository structureDAO;
     private IStructureAPI structureAPI;
 
-    public WorldGuardHelper(GraphDatabaseService graph, IStructureAPI structureAPI) {
+    public SettlerCraftWGService(GraphDatabaseService graph, IStructureAPI structureAPI) {
         this.graph = graph;
         this.structureDAO = new StructureRepository(graph);
         this.structureAPI = structureAPI;
@@ -201,7 +201,7 @@ public class WorldGuardHelper implements IStructureProtector {
             try {
                 mgr.save();
             } catch (StorageException ex) {
-                Logger.getLogger(WorldGuardHelper.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SettlerCraftWGService.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -233,7 +233,7 @@ public class WorldGuardHelper implements IStructureProtector {
                 try {
                     mgr.save();
                 } catch (StorageException ex) {
-                    Logger.getLogger(WorldGuardHelper.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SettlerCraftWGService.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -250,7 +250,7 @@ public class WorldGuardHelper implements IStructureProtector {
                 try {
                     mgr.save();
                 } catch (StorageException ex) {
-                    Logger.getLogger(WorldGuardHelper.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SettlerCraftWGService.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -266,7 +266,7 @@ public class WorldGuardHelper implements IStructureProtector {
             try {
                 mgr.save();
             } catch (StorageException ex) {
-                Logger.getLogger(WorldGuardHelper.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SettlerCraftWGService.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -281,7 +281,7 @@ public class WorldGuardHelper implements IStructureProtector {
             try {
                 mgr.save();
             } catch (StorageException ex) {
-                Logger.getLogger(WorldGuardHelper.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SettlerCraftWGService.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }

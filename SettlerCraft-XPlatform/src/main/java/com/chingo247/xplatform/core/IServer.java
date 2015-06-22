@@ -54,4 +54,6 @@ public interface IServer {
     
     public File getWorldRegionFolder(String world);
     
+    public abstract void broadcast(String message);
+    
 }

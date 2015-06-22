@@ -45,7 +45,6 @@ public class SchematicPlacementParser implements PlacementParser<SchematicPlacem
         Vector pos = placementElement.getPosition();
         
         int direction = placementElement.getRotation();
-        System.out.println("Direction parse: " + direction);
         
         
         SchematicManager sdm = SchematicManager.getInstance();

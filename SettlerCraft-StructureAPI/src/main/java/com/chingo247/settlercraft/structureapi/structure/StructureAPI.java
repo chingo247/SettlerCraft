@@ -64,12 +64,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.google.common.collect.Sets;
 import com.sk89q.worldedit.regions.CuboidRegion;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import org.dom4j.DocumentException;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSessionFactory;
 
@@ -215,7 +218,6 @@ public class StructureAPI implements IStructureAPI {
             } finally {
                 loadLock.unlock();
             }
-
         }
 
     }
@@ -333,6 +335,31 @@ public class StructureAPI implements IStructureAPI {
         return new ArrayList<>(restrictions);
     }
     
+    @Override
+    public boolean isQueueLocked(UUID player) {
+        BlockPlacer bp = (BlockPlacer) AsyncWorldEditMain.getInstance().getBlockPlacer();
+        
+        Class bpClass = bp.getClass();
+        
+        for(Field f : bpClass.getFields()) {
+            System.out.println("Field: " + f.getName());
+        }
+        
+        Field f;
+        try {
+            f = bpClass.getDeclaredField("m_lockedQueues");
+            f.setAccessible(true);
+            
+            HashSet s = (HashSet) f.get(bp);
+            
+            PlayerEntry playerEntry = new PlayerEntry(null,player);
+            return s.contains(playerEntry);
+            
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+            Logger.getLogger(StructureAPI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
+    }
     
 
     
@@ -375,17 +402,21 @@ public class StructureAPI implements IStructureAPI {
         @AllowConcurrentEvents
         public void onLoadingStructurePlans(StructurePlansReloadEvent event) {
             isLoadingPlans = true;
-            platform.getConsole().printMessage(COLORS.yellow() + "[SettlerCraft]: " + COLORS.reset() + "Loading StructurePlans");
+            platform.getServer().broadcast(COLORS.yellow() + "[SettlerCraft]: "+COLORS.reset()+"Plans are being reloaded...");
+//            platform.getConsole().printMessage(COLORS.yellow() + "[SettlerCraft]: " + COLORS.reset() + "Loading StructurePlans");
         }
 
         @Subscribe
         @AllowConcurrentEvents
         public void onStructurePlansLoaded(StructurePlansLoadedEvent event) {
+            planMenuFactory = new StructurePlanMenuFactory(platform, planMenu);
+            planMenuFactory.clearAll();
             for (IStructurePlan plan : StructurePlanManager.getInstance().getPlans()) {
                 planMenuFactory.load(plan);
             }
             isLoadingPlans = false;
-            platform.getConsole().printMessage(COLORS.yellow() + "[SettlerCraft]: " + COLORS.reset() + "Plans are loaded!");
+            platform.getServer().broadcast(COLORS.yellow() + "[SettlerCraft]: "+COLORS.reset()+"Reload plans complete!");
+//            platform.getConsole().printMessage(COLORS.yellow() + "[SettlerCraft]: " + COLORS.reset() + "Plans are loaded!");
         }
     }
 
@@ -397,6 +428,7 @@ public class StructureAPI implements IStructureAPI {
         this.sessionFactoryProvider = provider;
     }
     
+    @Override
     public AsyncEditSessionFactory getSessionFactory() {
         return sessionFactoryProvider.getFactory();
     }

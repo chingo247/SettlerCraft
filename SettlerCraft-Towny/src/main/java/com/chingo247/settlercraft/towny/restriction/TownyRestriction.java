@@ -31,11 +31,9 @@ import org.bukkit.Location;
  */
 public class TownyRestriction extends StructureRestriction {
 
-    private final int blockSize;
 
     public TownyRestriction() {
         super("Towny", "towny.structure.restriction", null);
-        this.blockSize = TownySettings.getTownBlockSize();
     }
     
     @Override
@@ -151,13 +149,14 @@ public class TownyRestriction extends StructureRestriction {
     
     
 
-    private List<WorldCoord> getCoords(org.bukkit.World w, CuboidRegion region) {
+    public static List<WorldCoord> getCoords(org.bukkit.World w, CuboidRegion region) {
 
         Vector minPoint = region.getMinimumPoint();
         Vector maxPoint = region.getMaximumPoint();
 
-        System.out.println("Before between: " + minPoint + " and " + maxPoint);
+//        System.out.println("Before between: " + minPoint + " and " + maxPoint);
 
+        int blockSize = TownySettings.getTownBlockSize();
         WorldCoord minCoord = WorldCoord.parseWorldCoord(new Location(w, minPoint.getBlockX(), 0, minPoint.getBlockZ()));
 //        WorldCoord maxCoord = WorldCoord.parseWorldCoord(new Location(w, maxPoint.getBlockX(), 0, maxPoint.getBlockZ()));
 
@@ -169,7 +168,7 @@ public class TownyRestriction extends StructureRestriction {
             for (int z = min.getBlockZ(); z < maxPoint.getBlockZ(); z += blockSize) {
                 WorldCoord wc = WorldCoord.parseWorldCoord(new Location(w, x, 0, z));
                 Vector2D pos = SettlerCraftTowny.translate(wc);
-                System.out.println("Added (" + wc.getX() + ", " + wc.getZ() + ") VECTOR(" + pos.getBlockX() + "," + pos.getBlockZ() + ")");
+//                System.out.println("Added (" + wc.getX() + ", " + wc.getZ() + ") VECTOR(" + pos.getBlockX() + "," + pos.getBlockZ() + ")");
                 coords.add(wc);
             }
         }

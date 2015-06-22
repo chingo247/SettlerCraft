@@ -35,7 +35,6 @@ import com.chingo247.settlercraft.structureapi.structure.plan.DefaultStructurePl
 import com.chingo247.settlercraft.structureapi.structure.plan.IStructurePlan;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.FilePlacement;
 import com.chingo247.settlercraft.structureapi.structure.plan.placement.Placement;
-import com.chingo247.settlercraft.structureapi.structure.plan.placement.SchematicPlacement;
 import com.chingo247.settlercraft.structureapi.structure.plan.xml.export.PlacementExporter;
 import com.chingo247.settlercraft.structureapi.util.PlacementUtil;
 import com.chingo247.xplatform.core.APlatform;
@@ -201,9 +200,10 @@ public class StructureManager {
         
         tx.success();
         }  
-//         if(structure != null) {
-//            EventManager.getInstance().getEventBus().post(new StructureCreateEvent(structure));
-//        }
+        
+        if(structure != null) {
+            EventManager.getInstance().getEventBus().post(new StructureCreateEvent(structure));
+        }
         
         
         return structure;
@@ -267,7 +267,6 @@ public class StructureManager {
         Files.copy(plan.getFile(), new File(structureDir, "structureplan.xml"));
         Placement placement = plan.getPlacement();
         
-        System.out.println("Moving resources, Direction: " + ((SchematicPlacement)placement).getRotation());
 
         // Move the resources if applicable!
         if (placement instanceof FilePlacement) {

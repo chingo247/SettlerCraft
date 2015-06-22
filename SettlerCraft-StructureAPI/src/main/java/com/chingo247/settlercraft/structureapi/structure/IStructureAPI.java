@@ -150,6 +150,13 @@ public interface IStructureAPI {
      */
     public void reload();
     
+    /**
+     * Checks if the AWE queue is locked for a given UUID
+     * @param player The player UUID or PlayerEntry UUID
+     * @return True if the queue was locked
+     */
+    public boolean isQueueLocked(UUID player);
+    
     
     /**
      * Checks if StructureAPI is loading (plans, schematics, etc)

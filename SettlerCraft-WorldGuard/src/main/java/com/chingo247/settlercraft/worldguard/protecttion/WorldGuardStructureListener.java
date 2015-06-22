@@ -34,11 +34,11 @@ import org.neo4j.graphdb.GraphDatabaseService;
  */
 public class WorldGuardStructureListener {
     
-    private final WorldGuardHelper worldGuardHelper;
+    private final SettlerCraftWGService worldGuardHelper;
     private final GraphDatabaseService graph;
     private final IStructureRepository structureDAO;
 
-    public WorldGuardStructureListener(WorldGuardHelper worldGuardHelper, GraphDatabaseService graph) {
+    public WorldGuardStructureListener(SettlerCraftWGService worldGuardHelper, GraphDatabaseService graph) {
         this.worldGuardHelper = worldGuardHelper;
         this.graph = graph;
         this.structureDAO = new StructureRepository(graph);
