@@ -6,25 +6,21 @@
 package com.chingo247.settlercraft.structureapi.model.structure;
 
 import com.chingo247.settlercraft.core.Direction;
-import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.settlercraft.core.model.interfaces.IBaseSettler;
 import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerNode;
 import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerType;
 import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnershipRelation;
 import com.chingo247.settlercraft.structureapi.model.util.StructureRelations;
 import com.chingo247.settlercraft.structureapi.model.world.StructureWorldNode;
-import com.chingo247.xplatform.core.IWorld;
+import com.chingo247.settlercraft.structureapi.structure.plan.util.RegionUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import org.neo4j.graphdb.DynamicLabel;
@@ -34,7 +30,6 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.traversal.Evaluation;
 import org.neo4j.graphdb.traversal.Evaluator;
 import org.neo4j.graphdb.traversal.Evaluators;
@@ -451,48 +446,67 @@ public class StructureNode extends AbstractStructure {
     }
 
     public List<StructureNode> getSubStructuresWithin(CuboidRegion region, int limit) {
+        final CuboidRegion thisRegion = getCuboidRegion();
 
         TraversalDescription traversal = getGraph().traversalDescription();
-        traversal.evaluator(Evaluators.excludeStartPosition()).evaluator(new Evaluator() {
+        Iterator<Node> nodeIt = traversal.relationships(DynamicRelationshipType.withName(StructureRelations.RELATION_SUBSTRUCTURE), org.neo4j.graphdb.Direction.INCOMING)
+            .evaluator(Evaluators.excludeStartPosition()).evaluator(new Evaluator() {
 
             @Override
             public Evaluation evaluate(Path path) {
+                
+                
                 StructureNode endStructure = new StructureNode(path.endNode());
                 if (endStructure.getStatus() == StructureStatus.REMOVED) {
                     return Evaluation.EXCLUDE_AND_PRUNE;
-                } else {
+                } else if(RegionUtil.overlaps(endStructure.getCuboidRegion(), thisRegion)) {
                     return Evaluation.INCLUDE_AND_CONTINUE;
+                } else {
+                    return Evaluation.EXCLUDE_AND_PRUNE;
                 }
             }
-        });
-
-        IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(getWorld().getName());
-        List<StructureNode> structures = new ArrayList<>();
-
-        Map<String, Object> params = Maps.newHashMap();
-        params.put("worldId", w.getUUID().toString());
-
-        String query
-                = "MATCH (world:" + WorldNode.LABEL.name() + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
-                + " WITH world "
-                + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
-                + " WHERE s." + StructureNode.DELETED_AT_PROPERTY + " IS NULL"
-                + " AND NOT s." + StructureNode.ID_PROPERTY + " = " + getId()
-                + " AND NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + StructureStatus.REMOVED.getStatusId()
-                + " AND s." + StructureNode.SIZE_PROPERTY + " <= " + getCuboidRegion().getArea()
-                + " AND s." + StructureNode.MAX_X_PROPERTY + " >= " + region.getMinimumPoint().getBlockX() + " AND s." + StructureNode.MIN_X_PROPERTY + " <= " + region.getMaximumPoint().getBlockX()
-                + " AND s." + StructureNode.MAX_Y_PROPERTY + " >= " + region.getMinimumPoint().getBlockY() + " AND s." + StructureNode.MIN_Y_PROPERTY + " <= " + region.getMaximumPoint().getBlockY()
-                + " AND s." + StructureNode.MAX_Z_PROPERTY + " >= " + region.getMinimumPoint().getBlockZ() + " AND s." + StructureNode.MIN_Z_PROPERTY + " <= " + region.getMaximumPoint().getBlockZ()
-                + " RETURN s"
-                + " LIMIT " + limit;
-        Result result = getGraph().execute(query, params);
-        while (result.hasNext()) {
-            Map<String, Object> map = result.next();
-            for (Object o : map.values()) {
-                structures.add(new StructureNode((Node) o));
+        }).breadthFirst().traverse(underlyingNode).nodes().iterator();
+        
+        List<StructureNode> structureNodes = new ArrayList<>();
+        if(limit > 0) {
+            int count = 0;
+            while(nodeIt.hasNext() && count < limit) {
+                structureNodes.add(new StructureNode(nodeIt.next()));
+                count++;
+            }
+        } else {
+            while(nodeIt.hasNext()) {
+                structureNodes.add(new StructureNode(nodeIt.next()));
             }
         }
-        return structures;
+
+//        IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(getWorld().getName());
+//        List<StructureNode> structures = new ArrayList<>();
+//
+//        Map<String, Object> params = Maps.newHashMap();
+//        params.put("worldId", w.getUUID().toString());
+//
+//        String query
+//                = "MATCH (world:" + WorldNode.LABEL.name() + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
+//                + " WITH world "
+//                + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
+//                + " WHERE s." + StructureNode.DELETED_AT_PROPERTY + " IS NULL"
+//                + " AND NOT s." + StructureNode.ID_PROPERTY + " = " + getId()
+//                + " AND NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + StructureStatus.REMOVED.getStatusId()
+//                + " AND s." + StructureNode.SIZE_PROPERTY + " <= " + getCuboidRegion().getArea()
+//                + " AND s." + StructureNode.MAX_X_PROPERTY + " >= " + region.getMinimumPoint().getBlockX() + " AND s." + StructureNode.MIN_X_PROPERTY + " <= " + region.getMaximumPoint().getBlockX()
+//                + " AND s." + StructureNode.MAX_Y_PROPERTY + " >= " + region.getMinimumPoint().getBlockY() + " AND s." + StructureNode.MIN_Y_PROPERTY + " <= " + region.getMaximumPoint().getBlockY()
+//                + " AND s." + StructureNode.MAX_Z_PROPERTY + " >= " + region.getMinimumPoint().getBlockZ() + " AND s." + StructureNode.MIN_Z_PROPERTY + " <= " + region.getMaximumPoint().getBlockZ()
+//                + " RETURN s"
+//                + " LIMIT " + limit;
+//        Result result = getGraph().execute(query, params);
+//        while (result.hasNext()) {
+//            Map<String, Object> map = result.next();
+//            for (Object o : map.values()) {
+//                structures.add(new StructureNode((Node) o));
+//            }
+//        }
+        return structureNodes;
     }
 
     public boolean hasSubstructuresWithin(CuboidRegion region) {

@@ -19,6 +19,7 @@ package com.chingo247.menuapi.menu;
 import com.chingo247.xplatform.core.AItemStack;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.settlercraft.core.SettlerCraft;
+import com.chingo247.xplatform.core.IColors;
 import com.google.common.collect.Maps;
 import java.util.Iterator;
 import java.util.Map;
@@ -31,13 +32,15 @@ import java.util.UUID;
 public class MenuAPI {
     
     private final Map<UUID, ACategoryMenu> openMenus;
-    private  APlatform platform;
+    private final APlatform platform;
+    private final IColors COLORS;
     
     private static MenuAPI instance;
     
     private MenuAPI() {
         this.platform = SettlerCraft.getInstance().getPlatform();
         this.openMenus = Maps.newHashMap();
+        this.COLORS = platform.getChatColors();
     }
     
     
@@ -82,7 +85,17 @@ public class MenuAPI {
         for(Iterator<ACategoryMenu> it = openMenus.values().iterator(); it.hasNext();) {
             ACategoryMenu menu = it.next();
             if(menu != null) {
-                menu.close("[SettlerCraft-Menu] Closing menus, server is reloading...");
+                menu.close(COLORS.yellow() + "[SettlerCraft]: "+COLORS.reset()+" Closing menus, server is reloading...");
+                it.remove();
+            }
+        }
+    }
+    
+    public void closeMenusWithTag(String tag) {
+        for(Iterator<ACategoryMenu> it = openMenus.values().iterator(); it.hasNext();) {
+            ACategoryMenu menu = it.next();
+            if(menu != null && menu.getTag() != null && tag.equals(menu.getTag())) {
+                menu.close(COLORS.yellow() + "[SettlerCraft]: "+COLORS.reset()+" Closing menu, server is reloading...");
                 it.remove();
             }
         }

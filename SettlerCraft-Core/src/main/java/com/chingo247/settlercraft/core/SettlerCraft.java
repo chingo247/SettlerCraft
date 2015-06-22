@@ -166,7 +166,12 @@ public class SettlerCraft {
 
     public World getWorld(UUID world) {
         IWorld w = platform.getServer().getWorld(world);
-        return w == null ? null : getWorld(w.getName());
+        
+        if(w != null) {
+            return getWorld(w.getName());
+        }
+        
+        return null;
     }
 
     public World getWorld(String world) {

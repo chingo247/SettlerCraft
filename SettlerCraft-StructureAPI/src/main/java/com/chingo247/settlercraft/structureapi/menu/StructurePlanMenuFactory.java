@@ -33,14 +33,17 @@ import com.sk89q.worldedit.regions.CuboidRegion;
  */
 public class StructurePlanMenuFactory {
 
+    public static final String PLAN_MENU_TAG = "planMenu";
     private final CategoryMenu menu;
     private final APlatform platform;
+    
     
 
     public StructurePlanMenuFactory(APlatform platform, CategoryMenu menu) {
         Preconditions.checkNotNull(platform);
         Preconditions.checkNotNull(menu);
         this.menu = menu;
+        this.menu.setTag(PLAN_MENU_TAG);
         this.platform = platform;
     }
     
@@ -69,7 +72,9 @@ public class StructurePlanMenuFactory {
     }
 
     public CategoryMenu createPlanMenu() {
-        return new DefaultCategoryMenu(SettlerCraft.getInstance().getEconomyProvider(),menu.getTitle(), menu.getView(), menu.getAllItems());
+        CategoryMenu categoryMenu = new DefaultCategoryMenu(SettlerCraft.getInstance().getEconomyProvider(),menu.getTitle(), menu.getView(), menu.getAllItems());
+        menu.setTag(PLAN_MENU_TAG);
+        return menu;
     }
     
     

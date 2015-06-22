@@ -19,6 +19,7 @@ package com.chingo247.settlercraft.structureapi.structure;
 import com.chingo247.settlercraft.structureapi.model.structure.StructureStatus;
 import com.chingo247.settlercraft.structureapi.model.structure.StructureNode;
 import com.chingo247.menuapi.menu.CategoryMenu;
+import com.chingo247.menuapi.menu.MenuAPI;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IPlugin;
 import com.chingo247.settlercraft.core.SettlerCraft;
@@ -187,7 +188,7 @@ public class StructureAPI implements IStructureAPI {
             restriction.check(player, world, region);
         }
     }
-
+    
     private void resetStates() {
         try (Transaction tx = graph.beginTx()) {
 
@@ -341,10 +342,6 @@ public class StructureAPI implements IStructureAPI {
         
         Class bpClass = bp.getClass();
         
-        for(Field f : bpClass.getFields()) {
-            System.out.println("Field: " + f.getName());
-        }
-        
         Field f;
         try {
             f = bpClass.getDeclaredField("m_lockedQueues");
@@ -410,6 +407,7 @@ public class StructureAPI implements IStructureAPI {
         @AllowConcurrentEvents
         public void onStructurePlansLoaded(StructurePlansLoadedEvent event) {
             planMenuFactory = new StructurePlanMenuFactory(platform, planMenu);
+            MenuAPI.getInstance().closeMenusWithTag(StructurePlanMenuFactory.PLAN_MENU_TAG);
             planMenuFactory.clearAll();
             for (IStructurePlan plan : StructurePlanManager.getInstance().getPlans()) {
                 planMenuFactory.load(plan);

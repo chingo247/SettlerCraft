@@ -58,7 +58,6 @@
 package com.chingo247.settlercraft.structureapi.structure.construction.asyncworldedit;
 
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
-import com.chingo247.settlercraft.structureapi.event.async.StructureJobCompleteEvent;
 import com.chingo247.settlercraft.structureapi.event.async.StructureJobStartedEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -251,7 +250,7 @@ public class SCJobEntry extends JobEntry {
             case PlacingBlocks:
                 setStatus(JobStatus.Done);
                 bp.removeJob(player, this);
-                AsyncEventManager.getInstance().post(new StructureJobCompleteEvent(m_taskId, getJobId()));
+//                AsyncEventManager.getInstance().post(new StructureJobCompleteEvent(m_taskId, getJobId()));
                 break;
             case Initializing:
             case Preparing:

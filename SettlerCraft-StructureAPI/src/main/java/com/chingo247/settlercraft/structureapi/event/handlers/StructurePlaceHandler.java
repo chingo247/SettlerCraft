@@ -229,7 +229,6 @@ public class StructurePlaceHandler {
                             player.printError("Status of #" + possibleParentStructure.getId() + " must not be in progress before substructures can be placed inside");
                             return;
                         }
-
                         structure = structureAPI.createSubstructure(possibleParentStructure, plan, world, pos1, direction, player);
                     } else {
                         structure = structureAPI.createStructure(plan, world, pos1, direction, player);
@@ -243,7 +242,6 @@ public class StructurePlaceHandler {
                         iPlayer.getInventory().removeItem(clone);
                         iPlayer.updateInventory();
                         EditSession session = structureAPI.getSessionFactory().getEditSession(world, -1, player);
-                        
                         if(!structureAPI.isQueueLocked(player.getUniqueId())) {
                             structureAPI.getConstructionManager().build(structure, iPlayer.getUniqueId(), session, new BuildOptions(), toLeft);
                         } else {
@@ -295,15 +293,16 @@ public class StructurePlaceHandler {
                     + " LIMIT 1";
 
             Result result = graph.execute(query, params);
-            StructureNode node = null;
+            StructureNode structureNode = null;
             while (result.hasNext()) {
                 Map<String, Object> map = result.next();
                 Node n = (Node) map.get("structure");
+                structureNode = new StructureNode(n);
                 structure = new Structure(n);
             }
 
-            if (node != null) {
-                isOwner = node.isOwner(player.getUniqueId());
+            if (structureNode != null) {
+                isOwner = structureNode.isOwner(player.getUniqueId());
             }
 
             tx.success();

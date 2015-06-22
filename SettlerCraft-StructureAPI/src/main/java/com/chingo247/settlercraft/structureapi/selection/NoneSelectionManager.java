@@ -16,6 +16,8 @@
  */
 package com.chingo247.settlercraft.structureapi.selection;
 
+import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
+import com.chingo247.xplatform.core.IColors;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -27,8 +29,11 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 public class NoneSelectionManager extends ASelectionManager {
     
     private static NoneSelectionManager instance;
+    private final IColors COLORS;
     
-    private NoneSelectionManager() {}
+    private NoneSelectionManager() {
+        this.COLORS = StructureAPI.getInstance().getPlatform().getChatColors();
+    }
     
     public static NoneSelectionManager getInstance() {
         if(instance == null) {
@@ -40,7 +45,19 @@ public class NoneSelectionManager extends ASelectionManager {
     @Override
     public void select(Player player, Vector start, Vector end) {
         CuboidRegion dimension = new CuboidRegion(start, end);
-        player.print("You've selected area: " + dimension.getMinimumPoint()+ ", " + dimension.getMaximumPoint());
+        Vector min = dimension.getMinimumPoint();
+        Vector max = dimension.getMaximumPoint();
+        
+        
+        player.print(COLORS.white() + "You've selected ("+ 
+                    COLORS.yellow() + "x:" + COLORS.white() + min.getBlockX() + " " +
+                    COLORS.yellow() + "y:" + COLORS.white() + min.getBlockY() + " " +
+                    COLORS.yellow() + "z:" + COLORS.white() + min.getBlockZ() + "),(" +
+                    COLORS.yellow() + "x:" + COLORS.white() + max.getBlockX() + " " +
+                    COLORS.yellow() + "y:" + COLORS.white() + max.getBlockY() + " " +
+                    COLORS.yellow() + "z:" + COLORS.white() + max.getBlockY() + ")"
+                + "\n" + COLORS.white() + "Click again to " + COLORS.green() + "confirm"
+        );
         putSelection(new Selection(player.getUniqueId(), start, end));
     }
 

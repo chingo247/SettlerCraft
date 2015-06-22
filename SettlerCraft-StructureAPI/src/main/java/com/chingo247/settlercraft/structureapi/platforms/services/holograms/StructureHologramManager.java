@@ -18,6 +18,7 @@ package com.chingo247.settlercraft.structureapi.platforms.services.holograms;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.event.EventManager;
+import com.chingo247.settlercraft.core.model.interfaces.IWorld;
 import com.chingo247.settlercraft.structureapi.event.StructureCreateEvent;
 import com.chingo247.settlercraft.structureapi.event.StructureStateChangeEvent;
 import com.chingo247.settlercraft.structureapi.model.hologram.StructureHologram;
@@ -242,16 +243,28 @@ public class StructureHologramManager {
                 final IStructureHologram hologram = hologramQueue.poll();
                 final Structure structure = hologram.getStructure();
                 final Vector position = structure.translateRelativeLocation(new Vector(hologram.getRelativeX(), hologram.getRelativeY(), hologram.getRelativeZ()));
-                final World w = SettlerCraft.getInstance().getWorld(hologram.getStructure().getWorld().getUUID());
+                
+                Structure s = hologram.getStructure();
+                if(s == null) {
+                    continue;
+                }
+                IWorld iw = s.getWorld();
+                if(iw == null) {
+                    continue;
+                }
+                
+                final World w = SettlerCraft.getInstance().getWorld(iw.getUUID());
 
-                scheduler.runSync(new Runnable() {
+                if(w != null) {
+                    scheduler.runSync(new Runnable() {
 
-                    @Override
-                    public void run() {
-                        Hologram h = hologramsProvider.createHologram(plugin.getName(), w, position);
-                        registerStructureHologram(structure, h);
-                    }
-                });
+                        @Override
+                        public void run() {
+                            Hologram h = hologramsProvider.createHologram(plugin.getName(), w, position);
+                            registerStructureHologram(structure, h);
+                        }
+                    });
+                }
                 count++;
             }
         

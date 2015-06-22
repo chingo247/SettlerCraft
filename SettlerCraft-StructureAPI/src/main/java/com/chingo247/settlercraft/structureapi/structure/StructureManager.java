@@ -179,7 +179,7 @@ public class StructureManager {
         Structure structure = null;
         try (Transaction tx = graph.beginTx()){
             StructureWorldNode worldNode = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
-            StructureNode structureNode = create(worldNode, structure, structurePlan.getPlacement(), structurePlan.getName(), position, direction, owner);
+            StructureNode structureNode = create(worldNode, parentStructure, structurePlan.getPlacement(), structurePlan.getName(), position, direction, owner);
              
             File structureDirectory = structureAPI.getDirectoryForStructure(worldNode, structureNode);
             if(structureDirectory.exists()) {
@@ -226,8 +226,14 @@ public class StructureManager {
             }
         }
 
-        if (parentNode != null) {
-            
+        
+        
+
+
+        // Create the StructureNode - Where it all starts...
+        structureNode = structureRepository.addStructure(worldNode, name, position, structureRegion, direction, 0.0);
+        
+        if (parentNode != null && structureNode != null) {
             boolean hasWithin = parentNode.hasSubstructuresWithin(structureRegion);
             if (hasWithin) {
                 throw new StructureException("Structure overlaps another structure...");
@@ -235,12 +241,8 @@ public class StructureManager {
             parentNode.addSubstructure(structureNode);
         }
 
-
-        // Create the StructureNode - Where it all starts...
-        structureNode = structureRepository.addStructure(worldNode, name, position, structureRegion, direction, 0.0);
-
         // Add owner!
-        if (owner != null) {
+        if (owner != null  && structureNode != null) {
             StructureOwnerNode settler = structureOwnerRepository.findByUUID(owner.getUniqueId());
             if (settler == null) {
                 throw new RuntimeException("Settler was null!"); // SHOULD NEVER HAPPEN AS SETTLERS ARE ADDED AT MOMENT OF FIRST LOGIN
@@ -249,7 +251,7 @@ public class StructureManager {
         }
 
         // Inherit ownership if there is a parent
-        if (parentNode != null) {
+        if (parentNode != null  && structureNode != null) {
             for (StructureOwnershipRelation rel : parentNode.getOwnerships()) {
                 structureNode.addOwner(rel.getOwner(), rel.getOwnerType());
             }

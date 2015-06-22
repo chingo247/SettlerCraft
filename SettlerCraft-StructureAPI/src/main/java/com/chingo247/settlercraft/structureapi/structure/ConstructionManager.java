@@ -96,6 +96,8 @@ public class ConstructionManager {
 
     private Map<Long, StructureJob> tasks;
     private static ConstructionManager instance;
+    
+    
 
     private ConstructionManager() {
         this.graph = SettlerCraft.getInstance().getNeo4j();
@@ -140,6 +142,8 @@ public class ConstructionManager {
 
                     if (isCanceled) {
                         AsyncEventManager.getInstance().post(new StructureJobCanceledEvent(jobEntry.getTaskID(), jobEntry.getJobId()));
+                    } else {
+                        AsyncEventManager.getInstance().post(new StructureJobCompleteEvent(jobEntry.getTaskID(), jobEntry.getJobId()));
                     }
                 }
             }
@@ -153,7 +157,6 @@ public class ConstructionManager {
         }
         return instance;
     }
-    
     
 
     /**
@@ -233,9 +236,7 @@ public class ConstructionManager {
                             Placement p = structure.getStructurePlan().getPlacement();
                             if (p instanceof RotationalPlacement) {
                                 RotationalPlacement rt = (RotationalPlacement) p;
-                                System.out.println("Before rotate: " + rt.getRotation());
                                 rt.rotate(structure.getDirection().getRotation());
-                                System.out.println("After rotate: " + rt.getRotation());
                             }
 
                             AsyncPlacement placement = new AsyncPlacement(playerEntry, p, new AsyncPlacementCallback() {
@@ -316,48 +317,49 @@ public class ConstructionManager {
 
                         tasks.put(structureId, new StructureJob(-1, true, player));
                         DemolishingPlacement dp;
+                        try(Transaction tx = graph.beginTx()) {
+                            if (parent == null || (!(parent.getStructurePlan().getPlacement() instanceof AbstractBlockPlacement))) {
+                                Vector size = region.getMaximumPoint().subtract(region.getMinimumPoint()).add(1, 1, 1);
 
-                        if (parent == null || (!(parent.getStructurePlan().getPlacement() instanceof AbstractBlockPlacement))) {
-                            Vector size = region.getMaximumPoint().subtract(region.getMinimumPoint()).add(1, 1, 1);
+                                dp = new DemolishingPlacement(size);
+                                AsyncDemolishingPlacement placement = new AsyncDemolishingPlacement(playerEntry, dp, new AsyncPlacementCallback() {
 
-                            dp = new DemolishingPlacement(size);
-                            AsyncDemolishingPlacement placement = new AsyncDemolishingPlacement(playerEntry, dp, new AsyncPlacementCallback() {
-
-                                @Override
-                                public void onJobAdded(int jobId) {
-                                    AsyncEventManager.getInstance().post(new StructureJobAddedEvent(structureId, jobId, true));
+                                    @Override
+                                    public void onJobAdded(int jobId) {
+                                        AsyncEventManager.getInstance().post(new StructureJobAddedEvent(structureId, jobId, true));
+                                    }
+                                }, structureId);
+                                placement.place(session, region.getMinimumPoint(), options);
+                            } else {
+                                Placement parentPlacement = parent.getStructurePlan().getPlacement();
+                                
+                                if (parentPlacement instanceof RotationalPlacement) {
+                                    RotationalPlacement rt = (RotationalPlacement) parentPlacement;
+                                    rt.rotate(parent.getDirection().getRotation());
                                 }
-                            }, structureId);
-                            placement.place(session, region.getMinimumPoint(), options);
-                        } else {
-                            Placement parentPlacement = plan.getPlacement();
 
-                            if (parentPlacement instanceof RotationalPlacement) {
-                                RotationalPlacement rt = (RotationalPlacement) parentPlacement;
-                                rt.rotate(parent.getDirection().getRotation());
+                                // Get Area of the child placement
+                                final CuboidRegion childRegion = region;
+                                options.addIgnore(new BlockPredicate() {
+
+                                    @Override
+                                    public boolean evaluate(Vector position, Vector worldPosition, BaseBlock block) {
+                                        return !childRegion.contains(worldPosition);
+                                    }
+                                });
+
+                                dp = new RestoringPlacement((AbstractBlockPlacement) parentPlacement);
+                                AsyncDemolishingPlacement placement = new AsyncDemolishingPlacement(playerEntry, dp, new AsyncPlacementCallback() {
+
+                                    @Override
+                                    public void onJobAdded(int jobId) {
+                                        AsyncEventManager.getInstance().post(new StructureJobAddedEvent(structureId, jobId, true));
+                                    }
+                                }, structureId);
+                                placement.place(session, parent.getCuboidRegion().getMinimumPoint(), options);
                             }
-
-                            // Get Area of the child placement
-                            final CuboidRegion childRegion = region;
-                            options.addIgnore(new BlockPredicate() {
-
-                                @Override
-                                public boolean evaluate(Vector position, Vector worldPosition, BaseBlock block) {
-                                    return !childRegion.contains(worldPosition);
-                                }
-                            });
-
-                            dp = new RestoringPlacement((AbstractBlockPlacement) parentPlacement);
-                            AsyncDemolishingPlacement placement = new AsyncDemolishingPlacement(playerEntry, dp, new AsyncPlacementCallback() {
-
-                                @Override
-                                public void onJobAdded(int jobId) {
-                                    AsyncEventManager.getInstance().post(new StructureJobAddedEvent(structureId, jobId, true));
-                                }
-                            }, structureId);
-                            placement.place(session, parent.getCuboidRegion().getMinimumPoint(), options);
-                        }
-                      
+                        tx.success();
+                        } 
 
                 } catch (Exception ex) { // Catch everything or disappear it will dissappear in the abyss!
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);

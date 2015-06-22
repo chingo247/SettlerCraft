@@ -54,7 +54,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
  */
 public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
 
-    public static final Level LOG_LEVEL = Level.INFO;
+    public static final Level LOG_LEVEL = Level.SEVERE;
     public static final String MSG_PREFIX = ChatColor.YELLOW + "[SettlerCraft]: ";
     private static final Logger LOGGER = Logger.getLogger(BKStructureAPIPlugin.class);
     private IEconomyProvider economyProvider;
