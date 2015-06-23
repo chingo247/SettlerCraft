@@ -265,6 +265,14 @@ public class StructureCommands {
     private void reload(ICommandSender sender, String[] commandArgs) throws CommandException {
         String help = "Usage: /stt reload plans";
         commandHelper.argumentsInRange(1, 1, commandArgs, "Usage: /stt reload plans");
+        if(sender instanceof IPlayer) {
+            IPlayer player = (IPlayer) sender;
+            if(!player.isOP()) {
+                sender.sendMessage(COLOR.red() + "You are not allowed to do this!");
+                return;
+            }
+        }
+        
         
         String reloadArgument = commandArgs[0];
         // reload plans
