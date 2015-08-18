@@ -5,8 +5,8 @@
  */
 package com.chingo247.settlercraft.towny.listener;
 
-import com.chingo247.settlercraft.structureapi.model.world.StructureWorldNode;
-import com.chingo247.settlercraft.structureapi.model.world.StructureWorldRepository;
+import com.chingo247.structurecraft.model.world.StructureWorldNode;
+import com.chingo247.structurecraft.model.world.StructureWorldRepository;
 import com.chingo247.settlercraft.towny.plugin.SettlerCraftTowny;
 import com.palmergames.bukkit.towny.TownySettings;
 import com.palmergames.bukkit.towny.event.NewTownEvent;

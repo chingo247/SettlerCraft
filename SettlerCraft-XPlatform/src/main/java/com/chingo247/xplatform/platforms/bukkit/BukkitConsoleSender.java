@@ -28,7 +28,6 @@ import com.google.common.base.Preconditions;
 import org.bukkit.command.CommandSender;
 
 /**
- *
  * @author Chingo
  */
 public class BukkitConsoleSender implements ICommandSender{

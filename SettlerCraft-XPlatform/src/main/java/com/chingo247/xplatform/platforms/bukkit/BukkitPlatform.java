@@ -29,6 +29,7 @@ import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IConsole;
 import com.chingo247.xplatform.core.IServer;
+import com.google.common.base.Preconditions;
 import java.io.File;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
@@ -47,6 +48,7 @@ public class BukkitPlatform extends APlatform {
     }
 
     public BukkitPlatform(BukkitServer bukkitServer) {
+        Preconditions.checkNotNull(bukkitServer, "Server was null");
         this.bukkitServer = bukkitServer;
     }
 

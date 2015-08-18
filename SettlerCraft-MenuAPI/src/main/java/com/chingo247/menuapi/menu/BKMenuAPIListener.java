@@ -17,7 +17,7 @@
 package com.chingo247.menuapi.menu;
 
 import com.chingo247.xplatform.platforms.bukkit.BukkitPlatform;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -31,7 +31,7 @@ import org.bukkit.event.server.PluginDisableEvent;
  */
 public class BKMenuAPIListener  implements Listener {
 
-    private final Logger LOG = Logger.getLogger(BKMenuAPIListener.class);
+    private final Logger LOG = Logger.getLogger(BKMenuAPIListener.class.getName());
     
     @EventHandler
     public void onServerReloadEvent(PluginDisableEvent disableEvent) {

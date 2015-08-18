@@ -51,25 +51,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>com.mysema.maven</groupId>
-                <artifactId>apt-maven-plugin</artifactId>
-                <version>1.0.9</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>process</goal> 
-                        </goals>
-                        <configuration>
-                            <outputDirectory>target/generated-sources/java</outputDirectory>
-                            <processor>com.mysema.query.apt.jpa.JPAAnnotationProcessor</processor>
-                            <options>
-                                <querydsl.entityAccessors>true</querydsl.entityAccessors>
-                            </options>          
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
@@ -95,51 +76,7 @@
                 <platform>bukkit</platform>
             </properties>
             <build>
-                
                 <finalName>SettlerCraft-Core-Bukkit-${project.version}</finalName>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-resources-plugin</artifactId>
-                        <version>2.7</version>
-                        <executions>
-                            <execution>
-                                <id>copy-resources-plugin-yml</id>
-                                <!-- here the phase you need -->
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>copy-resources</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${basedir}/src/main/resources</outputDirectory>
-                                    <resources>          
-                                        <resource>
-                                            <directory>${basedir}/src/main/resources/com/chingo247/settlercraft/resources/bukkit</directory>
-                                            <!--<filtering>true</filtering>-->
-                                        </resource>
-                                    </resources>              
-                                </configuration>            
-                            </execution>
-                            <execution>
-                                <id>copy-resources-platforms-util</id>
-                                <!-- here the phase you need -->
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>copy-resources</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${basedir}/src/main/resources/com/chingo247/settlercraft/core/util/generated</outputDirectory>
-                                    
-                                    <resources>          
-                                        <resource>
-                                            <directory>${basedir}/src/main/resources/com/chingo247/settlercraft/resources/util/platforms</directory>
-                                            <filtering>true</filtering>
-                                        </resource>
-                                    </resources>              
-                                </configuration>            
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
             </build>
         </profile>
     </profiles>
@@ -164,9 +101,9 @@
         
         <!--WorldEdit-->
         <dependency>
-            <groupId>com.thirdparty</groupId>
+            <groupId>com.sk89</groupId>
             <artifactId>worldedit</artifactId>  
-            <version>6.0-3308</version>
+            <version>6.1</version>
             <scope>provided</scope>
         </dependency>
         
@@ -177,99 +114,14 @@
             <version>1.0</version>
         </dependency>
        
-        <!-- HSQL -->
-        <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <version>2.3.2</version>
-            <scope>compile</scope>
-        </dependency>
         
-        <!--Hibernate-->
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate</artifactId>
-            <version>3.2.6.ga</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-collections</groupId>
-                    <artifactId>commons-collections</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
         </dependency>
-        <!--Hibernate Dependencies-->
-        <dependency>
-            <groupId>org.hibernate.javax.persistence</groupId>
-            <artifactId>hibernate-jpa-2.0-api</artifactId>
-            <version>1.0.1.Final</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-annotations</artifactId>
-            <version>3.2.0.cr3</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-collections</artifactId>
-                    <groupId>commons-collections</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>persistence-api</artifactId>
-                    <groupId>javax.persistence</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.2</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.6.1</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>ehcache</groupId>
-            <artifactId>ehcache</artifactId>
-            <version>1.2.3</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.transaction</groupId>
-            <artifactId>jta</artifactId>
-            <version>1.1</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib</artifactId>
-            <version>2.2.2</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>asm</groupId>
-                    <artifactId>asm</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>asm</groupId>
-            <artifactId>asm</artifactId>
-            <version>3.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.mysema.querydsl</groupId>
-            <artifactId>querydsl-collections</artifactId>
-            <version>3.3.2</version>
-        </dependency> 
-        <!--QueryDSL-->     
-        <dependency>
-            <groupId>com.mysema.querydsl</groupId>
-            <artifactId>querydsl-jpa</artifactId>
-            <version>3.3.2</version>
-        </dependency>
+
+        
         
         <!--CommonsIO Apache-->
         <dependency>
@@ -298,30 +150,21 @@
             <version>1.1.6</version>
         </dependency>
         
-        <dependency>
-            <groupId>net.sf.ehcache</groupId>
-            <artifactId>ehcache</artifactId>
-            <version>1.2.3</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-collections</groupId>
-                    <artifactId>commons-collections</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+       
         
         <!--Neo4j NoSQL Graph Database-->
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j</artifactId>
             <version>2.2.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.neo4j</groupId>
-                    <artifactId>neo4j-csv</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
+        
+       <dependency>
+          <groupId>org.neo4j</groupId>
+          <artifactId>neo4j-spatial</artifactId>
+          <version>0.15-neo4j-2.2.3</version>
+        </dependency>
+        
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

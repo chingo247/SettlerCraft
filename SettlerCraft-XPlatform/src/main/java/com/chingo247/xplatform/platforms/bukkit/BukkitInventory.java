@@ -25,6 +25,7 @@ package com.chingo247.xplatform.platforms.bukkit;
 
 import com.chingo247.xplatform.core.AInventory;
 import com.chingo247.xplatform.core.AItemStack;
+import com.google.common.base.Preconditions;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -39,6 +40,7 @@ public class BukkitInventory extends AInventory {
     private final Inventory inventory;
 
     public BukkitInventory(Inventory inventory) {
+        Preconditions.checkNotNull(inventory, "Inventory was null!");
         this.inventory = inventory;
     }
 
