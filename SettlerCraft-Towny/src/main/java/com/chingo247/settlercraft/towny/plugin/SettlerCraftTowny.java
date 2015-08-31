@@ -6,7 +6,7 @@
 package com.chingo247.settlercraft.towny.plugin;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
+import com.chingo247.structurecraft.structure.StructureAPI;
 import com.chingo247.settlercraft.towny.listener.TownListener;
 import com.chingo247.settlercraft.towny.restriction.TownyRestriction;
 import com.palmergames.bukkit.config.ConfigNodes;

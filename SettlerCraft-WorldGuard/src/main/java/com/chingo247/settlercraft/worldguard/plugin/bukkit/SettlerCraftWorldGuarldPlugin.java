@@ -17,8 +17,8 @@
 package com.chingo247.settlercraft.worldguard.plugin.bukkit;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.settlercraft.structureapi.structure.IStructureAPI;
-import com.chingo247.settlercraft.structureapi.structure.StructureAPI;
+import com.chingo247.structurecraft.structure.IStructureAPI;
+import com.chingo247.structurecraft.structure.StructureAPI;
 import com.chingo247.settlercraft.worldguard.protecttion.SettlerCraftWGService;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;

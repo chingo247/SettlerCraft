@@ -16,8 +16,8 @@
  */
 package com.chingo247.settlercraft.holographicdisplays.bukkit.plugin;
 
-import com.chingo247.settlercraft.structureapi.platforms.bukkit.selection.HologramSelectionManager;
-import com.chingo247.settlercraft.structureapi.platforms.services.holograms.StructureHologramManager;
+import com.chingo247.structurecraft.platforms.bukkit.selection.HologramSelectionManager;
+import com.chingo247.structurecraft.platforms.services.holograms.StructureHologramManager;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;

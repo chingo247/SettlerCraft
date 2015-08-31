@@ -52,10 +52,16 @@ public class BukkitServer implements IServer {
     
     @Override
     public List<IPlayer> getPlayers() {
+<<<<<<< HEAD
         final List<IPlayer> players = new ArrayList<>(server.getOnlinePlayers().length);
         final List<Player> bukkitPlayers = Arrays.asList(server.getOnlinePlayers());
         
         for(Player p : bukkitPlayers) {
+=======
+        final List<IPlayer> players = new ArrayList<>();
+        
+        for(Player p : server.getOnlinePlayers()) {
+>>>>>>> 56cd5b53133e5f05a95a58a74b02beb435b31da9
             players.add(new BukkitPlayer(p));
         }
         return players;
@@ -63,9 +69,8 @@ public class BukkitServer implements IServer {
 
     @Override
     public List<IWorld> getWorlds() {
-       final List<IWorld> worlds = new ArrayList<>(server.getOnlinePlayers().length);
-        final List<World> bukkitWorlds = server.getWorlds();
-        for(World w : bukkitWorlds) {
+       final List<IWorld> worlds = new ArrayList<>();
+        for(World w : server.getWorlds()) {
             worlds.add(new BukkitWorld(w));
         }
         return worlds;

@@ -16,14 +16,14 @@
  */
 package com.chingo247.settlercraft.worldguard.protecttion;
 
-import com.chingo247.settlercraft.structureapi.event.StructureAddOwnerEvent;
-import com.chingo247.settlercraft.structureapi.event.StructureCreateEvent;
-import com.chingo247.settlercraft.structureapi.event.StructureRemoveEvent;
-import com.chingo247.settlercraft.structureapi.event.StructureRemoveOwnerEvent;
-import com.chingo247.settlercraft.structureapi.model.interfaces.IStructureRepository;
-import com.chingo247.settlercraft.structureapi.model.owner.StructureOwnerType;
-import com.chingo247.settlercraft.structureapi.model.structure.Structure;
-import com.chingo247.settlercraft.structureapi.model.structure.StructureRepository;
+import com.chingo247.structurecraft.event.StructureAddOwnerEvent;
+import com.chingo247.structurecraft.event.StructureCreateEvent;
+import com.chingo247.structurecraft.event.StructureRemoveEvent;
+import com.chingo247.structurecraft.event.StructureRemoveOwnerEvent;
+import com.chingo247.structurecraft.model.interfaces.IStructureRepository;
+import com.chingo247.structurecraft.model.owner.StructureOwnerType;
+import com.chingo247.structurecraft.model.structure.Structure;
+import com.chingo247.structurecraft.model.structure.StructureRepository;
 import com.google.common.eventbus.Subscribe;
 import java.util.UUID;
 import org.neo4j.graphdb.GraphDatabaseService;
