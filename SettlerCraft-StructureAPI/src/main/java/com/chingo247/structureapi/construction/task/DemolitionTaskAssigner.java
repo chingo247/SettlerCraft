@@ -14,8 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction;
+package com.chingo247.structureapi.construction.task;
 
+import com.chingo247.structureapi.construction.ConstructionEntry;
+import com.chingo247.structureapi.construction.IDemolitionTaskAssigner;
 import com.chingo247.structureapi.exception.ConstructionException;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.structure.plan.placement.options.DemolitionOptions;

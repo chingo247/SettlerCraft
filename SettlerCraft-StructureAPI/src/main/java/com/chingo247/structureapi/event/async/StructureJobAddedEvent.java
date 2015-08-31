@@ -28,7 +28,7 @@ public class StructureJobAddedEvent extends StructureJobEvent {
     
     private UUID playerUUID;
     
-    public StructureJobAddedEvent(long structure, int jobid, UUID playerUUID, boolean isDemolishing) {
+    public StructureJobAddedEvent(long structure, int jobid, UUID playerUUID) {
         super(structure, jobid);
         this.playerUUID = playerUUID;
     }

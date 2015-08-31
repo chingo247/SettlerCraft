@@ -16,6 +16,7 @@
  */
 package com.chingo247.structureapi.construction;
 
+import com.chingo247.structureapi.construction.task.StructureTask;
 import com.chingo247.structureapi.exception.ConstructionException;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.structure.plan.placement.options.BuildOptions;

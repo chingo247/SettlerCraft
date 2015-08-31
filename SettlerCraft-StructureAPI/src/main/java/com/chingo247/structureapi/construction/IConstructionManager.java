@@ -35,9 +35,9 @@ public interface IConstructionManager {
     
     public void remove(ConstructionEntry entry);
 
-    public void stop(UUID player, ConstructionEntry entry, boolean force) throws ConstructionException;
+    public void stop(ConstructionEntry entry, boolean force) throws ConstructionException;
 
-    public void stop(UUID player, Structure entry, boolean useForce) throws ConstructionException;
+    public void stop(Structure entry, boolean useForce) throws ConstructionException;
 
     public void build(EditSession session, UUID player, ConstructionEntry entry, IBuildTaskAssigner assigner, BuildOptions options) throws ConstructionException;
 

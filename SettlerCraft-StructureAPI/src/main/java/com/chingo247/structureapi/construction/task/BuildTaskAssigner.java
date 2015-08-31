@@ -14,8 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction;
+package com.chingo247.structureapi.construction.task;
 
+import com.chingo247.structureapi.construction.ConstructionEntry;
+import com.chingo247.structureapi.construction.IBuildTaskAssigner;
 import com.chingo247.structureapi.exception.ConstructionException;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.structure.plan.placement.options.BuildOptions;
@@ -43,11 +45,11 @@ public class BuildTaskAssigner implements IBuildTaskAssigner {
         Structure structure = entry.getStructure();
 
         // 1. Create backup if none exists
-        File structureDir = structure.getStructureDirectory();
-        File backupFile = new File(structureDir, "restore.snapshot");
-        if(!backupFile.exists()) {
-            entry.addTask(taskFactory.backup(structure, "restore"));
-        }
+//        File structureDir = structure.getStructureDirectory();
+//        File backupFile = new File(structureDir, "restore.snapshot");
+//        if(!backupFile.exists()) {
+//            entry.addTask(taskFactory.backup(structure, "restore"));
+//        }
         
         // 2. TODO PLACE FENCE
         

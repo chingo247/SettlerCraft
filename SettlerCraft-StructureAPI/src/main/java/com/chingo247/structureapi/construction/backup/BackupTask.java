@@ -18,7 +18,7 @@ package com.chingo247.structureapi.construction.backup;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.structureapi.construction.ConstructionEntry;
-import com.chingo247.structureapi.construction.StructureTask;
+import com.chingo247.structureapi.construction.task.StructureTask;
 import com.chingo247.structureapi.exception.StructureTaskException;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.chingo247.structureapi.model.structure.Structure;

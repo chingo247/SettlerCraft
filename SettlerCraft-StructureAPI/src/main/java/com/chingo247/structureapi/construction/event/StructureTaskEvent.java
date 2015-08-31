@@ -16,7 +16,8 @@
  */
 package com.chingo247.structureapi.construction.event;
 
-import com.chingo247.structureapi.construction.StructureTask;
+import com.chingo247.structureapi.construction.task.StructureTask;
+import org.parboiled.common.Preconditions;
 
 /**
  *
@@ -27,6 +28,7 @@ public class StructureTaskEvent {
     private final StructureTask task;
 
     public StructureTaskEvent(StructureTask task) {
+        Preconditions.checkNotNull(task, "StructureTask may not be null");
         this.task = task;
     }
 

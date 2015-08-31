@@ -95,7 +95,6 @@ public class StructureHologramManager {
         this.plugin = plugin;
         invalidate();
         setupUnchecked();
-
         EventManager.getInstance().getEventBus().register(this); // Should be registered once...
     }
 
@@ -131,60 +130,76 @@ public class StructureHologramManager {
     @Subscribe
     @AllowConcurrentEvents
     public void onStructureCreate(StructureCreateEvent structureCreateEvent) {
-        if (hologramsProvider == null || !StructureAPI.getInstance().getConfig().useHolograms()) {
-            return;
-        }
-
-        final Structure structure = structureCreateEvent.getStructure();
-
-        // Assures non-async behavior - Fixes concurrent exceptions that could be thrown
-        scheduler.runSync(new Runnable() {
-
-            @Override
-            public void run() {
-                World w = SettlerCraft.getInstance().getWorld(structure.getWorld().getUUID());
-                createHologramForStructure(PLUGIN, w, structure.translateRelativeLocation(new Vector(0, 2, 0)), structure);
+        try {
+            if (hologramsProvider == null || !StructureAPI.getInstance().getConfig().useHolograms()) {
+                return;
             }
-        });
+            final Structure structure = structureCreateEvent.getStructure();
 
+            // Assures non-async behavior - Fixes concurrent exceptions that could be thrown
+            scheduler.runSync(new Runnable() {
+
+                @Override
+                public void run() {
+
+                    try {
+                        World w = SettlerCraft.getInstance().getWorld(structure.getWorld().getUUID());
+                        createHologramForStructure(PLUGIN, w, structure.translateRelativeLocation(new Vector(0, 2, 0)), structure);
+                    } catch (Exception ex) {
+                        Logger.getLogger(StructureHologramManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                    }
+
+                }
+            });
+        } catch (Exception ex) {
+            Logger.getLogger(StructureHologramManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+        }
     }
 
     @Subscribe
     @AllowConcurrentEvents
     public void onStructureStateChange(StructureStateChangeEvent changeEvent) {
-        if (hologramsProvider == null || !StructureAPI.getInstance().getConfig().useHolograms()) {
-            return;
-        }
-
-        final Structure structure = changeEvent.getStructure();
-        scheduler.runSync(new Runnable() {
-
-            @Override
-            public void run() {
-
-                List<Hologram> holos = holograms.get(structure.getId());
-                if (holos != null && !holos.isEmpty()) {
-                    synchronized (holos) {
-                        ConstructionStatus status = structure.getStatus();
-                        if (status == ConstructionStatus.REMOVED) {
-                            for (Hologram holo : holos) {
-                                holo.delete();
-                            }
-                            synchronized (holograms) {
-                                holograms.remove(structure.getId());
-                            }
-                        } else {
-                            String statusString = getStatusString(structure);
-                            for (Hologram holo : holos) {
-                                holo.removeLine(STATUS_LINE);
-                                holo.addLine(statusString);
-                            }
-
-                        }
-                    }
-                }
+        try {
+            if (hologramsProvider == null || !StructureAPI.getInstance().getConfig().useHolograms()) {
+                return;
             }
-        });
+            final Structure structure = changeEvent.getStructure();
+            scheduler.runSync(new Runnable() {
+
+                @Override
+                public void run() {
+
+                    try {
+                        List<Hologram> holos = holograms.get(structure.getId());
+                        if (holos != null && !holos.isEmpty()) {
+                            synchronized (holos) {
+                                ConstructionStatus status = structure.getStatus();
+                                if (status == ConstructionStatus.REMOVED) {
+                                    for (Hologram holo : holos) {
+                                        holo.delete();
+                                    }
+                                    synchronized (holograms) {
+                                        holograms.remove(structure.getId());
+                                    }
+                                } else {
+                                    String statusString = getStatusString(structure);
+                                    for (Hologram holo : holos) {
+                                        holo.removeLine(STATUS_LINE);
+                                        holo.addLine(statusString);
+                                    }
+
+                                }
+                            }
+                        }
+                    } catch (Exception ex) {
+                        Logger.getLogger(StructureHologramManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                    }
+
+                }
+            });
+        } catch (Exception ex) {
+            Logger.getLogger(StructureHologramManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+        }
 
     }
 
@@ -226,53 +241,47 @@ public class StructureHologramManager {
                 }
             }
 
-            
-
             tx.success();
         }
         int count = 0;
-            while (hologramQueue.peek() != null) {
-                if (count % 100 == 0) {
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(StructureHologramManager.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+        while (hologramQueue.peek() != null) {
+            if (count % 100 == 0) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(StructureHologramManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
-
-                final IStructureHologram hologram = hologramQueue.poll();
-                final Structure structure = hologram.getStructure();
-                final Vector position = structure.translateRelativeLocation(new Vector(hologram.getRelativeX(), hologram.getRelativeY(), hologram.getRelativeZ()));
-                
-                Structure s = hologram.getStructure();
-                if(s == null) {
-                    continue;
-                }
-                IWorld iw = s.getWorld();
-                if(iw == null) {
-                    continue;
-                }
-                
-                final World w = SettlerCraft.getInstance().getWorld(iw.getUUID());
-
-                if(w != null) {
-                    scheduler.runSync(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            Hologram h = hologramsProvider.createHologram(plugin.getName(), w, position);
-                            registerStructureHologram(structure, h);
-                        }
-                    });
-                }
-                count++;
             }
-        
+            final IStructureHologram hologram = hologramQueue.poll();
+            final Structure structure = hologram.getStructure();
+            final Vector position = structure.translateRelativeLocation(new Vector(hologram.getRelativeX(), hologram.getRelativeY(), hologram.getRelativeZ()));
 
+            Structure s = hologram.getStructure();
+            if (s == null) {
+                continue;
+            }
+            IWorld iw = s.getWorld();
+            if (iw == null) {
+                continue;
+            }
+
+            final World w = SettlerCraft.getInstance().getWorld(iw.getUUID());
+
+            if (w != null) {
+                scheduler.runSync(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        Hologram h = hologramsProvider.createHologram(plugin.getName(), w, position);
+                        registerStructureHologram(structure, h);
+                    }
+                });
+            }
+            count++;
+        }
     }
 
     private void setupUnchecked() {
-
         // Find unchecked structures without holos
         List<StructureNode> structures = Lists.newArrayList();
         try (Transaction tx = graph.beginTx()) {
@@ -296,7 +305,6 @@ public class StructureHologramManager {
             }
             tx.success();
         }
-
         try (Transaction tx = graph.beginTx()) {
 
             for (StructureNode structureNode : structures) {
@@ -308,7 +316,6 @@ public class StructureHologramManager {
             }
             tx.success();
         }
-
     }
 
     private Hologram createHologramForStructure(String plugin, World world, Vector position, Structure structure) {

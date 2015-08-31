@@ -64,11 +64,11 @@ class AWEPlacement<T extends Options> extends AbstractAsyncPlacement<T, Placemen
             AsyncEditSession aSession = (AsyncEditSession) editSession;
             wait = aSession.getWait();
             session = new CancelabeEditSession(aSession, aSession.getMask(), jobId);
-            job = new AWEJobEntry(playerEntry, (CancelabeEditSession) session, jobId, "place", taskUUID , callback);
+            job = new AWEJobEntry(playerEntry, (CancelabeEditSession) session, jobId, "place", taskUUID, callback);
         } else {
             session = editSession;
             wait = null;
-            job = new AWEJobEntry(playerEntry, jobId, "place", taskUUID,callback);
+            job = new AWEJobEntry(playerEntry, jobId, "place", taskUUID, callback);
         }
 
         if(callback != null) {

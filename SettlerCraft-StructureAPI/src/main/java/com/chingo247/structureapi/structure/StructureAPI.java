@@ -32,9 +32,9 @@ import com.chingo247.structureapi.menu.StructurePlanMenuFactory;
 import com.chingo247.structureapi.menu.StructurePlanMenuReader;
 import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.settlercraft.core.persistence.neo4j.Neo4jHelper;
-import com.chingo247.structureapi.construction.BuildTaskAssigner;
+import com.chingo247.structureapi.construction.task.BuildTaskAssigner;
 import com.chingo247.structureapi.construction.ConstructionManager;
-import com.chingo247.structureapi.construction.DemolitionTaskAssigner;
+import com.chingo247.structureapi.construction.task.DemolitionTaskAssigner;
 import com.chingo247.structureapi.construction.IBuildTaskAssigner;
 import com.chingo247.structureapi.construction.IConstructionManager;
 import com.chingo247.structureapi.construction.IDemolitionTaskAssigner;
@@ -87,6 +87,7 @@ import org.neo4j.graphdb.Transaction;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
+import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSessionFactory;
 import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
 
@@ -108,7 +109,7 @@ public class StructureAPI implements IStructureAPI {
     private IDemolitionTaskAssigner demolitionTaskAssigner;
     private IChunkManager chunkManager;
     private IBackupAPI backupAPI;
-    
+
     private final Lock loadLock = new ReentrantLock();
     private StructurePlanMenuFactory planMenuFactory;
     private AsyncEditSessionFactoryProvider sessionFactoryProvider;
@@ -126,7 +127,6 @@ public class StructureAPI implements IStructureAPI {
     private final IColors COLORS;
     private Level logLevel;
     private final Map<String, StructureManager> structureManagers;
-
 
     private StructureAPI() {
         this.platform = SettlerCraft.getInstance().getPlatform();
@@ -146,7 +146,7 @@ public class StructureAPI implements IStructureAPI {
         this.logLevel = Level.SEVERE;
 //        this.substructureHandler = new SubstructureHandler(graph, worldDAO, structureDAO, settlerDAO, this);
     }
-    
+
     public void registerBackupAPI(IBackupAPI backupAPI) {
         this.backupAPI = backupAPI;
     }
@@ -155,7 +155,7 @@ public class StructureAPI implements IStructureAPI {
     public IBackupAPI getBackupAPI() {
         return backupAPI;
     }
-    
+
     /**
      * Gets the {@link StructureManager} for a world, never returns null
      *
@@ -434,12 +434,12 @@ public class StructureAPI implements IStructureAPI {
     public void build(UUID player, Structure structure, BuildOptions options) throws ConstructionException {
         Player ply = SettlerCraft.getInstance().getPlayer(player);
         com.sk89q.worldedit.world.World w = SettlerCraft.getInstance().getWorld(structure.getWorld().getName());
-        ThreadSafeEditSession editSession;
+        AsyncEditSession editSession;
         StructureAPI api = (StructureAPI) StructureAPI.getInstance();
         if (ply == null) {
-            editSession = api.getSessionFactory().getThreadSafeEditSession(w, -1);
+            editSession = (AsyncEditSession) api.getSessionFactory().getEditSession(w, -1);
         } else {
-            editSession = api.getSessionFactory().getThreadSafeEditSession(w, -1, ply);
+            editSession = (AsyncEditSession) api.getSessionFactory().getEditSession(w, -1, ply);
         }
         build(editSession, player, structure, options);
     }
@@ -468,12 +468,12 @@ public class StructureAPI implements IStructureAPI {
     public void demolish(UUID player, Structure structure, DemolitionOptions options) throws ConstructionException {
         Player ply = SettlerCraft.getInstance().getPlayer(player);
         com.sk89q.worldedit.world.World w = SettlerCraft.getInstance().getWorld(structure.getWorld().getName());
-        ThreadSafeEditSession editSession;
+        AsyncEditSession editSession;
         StructureAPI api = (StructureAPI) StructureAPI.getInstance();
         if (ply == null) {
-            editSession = api.getSessionFactory().getThreadSafeEditSession(w, -1);
+            editSession = (AsyncEditSession) api.getSessionFactory().getEditSession(w, -1);
         } else {
-            editSession = api.getSessionFactory().getThreadSafeEditSession(w, -1, ply);
+            editSession = (AsyncEditSession) api.getSessionFactory().getEditSession(w, -1, ply);
         }
         demolish(editSession, player, structure, options);
     }
@@ -489,13 +489,8 @@ public class StructureAPI implements IStructureAPI {
     }
 
     @Override
-    public void stop(Structure structure, boolean useForce) throws ConstructionException {
-        stop(null, structure, useForce);
-    }
-    
-    @Override
-    public void stop(UUID player, Structure structure, boolean force) throws ConstructionException {
-        constructionManager.stop(player, structure, force);
+    public void stop(Structure structure, boolean force) throws ConstructionException {
+        constructionManager.stop(structure, force);
     }
 
     @Override
@@ -505,7 +500,7 @@ public class StructureAPI implements IStructureAPI {
 
     @Override
     public void registerChunkManager(IChunkManager chunkManager) throws StructureAPIException {
-        if(this.chunkManager != null) {
+        if (this.chunkManager != null) {
             throw new StructureAPIException("Already registered a chunkmanager!");
         }
         this.chunkManager = chunkManager;

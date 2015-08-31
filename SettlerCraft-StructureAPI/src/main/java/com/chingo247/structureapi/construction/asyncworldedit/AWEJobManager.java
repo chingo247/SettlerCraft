@@ -19,11 +19,14 @@ package com.chingo247.structureapi.construction.asyncworldedit;
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
 import com.chingo247.structureapi.construction.event.StructureTaskCancelledEvent;
 import com.chingo247.structureapi.construction.event.StructureTaskCompleteEvent;
+import com.chingo247.structureapi.exception.ConstructionException;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerListener;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
@@ -33,16 +36,16 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
  * @author Chingo
  */
 class AWEJobManager {
-    
+
     private static AWEJobManager instance;
-    
-    private final Map<UUID, AWEPlacementTask> tasks;
-    private final Lock lock;
+
+    private Map<UUID, AWEPlacementTask> tasks;
+    private Lock lock;
 
     private AWEJobManager() {
         this.tasks = Maps.newHashMap();
         this.lock = new ReentrantLock();
-        
+
         AsyncWorldEditMain.getInstance().getBlockPlacer().addListener(new IBlockPlacerListener() {
 
             @Override
@@ -52,75 +55,58 @@ class AWEJobManager {
 
             @Override
             public void jobRemoved(JobEntry je) {
-                System.out.println("On job removed!");
                 if (je instanceof AWEJobEntry) {
-                    // I FIRED THIS JOB!
-                    System.out.println("It appears we fired this!");
-                    AWEJobEntry jobEntry = (AWEJobEntry) je;
-                    
 
-                    boolean isCanceled = false;
                     lock.lock();
-                    AWEPlacementTask task = null;
                     try {
-
-                        task = tasks.get(jobEntry.getTaskUUID());
+                        // I FIRED THIS JOB!
+                        AWEJobEntry jobEntry = (AWEJobEntry) je;
+                        AWEPlacementTask task = tasks.get(jobEntry.getTaskUUID());
                         if (task != null) {
-                            isCanceled = task.isCanceled();
-                            if (isCanceled) {
-                                if (task.isChecked()) { // Fixes duplicate state 
-                                    System.out.println("Task was already cancelled...");
-                                    isCanceled = false; // dont fire it again...
-                                } else {
-                                    task.setChecked(true);
-                                }
+                            if (task.isChecked()) {
+                                return;
                             }
+                            task.setChecked(true);
+                        }
+                        if (task != null) {
+                            task.finish();
+                            tasks.remove(task.getUUID());
                         }
                     } finally {
                         lock.unlock();
                     }
 
-                    if (isCanceled) {
-                        AsyncEventManager.getInstance().post(new StructureTaskCancelledEvent(task));
-                    } else {
-                        AsyncEventManager.getInstance().post(new StructureTaskCompleteEvent(task));
-                    }
-                    
-                    if(task != null) {
-                        System.out.println("Finishing: " + task.getUUID().toString());
-                        task.finish();
-                        tasks.remove(task.getUUID());
-                    }
-                    
                 }
+
             }
         });
-        
-        
+
     }
-    
+
     public static AWEJobManager getInstance() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new AWEJobManager();
         }
         return instance;
     }
-    
+
     void register(AWEPlacementTask task) {
-        System.out.println("Registering task: " + task.getUUID().toString());
-        synchronized(tasks) {
+        lock.lock();
+        try {
             this.tasks.put(task.getUUID(), task);
+        } finally {
+            lock.unlock();
         }
     }
-    
-    void handleCancelled(AWEPlacementTask task) {
-        synchronized(tasks) {
-            task.setCanceled(true);
-            task.finish();
-            //TODO FIRE EVENT
-            
+
+    void remove(AWEPlacementTask task) {
+        lock.lock();
+        try {
             tasks.remove(task.getUUID());
+        } finally {
+            lock.unlock();
         }
+
     }
-    
+
 }

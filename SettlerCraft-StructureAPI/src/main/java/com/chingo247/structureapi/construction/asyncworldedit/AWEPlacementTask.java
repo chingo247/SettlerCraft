@@ -18,16 +18,21 @@ package com.chingo247.structureapi.construction.asyncworldedit;
 
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
 import com.chingo247.structureapi.construction.ConstructionEntry;
-import com.chingo247.structureapi.construction.StructureTask;
+import com.chingo247.structureapi.construction.task.StructureTask;
 import com.chingo247.structureapi.construction.event.StructureTaskCancelledEvent;
 import com.chingo247.structureapi.construction.event.StructureTaskStartEvent;
 import com.chingo247.structureapi.event.async.StructureJobAddedEvent;
+import com.chingo247.structureapi.exception.ConstructionException;
 import com.chingo247.structureapi.structure.plan.placement.Placement;
 import com.chingo247.structureapi.structure.plan.placement.options.Options;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 
@@ -42,7 +47,6 @@ public class AWEPlacementTask<T extends Options> extends StructureTask {
 
     private UUID uuid;
     private Placement placement;
-    private boolean canceled = false;
     private PlayerEntry playerEntry;
     private Vector position;
     private EditSession editSession;
@@ -54,6 +58,7 @@ public class AWEPlacementTask<T extends Options> extends StructureTask {
     /**
      * Constructor.
      *
+     * @param action
      * @param connstructionEntry The constructionEntry
      * @param placement The placement
      * @param playerEntry The playerEntry
@@ -72,20 +77,12 @@ public class AWEPlacementTask<T extends Options> extends StructureTask {
         this.editSession = editSession;
     }
 
-    void setCanceled(boolean canceled) {
-        this.canceled = canceled;
-    }
-
     void setJobId(int id) {
         this.jobId = id;
     }
 
     public int getJobId() {
         return jobId;
-    }
-
-    public boolean isCanceled() {
-        return canceled;
     }
 
     boolean isChecked() {
@@ -98,16 +95,15 @@ public class AWEPlacementTask<T extends Options> extends StructureTask {
 
     @Override
     protected void _start() {
-        System.out.println("Starting place task!");
-        final StructureTask t = this;
-        AWEPlacement p = new AWEPlacement(playerEntry, placement, uuid, new IAWECallback() {
+        final AWEPlacementTask t = this;
+        AWEPlacement p = new AWEPlacement(playerEntry, placement, t.getUUID(), new IAWECallback() {
 
             @Override
             public void onJobAdded(AWEJobEntry job) {
-                System.out.println("On job added!");
                 setJobId(job.getJobId());
-                AWEJobManager.getInstance().register(AWEPlacementTask.this);
-                AsyncEventManager.getInstance().post(new StructureJobAddedEvent(getConstructionEntry().getStructure().getId(), jobId, playerEntry.getUUID(), canceled));
+                System.out.println("Added task " + playerEntry.getUUID().toString() + ", jobId: " + jobId);
+                AWEJobManager.getInstance().register(t);
+                AsyncEventManager.getInstance().post(new StructureJobAddedEvent(getConstructionEntry().getStructure().getId(), jobId, playerEntry.getUUID()));
             }
 
             @Override
@@ -122,19 +118,20 @@ public class AWEPlacementTask<T extends Options> extends StructureTask {
         }
         );
 
-        System.out.println("[AWEPlacementTask]: Performing " + getAction());
-
         p.place(editSession, position, options);
     }
 
     @Override
     protected void _cancel() {
-        canceled = true;
-        JobEntry e = AsyncWorldEditMain.getInstance().getBlockPlacer().getJob(playerEntry, jobId);
-        if(e.getStatus() != JobEntry.JobStatus.Canceled) {
-           AsyncWorldEditMain.getInstance().getBlockPlacer().cancelJob(playerEntry, jobId);
-        } 
-        AsyncEventManager.getInstance().post(new StructureTaskCancelledEvent(this));
+        IBlockPlacer bp = AsyncWorldEditMain.getInstance().getBlockPlacer();
+        bp.cancelJob(playerEntry, jobId);
+        AWEJobManager.getInstance().remove(this);
+        if (!isCancelled()) { // if not cancelled and thus cancelled by AWE Command
+            try {
+                cancel();
+            } catch (ConstructionException ex) {
+            }
+        }
     }
 
 }

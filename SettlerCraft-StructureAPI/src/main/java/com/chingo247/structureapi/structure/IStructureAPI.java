@@ -162,8 +162,6 @@ public interface IStructureAPI {
     
     public void stop(Structure structure, boolean force) throws ConstructionException;
     
-    public void stop(UUID player, Structure structure, boolean force) throws ConstructionException;
-    
     /**
      * Gets the ConstructionManager
      * @return The ConstructionManager 

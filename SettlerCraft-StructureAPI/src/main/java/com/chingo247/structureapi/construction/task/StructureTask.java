@@ -14,12 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction;
+package com.chingo247.structureapi.construction.task;
 
+import com.chingo247.structureapi.construction.ConstructionManager;
+import com.chingo247.structureapi.construction.ConstructionEntry;
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
 import com.chingo247.structureapi.construction.event.StructureTaskCancelledEvent;
 import com.chingo247.structureapi.construction.event.StructureTaskCompleteEvent;
 import com.chingo247.structureapi.exception.ConstructionException;
+import com.google.common.base.Preconditions;
 import java.util.UUID;
 
 /**
@@ -27,14 +30,18 @@ import java.util.UUID;
  * @author Chingo
  */
 public abstract class StructureTask {
-    
+
     private ConstructionEntry constructionEntry;
     private UUID uuid;
     private boolean cancelled = false;
     private boolean failed = false;
+    private boolean finished = false;
     private String action;
-    
+
     public StructureTask(String action, ConstructionEntry constructionEntry) {
+        Preconditions.checkNotNull(constructionEntry, "ConstructionEntry may not be null");
+        Preconditions.checkNotNull(action, "Action may not null");
+        Preconditions.checkArgument(!"".equals(action), "Action may not be empty");
         this.constructionEntry = constructionEntry;
         this.uuid = UUID.randomUUID();
         this.action = action;
@@ -52,6 +59,10 @@ public abstract class StructureTask {
         return uuid;
     }
 
+    public boolean isFinished() {
+        return finished;
+    }
+
     public boolean isCancelled() {
         return cancelled;
     }
@@ -59,7 +70,7 @@ public abstract class StructureTask {
     public void setCancelled(boolean cancelled) {
         this.cancelled = cancelled;
     }
-    
+
     public void setFailed(boolean failed) {
         this.failed = false;
     }
@@ -67,39 +78,48 @@ public abstract class StructureTask {
     public boolean hasFailed() {
         return failed;
     }
-    
+
     public void start() {
         _start();
     }
-    
+
     protected abstract void _start();
-    
+
     /**
-     * Cancels this task. This method is called by the {@link StructureTask#cancel()} and should never be called from any other class or method.
-     * This methods solely serves to offer an implementation of the cancel method.
+     * Cancels this task. This method is called by the
+     * {@link StructureTask#cancel()} and should never be called from any other
+     * class or method. This methods solely serves to offer an implementation of
+     * the cancel method.
      */
     protected abstract void _cancel();
-    
-    public void cancel() throws ConstructionException {
-        if(!cancelled) {
-            cancelled = true;
+
+    public synchronized void cancel() throws ConstructionException {
+        if (!cancelled) {
+            setCancelled(true);
             _cancel();
-            ConstructionManager.getInstance().stop(null, constructionEntry, true);
-            AsyncEventManager.getInstance().post(new StructureTaskCancelledEvent(this));
-        }
+            ConstructionManager.getInstance().remove(constructionEntry);
+            finish();
+        } 
     }
-    
-    /***
+
+    /**
+     * *
      * Indicate that this task has finished
      */
-    public void finish() {
-        System.out.println("[StructureTask]: Finish and proceed!");
-        AsyncEventManager.getInstance().post(new StructureTaskCompleteEvent(this));
-        constructionEntry.proceed();
+    public synchronized void finish() {
+        
+        if (!finished) {
+            finished = true;
+            if (isCancelled()) {
+                AsyncEventManager.getInstance().post(new StructureTaskCancelledEvent(this));
+            } else {
+                AsyncEventManager.getInstance().post(new StructureTaskCompleteEvent(this));
+            }
+
+            if(!isCancelled() && !failed) {
+                constructionEntry.proceed();
+            }
+        }
     }
-    
-    
-    
-    
-    
+
 }

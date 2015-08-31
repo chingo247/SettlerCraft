@@ -821,7 +821,11 @@ public class StructureCommands {
         final boolean useForce = force != null && (force.equals("f") || force.equals("force"));
 
         // Stop current action
-        player.sendMessage("Stopping structure #" + COLOR.gold() + structure.getId() + "...");
+        String structureInfo = COLOR.reset() + ": #" + COLOR.gold() + structure.getId() + COLOR.blue() + " " + structure.getName();
+        player.sendMessage(COLOR.red()+ "STOPPING" + structureInfo);
+        
+        
+        
         try {
             structureAPI.stop(structure, useForce);
         } catch (ConstructionException ex) {

@@ -14,8 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction;
+package com.chingo247.structureapi.construction.task;
 
+import com.chingo247.structureapi.construction.ConstructionManager;
+import com.chingo247.structureapi.construction.ConstructionEntry;
+import com.chingo247.structureapi.construction.IStructureTaskFactory;
 import com.chingo247.structureapi.construction.asyncworldedit.AWEPlacementTask;
 import com.chingo247.structureapi.construction.backup.BackupTask;
 import com.chingo247.structureapi.construction.backup.IBackupAPI;
@@ -72,6 +75,9 @@ public class DefaultStructureTaskFactory implements IStructureTaskFactory {
         // Get the AWE playerEntry
         PlayerEntry playerEntry = AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(player);
         ConstructionEntry ce = ConstructionManager.getInstance().getEntry(structure);
+        
+        System.out.println("[DefaultStructureTaskFactory]: ConstructionEntry " + ce);
+        
         Vector pos = structure.getCuboidRegion().getMinimumPoint();
         
         // Make sure substructures are skipped during build

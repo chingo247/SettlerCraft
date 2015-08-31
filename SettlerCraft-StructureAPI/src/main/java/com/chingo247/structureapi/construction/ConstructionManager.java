@@ -23,6 +23,8 @@ import com.chingo247.settlercraft.core.util.KeyPool;
 import com.chingo247.structureapi.construction.event.StructureTaskCancelledEvent;
 import com.chingo247.structureapi.construction.event.StructureTaskCompleteEvent;
 import com.chingo247.structureapi.construction.event.StructureTaskStartEvent;
+import com.chingo247.structureapi.construction.task.DefaultStructureTaskFactory;
+import com.chingo247.structureapi.construction.task.StructureTask;
 import com.chingo247.structureapi.event.StructureStateChangeEvent;
 import com.chingo247.structureapi.event.async.StructureJobAddedEvent;
 import com.chingo247.structureapi.exception.ConstructionException;
@@ -39,12 +41,12 @@ import com.chingo247.structureapi.structure.plan.placement.options.DemolitionOpt
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IPlayer;
-import com.google.common.collect.Maps;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.entity.Player;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -71,13 +73,16 @@ public class ConstructionManager implements IConstructionManager {
 
     private final GraphDatabaseService graph;
     private final KeyPool<Long> structurePool;
+    private final KeyPool<Long> eventPool;
     private final ExecutorService executor;
     private final IStructureRepository structureRepository;
     private final APlatform platform;
     private final IColors colors;
+    
+    private final Object entriesMutex = new Object();
 
     private ConstructionManager() {
-        this.entries = Maps.newConcurrentMap();
+        this.entries = new HashMap<>();
         this.taskFactory = new DefaultStructureTaskFactory();
         this.graph = SettlerCraft.getInstance().getNeo4j();
         this.executor = SettlerCraft.getInstance().getExecutor();
@@ -85,6 +90,7 @@ public class ConstructionManager implements IConstructionManager {
         this.structureRepository = new StructureRepository(graph);
         this.platform = SettlerCraft.getInstance().getPlatform();
         this.colors = platform.getChatColors();
+        this.eventPool = new KeyPool<>(executor);
     }
 
     /**
@@ -112,31 +118,36 @@ public class ConstructionManager implements IConstructionManager {
 
     @Override
     public void remove(ConstructionEntry entry) {
-        entries.remove(entry.getStructure().getId());
+        synchronized(entriesMutex) {
+            entries.remove(entry.getStructure().getId());
+        }
     }
 
     @Override
     public ConstructionEntry getEntry(Structure structure) {
-        long id = structure.getId();
-        ConstructionEntry entry = entries.get(id);
-        if (entry == null) {
-            entry = new ConstructionEntry(structure);
-            entries.put(id, entry);
+        synchronized(entriesMutex) {
+            long id = structure.getId();
+            ConstructionEntry entry = entries.get(id);
+            if (entry == null) {
+                entry = new ConstructionEntry(structure);
+                entries.put(id, entry);
+            }
+             return entry;
         }
-        return entry;
+       
     }
 
     @Override
-    public void stop(UUID player, Structure structure, boolean useForce) {
-        stop(player, getEntry(structure), useForce);
+    public void stop(Structure structure, boolean useForce) {
+        stop(getEntry(structure), useForce);
     }
 
     @Override
-    public void stop(UUID player, ConstructionEntry entry, boolean useForce) {
+    public void stop(ConstructionEntry entry, boolean useForce) {
         // Stops it recursively
         entry.purge();
     }
-
+    
     @Override
     public void build(EditSession session, UUID player, Structure structure, IBuildTaskAssigner assigner, BuildOptions options) throws ConstructionException {
         build(session, player, getEntry(structure), assigner, options);
@@ -342,62 +353,146 @@ public class ConstructionManager implements IConstructionManager {
         demolish(session, player, getEntry(structure), assigner, options);
     }
 
-    @AllowConcurrentEvents
     @Subscribe
+    @AllowConcurrentEvents
     public void onJobAdded(StructureJobAddedEvent addedEvent) {
-        long structureId = addedEvent.getStructureId();
-        UUID uuid = addedEvent.getPlayerUUID();
+        try {
+            final long structureId = addedEvent.getStructureId();
+            final UUID uuid = addedEvent.getPlayerUUID();
 
-        Structure structure;
-        try (Transaction tx = graph.beginTx()) {
-            StructureNode structureNode = structureRepository.findById(structureId);
-            structureNode.setStatus(ConstructionStatus.QUEUED);
-            structure = new Structure(structureNode);
-            tx.success();
-        }
+            eventPool.execute(structureId, new Runnable() {
 
-        EventManager.getInstance().getEventBus().post(new StructureStateChangeEvent(structure));
+                @Override
+                public void run() {
+                    try {
+                        Structure structure;
+                        try (Transaction tx = graph.beginTx()) {
+                            StructureNode structureNode = structureRepository.findById(structureId);
+                            structureNode.setStatus(ConstructionStatus.QUEUED);
+                            structure = new Structure(structureNode);
+                            tx.success();
+                        }
 
-        if (uuid != null) {
-            IPlayer player = platform.getServer().getPlayer(uuid);
-            if (player != null) {
-                String status = getStatusString(ConstructionStatus.QUEUED.name(), structure);
-                player.sendMessage(status);
-            }
+                        EventManager.getInstance().getEventBus().post(new StructureStateChangeEvent(structure));
+
+                        if (uuid != null) {
+                            IPlayer player = platform.getServer().getPlayer(uuid);
+                            if (player != null) {
+                                String status = getStatusString(ConstructionStatus.QUEUED, ConstructionStatus.QUEUED.name(), structure);
+                                player.sendMessage(status);
+                            }
+                        }
+                    } catch (Exception ex) {
+                        Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                    }
+                }
+            });
+        } catch (Exception ex) {
+            Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 
-    @AllowConcurrentEvents
     @Subscribe
+    @AllowConcurrentEvents
     public void onTaskStartEvent(StructureTaskStartEvent startEvent) {
-        StructureTask task = startEvent.getTask();
-        Structure structure = task.getConstructionEntry().getStructure();
-        ConstructionStatus newStatus = ConstructionStatus.getStatus(startEvent.getTask().getAction());
-        updateStatus(newStatus, task.getAction(), structure);
+        try {
+            final StructureTask task = startEvent.getTask();
+            final Structure structure = task.getConstructionEntry().getStructure();
+
+            eventPool.execute(structure.getId(), new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        ConstructionStatus newStatus = ConstructionStatus.getStatus(task.getAction());
+                        
+                        updateStatus(newStatus, task.getAction(), structure);
+                    } catch (Exception ex) {
+                        Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                    }
+                }
+            });
+        } catch (Exception ex) {
+            Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+        }
     }
 
-    @AllowConcurrentEvents
     @Subscribe
+    @AllowConcurrentEvents
     public void onTaskCancelled(StructureTaskCancelledEvent cancelledEvent) {
-        StructureTask task = cancelledEvent.getTask();
-        Structure structure = task.getConstructionEntry().getStructure();
-        ConstructionStatus newStatus = ConstructionStatus.STOPPED;
-        updateStatus(newStatus, newStatus.name(), structure);
+        try {
+            final StructureTask task = cancelledEvent.getTask();
+            final Structure structure = task.getConstructionEntry().getStructure();
+
+            eventPool.execute(structure.getId(), new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        ConstructionStatus newStatus = ConstructionStatus.STOPPED;
+                        updateStatus(newStatus, newStatus.name(), structure);
+                    } catch (Exception ex) {
+                        Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                    }
+
+                }
+            });
+        } catch (Exception ex) {
+            Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+        }
     }
 
-    @AllowConcurrentEvents
     @Subscribe
+    @AllowConcurrentEvents
     public void onTaskComplete(StructureTaskCompleteEvent taskCompleteEvent) {
-        StructureTask task = taskCompleteEvent.getTask();
-        Structure structure = task.getConstructionEntry().getStructure();
-        ConstructionStatus newStatus = ConstructionStatus.COMPLETED;
-        updateStatus(newStatus, newStatus.name(), structure);
+        try {
+            final StructureTask task = taskCompleteEvent.getTask();
+            final ConstructionEntry entry = task.getConstructionEntry();
+            final Structure structure = entry.getStructure();
+
+            eventPool.execute(structure.getId(), new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        
+                        ConstructionStatus status = ConstructionStatus.getStatus(task.getAction());
+                        ConstructionStatus newStatus;
+                        switch(status) {
+                            case BUILDING:
+                            case ROLLING_BACK:
+                                newStatus = ConstructionStatus.COMPLETED;
+                                break;
+                            case DEMOLISHING:
+                                newStatus = ConstructionStatus.REMOVED;
+                                break;
+                            case CREATING_BACKUP:
+                                newStatus = ConstructionStatus.BACKUP_COMPLETE;
+                                break;
+                            default:
+                                if(task.isCancelled() || task.hasFailed()) {
+                                    newStatus = ConstructionStatus.ON_HOLD;
+                                    break;
+                                }
+                                return;
+                        }
+                        
+                        updateStatus(newStatus, newStatus.name(), structure);
+                    } catch (Exception ex) {
+                        Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                    }
+                }
+            });
+        } catch (Exception ex) {
+            Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+        }
     }
 
     private void updateStatus(ConstructionStatus newStatus, String statusToTell, Structure structure) {
         List<IPlayer> owners = new ArrayList<>();
 
         String status;
+        Structure updatedStructure;
         try (Transaction tx = graph.beginTx()) {
             StructureNode structureNode = new StructureNode(structure.getNode());
             structureNode.setStatus(newStatus);
@@ -409,12 +504,12 @@ public class ConstructionManager implements IConstructionManager {
                     owners.add(ply);
                 }
             }
-            status = getStatusString(statusToTell.toUpperCase().replaceAll("_", " "), new Structure(structureNode));
-
+            updatedStructure = new Structure(structureNode);
+            status = getStatusString(newStatus, statusToTell.toUpperCase().replaceAll("_", " "), updatedStructure);
             tx.success();
         }
 
-        EventManager.getInstance().getEventBus().post(new StructureStateChangeEvent(structure));
+        EventManager.getInstance().getEventBus().post(new StructureStateChangeEvent(updatedStructure));
 
         // Tell the new status!
         for (IPlayer p : owners) {
@@ -422,14 +517,15 @@ public class ConstructionManager implements IConstructionManager {
         }
     }
 
-    private String getStatusString(String status, Structure structure) {
+    private String getStatusString(ConstructionStatus newStatus, String status, Structure structure) {
         String structureInfo = colors.reset() + ": #" + colors.gold() + structure.getId() + colors.blue() + " " + structure.getName();
         String statusString = status.replaceAll("_", " ");
-        switch (structure.getConstructionStatus()) {
+        switch (newStatus) {
             case COMPLETED:
                 return colors.green() + statusString + structureInfo;
             case STOPPED:
             case ON_HOLD:
+            case REMOVED:
                 return colors.red() + statusString + structureInfo;
             default:
                 return colors.yellow() + statusString + structureInfo;

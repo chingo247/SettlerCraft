@@ -16,10 +16,14 @@
  */
 package com.chingo247.structureapi.construction;
 
+import com.chingo247.structureapi.construction.task.StructureTask;
+import com.chingo247.structureapi.exception.ConstructionException;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.google.common.base.Preconditions;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -34,6 +38,7 @@ public class ConstructionEntry {
     private Queue<StructureTask> tasks;
 
     ConstructionEntry(Structure structure) {
+        Preconditions.checkNotNull(structure, "Structure may not be null!");
         this.tasks = new LinkedList<>();
         this.structure = structure;
     }
@@ -102,8 +107,13 @@ public class ConstructionEntry {
      * Stops running tasks, clears existing ones.
      */
     void purge() {
-        if(currentTask != null) {
-            currentTask._cancel();
+        System.out.println("[ConstructionEntry]: PURGE TASK HERE");
+        if(currentTask != null && !currentTask.isCancelled()) {
+            System.out.println("[ConstructionEntry]: Not yet cancelled");
+            try {
+                currentTask.cancel();
+            } catch (ConstructionException ex) {
+            }
         }
         
         if(nextEntry != null) {

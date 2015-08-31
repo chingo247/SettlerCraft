@@ -22,10 +22,25 @@ package com.chingo247.structureapi.model.structure;
  */
 public enum ConstructionStatus {
     
+    /**
+     * When the construction has failed or was cancelled
+     */
     ON_HOLD(0),
+    /**
+     * When the construction is being placed and there is no next task
+     */
     BUILDING(1),
+    /**
+     * When the construction has been halted
+     */
     STOPPED(2),
+    /**
+     * When the construction is a demolishing type
+     */
     DEMOLISHING(3),
+    /**
+     * When construction has been completed
+     */
     COMPLETED(4),
     QUEUED(5),
     REMOVED(6),
@@ -33,7 +48,8 @@ public enum ConstructionStatus {
     ROLLING_BACK(8),
     PLACING(9),
     CREATING_BACKUP(10),
-    PERFORMING_OPERATION(11);
+    PERFORMING_OPERATION(11),
+    BACKUP_COMPLETE(12);
     
 
 
@@ -60,7 +76,7 @@ public enum ConstructionStatus {
             case "STOPPED":
                 return STOPPED;
             case "DEMOLISHING":
-                return COMPLETED;
+                return DEMOLISHING;
             case "COMPLETED":
                 return COMPLETED;
             case "QUEUED": 
@@ -73,6 +89,8 @@ public enum ConstructionStatus {
                 return ROLLING_BACK;
             case "PLACING":
                 return PLACING;
+            case "BACKUP_COMPLETE":
+                return BACKUP_COMPLETE;
             default:
                 return PERFORMING_OPERATION;
         }
@@ -93,6 +111,7 @@ public enum ConstructionStatus {
             case 9: return PLACING;
             case 10: return CREATING_BACKUP;
             case 11: return PERFORMING_OPERATION;
+            case 12: return BACKUP_COMPLETE;
             default: throw new AssertionError("Unreachable");
         }
     }

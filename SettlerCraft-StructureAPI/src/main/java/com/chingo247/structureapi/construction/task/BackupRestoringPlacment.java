@@ -14,22 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction;
+package com.chingo247.structureapi.construction.task;
 
 import com.chingo247.structureapi.construction.StructureBlock;
 import com.chingo247.structureapi.construction.backup.IWorldPartSnapshot;
 import com.chingo247.structureapi.structure.plan.placement.BlockPlacement;
-import com.chingo247.structureapi.structure.plan.placement.Placement;
 import com.chingo247.structureapi.structure.plan.placement.PlacementTypes;
 import com.chingo247.structureapi.structure.plan.placement.iterator.CuboidIterator;
-import com.chingo247.structureapi.structure.plan.placement.options.BlockMask;
-import com.chingo247.structureapi.structure.plan.placement.options.BlockPredicate;
 import com.chingo247.structureapi.structure.plan.placement.options.Options;
-import com.chingo247.structureapi.util.WorldUtil;
-import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockType;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -40,7 +34,7 @@ import java.util.PriorityQueue;
  *
  * @author Chingo
  */
-public class BackupRestoringPlacment extends BlockPlacement<Options> {
+class BackupRestoringPlacment extends BlockPlacement<Options> {
     
     private CuboidRegion region;
     private IWorldPartSnapshot snapshot;
@@ -49,9 +43,6 @@ public class BackupRestoringPlacment extends BlockPlacement<Options> {
         super(getSize(region).getBlockX(), getSize(region).getBlockY(), getSize(region).getBlockZ());
         this.region = region;
         this.snapshot = worldPartSnapshot;
-        
-        
-        
     }
 
     private static Vector getSize(CuboidRegion region) {

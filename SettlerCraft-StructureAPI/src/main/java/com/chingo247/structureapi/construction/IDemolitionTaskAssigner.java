@@ -16,7 +16,6 @@
  */
 package com.chingo247.structureapi.construction;
 
-import com.chingo247.structureapi.construction.ConstructionEntry;
 import com.chingo247.structureapi.exception.ConstructionException;
 import com.chingo247.structureapi.structure.plan.placement.options.DemolitionOptions;
 import com.sk89q.worldedit.EditSession;
