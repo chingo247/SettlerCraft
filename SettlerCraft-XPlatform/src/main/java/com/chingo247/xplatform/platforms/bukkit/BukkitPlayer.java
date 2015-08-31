@@ -23,6 +23,7 @@ public class BukkitPlayer implements IPlayer {
     private final IServer server;
 
     public BukkitPlayer(Player player) {
+        Preconditions.checkNotNull(player, "Player was null!");
         this.player = player;
         this.server = new BukkitServer(Bukkit.getServer());
     }

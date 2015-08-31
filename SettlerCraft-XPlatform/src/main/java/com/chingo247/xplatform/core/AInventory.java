@@ -24,21 +24,46 @@
 package com.chingo247.xplatform.core;
 
 /**
- *
+ * Abstraction of inventory
  * @author Chingo
  */
 public abstract class AInventory {
     
+    /**
+     * Checks if the inventory has the item
+     * @param stack The item
+     * @return True if inventory has the item
+     */
     public abstract boolean hasItem(AItemStack stack);
     
+    /**
+     * Removes an item from the inventory
+     * @param item The item to remove
+     */
     public abstract void removeItem(AItemStack item);
     
+    /**
+     * Adds adds an item to this inventory
+     * @param itemStack The item to add
+     */
     public abstract void addItem(AItemStack itemStack);
     
+    /**
+     * Sets an item at a certain index
+     * @param index The item to set
+     * @param itemstack The ItemStack
+     */
     public abstract void setItem(int index, AItemStack itemstack);          
     
+    /**
+     * Gets all the items in this inventory
+     * @return The items
+     */
     public abstract AItemStack[] getItems();
     
+    /**
+     * Clears the inventory
+     */
     public abstract void clear();
     
     

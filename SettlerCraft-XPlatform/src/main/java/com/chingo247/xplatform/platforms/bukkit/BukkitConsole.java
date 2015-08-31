@@ -24,10 +24,10 @@
 package com.chingo247.xplatform.platforms.bukkit;
 
 import com.chingo247.xplatform.core.IConsole;
+import com.google.common.base.Preconditions;
 import org.bukkit.command.ConsoleCommandSender;
 
 /**
- *
  * @author Chingo
  */
 public class BukkitConsole implements IConsole {
@@ -35,6 +35,7 @@ public class BukkitConsole implements IConsole {
     private final ConsoleCommandSender console;
 
     public BukkitConsole(ConsoleCommandSender commandSender) {
+        Preconditions.checkNotNull(commandSender, "commandSender was null");
         this.console = commandSender;
     }
 
