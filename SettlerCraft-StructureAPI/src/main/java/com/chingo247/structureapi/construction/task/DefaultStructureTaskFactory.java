@@ -162,7 +162,7 @@ public class DefaultStructureTaskFactory implements IStructureTaskFactory {
     }
 
     @Override
-    public StructureTask rollback(EditSession session, UUID player, Structure structure) throws StructureTaskException, IOException {
+    public StructureTask restore(EditSession session, UUID player, Structure structure) throws StructureTaskException, IOException {
         CuboidRegion region = structure.getCuboidRegion();
         Vector pos = region.getMinimumPoint();
         ConstructionEntry entry = ConstructionManager.getInstance().getEntry(structure);
@@ -175,7 +175,7 @@ public class DefaultStructureTaskFactory implements IStructureTaskFactory {
         File backupFile = getBackup(structure, FIRST_BACKUP);
         BackupRestoringPlacment brp = getPlacement(backupFile, region);
         
-        AWEPlacementTask task = new AWEPlacementTask(ConstructionStatus.ROLLING_BACK.name(), entry, brp, playerEntry, session, pos, new BuildOptions());
+        AWEPlacementTask task = new AWEPlacementTask(ConstructionStatus.RESTORING.name(), entry, brp, playerEntry, session, pos, new BuildOptions());
         return task;
     }
     

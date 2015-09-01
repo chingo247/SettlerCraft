@@ -42,14 +42,28 @@ public enum ConstructionStatus {
      * When construction has been completed
      */
     COMPLETED(4),
+    /**
+     * Structure has been queued
+     */
     QUEUED(5),
+    /**
+     * Structure has been removed
+     */
     REMOVED(6),
+    /**
+     * Structure is placing a fence
+     */
     PLACING_FENCE(7),
+    /**
+     * Structure is rolling back
+     */
     ROLLING_BACK(8),
     PLACING(9),
     CREATING_BACKUP(10),
     PERFORMING_OPERATION(11),
-    BACKUP_COMPLETE(12);
+    BACKUP_COMPLETE(12),
+    RESTORING(13);
+    
     
 
 
@@ -91,6 +105,8 @@ public enum ConstructionStatus {
                 return PLACING;
             case "BACKUP_COMPLETE":
                 return BACKUP_COMPLETE;
+            case "RESTORING":
+                return RESTORING;
             default:
                 return PERFORMING_OPERATION;
         }
@@ -112,6 +128,7 @@ public enum ConstructionStatus {
             case 10: return CREATING_BACKUP;
             case 11: return PERFORMING_OPERATION;
             case 12: return BACKUP_COMPLETE;
+            case 13: return RESTORING;
             default: throw new AssertionError("Unreachable");
         }
     }

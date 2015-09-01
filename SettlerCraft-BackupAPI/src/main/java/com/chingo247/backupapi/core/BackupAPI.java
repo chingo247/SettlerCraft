@@ -5,7 +5,7 @@
  */
 package com.chingo247.backupapi.core;
 
-import com.chingo247.backupapi.core.snapshot.SnapshotReader;
+import com.chingo247.backupapi.core.io.SnapshotReader;
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
 import com.chingo247.structureapi.construction.backup.IBackupAPI;
 import com.chingo247.structureapi.construction.backup.IBackupEntry;

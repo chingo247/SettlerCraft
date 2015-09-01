@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.backupapi.core.snapshot;
+package com.chingo247.backupapi.core.io;
 
 import com.chingo247.backupapi.core.util.PositionUtils;
 import com.chingo247.structureapi.construction.backup.IChunkSnapshot;
@@ -55,6 +55,8 @@ public class WorldPartSnapshot implements IWorldPartSnapshot {
     public BaseBlock getWorldBlockAt(int x, int y, int z) {
         Vector2D pos = PositionUtils.getChunkCoordinate(x, z);
         IChunkSnapshot cs = getChunk(pos.getBlockX(), pos.getBlockZ());
+        
+        
         
         if(cs == null) {
             return null;

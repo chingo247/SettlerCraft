@@ -22,6 +22,7 @@ import com.chingo247.structureapi.structure.plan.placement.options.BuildOptions;
 import com.chingo247.structureapi.structure.plan.placement.options.DemolitionOptions;
 import com.sk89q.worldedit.EditSession;
 import java.util.UUID;
+import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
  *
@@ -29,22 +30,83 @@ import java.util.UUID;
  */
 public interface IConstructionManager {
 
+    /**
+     * Gets the default taskfactory
+     * @return The default taskfactory
+     */
     public IStructureTaskFactory getTaskFactory();
 
+    /**
+     * Gets the {@link ConstructionEntry} of the given structure.
+     * @param structure The structure
+     * @return The constructionEntry
+     */
     public ConstructionEntry getEntry(Structure structure);
     
+    /**
+     * Removes a {@link ConstructionEntry} from the ConstructionManager
+     * @param entry The entry to remove
+     */
     public void remove(ConstructionEntry entry);
 
+    /**
+     * Stops all tasks scheduled for a specific construction entry
+     * @param entry The entry
+     * @param force Whether to use force, ignoring some checks
+     * @throws ConstructionException 
+     */
     public void stop(ConstructionEntry entry, boolean force) throws ConstructionException;
 
+    /**
+     * Stops all tasks scheduled for a specific construction entry
+     * @param entry The entry
+     * @param useForce Whether to use force, ignoring some checks
+     * @throws ConstructionException 
+     */
     public void stop(Structure entry, boolean useForce) throws ConstructionException;
 
-    public void build(EditSession session, UUID player, ConstructionEntry entry, IBuildTaskAssigner assigner, BuildOptions options) throws ConstructionException;
+    /**
+     * Builds a structure
+     * @param session The editSession to use
+     * @param player The playerUUID or any other UUID, if the player UUID is used and BarAPI was enabled this player will see the construction status
+     * @param entry The ConstructionEntry
+     * @param assigner The TaskAssigner
+     * @param options The options to use
+     * @throws ConstructionException 
+     */
+    public void build(AsyncEditSession session, UUID player, ConstructionEntry entry, IBuildTaskAssigner assigner, BuildOptions options) throws ConstructionException;
 
-    public void build(EditSession session, UUID player, Structure entry, IBuildTaskAssigner assigner, BuildOptions options) throws ConstructionException;
+    /**
+     * Builds a structure
+     * @param session The editSession to use
+     * @param player The playerUUID or any other UUID, if the player UUID is used and BarAPI was enabled this player will see the construction status
+     * @param structure The Structure
+     * @param assigner The TaskAssigner
+     * @param options The options to use
+     * @throws ConstructionException 
+     */
+    public void build(AsyncEditSession session, UUID player, Structure structure, IBuildTaskAssigner assigner, BuildOptions options) throws ConstructionException;
 
-    public void demolish(EditSession session, UUID player, ConstructionEntry entry, IDemolitionTaskAssigner assigner, DemolitionOptions options) throws ConstructionException;
+    /**
+     * Demolishes a structure
+     * @param session The editSession to use
+     * @param player The playerUUID or any other UUID, if the player UUID is used and BarAPI was enabled this player will see the construction status
+     * @param entry The ConstructionEntry
+     * @param assigner The TaskAssigner
+     * @param options The options to use
+     * @throws ConstructionException 
+     */
+    public void demolish(AsyncEditSession session, UUID player, ConstructionEntry entry, IDemolitionTaskAssigner assigner, DemolitionOptions options) throws ConstructionException;
 
-    public void demolish(EditSession session, UUID player, Structure entry, IDemolitionTaskAssigner assigner, DemolitionOptions options) throws ConstructionException;
+    /**
+     * Demolishes a structure
+     * @param session The editSession to use
+     * @param player The playerUUID or any other UUID, if the player UUID is used and BarAPI was enabled this player will see the construction status
+     * @param structure The Structure
+     * @param assigner The TaskAssigner
+     * @param options The options to use
+     * @throws ConstructionException 
+     */
+    public void demolish(AsyncEditSession session, UUID player, Structure structure, IDemolitionTaskAssigner assigner, DemolitionOptions options) throws ConstructionException;
 
 }

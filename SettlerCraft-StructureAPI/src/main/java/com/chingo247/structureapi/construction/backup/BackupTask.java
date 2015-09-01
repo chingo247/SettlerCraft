@@ -17,7 +17,9 @@
 package com.chingo247.structureapi.construction.backup;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
+import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
 import com.chingo247.structureapi.construction.ConstructionEntry;
+import com.chingo247.structureapi.construction.event.StructureTaskStartEvent;
 import com.chingo247.structureapi.construction.task.StructureTask;
 import com.chingo247.structureapi.exception.StructureTaskException;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
@@ -61,6 +63,8 @@ public class BackupTask extends StructureTask {
         ConstructionEntry entry = getConstructionEntry();
         Structure structure = entry.getStructure();
 
+        AsyncEventManager.getInstance().post(new StructureTaskStartEvent(this));
+        
         try {
             BackupTaskManager.getInstance().registerTask(this);
             backupEntry = backupAPI.createBackup(getUUID(), SettlerCraft.getInstance().getWorld(structure.getWorld().getName()), structure.getCuboidRegion(), target);

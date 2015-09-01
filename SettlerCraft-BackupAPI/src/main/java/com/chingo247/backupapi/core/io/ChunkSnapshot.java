@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.backupapi.core.snapshot;
+package com.chingo247.backupapi.core.io;
 
 import com.chingo247.structureapi.construction.backup.IChunkSnapshot;
 import com.chingo247.structureapi.construction.backup.ISectionSnapshot;
@@ -131,6 +131,13 @@ public class ChunkSnapshot implements IChunkSnapshot {
     public BaseBlock getBlockAt(int x, int y, int z) {
         int section = y >> 4;
         ISectionSnapshot ss = getSection(section);
+        
+        if(ss == null) {
+            // If section doesn't exist then its air
+            // Empty sections are never saved
+            return new BaseBlock(0); 
+        }
+        
         return ss == null ? null : ss.getBlockAt(x, y - (section * 16), z);
     }
     

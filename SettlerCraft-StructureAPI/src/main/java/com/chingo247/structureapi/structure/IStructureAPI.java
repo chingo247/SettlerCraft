@@ -44,6 +44,7 @@ import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
+import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSessionFactory;
 
 /**
@@ -140,9 +141,9 @@ public interface IStructureAPI {
      */
     public Structure createSubstructure(Structure structure, Placement placement, World world, Vector position, Direction direction) throws Exception;
     
-    public void build(EditSession editSession, UUID player, Structure structure, BuildOptions options, IBuildTaskAssigner taskAssigner) throws ConstructionException;
+    public void build(AsyncEditSession editSession, UUID player, Structure structure, BuildOptions options, IBuildTaskAssigner taskAssigner) throws ConstructionException;
     
-    public void build(EditSession editSession, UUID player, Structure structure, BuildOptions options) throws ConstructionException;
+    public void build(AsyncEditSession editSession, UUID player, Structure structure, BuildOptions options) throws ConstructionException;
     
     public void build(UUID player, Structure structure, BuildOptions options) throws ConstructionException;
     
@@ -150,9 +151,9 @@ public interface IStructureAPI {
     
     public void build(Structure structure) throws ConstructionException;
     
-    public void demolish(EditSession editSession, UUID player, Structure structure, DemolitionOptions options, IDemolitionTaskAssigner taskAssigner) throws ConstructionException;
+    public void demolish(AsyncEditSession editSession, UUID player, Structure structure, DemolitionOptions options, IDemolitionTaskAssigner taskAssigner) throws ConstructionException;
     
-    public void demolish(EditSession editSession, UUID player, Structure structure, DemolitionOptions options) throws ConstructionException;
+    public void demolish(AsyncEditSession editSession, UUID player, Structure structure, DemolitionOptions options) throws ConstructionException;
     
     public void demolish(UUID player, Structure structure, DemolitionOptions options) throws ConstructionException;
     

@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.backupapi.core.snapshot;
+package com.chingo247.backupapi.core.io;
 
-import com.chingo247.backupapi.core.snapshot.WorldPartSnapshot;
+import com.chingo247.backupapi.core.io.WorldPartSnapshot;
 import com.chingo247.structureapi.construction.backup.IWorldPartSnapshot;
 import com.sk89q.jnbt.IntTag;
 import com.sk89q.jnbt.NBTInputStream;
@@ -13,6 +13,7 @@ import com.sk89q.jnbt.NamedTag;
 import com.sk89q.jnbt.Tag;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.blocks.BaseBlock;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -43,13 +44,13 @@ public class SnapshotReader {
             
             worldSnapshot = new WorldPartSnapshot(snapshotMap, minX, minZ, maxX, maxZ);
             
-            Vector min = new Vector(-30, 63, 130);
-            Vector max = new Vector(-7, 76, 153);
+            Vector min = new Vector(-321, 71, 2978);
+            Vector max = new Vector(-133, 105, 3133);
             
             for(int x = min.getBlockX(); x < max.getBlockX(); x++) {
                 for(int z = min.getBlockZ(); z < max.getBlockZ(); z++) {
                     for(int y = min.getBlockY(); y < max.getBlockY(); y++) {
-                        worldSnapshot.getWorldBlockAt(x, y, z);
+                        BaseBlock b = worldSnapshot.getWorldBlockAt(x, y, z);
                     }
                 }
             }
@@ -89,7 +90,7 @@ public class SnapshotReader {
     public static void main(String[] args) {
         SnapshotReader reader = new SnapshotReader();
         try {
-            reader.read(new File("F:\\GAMES\\MineCraftServers\\bukkit\\1.8\\Bukkit 1.8-SettlerCraft-2.1.0\\plugins\\SettlerCraft-StructureAPI\\worlds\\world\\structures\\26\\backups\\restore.snapshot"));
+            reader.read(new File("F:\\GAMES\\MineCraftServers\\bukkit\\1.8\\Bukkit 1.8-SettlerCraft-2.1.0\\plugins\\SettlerCraft-StructureAPI\\worlds\\world\\structures\\57\\backups\\restore.snapshot"));
         } catch (IOException ex) {
             Logger.getLogger(SnapshotReader.class.getName()).log(Level.SEVERE, null, ex);
         }

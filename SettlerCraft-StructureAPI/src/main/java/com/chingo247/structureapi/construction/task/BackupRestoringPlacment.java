@@ -22,6 +22,7 @@ import com.chingo247.structureapi.structure.plan.placement.BlockPlacement;
 import com.chingo247.structureapi.structure.plan.placement.PlacementTypes;
 import com.chingo247.structureapi.structure.plan.placement.iterator.CuboidIterator;
 import com.chingo247.structureapi.structure.plan.placement.options.Options;
+import com.chingo247.structureapi.structure.plan.placement.traversal.TopDownCuboidTraversal;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
@@ -51,11 +52,13 @@ class BackupRestoringPlacment extends BlockPlacement<Options> {
 
     @Override
     public void place(EditSession editSession, Vector pos, Options option) {
-        Iterator<Vector> traversal = new CuboidIterator(
+        Iterator<Vector> traversal = new TopDownCuboidTraversal(getSize(),
                 option.getCubeX() <= 0 ? getSize().getBlockX() : option.getCubeX(),
                 option.getCubeY() <= 0 ? getSize().getBlockY() : option.getCubeY(),
                 option.getCubeZ() <= 0 ? getSize().getBlockZ() : option.getCubeZ()
-        ).iterate(getSize());
+        ).iterator();
+        
+        pos = region.getMinimumPoint();
         
         PriorityQueue<StructureBlock> placeLater = new PriorityQueue<>();
 

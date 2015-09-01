@@ -19,6 +19,7 @@ package com.chingo247.structureapi.construction.task;
 import com.chingo247.structureapi.construction.ConstructionEntry;
 import com.chingo247.structureapi.construction.IDemolitionTaskAssigner;
 import com.chingo247.structureapi.exception.ConstructionException;
+import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.structure.plan.placement.options.DemolitionOptions;
 import com.sk89q.worldedit.EditSession;
@@ -44,7 +45,8 @@ public class DemolitionTaskAssigner implements IDemolitionTaskAssigner{
         Structure structure = entry.getStructure();
         if(taskfactory.hasBackup(structure, "restore.snapshot")) {
             System.out.println("[DemolitionTaskAssigner]: HAS BACKUP");
-            entry.addTask(taskfactory.rollback(session, player, structure));
+            StructureTask task = taskfactory.restore(session, player, structure);
+            entry.addTask(task);
         } else {
             System.out.println("[DemolitionTaskAssigner]: NO BACKUP");
             entry.addTask(taskfactory.demolish(session, player, entry.getStructure(), options));

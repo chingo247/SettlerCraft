@@ -41,6 +41,7 @@ import com.chingo247.structureapi.structure.plan.placement.options.DemolitionOpt
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IPlayer;
+import com.google.common.base.Preconditions;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import com.sk89q.worldedit.EditSession;
@@ -60,6 +61,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.TraversalDescription;
+import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
  *
@@ -138,25 +140,30 @@ public class ConstructionManager implements IConstructionManager {
     }
 
     @Override
-    public void stop(Structure structure, boolean useForce) {
+    public void stop(Structure structure, boolean useForce) throws ConstructionException {
         stop(getEntry(structure), useForce);
     }
 
     @Override
-    public void stop(ConstructionEntry entry, boolean useForce) {
-        // Stops it recursively
+    public void stop(ConstructionEntry entry, boolean useForce) throws ConstructionException {
+        Preconditions.checkNotNull(entry, "ConstructionEntry may not be null");
+        if(entry.getStructure().getConstructionStatus() == ConstructionStatus.REMOVED) {
+            throw new ConstructionException("Can't stop a removed structure...");
+        }
         entry.purge();
     }
     
     @Override
-    public void build(EditSession session, UUID player, Structure structure, IBuildTaskAssigner assigner, BuildOptions options) throws ConstructionException {
+    public void build(AsyncEditSession session, UUID player, Structure structure, IBuildTaskAssigner assigner, BuildOptions options) throws ConstructionException {
         build(session, player, getEntry(structure), assigner, options);
     }
 
     @Override
-    public void build(final EditSession session, final UUID player, final ConstructionEntry entry, final IBuildTaskAssigner assigner, final BuildOptions options) throws ConstructionException {
+    public void build(final AsyncEditSession session, final UUID player, final ConstructionEntry entry, final IBuildTaskAssigner assigner, final BuildOptions options) throws ConstructionException {
         // Perform async
-        System.out.println("[ConstructionManager]: build!");
+        if(entry.getStructure().getConstructionStatus() == ConstructionStatus.REMOVED) {
+            throw new ConstructionException("Can't build a removed structure...");
+        }
 
         executor.execute(new Runnable() {
 
@@ -252,14 +259,17 @@ public class ConstructionManager implements IConstructionManager {
     }
 
     @Override
-    public void demolish(final EditSession session, final UUID player, final ConstructionEntry entry, final IDemolitionTaskAssigner assigner, final DemolitionOptions options) throws ConstructionException {
-
+    public void demolish(final AsyncEditSession session, final UUID player, final ConstructionEntry entry, final IDemolitionTaskAssigner assigner, final DemolitionOptions options) throws ConstructionException {
+        if(entry.getStructure().getConstructionStatus() == ConstructionStatus.REMOVED) {
+            throw new ConstructionException("Can't demolish a removed structure...");
+        }
+        
+        
         // Perform async
         executor.execute(new Runnable() {
 
             @Override
             public void run() {
-                System.out.println("[ConstructionManager]: run build async 1");
                 try {
 
                     // Get the id of the root structure, the structure that has no parent
@@ -279,7 +289,6 @@ public class ConstructionManager implements IConstructionManager {
 
                         @Override
                         public void run() {
-                            System.out.println("[ConstructionManager]: run build async 2");
                             try {
                                 List<Structure> structures = new ArrayList<>();
 
@@ -303,14 +312,12 @@ public class ConstructionManager implements IConstructionManager {
                                     tx.success();
                                 }
 
-                                System.out.println("[ConstructionManager]: Purging tasks");
                                 // Purge existing tasks from entries
                                 for (Structure s : structures) {
                                     ConstructionEntry e = getEntry(s);
                                     e.purge();
                                 }
 
-                                System.out.println("[ConstructionManager]: Assigning tasks");
                                 // Set entries
                                 ConstructionEntry prevEntry = null;
                                 try (Transaction tx = graph.beginTx()) {
@@ -349,7 +356,7 @@ public class ConstructionManager implements IConstructionManager {
     }
 
     @Override
-    public void demolish(EditSession session, UUID player, Structure structure, IDemolitionTaskAssigner assigner, DemolitionOptions options) throws ConstructionException {
+    public void demolish(AsyncEditSession session, UUID player, Structure structure, IDemolitionTaskAssigner assigner, DemolitionOptions options) throws ConstructionException {
         demolish(session, player, getEntry(structure), assigner, options);
     }
 
@@ -405,7 +412,6 @@ public class ConstructionManager implements IConstructionManager {
                 public void run() {
                     try {
                         ConstructionStatus newStatus = ConstructionStatus.getStatus(task.getAction());
-                        
                         updateStatus(newStatus, task.getAction(), structure);
                     } catch (Exception ex) {
                         Logger.getLogger(ConstructionManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -464,6 +470,7 @@ public class ConstructionManager implements IConstructionManager {
                                 newStatus = ConstructionStatus.COMPLETED;
                                 break;
                             case DEMOLISHING:
+                            case RESTORING:
                                 newStatus = ConstructionStatus.REMOVED;
                                 break;
                             case CREATING_BACKUP:

@@ -47,6 +47,10 @@ public abstract class StructureTask {
         this.action = action;
     }
 
+    public void setAction(String action) {
+        this.action = action;
+    }
+    
     public ConstructionEntry getConstructionEntry() {
         return constructionEntry;
     }

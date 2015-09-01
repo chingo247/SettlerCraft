@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.backupapi.core.snapshot;
+package com.chingo247.backupapi.core.io;
 
 import com.chingo247.backupapi.core.io.region.RegionFileFormat;
 import com.chingo247.structureapi.construction.backup.ISectionSnapshot;

@@ -86,14 +86,14 @@ public interface IStructureTaskFactory {
     public StructureTask backup(Structure structure, String backup) throws ConstructionException;
     
     /**
-     * Restores the area to before the structure was placed
+     * Restores the area to before the structure was placed, this will remove the structure
      * @param session The editsession to use
      * @param player The player UUID or any other random UUID if no tracking is required
      * @param structure The structure
      * @return The structure task
      * @throws Exception 
      */
-    public StructureTask rollback(EditSession session, UUID player, Structure structure) throws ConstructionException, IOException;
+    public StructureTask restore(EditSession session, UUID player, Structure structure) throws ConstructionException, IOException;
     
     /**
      * Restores the area back to the backup that was made

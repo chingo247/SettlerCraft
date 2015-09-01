@@ -420,13 +420,13 @@ public class StructureAPI implements IStructureAPI {
     }
 
     @Override
-    public void build(EditSession editSession, UUID player, Structure structure, BuildOptions options, IBuildTaskAssigner taskAssigner) throws ConstructionException {
+    public void build(AsyncEditSession editSession, UUID player, Structure structure, BuildOptions options, IBuildTaskAssigner taskAssigner) throws ConstructionException {
         System.out.println("[StructureAPI]: StructureAPI Build!");
         constructionManager.build(editSession, player, structure, taskAssigner, options);
     }
 
     @Override
-    public void build(final EditSession editSession, final UUID player, final Structure structure, final BuildOptions options) throws ConstructionException {
+    public void build(final AsyncEditSession editSession, final UUID player, final Structure structure, final BuildOptions options) throws ConstructionException {
         build(editSession, player, structure, options, buildTaskAssigner);
     }
 
@@ -455,12 +455,12 @@ public class StructureAPI implements IStructureAPI {
     }
 
     @Override
-    public void demolish(EditSession editSession, UUID player, Structure structure, DemolitionOptions options, IDemolitionTaskAssigner taskAssigner) throws ConstructionException {
+    public void demolish(AsyncEditSession editSession, UUID player, Structure structure, DemolitionOptions options, IDemolitionTaskAssigner taskAssigner) throws ConstructionException {
         constructionManager.demolish(editSession, player, structure, taskAssigner, options);
     }
 
     @Override
-    public void demolish(EditSession editSession, UUID player, Structure structure, DemolitionOptions options) throws ConstructionException {
+    public void demolish(AsyncEditSession editSession, UUID player, Structure structure, DemolitionOptions options) throws ConstructionException {
         demolish(editSession, player, structure, options, demolitionTaskAssigner);
     }
 

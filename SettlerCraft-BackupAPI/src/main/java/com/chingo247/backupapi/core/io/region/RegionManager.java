@@ -141,7 +141,10 @@ public class RegionManager {
                     int minY = region.getMinimumY() >> 4;
                     int maxY = region.getMaximumY() >> 4;
 
+//                    System.out.println("[RegionManager] Between " + minY + ", " + maxY);
+                    
                     for (NBTSection section : nbtl.getSections(minY, maxY)) {
+//                        System.out.println("[RegionManager]: writing section " + section.getY());
                         chunkDataMap.put("Section-[" + section.getY() + "]", section.getSectionTag());
                     }
 
@@ -224,8 +227,8 @@ public class RegionManager {
     }
 
     public static void main(String[] args) {
-        Vector min = new Vector(-30, 63, 130);
-        Vector max = new Vector(-7, 76, 153);
+        Vector min = new Vector(-321, 71, 2978);
+        Vector max = new Vector(-133, 105, 3133);
         RegionManager regionManager = new RegionManager(null);
         try {
             regionManager.copy("world", new CuboidRegion(min, new Vector(max)), new File("test.snapshot"));

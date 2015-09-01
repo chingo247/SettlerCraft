@@ -91,7 +91,7 @@ public class NBTLevel extends NBTData {
             NBTSection nbts = new NBTSection(this, sectionTag);
             
             int y = nbts.getY();
-            if((min < 0 || max < 0) || (y <= max && y >= min)) {
+            if(y >= min && y <= max) {
                 sections.add(nbts);
             } 
         }

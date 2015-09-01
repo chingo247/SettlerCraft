@@ -219,6 +219,7 @@ public class StructureHologramManager {
                 statusString = "";
                 break;
             case STOPPED:
+            case ON_HOLD:
                 statusString = color.red();
                 statusString += state.name();
                 break;
