@@ -18,7 +18,7 @@ package com.chingo247.structureapi.construction.task;
 
 import com.chingo247.structureapi.construction.ConstructionEntry;
 import com.chingo247.structureapi.construction.IBuildTaskAssigner;
-import com.chingo247.structureapi.construction.backup.IBackupAPI;
+import com.chingo247.backupapi.core.IBackupAPI;
 import com.chingo247.structureapi.exception.ConstructionException;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.structure.StructureAPI;

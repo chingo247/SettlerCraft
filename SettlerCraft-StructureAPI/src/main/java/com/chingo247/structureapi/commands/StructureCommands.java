@@ -197,14 +197,6 @@ public class StructureCommands {
                         case "info":
                             info(sender, commandArgs);
                             break;
-
-                        case "save":
-                            saveChunk(sender);
-//                        case "mask":
-//                            checkIsPlayer(sender);
-//                            mask((IPlayer) sender, commandArgs);
-//                            break;
-                            break;
                         case "build":
                             checkIsPlayer(sender);
                             build((IPlayer) sender, commandArgs);
@@ -278,24 +270,6 @@ public class StructureCommands {
         return true;
     }
 
-    private void saveChunk(ICommandSender sender) throws CommandException {
-        IPlayer player = (IPlayer) sender;
-
-        System.out.println("Saving chunk...");
-        ILocation loc = player.getLocation();
-
-        WorldServer handle = ((CraftWorld) Bukkit.getWorld(loc.getWorld().getName())).getHandle();
-
-        
-        Set<Vector2D> chunkPos = new CuboidRegion(new Vector(loc.getBlockX() - 16, loc.getBlockY() - 16, loc.getBlockZ() -16), new Vector(loc.getBlockX() + 16, loc.getBlockY() + 16, loc.getBlockZ() + 16)).getChunks();
-        
-        structureAPI.getChunkManager().save(SettlerCraft.getInstance().getWorld(loc.getWorld().getName()), chunkPos);
-        
-
-        System.out.println("Saved with chunkmanager");
-
-//        System.out.println("Chunk '( "+loc.getBlockX() + ", " + loc.getBlockZ()+" )' saved!");
-    }
 
     private void reload(ICommandSender sender, String[] commandArgs) throws CommandException {
         String help = "Usage: /stt reload plans";

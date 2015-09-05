@@ -21,16 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.backupapi.core.io.nbt;
+package com.chingo247.backupapi.core.event;
+
+import com.chingo247.backupapi.core.BackupState;
+import com.chingo247.backupapi.core.IBackupEntry;
+import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
 
 /**
- *
+ * Fired when the state of entry changes. These events are fired to the {@link AsyncEventManager}.
+ * SettlerCraft uses the Guava EventBus. See https://code.google.com/p/guava-libraries/wiki/EventBusExplained for more info
  * @author Chingo
  */
-public class TagNotFoundException extends Exception {
+public class BackupEntryStateChangeEvent extends BackupEntryEvent {
+    
+    private BackupState oldState;
 
-    public TagNotFoundException(String string) {
-        super(string);
+    public BackupEntryStateChangeEvent(IBackupEntry backupEntry, BackupState oldState) {
+        super(backupEntry);
+        this.oldState = oldState;
+    }
+
+    public BackupState getOldState() {
+        return oldState;
     }
     
 }

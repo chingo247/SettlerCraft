@@ -16,8 +16,9 @@
  */
 package com.chingo247.structureapi.construction.backup;
 
+import com.chingo247.backupapi.core.IBackupEntry;
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
-import com.chingo247.structureapi.construction.backup.event.BackupEntryStateChangeEvent;
+import com.chingo247.backupapi.core.event.BackupEntryStateChangeEvent;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;

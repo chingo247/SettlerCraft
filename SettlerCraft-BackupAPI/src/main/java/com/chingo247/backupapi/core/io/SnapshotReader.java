@@ -1,19 +1,33 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * The MIT License
+ *
+ * Copyright 2015 Chingo.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 package com.chingo247.backupapi.core.io;
 
-import com.chingo247.backupapi.core.io.WorldPartSnapshot;
-import com.chingo247.structureapi.construction.backup.IWorldPartSnapshot;
 import com.sk89q.jnbt.IntTag;
 import com.sk89q.jnbt.NBTInputStream;
 import com.sk89q.jnbt.NamedTag;
 import com.sk89q.jnbt.Tag;
-import com.sk89q.worldedit.BlockVector;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.world.DataException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -43,19 +57,6 @@ public class SnapshotReader {
             int maxZ = getChildTag(snapshotMap, "MaxZ", IntTag.class).getValue();
             
             worldSnapshot = new WorldPartSnapshot(snapshotMap, minX, minZ, maxX, maxZ);
-            
-            Vector min = new Vector(-321, 71, 2978);
-            Vector max = new Vector(-133, 105, 3133);
-            
-            for(int x = min.getBlockX(); x < max.getBlockX(); x++) {
-                for(int z = min.getBlockZ(); z < max.getBlockZ(); z++) {
-                    for(int y = min.getBlockY(); y < max.getBlockY(); y++) {
-                        BaseBlock b = worldSnapshot.getWorldBlockAt(x, y, z);
-                    }
-                }
-            }
-            
-            
         }
         
         
@@ -87,12 +88,4 @@ public class SnapshotReader {
         return expected.cast(tag);
     }
     
-    public static void main(String[] args) {
-        SnapshotReader reader = new SnapshotReader();
-        try {
-            reader.read(new File("F:\\GAMES\\MineCraftServers\\bukkit\\1.8\\Bukkit 1.8-SettlerCraft-2.1.0\\plugins\\SettlerCraft-StructureAPI\\worlds\\world\\structures\\57\\backups\\restore.snapshot"));
-        } catch (IOException ex) {
-            Logger.getLogger(SnapshotReader.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
 }

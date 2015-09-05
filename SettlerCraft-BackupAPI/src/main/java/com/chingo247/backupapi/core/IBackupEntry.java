@@ -21,16 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.backupapi.core.io.nbt;
+package com.chingo247.backupapi.core;
+
+import com.chingo247.backupapi.core.event.BackupEntryStateChangeEvent;
+import java.util.UUID;
 
 /**
- *
+ * Represents an entry of a backup of which the state can be tracked.<br/>
+ * <b>NOTE:</b> An event is fired when the state of this entry changes.
+ * See {@link BackupEntryStateChangeEvent}
+ * 
  * @author Chingo
  */
-public class TagNotFoundException extends Exception {
-
-    public TagNotFoundException(String string) {
-        super(string);
-    }
+public interface IBackupEntry {
+    
+    UUID getUUID();
+    
+    BackupState getState();
+    
+    boolean isCancelled();
+    
+    boolean isDone();
+    
+    void process(IBackupMaker backupManager);
+    
+    void cancel();
     
 }

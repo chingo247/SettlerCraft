@@ -1,18 +1,25 @@
 /*
- * Copyright (C) 2015 Chingo
+ * The MIT License
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright 2015 Chingo.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 package com.chingo247.backupapi.core.io.region;
 
@@ -30,6 +37,7 @@ import com.sk89q.jnbt.NBTInputStream;
 import com.sk89q.jnbt.NBTOutputStream;
 import com.sk89q.jnbt.NamedTag;
 import com.sk89q.jnbt.Tag;
+import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -48,6 +56,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 import org.apache.commons.io.FileUtils;
+import scala.reflect.api.Positions;
 
 /**
  *
@@ -60,18 +69,18 @@ public class RegionManager {
     public RegionManager(APlatform platform) {
         this.platform = platform;
     }
+    
+    private static void print(String s) {
+//        System.out.println("[RegionManager]: ");
+    }
 
     public void copy(String world, CuboidRegion region, File copyTo) throws IOException, Exception {
 //        File regionsDirectory = platform.getServer().getWorldRegionFolder(world);
         File regionsDirectory = new File("F:\\GAMES\\MineCraftServers\\bukkit\\1.8\\Bukkit 1.8-SettlerCraft-2.1.0\\world\\region");
 
-        System.out.println("[RegionManager]: Searching regions in  " + regionsDirectory.getAbsolutePath());
-
         Set<RegionFileFormat> rffs = getRegionFiles(regionsDirectory, region);
         HashMap<String, Tag> chunkTagMap = Maps.newHashMap();
 
-        System.out.println("[RegionManager]: Found " + rffs.size() + " regions");
-        
         Set<Vector2D> chunks = region.getChunks();
         for (RegionFileFormat rff : rffs) {
             setTags(rff, region, chunks, chunkTagMap);
@@ -80,12 +89,8 @@ public class RegionManager {
         Vector min = region.getMinimumPoint();
         Vector max = region.getMaximumPoint();
 
-        System.out.println("[RegionManager]: World positions " + min + ", " + max);
-
         Vector2D minPos = PositionUtils.getChunkPosition(min.getBlockX(), min.getBlockZ());
         Vector2D maxPos = PositionUtils.getChunkPosition(max.getBlockX(), max.getBlockZ());
-
-        System.out.println("[RegionManager]: ChunkPositions " + minPos + ", " + maxPos);
 
         chunkTagMap.put("MinX", new IntTag(minPos.getBlockX()));
         chunkTagMap.put("MinZ", new IntTag(minPos.getBlockZ()));
@@ -100,75 +105,91 @@ public class RegionManager {
     }
 
     private void setTags(RegionFileFormat rff, CuboidRegion region, Set<Vector2D> chunks, Map<String, Tag> chunkTags) throws IOException, Exception {
-        
         RegionFile rf = rff.read();
 
-        System.out.println("[RegionManager]: Saving " + chunks.size() + " chunks...");
+        try {
+            for (Iterator<Vector2D> chunkIt = chunks.iterator(); chunkIt.hasNext();) {
+                Vector2D v = chunkIt.next();
+                int xPos = v.getBlockX() * RegionFileFormat.CHUNK_SIZE;
+                int zPos = v.getBlockZ() * RegionFileFormat.CHUNK_SIZE;
+                Vector2D regionPos = PositionUtils.getRegionPosition(xPos, zPos);
 
-        for (Iterator<Vector2D> chunkIt = chunks.iterator(); chunkIt.hasNext();) {
-            Vector2D v = chunkIt.next();
-            int xPos = v.getBlockX() * RegionFileFormat.CHUNK_SIZE;
-            int zPos = v.getBlockZ() * RegionFileFormat.CHUNK_SIZE;
-            Vector2D regionPos = PositionUtils.getRegionPosition(xPos, zPos);
+                
+                String line = "";
+                
+                line += "Real pos " + xPos + ", " + zPos + " ";
 
-            xPos = (xPos - regionPos.getBlockX()) / RegionFileFormat.CHUNK_SIZE;
-            zPos = (zPos - regionPos.getBlockZ()) / RegionFileFormat.CHUNK_SIZE;
+                xPos = (xPos - regionPos.getBlockX()) >> 4;
+                zPos = (zPos - regionPos.getBlockZ()) >> 4;
 
-            if (rf.hasChunk(xPos, zPos)) {
-                // It's in here
-                chunkIt.remove();
+                line += "Chunk pos " + xPos + ", " + zPos + " ";
+
+                line += " has: " + rf.hasChunk(xPos, zPos) + " " + rff.getFile().getName() + " ";
+                
+                
+                int rx = PositionUtils.getRegionCoordinate(xPos * RegionFileFormat.CHUNK_SIZE, zPos * RegionFileFormat.CHUNK_SIZE).getBlockX();
+                int rz = PositionUtils.getRegionCoordinate(xPos * RegionFileFormat.CHUNK_SIZE, zPos * RegionFileFormat.CHUNK_SIZE).getBlockZ();
+                
+                boolean shouldHave = rff.getRegionX() == rx && rff.getRegionZ() == rz;
+                
+                line += " region: (" + rx + "," + rz + ")" + " should have: " + (shouldHave ? "yes" : "no");
+                
+                print(line);
+                
+                
+                if (rf.hasChunk(xPos, zPos)) {
+                    // It's in here
+                    chunkIt.remove();
 
                 // Chunk
-                //  - Level
-                //      - Sections
-                //      - Entities
-                //      - TileEntities
-//                System.out.println("[RegionManager]: Saving chunk(" + xPos + ", " + zPos + ")");
+                    //  - Level
+                    //      - Sections
+                    //      - Entities
+                    //      - TileEntities
+                    Tag t;
+                    try (NBTInputStream inputStream = new NBTInputStream(rf.getChunkDataInputStream(xPos, zPos))) {
+                        NamedTag nt = inputStream.readNamedTag();
+                        if (nt == null) {
+                            throw new TagNotFoundException("Couldn't find chunk tag!");
+                        }
+                        t = nt.getTag();
 
-                Tag t;
-                try (NBTInputStream inputStream = new NBTInputStream(rf.getChunkDataInputStream(xPos, zPos))) {
-                    NamedTag nt = inputStream.readNamedTag();
-                    if (nt == null) {
-                        throw new TagNotFoundException("Couldn't find chunk tag!");
+                        NBTChunk nbtc = new NBTChunk(new Vector2D(xPos, zPos), new Vector2D(v.getBlockX() * RegionFileFormat.CHUNK_SIZE, v.getBlockZ() * RegionFileFormat.CHUNK_SIZE), t);
+                        NBTLevel nbtl = nbtc.getLevelTag();
+
+                        HashMap<String, Tag> chunkDataMap = new HashMap<>();
+
+                        int minY = region.getMinimumY() >> 4;
+                        int maxY = region.getMaximumY() >> 4;
+
+                        for (NBTSection section : nbtl.getSections(minY, maxY)) {
+                            chunkDataMap.put("Section-[" + section.getY() + "]", section.getSectionTag());
+                        }
+
+                        ListTag tileEntities = nbtl.getTileEntityData();
+                        if (tileEntities != null) {
+                            chunkDataMap.put("TileEntities", tileEntities);
+                        }
+
+                        ListTag entities = nbtl.getEntityData();
+                        if (entities != null) {
+                            chunkDataMap.put("Entities", entities);
+                        }
+
+                        NamedTag sectionsCopyTag = new NamedTag("Sections", new CompoundTag(chunkDataMap));
+                        NamedTag chunkCopyTag = new NamedTag("Chunk", sectionsCopyTag.getTag());
+                        chunkTags.put("Chunk-[" + v.getBlockX() + "," + v.getBlockZ() + "]", chunkCopyTag.getTag());
+
                     }
-                    t = nt.getTag();
-
-                    NBTChunk nbtc = new NBTChunk(new Vector2D(xPos, zPos), new Vector2D(v.getBlockX() * RegionFileFormat.CHUNK_SIZE, v.getBlockZ() * RegionFileFormat.CHUNK_SIZE), t);
-                    NBTLevel nbtl = nbtc.getLevelTag();
-
-                    HashMap<String, Tag> chunkDataMap = new HashMap<>();
-
-                    int minY = region.getMinimumY() >> 4;
-                    int maxY = region.getMaximumY() >> 4;
-
-//                    System.out.println("[RegionManager] Between " + minY + ", " + maxY);
-                    
-                    for (NBTSection section : nbtl.getSections(minY, maxY)) {
-//                        System.out.println("[RegionManager]: writing section " + section.getY());
-                        chunkDataMap.put("Section-[" + section.getY() + "]", section.getSectionTag());
-                    }
-
-                    ListTag tileEntities = nbtl.getTileEntityData();
-                    if (tileEntities != null) {
-                        chunkDataMap.put("TileEntities", tileEntities);
-                    }
-
-                    ListTag entities = nbtl.getEntityData();
-                    if (entities != null) {
-                        chunkDataMap.put("Entities", entities);
-                    }
-
-                    NamedTag sectionsCopyTag = new NamedTag("Sections", new CompoundTag(chunkDataMap));
-                    NamedTag chunkCopyTag = new NamedTag("Chunk", sectionsCopyTag.getTag());
-                    chunkTags.put("Chunk-[" + v.getBlockX() + "," + v.getBlockZ() + "]", chunkCopyTag.getTag());
-
-                }
-            } else {
+                } else {
 //                System.out.println(" ");
 //                System.out.println("[RegionManager]: Doesn't have chunk " + xPos + ", " + zPos);
 //                System.out.println("[RegionManager]: Chunk at " + (rff.getX() + (xPos * RegionFileFormat.CHUNK_SIZE)) + ", " + (rff.getZ() + (zPos * RegionFileFormat.CHUNK_SIZE)));
 //                System.out.println(" ");
+                }
             }
+        } finally {
+            rf.close();
         }
     }
 
@@ -227,14 +248,18 @@ public class RegionManager {
     }
 
     public static void main(String[] args) {
-        Vector min = new Vector(-321, 71, 2978);
-        Vector max = new Vector(-133, 105, 3133);
+
         RegionManager regionManager = new RegionManager(null);
+
+        Vector min = new Vector(1.0, 63.0, 1.0);
+        Vector max = new Vector(107.0, 123.0, 142.0);
+
         try {
-            regionManager.copy("world", new CuboidRegion(min, new Vector(max)), new File("test.snapshot"));
+            regionManager.copy("world", new CuboidRegion(min, max), new File("test.snapshot"));
         } catch (Exception ex) {
             Logger.getLogger(RegionManager.class.getName()).log(Level.SEVERE, null, ex);
         }
+
     }
 
 }

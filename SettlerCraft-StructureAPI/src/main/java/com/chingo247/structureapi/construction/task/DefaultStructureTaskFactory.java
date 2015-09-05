@@ -21,8 +21,8 @@ import com.chingo247.structureapi.construction.ConstructionEntry;
 import com.chingo247.structureapi.construction.IStructureTaskFactory;
 import com.chingo247.structureapi.construction.asyncworldedit.AWEPlacementTask;
 import com.chingo247.structureapi.construction.backup.BackupTask;
-import com.chingo247.structureapi.construction.backup.IBackupAPI;
-import com.chingo247.structureapi.construction.backup.IWorldPartSnapshot;
+import com.chingo247.backupapi.core.IBackupAPI;
+import com.chingo247.backupapi.core.io.IWorldPartSnapshot;
 import com.chingo247.structureapi.exception.ConstructionException;
 import com.chingo247.structureapi.exception.StructureTaskException;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
@@ -34,16 +34,23 @@ import com.chingo247.structureapi.structure.plan.placement.DemolishingPlacement;
 import com.chingo247.structureapi.structure.plan.placement.Placement;
 import com.chingo247.structureapi.structure.plan.placement.RestoringPlacement;
 import com.chingo247.structureapi.structure.plan.placement.RotationalPlacement;
+import com.chingo247.structureapi.structure.plan.placement.SchematicPlacement;
 import com.chingo247.structureapi.structure.plan.placement.options.BlockPredicate;
 import com.chingo247.structureapi.structure.plan.placement.options.BuildOptions;
 import com.chingo247.structureapi.structure.plan.placement.options.DemolitionOptions;
+import com.chingo247.structureapi.structure.plan.schematic.FastClipboard;
+import com.chingo247.structureapi.structure.plan.schematic.DefaultSchematic;
+import com.sk89q.jnbt.NBTInputStream;
+import com.sk89q.jnbt.NamedTag;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.zip.GZIPInputStream;
 import org.neo4j.graphdb.Transaction;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
@@ -173,10 +180,19 @@ public class DefaultStructureTaskFactory implements IStructureTaskFactory {
         }
         
         File backupFile = getBackup(structure, FIRST_BACKUP);
-        BackupRestoringPlacment brp = getPlacement(backupFile, region);
+        NBTInputStream nbtStream = new NBTInputStream(
+                new GZIPInputStream(new FileInputStream(backupFile)));
+
+        NamedTag rootTag = nbtStream.readNamedTag();
+
+        if (rootTag.getName().equalsIgnoreCase("Schematic")) {
+            SchematicPlacement p = DefaultSchematic.readPlacement(backupFile);
+            return new AWEPlacementTask(ConstructionStatus.RESTORING.name(), entry, p, playerEntry, session, pos, new BuildOptions());
+        } else {
+            BackupRestoringPlacment brp = getPlacement(backupFile, region);
+            return new AWEPlacementTask(ConstructionStatus.RESTORING.name(), entry, brp, playerEntry, session, pos, new BuildOptions());
+        }
         
-        AWEPlacementTask task = new AWEPlacementTask(ConstructionStatus.RESTORING.name(), entry, brp, playerEntry, session, pos, new BuildOptions());
-        return task;
     }
     
     public boolean hasBackup(Structure structure, String backup) {

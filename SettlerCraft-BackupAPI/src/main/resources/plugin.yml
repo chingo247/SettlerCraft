@@ -1,4 +1,4 @@
-name: SettlerCraft-ChunkSaver
+name: SettlerCraft-BackupAPI
 main: com.chingo247.backupapi.bukkit.BKBackupManagerPlugin
 version: 2.2.0
 author: Chingo247

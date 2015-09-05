@@ -39,8 +39,8 @@ import com.chingo247.structureapi.construction.IBuildTaskAssigner;
 import com.chingo247.structureapi.construction.IConstructionManager;
 import com.chingo247.structureapi.construction.IDemolitionTaskAssigner;
 import com.chingo247.structureapi.construction.asyncworldedit.AsyncPlacement;
-import com.chingo247.structureapi.construction.backup.IBackupAPI;
-import com.chingo247.structureapi.construction.backup.IChunkManager;
+import com.chingo247.backupapi.core.IBackupAPI;
+import com.chingo247.backupapi.core.IChunkManager;
 import com.chingo247.structureapi.platform.IConfigProvider;
 import com.chingo247.structureapi.structure.plan.placement.Placement;
 import com.chingo247.structureapi.structure.plan.IStructurePlan;
@@ -147,7 +147,15 @@ public class StructureAPI implements IStructureAPI {
 //        this.substructureHandler = new SubstructureHandler(graph, worldDAO, structureDAO, settlerDAO, this);
     }
 
-    public void registerBackupAPI(IBackupAPI backupAPI) {
+    /**
+     * This methods should be used by SettlerCraft excusively
+     * @param backupAPI Registers the BackupAPI
+     * @throws StructureAPIException 
+     */
+    public void registerBackupAPI(IBackupAPI backupAPI) throws StructureAPIException {
+        if(this.backupAPI != null) {
+           throw new StructureAPIException("Can only register one BackupAPI");
+        }
         this.backupAPI = backupAPI;
     }
 
@@ -498,7 +506,6 @@ public class StructureAPI implements IStructureAPI {
         return chunkManager;
     }
 
-    @Override
     public void registerChunkManager(IChunkManager chunkManager) throws StructureAPIException {
         if (this.chunkManager != null) {
             throw new StructureAPIException("Already registered a chunkmanager!");

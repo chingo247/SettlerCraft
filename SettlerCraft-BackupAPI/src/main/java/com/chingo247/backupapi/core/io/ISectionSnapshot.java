@@ -21,16 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.backupapi.core.io.nbt;
+package com.chingo247.backupapi.core.io;
+
+import com.sk89q.worldedit.blocks.BaseBlock;
 
 /**
- *
+ * Chunks are divided into section. Each section has a dimension of 16x16x16. 
+ * This class represents one of those sections.
  * @author Chingo
  */
-public class TagNotFoundException extends Exception {
-
-    public TagNotFoundException(String string) {
-        super(string);
-    }
+public interface ISectionSnapshot {
+    
+    /**
+     * The Y position of this section normally varying between 0 and 15 
+     * @return The y position
+     */
+    int getY();
+    
+    /**
+     * Get the block at the given position. 
+     * @param x The x value, must be between 0 and 15
+     * @param y
+     * @param z
+     * @return 
+     */
+    BaseBlock getBlockAt(int x, int y, int z);
     
 }

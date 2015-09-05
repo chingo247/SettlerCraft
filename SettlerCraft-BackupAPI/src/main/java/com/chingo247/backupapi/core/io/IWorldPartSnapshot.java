@@ -21,16 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.backupapi.core.io.nbt;
+package com.chingo247.backupapi.core.io;
+
+import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.blocks.BaseBlock;
 
 /**
- *
+ * As the name of this class tells, this is a snapshot of a part of the world. Therefore
+ * this snapshot may not contain all chunks and also all chunks may not contain all sections.
+ * However, real world coordinates can be used.
+ * 
  * @author Chingo
  */
-public class TagNotFoundException extends Exception {
-
-    public TagNotFoundException(String string) {
-        super(string);
-    }
+public interface IWorldPartSnapshot { 
     
+    /**
+     * Gets the min position
+     * @return The min position
+     */
+    Vector2D getMinPosition();
+    
+    /**
+     * Gets the max position
+     * @return The max position
+     */
+    Vector2D getMaxPosition();
+    
+    /**
+     * Gets the block at the actual world position that is read from the backup. <br/>
+     * <b>NOTE</b>: This method will not return null if the section doesn't exist. Instead it will return a block of air.
+     * Reason: Minecraft does not save empty sections of chunks to save space, therefore when the section was null an empty block will be returned
+     * @param x The x
+     * @param y The y
+     * @param z The z
+     * @return The block
+     */
+    BaseBlock getWorldBlockAt(int x, int y, int z);
+    
+    
+
 }

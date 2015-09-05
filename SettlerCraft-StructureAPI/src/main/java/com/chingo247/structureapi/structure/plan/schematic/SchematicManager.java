@@ -80,7 +80,7 @@ public class SchematicManager {
             Schematic schematic = getSchematic(checksum);
             if (schematic == null) {
                 FastClipboard clipboard = FastClipboard.read(schematicFile);
-                schematic = new SchematicImpl(schematicFile, clipboard);
+                schematic = new DefaultSchematic(schematicFile, clipboard);
                 schematics.put(checksum, schematic);
                 clipboard = null;
             }
@@ -126,7 +126,7 @@ public class SchematicManager {
                     // Only load schematic data that wasn't yet loaded...
                     ISchematicData existingData = alreadyHere.get(checksum);
                     if(existingData != null) {
-                        Schematic s = new SchematicImpl(schematicFile, existingData.getWidth(), existingData.getHeight(), existingData.getLength());
+                        Schematic s = new DefaultSchematic(schematicFile, existingData.getWidth(), existingData.getHeight(), existingData.getLength());
                         alreadyDone.add(s);
                     } else if (getSchematic(checksum) == null) {
                         SchematicProcessor processor = new SchematicProcessor(schematicFile);
@@ -214,7 +214,7 @@ public class SchematicManager {
                 long start = System.currentTimeMillis();
                 FastClipboard clipboard = FastClipboard.read(schematicFile);
 //                LOG.print(LogLevel.INFO, schematicFile, "Schematic", System.currentTimeMillis() - start);
-                return new SchematicImpl(schematicFile, clipboard);
+                return new DefaultSchematic(schematicFile, clipboard);
             } catch (Exception ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
             }

@@ -21,16 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.backupapi.core.io.nbt;
+package com.chingo247.backupapi.core;
 
 /**
  *
  * @author Chingo
  */
-public class TagNotFoundException extends Exception {
-
-    public TagNotFoundException(String string) {
-        super(string);
-    }
+public interface IChunkManager {
+    
+    IChunkLoader getLoader(String world);
+    
+    IChunkSaver getSaver(String world);
     
 }

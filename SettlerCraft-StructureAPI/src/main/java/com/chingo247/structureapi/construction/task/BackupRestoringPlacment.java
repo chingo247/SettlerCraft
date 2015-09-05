@@ -17,10 +17,9 @@
 package com.chingo247.structureapi.construction.task;
 
 import com.chingo247.structureapi.construction.StructureBlock;
-import com.chingo247.structureapi.construction.backup.IWorldPartSnapshot;
+import com.chingo247.backupapi.core.io.IWorldPartSnapshot;
 import com.chingo247.structureapi.structure.plan.placement.BlockPlacement;
 import com.chingo247.structureapi.structure.plan.placement.PlacementTypes;
-import com.chingo247.structureapi.structure.plan.placement.iterator.CuboidIterator;
 import com.chingo247.structureapi.structure.plan.placement.options.Options;
 import com.chingo247.structureapi.structure.plan.placement.traversal.TopDownCuboidTraversal;
 import com.sk89q.worldedit.EditSession;

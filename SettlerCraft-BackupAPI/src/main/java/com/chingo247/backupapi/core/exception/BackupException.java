@@ -21,15 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.backupapi.core.io.nbt;
+package com.chingo247.backupapi.core.exception;
 
 /**
  *
  * @author Chingo
  */
-public class TagNotFoundException extends Exception {
+public class BackupException extends Exception {
 
-    public TagNotFoundException(String string) {
+    public BackupException(String string) {
         super(string);
     }
     

@@ -16,6 +16,8 @@
  */
 package com.chingo247.structureapi.construction.backup;
 
+import com.chingo247.backupapi.core.IBackupAPI;
+import com.chingo247.backupapi.core.IBackupEntry;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
 import com.chingo247.structureapi.construction.ConstructionEntry;

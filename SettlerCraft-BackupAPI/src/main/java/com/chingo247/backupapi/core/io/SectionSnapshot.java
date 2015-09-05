@@ -1,12 +1,29 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * The MIT License
+ *
+ * Copyright 2015 Chingo.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 package com.chingo247.backupapi.core.io;
 
 import com.chingo247.backupapi.core.io.region.RegionFileFormat;
-import com.chingo247.structureapi.construction.backup.ISectionSnapshot;
 import com.sk89q.jnbt.ByteArrayTag;
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.jnbt.Tag;
@@ -58,24 +75,31 @@ public class SectionSnapshot implements ISectionSnapshot {
         CompoundTag tag = getTileEntityData(x, y, z);
         
         if(id < 0 || data < 0) {
+            System.out.println("id: " + id + " data: " + data);
             return null;
         }
         
         return new BaseBlock(id, data, tag);
     }
-
+    
     private int getBlockId(int x, int y, int z) {
         int index = getArrayIndex(x, y, z);
-        if ((index >> 1) >= addId.length) { // No corresponding AddBlocks index
-            ids[index] = (byte) (ids[index] & 0xFF);
-        } else {
-            if ((index & 1) == 0) {
-                ids[index] = (byte) (((addId[index >> 1] & 0x0F) << 8) + (ids[index] & 0xFF));
-            } else {
-                ids[index] = (byte) (((addId[index >> 1] & 0xF0) << 4) + (ids[index] & 0xFF));
-            }
+        if((index >> 1) >= addId.length) {
+            return getBlockIdA(x, y, z) & 0xFF;
         }
-        return ids[getArrayIndex(x, y, z)];
+        return (getBlockIdA(x, y, z) & 0xFF) + (getBlockIdB(x, y, z) << 8);
+    }
+    
+    private byte getBlockIdA(int x, int y, int z) {
+        int index = getArrayIndex(x, y, z);
+        return ids[index];
+    }
+    
+    private int getBlockIdB(int x, int y, int z) {
+        
+        
+        
+        return getNibble4(addId, getArrayIndex(x, y, z));
     }
 
     private int getData(int x, int y, int z) {

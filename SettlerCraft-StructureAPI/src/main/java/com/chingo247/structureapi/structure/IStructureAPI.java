@@ -22,8 +22,8 @@ import com.chingo247.structureapi.construction.IBuildTaskAssigner;
 import com.chingo247.structureapi.construction.IConstructionManager;
 import com.chingo247.structureapi.construction.IDemolitionTaskAssigner;
 import com.chingo247.structureapi.construction.asyncworldedit.AsyncPlacement;
-import com.chingo247.structureapi.construction.backup.IBackupAPI;
-import com.chingo247.structureapi.construction.backup.IChunkManager;
+import com.chingo247.backupapi.core.IBackupAPI;
+import com.chingo247.backupapi.core.IChunkManager;
 import com.chingo247.structureapi.exception.StructureRestrictionException;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.platform.IConfigProvider;
@@ -293,8 +293,6 @@ public interface IStructureAPI {
      * @return The AsyncEditSessionFactor
      */
     public AsyncEditSessionFactory getSessionFactory();
-    
-    public void registerChunkManager(IChunkManager chunkManager) throws Exception;
     
     public IChunkManager getChunkManager();
     

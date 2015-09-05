@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.structureapi.construction.backup;
+package com.chingo247.backupapi.core;
 
 /**
  *

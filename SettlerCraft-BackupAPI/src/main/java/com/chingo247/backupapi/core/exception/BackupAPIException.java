@@ -21,27 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.structureapi.construction.backup;
-
-import com.sk89q.worldedit.Vector2D;
-import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldedit.world.World;
-import java.util.Set;
+package com.chingo247.backupapi.core.exception;
 
 /**
  *
  * @author Chingo
  */
-public interface IChunkManager {
-    
-    void save(World w, Set<Vector2D> chunkPositions);
-    
-    void save(World w, CuboidRegion region);
-    
-    void save(World w, int x, int z);
-    
-    void load(World w, int x, int z);
-    
-    boolean isLoaded(World w, int x, int z);
+public class BackupAPIException extends Exception {
+
+    public BackupAPIException(String string) {
+        super(string);
+    }
     
 }

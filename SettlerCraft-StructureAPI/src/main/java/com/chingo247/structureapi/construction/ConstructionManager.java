@@ -161,9 +161,9 @@ public class ConstructionManager implements IConstructionManager {
     @Override
     public void build(final AsyncEditSession session, final UUID player, final ConstructionEntry entry, final IBuildTaskAssigner assigner, final BuildOptions options) throws ConstructionException {
         // Perform async
-        if(entry.getStructure().getConstructionStatus() == ConstructionStatus.REMOVED) {
-            throw new ConstructionException("Can't build a removed structure...");
-        }
+//        if(entry.getStructure().getConstructionStatus() == ConstructionStatus.REMOVED) {
+//            throw new ConstructionException("Can't build a removed structure...");
+//        }
 
         executor.execute(new Runnable() {
 
@@ -260,9 +260,9 @@ public class ConstructionManager implements IConstructionManager {
 
     @Override
     public void demolish(final AsyncEditSession session, final UUID player, final ConstructionEntry entry, final IDemolitionTaskAssigner assigner, final DemolitionOptions options) throws ConstructionException {
-        if(entry.getStructure().getConstructionStatus() == ConstructionStatus.REMOVED) {
-            throw new ConstructionException("Can't demolish a removed structure...");
-        }
+//        if(entry.getStructure().getConstructionStatus() == ConstructionStatus.REMOVED) {
+//            throw new ConstructionException("Can't demolish a removed structure...");
+//        }
         
         
         // Perform async

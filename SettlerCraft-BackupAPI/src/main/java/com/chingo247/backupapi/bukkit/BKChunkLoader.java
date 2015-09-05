@@ -21,16 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.backupapi.core.io.nbt;
+package com.chingo247.backupapi.bukkit;
+
+import com.chingo247.backupapi.core.IChunkLoader;
+import net.minecraft.server.v1_8_R1.WorldServer;
+import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_8_R1.CraftWorld;
 
 /**
  *
  * @author Chingo
  */
-public class TagNotFoundException extends Exception {
-
-    public TagNotFoundException(String string) {
-        super(string);
+public class BKChunkLoader implements IChunkLoader {
+    
+    private World w;
+    
+    public BKChunkLoader(World w) {
+        this.w = w;
     }
+
+    @Override
+    public void load(int x, int z) {
+        this.w.loadChunk(x, z, true);
+    }
+
+    @Override
+    public void unload(int x, int z) {
+        this.w.unloadChunk(x, z, true, true);
+    }
+
+    @Override
+    public boolean isLoaded(int x, int z) {
+        return this.w.isChunkLoaded(x, z);
+    }
+    
+    
     
 }

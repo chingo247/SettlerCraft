@@ -16,6 +16,7 @@ package com.chingo247.structureapi.platform.bukkit;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import com.chingo247.backupapi.core.BackupAPI;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.xplatform.core.IPlugin;
 import com.chingo247.settlercraft.core.exception.SettlerCraftException;
@@ -99,6 +100,16 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
             return;
         }
         
+        if(Bukkit.getPluginManager().getPlugin("SettlerCraft-BackupAPI") != null) {
+            System.out.println("[SettlerCraft]: Found 'SettlerCraft-BackupAPI' Setting up backup options...");
+            StructureAPI structureAPI = ((StructureAPI)StructureAPI.getInstance());
+            try {
+                structureAPI.registerBackupAPI(BackupAPI.getInstance());
+                structureAPI.registerChunkManager(BackupAPI.getInstance().getChunkManager());
+            } catch (StructureAPIException ex) {
+                Logger.getLogger(BKStructureAPIPlugin.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } 
        
         
         // Get GraphDatabase
