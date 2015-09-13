@@ -5,7 +5,6 @@
  */
 package com.chingo247.structureapi.model.structure;
 
-import com.chingo247.structureapi.model.interfaces.IStructureRepository;
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.structureapi.model.world.StructureWorldNode;
 import com.google.common.collect.Maps;

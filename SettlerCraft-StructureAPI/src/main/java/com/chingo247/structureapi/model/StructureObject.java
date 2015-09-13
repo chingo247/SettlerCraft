@@ -18,7 +18,6 @@ package com.chingo247.structureapi.model;
 
 import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.settlercraft.core.Direction;
-import com.chingo247.structureapi.model.interfaces.IStructureObject;
 import com.chingo247.structureapi.util.WorldUtil;
 import com.sk89q.worldedit.Vector;
 import org.neo4j.graphdb.Node;

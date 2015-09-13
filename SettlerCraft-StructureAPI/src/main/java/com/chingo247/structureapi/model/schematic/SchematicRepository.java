@@ -16,7 +16,6 @@
  */
 package com.chingo247.structureapi.model.schematic;
 
-import com.chingo247.structureapi.model.interfaces.ISchematicRepository;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.List;

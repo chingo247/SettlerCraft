@@ -16,7 +16,7 @@
  */
 package com.chingo247.structureapi.selection;
 
-import com.chingo247.structureapi.structure.StructureAPI;
+import com.chingo247.structureapi.StructureAPI;
 import com.chingo247.xplatform.core.IColors;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;

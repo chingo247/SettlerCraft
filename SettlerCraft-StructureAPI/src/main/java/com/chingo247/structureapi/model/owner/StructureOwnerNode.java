@@ -9,7 +9,6 @@ import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.settlercraft.core.model.BaseSettlerNode;
 import com.chingo247.structureapi.model.structure.StructureRelations;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
-import com.chingo247.structureapi.model.interfaces.IStructureOwner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.List;

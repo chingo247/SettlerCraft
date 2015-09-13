@@ -7,7 +7,6 @@ package com.chingo247.structureapi.model.hologram;
 
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.chingo247.structureapi.model.structure.StructureNode;
-import com.chingo247.structureapi.model.interfaces.IStructureHologramRepository;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sk89q.worldedit.Vector;

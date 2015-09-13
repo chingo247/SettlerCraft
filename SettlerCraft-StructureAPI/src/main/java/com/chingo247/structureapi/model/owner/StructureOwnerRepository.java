@@ -7,7 +7,6 @@ package com.chingo247.structureapi.model.owner;
 
 import com.chingo247.settlercraft.core.model.BaseSettlerRepository;
 import com.chingo247.settlercraft.core.model.interfaces.IBaseSettler;
-import com.chingo247.structureapi.model.interfaces.IStructureOwnerRepository;
 import java.util.UUID;
 import org.neo4j.graphdb.GraphDatabaseService;
 

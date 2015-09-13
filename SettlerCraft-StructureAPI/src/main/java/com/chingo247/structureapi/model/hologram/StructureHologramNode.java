@@ -17,7 +17,6 @@
 package com.chingo247.structureapi.model.hologram;
 
 import com.chingo247.structureapi.model.StructureObject;
-import com.chingo247.structureapi.model.interfaces.IStructureHologram;
 import com.chingo247.structureapi.model.structure.Structure;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicLabel;
@@ -31,7 +30,7 @@ import org.neo4j.graphdb.RelationshipType;
  *
  * @author Chingo
  */
-public class StructureHologramNode extends StructureObject implements IStructureHologram {
+public class StructureHologramNode extends StructureObject {
     
     public static final Label LABEL = DynamicLabel.label("StructureHologram");
     public static final RelationshipType RELATION_HAS_HOLOGRAM = DynamicRelationshipType.withName("hasHologram");

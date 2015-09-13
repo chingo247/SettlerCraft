@@ -16,7 +16,6 @@
  */
 package com.chingo247.structureapi.model.hologram;
 
-import com.chingo247.structureapi.model.interfaces.IStructureHologram;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.sk89q.worldedit.Vector;
 import org.neo4j.graphdb.Node;
@@ -50,6 +49,11 @@ public final class StructureHologram implements IStructureHologram {
         return underlyingNode;
     }
 
+    @Override
+    public StructureHologramNode getHologramNode() {
+        return new StructureHologramNode(underlyingNode);
+    }
+    
     @Override
     public Structure getStructure() {
         return structure;

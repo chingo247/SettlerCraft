@@ -18,10 +18,10 @@ package com.chingo247.structureapi.construction.task;
 
 import com.chingo247.structureapi.construction.StructureBlock;
 import com.chingo247.backupapi.core.io.IWorldPartSnapshot;
-import com.chingo247.structureapi.structure.plan.placement.BlockPlacement;
-import com.chingo247.structureapi.structure.plan.placement.PlacementTypes;
-import com.chingo247.structureapi.structure.plan.placement.options.Options;
-import com.chingo247.structureapi.structure.plan.placement.traversal.TopDownCuboidTraversal;
+import com.chingo247.structureapi.plan.placement.BlockPlacement;
+import com.chingo247.structureapi.plan.placement.PlacementTypes;
+import com.chingo247.structureapi.plan.placement.options.Options;
+import com.chingo247.structureapi.plan.placement.traversal.TopDownCuboidTraversal;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;

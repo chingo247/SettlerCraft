@@ -17,7 +17,6 @@
 package com.chingo247.structureapi.model.owner;
 
 import com.chingo247.structureapi.model.structure.StructureNode;
-import com.chingo247.structureapi.model.interfaces.IStructureOwnership;
 import org.neo4j.graphdb.Relationship;
 
 /**

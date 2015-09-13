@@ -22,7 +22,7 @@ import static com.chingo247.settlercraft.core.Direction.EAST;
 import static com.chingo247.settlercraft.core.Direction.NORTH;
 import static com.chingo247.settlercraft.core.Direction.SOUTH;
 import static com.chingo247.settlercraft.core.Direction.WEST;
-import com.chingo247.structureapi.structure.plan.schematic.Schematic;
+import com.chingo247.structureapi.plan.schematic.Schematic;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;

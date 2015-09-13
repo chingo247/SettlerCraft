@@ -18,7 +18,7 @@
 
 package com.chingo247.structureapi.selection;
 
-import com.chingo247.structureapi.util.WorldEditUtil;
+import com.chingo247.settlercraft.core.SettlerCraft;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
@@ -49,7 +49,7 @@ public class CUISelectionManager extends ASelectionManager {
         LocalSession session = WorldEdit.getInstance().getSession(player);
         
         Selection selection = new Selection(player.getUniqueId(), start, end);
-        World world = WorldEditUtil.getWorld(player.getWorld().getName());
+        World world = SettlerCraft.getInstance().getWorld(player.getWorld().getName());
         putSelection(selection);
         
         session.getRegionSelector(world).selectPrimary(start, null);
@@ -60,7 +60,7 @@ public class CUISelectionManager extends ASelectionManager {
     @Override
     public void deselect(Player player) {
         LocalSession session = WorldEdit.getInstance().getSession(player);
-        World world = WorldEditUtil.getWorld(player.getWorld().getName());
+        World world = SettlerCraft.getInstance().getWorld(player.getWorld().getName());
         if (session.getRegionSelector(world).isDefined()) {
             session.getRegionSelector(world).clear();
             session.dispatchCUISelection(player);

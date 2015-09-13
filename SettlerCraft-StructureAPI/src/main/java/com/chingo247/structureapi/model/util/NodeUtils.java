@@ -16,7 +16,7 @@
  */
 package com.chingo247.structureapi.model.util;
 
-import com.chingo247.structureapi.model.interfaces.IFactory;
+import com.chingo247.structureapi.model.IFactory;
 import java.util.Iterator;
 import org.neo4j.graphdb.Node;
 

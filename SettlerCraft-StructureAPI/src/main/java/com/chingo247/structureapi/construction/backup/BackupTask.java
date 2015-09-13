@@ -26,7 +26,7 @@ import com.chingo247.structureapi.construction.task.StructureTask;
 import com.chingo247.structureapi.exception.StructureTaskException;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.chingo247.structureapi.model.structure.Structure;
-import com.chingo247.structureapi.structure.StructureAPI;
+import com.chingo247.structureapi.StructureAPI;
 import java.io.File;
 import java.util.UUID;
 import java.util.logging.Level;

@@ -21,7 +21,7 @@ import com.chingo247.structureapi.construction.IDemolitionTaskAssigner;
 import com.chingo247.structureapi.exception.ConstructionException;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.chingo247.structureapi.model.structure.Structure;
-import com.chingo247.structureapi.structure.plan.placement.options.DemolitionOptions;
+import com.chingo247.structureapi.plan.placement.options.DemolitionOptions;
 import com.sk89q.worldedit.EditSession;
 import java.io.IOException;
 import java.util.UUID;

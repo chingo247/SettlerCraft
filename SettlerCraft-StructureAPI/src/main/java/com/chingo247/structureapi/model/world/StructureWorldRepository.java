@@ -7,7 +7,6 @@ package com.chingo247.structureapi.model.world;
 
 import com.chingo247.settlercraft.core.model.WorldRepository;
 import com.chingo247.settlercraft.core.model.interfaces.IWorld;
-import com.chingo247.structureapi.model.interfaces.IStructureWorldRepository;
 import java.util.UUID;
 import org.neo4j.graphdb.GraphDatabaseService;
 

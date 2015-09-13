@@ -20,7 +20,7 @@ import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.model.World;
 import com.chingo247.settlercraft.core.model.interfaces.IWorld;
-import com.chingo247.structureapi.structure.StructureAPI;
+import com.chingo247.structureapi.StructureAPI;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;

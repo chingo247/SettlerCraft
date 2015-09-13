@@ -16,10 +16,9 @@
  */
 package com.chingo247.structureapi.model.structure;
 
-import com.chingo247.structureapi.model.interfaces.IStructure;
-import com.chingo247.structureapi.structure.StructureAPI;
-import com.chingo247.structureapi.structure.plan.IStructurePlan;
-import com.chingo247.structureapi.structure.plan.StructurePlanReader;
+import com.chingo247.structureapi.StructureAPI;
+import com.chingo247.structureapi.plan.IStructurePlan;
+import com.chingo247.structureapi.plan.StructurePlanReader;
 import com.chingo247.structureapi.util.WorldUtil;
 import com.sk89q.worldedit.Vector;
 import java.io.File;

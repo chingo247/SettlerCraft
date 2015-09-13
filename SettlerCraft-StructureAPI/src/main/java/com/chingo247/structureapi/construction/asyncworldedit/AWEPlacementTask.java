@@ -23,8 +23,8 @@ import com.chingo247.structureapi.construction.event.StructureTaskCancelledEvent
 import com.chingo247.structureapi.construction.event.StructureTaskStartEvent;
 import com.chingo247.structureapi.event.async.StructureJobAddedEvent;
 import com.chingo247.structureapi.exception.ConstructionException;
-import com.chingo247.structureapi.structure.plan.placement.Placement;
-import com.chingo247.structureapi.structure.plan.placement.options.Options;
+import com.chingo247.structureapi.plan.placement.Placement;
+import com.chingo247.structureapi.plan.placement.options.Options;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import java.util.UUID;

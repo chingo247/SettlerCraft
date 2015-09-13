@@ -16,7 +16,6 @@
  */
 package com.chingo247.structureapi.model.schematic;
 
-import com.chingo247.structureapi.model.interfaces.ISchematicData;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
