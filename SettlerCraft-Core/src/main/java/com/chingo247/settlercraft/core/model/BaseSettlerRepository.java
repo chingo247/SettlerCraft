@@ -46,7 +46,7 @@ public class BaseSettlerRepository implements IBaseSettlerRepository {
     public BaseSettlerNode findByUUID(UUID settlerId) {
         BaseSettlerNode settlerNode = null;
         try (Transaction tx = graph.beginTx()) {
-            String query = "MATCH(settler:"+BaseSettlerNode.LABEL.name()+" { "+BaseSettlerNode.UUID_PROPERTY+": '" + settlerId.toString()+ "'}) RETURN settler";
+            String query = "MATCH(settler:"+BaseSettlerNode.LABEL+" { "+BaseSettlerNode.UUID_PROPERTY+": '" + settlerId.toString()+ "'}) RETURN settler";
             Result r = graph.execute(query);
             if(r.hasNext()) {
                 Map<String,Object> map = r.next();
@@ -65,7 +65,7 @@ public class BaseSettlerRepository implements IBaseSettlerRepository {
         try (Transaction tx = graph.beginTx()) {
             Map<String,Object> params = Maps.newHashMap();
             params.put("settlerId", settlerId);
-            String query = "MATCH(settler:"+BaseSettlerNode.LABEL.name()+" { "+BaseSettlerNode.ID_PROPERTY+": {settlerId} }) RETURN settler";
+            String query = "MATCH(settler:"+BaseSettlerNode.LABEL+" { "+BaseSettlerNode.ID_PROPERTY+": {settlerId} }) RETURN settler";
             Result r = graph.execute(query, params);
             if(r.hasNext()) {
                 Map<String,Object> map = r.next();
@@ -83,7 +83,7 @@ public class BaseSettlerRepository implements IBaseSettlerRepository {
         BaseSettlerNode settler = null;
         try(Transaction tx = graph.beginTx()) {
             Long id = nextId();
-            Node settlerNode = graph.createNode(BaseSettlerNode.LABEL);
+            Node settlerNode = graph.createNode(BaseSettlerNode.label());
             settlerNode.setProperty(BaseSettlerNode.UUID_PROPERTY, baseSettler.getUUID().toString());
             settlerNode.setProperty(BaseSettlerNode.NAME_PROPERTY, baseSettler.getName());
             settlerNode.setProperty(BaseSettlerNode.ID_PROPERTY, id);

@@ -23,7 +23,6 @@
  */
 package com.chingo247.backupapi.core.event;
 
-import com.chingo247.backupapi.core.BackupState;
 import com.chingo247.backupapi.core.IBackupEntry;
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
 
@@ -34,15 +33,9 @@ import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
  */
 public class BackupEntryStateChangeEvent extends BackupEntryEvent {
     
-    private BackupState oldState;
 
-    public BackupEntryStateChangeEvent(IBackupEntry backupEntry, BackupState oldState) {
+    public BackupEntryStateChangeEvent(IBackupEntry backupEntry) {
         super(backupEntry);
-        this.oldState = oldState;
     }
 
-    public BackupState getOldState() {
-        return oldState;
-    }
-    
 }

@@ -79,9 +79,9 @@ public class StructureWorldNode extends WorldNode implements IStructureWorld {
         params.put("worldId", getUUID().toString());
         params.put("date", date);
 
-        String query = "MATCH (world:" + WorldNode.LABEL.name() + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
+        String query = "MATCH (world:" + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
                 + " WITH world "
-                + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
+                + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL + ")"
                 + " WHERE s." + StructureNode.DELETED_AT_PROPERTY + " > {date}"
                 + " RETURN s";
 
@@ -107,9 +107,9 @@ public class StructureWorldNode extends WorldNode implements IStructureWorld {
         params.put("worldId", getUUID().toString());
         params.put("date", date);
 
-        String query = "MATCH (world:" + WorldNode.LABEL.name() + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
+        String query = "MATCH (world:" + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
                 + " WITH world "
-                + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
+                + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL + ")"
                 + " WHERE s." + StructureNode.CREATED_AT_PROPERTY + " > {date}"
                 + " RETURN s";
 
@@ -139,9 +139,9 @@ public class StructureWorldNode extends WorldNode implements IStructureWorld {
         }
        
         String query = 
-                   "MATCH (world:"+WorldNode.LABEL.name()+" { "+WorldNode.ID_PROPERTY+": {worldId} })"
+                   "MATCH (world:"+WorldNode.LABEL+" { "+WorldNode.ID_PROPERTY+": {worldId} })"
                 + " WITH world "
-                + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
+                + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL + ")"
                 + " WHERE s." + StructureNode.DELETED_AT_PROPERTY + " IS NULL"
                 + " AND NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId()
                 + " AND s." + StructureNode.MAX_X_PROPERTY + " >= " + region.getMinimumPoint().getBlockX() + " AND s." + StructureNode.MIN_X_PROPERTY + " <= " + region.getMaximumPoint().getBlockX()

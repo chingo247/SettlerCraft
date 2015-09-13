@@ -7,6 +7,7 @@ import com.chingo247.xplatform.core.IPlayer;
 import com.chingo247.xplatform.core.IServer;
 import com.chingo247.xplatform.core.IWorld;
 import com.google.common.base.Preconditions;
+import java.util.Objects;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -111,6 +112,30 @@ public class BukkitPlayer implements IPlayer {
     public ILocation getLocation() {
         Location l = player.getLocation();
         return new BukkitLocation(new BukkitWorld(player.getWorld()), l.getBlockX(), l.getBlockY(), l.getBlockZ());
+    }
+
+    
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 61 * hash + Objects.hashCode(this.player.getUniqueId());
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final BukkitPlayer other = (BukkitPlayer) obj;
+        if (!Objects.equals(this.player.getUniqueId(), other.player.getUniqueId())) {
+            return false;
+        }
+        return true;
     }
 
     

@@ -28,10 +28,14 @@ import org.neo4j.graphdb.Node;
  */
 public class BaseSettlerNode implements IBaseSettler {
     
-    public static final Label LABEL = DynamicLabel.label("Settler");
+    public static final String LABEL = "Settler";
     public static final String UUID_PROPERTY = "uuid";
     public static final String NAME_PROPERTY = "name";
     public static final String ID_PROPERTY = "settlerId";
+    
+    public static Label label() {
+        return DynamicLabel.label(LABEL);
+    }
     
     protected final Node underlyingNode;
 

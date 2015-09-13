@@ -28,6 +28,7 @@ import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.structure.StructureAPI;
 import java.io.File;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,8 +42,8 @@ public class BackupTask extends StructureTask {
     private IBackupEntry backupEntry;
     
 
-    public BackupTask(ConstructionEntry constructionEntry, String backupName) throws StructureTaskException {
-        super(ConstructionStatus.CREATING_BACKUP.name(), constructionEntry);
+    public BackupTask(ConstructionEntry constructionEntry, String backupName, UUID submitter) throws StructureTaskException {
+        super(ConstructionStatus.CREATING_BACKUP.name(), constructionEntry, submitter);
         
         ConstructionEntry entry = getConstructionEntry();
         Structure structure = entry.getStructure();

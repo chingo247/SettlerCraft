@@ -83,7 +83,7 @@ public interface IStructureTaskFactory {
      * @return The structure task
      * @throws Exception 
      */
-    public StructureTask backup(Structure structure, String backup) throws ConstructionException;
+    public StructureTask backup(UUID player, Structure structure, String backup) throws ConstructionException;
     
     /**
      * Restores the area to before the structure was placed, this will remove the structure

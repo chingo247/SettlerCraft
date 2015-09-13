@@ -164,8 +164,8 @@ public class DefaultStructureTaskFactory implements IStructureTaskFactory {
     }
 
     @Override
-    public StructureTask backup(Structure structure, String backup) throws StructureTaskException {
-        return new BackupTask(ConstructionManager.getInstance().getEntry(structure), backup);
+    public StructureTask backup(UUID player, Structure structure, String backup) throws StructureTaskException {
+        return new BackupTask(ConstructionManager.getInstance().getEntry(structure), backup, player);
     }
 
     @Override

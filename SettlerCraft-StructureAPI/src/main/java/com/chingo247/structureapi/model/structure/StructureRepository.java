@@ -38,7 +38,7 @@ public class StructureRepository implements IStructureRepository {
         params.put("structureId", id);
        
         String query =
-                  " MATCH (s:" + StructureNode.LABEL.name() + " { "+StructureNode.ID_PROPERTY+": {structureId} })"
+                  " MATCH (s:" + StructureNode.LABEL + " { "+StructureNode.ID_PROPERTY+": {structureId} })"
                 + " RETURN s as structure";
         
         Result result = graph.execute(query, params);
@@ -81,7 +81,7 @@ public class StructureRepository implements IStructureRepository {
     @Override
     public StructureNode addStructure(StructureWorldNode world, String name, Vector position, CuboidRegion region, Direction direction, double price) {
         long id = nextId();
-        Node stNode = graph.createNode(StructureNode.LABEL);
+        Node stNode = graph.createNode(StructureNode.label());
         stNode.setProperty(StructureNode.ID_PROPERTY, id);
         stNode.setProperty(StructureNode.NAME_PROPERTY, name);
         stNode.setProperty(StructureNode.CONSTRUCTION_STATUS_PROPERTY, ConstructionStatus.ON_HOLD.getStatusId());
@@ -98,6 +98,12 @@ public class StructureRepository implements IStructureRepository {
         stNode.setProperty(StructureNode.CREATED_AT_PROPERTY, System.currentTimeMillis());
         stNode.setProperty(StructureNode.SIZE_PROPERTY, region.getArea());
         stNode.setProperty(StructureNode.PRICE_PROPERTY, price);
+        
+        Vector center = region.getCenter();
+        stNode.setProperty(StructureNode.CENTER_X_PROPERTY, center.getX());
+        stNode.setProperty(StructureNode.CENTER_Z_PROPERTY, center.getZ());
+        stNode.setProperty(StructureNode.CENTER_Y_PROPERTY, center.getY());
+        
         StructureNode structure = new StructureNode(stNode);
         world.addStructure(structure);
         return structure;

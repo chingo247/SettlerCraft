@@ -9,7 +9,7 @@ import com.chingo247.backupapi.core.BackupAPI;
 import com.chingo247.backupapi.core.IBackupMaker;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.backupapi.core.IChunkManager;
-import com.chingo247.backupapi.core.backup.BackupMaker;
+import com.chingo247.backupapi.core.BackupMaker;
 import com.chingo247.backupapi.core.exception.BackupAPIException;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.platforms.bukkit.BukkitPlugin;
@@ -55,12 +55,21 @@ public class BKBackupManagerPlugin extends JavaPlugin {
         }
     }
     
-    private void setupConfig(IBackupMaker bmgr) {
+    private void setupConfig(IBackupMaker bmgr) throws BackupAPIException {
         File configFile = new File(getDataFolder(), "config.yml");
         final FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
         int interval = config.getInt("backup.interval");
         int chunks = config.getInt("backup.chunks");
         long time = config.getLong("backup.time");
+        if(interval <= 0) {
+            throw new BackupAPIException("[BackupAPI]: Invalid value for backup interval, value has to be greater than 0");
+        }
+        if(chunks <= 0 && chunks != -1) {
+            throw new BackupAPIException("[BackupAPI]: Invalid value for chunks in config value has to be greater than 0 or equal to -1");
+        }
+        if(time <= 0 && time != -1) {
+            throw new BackupAPIException("[BackupAPI]: Invalid value for time , value has to be greater than 0 or equal to -1");
+        }
         bmgr.setInterval(interval);
         bmgr.setTime(time);
         bmgr.setChunks(chunks);

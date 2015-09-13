@@ -10,6 +10,7 @@ import com.chingo247.settlercraft.core.model.interfaces.IBaseSettler;
 import com.chingo247.structureapi.model.owner.StructureOwnerNode;
 import com.chingo247.structureapi.model.owner.StructureOwnerType;
 import com.chingo247.structureapi.model.owner.StructureOwnershipRelation;
+import com.chingo247.structureapi.model.util.NodeUtils;
 import com.chingo247.structureapi.model.world.StructureWorldNode;
 import com.chingo247.structureapi.util.RegionUtil;
 import com.google.common.base.Preconditions;
@@ -41,18 +42,23 @@ import org.neo4j.graphdb.traversal.TraversalDescription;
  */
 public class StructureNode extends AStructure {
 
-    public static final Label LABEL = DynamicLabel.label("Structure");
+    public static final String LABEL = "Structure";
     public static final String ID_PROPERTY = "structureId";
     public static final String NAME_PROPERTY = "name";
     public static final String DIRECTION_PROPERTY = "direction";
     public static final String CONSTRUCTION_STATUS_PROPERTY = "constructionStatus";
     public static final String MIN_X_PROPERTY = "minX", MIN_Y_PROPERTY = "minY", MIN_Z_PROPERTY = "minZ", MAX_X_PROPERTY = "maxX", MAX_Y_PROPERTY = "maxY", MAX_Z_PROPERTY = "maxZ";
     public static final String POS_X_PROPERTY = "x", POS_Y_PROPERTY = "y", POS_Z_PROPERTY = "z";
+    public static final String CENTER_X_PROPERTY = "centerX", CENTER_Y_PROPERTY = "centerY", CENTER_Z_PROPERTY = "centerZ";
     public static final String CREATED_AT_PROPERTY = "createdAt", DELETED_AT_PROPERTY = "deletedAt", COMPLETED_AT_PROPERTY = "completedAt";
     public static final String PRICE_PROPERTY = "price";
     public static final String SIZE_PROPERTY = "size";
     public static final String AUTO_REMOVED_PROPERTY = "autoremoved";
     public static final String CHECKED_HOLOGRAM_PROPERTY = "checkedHologram";
+    
+    public static Label label() {
+        return DynamicLabel.label(LABEL);
+    }
 
     // RelationShips
     private final Node underlyingNode;
@@ -68,6 +74,54 @@ public class StructureNode extends AStructure {
     public StructureNode(Node underlyingNode) {
         super(underlyingNode);
         this.underlyingNode = underlyingNode;
+    }
+    
+    /**
+     * Sets the center x
+     * @param x The center x to set
+     */
+    public void setCenterX(int x) {
+        underlyingNode.setProperty(CENTER_X_PROPERTY, x);
+    }
+    
+    /**
+     * Serts the center y
+     * @param y The center y to set
+     */
+    public void setCenterY(int y) {
+        underlyingNode.setProperty(CENTER_Y_PROPERTY, y);
+    }
+    
+    /**
+     * Sets the center z
+     * @param z The center z to set
+     */
+    public void setCenterZ(int z) {
+        underlyingNode.setProperty(CENTER_Z_PROPERTY, z);
+    }
+    
+    /**
+     * Gets the center x
+     * @return The center x
+     */
+    public int getCenterX() {
+        return NodeUtils.getInt(underlyingNode, CENTER_X_PROPERTY, 0);
+    }
+    
+    /**
+     * Gets the center y
+     * @return The center y
+     */
+    public int getCenterY() {
+        return NodeUtils.getInt(underlyingNode, CENTER_Y_PROPERTY, 0);
+    }
+    
+    /**
+     * Gets the center z
+     * @return The center z
+     */
+    public int getCenterZ() {
+        return NodeUtils.getInt(underlyingNode, CENTER_Z_PROPERTY, 0);
     }
 
     @Override

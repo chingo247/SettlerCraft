@@ -182,11 +182,11 @@ public class StructureAPI implements IStructureAPI {
     private void setupSchema() {
         // Create indexes, each index creation needs to be executed in a seperate transaction!
         try (Transaction tx = graph.beginTx()) {
-            Neo4jHelper.createIndexIfNotExist(graph, StructureNode.LABEL, StructureNode.DELETED_AT_PROPERTY);
+            Neo4jHelper.createIndexIfNotExist(graph, StructureNode.label(), StructureNode.DELETED_AT_PROPERTY);
             tx.success();
         }
         try (Transaction tx = graph.beginTx()) {
-            Neo4jHelper.createUniqueIndexIfNotExist(graph, StructureNode.LABEL, StructureNode.ID_PROPERTY);
+            Neo4jHelper.createUniqueIndexIfNotExist(graph, StructureNode.label(), StructureNode.ID_PROPERTY);
             tx.success();
         }
     }
@@ -237,7 +237,7 @@ public class StructureAPI implements IStructureAPI {
             params.put("removed", (Integer) ConstructionStatus.REMOVED.getStatusId());
             params.put("stopped", (Integer) ConstructionStatus.COMPLETED.getStatusId());
 
-            String query = "MATCH (s:" + StructureNode.LABEL.name() + ") "
+            String query = "MATCH (s:" + StructureNode.LABEL + ") "
                     + "WHERE NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " =  {completed} "
                     + "AND NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " =  {removed}"
                     + "SET s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " =  {stopped}";

@@ -21,16 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.backupapi.core.backup;
+package com.chingo247.backupapi.core;
 
-import com.chingo247.backupapi.core.BackupState;
-import com.chingo247.backupapi.core.IBackupEntry;
-import com.chingo247.backupapi.core.BackupMaker;
-import com.chingo247.backupapi.core.IBackupMaker;
-import com.chingo247.backupapi.core.IChunkManager;
 import com.chingo247.backupapi.core.event.BackupEntryStateChangeEvent;
 import com.chingo247.backupapi.core.io.region.RegionManager;
-import com.chingo247.backupapi.core.world.IChunk;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
 import com.sk89q.worldedit.Vector2D;
@@ -39,49 +33,61 @@ import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.server.v1_8_R1.Chunk;
-import net.minecraft.server.v1_8_R1.WorldServer;
-import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_8_R1.CraftWorld;
 
 /**
  *
  * @author Chingo
  */
-public class BackupEntry implements IBackupEntry{
-    
+public class BackupEntry implements IBackupEntry {
+
     private final World world;
     private final UUID uuid;
     private final CuboidRegion region;
-    private final IBackupMaker backupMaker;
-    private final IChunkManager chunkManager;
-    
+    private final IChunkLoader loader;
+    private final IChunkManager manager;
+
     private boolean isDone;
     private BackupState state;
     private File destinationFile;
     private boolean isCancelled;
     private final Object mutex;
-    
-    private Iterator<Vector2D> chunkIt;
-    
-    
 
-    BackupEntry(IChunkManager chunkManager, IBackupMaker backupMaker, World world, CuboidRegion region, File destinationFile, UUID uuid) {
+    private Iterator<Vector2D> chunkIt;
+    private boolean firstTime = false;
+    private int count;
+    private int total;
+    
+    private boolean failedProcess = false;
+    private Vector2D currentChunk;
+
+    BackupEntry(IChunkManager chunkManager,  World world, CuboidRegion region, File destinationFile, UUID uuid) {
         this.world = world;
         this.uuid = uuid;
         this.region = region;
-        this.backupMaker = backupMaker;
         this.isDone = false;
         this.state = BackupState.WAITING;
         this.destinationFile = destinationFile;
         this.isCancelled = false;
         this.mutex = new Object();
-        this.chunkIt = region.getChunks().iterator();
-        this.chunkManager = chunkManager;
+        
+        Set<Vector2D> chunks = region.getChunks();
+        this.total = chunks.size();
+        System.out.println("[BackupEntry]: Total number of chunks " + total);
+        this.chunkIt = chunks.iterator();
+        this.manager = chunkManager;
+        this.loader = chunkManager.getLoader(world.getName());
     }
+
+    @Override
+    public int getProgress() {
+        return (int)((count * 100.0f) / total);
+    }
+    
+    
 
     void setCancelled(boolean isCancelled) {
         this.isCancelled = isCancelled;
@@ -91,6 +97,7 @@ public class BackupEntry implements IBackupEntry{
         this.state = state;
     }
 
+    @Override
     public File getDestinationFile() {
         return destinationFile;
     }
@@ -101,52 +108,53 @@ public class BackupEntry implements IBackupEntry{
     }
 
     @Override
-    public void process(IBackupMaker backupManager) {
-        try {
-            long start = System.currentTimeMillis();
-            
-            WorldServer server = ((CraftWorld)Bukkit.getWorld(world.getName())).getHandle();
-            org.bukkit.World w = Bukkit.getWorld(world.getName());
-            
-            int i = 0;
-            while(chunkIt.hasNext()) {
-                Vector2D v = chunkIt.next();
-                
-                int x = v.getBlockX();
-                int z = v.getBlockZ();
-                
-                w.loadChunk(x, z, true);
-                Chunk c = server.chunkProviderServer.getOrCreateChunk(v.getBlockX(), v.getBlockZ());
-                server.chunkProviderServer.saveChunk(c);
-                w.unloadChunk(x,z);
-                i++;
-                if(i % 10 == 0) {
-                    server.chunkProviderServer.unloadChunks();
-                    server.flushSave();
-                }
-            }
-            server.flushSave();
-            
-            System.out.println("Saved in " + (System.currentTimeMillis() - start));
-            write();
-            System.out.println("Total time is " + (System.currentTimeMillis() - start));
-            finish();
-        } catch (IOException ex) {
-            Logger.getLogger(BackupEntry.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(BackupEntry.class.getName()).log(Level.SEVERE, null, ex);
+    public void process() {
+        if(firstTime) {
+            firstTime = false;
+            setState(BackupState.SAVING_CHUNKS);
+            AsyncEventManager.getInstance().post(new BackupEntryStateChangeEvent(this));
         }
-
+        
+        if (chunkIt.hasNext()) {
+            if(!failedProcess) {
+                currentChunk = chunkIt.next();
+            }
+            int x = currentChunk.getBlockX();
+            int z = currentChunk.getBlockZ();
+            try {
+                loader.load(x, z);
+                loader.unload(x, z);
+                failedProcess = false;
+                count++;
+                if(count % 50 == 0) {
+                    manager.writeToDisk(world.getName());
+                }
+            } catch(Exception ex) {
+                count--;
+                failedProcess = true;
+                Logger.getLogger(BackupEntry.class.getName()).log(Level.WARNING, "[SettlerCraft-BackupAPI]: Error during process", ex);
+            }
+            
+        } else {
+            System.out.println("[BackupEntry]: Writing to disk...");
+            try {
+                manager.writeToDisk(world.getName());
+                write();
+                finish();
+            } catch (Exception ex) {
+                Logger.getLogger(BackupEntry.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
     private void finish() {
-        BackupState oldState = getState();
         setState(BackupState.COMPLETE);
-        AsyncEventManager.getInstance().post(new BackupEntryStateChangeEvent(this, oldState));
+        AsyncEventManager.getInstance().post(new BackupEntryStateChangeEvent(this));
         isDone = true;
     }
 
     private void write() throws IOException, Exception {
+        setState(BackupState.COPYING_DATA);
         RegionManager regionManager = new RegionManager(SettlerCraft.getInstance().getPlatform());
         regionManager.copy(world.getName(), region, destinationFile);
     }
@@ -185,7 +193,5 @@ public class BackupEntry implements IBackupEntry{
             destinationFile.delete();
         }
     }
-    
-    
-    
+
 }

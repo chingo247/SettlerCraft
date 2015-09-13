@@ -37,16 +37,22 @@ public abstract class StructureTask {
     private boolean failed = false;
     private boolean finished = false;
     private String action;
+    private final UUID submitter;
 
-    public StructureTask(String action, ConstructionEntry constructionEntry) {
+    public StructureTask(String action, ConstructionEntry constructionEntry, UUID submitter) {
         Preconditions.checkNotNull(constructionEntry, "ConstructionEntry may not be null");
         Preconditions.checkNotNull(action, "Action may not null");
         Preconditions.checkArgument(!"".equals(action), "Action may not be empty");
         this.constructionEntry = constructionEntry;
         this.uuid = UUID.randomUUID();
         this.action = action;
+        this.submitter = submitter;
     }
 
+    public UUID getSubmitter() {
+        return submitter;
+    }
+    
     public void setAction(String action) {
         this.action = action;
     }

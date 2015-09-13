@@ -24,6 +24,7 @@
 package com.chingo247.backupapi.core;
 
 import com.chingo247.backupapi.core.event.BackupEntryStateChangeEvent;
+import java.io.File;
 import java.util.UUID;
 
 /**
@@ -39,12 +40,16 @@ public interface IBackupEntry {
     
     BackupState getState();
     
+    File getDestinationFile();
+    
     boolean isCancelled();
     
     boolean isDone();
     
-    void process(IBackupMaker backupManager);
+    void process();
     
     void cancel();
+    
+    int getProgress();
     
 }

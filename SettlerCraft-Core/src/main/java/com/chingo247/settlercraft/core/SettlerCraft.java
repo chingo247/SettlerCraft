@@ -76,19 +76,19 @@ public class SettlerCraft {
         this.settlerDAO = new BaseSettlerRepository(graph);
         
         try (Transaction tx = graph.beginTx()) {
-            if (!Neo4jHelper.hasUniqueConstraint(graph, WorldNode.LABEL, WorldNode.ID_PROPERTY)) {
-                this.graph.schema().constraintFor(WorldNode.LABEL)
+            if (!Neo4jHelper.hasUniqueConstraint(graph, WorldNode.label(), WorldNode.ID_PROPERTY)) {
+                this.graph.schema().constraintFor(WorldNode.label())
                         .assertPropertyIsUnique(WorldNode.ID_PROPERTY)
                         .create();
                 tx.success();
             }
         }
         try (Transaction tx = graph.beginTx()) {
-            Neo4jHelper.createUniqueIndexIfNotExist(graph, BaseSettlerNode.LABEL, BaseSettlerNode.UUID_PROPERTY);
+            Neo4jHelper.createUniqueIndexIfNotExist(graph, BaseSettlerNode.label(), BaseSettlerNode.UUID_PROPERTY);
             tx.success();
         }
         try (Transaction tx = graph.beginTx()) {
-            Neo4jHelper.createUniqueIndexIfNotExist(graph, BaseSettlerNode.LABEL, BaseSettlerNode.ID_PROPERTY);
+            Neo4jHelper.createUniqueIndexIfNotExist(graph, BaseSettlerNode.label(), BaseSettlerNode.ID_PROPERTY);
             tx.success();
         }
         try (Transaction tx = graph.beginTx()) {

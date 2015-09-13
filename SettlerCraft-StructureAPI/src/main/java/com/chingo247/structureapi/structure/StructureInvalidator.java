@@ -137,9 +137,9 @@ public class StructureInvalidator {
             params.put("worldId", world.getUUID().toString());
             params.put("date", date);
 
-            String query = "MATCH (world:" + WorldNode.LABEL.name() + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
+            String query = "MATCH (world:" + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
                     + " WITH world "
-                    + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
+                    + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL + ")"
                     + " WHERE s." + StructureNode.DELETED_AT_PROPERTY + " > {date}"
                     + " RETURN s";
 
@@ -192,9 +192,9 @@ public class StructureInvalidator {
             params.put("worldId", world.getUUID().toString());
             params.put("date", date);
 
-            String query = "MATCH (world:" + WorldNode.LABEL.name() + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
+            String query = "MATCH (world:" + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
                     + " WITH world "
-                    + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL.name() + ")"
+                    + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL + ")"
                     + " WHERE s." + StructureNode.CREATED_AT_PROPERTY + " > {date}"
                     + " RETURN s";
 

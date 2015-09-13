@@ -21,33 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.backupapi.bukkit;
+package com.chingo247.backupapi.core.event;
 
-import com.chingo247.backupapi.core.IChunkSaver;
-import net.minecraft.server.v1_8_R1.Chunk;
-import net.minecraft.server.v1_8_R1.WorldServer;
-import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_8_R1.CraftWorld;
+import com.chingo247.backupapi.core.IBackupEntry;
 
 /**
  *
  * @author Chingo
  */
-public class BKChunkSaver implements IChunkSaver {
-    
-    private WorldServer w;
+public class BackupEntryProgressUpdateEvent extends BackupEntryEvent {
 
-    public BKChunkSaver(World w) {
-        this.w = ((CraftWorld) w).getHandle();
+    public BackupEntryProgressUpdateEvent(IBackupEntry entry) {
+        super(entry);
     }
-
-    @Override
-    public void save(int x, int z) {
-        Chunk c = w.chunkProviderServer.getChunkAt(x, z);
-        w.chunkProviderServer.saveChunk(c);
-        w.chunkProviderServer.saveChunkNOP(c);
-    }
-    
-    
     
 }

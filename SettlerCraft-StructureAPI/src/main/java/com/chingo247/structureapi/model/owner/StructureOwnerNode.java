@@ -48,9 +48,9 @@ public class StructureOwnerNode extends BaseSettlerNode implements IStructureOwn
         }
 
         String query
-                = " MATCH (settler:" + BaseSettlerNode.LABEL.name() + " {" + BaseSettlerNode.UUID_PROPERTY + ": {ownerId} })"
+                = " MATCH (settler:" + BaseSettlerNode.LABEL + " {" + BaseSettlerNode.UUID_PROPERTY + ": {ownerId} })"
                 + " WITH settler"
-                + " MATCH (settler)<-[:" + StructureRelations.RELATION_OWNED_BY + "]-(s: " + StructureNode.LABEL.name() + ")"
+                + " MATCH (settler)<-[:" + StructureRelations.RELATION_OWNED_BY + "]-(s: " + StructureNode.LABEL + ")"
                 + " WHERE NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId()
                 + " RETURN s"
                 + " ORDER BY s." + StructureNode.CREATED_AT_PROPERTY + " DESC ";

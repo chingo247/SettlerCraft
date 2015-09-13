@@ -67,7 +67,7 @@ public class AWEPlacementTask<T extends Options> extends StructureTask {
      * @param options The options to use when placing
      */
     public AWEPlacementTask(String action, ConstructionEntry connstructionEntry, Placement placement, PlayerEntry playerEntry, EditSession editSession, Vector position, T options) {
-        super(action, connstructionEntry);
+        super(action, connstructionEntry, playerEntry.getUUID());
         this.uuid = UUID.randomUUID();
         this.playerEntry = playerEntry;
         this.position = position;

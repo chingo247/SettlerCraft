@@ -29,8 +29,17 @@ package com.chingo247.backupapi.core;
  */
 public interface IChunkManager {
     
+    /**
+     * Gets the chunkloader
+     * @param world The name of the world
+     * @return The loader
+     */
     IChunkLoader getLoader(String world);
     
-    IChunkSaver getSaver(String world);
+    /**
+     * Writes the changes to the disk
+     * @param world The name of the world
+     */
+    void writeToDisk(String world);
     
 }

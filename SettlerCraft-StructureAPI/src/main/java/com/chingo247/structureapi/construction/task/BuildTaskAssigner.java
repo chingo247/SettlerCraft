@@ -53,7 +53,7 @@ public class BuildTaskAssigner implements IBuildTaskAssigner {
             File structureDir = structure.getStructureDirectory();
             File backupFile = new File(structureDir, "restore.snapshot");
             if(!backupFile.exists()) {
-                entry.addTask(taskFactory.backup(structure, "restore"));
+                entry.addTask(taskFactory.backup(player, structure, "restore"));
             }
         }
         

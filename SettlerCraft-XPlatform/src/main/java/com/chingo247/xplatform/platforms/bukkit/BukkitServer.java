@@ -23,7 +23,7 @@ import com.chingo247.xplatform.core.IServer;
 import com.chingo247.xplatform.core.IWorld;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import org.bukkit.Bukkit;
@@ -52,18 +52,13 @@ public class BukkitServer implements IServer {
     
     @Override
     public List<IPlayer> getPlayers() {
-<<<<<<< HEAD
-        final List<IPlayer> players = new ArrayList<>(server.getOnlinePlayers().length);
-        final List<Player> bukkitPlayers = Arrays.asList(server.getOnlinePlayers());
+        final List<IPlayer> players = new ArrayList<>(server.getOnlinePlayers().size());
+        final Collection<? extends Player> bukkitPlayers = server.getOnlinePlayers();
         
         for(Player p : bukkitPlayers) {
-=======
-        final List<IPlayer> players = new ArrayList<>();
-        
-        for(Player p : server.getOnlinePlayers()) {
->>>>>>> 56cd5b53133e5f05a95a58a74b02beb435b31da9
             players.add(new BukkitPlayer(p));
         }
+       
         return players;
     }
 

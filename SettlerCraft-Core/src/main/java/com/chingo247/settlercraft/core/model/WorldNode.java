@@ -28,9 +28,14 @@ import org.neo4j.graphdb.Node;
  */
 public class WorldNode implements IWorld {
     
-    public static final Label LABEL = DynamicLabel.label("World");
+    
+    public static final String LABEL = "World";
     public static final String NAME_PROPERTY = "name";
     public static final String ID_PROPERTY = "uuid";
+    
+    public static Label label() {
+        return DynamicLabel.label(LABEL);
+    }
     
     protected final Node underlyingNode;
     

@@ -290,7 +290,7 @@ public class StructureHologramManager {
             Map<String, Object> params = Maps.newHashMap();
             params.put("checkedHolograms", true);
 
-            String query = "MATCH (s:" + StructureNode.LABEL.name() + ") "
+            String query = "MATCH (s:" + StructureNode.LABEL + ") "
                     + "WHERE NOT s." + StructureNode.CHECKED_HOLOGRAM_PROPERTY + " = {checkedHolograms} "
                     + "RETURN s";
 

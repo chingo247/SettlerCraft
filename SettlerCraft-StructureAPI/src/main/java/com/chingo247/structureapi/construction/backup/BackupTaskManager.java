@@ -17,11 +17,17 @@
 package com.chingo247.structureapi.construction.backup;
 
 import com.chingo247.backupapi.core.IBackupEntry;
+import com.chingo247.backupapi.core.event.BackupEntryProgressUpdateEvent;
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
 import com.chingo247.backupapi.core.event.BackupEntryStateChangeEvent;
+import com.chingo247.settlercraft.core.SettlerCraft;
+import com.chingo247.structureapi.model.structure.Structure;
+import com.chingo247.xplatform.core.IColors;
+import com.chingo247.xplatform.core.IPlayer;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
+import com.sk89q.worldedit.entity.Player;
 import java.util.Map;
 import java.util.UUID;
 
@@ -66,6 +72,34 @@ class BackupTaskManager {
                 }
                 break;
         }
+    }
+    
+    @Subscribe
+    @AllowConcurrentEvents
+    public void onBackupEntryProgressUpdate(BackupEntryProgressUpdateEvent event) {
+        
+        
+        if(event.getBackupEntry().getProgress() < 100) {
+            BackupTask t = null;
+            synchronized(this) {
+                t = tasks.get(event.getBackupEntry().getUUID());
+            }
+            if(t != null) {
+                UUID submitter = t.getSubmitter();
+                Structure structure = t.getConstructionEntry().getStructure();
+                if(submitter != null && structure != null) {
+                    IColors colors = SettlerCraft.getInstance().getPlatform().getChatColors();
+                    IPlayer p = SettlerCraft.getInstance().getPlatform().getPlayer(submitter);
+                    if(p != null) {
+                        p.sendMessage(colors.yellow() + "BACKUP PROGRESS" + colors.reset() + ": #"
+                                + colors.gold() + t.getConstructionEntry().getStructure().getId() 
+                                + colors.reset() + " at " + event.getBackupEntry().getProgress() + "%");
+                    }
+                }
+            } 
+        }
+        
+        
     }
     
     void registerTask(BackupTask task) {

@@ -122,6 +122,14 @@ public interface IPlayer extends ICommandSender {
     public  void  openInventory(AInventory inventory);
     
     public ILocation getLocation();
+
+    @Override
+    public boolean equals(Object obj);
+
+    @Override
+    public int hashCode();
+    
+    
     
     
 }

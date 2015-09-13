@@ -7,9 +7,10 @@ package com.chingo247.backupapi.bukkit;
 
 import com.chingo247.backupapi.core.IChunkLoader;
 import com.chingo247.backupapi.core.IChunkManager;
-import com.chingo247.backupapi.core.IChunkSaver;
+import net.minecraft.server.v1_8_R1.WorldServer;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_8_R1.CraftWorld;
 
 /**
  *
@@ -17,21 +18,27 @@ import org.bukkit.World;
  */
 public class BKChunkManager implements IChunkManager {
 
-
-    private static void print(String s) {
-        
-    }
-
     @Override
     public IChunkLoader getLoader(String world) {
         World w = Bukkit.getWorld(world);
         return w == null ? null : new BKChunkLoader(w);
     }
 
+
     @Override
-    public IChunkSaver getSaver(String world) {
+    public void writeToDisk(String world) {
+        // Get the world
         World w = Bukkit.getWorld(world);
-        return w == null ? null : new BKChunkSaver(w);
+        if(w == null) {
+            throw new NullPointerException("No world found for '" + world + "'");
+        }
+        // Write to disk
+        WorldServer ws = ((CraftWorld) w).getHandle();
+        
+        boolean oldSave = ws.savingDisabled;
+        ws.savingDisabled = false;
+        ws.flushSave();
+        ws.savingDisabled = oldSave;
     }
 
 }

@@ -47,7 +47,7 @@ public class StructureHologramRepository implements IStructureHologramRepository
         
         String query = "MATCH (h:"+StructureHologramNode.LABEL.name()+")"
                 + "<-[r:"+StructureHologramNode.RELATION_HAS_HOLOGRAM.name()+"]-"
-                + "(s:"+StructureNode.LABEL.name()+") "
+                + "(s:"+StructureNode.LABEL+") "
                 + "WHERE NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = {removed}"
                 + "RETURN h";
         Result r = graph.execute(query, params);
