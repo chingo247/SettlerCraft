@@ -171,7 +171,7 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         }
         
         // Register permissions
-        PermissionManager.getInstance().registerPermissions(new BKPermissionRegistry());
+        PermissionManager.getInstance().registerPermissionRegistry(new BKPermissionRegistry());
         
         // Setup Commands
         structureCommands = new StructureCommands(StructureAPI.getInstance(), SettlerCraft.getInstance().getExecutor(), graph);

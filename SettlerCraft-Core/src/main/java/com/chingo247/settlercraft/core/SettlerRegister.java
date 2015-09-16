@@ -17,6 +17,7 @@
 package com.chingo247.settlercraft.core;
 
 import com.chingo247.settlercraft.core.event.PlayerLoginEvent;
+import com.chingo247.settlercraft.core.exception.SettlerException;
 import com.chingo247.settlercraft.core.model.BaseSettlerRepository;
 import com.chingo247.settlercraft.core.model.interfaces.IBaseSettler;
 import com.chingo247.xplatform.core.IPlayer;
@@ -27,6 +28,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
@@ -65,6 +68,8 @@ public class SettlerRegister {
                         }
                         cachedPlayers.add(player.getUniqueId());
                         tx.success();
+                    } catch (SettlerException ex) {
+                        Logger.getLogger(SettlerRegister.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             });
@@ -79,9 +84,6 @@ public class SettlerRegister {
             this.player = player;
         }
         
-        
-        
-
         @Override
         public Long getId() {
             return null;

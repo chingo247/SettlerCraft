@@ -33,6 +33,7 @@ public class PermissionManager {
     
     private static final String PREFIX = "settlercraft.";
     private static PermissionManager instance;
+    private IPermissionRegistry permissionRegistry;
 
     private PermissionManager() {
     }
@@ -49,11 +50,16 @@ public class PermissionManager {
      * Will register permissions at the IPermissionRegistry
      * @param registry The registry to register the permissions to
      */
-    public void registerPermissions(IPermissionRegistry registry) {
+    public void registerPermissionRegistry(IPermissionRegistry registry) {
         Preconditions.checkNotNull(registry, "IPermissionRegistry may not be null");
         for(Perms p : Perms.values()) {
             registry.registerPermission(p.permission);
         }
+        this.permissionRegistry = registry;
+    }
+
+    public IPermissionRegistry getPermissionRegistry() {
+        return permissionRegistry;
     }
     
     public enum Perms {

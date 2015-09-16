@@ -16,6 +16,7 @@
  */
 package com.chingo247.settlercraft.core.model;
 
+import com.chingo247.settlercraft.core.exception.SettlerException;
 import com.chingo247.settlercraft.core.model.interfaces.IBaseSettler;
 import com.chingo247.settlercraft.core.model.interfaces.IBaseSettlerRepository;
 import java.util.Map;
@@ -79,9 +80,35 @@ public class BaseSettlerRepository implements IBaseSettlerRepository {
     }
     
     @Override
-    public BaseSettlerNode addSettler(IBaseSettler baseSettler) {
+    public BaseSettlerNode addSettler(UUID uuid, String name) throws SettlerException {
         BaseSettlerNode settler = null;
         try(Transaction tx = graph.beginTx()) {
+            if(findByUUID(uuid) != null) {
+                throw new SettlerException("Settler already exists!");
+            }
+            Long id = nextId();
+            Node settlerNode = graph.createNode(BaseSettlerNode.label());
+            settlerNode.setProperty(BaseSettlerNode.UUID_PROPERTY, uuid.toString());
+            settlerNode.setProperty(BaseSettlerNode.NAME_PROPERTY, name);
+            settlerNode.setProperty(BaseSettlerNode.ID_PROPERTY, id);
+            
+            settler = new BaseSettlerNode(settlerNode);
+            tx.success();
+        } 
+        return settler;
+    }
+    
+    
+    
+    @Override
+    public BaseSettlerNode addSettler(IBaseSettler baseSettler) throws SettlerException {
+        BaseSettlerNode settler = null;
+        try(Transaction tx = graph.beginTx()) {
+            if(findByUUID(baseSettler.getUUID()) != null) {
+                throw new SettlerException("Settler already exists!");
+            }
+            
+            
             Long id = nextId();
             Node settlerNode = graph.createNode(BaseSettlerNode.label());
             settlerNode.setProperty(BaseSettlerNode.UUID_PROPERTY, baseSettler.getUUID().toString());

@@ -16,6 +16,7 @@
  */
 package com.chingo247.settlercraft.core.model.interfaces;
 
+import com.chingo247.settlercraft.core.exception.SettlerException;
 import com.chingo247.settlercraft.core.model.BaseSettlerNode;
 import java.util.UUID;
 
@@ -29,6 +30,8 @@ public interface IBaseSettlerRepository {
     
     public BaseSettlerNode findById(Long id);
     
-    public BaseSettlerNode addSettler(IBaseSettler settler);
+    public BaseSettlerNode addSettler(IBaseSettler settler) throws SettlerException;
+    
+    public BaseSettlerNode addSettler(UUID uuid, String name) throws SettlerException;
     
 }

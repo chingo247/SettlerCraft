@@ -30,7 +30,7 @@ import org.neo4j.graphdb.Node;
  */
 public abstract class AStructure implements IStructure {
 
-    private final Node underlyingNode;
+    protected final Node underlyingNode;
     
     public AStructure(Node node) {
         this.underlyingNode = node;

@@ -7,10 +7,10 @@ package com.chingo247.structureapi.model.structure;
 
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.model.interfaces.IBaseSettler;
+import com.chingo247.settlercraft.core.persistence.neo4j.NodeHelper;
 import com.chingo247.structureapi.model.owner.StructureOwnerNode;
 import com.chingo247.structureapi.model.owner.StructureOwnerType;
 import com.chingo247.structureapi.model.owner.StructureOwnershipRelation;
-import com.chingo247.structureapi.model.util.NodeUtils;
 import com.chingo247.structureapi.model.world.StructureWorldNode;
 import com.chingo247.structureapi.util.RegionUtil;
 import com.google.common.base.Preconditions;
@@ -105,7 +105,7 @@ public class StructureNode extends AStructure {
      * @return The center x
      */
     public int getCenterX() {
-        return NodeUtils.getInt(underlyingNode, CENTER_X_PROPERTY, 0);
+        return NodeHelper.getInt(underlyingNode, CENTER_X_PROPERTY, 0);
     }
     
     /**
@@ -113,7 +113,7 @@ public class StructureNode extends AStructure {
      * @return The center y
      */
     public int getCenterY() {
-        return NodeUtils.getInt(underlyingNode, CENTER_Y_PROPERTY, 0);
+        return NodeHelper.getInt(underlyingNode, CENTER_Y_PROPERTY, 0);
     }
     
     /**
@@ -121,7 +121,7 @@ public class StructureNode extends AStructure {
      * @return The center z
      */
     public int getCenterZ() {
-        return NodeUtils.getInt(underlyingNode, CENTER_Z_PROPERTY, 0);
+        return NodeHelper.getInt(underlyingNode, CENTER_Z_PROPERTY, 0);
     }
 
     @Override
