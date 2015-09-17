@@ -60,11 +60,12 @@ public class BackupEntry implements IBackupEntry {
     private boolean firstTime = false;
     private int count;
     private int total;
-    
+
     private boolean failedProcess = false;
+    private boolean isWriting = false;
     private Vector2D currentChunk;
 
-    BackupEntry(IChunkManager chunkManager,  World world, CuboidRegion region, File destinationFile, UUID uuid) {
+    BackupEntry(IChunkManager chunkManager, World world, CuboidRegion region, File destinationFile, UUID uuid) {
         this.world = world;
         this.uuid = uuid;
         this.region = region;
@@ -73,7 +74,7 @@ public class BackupEntry implements IBackupEntry {
         this.destinationFile = destinationFile;
         this.isCancelled = false;
         this.mutex = new Object();
-        
+
         Set<Vector2D> chunks = region.getChunks();
         this.total = chunks.size();
         System.out.println("[BackupEntry]: Total number of chunks " + total);
@@ -84,10 +85,8 @@ public class BackupEntry implements IBackupEntry {
 
     @Override
     public int getProgress() {
-        return (int)((count * 100.0f) / total);
+        return (int) ((count * 100.0f) / total);
     }
-    
-    
 
     void setCancelled(boolean isCancelled) {
         this.isCancelled = isCancelled;
@@ -109,41 +108,45 @@ public class BackupEntry implements IBackupEntry {
 
     @Override
     public void process() {
-        if(firstTime) {
+        if (firstTime) {
             firstTime = false;
             setState(BackupState.SAVING_CHUNKS);
             AsyncEventManager.getInstance().post(new BackupEntryStateChangeEvent(this));
         }
-        
+
         if (chunkIt.hasNext()) {
-            if(!failedProcess) {
+            if (!failedProcess) {
                 currentChunk = chunkIt.next();
             }
             int x = currentChunk.getBlockX();
             int z = currentChunk.getBlockZ();
-            try {
-                loader.load(x, z);
-                loader.unload(x, z);
-                failedProcess = false;
-                count++;
-                if(count % 50 == 0) {
-                    manager.writeToDisk(world.getName());
-                }
-            } catch(Exception ex) {
-                count--;
-                failedProcess = true;
-                Logger.getLogger(BackupEntry.class.getName()).log(Level.WARNING, "[SettlerCraft-BackupAPI]: Error during process", ex);
-            }
-            
+            loader.load(x, z);
+            loader.unload(x, z);
+            failedProcess = false;
+            count++;
         } else {
-            System.out.println("[BackupEntry]: Writing to disk...");
-            try {
-                manager.writeToDisk(world.getName());
-                write();
-                finish();
-            } catch (Exception ex) {
-                Logger.getLogger(BackupEntry.class.getName()).log(Level.SEVERE, null, ex);
+            synchronized (this) {
+                if (isWriting) {
+                    return;
+                } else {
+                    isWriting = true;
+                }
             }
+            SettlerCraft.getInstance().getExecutor().execute(new Runnable() {
+
+                @Override
+                public void run() {
+                    System.out.println("[BackupEntry]: Writing to disk...");
+                    try {
+                        manager.writeToDisk(world.getName());
+                        write();
+                        finish();
+                    } catch (Exception ex) {
+                        Logger.getLogger(BackupEntry.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            });
+
         }
     }
 

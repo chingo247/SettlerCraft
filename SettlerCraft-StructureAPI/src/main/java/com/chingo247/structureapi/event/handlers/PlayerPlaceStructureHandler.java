@@ -275,7 +275,7 @@ public class PlayerPlaceStructureHandler {
             params.put("worldId", w.getUUID().toString());
 
             String query
-                    = "MATCH (world:" + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
+                    = "MATCH ( world: " + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
                     + " WITH world "
                     + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL + ")"
                     + " WHERE s." + StructureNode.DELETED_AT_PROPERTY + " IS NULL"
@@ -285,6 +285,7 @@ public class PlayerPlaceStructureHandler {
                     + " RETURN s as structure"
                     + " ORDER BY s." + StructureNode.SIZE_PROPERTY + " ASC "
                     + " LIMIT 1";
+            System.out.println("QUERY: "+ query);
 
             Result result = graph.execute(query, params);
             StructureNode structureNode = null;

@@ -16,8 +16,8 @@
  */
 package com.chingo247.settlercraft.worldguard.protecttion;
 
-import com.chingo247.structurecraft.model.structure.Structure;
-import com.chingo247.structurecraft.platforms.services.Service;
+import com.chingo247.structureapi.model.structure.Structure;
+import com.chingo247.structureapi.platform.services.Service;
 
 /**
  * An interface for plugins that protect regions (e.g. worldguard)

@@ -16,14 +16,14 @@
  */
 package com.chingo247.settlercraft.worldguard.restriction;
 
-import com.chingo247.structurecraft.structure.restriction.StructureRestriction;
 import com.chingo247.settlercraft.worldguard.protecttion.SettlerCraftWGService;
+import com.chingo247.structureapi.StructureRestriction;
 import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
-import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;

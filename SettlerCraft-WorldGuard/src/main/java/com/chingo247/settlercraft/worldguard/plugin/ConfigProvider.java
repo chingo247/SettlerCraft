@@ -17,10 +17,10 @@
 package com.chingo247.settlercraft.worldguard.plugin;
 
 import com.chingo247.settlercraft.core.exception.SettlerCraftException;
-import com.chingo247.structurecraft.platforms.bukkit.BKConfigProvider;
+import com.chingo247.structureapi.platform.bukkit.BKConfigProvider;
+import com.sk89q.worldedit.util.Direction.Flag;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
-import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
 import java.io.File;
 import java.util.HashMap;

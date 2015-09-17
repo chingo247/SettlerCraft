@@ -17,15 +17,25 @@
             <id>Nexus</id>
             <url>http://chingo247.com:8081/nexus/content/repositories/thirdparty/</url>
         </repository>
+        <!--WorldEdit Repo-->
+        <repository>
+            <id>WorldEdit</id>
+            <url>http://maven.sk89q.com/repo</url>
+        </repository>
+        <!--Bukkit Repo-->
+        <repository>
+            <id>bukkit-repo</id>
+            <url>http://repo.bukkit.org/content/groups/public/</url>
+        </repository>
     </repositories>
     
     <dependencies>
         
         <!--Bukkit-->
-        <dependency>
+         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.7.10</version>
+            <version>1.8</version>
             <scope>provided</scope>
         </dependency>
         
@@ -39,9 +49,9 @@
         
         <!-- WorldEdit -->
         <dependency>
-            <groupId>com.thirdparty</groupId>
+            <groupId>com.sk89</groupId>
             <artifactId>worldedit</artifactId>  
-            <version>6.0-3308</version>
+            <version>6.1</version>
             <scope>provided</scope>
         </dependency>
         
@@ -49,11 +59,13 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>SettlerCraft-StructureAPI</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>SettlerCraft-Core</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     

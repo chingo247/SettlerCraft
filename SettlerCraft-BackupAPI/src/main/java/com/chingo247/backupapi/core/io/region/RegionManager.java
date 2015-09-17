@@ -71,7 +71,7 @@ public class RegionManager {
     }
     
     private static void print(String s) {
-//        System.out.println("[RegionManager]: ");
+//        System.out.println("[RegionManager]: " + s);
     }
 
     public void copy(String world, CuboidRegion region, File copyTo) throws IOException, Exception {
@@ -105,36 +105,20 @@ public class RegionManager {
     }
 
     private void setTags(RegionFileFormat rff, CuboidRegion region, Set<Vector2D> chunks, Map<String, Tag> chunkTags) throws IOException, Exception {
-        RegionFile rf = rff.read();
-
-        try {
+        try (RegionFile rf = rff.read()) {
             for (Iterator<Vector2D> chunkIt = chunks.iterator(); chunkIt.hasNext();) {
                 Vector2D v = chunkIt.next();
+                
                 int xPos = v.getBlockX() * RegionFileFormat.CHUNK_SIZE;
                 int zPos = v.getBlockZ() * RegionFileFormat.CHUNK_SIZE;
                 Vector2D regionPos = PositionUtils.getRegionPosition(xPos, zPos);
-
                 
-                String line = "";
-                
-                line += "Real pos " + xPos + ", " + zPos + " ";
-
+                if(!(regionPos.getBlockX() == rff.getX() && regionPos.getBlockZ() == rff.getZ())) {
+                    continue;
+                }
+ 
                 xPos = (xPos - regionPos.getBlockX()) >> 4;
                 zPos = (zPos - regionPos.getBlockZ()) >> 4;
-
-                line += "Chunk pos " + xPos + ", " + zPos + " ";
-
-                line += " has: " + rf.hasChunk(xPos, zPos) + " " + rff.getFile().getName() + " ";
-                
-                
-                int rx = PositionUtils.getRegionCoordinate(xPos * RegionFileFormat.CHUNK_SIZE, zPos * RegionFileFormat.CHUNK_SIZE).getBlockX();
-                int rz = PositionUtils.getRegionCoordinate(xPos * RegionFileFormat.CHUNK_SIZE, zPos * RegionFileFormat.CHUNK_SIZE).getBlockZ();
-                
-                boolean shouldHave = rff.getRegionX() == rx && rff.getRegionZ() == rz;
-                
-                line += " region: (" + rx + "," + rz + ")" + " should have: " + (shouldHave ? "yes" : "no");
-                
-                print(line);
                 
                 
                 if (rf.hasChunk(xPos, zPos)) {
@@ -188,8 +172,6 @@ public class RegionManager {
 //                System.out.println(" ");
                 }
             }
-        } finally {
-            rf.close();
         }
     }
 
@@ -251,8 +233,8 @@ public class RegionManager {
 
         RegionManager regionManager = new RegionManager(null);
 
-        Vector min = new Vector(1.0, 63.0, 1.0);
-        Vector max = new Vector(107.0, 123.0, 142.0);
+        Vector min = new Vector(1.0, 63.0, 511);
+        Vector max = new Vector(107.0, 123.0, 722.0);
 
         try {
             regionManager.copy("world", new CuboidRegion(min, max), new File("test.snapshot"));

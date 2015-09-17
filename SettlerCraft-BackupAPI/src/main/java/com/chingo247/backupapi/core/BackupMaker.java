@@ -23,10 +23,6 @@
  */
 package com.chingo247.backupapi.core;
 
-import com.chingo247.backupapi.core.BackupState;
-import com.chingo247.backupapi.core.IBackupEntry;
-import com.chingo247.backupapi.core.IBackupMaker;
-import com.chingo247.backupapi.core.IChunkManager;
 import com.chingo247.backupapi.core.event.BackupEntryProgressUpdateEvent;
 import com.chingo247.backupapi.core.event.BackupEntryStateChangeEvent;
 import com.chingo247.backupapi.core.exception.BackupException;
@@ -60,7 +56,7 @@ public class BackupMaker implements IBackupMaker {
     private Map<UUID, IBackupEntry> entries;
     private Iterator<IBackupEntry> entryIt;
     private boolean running;
-    private final Lock lock;
+    private final Lock lock, runLock;
     private final BackupTask backupTask;
     private final IChunkManager chunkManager;
     private final IScheduler scheduler;
@@ -77,6 +73,7 @@ public class BackupMaker implements IBackupMaker {
         this.scheduler = scheduler;
         this.lock = new ReentrantLock();
         this.chunkManager = chunkManager;
+        this.runLock = new ReentrantLock();
     }
     
     @Override
@@ -141,7 +138,7 @@ public class BackupMaker implements IBackupMaker {
             if (!running) {
                 System.out.println("start!");
                 System.out.println("[BackupManager]: Scheduled first backup in " + interval + " ms");
-                scheduler.runAsync(backupTask);
+                scheduler.runSync(backupTask);
                 running = true;
             }
         } finally {
@@ -181,6 +178,10 @@ public class BackupMaker implements IBackupMaker {
         public void run() {
             long runTime = System.currentTimeMillis();
             System.out.println("RUN ");
+            if(!runLock.tryLock()) {
+                return; // Couldn't acquire lock
+            }
+            
             try {
 
                 // If the iterator is empty and there is nothing left
@@ -192,7 +193,7 @@ public class BackupMaker implements IBackupMaker {
                         stop();
                     } else {
                         System.out.println("[BackupManager]: No backup tasks left, running empty run [" + emptyRunCount + "/" + MAX_EMPTY_RUNS + "]");
-                        scheduler.runLaterAsync(interval, this);
+                        scheduler.runLater(interval, this);
                     }
                     return;
                 }
@@ -213,7 +214,7 @@ public class BackupMaker implements IBackupMaker {
                 // Process the entries
                 
                 while (entryIt.hasNext()) {
-                    IBackupEntry entry = entryIt.next();
+                    final IBackupEntry entry = entryIt.next();
                     if (entry.isCancelled() || entry.getState() == BackupState.FAILED) {
                         if(entry.getDestinationFile().exists()) {
                             entry.getDestinationFile().delete();
@@ -229,6 +230,8 @@ public class BackupMaker implements IBackupMaker {
                     
                     long startTime = System.currentTimeMillis();
                     int count = 0;
+                    
+                    
                     while(!entry.isDone() && (time == -1 || (System.currentTimeMillis() - startTime) < time) && (chunks == -1 || count < chunks)) {
                         entry.process();
                         count++;
@@ -239,9 +242,11 @@ public class BackupMaker implements IBackupMaker {
                 }
 
                 System.out.println("RUN Done in " + (System.currentTimeMillis() - runTime));
-                scheduler.runLaterAsync(interval, this);
+                scheduler.runLater(interval, this);
             } catch (Exception ex) {
                 Logger.getLogger(BackupMaker.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                runLock.unlock();
             }
         }
 

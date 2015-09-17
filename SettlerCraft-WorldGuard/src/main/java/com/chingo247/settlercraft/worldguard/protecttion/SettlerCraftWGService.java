@@ -19,19 +19,18 @@ package com.chingo247.settlercraft.worldguard.protecttion;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.core.model.BaseSettlerNode;
-import com.chingo247.structurecraft.model.interfaces.IStructureRepository;
-import com.chingo247.structurecraft.model.owner.StructureOwnerType;
-import com.chingo247.structurecraft.model.structure.Structure;
 import com.chingo247.settlercraft.worldguard.restriction.WorldGuardRestriction;
-import com.chingo247.structurecraft.model.structure.StructureStatus;
-import com.chingo247.structurecraft.structure.IStructureAPI;
-import com.chingo247.structurecraft.model.structure.StructureNode;
-import com.chingo247.structurecraft.model.structure.StructureRepository;
-import com.chingo247.structurecraft.structure.StructureAPI;
+import com.chingo247.structureapi.IStructureAPI;
+import com.chingo247.structureapi.StructureAPI;
+import com.chingo247.structureapi.model.owner.StructureOwnerType;
+import com.chingo247.structureapi.model.structure.ConstructionStatus;
+import com.chingo247.structureapi.model.structure.IStructureRepository;
+import com.chingo247.structureapi.model.structure.Structure;
+import com.chingo247.structureapi.model.structure.StructureNode;
+import com.chingo247.structureapi.model.structure.StructureRepository;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.bukkit.WGBukkit;
 import com.sk89q.worldguard.bukkit.WorldConfiguration;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -46,6 +45,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.google.common.collect.Lists;
+import com.sk89q.worldedit.LocalPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -114,7 +114,7 @@ public class SettlerCraftWGService implements IStructureProtector {
             Node rawNode = structureNode.getNode();
                 for (Relationship rel : rawNode.getRelationships(DynamicRelationshipType.withName("OwnedBy"))) {
                     Node n = rel.getOtherNode(rawNode);
-                    if(!n.hasLabel(BaseSettlerNode.LABEL)) {
+                    if(!n.hasLabel(BaseSettlerNode.label())) {
                         continue;
                     }
                     
@@ -152,9 +152,9 @@ public class SettlerCraftWGService implements IStructureProtector {
         final List<Structure> structures = Lists.newArrayList();
         try(Transaction tx = graph.beginTx()) {
             
-            String query = "MATCH(s:" + StructureNode.LABEL.name() + ") "
+            String query = "MATCH(s:" + StructureNode.LABEL + ") "
                     + "WHERE s."+WORLD_GUARD_REGION_PROPERTY+" IS NULL "
-                    + "AND NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + StructureStatus.REMOVED.getStatusId() + " "
+                    + "AND NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId() + " "
                     + "RETURN s";
             
             Result r = graph.execute(query);
@@ -364,9 +364,9 @@ public class SettlerCraftWGService implements IStructureProtector {
 
     private void processInvalidStructures() {
         
-        String query = "MATCH(s:"+StructureNode.LABEL.name() + ") "
+        String query = "MATCH(s:"+StructureNode.LABEL + ") "
                      + "WHERE s."+WORLD_GUARD_REGION_PROPERTY + " IS NOT NULL "
-                     + "AND s."+StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + StructureStatus.REMOVED.getStatusId() + " "
+                     + "AND s."+StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId() + " "
                      + "RETURN s";
         
         try(Transaction tx = graph.beginTx()) {

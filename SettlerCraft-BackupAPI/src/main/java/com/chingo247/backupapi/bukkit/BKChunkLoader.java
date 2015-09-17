@@ -49,6 +49,9 @@ public class BKChunkLoader implements IChunkLoader {
     public void load(final int x, final int z) {
         w.loadChunk(x, z, true);
         Chunk c = server.chunkProviderServer.loadChunk(x, z);
+        if(c == null) {
+            c = server.chunkProviderServer.getOrCreateChunk(x, z);
+        }
         c.mustSave = true;
         server.chunkProviderServer.saveChunk(c);
         server.chunkProviderServer.saveChunkNOP(c);
