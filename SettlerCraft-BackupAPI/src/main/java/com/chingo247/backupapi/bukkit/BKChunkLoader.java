@@ -26,10 +26,8 @@ package com.chingo247.backupapi.bukkit;
 import com.chingo247.backupapi.core.IChunkLoader;
 import net.minecraft.server.v1_8_R1.Chunk;
 import net.minecraft.server.v1_8_R1.WorldServer;
-import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R1.CraftWorld;
-import org.bukkit.plugin.Plugin;
 
 /**
  *
@@ -47,7 +45,6 @@ public class BKChunkLoader implements IChunkLoader {
 
     @Override
     public void load(final int x, final int z) {
-        w.loadChunk(x, z, true);
         Chunk c = server.chunkProviderServer.loadChunk(x, z);
         if(c == null) {
             c = server.chunkProviderServer.getOrCreateChunk(x, z);

@@ -64,6 +64,7 @@ public class BackupEntry implements IBackupEntry {
     private boolean failedProcess = false;
     private boolean isWriting = false;
     private Vector2D currentChunk;
+    private long totalTime = 0, loadTime = 0, unloadTime = 0;
 
     BackupEntry(IChunkManager chunkManager, World world, CuboidRegion region, File destinationFile, UUID uuid) {
         this.world = world;
@@ -80,7 +81,7 @@ public class BackupEntry implements IBackupEntry {
         System.out.println("[BackupEntry]: Total number of chunks " + total);
         this.chunkIt = chunks.iterator();
         this.manager = chunkManager;
-        this.loader = chunkManager.getLoader(world.getName());
+        this.loader = chunkManager.getHandler(world.getName());
     }
 
     @Override
@@ -118,12 +119,24 @@ public class BackupEntry implements IBackupEntry {
             if (!failedProcess) {
                 currentChunk = chunkIt.next();
             }
+            long time = System.currentTimeMillis();
             int x = currentChunk.getBlockX();
             int z = currentChunk.getBlockZ();
+            
+            long ldTime = System.currentTimeMillis();
             loader.load(x, z);
+            loadTime += System.currentTimeMillis() - ldTime;
+            
+            long nldTime = System.currentTimeMillis();
             loader.unload(x, z);
-            failedProcess = false;
+            unloadTime += System.currentTimeMillis() - nldTime;
+            
+            totalTime += System.currentTimeMillis() - time;
+            
             count++;
+            if(count % 10 == 0) {
+                System.out.println("avg save time: " + (totalTime / count) + "ms, avg loadTime: " + (loadTime/count) + "ms, avg unloadTime: " + (unloadTime/count) + "ms");
+            }
         } else {
             synchronized (this) {
                 if (isWriting) {

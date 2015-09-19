@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2015 Chingo.
+ * Copyright 2015 ching.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,25 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.backupapi.core;
+package com.chingo247.backupapi.core.entry;
 
 /**
  *
- * @author Chingo
+ * @author ching
  */
-public interface IChunkManager {
+public class SnapChunk {
     
-    /**
-     * Gets the chunkloader
-     * @param world The name of the world
-     * @return The loader
-     */
-    IChunkLoader getHandler(String world);
     
-    /**
-     * Writes the changes to the disk
-     * @param world The name of the world
-     */
-    void writeToDisk(String world);
     
 }

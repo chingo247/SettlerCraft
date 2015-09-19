@@ -16,10 +16,10 @@ import org.bukkit.craftbukkit.v1_8_R1.CraftWorld;
  *
  * @author Chingo
  */
-public class BKChunkManager implements IChunkManager {
+public class BKChunkManager implements IChunkManager  {
 
     @Override
-    public IChunkLoader getLoader(String world) {
+    public IChunkLoader getHandler(String world) {
         World w = Bukkit.getWorld(world);
         return w == null ? null : new BKChunkLoader(w);
     }
