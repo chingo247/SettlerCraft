@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction.task;
+package com.chingo247.structureapi.construction;
 
 import com.chingo247.structureapi.construction.StructureBlock;
 import com.chingo247.backupapi.core.io.IWorldPartSnapshot;
 import com.chingo247.structureapi.plan.placement.BlockPlacement;
 import com.chingo247.structureapi.plan.placement.PlacementTypes;
-import com.chingo247.structureapi.plan.placement.options.Options;
+import com.chingo247.structureapi.construction.options.Options;
 import com.chingo247.structureapi.plan.placement.traversal.TopDownCuboidTraversal;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;

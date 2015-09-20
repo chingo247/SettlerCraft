@@ -16,7 +16,7 @@
  */
 package com.chingo247.structureapi.construction.event;
 
-import com.chingo247.structureapi.construction.task.StructureTask;
+import com.chingo247.structureapi.construction.StructureTask;
 import org.parboiled.common.Preconditions;
 
 /**

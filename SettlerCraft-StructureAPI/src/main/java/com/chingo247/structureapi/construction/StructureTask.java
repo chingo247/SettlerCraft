@@ -14,14 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction.task;
+package com.chingo247.structureapi.construction;
 
-import com.chingo247.structureapi.construction.ConstructionManager;
-import com.chingo247.structureapi.construction.ConstructionEntry;
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
 import com.chingo247.structureapi.construction.event.StructureTaskCancelledEvent;
 import com.chingo247.structureapi.construction.event.StructureTaskCompleteEvent;
-import com.chingo247.structureapi.exception.ConstructionException;
 import com.google.common.base.Preconditions;
 import java.util.UUID;
 
@@ -36,6 +33,7 @@ public abstract class StructureTask {
     private boolean cancelled = false;
     private boolean failed = false;
     private boolean finished = false;
+    private boolean started = false;
     private String action;
     private final UUID submitter;
 
@@ -89,24 +87,21 @@ public abstract class StructureTask {
         return failed;
     }
 
-    public void start() {
-        _start();
+    public synchronized final void start() {
+        if(started == false) {
+            started = true;
+            execute();
+        }
     }
+    
+    protected abstract void execute();
+    
+    protected abstract void onCancel();
 
-    protected abstract void _start();
-
-    /**
-     * Cancels this task. This method is called by the
-     * {@link StructureTask#cancel()} and should never be called from any other
-     * class or method. This methods solely serves to offer an implementation of
-     * the cancel method.
-     */
-    protected abstract void _cancel();
-
-    public synchronized void cancel() throws ConstructionException {
+    public synchronized final void cancel() {
         if (!cancelled) {
             setCancelled(true);
-            _cancel();
+            onCancel();
             ConstructionManager.getInstance().remove(constructionEntry);
             finish();
         } 
@@ -116,9 +111,9 @@ public abstract class StructureTask {
      * *
      * Indicate that this task has finished
      */
-    public synchronized void finish() {
-        
+    public synchronized final void finish() {
         if (!finished) {
+            started = false;
             finished = true;
             if (isCancelled()) {
                 AsyncEventManager.getInstance().post(new StructureTaskCancelledEvent(this));
@@ -128,6 +123,8 @@ public abstract class StructureTask {
 
             if(!isCancelled() && !failed) {
                 constructionEntry.proceed();
+            } else {
+                constructionEntry.purge();
             }
         }
     }

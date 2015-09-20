@@ -130,11 +130,11 @@ public class StructureManager {
             tx = graph.beginTx();
             
             StructureWorldNode worldNode = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
-            StructureNode structureNode = create(worldNode, structure, placement, placement.getClass().getSimpleName(), position, direction, owner);
+            structure = create(worldNode, parentStructure, placement, placement.getClass().getSimpleName(), position, direction, owner);
 
-            if (structureNode != null) {
+            if (structure != null) {
                 
-                structureDirectory = structureAPI.getDirectoryForStructure(worldNode, structureNode);
+                structureDirectory = structureAPI.getDirectoryForStructure(worldNode, structure);
                 if(structureDirectory.exists()) {
                     structureDirectory.delete();
                 }
@@ -143,7 +143,6 @@ public class StructureManager {
                 File structurePlanFile = new File(structureDirectory, "structureplan.xml");
                 PlacementExporter exporter = new PlacementExporter();
                 exporter.export(placement, structurePlanFile, "structureplan.xml", true);
-                structure = new Structure(structureNode);
             }
             tx.success();
         } catch (StructureException ex) {
@@ -179,24 +178,22 @@ public class StructureManager {
         Structure structure = null;
         try (Transaction tx = graph.beginTx()){
             StructureWorldNode worldNode = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
-            StructureNode structureNode = create(worldNode, parentStructure, structurePlan.getPlacement(), structurePlan.getName(), position, direction, owner);
+            structure = create(worldNode, parentStructure, structurePlan.getPlacement(), structurePlan.getName(), position, direction, owner);
              
-            File structureDirectory = structureAPI.getDirectoryForStructure(worldNode, structureNode);
+            File structureDirectory = structureAPI.getDirectoryForStructure(worldNode, structure);
             if(structureDirectory.exists()) {
                 structureDirectory.delete();
             }
             structureDirectory.mkdirs();
             try {
-                moveResources(worldNode, structureNode, structurePlan);
+                moveResources(worldNode, structure, structurePlan);
             } catch (IOException ex) {
                 structureDirectory.delete();
                 Logger.getLogger(StructureManager.class.getName()).log(Level.SEVERE, null, ex);
             }
             
 
-        if (structureNode != null) {
-            structure = new Structure(structureNode);
-        }
+       
         
         tx.success();
         }  
@@ -209,7 +206,7 @@ public class StructureManager {
         return structure;
     }
 
-    synchronized StructureNode create(StructureWorldNode worldNode, Structure parent, Placement placement, String name, Vector position, Direction direction, Player owner) throws StructureException {
+    private synchronized Structure create(StructureWorldNode worldNode, Structure parent, Placement placement, String name, Vector position, Direction direction, Player owner) throws StructureException {
         checkWorldRestrictions(placement, world, position, direction);
 
         Vector min = position;
@@ -225,10 +222,6 @@ public class StructureManager {
                 throw new StructureException("Structure overlaps structure #" + parent.getId() + ", but does not fit within it's boundaries");
             }
         }
-
-        
-        
-
 
         // Create the StructureNode - Where it all starts...
         structureNode = structureRepository.addStructure(worldNode, name, position, structureRegion, direction, 0.0);
@@ -256,14 +249,19 @@ public class StructureManager {
                 structureNode.addOwner(rel.getOwner(), rel.getOwnerType());
             }
         }
+        
+        Structure structure = null;
+        if(structureNode != null) {
+            structure = new Structure(structureNode);
+        }
 
-        return structureNode;
+        return structure;
 
     }
 
-    final void moveResources(WorldNode worldNode, StructureNode structureNode, IStructurePlan plan) throws IOException {
+    final void moveResources(WorldNode worldNode, Structure structure, IStructurePlan plan) throws IOException {
         // Give this structure a directory!
-        File structureDir = structureAPI.getDirectoryForStructure(worldNode, structureNode);
+        File structureDir = structureAPI.getDirectoryForStructure(worldNode, structure);
         structureDir.mkdirs();
 
         Files.copy(plan.getFile(), new File(structureDir, "structureplan.xml"));

@@ -6,7 +6,6 @@
 package com.chingo247.structureapi.model.structure;
 
 import com.chingo247.settlercraft.core.Direction;
-import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.structureapi.model.world.StructureWorldNode;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;

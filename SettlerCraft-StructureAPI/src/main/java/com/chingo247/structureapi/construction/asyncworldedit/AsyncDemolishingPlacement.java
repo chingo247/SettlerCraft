@@ -16,7 +16,7 @@
  */
 package com.chingo247.structureapi.construction.asyncworldedit;
 
-import com.chingo247.structureapi.plan.placement.options.DemolitionOptions;
+import com.chingo247.structureapi.construction.options.DemolitionOptions;
 import com.chingo247.structureapi.plan.placement.DemolishingPlacement;
 import com.chingo247.structureapi.plan.placement.Placement;
 import com.sk89q.worldedit.EditSession;

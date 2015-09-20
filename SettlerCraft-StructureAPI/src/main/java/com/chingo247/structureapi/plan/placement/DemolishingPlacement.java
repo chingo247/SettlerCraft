@@ -16,7 +16,7 @@
  */
 package com.chingo247.structureapi.plan.placement;
 
-import com.chingo247.structureapi.plan.placement.options.DemolitionOptions;
+import com.chingo247.structureapi.construction.options.DemolitionOptions;
 import com.chingo247.structureapi.plan.placement.iterator.TopDownCuboidIterator;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;

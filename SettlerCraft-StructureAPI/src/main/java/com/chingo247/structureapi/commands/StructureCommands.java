@@ -52,8 +52,8 @@ import com.chingo247.structureapi.plan.IStructurePlan;
 import com.chingo247.structureapi.plan.StructurePlanManager;
 import com.chingo247.structureapi.plan.placement.Placement;
 import com.chingo247.structureapi.plan.placement.SchematicPlacement;
-import com.chingo247.structureapi.plan.placement.options.BuildOptions;
-import com.chingo247.structureapi.plan.placement.options.DemolitionOptions;
+import com.chingo247.structureapi.construction.options.BuildOptions;
+import com.chingo247.structureapi.construction.options.DemolitionOptions;
 import com.chingo247.structureapi.plan.schematic.FastClipboard;
 import com.chingo247.structureapi.plan.util.PlanGenerator;
 import com.chingo247.xplatform.core.APlatform;
@@ -1101,13 +1101,13 @@ public class StructureCommands {
 
         long start = System.currentTimeMillis();
         try (Transaction tx = graph.beginTx()) {
-            StructureNode structure = structureRepository.findById(structureId);
-            if (structure == null) {
+            StructureNode structurenode = structureRepository.findById(structureId);
+            if (structurenode == null) {
                 tx.success();
                 throw new CommandException("Couldn't find structure for id #" + structureId);
             }
 
-            IStructureOwnership ownership = structure.findOwnership(senderPlayer.getUniqueId());
+            IStructureOwnership ownership = structurenode.findOwnership(senderPlayer.getUniqueId());
 
             if (ownership == null) {
                 tx.success();
@@ -1159,31 +1159,31 @@ public class StructureCommands {
             UUID uuid = ply.getUniqueId();
             if (method.equalsIgnoreCase("add")) {
                 IBaseSettler settler = settlerRepository.findByUUID(ply.getUniqueId());
-                IStructureOwnership ownershipToAdd = structure.findOwnership(settler.getUUID());
+                IStructureOwnership ownershipToAdd = structurenode.findOwnership(settler.getUUID());
 
                 if (ownershipToAdd == null) {
-                    structure.addOwner(settler, requestedType);
-                    EventManager.getInstance().getEventBus().post(new StructureAddOwnerEvent(uuid, new Structure(structure), requestedType));
-                    senderPlayer.sendMessage("Successfully added '" + COLOR.green() + ply.getName() + COLOR.reset() + "' to #" + COLOR.gold() + structureId + " " + COLOR.blue() + structure.getName() + COLOR.reset() + " as " + COLOR.yellow() + requestedType.name());
+                    structurenode.addOwner(settler, requestedType);
+                    EventManager.getInstance().getEventBus().post(new StructureAddOwnerEvent(uuid, new Structure(structurenode), requestedType));
+                    senderPlayer.sendMessage("Successfully added '" + COLOR.green() + ply.getName() + COLOR.reset() + "' to #" + COLOR.gold() + structureId + " " + COLOR.blue() + structurenode.getName() + COLOR.reset() + " as " + COLOR.yellow() + requestedType.name());
                 } else if (ownershipToAdd.getOwnerType().getTypeId() < requestedType.getTypeId()) {
-                    structure.removeOwner(settler.getUUID());
-                    structure.addOwner(settler, requestedType);
-                    EventManager.getInstance().getEventBus().post(new StructureAddOwnerEvent(uuid, new Structure(structure), requestedType));
+                    structurenode.removeOwner(settler.getUUID());
+                    structurenode.addOwner(settler, requestedType);
+                    EventManager.getInstance().getEventBus().post(new StructureAddOwnerEvent(uuid, new Structure(structurenode), requestedType));
                     senderPlayer.sendMessage("Upgraded ownership of '" + COLOR.green() + ply.getName() + COLOR.reset() + "' to " + COLOR.yellow() + requestedType.name() + COLOR.reset() + " for structure ",
                             "#" + COLOR.gold() + ownershipToAdd.getStructure().getId() + " " + COLOR.blue() + ownershipToAdd.getStructure().getName());
                 } else {
                     throw new CommandException(ply.getName() + " is already an owner of this structure and his ownership couldn't be upgraded");
                 }
             } else { // remove
-                boolean isOwner = structure.isOwner(uuid);
+                boolean isOwner = structurenode.isOwner(uuid);
                 if (isOwner) {
                     senderPlayer.sendMessage(ply.getName() + " does not own this structure...");
                     return true;
                 }
 
-                structure.removeOwner(uuid);
-                EventManager.getInstance().getEventBus().post(new StructureRemoveOwnerEvent(uuid, new Structure(structure), requestedType));
-                senderPlayer.sendMessage("Successfully removed '" + COLOR.green() + ply.getName() + COLOR.reset() + "' from #" + COLOR.gold() + structureId + " " + COLOR.blue() + structure.getName() + " as " + COLOR.yellow() + requestedType.name());
+                structurenode.removeOwner(uuid);
+                EventManager.getInstance().getEventBus().post(new StructureRemoveOwnerEvent(uuid, new Structure(structurenode), requestedType));
+                senderPlayer.sendMessage("Successfully removed '" + COLOR.green() + ply.getName() + COLOR.reset() + "' from #" + COLOR.gold() + structureId + " " + COLOR.blue() + structurenode.getName() + " as " + COLOR.yellow() + requestedType.name());
 
             }
 

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction.task;
+package com.chingo247.structureapi.construction;
 
 import com.chingo247.structureapi.construction.ConstructionManager;
 import com.chingo247.structureapi.construction.ConstructionEntry;
@@ -35,9 +35,10 @@ import com.chingo247.structureapi.plan.placement.Placement;
 import com.chingo247.structureapi.plan.placement.RestoringPlacement;
 import com.chingo247.structureapi.plan.placement.RotationalPlacement;
 import com.chingo247.structureapi.plan.placement.SchematicPlacement;
-import com.chingo247.structureapi.plan.placement.options.BlockPredicate;
-import com.chingo247.structureapi.plan.placement.options.BuildOptions;
-import com.chingo247.structureapi.plan.placement.options.DemolitionOptions;
+import com.chingo247.structureapi.construction.options.BlockPredicate;
+import com.chingo247.structureapi.construction.options.BuildOptions;
+import com.chingo247.structureapi.construction.options.DemolitionOptions;
+import com.chingo247.structureapi.construction.options.Options;
 import com.chingo247.structureapi.plan.schematic.FastClipboard;
 import com.chingo247.structureapi.plan.schematic.DefaultSchematic;
 import com.sk89q.jnbt.NBTInputStream;
@@ -69,7 +70,7 @@ public class DefaultStructureTaskFactory implements IStructureTaskFactory {
     }
 
     @Override
-    public StructureTask build(EditSession session, UUID player, Structure structure, BuildOptions options) throws ConstructionException {
+    public StructureTask build(EditSession session, UUID player, Structure structure, Options options) throws ConstructionException {
         StructureNode sn = new StructureNode(structure.getNode());
 
         // Get the placement and rotate
@@ -120,7 +121,7 @@ public class DefaultStructureTaskFactory implements IStructureTaskFactory {
      * @return The StructureTask
      */
     @Override
-    public StructureTask demolish(EditSession session, UUID player, Structure structure, DemolitionOptions options) throws ConstructionException {
+    public StructureTask demolish(EditSession session, UUID player, Structure structure, Options options) throws ConstructionException {
         StructureNode sn = new StructureNode(structure.getNode());
         StructureNode parent = sn.getParent();
         DemolishingPlacement dp;

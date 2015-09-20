@@ -76,6 +76,10 @@ public class StructureNode extends AStructure {
         this.underlyingNode = underlyingNode;
     }
     
+    public Structure getUnmodifiable() {
+        return new Structure(underlyingNode);
+    }
+    
     /**
      * Sets the center x
      * @param x The center x to set

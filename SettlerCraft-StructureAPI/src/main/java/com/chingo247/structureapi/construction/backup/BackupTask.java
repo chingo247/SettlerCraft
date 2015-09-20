@@ -22,7 +22,7 @@ import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
 import com.chingo247.structureapi.construction.ConstructionEntry;
 import com.chingo247.structureapi.construction.event.StructureTaskStartEvent;
-import com.chingo247.structureapi.construction.task.StructureTask;
+import com.chingo247.structureapi.construction.StructureTask;
 import com.chingo247.structureapi.exception.StructureTaskException;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.chingo247.structureapi.model.structure.Structure;
@@ -61,7 +61,7 @@ public class BackupTask extends StructureTask {
     }
     
     @Override
-    protected void _start() {
+    protected void execute() {
         IBackupAPI backupAPI = StructureAPI.getInstance().getBackupAPI();
         ConstructionEntry entry = getConstructionEntry();
         Structure structure = entry.getStructure();
@@ -81,7 +81,7 @@ public class BackupTask extends StructureTask {
     }
 
     @Override
-    protected void _cancel() {
+    protected void onCancel() {
         if(backupEntry != null) {
             IBackupAPI backupAPI = StructureAPI.getInstance().getBackupAPI();
             backupAPI.cancel(backupEntry);

@@ -16,7 +16,7 @@
  */
 package com.chingo247.structureapi.plan.placement;
 
-import com.chingo247.structureapi.plan.placement.options.Options;
+import com.chingo247.structureapi.construction.options.Options;
 import java.io.File;
 
 /**

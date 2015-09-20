@@ -14,19 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction;
-
-import com.chingo247.structureapi.exception.ConstructionException;
-import com.chingo247.structureapi.plan.placement.options.BuildOptions;
-import com.sk89q.worldedit.EditSession;
-import java.util.UUID;
+package com.chingo247.structureapi.construction.options;
 
 /**
  *
  * @author Chingo
  */
-public interface IBuildTaskAssigner {
+public class DemolitionOptions extends Options {
+
+    public DemolitionOptions() {
+        setCubeY(-1); // Default for demolishing
+    }
+
+    // To be implemented
     
-    public void assignTasks(EditSession session, UUID player, ConstructionEntry entry, BuildOptions buildOptions) throws ConstructionException;
+    
+
     
 }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.structureapi.plan.placement.options;
+package com.chingo247.structureapi.construction.options;
 
 import com.chingo247.structureapi.construction.StructureTraversal;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author Chingo
  */
-public abstract class Options {
+public class Options {
     
     private int cubeX;
     private int cubeY;
@@ -21,6 +21,7 @@ public abstract class Options {
     private final List<BlockPredicate> toIgnore;
     private final List<BlockMask> masks;
     private StructureTraversal traveral;
+    private boolean traverseReversed;
     private boolean useForce;
 
     public Options() {
@@ -31,6 +32,7 @@ public abstract class Options {
         this.masks = new ArrayList<>();
         this.traveral = StructureTraversal.BREADTH_FIRST;
         this.useForce = false;
+        this.traverseReversed = false;
     }
     
     /**
@@ -97,6 +99,16 @@ public abstract class Options {
     public StructureTraversal getTraveral() {
         return traveral;
     }
+
+    public void setTraversingReversed(boolean traverseReversed) {
+        this.traverseReversed = traverseReversed;
+    }
+
+    public boolean isTraversingReversed() {
+        return traverseReversed;
+    }
+    
+    
     
    
     

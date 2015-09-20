@@ -17,20 +17,16 @@
 package com.chingo247.structureapi.model.structure;
 
 import com.chingo247.settlercraft.core.Direction;
-import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.model.World;
 import com.chingo247.settlercraft.core.model.interfaces.IWorld;
-import com.chingo247.structureapi.StructureAPI;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import java.util.Date;
-import java.util.UUID;
 import org.neo4j.graphdb.Node;
-import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
 
 /**
- *
+ * As opposed to the {@link StructureNode} this unmodifable structure has all it's properties loaded. 
+ * None of the opertions of this class have to be executed within a transaction
  * @author Chingo
  */
 public class Structure extends AStructure {
@@ -172,19 +168,6 @@ public class Structure extends AStructure {
     public IWorld getWorld() {
         return world;
     }
-    
-    private ThreadSafeEditSession getSession(UUID playerId) {
-        Player ply = SettlerCraft.getInstance().getPlayer(playerId);
-        com.sk89q.worldedit.world.World w = SettlerCraft.getInstance().getWorld(getWorld().getName());
-        ThreadSafeEditSession editSession;
-        StructureAPI api = (StructureAPI) StructureAPI.getInstance();
-        
-        if (ply == null) {
-            editSession =  api.getSessionFactory().getThreadSafeEditSession(w, -1);
-        } else {
-            editSession =  api.getSessionFactory().getThreadSafeEditSession(w, -1, ply);
-        }
-        return editSession;
-    }
+  
     
 }

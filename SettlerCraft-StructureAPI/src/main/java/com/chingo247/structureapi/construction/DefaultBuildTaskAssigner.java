@@ -14,15 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction.task;
+package com.chingo247.structureapi.construction;
 
 import com.chingo247.structureapi.construction.ConstructionEntry;
-import com.chingo247.structureapi.construction.IBuildTaskAssigner;
+import com.chingo247.structureapi.construction.ITaskAssigner;
 import com.chingo247.backupapi.core.IBackupAPI;
 import com.chingo247.structureapi.exception.ConstructionException;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.StructureAPI;
-import com.chingo247.structureapi.plan.placement.options.BuildOptions;
+import com.chingo247.structureapi.construction.options.BuildOptions;
+import com.chingo247.structureapi.construction.options.Options;
 import com.sk89q.worldedit.EditSession;
 import java.io.File;
 import java.util.UUID;
@@ -31,11 +32,11 @@ import java.util.UUID;
  *
  * @author Chingo
  */
-public class BuildTaskAssigner implements IBuildTaskAssigner {
+public class DefaultBuildTaskAssigner implements ITaskAssigner {
     
     private DefaultStructureTaskFactory taskFactory;
 
-    public BuildTaskAssigner() {
+    public DefaultBuildTaskAssigner() {
         this.taskFactory = new DefaultStructureTaskFactory();
     }
     
@@ -43,7 +44,7 @@ public class BuildTaskAssigner implements IBuildTaskAssigner {
     
     
     @Override
-    public void assignTasks(EditSession session, UUID player, ConstructionEntry entry, BuildOptions buildOptions) throws ConstructionException {
+    public void assignTasks(EditSession session, UUID player, ConstructionEntry entry, Options options) throws ConstructionException {
         Structure structure = entry.getStructure();
 
         // Only create backups when available
@@ -57,13 +58,10 @@ public class BuildTaskAssigner implements IBuildTaskAssigner {
             }
         }
         
-        
-        
-        
         // 2. TODO PLACE FENCE
         
         // 3. Build
-        entry.addTask(taskFactory.build(session, player, entry.getStructure(), buildOptions));
+        entry.addTask(taskFactory.build(session, player, entry.getStructure(), options));
     }
     
 }

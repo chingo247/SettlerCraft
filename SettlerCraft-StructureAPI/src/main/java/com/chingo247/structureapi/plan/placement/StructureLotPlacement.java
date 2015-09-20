@@ -17,7 +17,7 @@
 
 package com.chingo247.structureapi.plan.placement;
 
-import com.chingo247.structureapi.plan.placement.options.BuildOptions;
+import com.chingo247.structureapi.construction.options.BuildOptions;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 

@@ -32,12 +32,11 @@ import com.chingo247.structureapi.menu.StructurePlanMenuFactory;
 import com.chingo247.structureapi.menu.StructurePlanMenuReader;
 import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.settlercraft.core.persistence.neo4j.Neo4jHelper;
-import com.chingo247.structureapi.construction.task.BuildTaskAssigner;
+import com.chingo247.structureapi.construction.DefaultBuildTaskAssigner;
 import com.chingo247.structureapi.construction.ConstructionManager;
-import com.chingo247.structureapi.construction.task.DemolitionTaskAssigner;
-import com.chingo247.structureapi.construction.IBuildTaskAssigner;
+import com.chingo247.structureapi.construction.DefaultDemolitionTaskAssigner;
+import com.chingo247.structureapi.construction.ITaskAssigner;
 import com.chingo247.structureapi.construction.IConstructionManager;
-import com.chingo247.structureapi.construction.IDemolitionTaskAssigner;
 import com.chingo247.structureapi.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.backupapi.core.IBackupAPI;
 import com.chingo247.backupapi.core.IChunkManager;
@@ -52,11 +51,10 @@ import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.platform.services.AsyncEditSessionFactoryProvider;
 import com.chingo247.structureapi.exception.ConstructionException;
 import com.chingo247.structureapi.plan.placement.SchematicPlacement;
-import com.chingo247.structureapi.plan.placement.options.BuildOptions;
-import com.chingo247.structureapi.plan.placement.options.DemolitionOptions;
+import com.chingo247.structureapi.construction.options.BuildOptions;
+import com.chingo247.structureapi.construction.options.DemolitionOptions;
 import com.chingo247.structureapi.plan.schematic.Schematic;
 import com.chingo247.structureapi.plan.schematic.SchematicManager;
-import com.chingo247.structureapi.StructureRestriction;
 import com.chingo247.xplatform.core.IColors;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
@@ -75,7 +73,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.google.common.collect.Sets;
-import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -89,7 +86,6 @@ import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSessionFactory;
-import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
 
 /**
  *
@@ -105,8 +101,8 @@ public class StructureAPI implements IStructureAPI {
     private IPlugin plugin;
     private IConfigProvider config;
     private IConstructionManager constructionManager;
-    private IBuildTaskAssigner buildTaskAssigner;
-    private IDemolitionTaskAssigner demolitionTaskAssigner;
+    private ITaskAssigner buildTaskAssigner;
+    private ITaskAssigner demolitionTaskAssigner;
     private IChunkManager chunkManager;
     private IBackupAPI backupAPI;
 
@@ -134,8 +130,8 @@ public class StructureAPI implements IStructureAPI {
         this.restrictions = Sets.newHashSet();
         this.structureManagers = Maps.newHashMap();
         this.constructionManager = ConstructionManager.getInstance();
-        this.demolitionTaskAssigner = new DemolitionTaskAssigner();
-        this.buildTaskAssigner = new BuildTaskAssigner();
+        this.demolitionTaskAssigner = new DefaultDemolitionTaskAssigner();
+        this.buildTaskAssigner = new DefaultBuildTaskAssigner();
 
         // Now register the GlobalPlanManager
         this.COLORS = platform.getChatColors();
@@ -397,7 +393,7 @@ public class StructureAPI implements IStructureAPI {
         return false;
     }
 
-    final File getDirectoryForStructure(WorldNode worldNode, StructureNode structureNode) {
+    final File getDirectoryForStructure(WorldNode worldNode, Structure structureNode) {
         File structuresDirectory = getStructuresDirectory(worldNode.getName());
         File structureDir = new File(structuresDirectory, String.valueOf(structureNode.getId()));
         return structureDir;
@@ -428,9 +424,9 @@ public class StructureAPI implements IStructureAPI {
     }
 
     @Override
-    public void build(AsyncEditSession editSession, UUID player, Structure structure, BuildOptions options, IBuildTaskAssigner taskAssigner) throws ConstructionException {
+    public void build(AsyncEditSession editSession, UUID player, Structure structure, BuildOptions options, ITaskAssigner taskAssigner) throws ConstructionException {
         System.out.println("[StructureAPI]: StructureAPI Build!");
-        constructionManager.build(editSession, player, structure, taskAssigner, options);
+        constructionManager.perform(editSession, player, structure, taskAssigner, options);
     }
 
     @Override
@@ -463,8 +459,8 @@ public class StructureAPI implements IStructureAPI {
     }
 
     @Override
-    public void demolish(AsyncEditSession editSession, UUID player, Structure structure, DemolitionOptions options, IDemolitionTaskAssigner taskAssigner) throws ConstructionException {
-        constructionManager.demolish(editSession, player, structure, taskAssigner, options);
+    public void demolish(AsyncEditSession editSession, UUID player, Structure structure, DemolitionOptions options, ITaskAssigner taskAssigner) throws ConstructionException {
+        constructionManager.perform(editSession, player, structure, taskAssigner, options);
     }
 
     @Override
@@ -498,7 +494,7 @@ public class StructureAPI implements IStructureAPI {
 
     @Override
     public void stop(Structure structure, boolean force) throws ConstructionException {
-        constructionManager.stop(structure, force);
+        constructionManager.stop(structure);
     }
 
     @Override

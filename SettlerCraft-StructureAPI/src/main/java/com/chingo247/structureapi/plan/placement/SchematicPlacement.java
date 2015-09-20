@@ -18,7 +18,7 @@
 package com.chingo247.structureapi.plan.placement;
 
 import com.chingo247.settlercraft.core.Direction;
-import com.chingo247.structureapi.plan.placement.options.BuildOptions;
+import com.chingo247.structureapi.construction.options.BuildOptions;
 import com.chingo247.structureapi.plan.schematic.Schematic;
 import com.chingo247.structureapi.plan.schematic.FastClipboard;
 import com.chingo247.structureapi.util.WorldUtil;

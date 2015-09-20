@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.event.handlers;
+package com.chingo247.structureapi.handlers;
 
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.SettlerCraft;
@@ -35,11 +35,11 @@ import com.chingo247.structureapi.IStructureAPI;
 import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.structureapi.model.world.IStructureWorld;
 import com.chingo247.structureapi.model.world.IStructureWorldRepository;
-import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.StructureAPI;
 import com.chingo247.structureapi.plan.IStructurePlan;
 import com.chingo247.structureapi.plan.StructurePlanManager;
-import com.chingo247.structureapi.plan.placement.options.BuildOptions;
+import com.chingo247.structureapi.construction.options.BuildOptions;
+import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.util.PlacementUtil;
 import com.chingo247.structureapi.util.WorldUtil;
 import com.chingo247.xplatform.core.AInventory;
@@ -49,7 +49,6 @@ import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IPlayer;
 import com.chingo247.xplatform.core.IWorld;
 import com.google.common.collect.Maps;
-import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
@@ -236,6 +235,9 @@ public class PlayerPlaceStructureHandler {
                         clone.setAmount(1);
                         iPlayer.getInventory().removeItem(clone);
                         iPlayer.updateInventory();
+                        
+                        
+                        
                         if(!structureAPI.isQueueLocked(player.getUniqueId())) {
                             structureAPI.build(iPlayer.getUniqueId(), structure, new BuildOptions());
                         } else {

@@ -16,11 +16,10 @@
  */
 package com.chingo247.structureapi.construction;
 
-import com.chingo247.structureapi.construction.task.StructureTask;
 import com.chingo247.structureapi.exception.ConstructionException;
 import com.chingo247.structureapi.model.structure.Structure;
-import com.chingo247.structureapi.plan.placement.options.BuildOptions;
-import com.chingo247.structureapi.plan.placement.options.DemolitionOptions;
+import com.chingo247.structureapi.construction.options.DemolitionOptions;
+import com.chingo247.structureapi.construction.options.Options;
 import com.sk89q.worldedit.EditSession;
 import java.io.IOException;
 import java.util.UUID;
@@ -50,7 +49,7 @@ public interface IStructureTaskFactory {
      * @return The structure task
      * @throws Exception 
      */
-    public StructureTask build(EditSession session, UUID player, Structure structure, BuildOptions options) throws ConstructionException;
+    public StructureTask build(EditSession session, UUID player, Structure structure, Options options) throws ConstructionException;
     
     /**
      * Creates a task that will demolish the structure. After the structure is demolished the structure will be removed
@@ -74,7 +73,7 @@ public interface IStructureTaskFactory {
      * @return The structure task
      * @throws Exception 
      */
-    public StructureTask demolish(EditSession session, UUID player, Structure structure, DemolitionOptions options) throws ConstructionException;
+    public StructureTask demolish(EditSession session, UUID player, Structure structure, Options options) throws ConstructionException;
     
     /**
      * Creates a backup of the area

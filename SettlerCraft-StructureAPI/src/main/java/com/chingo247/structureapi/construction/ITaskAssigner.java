@@ -14,24 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.plan.placement.options;
+package com.chingo247.structureapi.construction;
 
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
+import com.chingo247.structureapi.exception.ConstructionException;
+import com.chingo247.structureapi.construction.options.Options;
+import com.sk89q.worldedit.EditSession;
+import java.io.IOException;
+import java.util.UUID;
 
 /**
  *
  * @author Chingo
  */
-public interface BlockPredicate {
+public interface ITaskAssigner {
     
-    /**
-     * Evaluates the position
-     * @param position The relative position to evaluate
-     * @param worldPosition
-     * @param block The block to evaluate
-     * @return true if evaluation expression is true
-     */
-    public boolean evaluate(Vector position, Vector worldPosition, BaseBlock block);
+    public void assignTasks(EditSession session, UUID player, ConstructionEntry entry, Options buildOptions) throws ConstructionException, IOException;
     
 }

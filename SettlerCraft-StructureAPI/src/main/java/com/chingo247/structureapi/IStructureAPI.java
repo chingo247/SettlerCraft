@@ -18,9 +18,8 @@ package com.chingo247.structureapi;
 
 import com.chingo247.menuapi.menu.CategoryMenu;
 import com.chingo247.settlercraft.core.Direction;
-import com.chingo247.structureapi.construction.IBuildTaskAssigner;
+import com.chingo247.structureapi.construction.ITaskAssigner;
 import com.chingo247.structureapi.construction.IConstructionManager;
-import com.chingo247.structureapi.construction.IDemolitionTaskAssigner;
 import com.chingo247.structureapi.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.backupapi.core.IBackupAPI;
 import com.chingo247.backupapi.core.IChunkManager;
@@ -32,11 +31,10 @@ import com.chingo247.structureapi.plan.IStructurePlan;
 import com.chingo247.structureapi.plan.StructurePlanManager;
 import com.chingo247.structureapi.plan.placement.Placement;
 import com.chingo247.structureapi.plan.placement.SchematicPlacement;
-import com.chingo247.structureapi.plan.placement.options.BuildOptions;
-import com.chingo247.structureapi.plan.placement.options.DemolitionOptions;
-import com.chingo247.structureapi.StructureRestriction;
+import com.chingo247.structureapi.construction.options.BuildOptions;
+import com.chingo247.structureapi.construction.options.DemolitionOptions;
+import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.xplatform.core.APlatform;
-import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -141,7 +139,7 @@ public interface IStructureAPI {
      */
     public Structure createSubstructure(Structure structure, Placement placement, World world, Vector position, Direction direction) throws Exception;
     
-    public void build(AsyncEditSession editSession, UUID player, Structure structure, BuildOptions options, IBuildTaskAssigner taskAssigner) throws ConstructionException;
+    public void build(AsyncEditSession editSession, UUID player, Structure structure, BuildOptions options, ITaskAssigner taskAssigner) throws ConstructionException;
     
     public void build(AsyncEditSession editSession, UUID player, Structure structure, BuildOptions options) throws ConstructionException;
     
@@ -151,7 +149,7 @@ public interface IStructureAPI {
     
     public void build(Structure structure) throws ConstructionException;
     
-    public void demolish(AsyncEditSession editSession, UUID player, Structure structure, DemolitionOptions options, IDemolitionTaskAssigner taskAssigner) throws ConstructionException;
+    public void demolish(AsyncEditSession editSession, UUID player, Structure structure, DemolitionOptions options, ITaskAssigner taskAssigner) throws ConstructionException;
     
     public void demolish(AsyncEditSession editSession, UUID player, Structure structure, DemolitionOptions options) throws ConstructionException;
     
@@ -168,8 +166,6 @@ public interface IStructureAPI {
      * @return The ConstructionManager 
      */
     public IConstructionManager getConstructionManager();
-    
-  
     
     /**
      * Gets the StructurePlanManager, alternatively {@link StructurePlanManager#getInstance() } may be used

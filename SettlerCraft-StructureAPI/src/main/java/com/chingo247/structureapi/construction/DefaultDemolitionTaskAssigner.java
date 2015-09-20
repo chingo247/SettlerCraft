@@ -14,14 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction.task;
+package com.chingo247.structureapi.construction;
 
 import com.chingo247.structureapi.construction.ConstructionEntry;
-import com.chingo247.structureapi.construction.IDemolitionTaskAssigner;
+import com.chingo247.structureapi.construction.ITaskAssigner;
 import com.chingo247.structureapi.exception.ConstructionException;
-import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.chingo247.structureapi.model.structure.Structure;
-import com.chingo247.structureapi.plan.placement.options.DemolitionOptions;
+import com.chingo247.structureapi.construction.options.Options;
 import com.sk89q.worldedit.EditSession;
 import java.io.IOException;
 import java.util.UUID;
@@ -30,18 +29,16 @@ import java.util.UUID;
  *
  * @author Chingo
  */
-public class DemolitionTaskAssigner implements IDemolitionTaskAssigner{
+public class DefaultDemolitionTaskAssigner implements ITaskAssigner {
     
     private DefaultStructureTaskFactory taskfactory;
 
-    public DemolitionTaskAssigner() {
+    public DefaultDemolitionTaskAssigner() {
         this.taskfactory = new DefaultStructureTaskFactory();
     }
-    
-    
 
     @Override
-    public void assignTasks(EditSession session, UUID player, ConstructionEntry entry, DemolitionOptions options) throws ConstructionException, IOException {
+    public void assignTasks(EditSession session, UUID player, ConstructionEntry entry, Options options) throws ConstructionException, IOException {
         Structure structure = entry.getStructure();
         if(taskfactory.hasBackup(structure, "restore.snapshot")) {
             System.out.println("[DemolitionTaskAssigner]: HAS BACKUP");

@@ -16,6 +16,7 @@
  */
 package com.chingo247.structureapi.event;
 
+import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.structureapi.model.structure.Structure;
 
 

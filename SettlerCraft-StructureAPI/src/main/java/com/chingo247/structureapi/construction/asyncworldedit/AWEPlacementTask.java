@@ -18,22 +18,16 @@ package com.chingo247.structureapi.construction.asyncworldedit;
 
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
 import com.chingo247.structureapi.construction.ConstructionEntry;
-import com.chingo247.structureapi.construction.task.StructureTask;
-import com.chingo247.structureapi.construction.event.StructureTaskCancelledEvent;
+import com.chingo247.structureapi.construction.StructureTask;
 import com.chingo247.structureapi.construction.event.StructureTaskStartEvent;
 import com.chingo247.structureapi.event.async.StructureJobAddedEvent;
-import com.chingo247.structureapi.exception.ConstructionException;
 import com.chingo247.structureapi.plan.placement.Placement;
-import com.chingo247.structureapi.plan.placement.options.Options;
+import com.chingo247.structureapi.construction.options.Options;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 
 /**
@@ -94,7 +88,7 @@ public class AWEPlacementTask<T extends Options> extends StructureTask {
     }
 
     @Override
-    protected void _start() {
+    protected void execute() {
         final AWEPlacementTask t = this;
         AWEPlacement p = new AWEPlacement(playerEntry, placement, t.getUUID(), new IAWECallback() {
 
@@ -108,7 +102,7 @@ public class AWEPlacementTask<T extends Options> extends StructureTask {
 
             @Override
             public void onCancelled() {
-                _cancel();
+                cancel();
             }
 
             @Override
@@ -122,16 +116,10 @@ public class AWEPlacementTask<T extends Options> extends StructureTask {
     }
 
     @Override
-    protected void _cancel() {
+    protected void onCancel() {
         IBlockPlacer bp = AsyncWorldEditMain.getInstance().getBlockPlacer();
         bp.cancelJob(playerEntry, jobId);
         AWEJobManager.getInstance().remove(this);
-        if (!isCancelled()) { // if not cancelled and thus cancelled by AWE Command
-            try {
-                cancel();
-            } catch (ConstructionException ex) {
-            }
-        }
     }
 
 }

@@ -18,7 +18,7 @@ package com.chingo247.structureapi.construction.asyncworldedit;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.structureapi.plan.placement.Placement;
-import com.chingo247.structureapi.plan.placement.options.Options;
+import com.chingo247.structureapi.construction.options.Options;
 import com.chingo247.xplatform.core.IScheduler;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;

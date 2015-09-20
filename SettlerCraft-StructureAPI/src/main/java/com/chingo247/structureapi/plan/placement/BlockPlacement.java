@@ -19,9 +19,9 @@ package com.chingo247.structureapi.plan.placement;
 
 import com.chingo247.structureapi.construction.StructureBlock;
 import com.chingo247.structureapi.plan.placement.iterator.CuboidIterator;
-import com.chingo247.structureapi.plan.placement.options.BlockMask;
-import com.chingo247.structureapi.plan.placement.options.BlockPredicate;
-import com.chingo247.structureapi.plan.placement.options.Options;
+import com.chingo247.structureapi.construction.options.BlockMask;
+import com.chingo247.structureapi.construction.options.BlockPredicate;
+import com.chingo247.structureapi.construction.options.Options;
 import com.chingo247.structureapi.util.WorldUtil;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
