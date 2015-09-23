@@ -47,7 +47,7 @@ public class BackupEntry implements IBackupEntry {
     private final World world;
     private final UUID uuid;
     private final CuboidRegion region;
-    private final IChunkLoader loader;
+    private final IChunkSaver loader;
     private final IChunkManager manager;
 
     private boolean isDone;
@@ -124,7 +124,7 @@ public class BackupEntry implements IBackupEntry {
             int z = currentChunk.getBlockZ();
             
             long ldTime = System.currentTimeMillis();
-            loader.load(x, z);
+            loader.save(x, z);
             loadTime += System.currentTimeMillis() - ldTime;
             
             long nldTime = System.currentTimeMillis();

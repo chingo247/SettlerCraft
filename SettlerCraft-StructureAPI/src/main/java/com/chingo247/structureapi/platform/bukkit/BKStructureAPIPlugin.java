@@ -112,6 +112,7 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         } 
        
         
+        
         // Get GraphDatabase
         graph = SettlerCraft.getInstance().getNeo4j();
         

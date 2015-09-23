@@ -34,7 +34,7 @@ public interface IChunkManager {
      * @param world The name of the world
      * @return The loader
      */
-    IChunkLoader getHandler(String world);
+    IChunkSaver getHandler(String world);
     
     /**
      * Writes the changes to the disk

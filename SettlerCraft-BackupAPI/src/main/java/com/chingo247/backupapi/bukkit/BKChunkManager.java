@@ -5,7 +5,7 @@
  */
 package com.chingo247.backupapi.bukkit;
 
-import com.chingo247.backupapi.core.IChunkLoader;
+import com.chingo247.backupapi.core.IChunkSaver;
 import com.chingo247.backupapi.core.IChunkManager;
 import net.minecraft.server.v1_8_R1.WorldServer;
 import org.bukkit.Bukkit;
@@ -19,9 +19,9 @@ import org.bukkit.craftbukkit.v1_8_R1.CraftWorld;
 public class BKChunkManager implements IChunkManager  {
 
     @Override
-    public IChunkLoader getHandler(String world) {
+    public IChunkSaver getHandler(String world) {
         World w = Bukkit.getWorld(world);
-        return w == null ? null : new BKChunkLoader(w);
+        return w == null ? null : new BKChunkSaver(w);
     }
 
 

@@ -27,9 +27,9 @@ package com.chingo247.backupapi.core;
  *
  * @author Chingo
  */
-public interface IChunkLoader {
+public interface IChunkSaver {
     
-    void load(int x, int z);
+    void save(int x, int z);
     
     void unload(int x, int z);
     

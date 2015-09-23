@@ -23,7 +23,7 @@
  */
 package com.chingo247.backupapi.bukkit;
 
-import com.chingo247.backupapi.core.IChunkLoader;
+import com.chingo247.backupapi.core.IChunkSaver;
 import net.minecraft.server.v1_8_R1.Chunk;
 import net.minecraft.server.v1_8_R1.WorldServer;
 import org.bukkit.World;
@@ -33,25 +33,39 @@ import org.bukkit.craftbukkit.v1_8_R1.CraftWorld;
  *
  * @author Chingo
  */
-public class BKChunkLoader implements IChunkLoader {
+public class BKChunkSaver implements IChunkSaver {
 
     private final WorldServer server;
     private final World w;
 
-    public BKChunkLoader(World w) {
+    public BKChunkSaver(World w) {
         this.w = w;
         this.server = ((CraftWorld)w).getHandle();
     }
 
     @Override
-    public void load(final int x, final int z) {
+    public void save(final int x, final int z) {
+        // Check if the chunk was loaded
+        boolean wasLoaded = server.chunkProviderServer.isChunkLoaded(x, z);
+        
+        //
+        
         Chunk c = server.chunkProviderServer.loadChunk(x, z);
         if(c == null) {
+            // This should never return null
             c = server.chunkProviderServer.getOrCreateChunk(x, z);
         }
+        
         c.mustSave = true;
         server.chunkProviderServer.saveChunk(c);
         server.chunkProviderServer.saveChunkNOP(c);
+        
+        // If the chunk was not loaded
+        // Then unload it again
+        if(!wasLoaded) {
+           unload(x, z);
+        }
+        
     }
 
     @Override
