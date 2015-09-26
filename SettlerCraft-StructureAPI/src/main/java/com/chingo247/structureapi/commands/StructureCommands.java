@@ -29,16 +29,16 @@ import com.chingo247.settlercraft.core.util.KeyPool;
 import com.chingo247.structureapi.event.StructureAddOwnerEvent;
 import com.chingo247.structureapi.event.StructureRemoveOwnerEvent;
 import com.chingo247.structureapi.exception.ConstructionException;
-import com.chingo247.structureapi.model.owner.IStructureOwner;
-import com.chingo247.structureapi.model.owner.StructureOwnerRepository;
-import com.chingo247.structureapi.model.owner.StructureOwnerType;
+import com.chingo247.structureapi.model.settler.ISettler;
+import com.chingo247.structureapi.model.settler.SettlerRepositiory;
+import com.chingo247.structureapi.model.owner.OwnerType;
 import com.chingo247.structureapi.model.structure.StructureRepository;
 import com.chingo247.structureapi.platform.services.PermissionManager;
 import com.chingo247.structureapi.model.world.StructureWorldRepository;
 import com.chingo247.structureapi.IStructureAPI;
 import com.chingo247.structureapi.model.structure.StructureNode;
-import com.chingo247.structureapi.model.owner.IStructureOwnerRepository;
-import com.chingo247.structureapi.model.owner.IStructureOwnership;
+import com.chingo247.structureapi.model.settler.ISettlerRepository;
+import com.chingo247.structureapi.model.owner.IOwnership;
 import com.chingo247.structureapi.model.structure.IStructureRepository;
 import com.chingo247.structureapi.model.world.IStructureWorldRepository;
 import com.chingo247.structureapi.model.structure.Structure;
@@ -54,6 +54,7 @@ import com.chingo247.structureapi.plan.placement.Placement;
 import com.chingo247.structureapi.plan.placement.SchematicPlacement;
 import com.chingo247.structureapi.construction.options.BuildOptions;
 import com.chingo247.structureapi.construction.options.DemolitionOptions;
+import com.chingo247.structureapi.model.OwnerDomain;
 import com.chingo247.structureapi.plan.schematic.FastClipboard;
 import com.chingo247.structureapi.plan.util.PlanGenerator;
 import com.chingo247.xplatform.core.APlatform;
@@ -107,7 +108,7 @@ public class StructureCommands {
     private final IStructureAPI structureAPI;
     private final IStructureRepository structureRepository;
     private final IStructureWorldRepository worldRepository;
-    private final IStructureOwnerRepository structureOwnerRepository;
+    private final ISettlerRepository structureOwnerRepository;
 
     private final PermissionManager permissionManager;
     private final IColors COLOR;
@@ -126,7 +127,7 @@ public class StructureCommands {
         this.structureRepository = new StructureRepository(graph);
         this.worldRepository = new StructureWorldRepository(graph);
         this.settlerRepository = new BaseSettlerRepository(graph);
-        this.structureOwnerRepository = new StructureOwnerRepository(graph);
+        this.structureOwnerRepository = new SettlerRepositiory(graph);
         this.graph = graph;
         this.console = UUID.randomUUID();
         this.playerPool = new KeyPool<>(executorService);
@@ -207,15 +208,15 @@ public class StructureCommands {
                             break;
                         case "masters":
                             checkIsPlayer(sender);
-                            owner((IPlayer) sender, commandArgs, StructureOwnerType.MASTER);
+                            owner((IPlayer) sender, commandArgs, OwnerType.MASTER);
                             break;
                         case "owners":
                             checkIsPlayer(sender);
-                            owner((IPlayer) sender, commandArgs, StructureOwnerType.OWNER);
+                            owner((IPlayer) sender, commandArgs, OwnerType.OWNER);
                             break;
                         case "members":
                             checkIsPlayer(sender);
-                            owner((IPlayer) sender, commandArgs, StructureOwnerType.MEMBER);
+                            owner((IPlayer) sender, commandArgs, OwnerType.MEMBER);
                             break;
                         case "rotate":
                             schematic(sender, commandArgs);
@@ -598,8 +599,8 @@ public class StructureCommands {
     private String getInfo(StructureNode structure) {
         TreeSet<String> owners = Sets.newTreeSet(ALPHABETICAL_ORDER);
 
-        List<? extends IStructureOwner> mastersNode = structure.getOwners(StructureOwnerType.MASTER);
-        for (IStructureOwner master : mastersNode) {
+        List<? extends ISettler> mastersNode = structure.getOwnerDomain().getOwners(OwnerType.MASTER);
+        for (ISettler master : mastersNode) {
             owners.add(master.getName());
         }
 
@@ -666,7 +667,7 @@ public class StructureCommands {
                 throw new CommandException("Couldn't find a structure for #" + structureIdArg);
             }
 
-            if (!sn.isOwner(player.getUniqueId(), StructureOwnerType.MASTER) && !player.isOP()) {
+            if (!sn.getOwnerDomain().isOwnerOfType(player.getUniqueId(), OwnerType.MASTER) && !player.isOP()) {
                 tx.success();
                 throw new CommandException("You are not the 'MASTER' owner of this structure...");
             }
@@ -716,7 +717,7 @@ public class StructureCommands {
             }
 
             // Player is not the owner!
-            if (!sn.isOwner(player.getUniqueId(), StructureOwnerType.MASTER) && !player.isOP()) {
+            if (!sn.getOwnerDomain().isOwnerOfType(player.getUniqueId(), OwnerType.MASTER) && !player.isOP()) {
                 tx.success();
                 throw new CommandException("You are not the 'MASTER' owner of this structure...");
             }
@@ -765,7 +766,7 @@ public class StructureCommands {
                 throw new CommandException("Couldn't find a structure for #" + structureIdArg);
             }
 
-            if (!sn.isOwner(player.getUniqueId()) && !player.isOP()) {
+            if (!sn.getOwnerDomain().isOwner(player.getUniqueId()) && !player.isOP()) {
                 tx.success();
                 throw new CommandException("You don't own this structure...");
             }
@@ -894,7 +895,7 @@ public class StructureCommands {
 
         long start = System.currentTimeMillis();
         try (Transaction tx = graph.beginTx()) {
-            IStructureOwner structureOwner = structureOwnerRepository.findByUUID(playerId);
+            ISettler structureOwner = structureOwnerRepository.findByUUID(playerId);
 
             long countStart = System.currentTimeMillis();
             long totalStructures = structureOwner.getStructureCount();
@@ -997,13 +998,13 @@ public class StructureCommands {
         return statusString;
     }
 
-    private boolean owner(IPlayer senderPlayer, String[] commandArgs, StructureOwnerType requestedType) throws CommandException {
+    private boolean owner(IPlayer senderPlayer, String[] commandArgs, OwnerType requestedType) throws CommandException {
 
         // /stt owner [structureId] <add|remove> [playerName|playerId]
         String help;
-        if (requestedType == StructureOwnerType.MASTER) {
+        if (requestedType == OwnerType.MASTER) {
             help = "/stt masters [structureId] <add|remove> [playerName|playerId]";
-        } else if (requestedType == StructureOwnerType.OWNER) {
+        } else if (requestedType == OwnerType.OWNER) {
             help = "/stt owners [structureId] <add|remove> [playerName|playerId]";
         } else {
             help = "/stt members [structureId] <add|remove> [playerName|playerId]";
@@ -1031,7 +1032,7 @@ public class StructureCommands {
                 }
 
                 structureName = structure.getName();
-                for (IStructureOwner member : structure.getOwners(requestedType)) {
+                for (ISettler member : structure.getOwnerDomain().getOwners(requestedType)) {
                     ownerships.add(member.getName());
                 }
 
@@ -1057,9 +1058,9 @@ public class StructureCommands {
             }
 
             String ownersString;
-            if (requestedType == StructureOwnerType.MASTER) {
+            if (requestedType == OwnerType.MASTER) {
                 ownersString = "Masters: ";
-            } else if (requestedType == StructureOwnerType.OWNER) {
+            } else if (requestedType == OwnerType.OWNER) {
                 ownersString = "Owners: ";
             } else {
                 ownersString = "Members: ";
@@ -1095,7 +1096,7 @@ public class StructureCommands {
                 throw new CommandException("Couldn't find structure for id #" + structureId);
             }
 
-            IStructureOwnership ownership = structurenode.findOwnership(senderPlayer.getUniqueId());
+            IOwnership ownership = structurenode.getOwnerDomain().getOwnership(senderPlayer.getUniqueId());
 
             if (ownership == null) {
                 tx.success();
@@ -1107,9 +1108,9 @@ public class StructureCommands {
                 throw new CommandException("You don't have enough privileges to " + method + " players of type '" + requestedType.name() + "'");
             }
 
-            if (requestedType == StructureOwnerType.MASTER && ownership.getOwnerType() == requestedType && method.equalsIgnoreCase("remove")) {
+            if (requestedType == OwnerType.MASTER && ownership.getOwnerType() == requestedType && method.equalsIgnoreCase("remove")) {
                 tx.success();
-                throw new CommandException("Players of type '" + StructureOwnerType.MASTER + "' can't remove each other");
+                throw new CommandException("Players of type '" + OwnerType.MASTER + "' can't remove each other");
             }
 
             IPlayer ply;
@@ -1136,7 +1137,7 @@ public class StructureCommands {
                         tx.success();
                         throw new CommandException("Couldn't find a player for id'" + number + "'");
                     }
-                    ply = platform.getPlayer(sn.getUUID());
+                    ply = platform.getPlayer(sn.getUniqueIndentifier());
 
                 } catch (NumberFormatException nfe) {
                     tx.success();
@@ -1147,32 +1148,27 @@ public class StructureCommands {
             UUID uuid = ply.getUniqueId();
             if (method.equalsIgnoreCase("add")) {
                 IBaseSettler settler = settlerRepository.findByUUID(ply.getUniqueId());
-                IStructureOwnership ownershipToAdd = structurenode.findOwnership(settler.getUUID());
+                OwnerDomain ownerDomain = structurenode.getOwnerDomain();
+                IOwnership ownershipToAdd = ownerDomain.getOwnership(settler.getUniqueIndentifier());
 
                 if (ownershipToAdd == null) {
-                    structurenode.addOwner(settler, requestedType);
+                    ownerDomain.updateOwnership(settler, requestedType);
                     EventManager.getInstance().getEventBus().post(new StructureAddOwnerEvent(uuid, new Structure(structurenode), requestedType));
                     senderPlayer.sendMessage("Successfully added '" + COLOR.green() + ply.getName() + COLOR.reset() + "' to #" + COLOR.gold() + structureId + " " + COLOR.blue() + structurenode.getName() + COLOR.reset() + " as " + COLOR.yellow() + requestedType.name());
-                } else if (ownershipToAdd.getOwnerType().getTypeId() < requestedType.getTypeId()) {
-                    structurenode.removeOwner(settler.getUUID());
-                    structurenode.addOwner(settler, requestedType);
-                    EventManager.getInstance().getEventBus().post(new StructureAddOwnerEvent(uuid, new Structure(structurenode), requestedType));
-                    senderPlayer.sendMessage("Upgraded ownership of '" + COLOR.green() + ply.getName() + COLOR.reset() + "' to " + COLOR.yellow() + requestedType.name() + COLOR.reset() + " for structure ",
-                            "#" + COLOR.gold() + ownershipToAdd.getStructure().getId() + " " + COLOR.blue() + ownershipToAdd.getStructure().getName());
                 } else {
-                    throw new CommandException(ply.getName() + " is already an owner of this structure and his ownership couldn't be upgraded");
-                }
+                    ownerDomain.updateOwnership(settler, requestedType);
+                    EventManager.getInstance().getEventBus().post(new StructureAddOwnerEvent(uuid, new Structure(structurenode), requestedType));
+                    senderPlayer.sendMessage("Updated ownership of '" + COLOR.green() + ply.getName() + COLOR.reset() + "' to " + COLOR.yellow() + requestedType.name() + COLOR.reset() + " for structure ",
+                            "#" + COLOR.gold() + structurenode.getId() + " " + COLOR.blue() + structurenode.getName());
+                } 
             } else { // remove
-                boolean isOwner = structurenode.isOwner(uuid);
-                if (isOwner) {
+                OwnerDomain ownerDomain = structurenode.getOwnerDomain();
+                if (!ownerDomain.removeOwnership(uuid)) {
                     senderPlayer.sendMessage(ply.getName() + " does not own this structure...");
                     return true;
                 }
-
-                structurenode.removeOwner(uuid);
                 EventManager.getInstance().getEventBus().post(new StructureRemoveOwnerEvent(uuid, new Structure(structurenode), requestedType));
                 senderPlayer.sendMessage("Successfully removed '" + COLOR.green() + ply.getName() + COLOR.reset() + "' from #" + COLOR.gold() + structureId + " " + COLOR.blue() + structurenode.getName() + " as " + COLOR.yellow() + requestedType.name());
-
             }
 
             tx.success();

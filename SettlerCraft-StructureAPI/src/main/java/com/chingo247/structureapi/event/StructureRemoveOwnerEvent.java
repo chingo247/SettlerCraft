@@ -16,7 +16,7 @@
  */
 package com.chingo247.structureapi.event;
 
-import com.chingo247.structureapi.model.owner.StructureOwnerType;
+import com.chingo247.structureapi.model.owner.OwnerType;
 import com.chingo247.structureapi.model.structure.Structure;
 import java.util.UUID;
 
@@ -27,9 +27,9 @@ import java.util.UUID;
 public class StructureRemoveOwnerEvent extends StructureEvent {
     
     private final UUID removedOwner;
-    private final StructureOwnerType ownerType;
+    private final OwnerType ownerType;
 
-    public StructureRemoveOwnerEvent(UUID removedOwner, Structure structure, StructureOwnerType type) {
+    public StructureRemoveOwnerEvent(UUID removedOwner, Structure structure, OwnerType type) {
         super(structure);
         this.removedOwner = removedOwner;
         this.ownerType = type;
@@ -47,7 +47,7 @@ public class StructureRemoveOwnerEvent extends StructureEvent {
      * Gets the type of the owner
      * @return The ownertype
      */
-    public StructureOwnerType getOwnerType() {
+    public OwnerType getOwnerType() {
         return ownerType;
     }
     

@@ -28,7 +28,7 @@ import com.chingo247.structureapi.construction.event.StructureTaskStartEvent;
 import com.chingo247.structureapi.event.StructureStateChangeEvent;
 import com.chingo247.structureapi.event.async.StructureJobAddedEvent;
 import com.chingo247.structureapi.exception.ConstructionException;
-import com.chingo247.structureapi.model.owner.StructureOwnerNode;
+import com.chingo247.structureapi.model.settler.Settler;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.chingo247.structureapi.model.structure.IStructureRepository;
 import com.chingo247.structureapi.model.structure.Structure;
@@ -36,6 +36,7 @@ import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.structureapi.model.structure.StructureRelations;
 import com.chingo247.structureapi.model.structure.StructureRepository;
 import com.chingo247.structureapi.construction.options.Options;
+import com.chingo247.structureapi.model.owner.Ownership;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IPlayer;
@@ -424,9 +425,9 @@ public class ConstructionManager implements IConstructionManager {
             StructureNode sn = new StructureNode(structure.getNode());
             sn.setStatus(newStatus);
 
-            List<StructureOwnerNode> settlers = sn.getOwners();
-            for (StructureOwnerNode settlerNode : settlers) {
-                IPlayer ply = platform.getPlayer(settlerNode.getUUID());
+            List<Ownership> ownerships = sn.getOwnerDomain().getOwnerships();
+            for (Ownership ownership : ownerships) {
+                IPlayer ply = platform.getPlayer(ownership.getOwner().getUniqueIndentifier());
                 if (ply != null) {
                     owners.add(ply);
                 }

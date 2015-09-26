@@ -104,14 +104,14 @@ public class BaseSettlerRepository implements IBaseSettlerRepository {
     public BaseSettlerNode addSettler(IBaseSettler baseSettler) throws SettlerException {
         BaseSettlerNode settler = null;
         try(Transaction tx = graph.beginTx()) {
-            if(findByUUID(baseSettler.getUUID()) != null) {
+            if(findByUUID(baseSettler.getUniqueIndentifier()) != null) {
                 throw new SettlerException("Settler already exists!");
             }
             
             
             Long id = nextId();
             Node settlerNode = graph.createNode(BaseSettlerNode.label());
-            settlerNode.setProperty(BaseSettlerNode.UUID_PROPERTY, baseSettler.getUUID().toString());
+            settlerNode.setProperty(BaseSettlerNode.UUID_PROPERTY, baseSettler.getUniqueIndentifier().toString());
             settlerNode.setProperty(BaseSettlerNode.NAME_PROPERTY, baseSettler.getName());
             settlerNode.setProperty(BaseSettlerNode.ID_PROPERTY, id);
             

@@ -14,40 +14,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.core.model.interfaces;
+package com.chingo247.structureapi.model.owner;
 
-import java.util.UUID;
+import com.chingo247.structureapi.model.settler.Settler;
+import com.chingo247.structureapi.model.structure.StructureNode;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 
 /**
- *
+ *  Classes that implement this interface discribe the relation between one structure and an owner
  * @author Chingo
  */
-public interface IBaseSettler extends IdentifiableNode<UUID>{
-    
-    
-    /**
-     * The id assigned to this Settler
-     * @return The id
-     */
-    public Long getId();
+public interface IOwnership {
     
     /**
-     * The UUID, if this Settler was a player the UUID is equal to {@link com.sk89q.worldedit.entity.Player#getUniqueId()}
-     * @return The UUID
+     * Gets the owner
+     * @return The owner
      */
-    @Override
-    public UUID getUniqueIndentifier();
+    public Settler getOwner();
     
     /**
-     * The name of this Settler
-     * @return The name of this Settler
+     * Gets the ownership type
+     * @return The ownershiptype
      */
-    public String getName();
+    public OwnerType getOwnerType();
     
     /**
-     * Returns the Node representing this Settler
-     * @return The Node
+     * Gets the relation
+     * @return The relation
      */
-    public Node getNode();
+    public Relationship getRelation();
+    
+    /**
+     * Gets the other node
+     * @return The other node
+     */
+    public Node getOtherNode();
+    
 }

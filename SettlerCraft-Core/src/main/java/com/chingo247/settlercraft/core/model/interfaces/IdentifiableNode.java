@@ -14,21 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.model.structure;
+package com.chingo247.settlercraft.core.model.interfaces;
+
+import org.neo4j.graphdb.Node;
 
 /**
  *
  * @author Chingo
  */
-public class StructureRelations {
+public interface IdentifiableNode<K> {
     
-    /**
-     * Should point to it's container
-     */
-    public static final String RELATION_WITHIN = "Within";
-    /**
-     * Should point to it's parent
-     */
-    public static final String RELATION_SUBSTRUCTURE = "SubstructureOf";
+    K getUniqueIndentifier();
+    
+    Node getNode();
     
 }

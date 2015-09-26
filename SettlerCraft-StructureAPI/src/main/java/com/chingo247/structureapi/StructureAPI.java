@@ -122,7 +122,7 @@ public class StructureAPI implements IStructureAPI {
 
     private final IColors COLORS;
     private Level logLevel;
-    private final Map<String, StructureManager> structureManagers;
+    private final Map<String, WorldManager> structureManagers;
 
     private StructureAPI() {
         this.platform = SettlerCraft.getInstance().getPlatform();
@@ -161,15 +161,15 @@ public class StructureAPI implements IStructureAPI {
     }
 
     /**
-     * Gets the {@link StructureManager} for a world, never returns null
+     * Gets the {@link WorldManager} for a world, never returns null
      *
      * @param w The world
      * @return The StructureManager
      */
-    private synchronized StructureManager getStructureManager(World w) {
-        StructureManager structureManager = structureManagers.get(w.getName());
+    private synchronized WorldManager getStructureManager(World w) {
+        WorldManager structureManager = structureManagers.get(w.getName());
         if (structureManager == null) {
-            structureManager = new StructureManager(w, instance);
+            structureManager = new WorldManager(w, instance);
             structureManagers.put(w.getName(), structureManager);
         }
         return structureManager;
@@ -275,49 +275,49 @@ public class StructureAPI implements IStructureAPI {
 
     @Override
     public Structure createStructure(IStructurePlan plan, World world, Vector position, Direction direction, Player owner) throws StructureException {
-        StructureManager structureManager = getStructureManager(world);
+        WorldManager structureManager = getStructureManager(world);
         return structureManager.createStructure(null, plan, position, direction, owner);
     }
 
     @Override
     public Structure createStructure(IStructurePlan plan, World world, Vector position, Direction direction) throws StructureException {
-        StructureManager structureManager = getStructureManager(world);
+        WorldManager structureManager = getStructureManager(world);
         return structureManager.createStructure(null, plan, position, direction, null);
     }
 
     @Override
     public Structure createStructure(Placement placement, World world, Vector position, Direction direction) throws StructureException {
-        StructureManager structureManager = getStructureManager(world);
+        WorldManager structureManager = getStructureManager(world);
         return structureManager.createStructure(null, placement, position, direction, null);
     }
 
     @Override
     public Structure createStructure(Placement placement, World world, Vector position, Direction direction, Player owner) throws StructureException {
-        StructureManager structureManager = getStructureManager(world);
+        WorldManager structureManager = getStructureManager(world);
         return structureManager.createStructure(null, placement, position, direction, owner);
     }
 
     @Override
     public Structure createSubstructure(Structure parent, IStructurePlan plan, World world, Vector position, Direction direction, Player owner) throws StructureException {
-        StructureManager structureManager = getStructureManager(world);
+        WorldManager structureManager = getStructureManager(world);
         return structureManager.createStructure(parent, plan, position, direction, owner);
     }
 
     @Override
     public Structure createSubstructure(Structure parent, IStructurePlan plan, World world, Vector position, Direction direction) throws StructureException {
-        StructureManager structureManager = getStructureManager(world);
+        WorldManager structureManager = getStructureManager(world);
         return structureManager.createStructure(parent, plan, position, direction, null);
     }
 
     @Override
     public Structure createSubstructure(Structure parent, Placement placement, World world, Vector position, Direction direction, Player owner) throws StructureException {
-        StructureManager structureManager = getStructureManager(world);
+        WorldManager structureManager = getStructureManager(world);
         return structureManager.createStructure(parent, placement, position, direction, owner);
     }
 
     @Override
     public Structure createSubstructure(Structure parent, Placement placement, World world, Vector position, Direction direction) throws StructureException {
-        StructureManager structureManager = getStructureManager(world);
+        WorldManager structureManager = getStructureManager(world);
         return structureManager.createStructure(parent, placement, position, direction, null);
     }
 

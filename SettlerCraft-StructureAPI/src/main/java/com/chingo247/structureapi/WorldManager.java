@@ -22,10 +22,10 @@ import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.structureapi.event.StructureCreateEvent;
 import com.chingo247.structureapi.exception.StructureException;
-import com.chingo247.structureapi.model.owner.StructureOwnerNode;
-import com.chingo247.structureapi.model.owner.StructureOwnerRepository;
-import com.chingo247.structureapi.model.owner.StructureOwnerType;
-import com.chingo247.structureapi.model.owner.StructureOwnershipRelation;
+import com.chingo247.structureapi.model.settler.Settler;
+import com.chingo247.structureapi.model.settler.SettlerRepositiory;
+import com.chingo247.structureapi.model.owner.OwnerType;
+import com.chingo247.structureapi.model.owner.Ownership;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.structureapi.model.structure.StructureRepository;
@@ -47,6 +47,8 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -61,29 +63,31 @@ import org.neo4j.graphdb.Transaction;
  *
  * @author Chingo
  */
-public class StructureManager {
+public class WorldManager {
 
     private final World world;
     private final StructureAPI structureAPI;
     private final APlatform platform;
     private final StructureWorldRepository structureWorldRepository;
     private final StructureRepository structureRepository;
-    private final StructureOwnerRepository structureOwnerRepository;
+    private final SettlerRepositiory structureOwnerRepository;
     private final GraphDatabaseService graph;
+    private final Lock worldLock;
 
     /**
      * Constructor
      *
      * @param world The world this StructureManager will 'Manage'
      */
-    StructureManager(World world, StructureAPI structureAPI) {
+    WorldManager(World world, StructureAPI structureAPI) {
         this.graph = SettlerCraft.getInstance().getNeo4j();
         this.world = world;
         this.structureAPI = structureAPI;
         this.platform = structureAPI.getPlatform();
         this.structureWorldRepository = new StructureWorldRepository(graph);
         this.structureRepository = new StructureRepository(graph);
-        this.structureOwnerRepository = new StructureOwnerRepository(graph);
+        this.structureOwnerRepository = new SettlerRepositiory(graph);
+        this.worldLock = new ReentrantLock();
     }
 
     /**
@@ -189,7 +193,7 @@ public class StructureManager {
                 moveResources(worldNode, structure, structurePlan);
             } catch (IOException ex) {
                 structureDirectory.delete();
-                Logger.getLogger(StructureManager.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
             }
             
 
@@ -236,17 +240,17 @@ public class StructureManager {
 
         // Add owner!
         if (owner != null  && structureNode != null) {
-            StructureOwnerNode settler = structureOwnerRepository.findByUUID(owner.getUniqueId());
+            Settler settler = structureOwnerRepository.findByUUID(owner.getUniqueId());
             if (settler == null) {
                 throw new RuntimeException("Settler was null!"); // SHOULD NEVER HAPPEN AS SETTLERS ARE ADDED AT MOMENT OF FIRST LOGIN
             }
-            structureNode.addOwner(settler, StructureOwnerType.MASTER);
+            structureNode.getOwnerDomain().updateOwnership(settler, OwnerType.MASTER);
         }
 
         // Inherit ownership if there is a parent
         if (parentNode != null  && structureNode != null) {
-            for (StructureOwnershipRelation rel : parentNode.getOwnerships()) {
-                structureNode.addOwner(rel.getOwner(), rel.getOwnerType());
+            for (Ownership ownership : parentNode.getOwnerDomain().getOwnerships()) {
+                structureNode.getOwnerDomain().updateOwnership(ownership.getOwner(), ownership.getOwnerType());
             }
         }
         

@@ -16,41 +16,39 @@
  */
 package com.chingo247.structureapi.model.owner;
 
+import com.chingo247.structureapi.model.settler.Settler;
 import com.chingo247.structureapi.model.structure.StructureNode;
+import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
 /**
  * Defines a relation between a Structure and an (Structure)Owner. All operations in this class require an active transaction.
  * @author Chingo
  */
-public class StructureOwnershipRelation implements IStructureOwnership {
+public class Ownership implements IOwnership {
     
-    private final StructureNode structure;
-    private final StructureOwnerNode owner;
+    private final Settler owner;
     private final Relationship rel;
 
-    public StructureOwnershipRelation(StructureNode structure, StructureOwnerNode owner, Relationship relation) {
-        this.structure = structure;
+    public Ownership(Settler owner, Relationship relation) {
         this.owner = owner;
         this.rel = relation;
     }
     
-    
-
-    @Override
-    public StructureNode getStructure() {
-        return structure;
+    public Node getOtherNode() {
+        return rel.getOtherNode(owner.getNode());
     }
 
+
     @Override
-    public StructureOwnerNode getOwner() {
+    public Settler getOwner() {
         return owner;
     }
 
     @Override
-    public StructureOwnerType getOwnerType() {
+    public OwnerType getOwnerType() {
         Integer typeProp = (Integer) rel.getProperty("Type");
-        StructureOwnerType t = StructureOwnerType.match(typeProp);
+        OwnerType t = OwnerType.match(typeProp);
         return t;
     }
 

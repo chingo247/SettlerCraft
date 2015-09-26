@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.structureapi.model.owner;
+package com.chingo247.structureapi.model.settler;
 
 import com.chingo247.settlercraft.core.model.BaseSettlerRepository;
 import com.chingo247.settlercraft.core.model.interfaces.IBaseSettler;
@@ -14,27 +14,27 @@ import org.neo4j.graphdb.GraphDatabaseService;
  * Defines methods to find nodes that represent a StructureOwner. All methods in this class require an active Transaction.
  * @author Chingo
  */
-public class StructureOwnerRepository extends BaseSettlerRepository implements IStructureOwnerRepository {
+public class SettlerRepositiory extends BaseSettlerRepository implements ISettlerRepository {
 
 
-    public StructureOwnerRepository(GraphDatabaseService graph) {
+    public SettlerRepositiory(GraphDatabaseService graph) {
         super(graph);
     }
 
     @Override
-    public StructureOwnerNode findByUUID(UUID uuid) {
+    public Settler findByUUID(UUID uuid) {
         IBaseSettler settler = super.findByUUID(uuid);
         if(settler != null) {
-            return new StructureOwnerNode(settler.getNode());
+            return new Settler(settler.getNode());
         }
         return null;
     }
 
     @Override
-    public StructureOwnerNode findById(Long id) {
+    public Settler findById(Long id) {
         IBaseSettler settler = super.findById(id);
         if(settler != null) {
-            return new StructureOwnerNode(settler.getNode());
+            return new Settler(settler.getNode());
         }
         return null;
     }

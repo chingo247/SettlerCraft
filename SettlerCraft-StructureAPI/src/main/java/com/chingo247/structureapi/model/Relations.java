@@ -14,21 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.model.structure;
+package com.chingo247.structureapi.model;
 
 /**
  *
  * @author Chingo
  */
-public class StructureRelations {
+public class Relations {
     
     /**
-     * Should point to it's container
+     * Should point to it's owner
      */
-    public static final String RELATION_WITHIN = "Within";
-    /**
-     * Should point to it's parent
-     */
-    public static final String RELATION_SUBSTRUCTURE = "SubstructureOf";
+    public static final String RELATION_OWNED_BY = "OwnedBy";
     
 }

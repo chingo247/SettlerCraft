@@ -23,10 +23,11 @@ import com.chingo247.settlercraft.core.model.BaseSettlerNode;
 import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.settlercraft.core.util.XXHasher;
+import com.chingo247.structureapi.model.OwnerDomain;
 import com.chingo247.structureapi.model.structure.IStructureRepository;
 import com.chingo247.structureapi.model.world.IStructureWorldRepository;
-import com.chingo247.structureapi.model.owner.StructureOwnerNode;
-import com.chingo247.structureapi.model.owner.StructureOwnerType;
+import com.chingo247.structureapi.model.settler.Settler;
+import com.chingo247.structureapi.model.owner.OwnerType;
 import com.chingo247.structureapi.model.structure.StructureRepository;
 import com.chingo247.structureapi.model.structure.StructureRelations;
 import com.chingo247.structureapi.model.world.StructureWorldRepository;
@@ -41,6 +42,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.google.common.collect.Lists;
+import java.util.UUID;
+import org.bukkit.Bukkit;
+import org.bukkit.Statistic;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
@@ -69,6 +73,7 @@ public class StructureInvalidator {
         this.structureRepository = new StructureRepository(graph);
         this.economy = economyProvider;
         this.structureWorldRepository = new StructureWorldRepository(graph);
+        
     }
 
     private File getSessionFile(IWorld world) {
@@ -225,10 +230,11 @@ public class StructureInvalidator {
                 System.out.println("[SettlerCraft]: Refunding players which own invalid structures within " + world.getName());
                 for (StructureNode sn : structureNodes) {
                     if (sn.getPrice() > 0 && !sn.isAutoremoved()) {
-                        List<StructureOwnerNode> masters = sn.getOwners(StructureOwnerType.MASTER);
+                        OwnerDomain ownerDomain = sn.getOwnerDomain();
+                        List<Settler> masters = ownerDomain.getOwners(OwnerType.MASTER);
                         double pricePerOwner = sn.getPrice() / masters.size();
                         for (BaseSettlerNode settler : masters) {
-                            economy.give(settler.getUUID(), pricePerOwner);
+                            economy.give(settler.getUniqueIndentifier(), pricePerOwner);
                             System.out.println("[SettlerCraft]: Refunded " + ShopUtil.valueString(pricePerOwner) + " to " + settler.getName()
                                     + " for structure #" + sn.getId() + " (" + ShopUtil.valueString(sn.getPrice()) + ")");
                         }

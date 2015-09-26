@@ -16,37 +16,34 @@
  */
 package com.chingo247.structureapi.model.owner;
 
-import com.chingo247.structureapi.model.structure.StructureNode;
-import org.neo4j.graphdb.Relationship;
-
 /**
- *  Classes that implement this interface discribe the relation between one structure and an owner
+ * Defines the variety of owner types.
  * @author Chingo
  */
-public interface IStructureOwnership {
+public enum OwnerType {
     
-    /**
-     * Gets the structure
-     * @return The structure
-     */
-    public StructureNode getStructure();
+    MEMBER(0),
+    OWNER(1),
+    MASTER(2);
     
-    /**
-     * Gets the owner
-     * @return The owner
-     */
-    public StructureOwnerNode getOwner();
+    private final int id;
+
+    private OwnerType(int id) {
+        this.id = id;
+    }
+
+    public int getTypeId() {
+        return id;
+    }
     
-    /**
-     * Gets the ownership type
-     * @return The ownershiptype
-     */
-    public StructureOwnerType getOwnerType();
-    
-    /**
-     * Gets the relation
-     * @return The relation
-     */
-    public Relationship getRelation();
+    public static OwnerType match(int id) {
+        switch(id) {
+            case 0: return MEMBER;
+            case 1: return OWNER;
+            case 2: return MASTER;
+            default: throw new AssertionError("Unreachable");
+        }
+        
+    }
     
 }

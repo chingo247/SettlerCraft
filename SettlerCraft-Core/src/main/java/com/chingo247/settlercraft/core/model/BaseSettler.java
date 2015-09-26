@@ -6,6 +6,7 @@
 package com.chingo247.settlercraft.core.model;
 
 import com.chingo247.settlercraft.core.model.interfaces.IBaseSettler;
+import com.chingo247.settlercraft.core.model.interfaces.IdentifiableNode;
 import java.util.UUID;
 import org.neo4j.graphdb.Node;
 
@@ -28,7 +29,7 @@ public class BaseSettler implements IBaseSettler {
     public BaseSettler(BaseSettlerNode settlerNode) {
         this.underlyingNode = settlerNode.getNode();
         this.id = settlerNode.getId();
-        this.uuid = settlerNode.getUUID();
+        this.uuid = settlerNode.getUniqueIndentifier();
         this.name = settlerNode.getName();
     }
 
@@ -38,7 +39,7 @@ public class BaseSettler implements IBaseSettler {
     }
 
     @Override
-    public UUID getUUID() {
+    public UUID getUniqueIndentifier() {
         return uuid;
     }
 

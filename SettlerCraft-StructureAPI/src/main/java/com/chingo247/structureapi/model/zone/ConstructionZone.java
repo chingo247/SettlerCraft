@@ -16,7 +16,7 @@
  */
 package com.chingo247.structureapi.model.zone;
 
-import com.sk89q.worldedit.regions.CuboidRegion;
+import com.chingo247.structureapi.model.plot.Plot;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -25,17 +25,18 @@ import org.neo4j.graphdb.Node;
  *
  * @author ching
  */
-public class ConstructionZone {
+public class ConstructionZone extends Plot {
     
     public static final String LABEL = "CONSTRUCTION_ZONE";
-    public static final String MIN_X_PROPERTY = "minX", MIN_Y_PROPERTY = "minY", MIN_Z_PROPERTY = "minZ", MAX_X_PROPERTY = "maxX", MAX_Y_PROPERTY = "maxY", MAX_Z_PROPERTY = "maxZ";
     
     public static Label label() {
         return DynamicLabel.label(LABEL);
     }
-    
+
     public ConstructionZone(Node node) {
-        
+        super(node);
     }
+    
+    
     
 }

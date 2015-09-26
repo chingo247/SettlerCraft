@@ -56,6 +56,7 @@ import com.sk89q.worldedit.blocks.ItemType;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -88,20 +89,19 @@ public class PlayerPlaceStructureHandler {
         this.color = platform.getChatColors();
         this.structureWorldRepository = new StructureWorldRepository(SettlerCraft.getInstance().getNeo4j());
     }
-    
+
     public void handleDeselect(Player player) {
-        
-        
-        if(CUISelectionManager.getInstance().hasSelection(player)) {
+
+        if (CUISelectionManager.getInstance().hasSelection(player)) {
             CUISelectionManager.getInstance().deselect(player);
         }
-        if(HologramSelectionManager.getInstance().hasHologramsProvider() && HologramSelectionManager.getInstance().hasSelection(player)) {
+        if (HologramSelectionManager.getInstance().hasHologramsProvider() && HologramSelectionManager.getInstance().hasSelection(player)) {
             HologramSelectionManager.getInstance().deselect(player);
         }
-        if(NoneSelectionManager.getInstance().hasSelection(player)) {
+        if (NoneSelectionManager.getInstance().hasSelection(player)) {
             NoneSelectionManager.getInstance().deselect(player);
         }
-        
+
     }
 
     public void handle(final AItemStack planItem, final Player player, final World world, final Vector pos) {
@@ -162,7 +162,7 @@ public class PlayerPlaceStructureHandler {
                         } else {
                             player.print(color.red() + "Removed invalid structure plans from your inventory");
                         }
-                        
+
                         iPlayer.getInventory().removeItem(planItem);
 
                         return;
@@ -178,7 +178,7 @@ public class PlayerPlaceStructureHandler {
 
     private void handlePlace(IStructurePlan plan, AItemStack item, Player player, World world, Vector pos1, ISelectionManager selectionManager) {
         IPlayer iPlayer = SettlerCraft.getInstance().getPlatform().getPlayer(player.getUniqueId());
-        
+
         Direction direction = WorldUtil.getDirection(iPlayer.getYaw());
         Vector pos2;
 
@@ -196,7 +196,7 @@ public class PlayerPlaceStructureHandler {
         // If player has NOT selected anything yet... make a new selection
         if (!selectionManager.hasSelection(player)) {
             selectionManager.select(player, pos1, pos2);
-            if(!(selectionManager instanceof NoneSelectionManager)) {
+            if (!(selectionManager instanceof NoneSelectionManager)) {
                 player.print(color.yellow() + "Left-Click " + color.reset() + " in the " + color.green() + " green " + color.reset() + "square to " + color.yellow() + "confirm");
                 player.print(color.yellow() + "Right-Click " + color.reset() + "to" + color.yellow() + " deselect");
             }
@@ -235,10 +235,8 @@ public class PlayerPlaceStructureHandler {
                         clone.setAmount(1);
                         iPlayer.getInventory().removeItem(clone);
                         iPlayer.updateInventory();
-                        
-                        
-                        
-                        if(!structureAPI.isQueueLocked(player.getUniqueId())) {
+
+                        if (!structureAPI.isQueueLocked(player.getUniqueId())) {
                             structureAPI.build(iPlayer.getUniqueId(), structure, new BuildOptions());
                         } else {
                             player.printError("Your queue is locked at the moment, try '/stt build " + structure.getId() + "' when your queue is unlocked");
@@ -248,15 +246,14 @@ public class PlayerPlaceStructureHandler {
                     player.print(color.red() + ex.getMessage());
                 } catch (Exception ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
-                } 
+                }
                 selectionManager.deselect(player);
-                
 
             }
         } else {
             selectionManager.deselect(player);
             selectionManager.select(player, pos1, pos2);
-            if(!(selectionManager instanceof NoneSelectionManager)) {
+            if (!(selectionManager instanceof NoneSelectionManager)) {
                 player.print(color.yellow() + "Left-Click " + color.reset() + " in the " + color.green() + " green " + color.reset() + "square to " + color.yellow() + "confirm");
                 player.print(color.yellow() + "Right-Click " + color.reset() + "to" + color.yellow() + " deselect");
             }
@@ -287,7 +284,7 @@ public class PlayerPlaceStructureHandler {
                     + " RETURN s as structure"
                     + " ORDER BY s." + StructureNode.SIZE_PROPERTY + " ASC "
                     + " LIMIT 1";
-            System.out.println("QUERY: "+ query);
+            System.out.println("QUERY: " + query);
 
             Result result = graph.execute(query, params);
             StructureNode structureNode = null;
@@ -299,13 +296,13 @@ public class PlayerPlaceStructureHandler {
             }
 
             if (structureNode != null) {
-                isOwner = structureNode.isOwner(player.getUniqueId());
+                isOwner = structureNode.getOwnerDomain().isOwner(player.getUniqueId());
             }
 
             tx.success();
         }
-        
-        if(structure != null && !structureAPI.getConfig().isSubstructuresAllowed()) {
+
+        if (structure != null && !structureAPI.getConfig().isSubstructuresAllowed()) {
             throw new StructureException("Placing substructures is disabled");
         }
 
@@ -364,11 +361,10 @@ public class PlayerPlaceStructureHandler {
                     if (s.contains("FREE")) {
                         return 0;
                     }
-                    
-                    
+
                     int modifier = 1;
                     try {
-                        if(s.contains("M")) {
+                        if (s.contains("M")) {
                             s = s.substring(0, s.indexOf("M"));
                             modifier = 1_000_000;
                         } else if (s.contains("K")) {
@@ -402,21 +398,22 @@ public class PlayerPlaceStructureHandler {
         }
 
         try (Transaction tx = graph.beginTx()) {
-            List<StructureNode> overlappingStructure;
+            StructureNode overlappingStructure = null;
             if (possibleParent != null) {
                 Node n = possibleParent.getNode();
                 StructureNode sn = new StructureNode(n);
-                overlappingStructure = sn.getSubStructuresWithin(new CuboidRegion(min, max), 1);
+                Iterator<StructureNode> subIt = sn.getSubStructuresWithin(new CuboidRegion(min, max)).iterator();
+                overlappingStructure = subIt.hasNext() ? subIt.next() : null;
             } else {
                 IWorld iw = platform.getServer().getWorld(world.getName());
-                IStructureWorld sw = structureWorldRepository.registerWorld(iw.getName(),iw.getUUID());
-                overlappingStructure = sw.getStructuresWithin(new CuboidRegion(min, max), 1);
+                IStructureWorld sw = structureWorldRepository.registerWorld(iw.getName(), iw.getUUID());
+                Iterator<StructureNode> subIt = sw.getStructuresWithin(new CuboidRegion(min, max), 1).iterator();
+                overlappingStructure = subIt.hasNext() ? subIt.next() : null;
             }
 
-            if (overlappingStructure != null && !overlappingStructure.isEmpty()) {
-                StructureNode n = overlappingStructure.get(0);
-                CuboidRegion overlappingArea = n.getCuboidRegion();
-                player.printError("Can't place structure, structure would overlap structure #" + n.getId() + " - " + n.getName() + "\n"
+            if (overlappingStructure != null) {
+                CuboidRegion overlappingArea = overlappingStructure.getCuboidRegion();
+                player.printError("Can't place structure, structure would overlap structure #" + overlappingStructure.getId() + " - " + overlappingStructure.getName() + "\n"
                         + "Located at min: " + overlappingArea.getMinimumPoint() + ", max: " + overlappingArea.getMaximumPoint());
                 tx.success();
                 return false;

@@ -14,36 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.model.owner;
+package com.chingo247.structureapi.model.plot;
+
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.regions.CuboidRegion;
 
 /**
- * Defines the variety of owner types.
+ *
  * @author Chingo
  */
-public enum StructureOwnerType {
+public interface IPlot {
     
-    MEMBER(0),
-    OWNER(1),
-    MASTER(2);
+    Vector getMin();
     
-    private final int id;
-
-    private StructureOwnerType(int id) {
-        this.id = id;
-    }
-
-    public int getTypeId() {
-        return id;
-    }
+    Vector getMax();
     
-    public static StructureOwnerType match(int id) {
-        switch(id) {
-            case 0: return MEMBER;
-            case 1: return OWNER;
-            case 2: return MASTER;
-            default: throw new AssertionError("Unreachable");
-        }
-        
-    }
+    CuboidRegion getCuboidRegion();
     
 }

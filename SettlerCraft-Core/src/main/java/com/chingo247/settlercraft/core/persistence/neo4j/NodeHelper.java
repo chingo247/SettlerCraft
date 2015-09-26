@@ -16,8 +16,8 @@
  */
 package com.chingo247.settlercraft.core.persistence.neo4j;
 
-import com.chingo247.settlercraft.core.model.interfaces.IFactory;
 import com.chingo247.settlercraft.core.model.interfaces.IPredicate;
+import com.google.common.base.Preconditions;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
@@ -73,11 +73,11 @@ public class NodeHelper {
         }
         return defaultValue;
     }
-    
+
     public static <T> T getSingle(Node node, RelationshipType type, Direction direction, Class<T> clazz) {
-        
+
         Relationship r = node.getSingleRelationship(type, direction);
-        if(r != null) {
+        if (r != null) {
             Node n = r.getOtherNode(node);
             try {
                 return clazz.getConstructor(Node.class).newInstance(n);
@@ -87,7 +87,7 @@ public class NodeHelper {
         }
         return null;
     }
-    
+
     public static <T> Iterable<T> makeIterable(final Iterable<Node> nodes, final Class<T> clazz) {
         final Iterator<Node> nodeIt = nodes.iterator();
         try {
@@ -169,5 +169,29 @@ public class NodeHelper {
     public static <T> Iterable<T> makeIterable(final Node thisNode, final Iterable<Relationship> nodes, final Class<T> clazz) {
         return makeIterable(thisNode, nodes, clazz, null);
     }
+
+    public static <T> boolean remove(final Node node, final Iterable<Relationship> nodes, final Class<T> clazz, IPredicate<T> predicate) {
+        Preconditions.checkNotNull(predicate, "Predicate may not be null");
+        try {
+            Constructor<T> c = clazz.getConstructor(Node.class);
+            for (Iterator<Relationship> iterator = nodes.iterator(); iterator.hasNext();) {
+                Relationship next = iterator.next();
+
+                Node otherNode = next.getOtherNode(node);
+                T other = c.newInstance(otherNode);
+                if (predicate.evaluate(other)) {
+                    next.delete();
+                    return true;
+                }
+            }
+        } catch (NoSuchMethodException | SecurityException ex) {
+            throw new RuntimeException(ex);
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            Logger.getLogger(NodeHelper.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
+    }
+    
+    
 
 }

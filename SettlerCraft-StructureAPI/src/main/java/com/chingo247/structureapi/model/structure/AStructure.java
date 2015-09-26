@@ -17,6 +17,7 @@
 package com.chingo247.structureapi.model.structure;
 
 import com.chingo247.structureapi.StructureAPI;
+import com.chingo247.structureapi.model.plot.Plot;
 import com.chingo247.structureapi.plan.IStructurePlan;
 import com.chingo247.structureapi.plan.StructurePlanReader;
 import com.chingo247.structureapi.util.WorldUtil;
@@ -28,11 +29,12 @@ import org.neo4j.graphdb.Node;
  *
  * @author Chingo
  */
-public abstract class AStructure implements IStructure {
+public abstract class AStructure extends Plot implements IStructure {
 
     protected final Node underlyingNode;
     
     public AStructure(Node node) {
+        super(node);
         this.underlyingNode = node;
     }
 

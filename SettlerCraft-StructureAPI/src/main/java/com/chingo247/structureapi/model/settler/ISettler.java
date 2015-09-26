@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.chingo247.structureapi.model.owner;
+package com.chingo247.structureapi.model.settler;
 
 import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.settlercraft.core.model.interfaces.IBaseSettler;
@@ -13,7 +13,7 @@ import java.util.List;
  * Represents someone who owns a structure
  * @author Chingo
  */
-public interface IStructureOwner extends IBaseSettler {
+public interface ISettler extends IBaseSettler {
     
     /**
      * Gets all the structures this Settler owns
