@@ -47,7 +47,7 @@ public class BackupTask extends StructureTask {
         
         ConstructionEntry entry = getConstructionEntry();
         Structure structure = entry.getStructure();
-        File structureDir = structure.getStructureDirectory();
+        File structureDir = structure.getDirectory();
         
         File backupDir = new File(structureDir, "//backups");
         backupDir.mkdirs();

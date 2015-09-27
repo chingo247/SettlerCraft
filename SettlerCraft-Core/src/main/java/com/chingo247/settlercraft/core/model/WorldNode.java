@@ -29,7 +29,7 @@ import org.neo4j.graphdb.Node;
 public class WorldNode implements IWorld {
     
     
-    public static final String LABEL = "World";
+    public static final String LABEL = "WORLD";
     public static final String NAME_PROPERTY = "name";
     public static final String ID_PROPERTY = "uuid";
     

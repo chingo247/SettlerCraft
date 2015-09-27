@@ -29,7 +29,7 @@ import com.chingo247.structureapi.model.owner.Ownership;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.structureapi.model.structure.StructureRepository;
-import com.chingo247.structureapi.model.world.StructureWorldNode;
+import com.chingo247.structureapi.model.world.StructureWorld;
 import com.chingo247.structureapi.model.world.StructureWorldRepository;
 import com.chingo247.structureapi.plan.DefaultStructurePlan;
 import com.chingo247.structureapi.plan.IStructurePlan;
@@ -38,107 +38,115 @@ import com.chingo247.structureapi.plan.placement.Placement;
 import com.chingo247.structureapi.plan.xml.export.PlacementExporter;
 import com.chingo247.structureapi.util.PlacementUtil;
 import com.chingo247.xplatform.core.APlatform;
-import com.chingo247.xplatform.core.ILocation;
 import com.chingo247.xplatform.core.IWorld;
 import com.google.common.io.Files;
+import com.google.common.util.concurrent.Monitor;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
 /**
- * Manages the creation of Structures. As of version 2.1.0 structures of
- * different world's no long have to wait on each other. Each world has it's own
- * StructureManager and serves as monitor for placing a structure.
- *
- * @since 2.1.0
+ * Handles the creation of 'plot-like objects' in a world. Example of plots are:
+ * - ConstructionZone
+ * - Structure
+ * - SelectionStructure
+ * - StructureLot
+ * 
+ * The monitor of this class will assure that all checks are applied correctly, even when plots created over multiple threads.
+ * This monitor can be retrieved by calling the {@link WorldCreationHandler#getMonitor() } method. 
+ * 
+ * @since 2.3.0
  *
  * @author Chingo
  */
-public class WorldManager {
+public class StructureCreator implements IStructureCreator {
 
-    private final World world;
-    private final StructureAPI structureAPI;
+    private final ConstructionWorld world;
+    private final IStructureAPI structureAPI;
     private final APlatform platform;
     private final StructureWorldRepository structureWorldRepository;
     private final StructureRepository structureRepository;
     private final SettlerRepositiory structureOwnerRepository;
     private final GraphDatabaseService graph;
-    private final Lock worldLock;
+    private final Monitor monitor;
 
     /**
      * Constructor
      *
      * @param world The world this StructureManager will 'Manage'
      */
-    WorldManager(World world, StructureAPI structureAPI) {
+    StructureCreator(ConstructionWorld world) {
         this.graph = SettlerCraft.getInstance().getNeo4j();
+        this.structureAPI = (StructureAPI) StructureAPI.getInstance();
         this.world = world;
-        this.structureAPI = structureAPI;
         this.platform = structureAPI.getPlatform();
         this.structureWorldRepository = new StructureWorldRepository(graph);
         this.structureRepository = new StructureRepository(graph);
         this.structureOwnerRepository = new SettlerRepositiory(graph);
-        this.worldLock = new ReentrantLock();
+        this.monitor = world.getMonitor();
+    }
+    
+    @Override
+    public Structure createStructure(IStructurePlan plan, Vector position, Direction direction, Player owner) throws StructureException {
+        return createStructure(null, plan, position, direction, owner);
     }
 
-    /**
-     * Checks if the placement is allowed to be placed. Placement should not
-     * overlap the world's spawn and should also be placed at a height > 1 and
-     * the top may not by higher than the world's max height
-     *
-     * @param p The placement
-     * @param world The world
-     * @param position The position of the placement
-     * @param direction The direction
-     */
-    private void checkWorldRestrictions(Placement p, World world, Vector position, Direction direction) throws StructureException {
-        Vector min = p.getCuboidRegion().getMinimumPoint().add(position);
-        Vector max = min.add(p.getCuboidRegion().getMaximumPoint());
-        CuboidRegion placementDimension = new CuboidRegion(min, max);
-
-        // Below the world?s
-        if (placementDimension.getMinimumPoint().getBlockY() <= 1) {
-            throw new StructureException("Structure must be placed at a minimum height of 1");
-        }
-
-        // Exceeds world height limit?
-        if (placementDimension.getMaximumPoint().getBlockY() > world.getMaxY()) {
-            throw new StructureException("Structure will reach above the world's max height (" + world.getMaxY() + ")");
-        }
-
-        // Check for overlap on the world's 'SPAWN'
-        IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
-        ILocation l = w.getSpawn();
-        Vector spawnPos = new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ());
-        if (placementDimension.contains(spawnPos)) {
-            throw new StructureException("Structure overlaps the world's spawn...");
-        }
-
+    @Override
+    public Structure createStructure(IStructurePlan plan,  Vector position, Direction direction) throws StructureException {
+        return createStructure(null, plan, position, direction, null);
     }
 
-    public Structure createStructure(Structure parentStructure, Placement placement, Vector position, Direction direction, Player owner) throws StructureException {
+    @Override
+    public Structure createStructure(Placement placement, Vector position, Direction direction) throws StructureException {
+        return createStructure(null, placement, position, direction, null);
+    }
+
+    @Override
+    public Structure createStructure(Placement placement, Vector position, Direction direction, Player owner) throws StructureException {
+        return createStructure(null, placement, position, direction, owner);
+    }
+
+    @Override
+    public Structure createSubstructure(Structure parent, IStructurePlan plan, Vector position, Direction direction, Player owner) throws StructureException {
+        return createStructure(parent, plan, position, direction, owner);
+    }
+
+    @Override
+    public Structure createSubstructure(Structure parent, IStructurePlan plan, Vector position, Direction direction) throws StructureException {
+        return createStructure(parent, plan, position, direction, null);
+    }
+
+    @Override
+    public Structure createSubstructure(Structure parent, Placement placement, Vector position, Direction direction, Player owner) throws StructureException {
+        return createStructure(parent, placement, position, direction, owner);
+    }
+
+    @Override
+    public Structure createSubstructure(Structure parent, Placement placement, Vector position, Direction direction) throws StructureException {
+        return createStructure(parent, placement, position, direction, null);
+    }
+    
+    private Structure createStructure(Structure parentStructure, Placement placement, Vector position, Direction direction, Player owner) throws StructureException {
         IWorld w = platform.getServer().getWorld(world.getName());
         Structure structure = null;
         Transaction tx = null;
         File structureDirectory = null;
         try {
+            monitor.enter();
             tx = graph.beginTx();
             
-            StructureWorldNode worldNode = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
+            StructureWorld worldNode = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
             structure = create(worldNode, parentStructure, placement, placement.getClass().getSimpleName(), position, direction, owner);
 
             if (structure != null) {
                 
-                structureDirectory = structureAPI.getDirectoryForStructure(worldNode, structure);
+                structureDirectory = structure.getDirectory();
                 if(structureDirectory.exists()) {
                     structureDirectory.delete();
                 }
@@ -169,6 +177,7 @@ public class WorldManager {
             if(tx != null) {
                 tx.close();
             }
+            monitor.leave();
         }
        
         if(structure != null) {
@@ -176,15 +185,18 @@ public class WorldManager {
         }
         return structure;
     }
-
-    public Structure createStructure(Structure parentStructure, IStructurePlan structurePlan, Vector position, Direction direction, Player owner) throws StructureException {
+    
+    private Structure createStructure(Structure parentStructure, IStructurePlan structurePlan, Vector position, Direction direction, Player owner) throws StructureException {
         IWorld w = platform.getServer().getWorld(world.getName());
         Structure structure = null;
-        try (Transaction tx = graph.beginTx()){
-            StructureWorldNode worldNode = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
+        Transaction tx = null;
+        try {
+            tx = graph.beginTx();
+            monitor.enter();
+            StructureWorld worldNode = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
             structure = create(worldNode, parentStructure, structurePlan.getPlacement(), structurePlan.getName(), position, direction, owner);
              
-            File structureDirectory = structureAPI.getDirectoryForStructure(worldNode, structure);
+            File structureDirectory = structure.getDirectory();
             if(structureDirectory.exists()) {
                 structureDirectory.delete();
             }
@@ -193,14 +205,19 @@ public class WorldManager {
                 moveResources(worldNode, structure, structurePlan);
             } catch (IOException ex) {
                 structureDirectory.delete();
-                Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(StructureCreator.class.getName()).log(Level.SEVERE, null, ex);
             }
             
 
        
         
         tx.success();
-        }  
+        } finally {
+           if(tx != null) {
+               tx.close();
+           }
+           monitor.leave();
+        }
         
         if(structure != null) {
             EventManager.getInstance().getEventBus().post(new StructureCreateEvent(structure));
@@ -209,9 +226,9 @@ public class WorldManager {
         
         return structure;
     }
-
-    private synchronized Structure create(StructureWorldNode worldNode, Structure parent, Placement placement, String name, Vector position, Direction direction, Player owner) throws StructureException {
-        checkWorldRestrictions(placement, world, position, direction);
+    
+    private Structure create(StructureWorld structureWorld, Structure parent, Placement placement, String name, Vector position, Direction direction, Player owner) throws StructureException {
+        world.checkWorldRestrictions(placement, world.getWorldEditWorld(), position, direction);
 
         Vector min = position;
         Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getCuboidRegion().getMaximumPoint());
@@ -228,7 +245,7 @@ public class WorldManager {
         }
 
         // Create the StructureNode - Where it all starts...
-        structureNode = structureRepository.addStructure(worldNode, name, position, structureRegion, direction, 0.0);
+        structureNode = structureRepository.addStructure(structureWorld, name, position, structureRegion, direction, 0.0);
         
         if (parentNode != null && structureNode != null) {
             boolean hasWithin = parentNode.hasSubstructuresWithin(structureRegion);
@@ -263,9 +280,9 @@ public class WorldManager {
 
     }
 
-    final void moveResources(WorldNode worldNode, Structure structure, IStructurePlan plan) throws IOException {
+    private void moveResources(WorldNode worldNode, Structure structure, IStructurePlan plan) throws IOException {
         // Give this structure a directory!
-        File structureDir = structureAPI.getDirectoryForStructure(worldNode, structure);
+        File structureDir = structure.getDirectory();
         structureDir.mkdirs();
 
         Files.copy(plan.getFile(), new File(structureDir, "structureplan.xml"));

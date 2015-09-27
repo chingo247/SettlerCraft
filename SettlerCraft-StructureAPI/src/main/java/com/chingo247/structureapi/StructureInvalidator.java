@@ -23,7 +23,8 @@ import com.chingo247.settlercraft.core.model.BaseSettlerNode;
 import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.settlercraft.core.util.XXHasher;
-import com.chingo247.structureapi.model.OwnerDomain;
+import com.chingo247.structureapi.model.RelTypes;
+import com.chingo247.structureapi.model.owner.OwnerDomain;
 import com.chingo247.structureapi.model.structure.IStructureRepository;
 import com.chingo247.structureapi.model.world.IStructureWorldRepository;
 import com.chingo247.structureapi.model.settler.Settler;
@@ -144,7 +145,7 @@ public class StructureInvalidator {
 
             String query = "MATCH (world:" + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
                     + " WITH world "
-                    + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL + ")"
+                    + " MATCH (world)<-[:" + RelTypes.WITHIN.name() + "]-(s:" + StructureNode.LABEL + ")"
                     + " WHERE s." + StructureNode.DELETED_AT_PROPERTY + " > {date}"
                     + " RETURN s";
 
@@ -199,7 +200,7 @@ public class StructureInvalidator {
 
             String query = "MATCH (world:" + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
                     + " WITH world "
-                    + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL + ")"
+                    + " MATCH (world)<-[:" + RelTypes.WITHIN.name() + "]-(s:" + StructureNode.LABEL + ")"
                     + " WHERE s." + StructureNode.CREATED_AT_PROPERTY + " > {date}"
                     + " RETURN s";
 

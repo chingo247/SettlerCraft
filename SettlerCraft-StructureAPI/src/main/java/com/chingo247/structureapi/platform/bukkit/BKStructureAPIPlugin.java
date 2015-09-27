@@ -26,7 +26,7 @@ import com.chingo247.settlercraft.core.platforms.bukkit.BKPermissionRegistry;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.structureapi.commands.StructureCommands;
 import com.chingo247.structureapi.exception.StructureAPIException;
-import com.chingo247.structureapi.platform.services.PermissionManager;
+import com.chingo247.structureapi.platform.permission.PermissionManager;
 import com.chingo247.structureapi.platform.services.holograms.StructureHologramManager;
 import com.chingo247.structureapi.StructureAPI;
 import com.chingo247.structureapi.StructureInvalidator;

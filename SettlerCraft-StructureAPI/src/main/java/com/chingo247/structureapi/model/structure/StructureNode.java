@@ -7,8 +7,9 @@ package com.chingo247.structureapi.model.structure;
 
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.persistence.neo4j.NodeHelper;
-import com.chingo247.structureapi.model.OwnerDomain;
-import com.chingo247.structureapi.model.world.StructureWorldNode;
+import com.chingo247.structureapi.model.RelTypes;
+import com.chingo247.structureapi.model.owner.OwnerDomain;
+import com.chingo247.structureapi.model.world.StructureWorld;
 import com.chingo247.structureapi.util.RegionUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -19,7 +20,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import org.neo4j.graphdb.DynamicLabel;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -37,7 +37,7 @@ import org.neo4j.graphdb.traversal.TraversalDescription;
  */
 public class StructureNode extends AStructure {
 
-    public static final String LABEL = "Structure";
+    public static final String LABEL = "STRUCTURE";
     public static final String ID_PROPERTY = "structureId";
     public static final String NAME_PROPERTY = "name";
     public static final String DIRECTION_PROPERTY = "direction";
@@ -278,10 +278,10 @@ public class StructureNode extends AStructure {
     }
 
     @Override
-    public final StructureWorldNode getWorld() {
-        Relationship rel = underlyingNode.getSingleRelationship(DynamicRelationshipType.withName(StructureRelations.RELATION_WITHIN), org.neo4j.graphdb.Direction.OUTGOING);
+    public final StructureWorld getWorld() {
+        Relationship rel = underlyingNode.getSingleRelationship(RelTypes.WITHIN, org.neo4j.graphdb.Direction.OUTGOING);
         Node node = rel.getOtherNode(underlyingNode);
-        return new StructureWorldNode(node);
+        return new StructureWorld(node);
     }
 
     @Override
@@ -302,7 +302,7 @@ public class StructureNode extends AStructure {
 
     public StructureNode getParent() {
         // (this)-[:substructure of]-(parent)
-        Relationship rel = underlyingNode.getSingleRelationship(DynamicRelationshipType.withName(StructureRelations.RELATION_SUBSTRUCTURE), org.neo4j.graphdb.Direction.OUTGOING);
+        Relationship rel = underlyingNode.getSingleRelationship(RelTypes.SUBSTRUCTURE_OF, org.neo4j.graphdb.Direction.OUTGOING);
         if (rel != null) {
             Node parentNode = rel.getOtherNode(underlyingNode);
             return new StructureNode(parentNode);
@@ -380,7 +380,7 @@ public class StructureNode extends AStructure {
 //    }
 
     public List<StructureNode> getSubstructures() {
-        Iterable<Relationship> relationships = underlyingNode.getRelationships(DynamicRelationshipType.withName(StructureRelations.RELATION_SUBSTRUCTURE), org.neo4j.graphdb.Direction.INCOMING);
+        Iterable<Relationship> relationships = underlyingNode.getRelationships(RelTypes.SUBSTRUCTURE_OF, org.neo4j.graphdb.Direction.INCOMING);
         List<StructureNode> substructures = Lists.newArrayList();
         for (Relationship rel : relationships) {
             StructureNode substructure = new StructureNode(rel.getOtherNode(underlyingNode));
@@ -392,7 +392,7 @@ public class StructureNode extends AStructure {
     }
 
     public boolean hasSubstructures() {
-        for (Relationship s : underlyingNode.getRelationships(org.neo4j.graphdb.Direction.INCOMING, DynamicRelationshipType.withName(StructureRelations.RELATION_SUBSTRUCTURE))) {
+        for (Relationship s : underlyingNode.getRelationships(org.neo4j.graphdb.Direction.INCOMING, RelTypes.SUBSTRUCTURE_OF)) {
             StructureNode sn = new StructureNode(s.getOtherNode(underlyingNode));
             if (sn.getStatus() != ConstructionStatus.REMOVED) {
                 return true;
@@ -403,7 +403,7 @@ public class StructureNode extends AStructure {
 
     public StructureNode getRoot() {
         TraversalDescription traversalDescription = underlyingNode.getGraphDatabase().traversalDescription();
-        Iterator<Node> nodeIt = traversalDescription.relationships(DynamicRelationshipType.withName(StructureRelations.RELATION_SUBSTRUCTURE), org.neo4j.graphdb.Direction.OUTGOING)
+        Iterator<Node> nodeIt = traversalDescription.relationships(RelTypes.SUBSTRUCTURE_OF, org.neo4j.graphdb.Direction.OUTGOING)
                 .depthFirst()
                 .traverse(underlyingNode)
                 .nodes()
@@ -422,7 +422,7 @@ public class StructureNode extends AStructure {
     public void addSubstructure(StructureNode otherNode) {
         Preconditions.checkArgument(!otherNode.isAncestorOf(this), "Can't add an ancestor as Substructure");
         Preconditions.checkArgument(!otherNode.isSubstructureOf(this), otherNode.getId() + " is already a substructure of " + getId() + "!");
-        otherNode.getNode().createRelationshipTo(underlyingNode, DynamicRelationshipType.withName(StructureRelations.RELATION_SUBSTRUCTURE));
+        otherNode.getNode().createRelationshipTo(underlyingNode, RelTypes.SUBSTRUCTURE_OF);
     }
 
     
@@ -455,7 +455,7 @@ public class StructureNode extends AStructure {
 
     public boolean isSubstructureOf(StructureNode structure) {
         TraversalDescription traversalDescription = underlyingNode.getGraphDatabase().traversalDescription();
-        Iterator<Node> nodeIt = traversalDescription.relationships(DynamicRelationshipType.withName(StructureRelations.RELATION_SUBSTRUCTURE), org.neo4j.graphdb.Direction.INCOMING)
+        Iterator<Node> nodeIt = traversalDescription.relationships(RelTypes.SUBSTRUCTURE_OF, org.neo4j.graphdb.Direction.INCOMING)
                 .breadthFirst()
                 .traverse(underlyingNode)
                 .nodes()
@@ -472,7 +472,7 @@ public class StructureNode extends AStructure {
 
     public boolean isAncestorOf(StructureNode structure) {
         TraversalDescription traversalDescription = underlyingNode.getGraphDatabase().traversalDescription();
-        Iterator<Node> nodeIt = traversalDescription.relationships(DynamicRelationshipType.withName(StructureRelations.RELATION_SUBSTRUCTURE), org.neo4j.graphdb.Direction.OUTGOING)
+        Iterator<Node> nodeIt = traversalDescription.relationships(RelTypes.SUBSTRUCTURE_OF, org.neo4j.graphdb.Direction.OUTGOING)
                 .depthFirst()
                 .traverse(underlyingNode)
                 .nodes()
@@ -490,7 +490,7 @@ public class StructureNode extends AStructure {
     public Iterable<StructureNode> getSubStructuresWithin(CuboidRegion region) {
         final CuboidRegion thisRegion = getCuboidRegion();
         TraversalDescription traversal = getGraph().traversalDescription();
-        Iterable<Node> structure = traversal.relationships(DynamicRelationshipType.withName(StructureRelations.RELATION_SUBSTRUCTURE), org.neo4j.graphdb.Direction.INCOMING)
+        Iterable<Node> structure = traversal.relationships(RelTypes.SUBSTRUCTURE_OF, org.neo4j.graphdb.Direction.INCOMING)
             .evaluator(Evaluators.excludeStartPosition()).evaluator(new Evaluator() {
 
             @Override

@@ -63,7 +63,7 @@ public class Structure extends AStructure {
         this.completedAt = structure.getCompletedAt();
         this.world = new World(structure.getWorld());
     }
-    
+   
     
     /**
      * Gets the id of the structure

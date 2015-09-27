@@ -14,9 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.model;
+package com.chingo247.structureapi.model.owner;
 
 import com.chingo247.settlercraft.core.model.interfaces.IBaseSettler;
+import com.chingo247.structureapi.model.Relations;
 import com.chingo247.structureapi.model.owner.OwnerType;
 import com.chingo247.structureapi.model.settler.Settler;
 import com.chingo247.structureapi.model.owner.Ownership;

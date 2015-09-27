@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Chingo
+ * Copyright (C) 2015 ching
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,17 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.model;
+package com.chingo247.structureapi.updates;
 
 /**
  *
- * @author Chingo
+ * @author ching
  */
-public class Relations {
+public interface IStructureAPIUpdate {
     
-    /**
-     * Should point to it's owner
-     */
-    public static final String RELATION_OWNED_BY = "OWNED_BY";
+    void update();
     
 }

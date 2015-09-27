@@ -32,8 +32,8 @@ import org.neo4j.graphdb.RelationshipType;
  */
 public class StructureHologramNode extends StructureObject {
     
-    public static final Label LABEL = DynamicLabel.label("StructureHologram");
-    public static final RelationshipType RELATION_HAS_HOLOGRAM = DynamicRelationshipType.withName("hasHologram");
+    public static final Label LABEL = DynamicLabel.label("STRUCTURE_HOLOGRAM");
+    public static final RelationshipType RELATION_HAS_HOLOGRAM = DynamicRelationshipType.withName("HAS_HOLOGRAM");
     
     private String name;
     

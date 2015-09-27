@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.platform.services;
+package com.chingo247.structureapi.platform.permission;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.platforms.services.IPermissionRegistry;
@@ -66,7 +66,8 @@ public class PermissionManager {
         OPEN_PLAN_MENU(new Permission(PREFIX + "settler.open.planmenu", PermissionDefault.OP, "Allows the player to use the plan menu (contains plans for FREE)")),
         OPEN_SHOP_MENU(new Permission(PREFIX + "settler.open.shopmenu", PermissionDefault.TRUE, "Allows the player to use the plan shop")),
         ROTATE_SCHEMATIC(new Permission(PREFIX + "content.editor.rotate.placement", PermissionDefault.OP, "Allows rotation of schematics")),
-        PLACE_STRUCTURE(new Permission(PREFIX + "settler.place.structure", PermissionDefault.TRUE, "Allows the player to place structures"));
+        PLACE_STRUCTURE(new Permission(PREFIX + "settler.place.structure", PermissionDefault.TRUE, "Allows the player to place structures")),
+        PLACE_CONSTRUCTION_ZONE(new Permission(PREFIX + "settler.place.constructionzone", PermissionDefault.FALSE, "Allows a player to place construction zones"));
         private Permission permission;
 
         private Perms(Permission permission) {

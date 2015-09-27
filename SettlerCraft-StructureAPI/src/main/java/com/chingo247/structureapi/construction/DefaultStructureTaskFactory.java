@@ -201,7 +201,7 @@ public class DefaultStructureTaskFactory implements IStructureTaskFactory {
     }
     
     private File getBackup(Structure structure, String backup) {
-        File backupDir = new File(structure.getStructureDirectory(), "//backups");
+        File backupDir = new File(structure.getDirectory(), "//backups");
         return new File(backupDir, backup);
     }
     

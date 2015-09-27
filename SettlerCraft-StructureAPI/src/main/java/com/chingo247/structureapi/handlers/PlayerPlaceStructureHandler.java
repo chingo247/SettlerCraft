@@ -19,13 +19,14 @@ package com.chingo247.structureapi.handlers;
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.model.WorldNode;
-import com.chingo247.settlercraft.core.util.KeyPool;
+import com.chingo247.settlercraft.core.concurrent.KeyPool;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
+import com.chingo247.structureapi.ConstructionWorld;
 import com.chingo247.structureapi.exception.StructureException;
 import com.chingo247.structureapi.exception.StructureRestrictionException;
 import com.chingo247.structureapi.model.structure.StructureRelations;
 import com.chingo247.structureapi.platform.bukkit.selection.HologramSelectionManager;
-import com.chingo247.structureapi.platform.services.PermissionManager;
+import com.chingo247.structureapi.platform.permission.PermissionManager;
 import com.chingo247.structureapi.selection.CUISelectionManager;
 import com.chingo247.structureapi.selection.ISelectionManager;
 import com.chingo247.structureapi.selection.NoneSelectionManager;
@@ -36,10 +37,14 @@ import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.structureapi.model.world.IStructureWorld;
 import com.chingo247.structureapi.model.world.IStructureWorldRepository;
 import com.chingo247.structureapi.StructureAPI;
+import com.chingo247.structureapi.StructureCreator;
 import com.chingo247.structureapi.plan.IStructurePlan;
 import com.chingo247.structureapi.plan.StructurePlanManager;
 import com.chingo247.structureapi.construction.options.BuildOptions;
+import com.chingo247.structureapi.model.RelTypes;
+import com.chingo247.structureapi.model.structure.IStructureRepository;
 import com.chingo247.structureapi.model.structure.Structure;
+import com.chingo247.structureapi.model.structure.StructureRepository;
 import com.chingo247.structureapi.util.PlacementUtil;
 import com.chingo247.structureapi.util.WorldUtil;
 import com.chingo247.xplatform.core.AInventory;
@@ -79,6 +84,7 @@ public class PlayerPlaceStructureHandler {
     private final IStructureAPI structureAPI;
     private final IColors color;
     private final IStructureWorldRepository structureWorldRepository;
+    private final IStructureRepository structureRepository;
     private final APlatform platform;
 
     public PlayerPlaceStructureHandler(IEconomyProvider economyProvider) {
@@ -87,7 +93,11 @@ public class PlayerPlaceStructureHandler {
         this.structureAPI = StructureAPI.getInstance();
         this.platform = structureAPI.getPlatform();
         this.color = platform.getChatColors();
-        this.structureWorldRepository = new StructureWorldRepository(SettlerCraft.getInstance().getNeo4j());
+        
+        // Setup repositories
+        GraphDatabaseService graph = SettlerCraft.getInstance().getNeo4j();
+        this.structureWorldRepository = new StructureWorldRepository(graph);
+        this.structureRepository = new StructureRepository(graph);
     }
 
     public void handleDeselect(Player player) {
@@ -220,14 +230,18 @@ public class PlayerPlaceStructureHandler {
                 Structure structure;
                 try {
                     // Create Structure using the SettlerCraft restrictions
+                    
+                    ConstructionWorld cw = structureAPI.getConstructionWorld(world);
+                    StructureCreator sc = cw.getStructureCreator();
+                    
                     if (possibleParentStructure != null) {
                         if (possibleParentStructure.getStatus() != ConstructionStatus.COMPLETED) {
                             player.printError("Status of #" + possibleParentStructure.getId() + " must not be in progress before substructures can be placed inside");
                             return;
                         }
-                        structure = structureAPI.createSubstructure(possibleParentStructure, plan, world, pos1, direction, player);
+                        structure = sc.createSubstructure(possibleParentStructure, plan, pos1, direction, player);
                     } else {
-                        structure = structureAPI.createStructure(plan, world, pos1, direction, player);
+                        structure = sc.createStructure(plan, pos1, direction, player);
                     }
 
                     if (structure != null) {
@@ -276,7 +290,7 @@ public class PlayerPlaceStructureHandler {
             String query
                     = "MATCH ( world: " + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
                     + " WITH world "
-                    + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL + ")"
+                    + " MATCH (world)<-[:" + RelTypes.WITHIN + "]-(s:" + StructureNode.LABEL + ")"
                     + " WHERE s." + StructureNode.DELETED_AT_PROPERTY + " IS NULL"
                     + " AND s." + StructureNode.MAX_X_PROPERTY + " >= " + position.getBlockX() + " AND s." + StructureNode.MIN_X_PROPERTY + " <= " + position.getBlockX()
                     + " AND s." + StructureNode.MAX_Y_PROPERTY + " >= " + position.getBlockY() + " AND s." + StructureNode.MIN_Y_PROPERTY + " <= " + position.getBlockY()
@@ -406,8 +420,7 @@ public class PlayerPlaceStructureHandler {
                 overlappingStructure = subIt.hasNext() ? subIt.next() : null;
             } else {
                 IWorld iw = platform.getServer().getWorld(world.getName());
-                IStructureWorld sw = structureWorldRepository.registerWorld(iw.getName(), iw.getUUID());
-                Iterator<StructureNode> subIt = sw.getStructuresWithin(new CuboidRegion(min, max), 1).iterator();
+                Iterator<StructureNode> subIt = structureRepository.findStructuresWithin(iw.getUUID(), new CuboidRegion(min, max), 1).iterator();
                 overlappingStructure = subIt.hasNext() ? subIt.next() : null;
             }
 

@@ -51,7 +51,7 @@ public class DefaultBuildTaskAssigner implements ITaskAssigner {
         IBackupAPI backupAPI = StructureAPI.getInstance().getBackupAPI();
         if(backupAPI != null) {
             // 1. Create backup if none exists
-            File structureDir = structure.getStructureDirectory();
+            File structureDir = structure.getDirectory();
             File backupFile = new File(structureDir, "restore.snapshot");
             if(!backupFile.exists()) {
                 entry.addTask(taskFactory.backup(player, structure, "restore"));

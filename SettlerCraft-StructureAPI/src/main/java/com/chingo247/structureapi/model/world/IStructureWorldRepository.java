@@ -6,7 +6,6 @@
 package com.chingo247.structureapi.model.world;
 
 import com.chingo247.settlercraft.core.model.interfaces.IWorldRepository;
-import com.chingo247.structureapi.model.world.StructureWorldNode;
 import java.util.UUID;
 
 /**
@@ -21,7 +20,7 @@ public interface IStructureWorldRepository extends IWorldRepository  {
      * @return The BaseWorld
      */
     @Override
-    public StructureWorldNode findByUUID(UUID worldUUID);
+    public StructureWorld findByUUID(UUID worldUUID);
 
     /**
      * Adds a world if not already added
@@ -30,7 +29,7 @@ public interface IStructureWorldRepository extends IWorldRepository  {
      * @return The world that has been created or the world that already existed with the same UUID
      */
     @Override
-    public StructureWorldNode registerWorld(String worldName, UUID worldUUID);
+    public StructureWorld registerWorld(String worldName, UUID worldUUID);
     
     
 }

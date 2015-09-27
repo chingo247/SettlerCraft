@@ -16,32 +16,35 @@
  */
 package com.chingo247.structureapi.model.plot;
 
-import com.chingo247.settlercraft.core.model.BaseSettler;
-import com.chingo247.settlercraft.core.model.DefaultNodeCollection;
-import com.chingo247.settlercraft.core.model.NodeCollection;
-import com.chingo247.structureapi.model.Relations;
+import com.chingo247.settlercraft.core.persistence.neo4j.NodeHelper;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
-import java.util.UUID;
-import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 
 /**
- *
+ * Defines a region that is 'ownable' 
  * @author Chingo
  */
 public class Plot implements IPlot {
 
     public static final String MIN_X_PROPERTY = "minX", MIN_Y_PROPERTY = "minY", MIN_Z_PROPERTY = "minZ", MAX_X_PROPERTY = "maxX", MAX_Y_PROPERTY = "maxY", MAX_Z_PROPERTY = "maxZ";
+    public static final String PLOT_TYPE_PROPERTY = "plotType";
+    public static final String LABEL_PLOT = "PLOT";
     
-
     private final Node underlyingNode;
 
     
     public Plot(Node node) {
         this.underlyingNode = node;
+    }
+    
+    public String getPlotType() {
+        return NodeHelper.getString(underlyingNode, PLOT_TYPE_PROPERTY, "plot");
+    }
+    
+    public Node getNode() {
+        return underlyingNode;
     }
 
     public void setMinX(int x) {

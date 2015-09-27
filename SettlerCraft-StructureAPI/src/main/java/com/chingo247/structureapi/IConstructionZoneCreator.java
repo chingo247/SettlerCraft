@@ -16,23 +16,10 @@
  */
 package com.chingo247.structureapi;
 
-import com.chingo247.settlercraft.core.model.BaseSettler;
-import com.chingo247.structureapi.model.zone.ConstructionZone;
-import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldedit.world.World;
-
 /**
  *
  * @author ching
  */
-public interface IConstructionZoneManager {
-    
-    ConstructionZone createZone(World world, CuboidRegion region);
-    
-    ConstructionZone createZone(World world, CuboidRegion region, BaseSettler owner);
-    
-    void delete(long id);
-    
-    ConstructionZone findZoneById(long id);
+public interface IConstructionZoneCreator {
     
 }

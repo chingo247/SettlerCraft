@@ -51,176 +51,92 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSessionFactory;
  */
 public interface IStructureAPI {
     
-    /**
-     * Creates a structure with the provided plan
-     * @param plan The StructurePlan
-     * @param world The world
-     * @param position The position
-     * @param direction The direction of the player
-     * @return The Structure that has been created
-     */
-    public Structure createStructure(IStructurePlan plan, World world, Vector position, Direction direction) throws Exception;
+    ConstructionWorld getConstructionWorld(String world);
     
-    /**
-     * Creates a structure with the provided plan
-     * @param plan The StructurePlan
-     * @param world The world
-     * @param position The position
-     * @param direction The direction of the player
-     * @param owner The player that will be assigned as MASTER owner of this structure
-     * @return The Structure that has been created
-     */
-    public Structure createStructure(IStructurePlan plan, World world, Vector position, Direction direction, Player owner) throws Exception;
+    ConstructionWorld getConstructionWorld(World world);
     
-     /**
-     * Creates a structure with the provided placement
-     * @param placement The Placement
-     * @param world The world
-     * @param position The position
-     * @param direction The direction of the player
-     * @return The Structure that has been created
-     */
-    public Structure createStructure(Placement placement, World world, Vector position, Direction direction) throws Exception;
+    void build(AsyncEditSession editSession, UUID player, Structure structure, BuildOptions options, ITaskAssigner taskAssigner) throws ConstructionException;
     
-    /**
-     * Creates a structure with the provided plan
-     * @param placement The Placement
-     * @param world The world
-     * @param position The position
-     * @param direction The direction of the player
-     * @param owner The player that will be assigned as MASTER owner of this structure
-     * @return The Structure that has been created
-     */
-    public Structure createStructure(Placement placement, World world, Vector position, Direction direction, Player owner) throws Exception;
+    void build(AsyncEditSession editSession, UUID player, Structure structure, BuildOptions options) throws ConstructionException;
     
-     /**
-     * Creates a substructure for given structure with the provided plan
-     * @param structure The structure to add the created structure to
-     * @param plan The StructurePlan
-     * @param world The world
-     * @param position The position
-     * @param direction The direction of the player
-     * @param owner The player that will be assigned as MASTER owner of this structure
-     * @return The Structure that has been created
-     */
-    public Structure createSubstructure(Structure structure, IStructurePlan plan, World world, Vector position, Direction direction, Player owner) throws Exception;
+    void build(UUID player, Structure structure, BuildOptions options) throws ConstructionException;
     
-     /**
-     * Creates a substructure for given structure with the provided plan
-     * @param structure The structure to add the created structure to
-     * @param plan The StructurePlan
-     * @param world The world
-     * @param position The position
-     * @param direction The direction of the player
-     * @return The Structure that has been created
-     */
-    public Structure createSubstructure(Structure structure, IStructurePlan plan, World world, Vector position, Direction direction) throws Exception;
+    void build(Structure structure, BuildOptions options) throws ConstructionException;
     
-     /**
-     * Creates a substructure for given structure with the provided placement
-     * @param structure The structure to add the created structure to
-     * @param placement The Placement
-     * @param world The world
-     * @param position The position
-     * @param direction The direction of the player
-     * @param owner The player that will be assigned as MASTER owner of this structure
-     * @return The Structure that has been created
-     */
-    public Structure createSubstructure(Structure structure, Placement placement, World world, Vector position, Direction direction, Player owner) throws Exception;
+    void build(Structure structure) throws ConstructionException;
     
-     /**
-     * Creates a substructure for given structure with the provided placement
-     * @param structure The structure to add the created structure to
-     * @param placement The Placement
-     * @param world The world
-     * @param position The position
-     * @param direction The direction of the player
-     * @return The Structure that has been created
-     */
-    public Structure createSubstructure(Structure structure, Placement placement, World world, Vector position, Direction direction) throws Exception;
+    void demolish(AsyncEditSession editSession, UUID player, Structure structure, DemolitionOptions options, ITaskAssigner taskAssigner) throws ConstructionException;
     
-    public void build(AsyncEditSession editSession, UUID player, Structure structure, BuildOptions options, ITaskAssigner taskAssigner) throws ConstructionException;
+    void demolish(AsyncEditSession editSession, UUID player, Structure structure, DemolitionOptions options) throws ConstructionException;
     
-    public void build(AsyncEditSession editSession, UUID player, Structure structure, BuildOptions options) throws ConstructionException;
+    void demolish(UUID player, Structure structure, DemolitionOptions options) throws ConstructionException;
     
-    public void build(UUID player, Structure structure, BuildOptions options) throws ConstructionException;
+    void demolish(Structure structure, DemolitionOptions options) throws ConstructionException;
     
-    public void build(Structure structure, BuildOptions options) throws ConstructionException;
+    void demolish(Structure structure) throws ConstructionException;
     
-    public void build(Structure structure) throws ConstructionException;
-    
-    public void demolish(AsyncEditSession editSession, UUID player, Structure structure, DemolitionOptions options, ITaskAssigner taskAssigner) throws ConstructionException;
-    
-    public void demolish(AsyncEditSession editSession, UUID player, Structure structure, DemolitionOptions options) throws ConstructionException;
-    
-    public void demolish(UUID player, Structure structure, DemolitionOptions options) throws ConstructionException;
-    
-    public void demolish(Structure structure, DemolitionOptions options) throws ConstructionException;
-    
-    public void demolish(Structure structure) throws ConstructionException;
-    
-    public void stop(Structure structure, boolean force) throws ConstructionException;
+    void stop(Structure structure, boolean force) throws ConstructionException;
     
     /**
      * Gets the ConstructionManager
      * @return The ConstructionManager 
      */
-    public IConstructionManager getConstructionManager();
+    IConstructionManager getConstructionManager();
     
     /**
      * Gets the StructurePlanManager, alternatively {@link StructurePlanManager#getInstance() } may be used
      * @return The StructurePlanManager 
      */
-    public StructurePlanManager getStructurePlanManager();
+    StructurePlanManager getStructurePlanManager();
     
     /**
      * Reloads the StructureAPI
      */
-    public void reload();
+    void reload();
     
     /**
      * Checks if the AWE queue is locked for a given UUID
      * @param player The player UUID or PlayerEntry UUID
      * @return True if the queue was locked
      */
-    public boolean isQueueLocked(UUID player);
+    boolean isQueueLocked(UUID player);
     
     
     /**
      * Checks if StructureAPI is loading (plans, schematics, etc)
      * @return True if StructureAPI is loadings
      */
-    public boolean isLoading();
+    boolean isLoading();
     
     /**
      * Gets the ConfigProvider
      * @return The ConfigProvider
      */
-    public IConfigProvider getConfig();
+    IConfigProvider getConfig();
     
     /**
      * Gets the platform
      * @return The platform
      */
-    public APlatform getPlatform();
+    APlatform getPlatform();
     
     /**
      * Gets the plan directory
      * @return The plan directory
      */
-    public File getPlanDirectory();
+    File getPlanDirectory();
     
     /**
      * The directory where plans are generated from schematics
      * @return The directory
      */
-    public File getGenerationDirectory();
+    File getGenerationDirectory();
     
     /**
      * The directory where plans are generated from schematics
      * @return The directory
      */
-    public File getWorkingDirectory();
+    File getWorkingDirectory();
     
     
     /**
@@ -228,7 +144,7 @@ public interface IStructureAPI {
      * @param world The world 
      * @return The structures directory
      */
-    public File getStructuresDirectory(String world);
+    File getStructuresDirectory(String world);
     
     /**
      * Creates a new PlanMenu, this PlanMenu is loaded with all the plans available. 
@@ -236,19 +152,19 @@ public interface IStructureAPI {
      * new instances need to be created
      * @return The PlanMenu
      */
-    public CategoryMenu createPlanMenu();
+    CategoryMenu createPlanMenu();
     
     /**
      * Adds a restriction that will be added as check when placing structures
      * @param structureRestriction The restriction
      */
-    public void addRestriction(StructureRestriction structureRestriction);
+    void addRestriction(StructureRestriction structureRestriction);
     
     /**
      * Removes a restriction for placing structures
      * @param structureRestriction 
      */
-    public void removeRestriction(StructureRestriction structureRestriction);
+    void removeRestriction(StructureRestriction structureRestriction);
     
     /**
      * Checks all StructureRestrictions. Each restriction determines if something is allowed to be placed
@@ -258,7 +174,7 @@ public interface IStructureAPI {
      * @param region The region
      * @throws com.chingo247.structureapi.exception.StructureRestrictionException Thrown when a restriction was violated
      */
-    public void checkRestrictions(Player player, World world, CuboidRegion region) throws StructureRestrictionException;
+    void checkRestrictions(Player player, World world, CuboidRegion region) throws StructureRestrictionException;
     
     /**
      * Loads a schematic file
@@ -266,7 +182,7 @@ public interface IStructureAPI {
      * @return The schematicPlacement
      * @throws IOException 
      */
-    public SchematicPlacement loadSchematic(File schematicFile) throws IOException ;
+    SchematicPlacement loadSchematic(File schematicFile) throws IOException ;
     
     /**
      * Makes a placement Async
@@ -276,20 +192,20 @@ public interface IStructureAPI {
      * @param placement The placement
      * @return The AsyncPlacement
      */
-    public AsyncPlacement makeAsync(UUID player, Placement placement);
+    AsyncPlacement makeAsync(UUID player, Placement placement);
     
     /**
      * Gets the registered BackupAPI. May return null if none was registered
      * @return The BackupAPI
      */
-    public IBackupAPI getBackupAPI();
+    IBackupAPI getBackupAPI();
     
     /**
      * Gets an AsyncEditSessionFactory
      * @return The AsyncEditSessionFactor
      */
-    public AsyncEditSessionFactory getSessionFactory();
+    AsyncEditSessionFactory getSessionFactory();
     
-    public IChunkManager getChunkManager();
+    IChunkManager getChunkManager();
     
 }

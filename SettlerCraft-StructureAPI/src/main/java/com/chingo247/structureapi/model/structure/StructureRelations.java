@@ -22,13 +22,6 @@ package com.chingo247.structureapi.model.structure;
  */
 public class StructureRelations {
     
-    /**
-     * Should point to it's container
-     */
-    public static final String RELATION_WITHIN = "Within";
-    /**
-     * Should point to it's parent
-     */
-    public static final String RELATION_SUBSTRUCTURE = "SubstructureOf";
+    
     
 }

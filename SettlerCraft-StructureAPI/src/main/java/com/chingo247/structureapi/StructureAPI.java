@@ -16,6 +16,7 @@
  */
 package com.chingo247.structureapi;
 
+import com.chingo247.structureapi.updates.StructureAPI_Update_2_2_0;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.menuapi.menu.CategoryMenu;
@@ -56,6 +57,7 @@ import com.chingo247.structureapi.construction.options.DemolitionOptions;
 import com.chingo247.structureapi.plan.schematic.Schematic;
 import com.chingo247.structureapi.plan.schematic.SchematicManager;
 import com.chingo247.xplatform.core.IColors;
+import com.chingo247.xplatform.core.IWorld;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.AllowConcurrentEvents;
@@ -122,13 +124,13 @@ public class StructureAPI implements IStructureAPI {
 
     private final IColors COLORS;
     private Level logLevel;
-    private final Map<String, WorldManager> structureManagers;
+    private final Map<String, ConstructionWorld> worlds;
 
     private StructureAPI() {
         this.platform = SettlerCraft.getInstance().getPlatform();
         this.graph = SettlerCraft.getInstance().getNeo4j();
         this.restrictions = Sets.newHashSet();
-        this.structureManagers = Maps.newHashMap();
+        this.worlds = Maps.newHashMap();
         this.constructionManager = ConstructionManager.getInstance();
         this.demolitionTaskAssigner = new DefaultDemolitionTaskAssigner();
         this.buildTaskAssigner = new DefaultBuildTaskAssigner();
@@ -139,12 +141,13 @@ public class StructureAPI implements IStructureAPI {
         EventManager.getInstance().getEventBus().register(new StructurePlanManagerHandler());
 
         setupSchema();
+        applyUpdates();
         this.logLevel = Level.SEVERE;
 //        this.substructureHandler = new SubstructureHandler(graph, worldDAO, structureDAO, settlerDAO, this);
     }
 
     /**
-     * This methods should be used by SettlerCraft excusively
+     * This method should exclusively be used by SettlerCraft 
      * @param backupAPI Registers the BackupAPI
      * @throws StructureAPIException 
      */
@@ -161,20 +164,41 @@ public class StructureAPI implements IStructureAPI {
     }
 
     /**
-     * Gets the {@link WorldManager} for a world, never returns null
+     * Gets the {@link StructureCreator} for a world, never returns null
      *
-     * @param w The world
-     * @return The StructureManager
+     * @param world The name of the world
+     * @return The The WorldCreationHandler
      */
-    private synchronized WorldManager getStructureManager(World w) {
-        WorldManager structureManager = structureManagers.get(w.getName());
-        if (structureManager == null) {
-            structureManager = new WorldManager(w, instance);
-            structureManagers.put(w.getName(), structureManager);
+    @Override
+    public synchronized ConstructionWorld getConstructionWorld(String world) {
+        Preconditions.checkNotNull(world, "World may not be null");
+        ConstructionWorld constructionWorld = worlds.get(world);
+        if (constructionWorld == null) {
+            IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world);
+            constructionWorld = new ConstructionWorld(w, instance);
+            worlds.put(w.getName(), constructionWorld);
         }
-        return structureManager;
+        return constructionWorld;
     }
 
+    /**
+     * Gets the {@link StructureCreator} for a world, never returns null
+     *
+     * @param world The world
+     * @return The The WorldCreationHandler
+     */
+    @Override
+    public ConstructionWorld getConstructionWorld(World world) {
+        return getConstructionWorld(world.getName());
+    }
+    
+    
+    
+    private void applyUpdates() {
+        StructureAPI_Update_2_2_0 update = new StructureAPI_Update_2_2_0(graph);
+        update.update();
+    }
+    
     private void setupSchema() {
         // Create indexes, each index creation needs to be executed in a seperate transaction!
         try (Transaction tx = graph.beginTx()) {
@@ -223,6 +247,8 @@ public class StructureAPI implements IStructureAPI {
             restriction.check(player, world, region);
         }
     }
+
+    
 
     private void resetStates() {
         try (Transaction tx = graph.beginTx()) {
@@ -273,53 +299,7 @@ public class StructureAPI implements IStructureAPI {
         return StructurePlanManager.getInstance();
     }
 
-    @Override
-    public Structure createStructure(IStructurePlan plan, World world, Vector position, Direction direction, Player owner) throws StructureException {
-        WorldManager structureManager = getStructureManager(world);
-        return structureManager.createStructure(null, plan, position, direction, owner);
-    }
-
-    @Override
-    public Structure createStructure(IStructurePlan plan, World world, Vector position, Direction direction) throws StructureException {
-        WorldManager structureManager = getStructureManager(world);
-        return structureManager.createStructure(null, plan, position, direction, null);
-    }
-
-    @Override
-    public Structure createStructure(Placement placement, World world, Vector position, Direction direction) throws StructureException {
-        WorldManager structureManager = getStructureManager(world);
-        return structureManager.createStructure(null, placement, position, direction, null);
-    }
-
-    @Override
-    public Structure createStructure(Placement placement, World world, Vector position, Direction direction, Player owner) throws StructureException {
-        WorldManager structureManager = getStructureManager(world);
-        return structureManager.createStructure(null, placement, position, direction, owner);
-    }
-
-    @Override
-    public Structure createSubstructure(Structure parent, IStructurePlan plan, World world, Vector position, Direction direction, Player owner) throws StructureException {
-        WorldManager structureManager = getStructureManager(world);
-        return structureManager.createStructure(parent, plan, position, direction, owner);
-    }
-
-    @Override
-    public Structure createSubstructure(Structure parent, IStructurePlan plan, World world, Vector position, Direction direction) throws StructureException {
-        WorldManager structureManager = getStructureManager(world);
-        return structureManager.createStructure(parent, plan, position, direction, null);
-    }
-
-    @Override
-    public Structure createSubstructure(Structure parent, Placement placement, World world, Vector position, Direction direction, Player owner) throws StructureException {
-        WorldManager structureManager = getStructureManager(world);
-        return structureManager.createStructure(parent, placement, position, direction, owner);
-    }
-
-    @Override
-    public Structure createSubstructure(Structure parent, Placement placement, World world, Vector position, Direction direction) throws StructureException {
-        WorldManager structureManager = getStructureManager(world);
-        return structureManager.createStructure(parent, placement, position, direction, null);
-    }
+    
 
     @Override
     public final File getStructuresDirectory(String world) {

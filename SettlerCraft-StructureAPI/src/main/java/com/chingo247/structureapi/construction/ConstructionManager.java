@@ -20,7 +20,7 @@ import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
 import com.chingo247.settlercraft.core.persistence.neo4j.NodeHelper;
-import com.chingo247.settlercraft.core.util.KeyPool;
+import com.chingo247.settlercraft.core.concurrent.KeyPool;
 import com.chingo247.structureapi.StructureAPI;
 import com.chingo247.structureapi.construction.event.StructureTaskCancelledEvent;
 import com.chingo247.structureapi.construction.event.StructureTaskCompleteEvent;
@@ -36,6 +36,7 @@ import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.structureapi.model.structure.StructureRelations;
 import com.chingo247.structureapi.model.structure.StructureRepository;
 import com.chingo247.structureapi.construction.options.Options;
+import com.chingo247.structureapi.model.RelTypes;
 import com.chingo247.structureapi.model.owner.Ownership;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IColors;
@@ -208,7 +209,7 @@ public class ConstructionManager implements IConstructionManager {
                                 try (Transaction tx = graph.beginTx()) {
                                     
                                     TraversalDescription traversal = graph.traversalDescription()
-                                            .relationships(DynamicRelationshipType.withName(StructureRelations.RELATION_SUBSTRUCTURE), Direction.INCOMING);
+                                            .relationships(RelTypes.SUBSTRUCTURE_OF, Direction.INCOMING);
                                     
                                             if(options.isTraversingReversed()) {
                                                 traversal = traversal.reverse();

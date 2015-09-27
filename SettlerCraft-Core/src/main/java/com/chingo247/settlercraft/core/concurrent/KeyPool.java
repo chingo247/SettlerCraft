@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.settlercraft.core.util;
+package com.chingo247.settlercraft.core.concurrent;
 
 import java.util.HashMap;
 import java.util.LinkedList;

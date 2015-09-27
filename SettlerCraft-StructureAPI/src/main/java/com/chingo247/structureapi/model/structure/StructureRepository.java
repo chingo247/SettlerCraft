@@ -6,12 +6,21 @@
 package com.chingo247.structureapi.model.structure;
 
 import com.chingo247.settlercraft.core.Direction;
-import com.chingo247.structureapi.model.world.StructureWorldNode;
+import com.chingo247.settlercraft.core.model.WorldNode;
+import com.chingo247.structureapi.model.RelTypes;
+import com.chingo247.structureapi.model.plot.Plot;
+import com.chingo247.structureapi.model.settler.Settler;
+import com.chingo247.structureapi.model.world.StructureWorld;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
+import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
@@ -78,9 +87,9 @@ public class StructureRepository implements IStructureRepository {
     }
 
     @Override
-    public StructureNode addStructure(StructureWorldNode world, String name, Vector position, CuboidRegion region, Direction direction, double price) {
+    public StructureNode addStructure(StructureWorld world, String name, Vector position, CuboidRegion region, Direction direction, double price) {
         long id = nextId();
-        Node stNode = graph.createNode(StructureNode.label());
+        Node stNode = graph.createNode(StructureNode.label(), DynamicLabel.label(Plot.LABEL_PLOT));
         stNode.setProperty(StructureNode.ID_PROPERTY, id);
         stNode.setProperty(StructureNode.NAME_PROPERTY, name);
         stNode.setProperty(StructureNode.CONSTRUCTION_STATUS_PROPERTY, ConstructionStatus.ON_HOLD.getStatusId());
@@ -97,6 +106,7 @@ public class StructureRepository implements IStructureRepository {
         stNode.setProperty(StructureNode.CREATED_AT_PROPERTY, System.currentTimeMillis());
         stNode.setProperty(StructureNode.SIZE_PROPERTY, region.getArea());
         stNode.setProperty(StructureNode.PRICE_PROPERTY, price);
+        stNode.setProperty(StructureNode.PLOT_TYPE_PROPERTY, "Structure");
         
         Vector center = region.getCenter();
         stNode.setProperty(StructureNode.CENTER_X_PROPERTY, center.getX());
@@ -108,9 +118,200 @@ public class StructureRepository implements IStructureRepository {
         return structure;
     }
     
+    @Override
+    public Iterable<StructureNode> findWorldDeletedAfter(UUID worldUUID, long date) {
+        List<StructureNode> structures = com.google.common.collect.Lists.newArrayList();
+
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("worldId", worldUUID.toString());
+        params.put("date", date);
+
+        String query = "MATCH (world:" + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
+                + " WITH world "
+                + " MATCH (world)<-[:" + RelTypes.WITHIN.name() + "]-(s:" + StructureNode.LABEL + ")"
+                + " WHERE s." + StructureNode.DELETED_AT_PROPERTY + " > {date}"
+                + " RETURN s";
+
+        Result r = graph.execute(query, params);
+
+        while (r.hasNext()) {
+            Map<String, Object> map = r.next();
+
+            for (Object o : map.values()) {
+                Node n = (Node) o;
+                StructureNode sn = new StructureNode(n);
+                structures.add(sn);
+            }
+        }
+        return structures;
+    }
     
+    @Override
+    public Iterable<StructureNode> findCreatedAfter(UUID worldUUID, long date) {
+        List<StructureNode> structures = Lists.newArrayList();
+
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("worldId", worldUUID.toString());
+        params.put("date", date);
+
+        String query = "MATCH (world:" + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
+                + " WITH world "
+                + " MATCH (world)<-[:" + RelTypes.WITHIN.name() + "]-(s:" + StructureNode.LABEL + ")"
+                + " WHERE s." + StructureNode.CREATED_AT_PROPERTY + " > {date}"
+                + " RETURN s";
+
+        Result r = graph.execute(query, params);
+
+        while (r.hasNext()) {
+            Map<String, Object> map = r.next();
+
+            for (Object o : map.values()) {
+                Node n = (Node) o;
+                StructureNode sn = new StructureNode(n);
+                structures.add(sn);
+            }
+        }
+        return structures;
+    }
+
+    @Override
+    public Iterable<StructureNode> findByWorld(UUID worldUUID) {
+        List<StructureNode> structures = Lists.newArrayList();
+
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("worldId", worldUUID.toString());
+        String query = "MATCH (world:" + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
+                + " WITH world "
+                + " MATCH (world)<-[:" + RelTypes.WITHIN.name() + "]-(s:" + StructureNode.LABEL + ")"
+                + " RETURN s";
+
+        Result r = graph.execute(query, params);
+
+        while (r.hasNext()) {
+            Map<String, Object> map = r.next();
+
+            for (Object o : map.values()) {
+                Node n = (Node) o;
+                StructureNode sn = new StructureNode(n);
+                structures.add(sn);
+            }
+        }
+        return structures;
+    }
     
+    @Override
+    public Iterable<StructureNode> findBySettler(UUID settlerUUID) {
+        List<StructureNode> structures = Lists.newArrayList();
+
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("settlerUUID", settlerUUID.toString());
+        String query = "MATCH (settler:" + Settler.LABEL + " { " + Settler.ID_PROPERTY + ": {settlerUUID} })"
+                + " WITH settler "
+                + " MATCH (settler)<-[:" + RelTypes.OWNED_BY.name() + "]-(structure:" + StructureNode.LABEL + ")"
+                + " WHERE NOT " + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId()
+                + " ORDER BY " + StructureNode.CREATED_AT_PROPERTY + " DESC "
+                + " RETURN structure";
+
+        Result r = graph.execute(query, params);
+
+        while (r.hasNext()) {
+            Map<String, Object> map = r.next();
+            Object o = map.get("structure");
+            if(o != null) {
+                Node n = (Node) o;
+                StructureNode sn = new StructureNode(n);
+                structures.add(sn);
+            }
+        }
+        return structures;
+    }
     
+    @Override
+    public Iterable<StructureNode> findStructuresWithin(UUID worldUUID, CuboidRegion region, int limit) {
+        List<StructureNode> structures = new ArrayList<>();
+      
+        Map<String,Object> params = Maps.newHashMap();
+        params.put("worldId", worldUUID.toString());
+        if(limit > 0) {
+            params.put("limit", limit);
+        }
+       
+        String query = 
+                   "MATCH (world:"+WorldNode.LABEL+" { "+WorldNode.ID_PROPERTY+": {worldId} })"
+                + " WITH world "
+                + " MATCH (world)<-[:" + RelTypes.WITHIN.name() + "]-(s:" + StructureNode.LABEL + ")"
+                + " WHERE s." + StructureNode.DELETED_AT_PROPERTY + " IS NULL"
+                + " AND NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId()
+                + " AND s." + StructureNode.MAX_X_PROPERTY + " >= " + region.getMinimumPoint().getBlockX() + " AND s." + StructureNode.MIN_X_PROPERTY + " <= " + region.getMaximumPoint().getBlockX()
+                + " AND s." + StructureNode.MAX_Y_PROPERTY + " >= " + region.getMinimumPoint().getBlockY() + " AND s." + StructureNode.MIN_Y_PROPERTY + " <= " + region.getMaximumPoint().getBlockY()
+                + " AND s." + StructureNode.MAX_Z_PROPERTY + " >= " + region.getMinimumPoint().getBlockZ() + " AND s." + StructureNode.MIN_Z_PROPERTY + " <= " + region.getMaximumPoint().getBlockZ()
+                + " RETURN s";
+        
+        if(limit > 0) {
+            query += " LIMIT {limit}";
+        }
+        
+        Result result = graph.execute(query, params);
+        while (result.hasNext()) {
+            Map<String, Object> map = result.next();
+            for (Object o : map.values()) {
+                structures.add(new StructureNode((Node) o));
+            }
+        }
+
+        return structures;
+    }
+    
+    @Override
+    public boolean hasStructuresWithin(UUID worldUUID, CuboidRegion region) {
+        return !findStructuresWithin(worldUUID,region, 1).iterator().hasNext();
+    }
+
+    @Override
+    public int countStructuresOfSettler(UUID settlerUUID) {
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("settlerUUID", settlerUUID.toString());
+        String query = "MATCH (settler:" + Settler.LABEL + " { " + Settler.ID_PROPERTY + ": {settlerUUID} })"
+                + " WITH settler "
+                + " MATCH (settler)<-[:" + RelTypes.OWNED_BY.name() + "]-(structure:" + StructureNode.LABEL + ")"
+                + " WHERE NOT " + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId()
+                + " RETURN COUNT(structure) as total";
+
+        Result r = graph.execute(query, params);
+
+        int count = 0;
+        if(r.hasNext()) {
+            Map<String, Object> map = r.next();
+            Object o = map.get("total");
+            if(o != null) {
+                count = (int) o;
+            }
+        }
+        return count;
+    }
+
+    @Override
+    public int countStructuresWithinWorld(UUID worldUUID) {
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("worldUUID", worldUUID.toString());
+        String query = "MATCH (world:" + Settler.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldUUID} })"
+                + " WITH world "
+                + " MATCH (world)<-[:" + RelTypes.WITHIN.name() + "]-(structure:" + StructureNode.LABEL + ")"
+                + " WHERE NOT " + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId()
+                + " RETURN COUNT(structure) as total";
+
+        Result r = graph.execute(query, params);
+
+        int count = 0;
+        if(r.hasNext()) {
+            Map<String, Object> map = r.next();
+            Object o = map.get("total");
+            if(o != null) {
+                count = (int) o;
+            }
+        }
+        return count;
+    }
 
     
 }

@@ -25,7 +25,7 @@ import com.chingo247.settlercraft.core.model.BaseSettlerRepository;
 import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.settlercraft.core.model.interfaces.IBaseSettler;
 import com.chingo247.settlercraft.core.model.interfaces.IBaseSettlerRepository;
-import com.chingo247.settlercraft.core.util.KeyPool;
+import com.chingo247.settlercraft.core.concurrent.KeyPool;
 import com.chingo247.structureapi.event.StructureAddOwnerEvent;
 import com.chingo247.structureapi.event.StructureRemoveOwnerEvent;
 import com.chingo247.structureapi.exception.ConstructionException;
@@ -33,7 +33,7 @@ import com.chingo247.structureapi.model.settler.ISettler;
 import com.chingo247.structureapi.model.settler.SettlerRepositiory;
 import com.chingo247.structureapi.model.owner.OwnerType;
 import com.chingo247.structureapi.model.structure.StructureRepository;
-import com.chingo247.structureapi.platform.services.PermissionManager;
+import com.chingo247.structureapi.platform.permission.PermissionManager;
 import com.chingo247.structureapi.model.world.StructureWorldRepository;
 import com.chingo247.structureapi.IStructureAPI;
 import com.chingo247.structureapi.model.structure.StructureNode;
@@ -46,7 +46,6 @@ import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import static com.chingo247.structureapi.model.structure.ConstructionStatus.COMPLETED;
 import static com.chingo247.structureapi.model.structure.ConstructionStatus.ON_HOLD;
 import com.chingo247.structureapi.model.structure.StructureRelations;
-import com.chingo247.structureapi.model.world.StructureWorldNode;
 import com.chingo247.structureapi.StructureAPI;
 import com.chingo247.structureapi.plan.IStructurePlan;
 import com.chingo247.structureapi.plan.StructurePlanManager;
@@ -54,7 +53,9 @@ import com.chingo247.structureapi.plan.placement.Placement;
 import com.chingo247.structureapi.plan.placement.SchematicPlacement;
 import com.chingo247.structureapi.construction.options.BuildOptions;
 import com.chingo247.structureapi.construction.options.DemolitionOptions;
-import com.chingo247.structureapi.model.OwnerDomain;
+import com.chingo247.structureapi.model.RelTypes;
+import com.chingo247.structureapi.model.owner.OwnerDomain;
+import com.chingo247.structureapi.model.world.StructureWorld;
 import com.chingo247.structureapi.plan.schematic.FastClipboard;
 import com.chingo247.structureapi.plan.util.PlanGenerator;
 import com.chingo247.xplatform.core.APlatform;
@@ -166,7 +167,6 @@ public class StructureCommands {
                             try (Transaction tx = graph.beginTx()) {
                                 IBaseSettler node = settlerRepository.findByUUID(ply.getUniqueId()); // NEVER NULL
                                 sender.sendMessage("Your unique id is #" + COLOR.gold() + node.getId());
-
                                 tx.success();
                             }
                             break;
@@ -523,7 +523,7 @@ public class StructureCommands {
                     return true;
                 }
 
-                StructureWorldNode w = structure.getWorld();
+                StructureWorld w = structure.getWorld();
                 if (!w.getName().equals(player.getWorld().getName())) {
                     player.sendMessage(COLOR.red() + "Structure must be in the same world...");
                     return true;
@@ -942,7 +942,7 @@ public class StructureCommands {
         String query
                 = "MATCH (world:" + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
                 + " WITH world "
-                + " MATCH (world)<-[:" + StructureRelations.RELATION_WITHIN + "]-(s:" + StructureNode.LABEL + ")"
+                + " MATCH (world)<-[:" + RelTypes.WITHIN.name() + "]-(s:" + StructureNode.LABEL + ")"
                 + " WHERE NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId()
                 + " AND s." + StructureNode.MAX_X_PROPERTY + " >= " + position.getBlockX() + " AND s." + StructureNode.MIN_X_PROPERTY + " <= " + position.getBlockX()
                 + " AND s." + StructureNode.MAX_Y_PROPERTY + " >= " + position.getBlockY() + " AND s." + StructureNode.MIN_Y_PROPERTY + " <= " + position.getBlockY()

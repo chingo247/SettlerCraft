@@ -16,15 +16,19 @@
  */
 package com.chingo247.structureapi.model;
 
+import org.neo4j.graphdb.RelationshipType;
+
 /**
  *
  * @author Chingo
  */
-public class Relations {
+public enum RelTypes implements RelationshipType {
     
-    /**
-     * Should point to it's owner
-     */
-    public static final String RELATION_OWNED_BY = "OWNED_BY";
+    WITHIN ,
+    
+    SUBSTRUCTURE_OF,
+    
+    OWNED_BY
+   
     
 }

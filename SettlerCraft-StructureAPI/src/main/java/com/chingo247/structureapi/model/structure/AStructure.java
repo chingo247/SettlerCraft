@@ -42,7 +42,7 @@ public abstract class AStructure extends Plot implements IStructure {
     public Node getNode() {
         return underlyingNode;
     }
-    
+
     
     /**
      * Will add the offset to the structure's origin, which is always the front
@@ -97,14 +97,14 @@ public abstract class AStructure extends Plot implements IStructure {
      *
      * @return The directory
      */
-    public final File getStructureDirectory() {
+    public final File getDirectory() {
         File worldStructureFolder = StructureAPI.getInstance().getStructuresDirectory(getWorld().getName());
         return new File(worldStructureFolder, String.valueOf(getId()));
     }
 
     @Override
     public IStructurePlan getStructurePlan() {
-        File planFile = new File(getStructureDirectory(), "structureplan.xml");
+        File planFile = new File(getDirectory(), "structureplan.xml");
 
         StructurePlanReader reader = new StructurePlanReader();
         IStructurePlan plan = reader.readFile(planFile);

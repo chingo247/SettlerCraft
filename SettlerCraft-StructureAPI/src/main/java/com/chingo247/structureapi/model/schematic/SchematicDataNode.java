@@ -27,7 +27,7 @@ import org.neo4j.graphdb.Relationship;
  */
 public class SchematicDataNode implements ISchematicData {
     
-    public static final String LABEL_NAME = "SchematicData";
+    public static final String LABEL_NAME = "SCHEMATIC_DATA";
     public static final Label LABEL = DynamicLabel.label(LABEL_NAME);
     public static final String WIDTH_PROPERTY = "width";
     public static final String HEIGHT_PROPERTY = "height";

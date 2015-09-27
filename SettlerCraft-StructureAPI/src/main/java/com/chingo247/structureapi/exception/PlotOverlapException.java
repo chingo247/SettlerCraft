@@ -14,17 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.model;
+package com.chingo247.structureapi.exception;
 
 /**
  *
  * @author Chingo
  */
-public class Relations {
-    
-    /**
-     * Should point to it's owner
-     */
-    public static final String RELATION_OWNED_BY = "OWNED_BY";
+public class PlotOverlapException extends StructureException {
+
+    public PlotOverlapException(String message) {
+        super(message);
+    }
     
 }

@@ -21,18 +21,18 @@ public class StructureWorldRepository extends WorldRepository implements IStruct
     }
 
     @Override
-    public StructureWorldNode findByUUID(UUID worldUUID) {
+    public StructureWorld findByUUID(UUID worldUUID) {
         IWorld world = super.findByUUID(worldUUID); //To change body of generated methods, choose Tools | Templates.
         if(world != null) {
-            return new StructureWorldNode(world.getNode());
+            return new StructureWorld(world.getNode());
         }
         return null;
     }
 
     @Override
-    public StructureWorldNode registerWorld(String worldName, UUID worldUUID) {
+    public StructureWorld registerWorld(String worldName, UUID worldUUID) {
         IWorld world = super.registerWorld(worldName, worldUUID); //To change body of generated methods, choose Tools | Templates.
-        return new StructureWorldNode(world.getNode());
+        return new StructureWorld(world.getNode());
     }
     
     
