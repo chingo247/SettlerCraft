@@ -72,7 +72,7 @@ public class BKConfigProvider implements IConfigProvider {
     
 
     @Override
-    public boolean isSubstructuresAllowed() {
+    public boolean allowsSubstructures() {
         return allowsSubstructures;
     }
 

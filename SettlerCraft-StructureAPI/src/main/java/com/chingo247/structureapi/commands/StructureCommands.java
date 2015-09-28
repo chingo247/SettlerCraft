@@ -45,7 +45,6 @@ import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import static com.chingo247.structureapi.model.structure.ConstructionStatus.COMPLETED;
 import static com.chingo247.structureapi.model.structure.ConstructionStatus.ON_HOLD;
-import com.chingo247.structureapi.model.structure.StructureRelations;
 import com.chingo247.structureapi.StructureAPI;
 import com.chingo247.structureapi.plan.IStructurePlan;
 import com.chingo247.structureapi.plan.StructurePlanManager;

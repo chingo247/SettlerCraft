@@ -16,8 +16,7 @@
  */
 package com.chingo247.structureapi.model.schematic;
 
-import com.chingo247.structureapi.model.schematic.SchematicDataNode;
-import java.util.List;
+import java.util.Collection;
 
 /**
  *
@@ -27,9 +26,9 @@ public interface ISchematicRepository {
 
     public SchematicDataNode findByHash(long hash);
 
-    public List<SchematicDataNode> findBeforeDate(long date);
+    public Collection<SchematicDataNode> findBeforeDate(long date);
 
-    public List<SchematicDataNode> findAfterDate(long date);
+    public Collection<SchematicDataNode> findAfterDate(long date);
 
     public void addSchematic(String name, long xxhash64, int width, int height, int length, long importDate);
 }

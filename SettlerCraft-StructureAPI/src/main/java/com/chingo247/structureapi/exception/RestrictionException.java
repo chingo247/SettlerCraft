@@ -20,10 +20,10 @@ package com.chingo247.structureapi.exception;
  *
  * @author Chingo
  */
-public class PlotOverlapException extends StructureException {
+public class RestrictionException extends StructureAPIException {
 
-    public PlotOverlapException(String message) {
-        super(message);
+    public RestrictionException(String string) {
+        super(string);
     }
     
 }

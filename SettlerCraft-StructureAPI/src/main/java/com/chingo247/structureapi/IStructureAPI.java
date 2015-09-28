@@ -17,7 +17,6 @@
 package com.chingo247.structureapi;
 
 import com.chingo247.menuapi.menu.CategoryMenu;
-import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.structureapi.construction.ITaskAssigner;
 import com.chingo247.structureapi.construction.IConstructionManager;
 import com.chingo247.structureapi.construction.asyncworldedit.AsyncPlacement;
@@ -27,15 +26,13 @@ import com.chingo247.structureapi.exception.StructureRestrictionException;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.platform.IConfigProvider;
 import com.chingo247.structureapi.exception.ConstructionException;
-import com.chingo247.structureapi.plan.IStructurePlan;
 import com.chingo247.structureapi.plan.StructurePlanManager;
 import com.chingo247.structureapi.plan.placement.Placement;
 import com.chingo247.structureapi.plan.placement.SchematicPlacement;
 import com.chingo247.structureapi.construction.options.BuildOptions;
 import com.chingo247.structureapi.construction.options.DemolitionOptions;
-import com.chingo247.structureapi.model.structure.StructureNode;
+import com.chingo247.structureapi.exception.RestrictionException;
 import com.chingo247.xplatform.core.APlatform;
-import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
@@ -205,6 +202,8 @@ public interface IStructureAPI {
      * @return The AsyncEditSessionFactor
      */
     AsyncEditSessionFactory getSessionFactory();
+    
+    IPlacingValidator getPlacingValidator();
     
     IChunkManager getChunkManager();
     

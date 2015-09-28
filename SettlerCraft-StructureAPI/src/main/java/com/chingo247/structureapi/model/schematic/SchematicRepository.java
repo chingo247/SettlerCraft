@@ -18,6 +18,7 @@ package com.chingo247.structureapi.model.schematic;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -57,7 +58,7 @@ public class SchematicRepository implements ISchematicRepository {
     }
     
     @Override
-    public List<SchematicDataNode> findBeforeDate(long date) {
+    public Collection<SchematicDataNode> findBeforeDate(long date) {
         List<SchematicDataNode> schematics = Lists.newArrayList();
         try(Transaction tx = graph.beginTx()) {
             Map<String,Object> parameters = Maps.newHashMap();
@@ -76,7 +77,7 @@ public class SchematicRepository implements ISchematicRepository {
     }
     
     @Override
-    public List<SchematicDataNode> findAfterDate(long date) {
+    public Collection<SchematicDataNode> findAfterDate(long date) {
         List<SchematicDataNode> schematics = Lists.newArrayList();
         try(Transaction tx = graph.beginTx()) {
             Map<String,Object> parameters = Maps.newHashMap();

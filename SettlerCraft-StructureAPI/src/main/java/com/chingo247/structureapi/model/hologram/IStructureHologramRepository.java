@@ -8,6 +8,7 @@ package com.chingo247.structureapi.model.hologram;
 import com.chingo247.structureapi.model.hologram.StructureHologramNode;
 import com.chingo247.structureapi.model.structure.StructureNode;
 import com.sk89q.worldedit.Vector;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -18,7 +19,7 @@ public interface IStructureHologramRepository {
     
     public StructureHologramNode addHologram(StructureNode structure, Vector relativePosition);
     
-    public List<StructureHologramNode> findAll();
+    public Collection<StructureHologramNode> findAll();
     
     
 }

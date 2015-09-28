@@ -52,7 +52,7 @@ public class WorldRepository implements IWorldRepository {
     }
    
     @Override
-    public WorldNode registerWorld(String worldName, UUID worldUUID) {
+    public WorldNode addOrGet(String worldName, UUID worldUUID) {
         WorldNode world = findByUUID(worldUUID);
         if(world == null) { 
             Node worldNode = graph.createNode(WorldNode.label());

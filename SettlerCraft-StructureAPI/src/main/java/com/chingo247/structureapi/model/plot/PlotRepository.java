@@ -22,7 +22,6 @@ import com.chingo247.structureapi.ConstructionWorld;
 import com.chingo247.structureapi.model.RelTypes;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.chingo247.structureapi.model.structure.StructureNode;
-import com.chingo247.structureapi.model.structure.StructureRelations;
 import com.chingo247.xplatform.core.IWorld;
 import com.google.common.collect.Maps;
 import com.sk89q.worldedit.regions.CuboidRegion;

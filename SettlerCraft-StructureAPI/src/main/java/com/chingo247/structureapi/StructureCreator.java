@@ -141,7 +141,7 @@ public class StructureCreator implements IStructureCreator {
             monitor.enter();
             tx = graph.beginTx();
             
-            StructureWorld worldNode = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
+            StructureWorld worldNode = structureWorldRepository.addOrGet(w.getName(), w.getUUID());
             structure = create(worldNode, parentStructure, placement, placement.getClass().getSimpleName(), position, direction, owner);
 
             if (structure != null) {
@@ -193,7 +193,7 @@ public class StructureCreator implements IStructureCreator {
         try {
             tx = graph.beginTx();
             monitor.enter();
-            StructureWorld worldNode = structureWorldRepository.registerWorld(w.getName(), w.getUUID());
+            StructureWorld worldNode = structureWorldRepository.addOrGet(w.getName(), w.getUUID());
             structure = create(worldNode, parentStructure, structurePlan.getPlacement(), structurePlan.getName(), position, direction, owner);
              
             File structureDirectory = structure.getDirectory();
@@ -245,7 +245,8 @@ public class StructureCreator implements IStructureCreator {
         }
 
         // Create the StructureNode - Where it all starts...
-        structureNode = structureRepository.addStructure(structureWorld, name, position, structureRegion, direction, 0.0);
+        structureNode = structureRepository.addStructure(name, position, structureRegion, direction, 0.0);
+        structureWorld.addStructure(structureNode);
         
         if (parentNode != null && structureNode != null) {
             boolean hasWithin = parentNode.hasSubstructuresWithin(structureRegion);

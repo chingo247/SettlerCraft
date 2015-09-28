@@ -29,7 +29,7 @@ public interface IConfigProvider {
 
     public boolean isPlanShopEnabled();
 
-    public boolean isSubstructuresAllowed();
+    public boolean allowsSubstructures();
     
     public boolean useHolograms();
     

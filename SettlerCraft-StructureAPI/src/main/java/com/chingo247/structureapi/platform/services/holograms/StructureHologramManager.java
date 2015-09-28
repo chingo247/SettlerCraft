@@ -42,6 +42,7 @@ import com.google.common.eventbus.Subscribe;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.world.World;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -234,7 +235,7 @@ public class StructureHologramManager {
     private void initHolos() {
         final Queue<StructureHologram> hologramQueue = new LinkedList<>();
         try (Transaction tx = graph.beginTx()) {
-            List<StructureHologramNode> structureHolograms = structureHologramRepository.findAll();
+            Collection<StructureHologramNode> structureHolograms = structureHologramRepository.findAll();
 
             for (StructureHologramNode shn : structureHolograms) {
                 if (shn.getStructure() != null) {

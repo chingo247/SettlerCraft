@@ -10,6 +10,7 @@ import com.chingo247.structureapi.model.structure.StructureNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sk89q.worldedit.Vector;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -40,7 +41,7 @@ public class StructureHologramRepository implements IStructureHologramRepository
     }
     
     @Override
-    public List<StructureHologramNode> findAll() {
+    public Collection<StructureHologramNode> findAll() {
         Map<String,Object> params = Maps.newHashMap();
         params.put("removed", (Integer) ConstructionStatus.REMOVED.getStatusId());
         

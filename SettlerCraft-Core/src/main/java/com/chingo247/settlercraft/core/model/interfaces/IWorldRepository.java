@@ -16,7 +16,6 @@
  */
 package com.chingo247.settlercraft.core.model.interfaces;
 
-import com.chingo247.settlercraft.core.model.World;
 import com.chingo247.settlercraft.core.model.WorldNode;
 import java.util.UUID;
 
@@ -39,6 +38,6 @@ public interface IWorldRepository {
      * @param worldUUID The worldUUID
      * @return The world that has been created or the world that already existed with the same UUID
      */
-    public <T extends WorldNode> T registerWorld(String worldName, UUID worldUUID);
+    public <T extends WorldNode> T addOrGet(String worldName, UUID worldUUID);
     
 }

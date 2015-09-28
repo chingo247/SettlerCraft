@@ -8,7 +8,6 @@ package com.chingo247.structureapi.model.settler;
 import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.settlercraft.core.model.BaseSettlerNode;
 import com.chingo247.structureapi.model.Relations;
-import com.chingo247.structureapi.model.structure.StructureRelations;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

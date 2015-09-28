@@ -29,7 +29,7 @@ public interface IStructureWorldRepository extends IWorldRepository  {
      * @return The world that has been created or the world that already existed with the same UUID
      */
     @Override
-    public StructureWorld registerWorld(String worldName, UUID worldUUID);
+    public StructureWorld addOrGet(String worldName, UUID worldUUID);
     
     
 }

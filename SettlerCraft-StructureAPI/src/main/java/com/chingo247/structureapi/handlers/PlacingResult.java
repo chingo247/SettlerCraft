@@ -14,17 +14,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.exception;
+package com.chingo247.structureapi.handlers;
+
+import com.chingo247.structureapi.model.structure.Structure;
 
 /**
  *
  * @author Chingo
  */
-public class StructureRestrictionException extends RestrictionException {
+class PlacingResult {
+    
+    private Structure parentStructure;
+    private boolean canPlace;
 
-    public StructureRestrictionException(String message) {
-        super(message);
+    public PlacingResult(boolean canPlace) {
+        this.canPlace = canPlace;
     }
+
+    public void setParentStructure(Structure parentStructure) {
+        this.parentStructure = parentStructure;
+    }
+    
+    public Structure getParentStructure() {
+        return parentStructure;
+    }
+    
+    public boolean hasParentStructure() {
+        return parentStructure != null;
+    }
+
+    public boolean canPlace() {
+        return canPlace;
+    }
+    
+    
     
     
     

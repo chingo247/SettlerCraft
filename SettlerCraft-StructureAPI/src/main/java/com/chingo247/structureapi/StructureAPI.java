@@ -24,11 +24,9 @@ import com.chingo247.menuapi.menu.MenuAPI;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IPlugin;
 import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.core.exception.SettlerCraftException;
 import com.chingo247.structureapi.exception.StructureAPIException;
-import com.chingo247.structureapi.exception.StructureException;
 import com.chingo247.structureapi.menu.StructurePlanMenuFactory;
 import com.chingo247.structureapi.menu.StructurePlanMenuReader;
 import com.chingo247.settlercraft.core.model.WorldNode;
@@ -62,7 +60,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
-import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.world.World;
 import java.io.File;
@@ -107,6 +104,7 @@ public class StructureAPI implements IStructureAPI {
     private ITaskAssigner demolitionTaskAssigner;
     private IChunkManager chunkManager;
     private IBackupAPI backupAPI;
+    private IPlacingValidator placingValidator;
 
     private final Lock loadLock = new ReentrantLock();
     private StructurePlanMenuFactory planMenuFactory;
@@ -134,16 +132,14 @@ public class StructureAPI implements IStructureAPI {
         this.constructionManager = ConstructionManager.getInstance();
         this.demolitionTaskAssigner = new DefaultDemolitionTaskAssigner();
         this.buildTaskAssigner = new DefaultBuildTaskAssigner();
-
-        // Now register the GlobalPlanManager
         this.COLORS = platform.getChatColors();
-
+       
+        this.logLevel = Level.SEVERE;
+        this.placingValidator = new PlacingValidator(graph, instance, platform);
+       
         EventManager.getInstance().getEventBus().register(new StructurePlanManagerHandler());
-
         setupSchema();
         applyUpdates();
-        this.logLevel = Level.SEVERE;
-//        this.substructureHandler = new SubstructureHandler(graph, worldDAO, structureDAO, settlerDAO, this);
     }
 
     /**
@@ -191,8 +187,10 @@ public class StructureAPI implements IStructureAPI {
     public ConstructionWorld getConstructionWorld(World world) {
         return getConstructionWorld(world.getName());
     }
-    
-    
+
+    public IPlacingValidator getPlacingValidator() {
+        return placingValidator;
+    }
     
     private void applyUpdates() {
         StructureAPI_Update_2_2_0 update = new StructureAPI_Update_2_2_0(graph);
@@ -247,6 +245,8 @@ public class StructureAPI implements IStructureAPI {
             restriction.check(player, world, region);
         }
     }
+    
+    
 
     
 

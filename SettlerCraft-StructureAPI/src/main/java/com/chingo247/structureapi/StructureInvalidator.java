@@ -30,7 +30,6 @@ import com.chingo247.structureapi.model.world.IStructureWorldRepository;
 import com.chingo247.structureapi.model.settler.Settler;
 import com.chingo247.structureapi.model.owner.OwnerType;
 import com.chingo247.structureapi.model.structure.StructureRepository;
-import com.chingo247.structureapi.model.structure.StructureRelations;
 import com.chingo247.structureapi.model.world.StructureWorldRepository;
 import com.chingo247.xplatform.core.IServer;
 import com.chingo247.xplatform.core.IWorld;
@@ -43,9 +42,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.google.common.collect.Lists;
-import java.util.UUID;
-import org.bukkit.Bukkit;
-import org.bukkit.Statistic;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
@@ -57,24 +53,19 @@ import org.neo4j.graphdb.Transaction;
  */
 public class StructureInvalidator {
 
-    private IServer server;
-    private ExecutorService executor;
-    private GraphDatabaseService graph;
-    private IStructureRepository structureRepository;
-    private IStructureWorldRepository structureWorldRepository;
-    private IEconomyProvider economy;
+    private final IServer server;
+    private final GraphDatabaseService graph;
+    private final IStructureWorldRepository structureWorldRepository;
+    private final IEconomyProvider economy;
     
 
-    private static String LOCK_DATA = "lockData";
+    private static final String LOCK_DATA = "lockData";
 
     public StructureInvalidator(IServer server, ExecutorService executor, GraphDatabaseService graph, IEconomyProvider economyProvider) {
         this.server = server;
-        this.executor = executor;
         this.graph = graph;
-        this.structureRepository = new StructureRepository(graph);
         this.economy = economyProvider;
         this.structureWorldRepository = new StructureWorldRepository(graph);
-        
     }
 
     private File getSessionFile(IWorld world) {

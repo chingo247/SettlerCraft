@@ -22,7 +22,6 @@ import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.structureapi.exception.StructureException;
 import com.chingo247.structureapi.model.plot.PlotRepository;
 import com.chingo247.structureapi.model.world.IStructureWorldRepository;
-import com.chingo247.structureapi.model.world.StructureWorld;
 import com.chingo247.structureapi.model.world.StructureWorldRepository;
 import com.chingo247.structureapi.plan.placement.Placement;
 import com.chingo247.structureapi.world.WorldConfig;

@@ -18,10 +18,7 @@ package com.chingo247.structureapi.model.owner;
 
 import com.chingo247.settlercraft.core.model.interfaces.IBaseSettler;
 import com.chingo247.structureapi.model.Relations;
-import com.chingo247.structureapi.model.owner.OwnerType;
 import com.chingo247.structureapi.model.settler.Settler;
-import com.chingo247.structureapi.model.owner.Ownership;
-import com.chingo247.structureapi.model.structure.StructureRelations;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.UUID;

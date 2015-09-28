@@ -6,9 +6,9 @@
 package com.chingo247.structureapi.model.structure;
 
 import com.chingo247.settlercraft.core.Direction;
-import com.chingo247.structureapi.model.world.StructureWorld;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
+import java.util.Collection;
 import java.util.UUID;
 
 /**
@@ -17,24 +17,42 @@ import java.util.UUID;
  */
 public interface IStructureRepository {
     
-    public StructureNode findById(Long id);
+    StructureNode findById(Long id);
     
-    public StructureNode addStructure(StructureWorld world, String name, Vector position, CuboidRegion affectedArea, Direction direction, double price);
+    /**
+     * Adds a structure to the graph
+     * @param name The name of the structure
+     * @param position The position
+     * @param region The region
+     * @param direction The direction
+     * @param price The price of the structure
+     * @return 
+     */
+    StructureNode addStructure(String name, Vector position, CuboidRegion region, Direction direction, double price);
     
-    public Iterable<StructureNode> findByWorld(UUID worldUUID);
+    Collection<StructureNode> findByWorld(UUID worldUUID);
     
-    public Iterable<StructureNode> findBySettler(UUID settlerUUID);
+    Collection<StructureNode> findBySettler(UUID settlerUUID);
     
-    public Iterable<StructureNode> findWorldDeletedAfter(UUID worldUUID, long date);
+    Collection<StructureNode> findWorldDeletedAfter(UUID worldUUID, long date);
     
-    public Iterable<StructureNode> findCreatedAfter(UUID worldUUID, long date);
+    Collection<StructureNode> findCreatedAfter(UUID worldUUID, long date);
     
-    public Iterable<StructureNode> findStructuresWithin(UUID worldUUID, CuboidRegion region, int limit);
+    Collection<StructureNode> findStructuresWithin(UUID worldUUID, CuboidRegion region, int limit);
     
-    public int countStructuresOfSettler(UUID settlerUUID);
+    /**
+     * Finds the smallest structure on point. As structures may have substructures, the smallest structure on a point is considered a 'leaf' structure.
+     * This method is used to check if a new structure is qualified as substructure, as substructures must fit completely within their parent or placed completely outside.
+     * @param worldUUID
+     * @param position
+     * @return The structure
+     */
+    StructureNode findSmallestStructureOnPoint(UUID worldUUID, Vector position);
     
-    public int countStructuresWithinWorld(UUID worldUUID);
+    int countStructuresOfSettler(UUID settlerUUID);
     
-    public boolean hasStructuresWithin(UUID worldUUID, CuboidRegion region);
+    int countStructuresWithinWorld(UUID worldUUID);
+    
+    boolean hasStructuresWithin(UUID worldUUID, CuboidRegion region);
     
 }

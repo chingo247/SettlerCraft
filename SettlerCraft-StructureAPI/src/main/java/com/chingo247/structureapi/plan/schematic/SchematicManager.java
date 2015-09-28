@@ -36,6 +36,7 @@ import java.util.concurrent.RecursiveTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.google.common.collect.Maps;
+import java.util.Collection;
 import org.apache.commons.io.FileUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -113,7 +114,7 @@ public class SchematicManager {
         XXHasher hasher = new XXHasher();
         
         try(Transaction tx = graph.beginTx()) {
-            List<SchematicDataNode> schematicNodes = schematicRepository.findAfterDate(System.currentTimeMillis() - TWO_DAYS);
+            Collection<SchematicDataNode> schematicNodes = schematicRepository.findAfterDate(System.currentTimeMillis() - TWO_DAYS);
             for(SchematicDataNode node : schematicNodes) {
                 alreadyHere.put(node.getXXHash64(), node);
             }

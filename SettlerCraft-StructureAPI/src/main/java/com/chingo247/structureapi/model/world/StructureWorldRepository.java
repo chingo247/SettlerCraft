@@ -30,8 +30,8 @@ public class StructureWorldRepository extends WorldRepository implements IStruct
     }
 
     @Override
-    public StructureWorld registerWorld(String worldName, UUID worldUUID) {
-        IWorld world = super.registerWorld(worldName, worldUUID); //To change body of generated methods, choose Tools | Templates.
+    public StructureWorld addOrGet(String worldName, UUID worldUUID) {
+        IWorld world = super.addOrGet(worldName, worldUUID); //To change body of generated methods, choose Tools | Templates.
         return new StructureWorld(world.getNode());
     }
     
