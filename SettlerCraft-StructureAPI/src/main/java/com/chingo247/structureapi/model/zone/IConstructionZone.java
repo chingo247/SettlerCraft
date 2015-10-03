@@ -14,24 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.model.plot;
+package com.chingo247.structureapi.model.zone;
 
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.regions.CuboidRegion;
-import org.neo4j.graphdb.Node;
+import com.chingo247.structureapi.model.owner.OwnerDomain;
+import com.chingo247.structureapi.model.plot.IPlot;
 
 /**
  *
  * @author Chingo
  */
-public interface IPlot {
+public interface IConstructionZone extends IPlot {
     
-    Node getNode();
+    OwnerDomain getOwnerDomain();
     
-    Vector getMin();
+    AccessType getAccessType();
     
-    Vector getMax();
-    
-    CuboidRegion getCuboidRegion();
+    void setAccessType(AccessType accessType);
     
 }

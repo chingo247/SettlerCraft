@@ -58,18 +58,18 @@ public interface IPlacingValidator {
      */
     void checkStructureRestrictions(World world, CuboidRegion region) throws RestrictionException;
     
-    /**
-     * Checks if the given region will overlap any 'plots' (e.g. structures, constructionzones, etc), if so it will check the policy
-     * for those plots are violated. Structure for instance should only allow overlap if the structure completely fits within another structure.
-     * Also substructuring is only allowed when the structure is owned by the given player.
-     * 
-     * <b>NOTE: REQUIRES AN ACTIVE {@link Transaction}<b/> 
-     * @param world
-     * @param region
-     * @param player 
-     */
-    void checkStructureOverlapRestrictions(World world, CuboidRegion region, Player player) throws RestrictionException;
-    
+//    /**
+//     * Checks if the given region will overlap any 'plots' (e.g. structures, constructionzones, etc), if so it will check the policy
+//     * for those plots are violated. Structure for instance should only allow overlap if the structure completely fits within another structure.
+//     * Also substructuring is only allowed when the structure is owned by the given player.
+//     * 
+//     * <b>NOTE: REQUIRES AN ACTIVE {@link Transaction}<b/> 
+//     * @param world
+//     * @param region
+//     * @param player 
+//     */
+//    void checkStructureOverlapRestrictions(World world, CuboidRegion region, Player player) throws RestrictionException;
+//    
     /**
      * This method will enforce restrictions from the player point of view. This method will first get the smallest structure on the give position.
      * If the affected area fits within this structure and it does not overlap any other structures than the affected area is allowed to be edited
@@ -92,14 +92,14 @@ public interface IPlacingValidator {
      */
     void checkStructurePlacingRestrictions(World world, CuboidRegion affectArea, Vector placingPoint) throws RestrictionException;
     
-    /**
-     * Checks if the given region will overlap any 'plots' (e.g. structures, constructionzones, etc), if so it will check the policy
-     * for those plots are violated. Structure for instance should only allow overlap if the structure completely fits within another structure.
-     * 
-     * <b>NOTE: REQUIRES AN ACTIVE {@link Transaction}<b/> 
-     * @param world
-     * @param region
-     */
-    void checkStructureOverlapRestrictions(World world, CuboidRegion region) throws RestrictionException;
+//    /**
+//     * Checks if the given region will overlap any 'plots' (e.g. structures, constructionzones, etc), if so it will check the policy
+//     * for those plots are violated. Structure for instance should only allow overlap if the structure completely fits within another structure.
+//     * 
+//     * <b>NOTE: REQUIRES AN ACTIVE {@link Transaction}<b/> 
+//     * @param world
+//     * @param region
+//     */
+//    void checkStructureOverlapRestrictions(World world, CuboidRegion region) throws RestrictionException;
     
 }

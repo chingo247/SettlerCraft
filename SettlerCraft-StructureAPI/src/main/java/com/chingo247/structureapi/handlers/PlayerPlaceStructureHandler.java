@@ -356,7 +356,7 @@ public class PlayerPlaceStructureHandler {
 
             placingValidator.checkStructurePlacingRestrictions(world, affectedArea, min, player);
 
-            StructureNode structureNode = structureRepository.findSmallestStructureOnPoint(iw.getUUID(), pos1);
+            StructureNode structureNode = structureRepository.findStructureOnPosition(iw.getUUID(), pos1);
             if (structureNode != null) {
                 parentStructure = new Structure(structureNode);
             }

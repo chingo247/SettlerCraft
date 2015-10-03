@@ -24,6 +24,7 @@ import com.chingo247.structureapi.model.plot.PlotRepository;
 import com.chingo247.structureapi.model.world.IStructureWorldRepository;
 import com.chingo247.structureapi.model.world.StructureWorldRepository;
 import com.chingo247.structureapi.plan.placement.Placement;
+import com.chingo247.structureapi.world.IWorldConfig;
 import com.chingo247.structureapi.world.WorldConfig;
 import com.chingo247.xplatform.core.ILocation;
 import com.chingo247.xplatform.core.IWorld;
@@ -44,9 +45,9 @@ public class ConstructionWorld implements IWorld {
     private World worldEditWorld;
     private PlotRepository plotRepository;
     private IStructureWorldRepository worldRepository;
-    private WorldConfig config;
     private Monitor monitor;
     private StructureCreator structureCreator;
+    private IWorldConfig config;
     
     ConstructionWorld(IWorld w, StructureAPI structureAPI) {
         GraphDatabaseService graph = SettlerCraft.getInstance().getNeo4j();
@@ -55,6 +56,10 @@ public class ConstructionWorld implements IWorld {
         this.plotRepository = new PlotRepository(graph);
         this.worldRepository = new StructureWorldRepository(graph);
         this.structureCreator = new StructureCreator(this);
+    }
+
+    public IWorldConfig getConfig() {
+        return config;
     }
     
     World getWorldEditWorld() {

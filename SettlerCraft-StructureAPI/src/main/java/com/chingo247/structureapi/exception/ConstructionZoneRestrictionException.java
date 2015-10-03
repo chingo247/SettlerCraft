@@ -14,24 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.model.plot;
-
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.regions.CuboidRegion;
-import org.neo4j.graphdb.Node;
+package com.chingo247.structureapi.exception;
 
 /**
  *
  * @author Chingo
  */
-public interface IPlot {
-    
-    Node getNode();
-    
-    Vector getMin();
-    
-    Vector getMax();
-    
-    CuboidRegion getCuboidRegion();
+public class ConstructionZoneRestrictionException extends RestrictionException {
+
+    public ConstructionZoneRestrictionException(String string) {
+        super(string);
+    }
     
 }

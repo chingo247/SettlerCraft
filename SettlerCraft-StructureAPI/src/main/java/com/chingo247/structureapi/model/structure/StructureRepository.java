@@ -262,7 +262,8 @@ public class StructureRepository implements IStructureRepository {
         return structures;
     }
 
-    public StructureNode findSmallestStructureOnPoint(UUID worldUUID, Vector position) {
+    @Override
+    public StructureNode findStructureOnPosition(UUID worldUUID, Vector position) {
         StructureNode structure = null;
         Map<String, Object> params = Maps.newHashMap();
         params.put("worldId", worldUUID.toString());

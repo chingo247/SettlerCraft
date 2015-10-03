@@ -20,6 +20,8 @@ import com.chingo247.settlercraft.core.persistence.neo4j.NodeHelper;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
+import org.neo4j.graphdb.DynamicLabel;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 
 /**
@@ -32,8 +34,11 @@ public class Plot implements IPlot {
     public static final String PLOT_TYPE_PROPERTY = "plotType";
     public static final String LABEL_PLOT = "PLOT";
     
-    private final Node underlyingNode;
+    protected final Node underlyingNode;
 
+    public static Label plotLabel() {
+        return DynamicLabel.label(LABEL_PLOT);
+    }
     
     public Plot(Node node) {
         this.underlyingNode = node;
@@ -43,6 +48,7 @@ public class Plot implements IPlot {
         return NodeHelper.getString(underlyingNode, PLOT_TYPE_PROPERTY, "plot");
     }
     
+    @Override
     public Node getNode() {
         return underlyingNode;
     }

@@ -55,6 +55,7 @@ public class BaseSettlerRepository implements IBaseSettlerRepository {
                     settlerNode = new BaseSettlerNode((Node) o);
                 }
             }
+            
             tx.success();
         }
         return settlerNode;

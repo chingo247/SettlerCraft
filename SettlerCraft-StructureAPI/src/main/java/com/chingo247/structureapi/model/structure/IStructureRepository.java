@@ -47,7 +47,7 @@ public interface IStructureRepository {
      * @param position
      * @return The structure
      */
-    StructureNode findSmallestStructureOnPoint(UUID worldUUID, Vector position);
+    StructureNode findStructureOnPosition(UUID worldUUID, Vector position);
     
     int countStructuresOfSettler(UUID settlerUUID);
     

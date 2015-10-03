@@ -14,24 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.model.plot;
+package com.chingo247.settlercraft.core.commands.util;
 
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.regions.CuboidRegion;
-import org.neo4j.graphdb.Node;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  *
  * @author Chingo
  */
-public interface IPlot {
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface CommandExtras {
     
-    Node getNode();
+    /**
+     * If true, command will be executed asynchronously.
+     */
+    boolean async() default false;
     
-    Vector getMin();
-    
-    Vector getMax();
-    
-    CuboidRegion getCuboidRegion();
+    /**
+     * The sender type that is allowed, default is ANY sender
+     */
+    CommandSenderType senderType() default CommandSenderType.ANY;
     
 }

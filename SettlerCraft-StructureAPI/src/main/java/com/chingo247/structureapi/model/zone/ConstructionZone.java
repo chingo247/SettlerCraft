@@ -16,6 +16,8 @@
  */
 package com.chingo247.structureapi.model.zone;
 
+import com.chingo247.settlercraft.core.persistence.neo4j.NodeHelper;
+import com.chingo247.structureapi.model.owner.OwnerDomain;
 import com.chingo247.structureapi.model.plot.Plot;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.Label;
@@ -25,9 +27,14 @@ import org.neo4j.graphdb.Node;
  *
  * @author ching
  */
-public class ConstructionZone extends Plot {
+public class ConstructionZone extends Plot implements IConstructionZone {
     
     public static final String LABEL = "CONSTRUCTION_ZONE";
+    public static final String ACCESS_TYPE_PROPERTY = "ACCESS_TYPE"; // 
+    public static final String ID_PROPERTY = "ID";
+    private OwnerDomain ownerDomain;
+    
+    
     
     public static Label label() {
         return DynamicLabel.label(LABEL);
@@ -36,7 +43,30 @@ public class ConstructionZone extends Plot {
     public ConstructionZone(Node node) {
         super(node);
     }
+
+    @Override
+    public OwnerDomain getOwnerDomain() {
+        return ownerDomain;
+    }
     
+    public Long getId() {
+        return NodeHelper.getLong(underlyingNode, ID_PROPERTY, null);
+    }
+    
+    @Override
+    public AccessType getAccessType() {
+        int type = NodeHelper.getInt(underlyingNode, ACCESS_TYPE_PROPERTY, -1);
+        if(type == -1) {
+            return null;
+        } else {
+            return AccessType.getAccessType(type);
+        }
+    }
+    
+    @Override
+    public void setAccessType(AccessType accessType) {
+        underlyingNode.setProperty(ACCESS_TYPE_PROPERTY, accessType.getTypeId());
+    }
     
     
 }

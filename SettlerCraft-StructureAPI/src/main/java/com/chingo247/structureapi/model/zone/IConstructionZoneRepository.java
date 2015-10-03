@@ -14,24 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.model.plot;
+package com.chingo247.structureapi.model.zone;
 
-import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
-import org.neo4j.graphdb.Node;
+import java.util.Collection;
+import java.util.UUID;
 
 /**
  *
  * @author Chingo
  */
-public interface IPlot {
+public interface IConstructionZoneRepository {
     
-    Node getNode();
     
-    Vector getMin();
+    IConstructionZone findById(long id);
     
-    Vector getMax();
+    Collection<IConstructionZone> findWithin(UUID worldUUID, CuboidRegion searchArea, int limit);
     
-    CuboidRegion getCuboidRegion();
+    Iterable<? extends IConstructionZone> findAll();
+    
+    IConstructionZone add(CuboidRegion region);
+    
+    void delete(long id);
+    
+    void delete(IConstructionZone zone);
     
 }

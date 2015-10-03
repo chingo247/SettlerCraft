@@ -16,12 +16,151 @@
  */
 package com.chingo247.structureapi.model.zone;
 
+import com.chingo247.settlercraft.core.model.WorldNode;
+import com.chingo247.settlercraft.core.persistence.neo4j.NodeHelper;
+import com.chingo247.structureapi.model.RelTypes;
+import com.chingo247.structureapi.model.plot.Plot;
+import com.chingo247.structureapi.model.structure.ConstructionStatus;
+import com.chingo247.structureapi.model.structure.StructureNode;
+import com.google.common.collect.Maps;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Result;
+
 /**
  *
  * @author ching
  */
-public class ConstructionZoneRepository {
+public class ConstructionZoneRepository implements IConstructionZoneRepository {
     
+    private boolean checked;
+    private final GraphDatabaseService graph;
+
+    public ConstructionZoneRepository(GraphDatabaseService graph) {
+        this.checked = false;
+        this.graph = graph;
+    }
     
+    private long nextId() {
+        if (!checked) {
+            Result r = graph.execute("MATCH (sid: ID_GENERATOR {name:'CONSTRUCTION_ZONE_ID'}) "
+                    + "RETURN sid "
+                    + "LIMIT 1");
+            if (!r.hasNext()) {
+                graph.execute("CREATE (sid: ID_GENERATOR {name:'CONSTRUCTION_ZONE_ID', nextId: 1})");
+                checked = true;
+                return 1;
+            }
+            checked = true;
+        }
+
+        // Work-around for getting the next Id
+        // Sets the lock at this node by removing a non-existent property
+        String idQuery = "MATCH (sid:ID_GENERATOR {name:'CONSTRUCTION_ZONE_ID'}) "
+                + "REMOVE sid.lock " // NON-EXISTENT PROPERTY
+                + "SET sid.nextId = sid.nextId + 1 "
+                + "RETURN sid.nextId as nextId";
+        Result r = graph.execute(idQuery);
+        long id = (long) r.next().get("nextId");
+
+        return id;
+    }
+
+    @Override
+    public IConstructionZone findById(long id) {
+        ConstructionZone zone = null;
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("id", id);
+
+        String query
+                = " MATCH (s:" + StructureNode.LABEL + " { " + StructureNode.ID_PROPERTY + ": {id} })"
+                + " RETURN s as zone";
+
+        Result result = graph.execute(query, params);
+
+        while (result.hasNext()) {
+            Node n = (Node) result.next().get("zone");
+            zone = new ConstructionZone(n);
+            break;
+        }
+        return zone;
+    }
+
+    @Override
+    public Collection<IConstructionZone> findWithin(UUID worldUUID, CuboidRegion searchArea, int limit) {
+        List<IConstructionZone> zones = new ArrayList<>();
+
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("worldId", worldUUID.toString());
+        if (limit > 0) {
+            params.put("limit", limit);
+        }
+
+        Vector min = searchArea.getMinimumPoint();
+        Vector max = searchArea.getMaximumPoint();
+        
+        String query
+                = "MATCH (world:" + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
+                + " WITH world "
+                + " MATCH (world)<-[:" + RelTypes.WITHIN.name() + "]-(s:" + ConstructionZone.LABEL + ")"
+                + " WHERE "
+                + " s." + ConstructionZone.MAX_X_PROPERTY + " >= " + min.getBlockX() + " AND s." + ConstructionZone.MIN_X_PROPERTY + " <= " + max.getBlockX()
+                + " AND s." + ConstructionZone.MAX_Y_PROPERTY + " >= " + min.getBlockY() + " AND s." + ConstructionZone.MIN_Y_PROPERTY + " <= " + max.getBlockY()
+                + " AND s." + ConstructionZone.MAX_Z_PROPERTY + " >= " + min.getBlockZ() + " AND s." + ConstructionZone.MIN_Z_PROPERTY + " <= " + max.getBlockZ()
+                + " RETURN s";
+
+        if (limit > 0) {
+            query += " LIMIT {limit}";
+        }
+
+        Result result = graph.execute(query, params);
+        while (result.hasNext()) {
+            Map<String, Object> map = result.next();
+            for (Object o : map.values()) {
+                zones.add(new ConstructionZone((Node) o));
+            }
+        }
+
+        return zones;
+    }
+
+    @Override
+    public Iterable<? extends IConstructionZone> findAll() {
+        return NodeHelper.makeIterable(graph.findNodes(ConstructionZone.label()), ConstructionZone.class);
+    }
+
+    @Override
+    public IConstructionZone add(CuboidRegion region) {
+        Vector min = region.getMinimumPoint();
+        Vector max = region.getMaximumPoint();
+        Node n = graph.createNode(Plot.plotLabel(), ConstructionZone.label());
+        n.setProperty(ConstructionZone.ID_PROPERTY, nextId());
+        ConstructionZone zone = new ConstructionZone(n);
+        zone.setAccessType(AccessType.PRIVATE);
+        zone.setMinX(min.getBlockX());
+        zone.setMinY(min.getBlockY());
+        zone.setMinZ(min.getBlockZ());
+        zone.setMaxX(max.getBlockX());
+        zone.setMaxY(max.getBlockY());
+        zone.setMaxZ(max.getBlockZ());
+        return zone;
+    }
+
+    @Override
+    public void delete(long id) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void delete(IConstructionZone zone) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

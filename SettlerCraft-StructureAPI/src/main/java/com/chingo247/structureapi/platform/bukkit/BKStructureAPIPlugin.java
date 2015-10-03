@@ -21,21 +21,27 @@ import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.xplatform.core.IPlugin;
 import com.chingo247.settlercraft.core.exception.SettlerCraftException;
 import com.chingo247.structureapi.platform.bukkit.listener.PlanListener;
-import com.chingo247.settlercraft.core.exception.CommandException;
 import com.chingo247.settlercraft.core.platforms.bukkit.BKPermissionRegistry;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
-import com.chingo247.structureapi.commands.StructureCommands;
 import com.chingo247.structureapi.exception.StructureAPIException;
 import com.chingo247.structureapi.platform.permission.PermissionManager;
 import com.chingo247.structureapi.platform.services.holograms.StructureHologramManager;
 import com.chingo247.structureapi.StructureAPI;
 import com.chingo247.structureapi.StructureInvalidator;
+import com.chingo247.structureapi.commands.SchematicCommands;
+import com.chingo247.structureapi.commands.SettlerCommands;
+import com.chingo247.structureapi.commands.StructureCommands;
+import com.chingo247.structureapi.commands.StructurePlanCommands;
+import com.chingo247.settlercraft.core.commands.util.PluginCommandManager;
 import com.chingo247.structureapi.plan.util.PlanGenerator;
-import com.chingo247.xplatform.core.ICommandSender;
 import com.chingo247.xplatform.platforms.bukkit.BukkitConsoleSender;
-import com.chingo247.xplatform.platforms.bukkit.BukkitPlayer;
 import com.chingo247.xplatform.platforms.bukkit.BukkitPlugin;
 import com.chingo247.xplatform.platforms.bukkit.BukkitServer;
+import com.sk89q.bukkit.util.CommandsManagerRegistration;
+import com.sk89q.minecraft.util.commands.CommandPermissionsException;
+import com.sk89q.minecraft.util.commands.CommandUsageException;
+import com.sk89q.minecraft.util.commands.MissingNestedCommandException;
+import com.sk89q.minecraft.util.commands.WrappedCommandException;
 import java.io.File;
 
 import java.util.logging.Level;
@@ -44,7 +50,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dom4j.DocumentException;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -63,7 +68,7 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
     private static BKStructureAPIPlugin instance;
     private StructureCommands structureCommands;
     private GraphDatabaseService graph;
-    
+    private PluginCommandManager commands;
 
     @Override
     public void onEnable() {
@@ -175,28 +180,41 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         PermissionManager.getInstance().registerPermissionRegistry(new BKPermissionRegistry());
         
         // Setup Commands
-        structureCommands = new StructureCommands(StructureAPI.getInstance(), SettlerCraft.getInstance().getExecutor(), graph);
-        
-        
+        registerCommands();
+    }
+    
+    private void registerCommands() {
+        this.commands = new PluginCommandManager(SettlerCraft.getInstance().getExecutor(), SettlerCraft.getInstance().getPlatform());
+        CommandsManagerRegistration cmdRegister = new CommandsManagerRegistration(this, commands);
+        cmdRegister.register(SchematicCommands.class);
+        cmdRegister.register(StructureCommands.class);
+        cmdRegister.register(SettlerCommands.class);
+        cmdRegister.register(StructurePlanCommands.class);
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        ICommandSender s = (sender instanceof Player) ? new BukkitPlayer((Player) sender) : new BukkitConsoleSender(sender);
-            try {
-                switch(command.getName()) {
-                    case "stt": return structureCommands.handle(s, command.getName(), args);
-                    default:
-                        sender.sendMessage("No action known for " + command.getName());
-                        break;
-                }
-                return true; //To change body of generated methods, choose Tools | Templates.
-            } catch (CommandException ex) {
-                sender.sendMessage(ex.getPlayerErrorMessage());
-                
+        try {
+            this.commands.execute(command.getName(), args, new BukkitConsoleSender(sender), new BukkitConsoleSender(sender), StructureAPI.getInstance());
+        } catch (CommandPermissionsException e) {
+            sender.sendMessage(ChatColor.RED + "You don't have permission.");
+        } catch (MissingNestedCommandException e) {
+            sender.sendMessage(ChatColor.RED + e.getUsage());
+        } catch (CommandUsageException e) {
+            sender.sendMessage(ChatColor.RED + e.getMessage());
+            sender.sendMessage(ChatColor.RED + e.getUsage());
+        } catch (WrappedCommandException e) {
+            if (e.getCause() instanceof NumberFormatException) {
+                sender.sendMessage(ChatColor.RED + "Number expected, string received instead.");
+            } else {
+                sender.sendMessage(ChatColor.RED + "An error has occurred. See console.");
+                e.printStackTrace();
             }
-        
-        return false;
+        } catch (com.sk89q.minecraft.util.commands.CommandException e) {
+            sender.sendMessage(ChatColor.RED + e.getMessage());
+        }
+ 
+        return true;
     }
 
     @Override

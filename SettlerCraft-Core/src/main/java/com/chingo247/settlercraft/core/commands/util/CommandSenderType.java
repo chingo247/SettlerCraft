@@ -14,24 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.model.plot;
-
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.regions.CuboidRegion;
-import org.neo4j.graphdb.Node;
+package com.chingo247.settlercraft.core.commands.util;
 
 /**
  *
  * @author Chingo
  */
-public interface IPlot {
+public enum CommandSenderType {
     
-    Node getNode();
-    
-    Vector getMin();
-    
-    Vector getMax();
-    
-    CuboidRegion getCuboidRegion();
+    ANY,
+    CONSOLE,
+    OP,
+    PLAYER
     
 }

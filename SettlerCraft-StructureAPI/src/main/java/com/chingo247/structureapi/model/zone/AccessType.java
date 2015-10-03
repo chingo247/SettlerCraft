@@ -14,24 +14,47 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.model.plot;
-
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.regions.CuboidRegion;
-import org.neo4j.graphdb.Node;
+package com.chingo247.structureapi.model.zone;
 
 /**
  *
  * @author Chingo
  */
-public interface IPlot {
+public enum AccessType {
     
-    Node getNode();
+    /**
+     * Everyone has access
+     */
+    PUBLIC(0),
+    /**
+     * Only owners have access
+     */
+    PRIVATE(1),
     
-    Vector getMin();
+    /**
+     * No one is allowed
+     */
+    RESTRICTED(2);
+
     
-    Vector getMax();
+    private final int typeId;
     
-    CuboidRegion getCuboidRegion();
+    private AccessType(int id) {
+        this.typeId = id;
+    }
+
+    public int getTypeId() {
+        return typeId;
+    }
+    
+    public static final AccessType getAccessType(int typeId) {
+        switch(typeId) {
+            case 0: return PUBLIC;
+            case 1: return PRIVATE;
+            case 2: return RESTRICTED;
+            default: throw new IllegalArgumentException("No type for id '" + typeId + "'");
+        }
+    }
+    
     
 }

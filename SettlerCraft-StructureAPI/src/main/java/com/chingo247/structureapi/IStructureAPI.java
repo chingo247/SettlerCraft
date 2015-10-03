@@ -22,6 +22,7 @@ import com.chingo247.structureapi.construction.IConstructionManager;
 import com.chingo247.structureapi.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.backupapi.core.IBackupAPI;
 import com.chingo247.backupapi.core.IChunkManager;
+import com.chingo247.settlercraft.core.concurrent.KeyPool;
 import com.chingo247.structureapi.exception.StructureRestrictionException;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.platform.IConfigProvider;

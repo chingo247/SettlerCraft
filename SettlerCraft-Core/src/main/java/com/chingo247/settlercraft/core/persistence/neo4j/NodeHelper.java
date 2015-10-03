@@ -87,9 +87,8 @@ public class NodeHelper {
         }
         return null;
     }
-
-    public static <T> Iterable<T> makeIterable(final Iterable<Node> nodes, final Class<T> clazz) {
-        final Iterator<Node> nodeIt = nodes.iterator();
+    
+    public static <T> Iterable<T> makeIterable(final Iterator<Node> nodeIt, final Class<T> clazz) {
         try {
             final Constructor c = clazz.getConstructor(Node.class);
             return new Iterable<T>() {
@@ -118,7 +117,11 @@ public class NodeHelper {
         } catch (NoSuchMethodException | SecurityException ex) {
             throw new RuntimeException(ex);
         }
+    }
 
+    public static <T> Iterable<T> makeIterable(final Iterable<Node> nodes, final Class<T> clazz) {
+        final Iterator<Node> nodeIt = nodes.iterator();
+        return makeIterable(nodeIt, clazz);
     }
 
     public static <T> Iterable<T> makeIterable(final Node node, final Iterable<Relationship> nodes, final Class<T> clazz, IPredicate<T> predicate) {

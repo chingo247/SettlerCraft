@@ -123,7 +123,7 @@ public class StructureAPI implements IStructureAPI {
     private final IColors COLORS;
     private Level logLevel;
     private final Map<String, ConstructionWorld> worlds;
-
+    
     private StructureAPI() {
         this.platform = SettlerCraft.getInstance().getPlatform();
         this.graph = SettlerCraft.getInstance().getNeo4j();
@@ -135,13 +135,14 @@ public class StructureAPI implements IStructureAPI {
         this.COLORS = platform.getChatColors();
        
         this.logLevel = Level.SEVERE;
-        this.placingValidator = new PlacingValidator(graph, instance, platform);
+        this.placingValidator = new StructurePlacingValidator(graph, instance, platform);
        
         EventManager.getInstance().getEventBus().register(new StructurePlanManagerHandler());
         setupSchema();
         applyUpdates();
     }
-
+    
+  
     /**
      * This method should exclusively be used by SettlerCraft 
      * @param backupAPI Registers the BackupAPI

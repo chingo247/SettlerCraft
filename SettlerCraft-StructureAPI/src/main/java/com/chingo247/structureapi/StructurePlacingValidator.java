@@ -16,8 +16,8 @@
  */
 package com.chingo247.structureapi;
 
-import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.SettlerCraft;
+import com.chingo247.structureapi.exception.ConstructionZoneRestrictionException;
 import com.chingo247.structureapi.exception.RestrictionException;
 import com.chingo247.structureapi.exception.StructureRestrictionException;
 import com.chingo247.structureapi.exception.WorldRestrictionException;
@@ -26,12 +26,14 @@ import com.chingo247.structureapi.model.settler.Settler;
 import com.chingo247.structureapi.model.settler.SettlerRepositiory;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.chingo247.structureapi.model.structure.IStructureRepository;
-import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.structureapi.model.structure.StructureRepository;
-import com.chingo247.structureapi.plan.IStructurePlan;
-import com.chingo247.structureapi.util.PlacementUtil;
+import com.chingo247.structureapi.model.zone.AccessType;
+import com.chingo247.structureapi.model.zone.ConstructionZoneRepository;
+import com.chingo247.structureapi.model.zone.IConstructionZone;
+import com.chingo247.structureapi.model.zone.IConstructionZoneRepository;
 import com.chingo247.structureapi.util.RegionUtil;
+import com.chingo247.structureapi.world.IWorldConfig;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.ILocation;
 import com.chingo247.xplatform.core.IWorld;
@@ -41,28 +43,28 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
 import java.util.Collection;
 import java.util.Iterator;
-import javax.annotation.Nonnull;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Transaction;
 
 /**
  *
  * @author Chingo
  */
-public class PlacingValidator implements IPlacingValidator {
+public class StructurePlacingValidator implements IPlacingValidator {
 
     private final GraphDatabaseService graph;
     private final IStructureRepository structureRepository;
+    private final IConstructionZoneRepository constructionZoneRepository;
     private final ISettlerRepository settlerRepository;
     private final IStructureAPI structureAPI;
     private final APlatform platform;
 
-    public PlacingValidator(GraphDatabaseService graph, IStructureAPI structureAPI, APlatform platform) {
+    public StructurePlacingValidator(GraphDatabaseService graph, IStructureAPI structureAPI, APlatform platform) {
         this.graph = graph;
         this.structureAPI = structureAPI;
         this.structureRepository = new StructureRepository(graph);
         this.settlerRepository = new SettlerRepositiory(graph);
+        this.constructionZoneRepository = new ConstructionZoneRepository(graph);
         this.platform = platform;
     }
 
@@ -98,46 +100,53 @@ public class PlacingValidator implements IPlacingValidator {
         structureAPI.checkRestrictions(null, world, region);
     }
 
-    @Override
-    public void checkStructureOverlapRestrictions(World world, CuboidRegion region, Player player) throws StructureRestrictionException {
-        IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
-        
-        boolean allowsSubstructures = structureAPI.getConfig().allowsSubstructures();
-        
-        if(allowsSubstructures) {
-            Collection<StructureNode> structures = structureRepository.findStructuresWithin(w.getUUID(), region, -1);
-            Settler settler = player != null ? settlerRepository.findByUUID(player.getUniqueId()) : null;
-            for (StructureNode structureNode : structures) {
-                if (!RegionUtil.isDimensionWithin(structureNode.getCuboidRegion(), region)) { // overlaps but doesn't fit within
-                    throw new StructureRestrictionException("Structure overlaps structure #" + structureNode.getId() + " " + structureNode.getName());
-                } else if (settler != null && structureNode.getOwnerDomain().isOwner(settler.getUniqueIndentifier())) { // fits within but doesnt own
-                    throw new StructureRestrictionException("Can't create substructure, structure will overlap a structure you don't own");
-                } else if(structureNode.getStatus() != ConstructionStatus.COMPLETED && structureNode.getStatus() != ConstructionStatus.STOPPED) { // fits within and owns, but structure is in progress
-                    throw new StructureRestrictionException("Can't place within a structure that is in progress");
-                }
-            } 
-        } else {
-            Iterator<StructureNode> iterator = structureRepository.findStructuresWithin(w.getUUID(), region, 1).iterator();
-            if(iterator.hasNext()) {
-                StructureNode structureNode = iterator.next();
-                throw new StructureRestrictionException("Structure overlaps structure #" + structureNode.getId() + " " + structureNode.getName());
-            }
-        }
-    }
-
-    @Override
-    public void checkStructureOverlapRestrictions(World world, CuboidRegion region) throws StructureRestrictionException {
-        checkStructureOverlapRestrictions(world, region, null);
-    }
+//    @Override
+//    public void checkStructureOverlapRestrictions(World world, CuboidRegion region, Player player) throws StructureRestrictionException {
+//        IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
+//        
+//        boolean allowsSubstructures = structureAPI.getConfig().allowsSubstructures();
+//        
+//        if(allowsSubstructures) {
+//            Collection<StructureNode> structures = structureRepository.findStructuresWithin(w.getUUID(), region, -1);
+//            Settler settler = player != null ? settlerRepository.findByUUID(player.getUniqueId()) : null;
+//            for (StructureNode structureNode : structures) {
+//                if (!RegionUtil.isDimensionWithin(structureNode.getCuboidRegion(), region)) { // overlaps but doesn't fit within
+//                    throw new StructureRestrictionException("Structure overlaps structure #" + structureNode.getId() + " " + structureNode.getName());
+//                } else if (settler != null && structureNode.getOwnerDomain().isOwner(settler.getUniqueIndentifier())) { // fits within but doesnt own
+//                    throw new StructureRestrictionException("Can't create substructure, structure will overlap a structure you don't own");
+//                } else if(structureNode.getStatus() != ConstructionStatus.COMPLETED && structureNode.getStatus() != ConstructionStatus.STOPPED) { // fits within and owns, but structure is in progress
+//                    throw new StructureRestrictionException("Can't place within a structure that is in progress");
+//                }
+//            } 
+//        } else {
+//            Iterator<StructureNode> iterator = structureRepository.findStructuresWithin(w.getUUID(), region, 1).iterator();
+//            if(iterator.hasNext()) {
+//                StructureNode structureNode = iterator.next();
+//                throw new StructureRestrictionException("Structure overlaps structure #" + structureNode.getId() + " " + structureNode.getName());
+//            }
+//        }
+//    }
+//
+//    @Override
+//    public void checkStructureOverlapRestrictions(World world, CuboidRegion region) throws StructureRestrictionException {
+//        checkStructureOverlapRestrictions(world, region, null);
+//    }
 
     @Override
     public void checkStructurePlacingRestrictions(World world, CuboidRegion affectArea, Vector placingPoint, Player player) throws RestrictionException {
-        APlatform platform = SettlerCraft.getInstance().getPlatform();
-        IWorld w = platform.getServer().getWorld(world.getName());
         boolean allowsSubstructures = structureAPI.getConfig().allowsSubstructures();
+        ConstructionWorld w = StructureAPI.getInstance().getConstructionWorld(world);
+        IWorldConfig config = w.getConfig();
+        
+        if(config.restrictsStructures()) {
+            throw new WorldRestrictionException("This world does not allow any structures");
+        }
+        
+        checkConstructionZoneRestrictions(w, affectArea, player);
+        
         
         if(allowsSubstructures) {
-            StructureNode possibleParent = structureRepository.findSmallestStructureOnPoint(w.getUUID(), placingPoint);
+            StructureNode possibleParent = structureRepository.findStructureOnPosition(w.getUUID(), placingPoint);
             Vector min = affectArea.getMinimumPoint();
             Vector max = affectArea.getMaximumPoint();
             StructureNode overlappingStructure;
@@ -174,5 +183,41 @@ public class PlacingValidator implements IPlacingValidator {
         checkStructurePlacingRestrictions(world, affectArea, placingPoint, null);
     }
 
+    private void checkConstructionZoneRestrictions(ConstructionWorld world, CuboidRegion affectArea, Player player) throws ConstructionZoneRestrictionException {
+        Collection<IConstructionZone> zones = constructionZoneRepository.findWithin(world.getUUID(), affectArea, 2);
+        
+        // May not overlap multiple zones
+        if(zones.size() == 2) {
+            throw new ConstructionZoneRestrictionException("Structure overlaps multiple construction zones");
+        }
+        
+        // Check if restricted to zones
+        if(zones.isEmpty() && world.getConfig().isZonesOnly()) {
+            throw new ConstructionZoneRestrictionException("Structures may only be placed within construction zones");
+        }
+        
+        // If zones != empty, check acces
+        if(!zones.isEmpty()) {
+            IConstructionZone zone = zones.iterator().next();
+            CuboidRegion zoneRegion = zone.getCuboidRegion();
+            
+            if(zone.getAccessType() == AccessType.RESTRICTED) {
+                throw new ConstructionZoneRestrictionException("Placing structures is restricted within this construction zone: "
+                        + "\n" + "(" + zoneRegion.getMinimumPoint() + ", " + zoneRegion.getMaximumPoint());
+            }
+            
+            if(zone.getAccessType() == AccessType.PRIVATE && !zone.getOwnerDomain().isOwner(player.getUniqueId())) {
+                throw new ConstructionZoneRestrictionException("You are not a member of this zone!"
+                         + "\n" + "(" + zoneRegion.getMinimumPoint() + ", " + zoneRegion.getMaximumPoint());
+            }
+            
+            if(!RegionUtil.isDimensionWithin(zoneRegion, affectArea)) {
+                throw new ConstructionZoneRestrictionException("Structure is not within construction zone"
+                         + "\n" + "(" + zoneRegion.getMinimumPoint() + ", " + zoneRegion.getMaximumPoint());
+            }
+            
+        }
+        
+    }
     
 }

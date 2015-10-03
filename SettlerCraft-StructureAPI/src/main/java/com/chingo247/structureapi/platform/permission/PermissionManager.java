@@ -63,6 +63,8 @@ public class PermissionManager {
     }
     
     public enum Perms {
+        CONTENT_GENERATE_PLANS(new Permission(PREFIX + "content.generate.plans", PermissionDefault.OP, "Allows a player to generate plans from schematics on the server")),
+        CONTENT_RELOAD_PLANS(new Permission(PREFIX + "content.reload.plans", PermissionDefault.OP, "Allows a player to reload plans on the server")),
         OPEN_PLAN_MENU(new Permission(PREFIX + "settler.open.planmenu", PermissionDefault.OP, "Allows the player to use the plan menu (contains plans for FREE)")),
         OPEN_SHOP_MENU(new Permission(PREFIX + "settler.open.shopmenu", PermissionDefault.TRUE, "Allows the player to use the plan shop")),
         ROTATE_SCHEMATIC(new Permission(PREFIX + "content.editor.rotate.placement", PermissionDefault.OP, "Allows rotation of schematics")),
@@ -73,6 +75,11 @@ public class PermissionManager {
         private Perms(Permission permission) {
             this.permission = permission;
         }
+
+        public Permission getPermission() {
+            return permission;
+        }
+        
     }
     
     public boolean isAllowed(Player player, Perms permission) {
