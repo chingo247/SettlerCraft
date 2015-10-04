@@ -35,6 +35,7 @@ import com.chingo247.structureapi.commands.StructurePlanCommands;
 import com.chingo247.settlercraft.core.commands.util.PluginCommandManager;
 import com.chingo247.structureapi.plan.util.PlanGenerator;
 import com.chingo247.xplatform.platforms.bukkit.BukkitConsoleSender;
+import com.chingo247.xplatform.platforms.bukkit.BukkitPlayer;
 import com.chingo247.xplatform.platforms.bukkit.BukkitPlugin;
 import com.chingo247.xplatform.platforms.bukkit.BukkitServer;
 import com.sk89q.bukkit.util.CommandsManagerRegistration;
@@ -50,6 +51,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dom4j.DocumentException;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -196,7 +198,11 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         try {
-            this.commands.execute(command.getName(), args, new BukkitConsoleSender(sender), new BukkitConsoleSender(sender), StructureAPI.getInstance());
+            if(sender instanceof Player) {
+               this.commands.execute(command.getName(), args, new BukkitPlayer((Player) sender), new BukkitPlayer((Player) sender), StructureAPI.getInstance());
+            } else {
+               this.commands.execute(command.getName(), args, new BukkitConsoleSender(sender), new BukkitConsoleSender(sender), StructureAPI.getInstance());
+            }
         } catch (CommandPermissionsException e) {
             sender.sendMessage(ChatColor.RED + "You don't have permission.");
         } catch (MissingNestedCommandException e) {

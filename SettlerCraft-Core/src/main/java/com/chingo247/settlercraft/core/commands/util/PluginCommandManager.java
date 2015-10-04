@@ -131,40 +131,40 @@ public class PluginCommandManager extends CommandsManager<ICommandSender> {
                         throw new AssertionError("Unreachable");
                 }
 
-                if (!commandExtra.async()) {
-                    super.executeMethod(parent, args, sender, methodArgs, level); //To change body of generated methods, choose Tools | Templates.
-                } else {
-                    commandPool.execute(getUUID(sender), new Runnable() {
+            }
 
-                        @Override
-                        public void run() {
-                            try {
-                                PluginCommandManager.super.executeMethod(parent, args, sender, methodArgs, level);
-                            } catch (CommandPermissionsException e) {
-                                sender.sendMessage(colors.red() + "You don't have permission.");
-                            } catch (MissingNestedCommandException e) {
-                                sender.sendMessage(colors.red() + e.getUsage());
-                            } catch (CommandUsageException e) {
-                                sender.sendMessage(colors.red() + e.getMessage());
-                                sender.sendMessage(colors.red() + e.getUsage());
-                            } catch (WrappedCommandException e) {
-                                if (e.getCause() instanceof NumberFormatException) {
-                                    sender.sendMessage(colors.red() + "Number expected, string received instead.");
-                                } else {
-                                    sender.sendMessage(colors.red() + "An error has occurred. See console.");
-                                    e.printStackTrace();
-                                }
-                            } catch (com.sk89q.minecraft.util.commands.CommandException e) {
-                                sender.sendMessage(colors.red() + e.getMessage());
-                            } catch (Exception ex) {
-                                sender.sendMessage(colors.red() + "An error has occurred. See console (if possible).");
-                                Logger.getLogger(PluginCommandManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            if (!commandExtra.async()) {
+                super.executeMethod(parent, args, sender, methodArgs, level); //To change body of generated methods, choose Tools | Templates.
+            } else {
+                commandPool.execute(getUUID(sender), new Runnable() {
+
+                    @Override
+                    public void run() {
+                        try {
+                            PluginCommandManager.super.executeMethod(parent, args, sender, methodArgs, level);
+                        } catch (CommandPermissionsException e) {
+                            sender.sendMessage(colors.red() + "You don't have permission.");
+                        } catch (MissingNestedCommandException e) {
+                            sender.sendMessage(colors.red() + e.getUsage());
+                        } catch (CommandUsageException e) {
+                            sender.sendMessage(colors.red() + e.getMessage());
+                            sender.sendMessage(colors.red() + e.getUsage());
+                        } catch (WrappedCommandException e) {
+                            if (e.getCause() instanceof NumberFormatException) {
+                                sender.sendMessage(colors.red() + "Number expected, string received instead.");
+                            } else {
+                                sender.sendMessage(colors.red() + "An error has occurred. See console.");
+                                e.printStackTrace();
                             }
+                        } catch (com.sk89q.minecraft.util.commands.CommandException e) {
+                            sender.sendMessage(colors.red() + e.getMessage());
+                        } catch (Exception ex) {
+                            sender.sendMessage(colors.red() + "An error has occurred. See console (if possible).");
+                            Logger.getLogger(PluginCommandManager.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
                         }
+                    }
 
-                    });
-                }
-
+                });
             }
 
         } else { // Execute normally
@@ -173,7 +173,6 @@ public class PluginCommandManager extends CommandsManager<ICommandSender> {
 
     }
 
-    
     @Override
     public boolean hasPermission(ICommandSender sender, String permission) {
         return (!(sender instanceof IPlayer)) || sender.hasPermission(permission);

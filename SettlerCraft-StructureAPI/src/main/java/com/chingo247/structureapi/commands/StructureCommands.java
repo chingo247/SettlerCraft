@@ -203,6 +203,9 @@ public class StructureCommands {
         final IColors color = structureAPI.getPlatform().getChatColors();
         final StructureRepository structureRepository = new StructureRepository(graph);
 
+        System.out.println("Arguments: " + args.argsLength());
+        System.out.println("InstanceOf Player: " + (sender instanceof IPlayer));
+        
         if (args.argsLength() == 1) {
             // Find by ID
             Long id;
@@ -666,6 +669,7 @@ public class StructureCommands {
             long totalPages = Math.round(Math.ceil(totalStructures / (MAX_LINES - 1)));
             List<StructureNode> structures = structureOwner.getStructures(skip, limit);
             if (p > totalPages || p < 0) {
+                tx.success();
                 throw new CommandException("Page " + p + " out of " + totalPages + "...");
             }
 

@@ -74,8 +74,8 @@ public class PermissionManager {
         SETTLER_STRUCTURE_PLACE(new Permission(Permissions.STRUCTURE_PLACE, PermissionDefault.TRUE, "Allows the player to place structures")),
         SETTLER_STRUCTURE_CONSTRUCTION(new Permission(Permissions.STRUCTURE_CONSTRUCTION, PermissionDefault.TRUE, "Allows the player to start construction.demolition of a structure")),
         SETTLER_STRUCTURE_INFO(new Permission(Permissions.STRUCTURE_INFO, PermissionDefault.TRUE, "Allows the player to show information about a structure")),
-        SETTLER_STRUCTURE_LIST(new Permission(Permissions.STRUCTURE_INFO, PermissionDefault.TRUE, "Allows the player to show a list structures he or another player owns")),
-        SETTLER_STRUCTURE_LOCATION(new Permission(Permissions.STRUCTURE_INFO, PermissionDefault.TRUE, "Allows the player to show his relative position to a structure")),
+        SETTLER_STRUCTURE_LIST(new Permission(Permissions.STRUCTURE_LIST, PermissionDefault.TRUE, "Allows the player to show a list structures he or another player owns")),
+        SETTLER_STRUCTURE_LOCATION(new Permission(Permissions.STRUCTURE_LOCATION, PermissionDefault.TRUE, "Allows the player to show his relative position to a structure")),
         
         SETTLER_CONSTRUCTION_ZONE_PLACE(new Permission(Permissions.CONSTRUCTIONZONE_CREATE, PermissionDefault.OP, "Allows a player to create construction zones"));
         private Permission permission;
