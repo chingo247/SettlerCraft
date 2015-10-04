@@ -19,7 +19,6 @@ package com.chingo247.structureapi.construction;
 import com.chingo247.structureapi.construction.ConstructionEntry;
 import com.chingo247.structureapi.construction.ITaskAssigner;
 import com.chingo247.backupapi.core.IBackupAPI;
-import com.chingo247.structureapi.exception.ConstructionException;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.StructureAPI;
 import com.chingo247.structureapi.construction.options.BuildOptions;

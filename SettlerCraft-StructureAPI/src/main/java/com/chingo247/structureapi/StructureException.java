@@ -14,15 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.exception;
+package com.chingo247.structureapi;
 
 /**
  *
  * @author Chingo
  */
-public class StructureRestrictionException extends RestrictionException {
+public class StructureException extends Exception {
 
-    public StructureRestrictionException(String message) {
+    public StructureException(String message) {
         super(message);
     }
     

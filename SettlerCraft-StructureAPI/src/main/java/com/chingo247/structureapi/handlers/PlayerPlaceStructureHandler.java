@@ -23,8 +23,8 @@ import com.chingo247.settlercraft.core.concurrent.KeyPool;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.structureapi.ConstructionWorld;
 import com.chingo247.structureapi.IPlacingValidator;
-import com.chingo247.structureapi.exception.StructureException;
-import com.chingo247.structureapi.exception.StructureRestrictionException;
+import com.chingo247.structureapi.StructureException;
+import com.chingo247.structureapi.StructureRestrictionException;
 import com.chingo247.structureapi.platform.bukkit.selection.HologramSelectionManager;
 import com.chingo247.structureapi.platform.permission.PermissionManager;
 import com.chingo247.structureapi.selection.CUISelectionManager;
@@ -40,7 +40,7 @@ import com.chingo247.structureapi.StructureCreator;
 import com.chingo247.structureapi.plan.IStructurePlan;
 import com.chingo247.structureapi.plan.StructurePlanManager;
 import com.chingo247.structureapi.construction.options.BuildOptions;
-import com.chingo247.structureapi.exception.RestrictionException;
+import com.chingo247.structureapi.RestrictionException;
 import com.chingo247.structureapi.model.RelTypes;
 import com.chingo247.structureapi.model.structure.IStructureRepository;
 import com.chingo247.structureapi.model.structure.Structure;
@@ -123,7 +123,7 @@ public class PlayerPlaceStructureHandler {
             return;
         }
 
-        if (!PermissionManager.getInstance().isAllowed(player, PermissionManager.Perms.PLACE_STRUCTURE)) {
+        if (!PermissionManager.getInstance().isAllowed(player, PermissionManager.Perms.SETTLER_STRUCTURE_PLACE)) {
             player.printError("You have no permission to place structures");
             return;
         }

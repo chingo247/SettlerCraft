@@ -17,7 +17,6 @@
 package com.chingo247.structureapi.construction;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.structureapi.exception.ConstructionException;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.google.common.base.Preconditions;
 import java.util.LinkedList;

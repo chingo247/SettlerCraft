@@ -18,7 +18,6 @@ package com.chingo247.structureapi.construction;
 
 import com.chingo247.structureapi.construction.ConstructionEntry;
 import com.chingo247.structureapi.construction.ITaskAssigner;
-import com.chingo247.structureapi.exception.ConstructionException;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.construction.options.Options;
 import com.sk89q.worldedit.EditSession;

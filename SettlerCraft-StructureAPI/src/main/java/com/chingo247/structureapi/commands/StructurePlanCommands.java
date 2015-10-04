@@ -29,6 +29,7 @@ import com.sk89q.minecraft.util.commands.CommandContext;
 import com.sk89q.minecraft.util.commands.CommandException;
 import com.sk89q.minecraft.util.commands.CommandUsageException;
 import com.chingo247.structureapi.plan.util.PlanGenerator;
+import com.chingo247.structureapi.platform.permission.Permissions;
 import com.sk89q.minecraft.util.commands.CommandPermissions;
 import java.io.File;
 
@@ -39,7 +40,6 @@ import java.io.File;
 public class StructurePlanCommands {
 
     @CommandExtras(senderType = CommandSenderType.CONSOLE)
-    @CommandPermissions({"settlercraft.content.generate.plans"})
     @Command(aliases = {"plans:generate"}, usage = "/plans:generate", desc = "Generates structure plans for schematics", max = 0)
     public static void generate(final CommandContext args, ICommandSender sender, IStructureAPI structureAPI) throws CommandUsageException, CommandException {
         File generationDirectory = StructureAPI.getInstance().getGenerationDirectory();
@@ -47,7 +47,7 @@ public class StructurePlanCommands {
     }
 
     @CommandExtras(senderType = CommandSenderType.OP)
-    @CommandPermissions({"settlercraft.content.reload.plans"})
+    @CommandPermissions({Permissions.CONTENT_RELOAD_PLANS})
     @Command(aliases = {"plans:reload"}, usage = "/plans:reload", desc = "Reloads structure plans", max = 0)
     public static void reload(final CommandContext args, ICommandSender sender, IStructureAPI structureAPI) throws CommandException {
         if (!structureAPI.isLoading()) {
@@ -58,7 +58,7 @@ public class StructurePlanCommands {
     }
 
     @CommandExtras(senderType = CommandSenderType.PLAYER)
-    @CommandPermissions({"settlercraft.settler.open.planmenu"})
+    @CommandPermissions({Permissions.SETTLER_OPEN_PLANMENU})
     @Command(aliases = {"plans:menu"}, usage = "/plans:menu", desc = "Opens the plan menu", max = 0)
     public static void openMenu(final CommandContext args, ICommandSender sender, IStructureAPI structureAPI) throws CommandException {
         if (!structureAPI.getConfig().isPlanMenuEnabled()) {
@@ -68,7 +68,7 @@ public class StructurePlanCommands {
     }
 
     @CommandExtras(senderType = CommandSenderType.PLAYER)
-    @CommandPermissions({"settlercraft.settler.open.planshop"})
+    @CommandPermissions({Permissions.SETTLER_OPEN_PLANSHOP})
     @Command(aliases = {"plans:shop"}, usage = "/plans:shop", desc = "Opens the plan shop", max = 0)
     public static void openShop(final CommandContext args, ICommandSender sender, IStructureAPI structureAPI) throws CommandException {
         if (!structureAPI.getConfig().isPlanShopEnabled()) {

@@ -23,7 +23,7 @@ import com.chingo247.settlercraft.core.exception.SettlerCraftException;
 import com.chingo247.structureapi.platform.bukkit.listener.PlanListener;
 import com.chingo247.settlercraft.core.platforms.bukkit.BKPermissionRegistry;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
-import com.chingo247.structureapi.exception.StructureAPIException;
+import com.chingo247.structureapi.StructureAPIException;
 import com.chingo247.structureapi.platform.permission.PermissionManager;
 import com.chingo247.structureapi.platform.services.holograms.StructureHologramManager;
 import com.chingo247.structureapi.StructureAPI;
@@ -62,11 +62,12 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
 
     public static final Level LOG_LEVEL = Level.SEVERE;
     public static final String MSG_PREFIX = ChatColor.YELLOW + "[SettlerCraft]: ";
+    
     private static final Logger LOGGER = Logger.getLogger(BKStructureAPIPlugin.class.getName());
+    
     private IEconomyProvider economyProvider;
     private BKConfigProvider configProvider;
     private static BKStructureAPIPlugin instance;
-    private StructureCommands structureCommands;
     private GraphDatabaseService graph;
     private PluginCommandManager commands;
 

@@ -1,6 +1,5 @@
 package com.chingo247.structureapi.world;
 
-import com.chingo247.structureapi.exception.WorldConfigException;
 import fiber.core.impl.BuildContextImpl;
 import fiber.core.impl.xml.ModelReader;
 import fiber.core.impl.xml.located.LocatedElement;

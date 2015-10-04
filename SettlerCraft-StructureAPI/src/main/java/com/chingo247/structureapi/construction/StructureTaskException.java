@@ -14,15 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.exception;
+package com.chingo247.structureapi.construction;
+
+import com.chingo247.structureapi.construction.ConstructionException;
 
 /**
  *
  * @author Chingo
  */
-public class StructureAPIException extends Exception {
+public class StructureTaskException extends ConstructionException {
 
-    public StructureAPIException(String message) {
+    public StructureTaskException(String message) {
         super(message);
     }
     

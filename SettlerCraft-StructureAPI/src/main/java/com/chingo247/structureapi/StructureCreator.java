@@ -21,7 +21,6 @@ import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.structureapi.event.StructureCreateEvent;
-import com.chingo247.structureapi.exception.StructureException;
 import com.chingo247.structureapi.model.settler.Settler;
 import com.chingo247.structureapi.model.settler.SettlerRepositiory;
 import com.chingo247.structureapi.model.owner.OwnerType;

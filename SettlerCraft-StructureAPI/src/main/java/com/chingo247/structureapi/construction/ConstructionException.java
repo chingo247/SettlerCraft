@@ -1,3 +1,8 @@
+package com.chingo247.structureapi.construction;
+
+import com.chingo247.structureapi.StructureException;
+
+
 /*
  * Copyright (C) 2015 Chingo
  *
@@ -14,18 +19,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.exception;
 
 /**
  *
  * @author Chingo
  */
-public class StructureException extends Exception {
+public class ConstructionException extends StructureException {
 
-    public StructureException(String message) {
+    public ConstructionException(String message) {
         super(message);
     }
-    
-    
-    
+
 }

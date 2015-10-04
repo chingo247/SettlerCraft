@@ -19,16 +19,16 @@ package com.chingo247.structureapi.commands;
 import com.chingo247.menuapi.menu.util.ShopUtil;
 import com.chingo247.settlercraft.core.commands.util.CommandExtras;
 import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.settlercraft.core.concurrent.KeyPool;
 import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.core.model.interfaces.IBaseSettler;
 import com.chingo247.structureapi.IStructureAPI;
 import com.chingo247.settlercraft.core.commands.util.CommandSenderType;
+import com.chingo247.settlercraft.core.platforms.services.permission.Permission;
 import com.chingo247.structureapi.construction.options.BuildOptions;
 import com.chingo247.structureapi.construction.options.DemolitionOptions;
 import com.chingo247.structureapi.event.StructureAddOwnerEvent;
 import com.chingo247.structureapi.event.StructureRemoveOwnerEvent;
-import com.chingo247.structureapi.exception.ConstructionException;
+import com.chingo247.structureapi.construction.ConstructionException;
 import com.chingo247.structureapi.model.owner.IOwnership;
 import com.chingo247.structureapi.model.owner.OwnerDomain;
 import com.chingo247.structureapi.model.owner.OwnerType;
@@ -41,6 +41,7 @@ import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.structureapi.model.structure.StructureRepository;
 import com.chingo247.structureapi.model.world.StructureWorld;
+import com.chingo247.structureapi.platform.permission.Permissions;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.ICommandSender;
 import com.chingo247.xplatform.core.ILocation;
@@ -49,10 +50,9 @@ import com.google.common.collect.Sets;
 import com.sk89q.minecraft.util.commands.Command;
 import com.sk89q.minecraft.util.commands.CommandContext;
 import com.sk89q.minecraft.util.commands.CommandException;
+import com.sk89q.minecraft.util.commands.CommandPermissions;
 import com.sk89q.minecraft.util.commands.CommandUsageException;
-import com.sk89q.minecraft.util.commands.Logging;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.world.World;
 import java.util.Comparator;
 import java.util.List;
@@ -195,8 +195,9 @@ public class StructureCommands {
         return statusString;
     }
 
+    @CommandPermissions(Permissions.STRUCTURE_INFO)
     @CommandExtras(async = true)
-    @Command(aliases = {"structure:info", "stt:info"}, desc = "Display info about a structure", max = 1)
+    @Command(aliases = {"structure:info", "stt:info"}, desc = "Display info about the structure you are in or with the given id", max = 1)
     public static void info(final CommandContext args, final ICommandSender sender, IStructureAPI structureAPI) throws Exception {
         final GraphDatabaseService graph = SettlerCraft.getInstance().getNeo4j();
         final IColors color = structureAPI.getPlatform().getChatColors();
@@ -252,6 +253,7 @@ public class StructureCommands {
 
     }
 
+    @CommandPermissions(Permissions.STRUCTURE_CONSTRUCTION)
     @CommandExtras(async = true)
     @Command(aliases = {"structure:build", "stt:build"}, desc = "Builds a structure", min = 1, max = 1, flags = "f")
     public static void build(final CommandContext args, final ICommandSender sender, final IStructureAPI structureAPI) throws Exception {
@@ -295,6 +297,7 @@ public class StructureCommands {
 
     }
 
+    @CommandPermissions(Permissions.STRUCTURE_CONSTRUCTION)
     @CommandExtras(async = true)
     @Command(aliases = {"structure:demolish", "stt:demolish"}, desc = "Demolishes a structure", min = 1, max = 1, flags = "f")
     public static void demolish(final CommandContext args, ICommandSender sender, IStructureAPI structureAPI) throws Exception {
@@ -346,6 +349,7 @@ public class StructureCommands {
 
     }
 
+    @CommandPermissions(Permissions.STRUCTURE_CONSTRUCTION)
     @CommandExtras(async = true)
     @Command(aliases = {"structure:halt", "stt:halt"}, desc = "Stop building or demolishing of a structure", min = 1, max = 1, flags = "f")
     public static void halt(final CommandContext args, ICommandSender sender, IStructureAPI structureAPI) throws Exception {
@@ -601,6 +605,7 @@ public class StructureCommands {
         return true;
     }
 
+    @CommandPermissions(Permissions.STRUCTURE_LIST)
     @CommandExtras(async = true)
     @Command(aliases = {"structure:list", "stt:list"}, desc = "")
     public static void list(final CommandContext args, ICommandSender sender, IStructureAPI structureAPI) throws Exception {
@@ -687,6 +692,7 @@ public class StructureCommands {
         sender.sendMessage(message);
     }
     
+    @CommandPermissions(Permissions.STRUCTURE_LOCATION)
     @CommandExtras(async = true, senderType = CommandSenderType.PLAYER)
     @Command(aliases = {"structure:location", "stt:location"}, desc = "")
     public static void location(final CommandContext args, ICommandSender sender, IStructureAPI structureAPI) throws Exception {

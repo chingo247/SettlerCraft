@@ -1,6 +1,3 @@
-package com.chingo247.structureapi.exception;
-
-
 /*
  * Copyright (C) 2015 Chingo
  *
@@ -17,15 +14,16 @@ package com.chingo247.structureapi.exception;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.chingo247.structureapi;
 
 /**
  *
  * @author Chingo
  */
-public class ConstructionException extends StructureException {
+public class WorldRestrictionException extends RestrictionException {
 
-    public ConstructionException(String message) {
-        super(message);
+    public WorldRestrictionException(String string) {
+        super(string);
     }
-
+    
 }

@@ -63,13 +63,21 @@ public class PermissionManager {
     }
     
     public enum Perms {
-        CONTENT_GENERATE_PLANS(new Permission(PREFIX + "content.generate.plans", PermissionDefault.OP, "Allows a player to generate plans from schematics on the server")),
-        CONTENT_RELOAD_PLANS(new Permission(PREFIX + "content.reload.plans", PermissionDefault.OP, "Allows a player to reload plans on the server")),
-        OPEN_PLAN_MENU(new Permission(PREFIX + "settler.open.planmenu", PermissionDefault.OP, "Allows the player to use the plan menu (contains plans for FREE)")),
-        OPEN_SHOP_MENU(new Permission(PREFIX + "settler.open.shopmenu", PermissionDefault.TRUE, "Allows the player to use the plan shop")),
-        ROTATE_SCHEMATIC(new Permission(PREFIX + "content.editor.rotate.placement", PermissionDefault.OP, "Allows rotation of schematics")),
-        PLACE_STRUCTURE(new Permission(PREFIX + "settler.place.structure", PermissionDefault.TRUE, "Allows the player to place structures")),
-        PLACE_CONSTRUCTION_ZONE(new Permission(PREFIX + "settler.place.constructionzone", PermissionDefault.FALSE, "Allows a player to place construction zones"));
+//        CONTENT_GENERATE_PLANS(new Permission(Permissions.CONTENT_GENERATE_PLANS, PermissionDefault.OP, "Allows to generate plans from schematics on the server - is CONSOLE only")),
+        CONTENT_RELOAD_PLANS(new Permission(Permissions.CONTENT_RELOAD_PLANS, PermissionDefault.OP, "Allows a player to reload plans on the server")),
+        CONTENT_ROTATE_PLACEMENT(new Permission(Permissions.CONTENT_ROTATE_PLACEMENT, PermissionDefault.OP, "Allows a player to rotate the original schematic for all future placing")),
+        
+        SETTLER_OPEN_PLAN_MENU(new Permission(Permissions.SETTLER_OPEN_PLANMENU, PermissionDefault.OP, "Allows a player to use the plan menu (contains plans for FREE)")),
+        SETTLER_OPEN_SHOP_MENU(new Permission(Permissions.SETTLER_OPEN_PLANSHOP, PermissionDefault.TRUE, "Allows a player to use the plan shop")),
+        
+        SETTLER_STRUCTURE_CREATE(new Permission(Permissions.STRUCTURE_CREATE, PermissionDefault.OP, "Allows a player to create structures from selections")),
+        SETTLER_STRUCTURE_PLACE(new Permission(Permissions.STRUCTURE_PLACE, PermissionDefault.TRUE, "Allows the player to place structures")),
+        SETTLER_STRUCTURE_CONSTRUCTION(new Permission(Permissions.STRUCTURE_CONSTRUCTION, PermissionDefault.TRUE, "Allows the player to start construction.demolition of a structure")),
+        SETTLER_STRUCTURE_INFO(new Permission(Permissions.STRUCTURE_INFO, PermissionDefault.TRUE, "Allows the player to show information about a structure")),
+        SETTLER_STRUCTURE_LIST(new Permission(Permissions.STRUCTURE_INFO, PermissionDefault.TRUE, "Allows the player to show a list structures he or another player owns")),
+        SETTLER_STRUCTURE_LOCATION(new Permission(Permissions.STRUCTURE_INFO, PermissionDefault.TRUE, "Allows the player to show his relative position to a structure")),
+        
+        SETTLER_CONSTRUCTION_ZONE_PLACE(new Permission(Permissions.CONSTRUCTIONZONE_CREATE, PermissionDefault.OP, "Allows a player to create construction zones"));
         private Permission permission;
 
         private Perms(Permission permission) {

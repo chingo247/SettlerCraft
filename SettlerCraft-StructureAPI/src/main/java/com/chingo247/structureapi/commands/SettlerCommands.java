@@ -17,7 +17,6 @@
 package com.chingo247.structureapi.commands;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.settlercraft.core.concurrent.KeyPool;
 import com.chingo247.settlercraft.core.model.interfaces.IBaseSettler;
 import com.chingo247.structureapi.IStructureAPI;
 import com.chingo247.settlercraft.core.commands.util.CommandExtras;
@@ -27,12 +26,11 @@ import com.sk89q.minecraft.util.commands.CommandContext;
 import com.sk89q.minecraft.util.commands.CommandException;
 import com.chingo247.structureapi.model.settler.ISettlerRepository;
 import com.chingo247.structureapi.model.settler.SettlerRepositiory;
+import com.chingo247.structureapi.platform.permission.Permissions;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IPlayer;
 import com.sk89q.minecraft.util.commands.Command;
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.sk89q.minecraft.util.commands.CommandPermissions;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -42,13 +40,15 @@ import org.neo4j.graphdb.Transaction;
  */
 public class SettlerCommands {
 
+    @CommandPermissions(Permissions.SETTLER_ME)
     @CommandExtras(async = true, senderType = CommandSenderType.PLAYER)
-    @Command(aliases = {"settler:me"}, desc = "Shows the id of the player", max = 0)
+    @Command(aliases = {"settler:me"}, usage = "/settler:me", desc = "Display your settler id", max = 0)
     public static void me(final CommandContext args, ICommandSender sender, IStructureAPI structureAPI) throws CommandException {
         final IPlayer player = (IPlayer) sender;
         final GraphDatabaseService graph = SettlerCraft.getInstance().getNeo4j();
         final ISettlerRepository settlerRepository = new SettlerRepositiory(graph);
         final IColors COLOR = structureAPI.getPlatform().getChatColors();
+        
         try (Transaction tx = graph.beginTx()) {
             IBaseSettler node = settlerRepository.findByUUID(player.getUniqueId()); // NEVER NULL
             player.sendMessage("Your unique id is #" + COLOR.gold() + node.getId());

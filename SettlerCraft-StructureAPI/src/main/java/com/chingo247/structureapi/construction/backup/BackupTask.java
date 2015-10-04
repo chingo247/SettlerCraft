@@ -23,7 +23,7 @@ import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
 import com.chingo247.structureapi.construction.ConstructionEntry;
 import com.chingo247.structureapi.construction.event.StructureTaskStartEvent;
 import com.chingo247.structureapi.construction.StructureTask;
-import com.chingo247.structureapi.exception.StructureTaskException;
+import com.chingo247.structureapi.construction.StructureTaskException;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.StructureAPI;

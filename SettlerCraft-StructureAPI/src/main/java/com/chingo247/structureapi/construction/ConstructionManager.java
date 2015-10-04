@@ -27,7 +27,6 @@ import com.chingo247.structureapi.construction.event.StructureTaskCompleteEvent;
 import com.chingo247.structureapi.construction.event.StructureTaskStartEvent;
 import com.chingo247.structureapi.event.StructureStateChangeEvent;
 import com.chingo247.structureapi.event.async.StructureJobAddedEvent;
-import com.chingo247.structureapi.exception.ConstructionException;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.chingo247.structureapi.model.structure.IStructureRepository;
 import com.chingo247.structureapi.model.structure.Structure;

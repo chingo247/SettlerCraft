@@ -28,6 +28,7 @@ import com.chingo247.structureapi.plan.StructurePlanManager;
 import com.chingo247.structureapi.plan.placement.Placement;
 import com.chingo247.structureapi.plan.placement.SchematicPlacement;
 import com.chingo247.structureapi.plan.schematic.FastClipboard;
+import com.chingo247.structureapi.platform.permission.Permissions;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.ICommandSender;
 import com.google.common.collect.Lists;
@@ -36,6 +37,7 @@ import com.sk89q.minecraft.util.commands.Command;
 import com.sk89q.minecraft.util.commands.CommandContext;
 import com.sk89q.minecraft.util.commands.CommandException;
 import com.sk89q.minecraft.util.commands.CommandPermissions;
+import com.sk89q.minecraft.util.commands.CommandUsageException;
 import com.sk89q.worldedit.entity.Player;
 import java.io.File;
 import java.io.IOException;
@@ -52,13 +54,14 @@ import org.neo4j.graphdb.Transaction;
  */
 public class SchematicCommands {
     
-    @CommandPermissions({"settlercraft.content.editor.rotate.placement"})
+    @CommandPermissions({Permissions.CONTENT_ROTATE_PLACEMENT})
     @CommandExtras(async = true)
-    @Command(aliases = {"schematic:rotate"}, desc = "Shows the id of the player", max = 0)
-    public static void me(final CommandContext args, ICommandSender sender, IStructureAPI structureAPI) throws CommandException {
+    @Command(aliases = {"schematic:rotate"}, usage = "/schematic:rotate [structure-id][degrees]",desc = "Rotates a schematic of a structure, only affects future structures with the same schematic", min = 2, max = 2)
+    public static void schematicRotate(final CommandContext args, ICommandSender sender, IStructureAPI structureAPI) throws CommandException {
         final GraphDatabaseService graph = SettlerCraft.getInstance().getNeo4j();
         final IStructureRepository structureRepository = new StructureRepository(graph);
         final IColors COLOR = SettlerCraft.getInstance().getPlatform().getChatColors();
+        final String usage = "/schematic:rotate [structure-id][degrees]";
         
         String idArg = args.getString(0);
         String degreeArg = args.getString(1);
@@ -67,14 +70,14 @@ public class SchematicCommands {
         try {
             structureId = Long.parseLong(idArg);
         } catch (NumberFormatException nfe) {
-            throw new CommandException("Expected a number for [structure-id] but got '" + idArg + "'");
+            throw new CommandUsageException("Expected a number for [structure-id] but got '" + idArg + "'", usage);
         }
         
         int degrees;
         try {
             degrees = Integer.parseInt(degreeArg);
         } catch (NumberFormatException nfe) {
-            throw new CommandException("Expected a number for [degrees] but got '" + degreeArg + "'");
+            throw new CommandUsageException("Expected a number for [degrees] but got '" + degreeArg + "'", usage);
         }
         
         if(degrees % 90 != 0) {

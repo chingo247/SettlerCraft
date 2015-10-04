@@ -48,7 +48,7 @@ public class ConstructionZoneCreator {
     }
     
     public boolean mayCreateZone(Player player) {
-        return PermissionManager.getInstance().isAllowed(player, PermissionManager.Perms.PLACE_CONSTRUCTION_ZONE);
+        return PermissionManager.getInstance().isAllowed(player, PermissionManager.Perms.SETTLER_CONSTRUCTION_ZONE_PLACE);
     }
     
     public void createZone(CuboidRegion region) {

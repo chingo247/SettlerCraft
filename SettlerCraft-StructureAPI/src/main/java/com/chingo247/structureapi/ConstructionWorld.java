@@ -19,7 +19,6 @@ package com.chingo247.structureapi;
 
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.structureapi.exception.StructureException;
 import com.chingo247.structureapi.model.plot.PlotRepository;
 import com.chingo247.structureapi.model.world.IStructureWorldRepository;
 import com.chingo247.structureapi.model.world.StructureWorldRepository;

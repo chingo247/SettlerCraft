@@ -16,7 +16,6 @@
  */
 package com.chingo247.structureapi.construction;
 
-import com.chingo247.structureapi.exception.ConstructionException;
 import com.chingo247.structureapi.construction.options.Options;
 import com.sk89q.worldedit.EditSession;
 import java.io.IOException;

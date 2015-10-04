@@ -16,7 +16,6 @@
  */
 package com.chingo247.structureapi;
 
-import com.chingo247.structureapi.exception.RestrictionException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;

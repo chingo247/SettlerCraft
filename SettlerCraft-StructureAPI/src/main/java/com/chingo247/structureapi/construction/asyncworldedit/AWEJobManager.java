@@ -19,7 +19,7 @@ package com.chingo247.structureapi.construction.asyncworldedit;
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
 import com.chingo247.structureapi.construction.event.StructureTaskCancelledEvent;
 import com.chingo247.structureapi.construction.event.StructureTaskCompleteEvent;
-import com.chingo247.structureapi.exception.ConstructionException;
+import com.chingo247.structureapi.construction.ConstructionException;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.UUID;
