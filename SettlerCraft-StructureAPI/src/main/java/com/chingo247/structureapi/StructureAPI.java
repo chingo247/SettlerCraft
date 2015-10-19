@@ -63,18 +63,14 @@ import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import com.google.common.collect.Sets;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import org.dom4j.DocumentException;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -102,7 +98,6 @@ public class StructureAPI implements IStructureAPI {
     private ITaskAssigner demolitionTaskAssigner;
     private IChunkManager chunkManager;
     private IBackupAPI backupAPI;
-    private IPlacingValidator placingValidator;
 
     private final Lock loadLock = new ReentrantLock();
     private StructurePlanMenuFactory planMenuFactory;
@@ -114,7 +109,7 @@ public class StructureAPI implements IStructureAPI {
     private boolean isLoadingPlans = false;
     private static StructureAPI instance;
 
-    private final Set<StructureRestriction> restrictions;
+    
 
     private final Logger LOG = Logger.getLogger(getClass().getName());
 
@@ -125,7 +120,7 @@ public class StructureAPI implements IStructureAPI {
     private StructureAPI() {
         this.platform = SettlerCraft.getInstance().getPlatform();
         this.graph = SettlerCraft.getInstance().getNeo4j();
-        this.restrictions = Sets.newHashSet();
+        
         this.worlds = Maps.newHashMap();
         this.constructionManager = ConstructionManager.getInstance();
         this.demolitionTaskAssigner = new DefaultDemolitionTaskAssigner();
@@ -133,7 +128,6 @@ public class StructureAPI implements IStructureAPI {
         this.COLORS = platform.getChatColors();
        
         this.logLevel = Level.SEVERE;
-        this.placingValidator = new StructurePlacingValidator(graph, instance, platform);
        
         EventManager.getInstance().getEventBus().register(new StructurePlanManagerHandler());
         setupSchema();
@@ -187,10 +181,6 @@ public class StructureAPI implements IStructureAPI {
         return getConstructionWorld(world.getName());
     }
 
-    public IPlacingValidator getPlacingValidator() {
-        return placingValidator;
-    }
-    
     private void applyUpdates() {
         StructureAPI_Update_2_2_0 update = new StructureAPI_Update_2_2_0(graph);
         update.update();
@@ -237,17 +227,6 @@ public class StructureAPI implements IStructureAPI {
 
         reload();
     }
-
-    @Override
-    public void checkRestrictions(Player player, World world, CuboidRegion region) throws StructureRestrictionException {
-        for (StructureRestriction restriction : restrictions) {
-            restriction.check(player, world, region);
-        }
-    }
-    
-    
-
-    
 
     private void resetStates() {
         try (Transaction tx = graph.beginTx()) {
@@ -298,7 +277,11 @@ public class StructureAPI implements IStructureAPI {
         return StructurePlanManager.getInstance();
     }
 
-    
+    public final File getWorldDirectory(String world) {
+        File f = new File(getWorkingDirectory().getAbsolutePath() + "//worlds//" + world);
+        f.mkdirs();
+        return f;
+    }
 
     @Override
     public final File getStructuresDirectory(String world) {
@@ -346,9 +329,7 @@ public class StructureAPI implements IStructureAPI {
         return logLevel;
     }
 
-    public List<StructureRestriction> getRestrictions() {
-        return new ArrayList<>(restrictions);
-    }
+    
 
     @Override
     public boolean isQueueLocked(UUID player) {
@@ -388,19 +369,7 @@ public class StructureAPI implements IStructureAPI {
         return new File(getWorkingDirectory(), "generate");
     }
 
-    @Override
-    public void addRestriction(StructureRestriction structureRestriction) {
-        synchronized (restrictions) {
-            this.restrictions.add(structureRestriction);
-        }
-    }
-
-    @Override
-    public void removeRestriction(StructureRestriction structureRestriction) {
-        synchronized (restrictions) {
-            this.restrictions.remove(structureRestriction);
-        }
-    }
+    
 
     @Override
     public void build(AsyncEditSession editSession, UUID player, Structure structure, BuildOptions options, ITaskAssigner taskAssigner) throws ConstructionException {

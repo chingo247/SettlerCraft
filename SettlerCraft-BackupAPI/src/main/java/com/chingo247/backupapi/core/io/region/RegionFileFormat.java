@@ -44,7 +44,7 @@ public class RegionFileFormat {
     private int regionX;
     private int regionZ;
 
-    RegionFileFormat(File regionFile) {
+    public RegionFileFormat(File regionFile) {
         this.file = regionFile;
         
         Vector2D v = parsePosition(regionFile);

@@ -16,6 +16,8 @@
  */
 package com.chingo247.structureapi;
 
+import com.chingo247.structureapi.RestrictionException;
+
 /**
  *
  * @author Chingo

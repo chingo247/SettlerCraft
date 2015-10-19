@@ -14,43 +14,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.model.owner;
+package com.chingo247.structureapi.event.zone;
+
+import com.chingo247.structureapi.model.owner.OwnerType;
+import com.chingo247.structureapi.model.zone.IConstructionZone;
+import java.util.UUID;
 
 /**
- * Defines the variety of owner types.
+ *
  * @author Chingo
  */
-public enum OwnerType {
+public class ConstructionZoneUpdateOwnerEvent extends ConstructionZoneEvent {
     
-    MEMBER(0, "MEMBERS"),
-    OWNER(1, "OWNERS"),
-    MASTER(2, "MASTERS");
-    
-    private final int id;
-    private final String plural;
+    private UUID player;
+    private OwnerType ownerType;
 
-    private OwnerType(int id, String plural) {
-        this.id = id;
-        this.plural = plural;
-    }
-
-    public int getTypeId() {
-        return id;
-    }
-
-    public String plural() {
-        return plural;
-    }
-    
-    
-    public static OwnerType match(int id) {
-        switch(id) {
-            case 0: return MEMBER;
-            case 1: return OWNER;
-            case 2: return MASTER;
-            default: throw new AssertionError("Unreachable");
-        }
+    public ConstructionZoneUpdateOwnerEvent(IConstructionZone zone, UUID player, OwnerType ownerType) {
+        super(zone);
         
+        this.player = player;
+        this.ownerType = ownerType;
+    }
+
+    public OwnerType getOwnerType() {
+        return ownerType;
+    }
+
+    public UUID getPlayer() {
+        return player;
     }
     
 }

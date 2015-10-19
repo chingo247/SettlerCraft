@@ -69,7 +69,13 @@ public class StructureAPI_Update_2_2_0 implements IStructureAPIUpdate{
                 graph.execute("MATCH (a:STRUCTURE_HOLOGRAM)<-[r:hasHologram]-(b:STRUCTURE) CREATE (a)<-[:HAS_HOLOGRAM]-(b) DELETE r");
                 // Update 'ownedBy' to 'OWNED_BY'
                 graph.execute("MATCH (a)<-[r:OwnedBy]-(b:STRUCTURE) CREATE (a)<-[:OWNED_BY]-(b) DELETE r");
-            }
+                
+                graph.execute("MATCH (a:STRUCTURE) WHERE NOT a.WGRegion IS NULL CREATE (a)-[:PROTECTED_BY]->(w:WORLDGUARD_REGION {region: a.WGRegion})");
+                
+                n = graph.createNode(UPDATE_LABEL);
+                n.setProperty(UPDATE_KEY, UPDATE_VERSION);
+            } 
+            
             tx.success();
         }
         

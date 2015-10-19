@@ -261,6 +261,43 @@ public class StructureRepository implements IStructureRepository {
 
         return structures;
     }
+    
+    @Override
+    public Collection<StructureNode> findRootStructuresWithin(UUID worldUUID, CuboidRegion region, int limit) {
+        List<StructureNode> structures = new ArrayList<>();
+
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("worldId", worldUUID.toString());
+        if (limit > 0) {
+            params.put("limit", limit);
+        }
+
+        String query
+                = "MATCH (world:" + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
+                + " WITH world "
+                + " MATCH (world)<-[:" + RelTypes.WITHIN.name() + "]-(s:" + StructureNode.LABEL + ")"
+                + " WHERE s." + StructureNode.DELETED_AT_PROPERTY + " IS NULL"
+                + " AND NOT (s)-[:"+RelTypes.SUBSTRUCTURE_OF+"]->(:"+StructureNode.LABEL+")"
+                + " AND NOT s." + StructureNode.CONSTRUCTION_STATUS_PROPERTY + " = " + ConstructionStatus.REMOVED.getStatusId()
+                + " AND s." + StructureNode.MAX_X_PROPERTY + " >= " + region.getMinimumPoint().getBlockX() + " AND s." + StructureNode.MIN_X_PROPERTY + " <= " + region.getMaximumPoint().getBlockX()
+                + " AND s." + StructureNode.MAX_Y_PROPERTY + " >= " + region.getMinimumPoint().getBlockY() + " AND s." + StructureNode.MIN_Y_PROPERTY + " <= " + region.getMaximumPoint().getBlockY()
+                + " AND s." + StructureNode.MAX_Z_PROPERTY + " >= " + region.getMinimumPoint().getBlockZ() + " AND s." + StructureNode.MIN_Z_PROPERTY + " <= " + region.getMaximumPoint().getBlockZ()
+                + " RETURN s";
+
+        if (limit > 0) {
+            query += " LIMIT {limit}";
+        }
+
+        Result result = graph.execute(query, params);
+        while (result.hasNext()) {
+            Map<String, Object> map = result.next();
+            for (Object o : map.values()) {
+                structures.add(new StructureNode((Node) o));
+            }
+        }
+
+        return structures;
+    }
 
     @Override
     public StructureNode findStructureOnPosition(UUID worldUUID, Vector position) {

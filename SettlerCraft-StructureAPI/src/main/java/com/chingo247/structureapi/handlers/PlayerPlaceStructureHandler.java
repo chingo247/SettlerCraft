@@ -18,13 +18,10 @@ package com.chingo247.structureapi.handlers;
 
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.settlercraft.core.concurrent.KeyPool;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.structureapi.ConstructionWorld;
-import com.chingo247.structureapi.IPlacingValidator;
 import com.chingo247.structureapi.StructureException;
-import com.chingo247.structureapi.StructureRestrictionException;
 import com.chingo247.structureapi.platform.bukkit.selection.HologramSelectionManager;
 import com.chingo247.structureapi.platform.permission.PermissionManager;
 import com.chingo247.structureapi.selection.CUISelectionManager;
@@ -33,15 +30,14 @@ import com.chingo247.structureapi.selection.NoneSelectionManager;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.chingo247.structureapi.model.world.StructureWorldRepository;
 import com.chingo247.structureapi.IStructureAPI;
+import com.chingo247.structureapi.IStructureManager;
 import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.structureapi.model.world.IStructureWorldRepository;
 import com.chingo247.structureapi.StructureAPI;
-import com.chingo247.structureapi.StructureCreator;
 import com.chingo247.structureapi.plan.IStructurePlan;
 import com.chingo247.structureapi.plan.StructurePlanManager;
 import com.chingo247.structureapi.construction.options.BuildOptions;
 import com.chingo247.structureapi.RestrictionException;
-import com.chingo247.structureapi.model.RelTypes;
 import com.chingo247.structureapi.model.structure.IStructureRepository;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.model.structure.StructureRepository;
@@ -53,7 +49,6 @@ import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IPlayer;
 import com.chingo247.xplatform.core.IWorld;
-import com.google.common.collect.Maps;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
@@ -61,16 +56,12 @@ import com.sk89q.worldedit.blocks.ItemType;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
 /**
@@ -114,11 +105,11 @@ public class PlayerPlaceStructureHandler {
 
     }
 
-    public void handle(final AItemStack planItem, final Player player, final World world, final Vector pos) {
+    public void handle(final AItemStack planItem, final Player player, final ConstructionWorld world, final Vector pos) {
         handle(planItem, player, world, pos, null);
     }
 
-    public void handle(final AItemStack planItem, final Player player, final World world, final Vector pos, ISelectionManager selectionManager) {
+    public void handle(final AItemStack planItem, final Player player, final ConstructionWorld world, final Vector pos, ISelectionManager selectionManager) {
         if (!isStructurePlan(planItem)) {
             return;
         }
@@ -186,7 +177,7 @@ public class PlayerPlaceStructureHandler {
 
     }
 
-    private void handlePlace(IStructurePlan plan, AItemStack item, Player player, World world, Vector pos1, ISelectionManager selectionManager) {
+    private void handlePlace(IStructurePlan plan, AItemStack item, Player player, ConstructionWorld world, Vector pos1, ISelectionManager selectionManager) {
         IPlayer iPlayer = SettlerCraft.getInstance().getPlatform().getPlayer(player.getUniqueId());
 
         Direction direction = WorldUtil.getDirection(iPlayer.getYaw());
@@ -216,8 +207,7 @@ public class PlayerPlaceStructureHandler {
             if (placingResult.canPlace()) {
                 Structure structure;
                 try {
-                    ConstructionWorld cw = structureAPI.getConstructionWorld(world);
-                    StructureCreator sc = cw.getStructureCreator();
+                    IStructureManager sc = world.getStructureHandler();
 
                     if (placingResult.hasParentStructure()) {
                         Structure parentStructure = placingResult.getParentStructure();
@@ -331,16 +321,16 @@ public class PlayerPlaceStructureHandler {
         return price;
     }
 
-    private PlacingResult canPlace(Player player, World world, Vector pos1, Direction direction, IStructurePlan plan) {
+    private PlacingResult canPlace(Player player, ConstructionWorld world, Vector pos1, Direction direction, IStructurePlan plan) {
         // Check for overlap with other structures
         Vector min = pos1;
         Vector max = PlacementUtil.getPoint2Right(min, direction, plan.getPlacement().getCuboidRegion().getMaximumPoint());
-        IPlacingValidator placingValidator = structureAPI.getPlacingValidator();
+        
         CuboidRegion affectedArea = new CuboidRegion(min, max);
 
         try {
-            placingValidator.checkWorldRestrictions(world, affectedArea);
-            placingValidator.checkStructureRestrictions(world, affectedArea, player);
+            world.getStructureHandler().checkWorldRestrictions(world, affectedArea);
+            world.getStructureHandler().checkStructureRestrictions(player, world, affectedArea);
         } catch (RestrictionException ex) {
             player.printError(ex.getMessage());
             return new PlacingResult(false);
@@ -354,7 +344,7 @@ public class PlayerPlaceStructureHandler {
         try {
             tx = graph.beginTx();
 
-            placingValidator.checkStructurePlacingRestrictions(world, affectedArea, min, player);
+            world.getStructureHandler().checkStructurePlacingRestrictions(player, world, affectedArea, min);
 
             StructureNode structureNode = structureRepository.findStructureOnPosition(iw.getUUID(), pos1);
             if (structureNode != null) {

@@ -22,13 +22,24 @@ import com.chingo247.structureapi.plan.IStructurePlan;
 import com.chingo247.structureapi.plan.placement.Placement;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
+import java.util.Set;
 
 /**
  *
  * @author Chingo
  */
-public interface IStructureCreator {
+public interface IStructureManager {
+    
+    void checkWorldRestrictions(ConstructionWorld world, CuboidRegion region) throws RestrictionException;
+    
+    
+    Set<StructureRestriction> getRegisteredRestrictions();
+    
+    void addRestriction(StructureRestriction structureRestriction);
+    
+    void removeRestriction(StructureRestriction structureRestriction);
     
     /* Creates a structure with the provided plan
      * @param plan The StructurePlan
@@ -116,5 +127,22 @@ public interface IStructureCreator {
      * @return The Structure that has been created
      */
     public Structure createSubstructure(Structure structure, Placement placement, Vector position, Direction direction) throws Exception;
+    
+    void checkStructureRestrictions(World world, CuboidRegion region) throws StructureRestrictionException;
+    
+    void checkStructureRestrictions(ConstructionWorld world, CuboidRegion region) throws StructureRestrictionException;
+    
+    void checkStructureRestrictions(Player player, World world, CuboidRegion region) throws StructureRestrictionException;
+    
+    void checkStructureRestrictions(Player player, ConstructionWorld world, CuboidRegion region) throws StructureRestrictionException;
+    
+    
+    void checkStructurePlacingRestrictions(Player player, ConstructionWorld world, CuboidRegion region) throws RestrictionException;
+    
+    void checkStructurePlacingRestrictions(ConstructionWorld world, CuboidRegion region) throws RestrictionException;
+    
+    void checkStructurePlacingRestrictions(Player player, ConstructionWorld world, CuboidRegion affectArea, Vector placingPoint) throws RestrictionException;
+    
+    void checkStructurePlacingRestrictions(ConstructionWorld world, CuboidRegion affectArea, Vector placingPoint) throws RestrictionException;
     
 }

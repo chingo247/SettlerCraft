@@ -46,164 +46,164 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSessionFactory;
  * @author Chingo
  */
 public interface IStructureAPI {
-    
+
     ConstructionWorld getConstructionWorld(String world);
-    
+
     ConstructionWorld getConstructionWorld(World world);
-    
+
     void build(AsyncEditSession editSession, UUID player, Structure structure, BuildOptions options, ITaskAssigner taskAssigner) throws ConstructionException;
-    
+
     void build(AsyncEditSession editSession, UUID player, Structure structure, BuildOptions options) throws ConstructionException;
-    
+
     void build(UUID player, Structure structure, BuildOptions options) throws ConstructionException;
-    
+
     void build(Structure structure, BuildOptions options) throws ConstructionException;
-    
+
     void build(Structure structure) throws ConstructionException;
-    
+
     void demolish(AsyncEditSession editSession, UUID player, Structure structure, DemolitionOptions options, ITaskAssigner taskAssigner) throws ConstructionException;
-    
+
     void demolish(AsyncEditSession editSession, UUID player, Structure structure, DemolitionOptions options) throws ConstructionException;
-    
+
     void demolish(UUID player, Structure structure, DemolitionOptions options) throws ConstructionException;
-    
+
     void demolish(Structure structure, DemolitionOptions options) throws ConstructionException;
-    
+
     void demolish(Structure structure) throws ConstructionException;
-    
+
     void stop(Structure structure, boolean force) throws ConstructionException;
-    
+
     /**
      * Gets the ConstructionManager
-     * @return The ConstructionManager 
+     *
+     * @return The ConstructionManager
      */
     IConstructionManager getConstructionManager();
-    
+
     /**
-     * Gets the StructurePlanManager, alternatively {@link StructurePlanManager#getInstance() } may be used
-     * @return The StructurePlanManager 
+     * Gets the StructurePlanManager, alternatively {@link StructurePlanManager#getInstance()
+     * } may be used
+     *
+     * @return The StructurePlanManager
      */
     StructurePlanManager getStructurePlanManager();
-    
+
     /**
      * Reloads the StructureAPI
      */
     void reload();
-    
+
     /**
      * Checks if the AWE queue is locked for a given UUID
+     *
      * @param player The player UUID or PlayerEntry UUID
      * @return True if the queue was locked
      */
     boolean isQueueLocked(UUID player);
-    
-    
+
     /**
      * Checks if StructureAPI is loading (plans, schematics, etc)
+     *
      * @return True if StructureAPI is loadings
      */
     boolean isLoading();
-    
+
     /**
      * Gets the ConfigProvider
+     *
      * @return The ConfigProvider
      */
     IConfigProvider getConfig();
-    
+
     /**
      * Gets the platform
+     *
      * @return The platform
      */
     APlatform getPlatform();
-    
+
     /**
      * Gets the plan directory
+     *
      * @return The plan directory
      */
     File getPlanDirectory();
-    
+
     /**
      * The directory where plans are generated from schematics
+     *
      * @return The directory
      */
     File getGenerationDirectory();
-    
+
     /**
      * The directory where plans are generated from schematics
+     *
      * @return The directory
      */
     File getWorkingDirectory();
-    
-    
+
+    /**
+     * Gets the directory where world data is stored (within StructureAPI
+     * directory)
+     *
+     * @param world The world
+     * @return The directory for given world
+     */
+    File getWorldDirectory(String world);
+
     /**
      * Gets the Structures directory for a world
-     * @param world The world 
+     *
+     * @param world The world
      * @return The structures directory
      */
     File getStructuresDirectory(String world);
-    
+
     /**
-     * Creates a new PlanMenu, this PlanMenu is loaded with all the plans available. 
-     * The Plan Menu can be used by ONE player. Each player requires it's own plan menu, therefore 
-     * new instances need to be created
+     * Creates a new PlanMenu, this PlanMenu is loaded with all the plans
+     * available. The Plan Menu can be used by ONE player. Each player requires
+     * it's own plan menu, therefore new instances need to be created
+     *
      * @return The PlanMenu
      */
     CategoryMenu createPlanMenu();
-    
-    /**
-     * Adds a restriction that will be added as check when placing structures
-     * @param structureRestriction The restriction
-     */
-    void addRestriction(StructureRestriction structureRestriction);
-    
-    /**
-     * Removes a restriction for placing structures
-     * @param structureRestriction 
-     */
-    void removeRestriction(StructureRestriction structureRestriction);
-    
-    /**
-     * Checks all StructureRestrictions. Each restriction determines if something is allowed to be placed
-     * in a certain area by a certain player.
-     * @param player The player, may be null
-     * @param world The world
-     * @param region The region
-     * @throws com.chingo247.structureapi.exception.StructureRestrictionException Thrown when a restriction was violated
-     */
-    void checkRestrictions(Player player, World world, CuboidRegion region) throws StructureRestrictionException;
-    
+
     /**
      * Loads a schematic file
+     *
      * @param schematicFile The schematic file to load
      * @return The schematicPlacement
-     * @throws IOException 
+     * @throws IOException
      */
-    SchematicPlacement loadSchematic(File schematicFile) throws IOException ;
-    
+    SchematicPlacement loadSchematic(File schematicFile) throws IOException;
+
     /**
      * Makes a placement Async
-     * @param player The player UUID or null, The UUID specifies the Queue for AsyncWorldEdit
-     * A null value means that the UUID was issued by PlayerEntry.CONSOLE. 
-     * Note that the UUID does not have to be of a real player.
+     *
+     * @param player The player UUID or null, The UUID specifies the Queue for
+     * AsyncWorldEdit A null value means that the UUID was issued by
+     * PlayerEntry.CONSOLE. Note that the UUID does not have to be of a real
+     * player.
      * @param placement The placement
      * @return The AsyncPlacement
      */
     AsyncPlacement makeAsync(UUID player, Placement placement);
-    
+
     /**
      * Gets the registered BackupAPI. May return null if none was registered
+     *
      * @return The BackupAPI
      */
     IBackupAPI getBackupAPI();
-    
+
     /**
      * Gets an AsyncEditSessionFactory
+     *
      * @return The AsyncEditSessionFactor
      */
     AsyncEditSessionFactory getSessionFactory();
-    
-    IPlacingValidator getPlacingValidator();
-    
+
     IChunkManager getChunkManager();
-    
+
 }

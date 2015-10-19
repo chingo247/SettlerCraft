@@ -1,6 +1,3 @@
-package com.chingo247.structureapi.platform;
-
-
 /*
  * Copyright (C) 2015 Chingo
  *
@@ -17,22 +14,18 @@ package com.chingo247.structureapi.platform;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.chingo247.structureapi.event.zone;
 
+import com.chingo247.structureapi.model.zone.IConstructionZone;
 
 /**
  *
  * @author Chingo
  */
-public interface IConfigProvider {
-    
-    public boolean isPlanMenuEnabled();
+public class DeleteConstructionZoneEvent extends ConstructionZoneEvent {
 
-    public boolean isPlanShopEnabled();
-
-    public boolean allowsSubstructures();
-    
-    public boolean useHolograms();
-    
-    public boolean protectStructures();
+    public DeleteConstructionZoneEvent(IConstructionZone zone) {
+        super(zone);
+    }
     
 }

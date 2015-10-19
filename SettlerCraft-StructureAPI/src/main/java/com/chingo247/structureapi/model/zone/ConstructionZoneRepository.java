@@ -22,7 +22,9 @@ import com.chingo247.structureapi.model.RelTypes;
 import com.chingo247.structureapi.model.plot.Plot;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.chingo247.structureapi.model.structure.StructureNode;
+import com.chingo247.xplatform.core.ILocation;
 import com.google.common.collect.Maps;
+import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Result;
 
 /**
@@ -39,7 +42,7 @@ import org.neo4j.graphdb.Result;
  * @author ching
  */
 public class ConstructionZoneRepository implements IConstructionZoneRepository {
-    
+
     private boolean checked;
     private final GraphDatabaseService graph;
 
@@ -47,7 +50,7 @@ public class ConstructionZoneRepository implements IConstructionZoneRepository {
         this.checked = false;
         this.graph = graph;
     }
-    
+
     private long nextId() {
         if (!checked) {
             Result r = graph.execute("MATCH (sid: ID_GENERATOR {name:'CONSTRUCTION_ZONE_ID'}) "
@@ -74,7 +77,7 @@ public class ConstructionZoneRepository implements IConstructionZoneRepository {
     }
 
     @Override
-    public IConstructionZone findById(long id) {
+    public ConstructionZone findById(long id) {
         ConstructionZone zone = null;
         Map<String, Object> params = Maps.newHashMap();
         params.put("id", id);
@@ -94,8 +97,41 @@ public class ConstructionZoneRepository implements IConstructionZoneRepository {
     }
 
     @Override
-    public Collection<IConstructionZone> findWithin(UUID worldUUID, CuboidRegion searchArea, int limit) {
-        List<IConstructionZone> zones = new ArrayList<>();
+    public ConstructionZone findOnPosition(ILocation location) {
+        return findOnPosition(
+                location.getWorld().getUUID(),
+                new BlockVector(location.getBlockX(), location.getBlockY(), location.getBlockZ())
+        );
+    }
+
+    @Override
+    public ConstructionZone findOnPosition(UUID worldUUID, Vector position) {
+        ConstructionZone constructionZone = null;
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("worldId", worldUUID.toString());
+        String query
+                = "MATCH ( world: " + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
+                + " WITH world "
+                + " MATCH (world)<-[:" + RelTypes.WITHIN + "]-(s:" + ConstructionZone.LABEL + ")"
+                + " WHERE "
+                + " AND s." + ConstructionZone.MAX_X_PROPERTY + " >= " + position.getBlockX() + " AND s." + ConstructionZone.MIN_X_PROPERTY + " <= " + position.getBlockX()
+                + " AND s." + ConstructionZone.MAX_Y_PROPERTY + " >= " + position.getBlockY() + " AND s." + ConstructionZone.MIN_Y_PROPERTY + " <= " + position.getBlockY()
+                + " AND s." + ConstructionZone.MAX_Z_PROPERTY + " >= " + position.getBlockZ() + " AND s." + ConstructionZone.MIN_Z_PROPERTY + " <= " + position.getBlockZ()
+                + " RETURN s as zone"
+                + " LIMIT 1";
+
+        Result result = graph.execute(query, params);
+        while (result.hasNext()) {
+            Map<String, Object> map = result.next();
+            Node n = (Node) map.get("zone");
+            constructionZone = new ConstructionZone(n);
+        }
+        return constructionZone;
+    }
+
+    @Override
+    public Collection<ConstructionZone> findWithin(UUID worldUUID, CuboidRegion searchArea, int limit) {
+        List<ConstructionZone> zones = new ArrayList<>();
 
         Map<String, Object> params = Maps.newHashMap();
         params.put("worldId", worldUUID.toString());
@@ -105,7 +141,7 @@ public class ConstructionZoneRepository implements IConstructionZoneRepository {
 
         Vector min = searchArea.getMinimumPoint();
         Vector max = searchArea.getMaximumPoint();
-        
+
         String query
                 = "MATCH (world:" + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
                 + " WITH world "
@@ -132,12 +168,12 @@ public class ConstructionZoneRepository implements IConstructionZoneRepository {
     }
 
     @Override
-    public Iterable<? extends IConstructionZone> findAll() {
+    public Iterable<ConstructionZone> findAll() {
         return NodeHelper.makeIterable(graph.findNodes(ConstructionZone.label()), ConstructionZone.class);
     }
 
     @Override
-    public IConstructionZone add(CuboidRegion region) {
+    public ConstructionZone add(CuboidRegion region) {
         Vector min = region.getMinimumPoint();
         Vector max = region.getMaximumPoint();
         Node n = graph.createNode(Plot.plotLabel(), ConstructionZone.label());
@@ -155,12 +191,19 @@ public class ConstructionZoneRepository implements IConstructionZoneRepository {
 
     @Override
     public void delete(long id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        ConstructionZone zone = findById(id);
+        if (zone != null) {
+            delete(zone);
+        }
     }
 
     @Override
-    public void delete(IConstructionZone zone) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void delete(ConstructionZone zone) {
+        Node n = zone.getNode();
+        for(Relationship rel : n.getRelationships()) {
+            rel.delete();
+        }
+        n.delete();
     }
-    
+
 }

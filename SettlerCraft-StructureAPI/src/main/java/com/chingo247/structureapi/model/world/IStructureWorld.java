@@ -7,6 +7,7 @@ package com.chingo247.structureapi.model.world;
 
 import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.settlercraft.core.model.interfaces.IWorld;
+import com.chingo247.structureapi.model.zone.IConstructionZone;
 
 /**
  *
@@ -18,12 +19,18 @@ public interface IStructureWorld extends IWorld {
      * Adds a  structure to this world
      * @param structure The structure to add
      */
-    public void addStructure(StructureNode structure);
+    void addStructure(StructureNode structure);
     
     /**
      * Adds a  structure to this world
      * @param structure The structure to add
      */
-    public boolean deleteStructure(long structureId);
+    boolean deleteStructure(long structureId);
+    
+    void addZone(IConstructionZone zone);
+
+    boolean deleteZone(long id);
+    
+    
     
 }

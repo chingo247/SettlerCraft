@@ -77,7 +77,7 @@ public class BKConfigProvider implements IConfigProvider {
     }
 
     @Override
-    public boolean protectesStructures() {
+    public boolean protectStructures() {
         return protectStructures;
     }
 

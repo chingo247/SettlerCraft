@@ -37,7 +37,6 @@ import com.sk89q.jnbt.NBTInputStream;
 import com.sk89q.jnbt.NBTOutputStream;
 import com.sk89q.jnbt.NamedTag;
 import com.sk89q.jnbt.Tag;
-import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -56,7 +55,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 import org.apache.commons.io.FileUtils;
-import scala.reflect.api.Positions;
 
 /**
  *
@@ -64,7 +62,7 @@ import scala.reflect.api.Positions;
  */
 public class RegionManager {
 
-    private APlatform platform;
+    private final APlatform platform;
 
     public RegionManager(APlatform platform) {
         this.platform = platform;

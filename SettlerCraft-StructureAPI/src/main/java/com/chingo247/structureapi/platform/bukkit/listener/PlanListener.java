@@ -21,6 +21,7 @@ import com.chingo247.xplatform.platforms.bukkit.BukkitPlatform;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.structureapi.platform.bukkit.util.BKWorldEditUtil;
 import com.chingo247.settlercraft.core.SettlerCraft;
+import com.chingo247.structureapi.StructureAPI;
 import com.chingo247.structureapi.handlers.PlayerPlaceStructureHandler;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
@@ -66,7 +67,7 @@ public class PlanListener implements Listener {
         }
 
         Location loc = block.getLocation();
-        placeHandler.handle(stack, player, SettlerCraft.getInstance().getWorld(player.getWorld().getName()), new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
+        placeHandler.handle(stack, player, StructureAPI.getInstance().getConstructionWorld(player.getWorld().getName()), new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
     }
 
 }

@@ -60,7 +60,7 @@ public class OwnerDomain {
         return ownership;
     }
     
-    public void updateOwnership(IBaseSettler settler, OwnerType ownerType) {
+    public void setOwnership(IBaseSettler settler, OwnerType ownerType) {
         // if exists... update it
         for(Ownership o : getOwnerships()) {
             if(o.getOwner().getUniqueIndentifier().equals(settler.getUniqueIndentifier())) {

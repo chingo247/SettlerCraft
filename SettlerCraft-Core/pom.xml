@@ -143,6 +143,13 @@
             <scope>provided</scope>
         </dependency>
         
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.9</version>
+        </dependency>
+
+        
         <!--WorldEdit-->
         <dependency>
             <groupId>com.sk89</groupId>

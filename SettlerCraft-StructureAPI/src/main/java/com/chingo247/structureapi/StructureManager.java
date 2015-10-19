@@ -17,7 +17,6 @@
 package com.chingo247.structureapi;
 
 import com.chingo247.settlercraft.core.Direction;
-import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.structureapi.event.StructureCreateEvent;
@@ -25,29 +24,44 @@ import com.chingo247.structureapi.model.settler.Settler;
 import com.chingo247.structureapi.model.settler.SettlerRepositiory;
 import com.chingo247.structureapi.model.owner.OwnerType;
 import com.chingo247.structureapi.model.owner.Ownership;
+import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.structureapi.model.structure.StructureRepository;
 import com.chingo247.structureapi.model.world.StructureWorld;
 import com.chingo247.structureapi.model.world.StructureWorldRepository;
+import com.chingo247.structureapi.model.zone.AccessType;
+import com.chingo247.structureapi.model.zone.ConstructionZone;
+import com.chingo247.structureapi.model.zone.ConstructionZoneRepository;
+import com.chingo247.structureapi.model.zone.IConstructionZone;
+import com.chingo247.structureapi.model.zone.IConstructionZoneRepository;
 import com.chingo247.structureapi.plan.DefaultStructurePlan;
 import com.chingo247.structureapi.plan.IStructurePlan;
 import com.chingo247.structureapi.plan.placement.FilePlacement;
 import com.chingo247.structureapi.plan.placement.Placement;
 import com.chingo247.structureapi.plan.xml.export.PlacementExporter;
+import com.chingo247.structureapi.platform.ConfigProvider;
 import com.chingo247.structureapi.util.PlacementUtil;
+import com.chingo247.structureapi.util.RegionUtil;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IWorld;
+import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import com.google.common.util.concurrent.Monitor;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 
 /**
@@ -64,31 +78,193 @@ import org.neo4j.graphdb.Transaction;
  *
  * @author Chingo
  */
-public class StructureCreator implements IStructureCreator {
+public class StructureManager extends AbstractPlotManager implements IStructureManager {
 
     private final ConstructionWorld world;
     private final IStructureAPI structureAPI;
     private final APlatform platform;
     private final StructureWorldRepository structureWorldRepository;
     private final StructureRepository structureRepository;
-    private final SettlerRepositiory structureOwnerRepository;
+    private final IConstructionZoneRepository constructionZoneRepository;
+    private final SettlerRepositiory settlerRepository;
     private final GraphDatabaseService graph;
     private final Monitor monitor;
+    private final Set<StructureRestriction> restrictions;
 
     /**
      * Constructor
      *
      * @param world The world this StructureManager will 'Manage'
      */
-    StructureCreator(ConstructionWorld world) {
-        this.graph = SettlerCraft.getInstance().getNeo4j();
+    StructureManager(ConstructionWorld world, GraphDatabaseService graph) {
+        this.graph = graph;
         this.structureAPI = (StructureAPI) StructureAPI.getInstance();
         this.world = world;
         this.platform = structureAPI.getPlatform();
         this.structureWorldRepository = new StructureWorldRepository(graph);
         this.structureRepository = new StructureRepository(graph);
-        this.structureOwnerRepository = new SettlerRepositiory(graph);
+        this.settlerRepository = new SettlerRepositiory(graph);
+        this.constructionZoneRepository = new ConstructionZoneRepository(graph);
         this.monitor = world.getMonitor();
+        this.restrictions = Sets.newHashSet();
+    }
+    
+    @Override
+    public Set<StructureRestriction> getRegisteredRestrictions() {
+        return new HashSet<>(restrictions);
+    }
+    
+    @Override
+    public void addRestriction(StructureRestriction structureRestriction) {
+        synchronized (restrictions) {
+            this.restrictions.add(structureRestriction);
+        }
+    }
+
+    @Override
+    public void removeRestriction(StructureRestriction structureRestriction) {
+        synchronized (restrictions) {
+            this.restrictions.remove(structureRestriction);
+        }
+    }
+    
+    @Override
+    public void checkStructureRestrictions(Player player, ConstructionWorld world, CuboidRegion region) throws StructureRestrictionException {
+        checkStructureRestrictions(player, world.getWorldEditWorld(), region);
+    }
+
+    @Override
+    public void checkStructureRestrictions(ConstructionWorld world, CuboidRegion region) throws StructureRestrictionException {
+        checkStructureRestrictions(null, world, region);
+    }
+    
+    @Override
+    public void checkStructureRestrictions(Player player, World world, CuboidRegion region) throws StructureRestrictionException {
+        for (Iterator<StructureRestriction> iterator = restrictions.iterator(); iterator.hasNext();) {
+            StructureRestriction next = iterator.next();
+            next.evaluate(player, world, region);
+       }
+    }
+    
+    @Override
+    public void checkStructureRestrictions(World world, CuboidRegion region) throws StructureRestrictionException {
+        checkStructureRestrictions(null, world, region);
+    }
+    
+    @Override
+    public void checkStructurePlacingRestrictions(Player player, ConstructionWorld world, CuboidRegion region) throws StructureRestrictionException {
+        boolean allowsSubstructures = structureAPI.getConfig().allowsSubstructures();
+        if(allowsSubstructures) {
+            Collection<StructureNode> structures = structureRepository.findStructuresWithin(world.getUUID(), region, -1);
+            Settler settler = player != null ? settlerRepository.findByUUID(player.getUniqueId()) : null;
+            for (StructureNode structureNode : structures) {
+                if (!RegionUtil.isDimensionWithin(structureNode.getCuboidRegion(), region)) { // overlaps but doesn't fit within
+                    throw new StructureRestrictionException("Structure overlaps structure #" + structureNode.getId() + " " + structureNode.getName());
+                } else if (settler != null && structureNode.getOwnerDomain().isOwner(settler.getUniqueIndentifier())) { // fits within but doesnt own
+                    throw new StructureRestrictionException("Can't create substructure, structure will overlap a structure you don't own");
+                } else if(structureNode.getStatus() != ConstructionStatus.COMPLETED && structureNode.getStatus() != ConstructionStatus.STOPPED) { // fits within and owns, but structure is in progress
+                    throw new StructureRestrictionException("Can't place within a structure that is in progress");
+                }
+            } 
+        } else {
+            Iterator<StructureNode> iterator = structureRepository.findStructuresWithin(world.getUUID(), region, 1).iterator();
+            if(iterator.hasNext()) {
+                StructureNode structureNode = iterator.next();
+                throw new StructureRestrictionException("Structure overlaps structure #" + structureNode.getId() + " " + structureNode.getName());
+            }
+        }
+    }
+
+    @Override
+    public void checkStructurePlacingRestrictions(ConstructionWorld world, CuboidRegion region) throws StructureRestrictionException {
+        checkStructurePlacingRestrictions(null, world, region);
+    }
+
+    @Override
+    public void checkStructurePlacingRestrictions(Player player, ConstructionWorld world, CuboidRegion affectArea, Vector placingPoint) throws RestrictionException {
+        boolean allowsSubstructures = structureAPI.getConfig().allowsSubstructures();
+        ConfigProvider config = world.getConfig();
+        
+        if(config.allowsStructures()) {
+            throw new WorldRestrictionException("This world does not allow any structures");
+        }
+        
+        
+        checkStructureConstructionZoneRestrictions(world, affectArea, player);
+        
+        
+        if(allowsSubstructures) {
+            StructureNode possibleParent = structureRepository.findStructureOnPosition(world.getUUID(), placingPoint);
+            Vector min = affectArea.getMinimumPoint();
+            Vector max = affectArea.getMaximumPoint();
+            StructureNode overlappingStructure;
+            if (possibleParent != null) {
+                Node n = possibleParent.getNode();
+                StructureNode sn = new StructureNode(n);
+                Iterator<StructureNode> subIt = sn.getSubStructuresWithin(new CuboidRegion(min, max)).iterator();
+                overlappingStructure = subIt.hasNext() ? subIt.next() : null;
+            } else {
+                Iterator<StructureNode> subIt = structureRepository.findStructuresWithin(world.getUUID(), new CuboidRegion(min, max), 1).iterator();
+                overlappingStructure = subIt.hasNext() ? subIt.next() : null;
+            }
+
+            if (overlappingStructure != null && !overlappingStructure.getOwnerDomain().isOwner(player.getUniqueId())) {
+                CuboidRegion overlappingArea = overlappingStructure.getCuboidRegion();
+                throw new StructureRestrictionException("Target area overlaps structure: \n#" + overlappingStructure.getId() + " - " + overlappingStructure.getName() + "\n"
+                        + "Located at min: " + overlappingArea.getMinimumPoint() + ", max: " + overlappingArea.getMaximumPoint());
+            }
+            
+            if(overlappingStructure != null && (overlappingStructure.getStatus() != ConstructionStatus.COMPLETED && overlappingStructure.getStatus() != ConstructionStatus.STOPPED)) {
+                throw new StructureRestrictionException("Can't place within a structure that is in progress...");
+            }
+            
+            
+        } else {
+            checkStructureRestrictions(world, affectArea);
+        }
+
+    }
+
+    @Override
+    public void checkStructurePlacingRestrictions(ConstructionWorld world, CuboidRegion affectArea, Vector placingPoint) throws RestrictionException {
+        checkStructurePlacingRestrictions(null, world, affectArea, placingPoint);
+    }
+
+    private void checkStructureConstructionZoneRestrictions(ConstructionWorld world, CuboidRegion affectArea, Player player) throws RestrictionException {
+        Collection<ConstructionZone> zones = constructionZoneRepository.findWithin(world.getUUID(), affectArea, 2);
+        
+        // May not overlap multiple zones
+        if(zones.size() == 2) {
+            throw new ConstructionZoneRestrictionException("Structure overlaps multiple construction zones");
+        }
+        
+        // Check if restricted to zones
+        if(zones.isEmpty() && world.getConfig().isRestrictedToZones()) {
+            throw new ConstructionZoneRestrictionException("Structures may only be placed within construction zones");
+        }
+        
+        // If zones != empty, check acces
+        if(!zones.isEmpty()) {
+            IConstructionZone zone = zones.iterator().next();
+            CuboidRegion zoneRegion = zone.getCuboidRegion();
+            
+            if(zone.getAccessType() == AccessType.RESTRICTED) {
+                throw new ConstructionZoneRestrictionException("Placing structures is restricted within this construction zone: "
+                        + "\n" + "(" + zoneRegion.getMinimumPoint() + ", " + zoneRegion.getMaximumPoint());
+            }
+            
+            if(zone.getAccessType() == AccessType.PRIVATE && !zone.getOwnerDomain().isOwner(player.getUniqueId())) {
+                throw new ConstructionZoneRestrictionException("You are not a member of this zone!"
+                         + "\n" + "(" + zoneRegion.getMinimumPoint() + ", " + zoneRegion.getMaximumPoint());
+            }
+            
+            if(!RegionUtil.isDimensionWithin(zoneRegion, affectArea)) {
+                throw new ConstructionZoneRestrictionException("Structure is not within construction zone"
+                         + "\n" + "(" + zoneRegion.getMinimumPoint() + ", " + zoneRegion.getMaximumPoint());
+            }
+            
+        }
+        
     }
     
     @Override
@@ -204,7 +380,7 @@ public class StructureCreator implements IStructureCreator {
                 moveResources(worldNode, structure, structurePlan);
             } catch (IOException ex) {
                 structureDirectory.delete();
-                Logger.getLogger(StructureCreator.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(StructureManager.class.getName()).log(Level.SEVERE, null, ex);
             }
             
 
@@ -257,17 +433,17 @@ public class StructureCreator implements IStructureCreator {
 
         // Add owner!
         if (owner != null  && structureNode != null) {
-            Settler settler = structureOwnerRepository.findByUUID(owner.getUniqueId());
+            Settler settler = settlerRepository.findByUUID(owner.getUniqueId());
             if (settler == null) {
                 throw new RuntimeException("Settler was null!"); // SHOULD NEVER HAPPEN AS SETTLERS ARE ADDED AT MOMENT OF FIRST LOGIN
             }
-            structureNode.getOwnerDomain().updateOwnership(settler, OwnerType.MASTER);
+            structureNode.getOwnerDomain().setOwnership(settler, OwnerType.MASTER);
         }
 
         // Inherit ownership if there is a parent
         if (parentNode != null  && structureNode != null) {
             for (Ownership ownership : parentNode.getOwnerDomain().getOwnerships()) {
-                structureNode.getOwnerDomain().updateOwnership(ownership.getOwner(), ownership.getOwnerType());
+                structureNode.getOwnerDomain().setOwnership(ownership.getOwner(), ownership.getOwnerType());
             }
         }
         

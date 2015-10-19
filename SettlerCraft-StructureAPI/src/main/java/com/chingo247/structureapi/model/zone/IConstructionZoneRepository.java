@@ -16,6 +16,8 @@
  */
 package com.chingo247.structureapi.model.zone;
 
+import com.chingo247.xplatform.core.ILocation;
+import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import java.util.Collection;
 import java.util.UUID;
@@ -27,16 +29,20 @@ import java.util.UUID;
 public interface IConstructionZoneRepository {
     
     
-    IConstructionZone findById(long id);
+    ConstructionZone findById(long id);
     
-    Collection<IConstructionZone> findWithin(UUID worldUUID, CuboidRegion searchArea, int limit);
+    ConstructionZone findOnPosition(UUID worldUUID, Vector position);
     
-    Iterable<? extends IConstructionZone> findAll();
+    ConstructionZone findOnPosition(ILocation location);
     
-    IConstructionZone add(CuboidRegion region);
+    Collection<ConstructionZone> findWithin(UUID worldUUID, CuboidRegion searchArea, int limit);
+    
+    Iterable<? extends ConstructionZone> findAll();
+    
+    ConstructionZone add(CuboidRegion region);
     
     void delete(long id);
     
-    void delete(IConstructionZone zone);
+    void delete(ConstructionZone zone);
     
 }

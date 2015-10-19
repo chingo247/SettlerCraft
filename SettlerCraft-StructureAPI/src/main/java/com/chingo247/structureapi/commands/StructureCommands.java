@@ -23,7 +23,6 @@ import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.core.model.interfaces.IBaseSettler;
 import com.chingo247.structureapi.IStructureAPI;
 import com.chingo247.settlercraft.core.commands.util.CommandSenderType;
-import com.chingo247.settlercraft.core.platforms.services.permission.Permission;
 import com.chingo247.structureapi.construction.options.BuildOptions;
 import com.chingo247.structureapi.construction.options.DemolitionOptions;
 import com.chingo247.structureapi.event.StructureAddOwnerEvent;
@@ -36,6 +35,7 @@ import com.chingo247.structureapi.model.settler.ISettler;
 import com.chingo247.structureapi.model.settler.ISettlerRepository;
 import com.chingo247.structureapi.model.settler.SettlerRepositiory;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
+import com.chingo247.structureapi.model.structure.IStructure;
 import com.chingo247.structureapi.model.structure.IStructureRepository;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.model.structure.StructureNode;
@@ -53,6 +53,7 @@ import com.sk89q.minecraft.util.commands.CommandException;
 import com.sk89q.minecraft.util.commands.CommandPermissions;
 import com.sk89q.minecraft.util.commands.CommandUsageException;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.world.World;
 import java.util.Comparator;
 import java.util.List;
@@ -202,10 +203,8 @@ public class StructureCommands {
         final GraphDatabaseService graph = SettlerCraft.getInstance().getNeo4j();
         final IColors color = structureAPI.getPlatform().getChatColors();
         final StructureRepository structureRepository = new StructureRepository(graph);
+        final StructureNode structure;
 
-        System.out.println("Arguments: " + args.argsLength());
-        System.out.println("InstanceOf Player: " + (sender instanceof IPlayer));
-        
         if (args.argsLength() == 1) {
             // Find by ID
             Long id;
@@ -217,14 +216,14 @@ public class StructureCommands {
             long start = System.currentTimeMillis();
 
             try (Transaction tx = graph.beginTx()) {
-                StructureNode structure = structureRepository.findById(id);
+                structure = structureRepository.findById(id);
 
                 if (structure == null) {
                     tx.success();
                     throw new CommandException("Couldn't find structure for id #" + id);
                 }
-
-                sender.sendMessage(getInfo(structure, color));
+                String info = getInfo(structure, color);
+                sender.sendMessage(info);
                 tx.success();
             }
 
@@ -237,23 +236,21 @@ public class StructureCommands {
             long start = System.currentTimeMillis();
 
             try (Transaction tx = graph.beginTx()) {
-                StructureNode s = structureRepository.findStructureOnPosition(ply.getWorld().getUUID(), pos);
+                structure = structureRepository.findStructureOnPosition(ply.getWorld().getUUID(), pos);
 
-                if (s == null) {
+                if (structure == null) {
                     tx.success();
                     throw new CommandException(" Not within a structure...");
                 }
 
-                String info = getInfo(s, color);
+                String info = getInfo(structure, color);
                 sender.sendMessage(info);
                 tx.success();
             }
-
             LOG.log(Level.INFO, "info in {0} ms", (System.currentTimeMillis() - start));
         } else {
             throw new CommandException("Too few arguments \n" + "/structure:info [id]");
         }
-
     }
 
     @CommandPermissions(Permissions.STRUCTURE_CONSTRUCTION)
@@ -323,7 +320,7 @@ public class StructureCommands {
             // Structure not found!
             if (sn == null) {
                 tx.success();
-                throw new com.chingo247.settlercraft.core.exception.CommandException("Couldn't find a structure for #" + structureIdArg);
+                throw new CommandException("Couldn't find a structure for #" + structureIdArg);
             }
 
             // Player is not the owner!
@@ -361,7 +358,7 @@ public class StructureCommands {
         final Structure structure;
         final UUID uuid = getUUID(sender);
         final IColors colors = structureAPI.getPlatform().getChatColors();
-        
+
         String structureIdArg = args.getString(0);
         if (!NumberUtils.isNumber(structureIdArg)) {
             throw new CommandException("Expected a number but got '" + structureIdArg + "'");
@@ -394,7 +391,7 @@ public class StructureCommands {
 
         // Stop current action
         String structureInfo = colors.reset() + ": #" + colors.gold() + structure.getId() + colors.blue() + " " + structure.getName();
-        sender.sendMessage(colors.red()+ "STOPPING" + structureInfo);
+        sender.sendMessage(colors.red() + "STOPPING" + structureInfo);
         try {
             structureAPI.stop(structure, useForce);
         } catch (ConstructionException ex) {
@@ -406,102 +403,107 @@ public class StructureCommands {
     @CommandExtras(async = true)
     @Command(aliases = {"structure:masters", "stt:masters"}, desc = "")
     public static void masters(final CommandContext args, ICommandSender sender, IStructureAPI structureAPI) throws Exception {
-        masterOwnerMember(sender, args, structureAPI, OwnerType.MASTER, args.hasFlag('#') ? args.getFlag('#') : null);
+        ownerships(sender, args, structureAPI, OwnerType.MASTER);
     }
 
     @CommandExtras(async = true)
     @Command(aliases = {"structure:owners", "stt:owners"}, desc = "")
     public static void owners(final CommandContext args, ICommandSender sender, IStructureAPI structureAPI) throws Exception {
-        masterOwnerMember(sender, args, structureAPI, OwnerType.OWNER, args.hasFlag('#') ? args.getFlag('#') : null);
+        ownerships(sender, args, structureAPI, OwnerType.OWNER);
     }
 
     @CommandExtras(async = true)
     @Command(aliases = {"structure:members", "stt:members"}, desc = "")
     public static void members(final CommandContext args, ICommandSender sender, IStructureAPI structureAPI) throws Exception {
-        masterOwnerMember(sender, args, structureAPI, OwnerType.MEMBER, args.hasFlag('#') ? args.getFlag('#') : null);
+        ownerships(sender, args, structureAPI, OwnerType.MEMBER);
     }
 
-    private static boolean masterOwnerMember(ICommandSender sender, CommandContext args, IStructureAPI structureAPI, OwnerType requestedType, String idFlag) throws CommandException {
+    private static StructureNode getStructure(CommandContext args, Transaction activeTransaction) throws CommandException {
         final GraphDatabaseService graph = SettlerCraft.getInstance().getNeo4j();
         final IStructureRepository structureRepository = new StructureRepository(graph);
-        final ISettlerRepository settlerRepository = new SettlerRepositiory(graph);
-        final IColors COLOR = structureAPI.getPlatform().getChatColors();
-
-        // /stt owner [structureId] <add|remove> [playerName|playerId]
-        String help;
-        if (requestedType == OwnerType.MASTER) {
-            help = "/structure:masters [structureId] <add|remove> [playerName| -# playerId]";
-        } else if (requestedType == OwnerType.OWNER) {
-            help = "/structure:owners [structureId] <add|remove> [playerName| -# playerId]";
-        } else {
-            help = "/structure:members [structureId] <add|remove> [playerName| -# playerId]";
-        }
-
         Long structureId = null;
-        if (args.argsLength() >= 1) {
-            String structureIdArg = args.getString(0);
-            if (!NumberUtils.isNumber(structureIdArg)) {
-                throw new CommandException("Expected a number but got '" + structureIdArg + "'");
+        String structureIdArg = args.getString(0);
+        if (!NumberUtils.isNumber(structureIdArg)) {
+            activeTransaction.success();
+            throw new CommandException("Expected a number but got '" + structureIdArg + "'");
+        }
+        structureId = Long.parseLong(structureIdArg);
+        StructureNode structure = structureRepository.findById(structureId);
+        if (structure == null) {
+            activeTransaction.success();
+            throw new CommandException("Couldn't find structure for id #" + structureId);
+        }
+        return structure;
+    }
+
+    private static void showOwnerships(ICommandSender sender, CommandContext args, IStructureAPI structureAPI, OwnerType type) throws CommandException {
+        IColors COLOR = structureAPI.getPlatform().getChatColors();
+        GraphDatabaseService graph = SettlerCraft.getInstance().getNeo4j();
+
+        TreeSet<String> ownerships = Sets.newTreeSet(ALPHABETICAL_ORDER);
+        String structureName = null;
+        Long structureId;
+        try (Transaction tx = graph.beginTx()) {
+            StructureNode structure = getStructure(args, tx);
+            structureName = structure.getName();
+            structureId = structure.getId();
+            for (ISettler member : structure.getOwnerDomain().getOwners(type)) {
+                ownerships.add(member.getName());
             }
-            structureId = Long.parseLong(structureIdArg);
+
+            tx.success();
+        }
+        String ownershipString = "";
+        int size = ownerships.size();
+
+        if (size != 0) {
+            int count = 0;
+
+            for (String ownership : ownerships) {
+                ownershipString += ownership;
+                count++;
+                if (count != size) {
+                    ownershipString += ", ";
+                }
+
+            }
+        } else {
+            ownershipString = "None";
         }
 
-        // /stt: [members|owners|masters]
-        if (args.argsLength() == 1) {
-            TreeSet<String> ownerships = Sets.newTreeSet(ALPHABETICAL_ORDER);
-            String structureName = null;
-            long start = System.currentTimeMillis();
-            try (Transaction tx = graph.beginTx()) {
-                StructureNode structure = structureRepository.findById(structureId);
-                if (structure == null) {
-                    tx.success();
-                    throw new CommandException("Couldn't find structure for id #" + structureId);
-                }
-
-                structureName = structure.getName();
-                for (ISettler member : structure.getOwnerDomain().getOwners(requestedType)) {
-                    ownerships.add(member.getName());
-                }
-
-                tx.success();
-            }
-            LOG.log(Level.INFO, "owners in {0} ms", (System.currentTimeMillis() - start));
-            String ownershipString = "";
-            int size = ownerships.size();
-
-            if (size != 0) {
-                int count = 0;
-
-                for (String ownership : ownerships) {
-                    ownershipString += ownership;
-                    count++;
-                    if (count != size) {
-                        ownershipString += ", ";
-                    }
-
-                }
-            } else {
-                ownershipString = "None";
-            }
-
-            String ownersString;
-            if (requestedType == OwnerType.MASTER) {
-                ownersString = "Masters: ";
-            } else if (requestedType == OwnerType.OWNER) {
-                ownersString = "Owners: ";
-            } else {
-                ownersString = "Members: ";
-            }
-
-            if (size == 0) {
-                sender.sendMessage("#" + COLOR.gold() + structureId + " - " + COLOR.blue() + structureName, COLOR.reset() + ownersString + COLOR.red() + ownershipString);
-            } else {
-                sender.sendMessage("#" + COLOR.gold() + structureId + " - " + COLOR.blue() + structureName, COLOR.reset() + ownersString, ownershipString);
-            }
-
-            return true;
+        String ownersString;
+        if (type == OwnerType.MASTER) {
+            ownersString = "Masters: ";
+        } else if (type == OwnerType.OWNER) {
+            ownersString = "Owners: ";
+        } else {
+            ownersString = "Members: ";
         }
 
+        if (size == 0) {
+            sender.sendMessage("#" + COLOR.gold() + structureId + " - " + COLOR.blue() + structureName, COLOR.reset() + ownersString + COLOR.red() + ownershipString);
+        } else {
+            sender.sendMessage("#" + COLOR.gold() + structureId + " - " + COLOR.blue() + structureName, COLOR.reset() + ownersString, ownershipString);
+        }
+
+    }
+
+    private static void updateOwnership(ICommandSender sender, CommandContext args, IStructureAPI structureAPI, OwnerType type) throws CommandException {
+        GraphDatabaseService graph = SettlerCraft.getInstance().getNeo4j();
+        IColors colors = structureAPI.getPlatform().getChatColors();
+        ISettlerRepository settlerRepository = new SettlerRepositiory(graph);
+        
+        // Set help message
+        String help;
+        if (type == OwnerType.MASTER) {
+            help = "/structure:masters [structureId] <add|remove> [playerName| #settler-id]";
+        } else if (type == OwnerType.OWNER) {
+            help = "/structure:owners [structureId] <add|remove> [playerName| #settler-id]";
+        } else {
+            help = "/structure:members [structureId] <add|remove> [playerName| #settler-id]";
+        }
+        
+        // Check argument lengths
         if (args.argsLength() < 3) {
             throw new CommandException("Too few arguments" + "\n" + help);
         } else if (args.argsLength() > 3) {
@@ -515,29 +517,23 @@ public class StructureCommands {
             throw new CommandException("Unknown method '" + method + "', expected 'add' or 'remove'" + "\n" + help);
         }
 
-        long start = System.currentTimeMillis();
         try (Transaction tx = graph.beginTx()) {
-            StructureNode structurenode = structureRepository.findById(structureId);
-            if (structurenode == null) {
-                tx.success();
-                throw new CommandException("Couldn't find structure for id #" + structureId);
-            }
-
+            StructureNode structureNode = getStructure(args, tx);
             if (!isOP(sender)) {
                 IPlayer player = (IPlayer) sender;
-                IOwnership ownership = structurenode.getOwnerDomain().getOwnership(player.getUniqueId());
+                IOwnership ownership = structureNode.getOwnerDomain().getOwnership(player.getUniqueId());
 
                 if (ownership == null) {
                     tx.success();
                     throw new CommandException("You don't own this structure");
                 }
 
-                if (ownership.getOwnerType().getTypeId() < requestedType.getTypeId()) {
+                if (ownership.getOwnerType().getTypeId() < type.getTypeId()) {
                     tx.success();
-                    throw new CommandException("You don't have enough privileges to " + method + " players of type '" + requestedType.name() + "'");
+                    throw new CommandException("You don't have enough privileges to " + method + " players of type '" + type.name() + "'");
                 }
 
-                if (requestedType == OwnerType.MASTER && ownership.getOwnerType() == requestedType && method.equalsIgnoreCase("remove")) {
+                if (type == OwnerType.MASTER && ownership.getOwnerType() == type && method.equalsIgnoreCase("remove")) {
                     tx.success();
                     throw new CommandException("Players of type '" + OwnerType.MASTER + "' can't remove each other");
                 }
@@ -545,7 +541,7 @@ public class StructureCommands {
             }
 
             IPlayer ply;
-            if (idFlag == null) {
+            if (playerArg.startsWith("#")) {
                 if (!isUniquePlayerName(playerArg, structureAPI)) {
                     throw new CommandException("Player name '" + playerArg + "' is not unique \n"
                             + "Use player id instead of name \n"
@@ -562,50 +558,64 @@ public class StructureCommands {
             } else {
                 Long id = null;
                 try {
-                    id = Long.parseLong(idFlag);
+                    id = Long.parseLong(playerArg);
                     IBaseSettler sn = settlerRepository.findById(id);
                     if (sn == null) {
                         tx.success();
-                        throw new CommandException("Couldn't find a player for id'" + idFlag + "'");
+                        throw new CommandException("Couldn't find a player for id'" + playerArg + "'");
                     }
                     ply = structureAPI.getPlatform().getPlayer(sn.getUniqueIndentifier());
 
                 } catch (NumberFormatException nfe) {
                     tx.success();
-                    throw new CommandException("Expected a number after -# but got'" + idFlag + "'");
+                    String error = "Expected ";
+                    if(type == OwnerType.MEMBER) {
+                        error += "/stt:members ";
+                    } else if(type == OwnerType.OWNER) {
+                        error += "/stt:owners ";
+                    } else {
+                        error += "/stt:masters ";
+                    }
+                    error += method + "#[settler-id] \nbut got '" + playerArg + "' after #";
+                    throw new CommandException(error);
                 }
             }
 
             UUID uuid = ply.getUniqueId();
             if (method.equalsIgnoreCase("add")) {
                 IBaseSettler settler = settlerRepository.findByUUID(ply.getUniqueId());
-                OwnerDomain ownerDomain = structurenode.getOwnerDomain();
+                OwnerDomain ownerDomain = structureNode.getOwnerDomain();
                 IOwnership ownershipToAdd = ownerDomain.getOwnership(settler.getUniqueIndentifier());
 
                 if (ownershipToAdd == null) {
-                    ownerDomain.updateOwnership(settler, requestedType);
-                    EventManager.getInstance().getEventBus().post(new StructureAddOwnerEvent(uuid, new Structure(structurenode), requestedType));
-                    sender.sendMessage("Successfully added '" + COLOR.green() + ply.getName() + COLOR.reset() + "' to #" + COLOR.gold() + structureId + " " + COLOR.blue() + structurenode.getName() + COLOR.reset() + " as " + COLOR.yellow() + requestedType.name());
+                    ownerDomain.setOwnership(settler, type);
+                    EventManager.getInstance().getEventBus().post(new StructureAddOwnerEvent(uuid, new Structure(structureNode), type));
+                    sender.sendMessage("Successfully added '" + colors.green() + ply.getName() + colors.reset() + "' to #" + colors.gold() + structureNode.getId() + " " + colors.blue() + structureNode.getName() + colors.reset() + " as " + colors.yellow() + type.name());
                 } else {
-                    ownerDomain.updateOwnership(settler, requestedType);
-                    EventManager.getInstance().getEventBus().post(new StructureAddOwnerEvent(uuid, new Structure(structurenode), requestedType));
-                    sender.sendMessage("Updated ownership of '" + COLOR.green() + ply.getName() + COLOR.reset() + "' to " + COLOR.yellow() + requestedType.name() + COLOR.reset() + " for structure ",
-                            "#" + COLOR.gold() + structurenode.getId() + " " + COLOR.blue() + structurenode.getName());
+                    ownerDomain.setOwnership(settler, type);
+                    EventManager.getInstance().getEventBus().post(new StructureAddOwnerEvent(uuid, new Structure(structureNode), type));
+                    sender.sendMessage("Updated ownership of '" + colors.green() + ply.getName() + colors.reset() + "' to " + colors.yellow() + type.name() + colors.reset() + " for structure ",
+                            "#" + colors.gold() + structureNode.getId() + " " + colors.blue() + structureNode.getName());
                 }
             } else { // remove
-                OwnerDomain ownerDomain = structurenode.getOwnerDomain();
+                OwnerDomain ownerDomain = structureNode.getOwnerDomain();
                 if (!ownerDomain.removeOwnership(uuid)) {
-                    sender.sendMessage(ply.getName() + " does not own this structure...");
-                    return true;
+                    throw new CommandException(ply.getName() + " does not own this structure...");
                 }
-                EventManager.getInstance().getEventBus().post(new StructureRemoveOwnerEvent(uuid, new Structure(structurenode), requestedType));
-                sender.sendMessage("Successfully removed '" + COLOR.green() + ply.getName() + COLOR.reset() + "' from #" + COLOR.gold() + structureId + " " + COLOR.blue() + structurenode.getName() + " as " + COLOR.yellow() + requestedType.name());
+                EventManager.getInstance().getEventBus().post(new StructureRemoveOwnerEvent(uuid, new Structure(structureNode), type));
+                sender.sendMessage("Successfully removed '" + colors.green() + ply.getName() + colors.reset() + "' from #" + colors.gold() + structureNode.getId() + " " + colors.blue() + structureNode.getName() + " as " + colors.yellow() + type.name());
             }
-
             tx.success();
         }
-        LOG.log(Level.INFO, "owners add/remove in {0} ms", (System.currentTimeMillis() - start));
-        return true;
+    }
+    
+    private static void ownerships(ICommandSender sender, CommandContext args, IStructureAPI structureAPI, OwnerType requestedType) throws CommandException {
+        if (args.argsLength() == 1) {
+            showOwnerships(sender, args, structureAPI, requestedType);
+        } else {
+            updateOwnership(sender, args, structureAPI, requestedType);
+        }
+        
     }
 
     @CommandPermissions(Permissions.STRUCTURE_LIST)
@@ -615,27 +625,27 @@ public class StructureCommands {
         final GraphDatabaseService graph = SettlerCraft.getInstance().getNeo4j();
         final ISettlerRepository structureOwnerRepository = new SettlerRepositiory(graph);
         final IColors colors = structureAPI.getPlatform().getChatColors();
-        
+
         int page = 0;
         final UUID playerId;
         if (args.argsLength() == 0) {
-            if(!isPlayer(sender)) {
+            if (!isPlayer(sender)) {
                 throw new CommandUsageException("Too few arguments!", "/structure:list - Is for players only");
             }
-            
+
             playerId = getUUID(sender);
 
         } else if (args.argsLength() == 1) {
-            if(!isPlayer(sender)) {
+            if (!isPlayer(sender)) {
                 throw new CommandUsageException("Too few arguments!", "/structure:list [page] - Is for players only");
             }
-            
+
             playerId = getUUID(sender);
             String pageArg = args.getString(0);
             if (NumberUtils.isNumber(pageArg)) {
                 page = Integer.parseInt(pageArg);
             } else {
-                throw new com.chingo247.settlercraft.core.exception.CommandException("Expected a number but got '" + pageArg + "'");
+                throw new CommandException("Expected a number but got '" + pageArg + "'");
             }
         } else { // 2 arguments
 
@@ -695,7 +705,7 @@ public class StructureCommands {
         LOG.log(Level.INFO, "list structures in {0} ms", (System.currentTimeMillis() - start));
         sender.sendMessage(message);
     }
-    
+
     @CommandPermissions(Permissions.STRUCTURE_LOCATION)
     @CommandExtras(async = true, senderType = CommandSenderType.PLAYER)
     @Command(aliases = {"structure:location", "stt:location"}, desc = "")
@@ -704,7 +714,7 @@ public class StructureCommands {
         final IStructureRepository structureRepository = new StructureRepository(graph);
         final IColors colors = structureAPI.getPlatform().getChatColors();
         final IPlayer player = (IPlayer) sender;
-        
+
         if (args.argsLength() == 1) {
             Long id;
             String idArg = args.getString(0);
@@ -764,7 +774,17 @@ public class StructureCommands {
             }
             LOG.log(Level.INFO, "relative location in {0} ms", (System.currentTimeMillis() - start));
         }
-        
+
     }
 
+    @CommandPermissions(Permissions.STRUCTURE_CREATE)
+    @CommandExtras(async = true, senderType = CommandSenderType.PLAYER)
+    @Command(aliases = {"structure:create", "/stt:create"}, desc = "Create a structure from selection or given arguments")
+    public static void create(final CommandContext args, ICommandSender sender, IStructureAPI structureAPI) throws Exception {
+        if (args.argsLength() == 0) { // Create from selection
+            IPlayer plySender = (IPlayer) sender;
+            Player player = SettlerCraft.getInstance().getPlayer(plySender.getUniqueId());
+
+        }
+    }
 }

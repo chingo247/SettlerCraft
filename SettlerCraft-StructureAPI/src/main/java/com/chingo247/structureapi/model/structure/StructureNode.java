@@ -6,6 +6,7 @@
 package com.chingo247.structureapi.model.structure;
 
 import com.chingo247.settlercraft.core.Direction;
+import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.settlercraft.core.persistence.neo4j.NodeHelper;
 import com.chingo247.structureapi.model.RelTypes;
 import com.chingo247.structureapi.model.owner.OwnerDomain;
@@ -279,9 +280,13 @@ public class StructureNode extends AStructure {
 
     @Override
     public final StructureWorld getWorld() {
-        Relationship rel = underlyingNode.getSingleRelationship(RelTypes.WITHIN, org.neo4j.graphdb.Direction.OUTGOING);
-        Node node = rel.getOtherNode(underlyingNode);
-        return new StructureWorld(node);
+        for(Relationship rel : underlyingNode.getRelationships(RelTypes.WITHIN, org.neo4j.graphdb.Direction.OUTGOING)) {
+            if(rel.getOtherNode(underlyingNode).hasLabel(WorldNode.label())) {
+                Node node = rel.getOtherNode(underlyingNode);
+                return new StructureWorld(node);
+            }
+        }
+        return null;
     }
 
     @Override
@@ -309,75 +314,6 @@ public class StructureNode extends AStructure {
         }
         return null;
     }
-
-//    public Ownership findOwnership(UUID possibleOwner) {
-//        for (Relationship rel : underlyingNode.getRelationships(DynamicRelationshipType.withName(Relations.RELATION_OWNED_BY), org.neo4j.graphdb.Direction.OUTGOING)) {
-//            Settler ownerNode = new Settler(rel.getOtherNode(underlyingNode));
-//            if (ownerNode.getUniqueIndentifier().equals(possibleOwner)) {
-//                return new Ownership(ownerNode, rel);
-//            }
-//        }
-//        return null;
-//    }
-//
-//    public boolean addOwner(IBaseSettler node, OwnerType type) {
-//        if (isOwner(node.getUniqueIndentifier())) {
-//            return false;
-//        }
-//        Relationship relationship = underlyingNode.createRelationshipTo(node.getNode(), DynamicRelationshipType.withName(Relations.RELATION_OWNED_BY));
-//        relationship.setProperty("Type", type.getTypeId());
-//        return true;
-//    }
-//
-//    public boolean isOwner(UUID possibleOwner) {
-//        return findOwnership(possibleOwner) != null;
-//    }
-//
-//    public boolean isOwner(UUID possibleOwner, OwnerType type) {
-//        Ownership ownership = findOwnership(possibleOwner);
-//        if (ownership == null) {
-//            return false;
-//        }
-//        return ownership.getOwnerType() == type;
-//    }
-//
-//    public boolean removeOwner(UUID owner) {
-//        Ownership ownership = findOwnership(owner);
-//        if (ownership != null) {
-//            ownership.getRelation().delete();
-//            return true;
-//        }
-//        return false;
-//    }
-
-//    public List<Settler> getOwners() {
-//        List<Settler> owners = Lists.newArrayList();
-//        for (Relationship rel : underlyingNode.getRelationships(DynamicRelationshipType.withName(StructureRelations.RELATION_OWNED_BY), org.neo4j.graphdb.Direction.OUTGOING)) {
-//            if (rel.hasProperty("Type")) {
-//                Integer typeProp = (Integer) rel.getProperty("Type");
-//                OwnerType type = OwnerType.match(typeProp);
-//                Settler ownerNode = new Settler(rel.getOtherNode(underlyingNode));
-//                owners.add(ownerNode);
-//            }
-//        }
-//        return owners;
-//    }
-
-    
-
-//    public List<Ownership> getOwnerships() {
-//        List<Ownership> owners = Lists.newArrayList();
-//        for (Relationship rel : underlyingNode.getRelationships(DynamicRelationshipType.withName(StructureRelations.RELATION_OWNED_BY), org.neo4j.graphdb.Direction.OUTGOING)) {
-//            if (rel.hasProperty("Type")) {
-//                Integer typeId = (Integer) rel.getProperty("Type");
-//                OwnerType type = OwnerType.match(typeId);
-//
-//                owners.add(new Ownership(this, new Settler(rel.getOtherNode(underlyingNode)), rel));
-//
-//            }
-//        }
-//        return owners;
-//    }
 
     public List<StructureNode> getSubstructures() {
         Iterable<Relationship> relationships = underlyingNode.getRelationships(RelTypes.SUBSTRUCTURE_OF, org.neo4j.graphdb.Direction.INCOMING);

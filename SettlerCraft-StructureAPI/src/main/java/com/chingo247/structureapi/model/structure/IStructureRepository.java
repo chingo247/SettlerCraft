@@ -40,6 +40,8 @@ public interface IStructureRepository {
     
     Collection<StructureNode> findStructuresWithin(UUID worldUUID, CuboidRegion region, int limit);
     
+    Collection<StructureNode> findRootStructuresWithin(UUID worldUUID, CuboidRegion region, int limit);
+    
     /**
      * Finds the smallest structure on point. As structures may have substructures, the smallest structure on a point is considered a 'leaf' structure.
      * This method is used to check if a new structure is qualified as substructure, as substructures must fit completely within their parent or placed completely outside.

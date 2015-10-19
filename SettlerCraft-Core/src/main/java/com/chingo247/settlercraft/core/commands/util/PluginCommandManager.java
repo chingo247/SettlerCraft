@@ -45,15 +45,13 @@ import java.util.logging.Logger;
 public class PluginCommandManager extends CommandsManager<ICommandSender> {
 
     private static final UUID CONSOLE_UUID = UUID.randomUUID();
-    private Map<String, CommandExtras> extra;
-    private KeyPool<UUID> commandPool;
-    private APlatform platform;
-    private IColors colors;
+    private final Map<String, CommandExtras> extra;
+    private final KeyPool<UUID> commandPool;
+    private final IColors colors;
 
     public PluginCommandManager(ExecutorService es, APlatform platform) {
         this.commandPool = new KeyPool<>(es);
         this.extra = Maps.newHashMap();
-        this.platform = platform;
         this.colors = platform.getChatColors();
     }
 

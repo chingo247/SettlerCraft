@@ -14,25 +14,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.core.exception;
+package com.chingo247.structureapi.event.zone;
+
+import com.chingo247.structureapi.model.owner.OwnerType;
+import com.chingo247.structureapi.model.zone.IConstructionZone;
+import java.util.UUID;
 
 /**
- * Thrown when a command was not successfully executed
+ *
  * @author Chingo
  */
-public class CommandException extends Exception {
+public class ConstructionZoneRemoveOwnerEvent extends ConstructionZoneEvent {
     
-    private final String[] playerMessage;
+    private UUID player;
+    private OwnerType ownerType;
 
-    public CommandException(String... message) {
-        playerMessage = message;
+    public ConstructionZoneRemoveOwnerEvent(IConstructionZone zone, UUID player, OwnerType ownerType) {
+        super(zone);
+        
+        this.player = player;
+        this.ownerType = ownerType;
     }
 
-    public String[] getPlayerErrorMessage() {
-        return playerMessage;
+    public OwnerType getOwnerType() {
+        return ownerType;
     }
-    
-    
-    
+
+    public UUID getPlayer() {
+        return player;
+    }
     
 }

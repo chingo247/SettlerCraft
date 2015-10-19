@@ -44,6 +44,7 @@ public class Permissions {
     public static final String SETTLER_ME = PREFIX + "settler.me.info";
     
     public static final String CONSTRUCTIONZONE_CREATE = PREFIX + "constructionzone.create";
+    public static final String CONSTRUCTIONZONE_DELETE = PREFIX + "constructionzone.delete";
     
     
     

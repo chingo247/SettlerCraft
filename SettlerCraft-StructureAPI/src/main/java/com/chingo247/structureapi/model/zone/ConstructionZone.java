@@ -16,12 +16,18 @@
  */
 package com.chingo247.structureapi.model.zone;
 
+import com.chingo247.settlercraft.core.SettlerCraft;
+import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.settlercraft.core.persistence.neo4j.NodeHelper;
+import com.chingo247.structureapi.model.RelTypes;
 import com.chingo247.structureapi.model.owner.OwnerDomain;
 import com.chingo247.structureapi.model.plot.Plot;
+import com.chingo247.structureapi.model.world.StructureWorld;
+import com.chingo247.xplatform.core.IWorld;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 
 /**
  *
@@ -33,8 +39,8 @@ public class ConstructionZone extends Plot implements IConstructionZone {
     public static final String ACCESS_TYPE_PROPERTY = "ACCESS_TYPE"; // 
     public static final String ID_PROPERTY = "ID";
     private OwnerDomain ownerDomain;
-    
-    
+    private IWorld world;
+    private Long id;
     
     public static Label label() {
         return DynamicLabel.label(LABEL);
@@ -49,6 +55,7 @@ public class ConstructionZone extends Plot implements IConstructionZone {
         return ownerDomain;
     }
     
+    @Override
     public Long getId() {
         return NodeHelper.getLong(underlyingNode, ID_PROPERTY, null);
     }
@@ -66,6 +73,23 @@ public class ConstructionZone extends Plot implements IConstructionZone {
     @Override
     public void setAccessType(AccessType accessType) {
         underlyingNode.setProperty(ACCESS_TYPE_PROPERTY, accessType.getTypeId());
+    }
+
+    @Override
+    public IWorld getWorld() {
+        if(world == null) {
+            for(Relationship rel : underlyingNode.getRelationships(RelTypes.WITHIN, org.neo4j.graphdb.Direction.OUTGOING)) {
+                if(rel.getOtherNode(underlyingNode).hasLabel(WorldNode.label())) {
+                    Node node = rel.getOtherNode(underlyingNode);
+                    StructureWorld w = new StructureWorld(node);
+                    world = SettlerCraft.getInstance().getPlatform().getServer().getWorld(w.getUUID());
+                    return world;
+                }
+            }
+            return null;
+        } else {
+            return world;
+        }
     }
     
     

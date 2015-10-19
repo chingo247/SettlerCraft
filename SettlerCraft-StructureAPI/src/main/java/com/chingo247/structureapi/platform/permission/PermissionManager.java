@@ -64,6 +64,7 @@ public class PermissionManager {
     
     public enum Perms {
 //        CONTENT_GENERATE_PLANS(new Permission(Permissions.CONTENT_GENERATE_PLANS, PermissionDefault.OP, "Allows to generate plans from schematics on the server - is CONSOLE only")),
+//        CONTENT_GENERATE_PLANS(new Permission(Permissions.CONTENT_GENERATE_PLANS, PermissionDefault.OP, "Allows to generate plans from schematics on the server - is CONSOLE only")),
         CONTENT_RELOAD_PLANS(new Permission(Permissions.CONTENT_RELOAD_PLANS, PermissionDefault.OP, "Allows a player to reload plans on the server")),
         CONTENT_ROTATE_PLACEMENT(new Permission(Permissions.CONTENT_ROTATE_PLACEMENT, PermissionDefault.OP, "Allows a player to rotate the original schematic for all future placing")),
         
@@ -77,7 +78,8 @@ public class PermissionManager {
         SETTLER_STRUCTURE_LIST(new Permission(Permissions.STRUCTURE_LIST, PermissionDefault.TRUE, "Allows the player to show a list structures he or another player owns")),
         SETTLER_STRUCTURE_LOCATION(new Permission(Permissions.STRUCTURE_LOCATION, PermissionDefault.TRUE, "Allows the player to show his relative position to a structure")),
         
-        SETTLER_CONSTRUCTION_ZONE_PLACE(new Permission(Permissions.CONSTRUCTIONZONE_CREATE, PermissionDefault.OP, "Allows a player to create construction zones"));
+        SETTLER_CONSTRUCTION_ZONE_CREATE(new Permission(Permissions.CONSTRUCTIONZONE_CREATE, PermissionDefault.OP, "Allows a player to create construction zones")),
+        SETTLER_CONSTRUCTION_ZONE_DELETE(new Permission(Permissions.CONSTRUCTIONZONE_DELETE, PermissionDefault.OP, "Allows a player to delete construction zones"));
         private Permission permission;
 
         private Perms(Permission permission) {
