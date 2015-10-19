@@ -55,7 +55,6 @@ import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.blocks.ItemType;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldedit.world.World;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -118,6 +117,7 @@ public class PlayerPlaceStructureHandler {
             player.printError("You have no permission to place structures");
             return;
         }
+        
 
         LocalSession session = WorldEdit.getInstance().getSession(player);
 
@@ -327,10 +327,15 @@ public class PlayerPlaceStructureHandler {
         Vector max = PlacementUtil.getPoint2Right(min, direction, plan.getPlacement().getCuboidRegion().getMaximumPoint());
         
         CuboidRegion affectedArea = new CuboidRegion(min, max);
+        
+        if(!world.getConfig().allowsStructures()) {
+            player.printError("This world does not allow structures");
+            return new PlacingResult(false);
+        }
 
         try {
-            world.getStructureHandler().checkWorldRestrictions(world, affectedArea);
-            world.getStructureHandler().checkStructureRestrictions(player, world, affectedArea);
+            world.getStructureHandler().checkWorldRestrictions(affectedArea);
+            world.getStructureHandler().checkStructureRestrictions(player, affectedArea);
         } catch (RestrictionException ex) {
             player.printError(ex.getMessage());
             return new PlacingResult(false);
@@ -344,7 +349,7 @@ public class PlayerPlaceStructureHandler {
         try {
             tx = graph.beginTx();
 
-            world.getStructureHandler().checkStructurePlacingRestrictions(player, world, affectedArea, min);
+            world.getStructureHandler().checkStructurePlacingRestrictions(player, affectedArea, min);
 
             StructureNode structureNode = structureRepository.findStructureOnPosition(iw.getUUID(), pos1);
             if (structureNode != null) {

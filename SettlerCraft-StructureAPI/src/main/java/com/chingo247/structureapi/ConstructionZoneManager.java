@@ -47,7 +47,6 @@ import org.neo4j.graphdb.Transaction;
 public class ConstructionZoneManager extends AbstractPlotManager implements IConstructionZoneManager {
     
     private final GraphDatabaseService graph;
-    private final ConstructionWorld constructionWorld;
     private final Monitor monitor;
     private final IStructureRepository structureRepository;
     private final IStructureWorldRepository worldRepository;
@@ -55,8 +54,8 @@ public class ConstructionZoneManager extends AbstractPlotManager implements ICon
     private final IConstructionZoneRepository constructionZoneRepository;
 
     ConstructionZoneManager(ConstructionWorld constructionWorld, GraphDatabaseService graph) {
+        super(constructionWorld);
         this.graph = graph;
-        this.constructionWorld = constructionWorld;
         this.monitor = constructionWorld.getMonitor();
         this.structureRepository = new StructureRepository(graph);
         this.constructionZoneRepository = new ConstructionZoneRepository(graph);
@@ -67,22 +66,20 @@ public class ConstructionZoneManager extends AbstractPlotManager implements ICon
     
     @Override
     public IConstructionZone createZone(CuboidRegion cuboidRegion, IPlayer owner) throws RestrictionException {
-        
-        checkWorldRestrictions(constructionWorld, cuboidRegion);
-        
+        checkWorldRestrictions(cuboidRegion);
         Transaction tx = null;
         IConstructionZone zone = null;
         monitor.enter();
         try {
             tx = graph.beginTx();
-            checkConstructionZonePlacingRestrictions(constructionWorld, cuboidRegion);
+            checkConstructionZonePlacingRestrictions(cuboidRegion);
             zone = constructionZoneRepository.add(cuboidRegion);
             if(owner != null) {
                 ISettler settler = settlerRepository.findByUUID(owner.getUniqueId());
                 zone.getOwnerDomain().setOwnership(settler, OwnerType.MASTER);
             }
-            StructureWorld world = worldRepository.addOrGet(constructionWorld.getName(), constructionWorld.getUUID());
-            world.addZone(zone);
+            StructureWorld w = worldRepository.addOrGet(world.getName(), world.getUUID());
+            w.addZone(zone);
             AsyncEventManager.getInstance().post(new CreateConstructionZoneEvent(zone));
             tx.success();
         } catch (Exception ex) {
@@ -108,7 +105,7 @@ public class ConstructionZoneManager extends AbstractPlotManager implements ICon
      * @param region
      */
     @Override
-    public void checkConstructionZonePlacingRestrictions(ConstructionWorld world, CuboidRegion region) throws RestrictionException {
+    public void checkConstructionZonePlacingRestrictions(CuboidRegion region) throws RestrictionException {
         Collection<ConstructionZone> zones = constructionZoneRepository.findWithin(world.getUUID(), region, 1);
 
         if (!zones.isEmpty()) {

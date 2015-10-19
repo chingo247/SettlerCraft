@@ -26,9 +26,9 @@ import com.sk89q.worldedit.regions.CuboidRegion;
  */
 public interface IConstructionZoneManager {
     
-    void checkWorldRestrictions(ConstructionWorld world, CuboidRegion region) throws RestrictionException;
+    void checkWorldRestrictions(CuboidRegion region) throws RestrictionException;
     
-    void checkConstructionZonePlacingRestrictions(ConstructionWorld world, CuboidRegion region) throws RestrictionException;
+    void checkConstructionZonePlacingRestrictions(CuboidRegion region) throws RestrictionException;
     
     IConstructionZone createZone(CuboidRegion region, IPlayer player) throws RestrictionException ;
     

@@ -18,7 +18,6 @@ package com.chingo247.structureapi;
 
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.event.EventManager;
-import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.structureapi.event.StructureCreateEvent;
 import com.chingo247.structureapi.model.settler.Settler;
 import com.chingo247.structureapi.model.settler.SettlerRepositiory;
@@ -45,19 +44,15 @@ import com.chingo247.structureapi.util.PlacementUtil;
 import com.chingo247.structureapi.util.RegionUtil;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IWorld;
-import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import com.google.common.util.concurrent.Monitor;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -80,7 +75,6 @@ import org.neo4j.graphdb.Transaction;
  */
 public class StructureManager extends AbstractPlotManager implements IStructureManager {
 
-    private final ConstructionWorld world;
     private final IStructureAPI structureAPI;
     private final APlatform platform;
     private final StructureWorldRepository structureWorldRepository;
@@ -89,7 +83,7 @@ public class StructureManager extends AbstractPlotManager implements IStructureM
     private final SettlerRepositiory settlerRepository;
     private final GraphDatabaseService graph;
     private final Monitor monitor;
-    private final Set<StructureRestriction> restrictions;
+    
 
     /**
      * Constructor
@@ -97,62 +91,31 @@ public class StructureManager extends AbstractPlotManager implements IStructureM
      * @param world The world this StructureManager will 'Manage'
      */
     StructureManager(ConstructionWorld world, GraphDatabaseService graph) {
+        super(world);
         this.graph = graph;
         this.structureAPI = (StructureAPI) StructureAPI.getInstance();
-        this.world = world;
         this.platform = structureAPI.getPlatform();
         this.structureWorldRepository = new StructureWorldRepository(graph);
         this.structureRepository = new StructureRepository(graph);
         this.settlerRepository = new SettlerRepositiory(graph);
         this.constructionZoneRepository = new ConstructionZoneRepository(graph);
         this.monitor = world.getMonitor();
-        this.restrictions = Sets.newHashSet();
+        
     }
     
     @Override
-    public Set<StructureRestriction> getRegisteredRestrictions() {
-        return new HashSet<>(restrictions);
+    public void checkStructureRestrictions(CuboidRegion region) throws StructureRestrictionException {
+        checkStructureRestrictions(null, region);
     }
     
     @Override
-    public void addRestriction(StructureRestriction structureRestriction) {
-        synchronized (restrictions) {
-            this.restrictions.add(structureRestriction);
-        }
-    }
-
-    @Override
-    public void removeRestriction(StructureRestriction structureRestriction) {
-        synchronized (restrictions) {
-            this.restrictions.remove(structureRestriction);
-        }
+    public void checkStructureRestrictions(Player player, CuboidRegion region) throws StructureRestrictionException {
+        structureAPI.checkRestrictions(player, world, region);
     }
     
-    @Override
-    public void checkStructureRestrictions(Player player, ConstructionWorld world, CuboidRegion region) throws StructureRestrictionException {
-        checkStructureRestrictions(player, world.getWorldEditWorld(), region);
-    }
-
-    @Override
-    public void checkStructureRestrictions(ConstructionWorld world, CuboidRegion region) throws StructureRestrictionException {
-        checkStructureRestrictions(null, world, region);
-    }
     
     @Override
-    public void checkStructureRestrictions(Player player, World world, CuboidRegion region) throws StructureRestrictionException {
-        for (Iterator<StructureRestriction> iterator = restrictions.iterator(); iterator.hasNext();) {
-            StructureRestriction next = iterator.next();
-            next.evaluate(player, world, region);
-       }
-    }
-    
-    @Override
-    public void checkStructureRestrictions(World world, CuboidRegion region) throws StructureRestrictionException {
-        checkStructureRestrictions(null, world, region);
-    }
-    
-    @Override
-    public void checkStructurePlacingRestrictions(Player player, ConstructionWorld world, CuboidRegion region) throws StructureRestrictionException {
+    public void checkStructurePlacingRestrictions(Player player, CuboidRegion region) throws StructureRestrictionException {
         boolean allowsSubstructures = structureAPI.getConfig().allowsSubstructures();
         if(allowsSubstructures) {
             Collection<StructureNode> structures = structureRepository.findStructuresWithin(world.getUUID(), region, -1);
@@ -176,12 +139,12 @@ public class StructureManager extends AbstractPlotManager implements IStructureM
     }
 
     @Override
-    public void checkStructurePlacingRestrictions(ConstructionWorld world, CuboidRegion region) throws StructureRestrictionException {
-        checkStructurePlacingRestrictions(null, world, region);
+    public void checkStructurePlacingRestrictions(CuboidRegion region) throws StructureRestrictionException {
+        checkStructurePlacingRestrictions(null, region);
     }
 
     @Override
-    public void checkStructurePlacingRestrictions(Player player, ConstructionWorld world, CuboidRegion affectArea, Vector placingPoint) throws RestrictionException {
+    public void checkStructurePlacingRestrictions(Player player, CuboidRegion affectArea, Vector placingPoint) throws RestrictionException {
         boolean allowsSubstructures = structureAPI.getConfig().allowsSubstructures();
         ConfigProvider config = world.getConfig();
         
@@ -220,14 +183,14 @@ public class StructureManager extends AbstractPlotManager implements IStructureM
             
             
         } else {
-            checkStructureRestrictions(world, affectArea);
+            checkStructureRestrictions(affectArea);
         }
 
     }
 
     @Override
-    public void checkStructurePlacingRestrictions(ConstructionWorld world, CuboidRegion affectArea, Vector placingPoint) throws RestrictionException {
-        checkStructurePlacingRestrictions(null, world, affectArea, placingPoint);
+    public void checkStructurePlacingRestrictions(CuboidRegion affectArea, Vector placingPoint) throws RestrictionException {
+        checkStructurePlacingRestrictions(null, affectArea, placingPoint);
     }
 
     private void checkStructureConstructionZoneRestrictions(ConstructionWorld world, CuboidRegion affectArea, Player player) throws RestrictionException {
@@ -377,7 +340,7 @@ public class StructureManager extends AbstractPlotManager implements IStructureM
             }
             structureDirectory.mkdirs();
             try {
-                moveResources(worldNode, structure, structurePlan);
+                moveResources(structure, structurePlan);
             } catch (IOException ex) {
                 structureDirectory.delete();
                 Logger.getLogger(StructureManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -403,7 +366,7 @@ public class StructureManager extends AbstractPlotManager implements IStructureM
     }
     
     private Structure create(StructureWorld structureWorld, Structure parent, Placement placement, String name, Vector position, Direction direction, Player owner) throws StructureException {
-        world.checkWorldRestrictions(placement, world.getWorldEditWorld(), position, direction);
+        world.checkWorldRestrictions(placement, world.asWorldEditWorld(), position, direction);
 
         Vector min = position;
         Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getCuboidRegion().getMaximumPoint());
@@ -456,7 +419,7 @@ public class StructureManager extends AbstractPlotManager implements IStructureM
 
     }
 
-    private void moveResources(WorldNode worldNode, Structure structure, IStructurePlan plan) throws IOException {
+    private void moveResources(Structure structure, IStructurePlan plan) throws IOException {
         // Give this structure a directory!
         File structureDir = structure.getDirectory();
         structureDir.mkdirs();

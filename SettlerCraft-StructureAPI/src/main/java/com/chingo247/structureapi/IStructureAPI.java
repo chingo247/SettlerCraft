@@ -169,6 +169,26 @@ public interface IStructureAPI {
      */
     CategoryMenu createPlanMenu();
 
+
+    /**
+     * Checks all StructureRestrictions. Each restriction determines if
+     * something is allowed to be placed in a certain area by a certain player.
+     *
+     * @param player The player, may be null
+     * @param world The world
+     * @param region The region
+     * @throws
+     * com.chingo247.structureapi.exception.StructureRestrictionException Thrown
+     * when a restriction was violated
+     */
+    void checkRestrictions(Player player, World world, CuboidRegion region) throws StructureRestrictionException;
+
+    void checkRestrictions(Player player, ConstructionWorld constructionWorld, CuboidRegion region) throws StructureRestrictionException;
+
+    void addRestriction(StructureRestriction structureRestriction);
+    
+    void removeRestriction(StructureRestriction structureRestriction);
+    
     /**
      * Loads a schematic file
      *

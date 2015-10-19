@@ -56,6 +56,7 @@ import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IWorld;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import com.sk89q.worldedit.entity.Player;
@@ -71,6 +72,7 @@ import java.util.logging.Logger;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import java.lang.reflect.Field;
 import java.util.HashSet;
+import java.util.Set;
 import org.dom4j.DocumentException;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -89,7 +91,7 @@ public class StructureAPI implements IStructureAPI {
     public static final String STRUCTURE_PLAN_FILE_NAME = "plan.xml";
     public static final String PLUGIN_NAME = "SettlerCraft";
     public static final String PLANS_DIRECTORY = "plans";
-
+    private final Set<StructureRestriction> restrictions;
     private final APlatform platform;
     private IPlugin plugin;
     private IConfigProvider config;
@@ -126,7 +128,7 @@ public class StructureAPI implements IStructureAPI {
         this.demolitionTaskAssigner = new DefaultDemolitionTaskAssigner();
         this.buildTaskAssigner = new DefaultBuildTaskAssigner();
         this.COLORS = platform.getChatColors();
-       
+        this.restrictions = Sets.newHashSet();
         this.logLevel = Level.SEVERE;
        
         EventManager.getInstance().getEventBus().register(new StructurePlanManagerHandler());
@@ -150,6 +152,20 @@ public class StructureAPI implements IStructureAPI {
     @Override
     public IBackupAPI getBackupAPI() {
         return backupAPI;
+    }
+    
+    @Override
+    public void addRestriction(StructureRestriction structureRestriction) {
+        synchronized (restrictions) {
+            this.restrictions.add(structureRestriction);
+        }
+    }
+
+    @Override
+    public void removeRestriction(StructureRestriction structureRestriction) {
+        synchronized (restrictions) {
+            this.restrictions.remove(structureRestriction);
+        }
     }
 
     /**
@@ -227,6 +243,22 @@ public class StructureAPI implements IStructureAPI {
 
         reload();
     }
+
+     
+    @Override
+    public void checkRestrictions(Player player, World world, CuboidRegion affectedArea) throws StructureRestrictionException {
+        
+    }
+    
+    @Override
+    public void checkRestrictions(Player player, ConstructionWorld world, CuboidRegion region) throws StructureRestrictionException {
+        checkRestrictions(player, world.asWorldEditWorld(), region);
+    }
+    
+    
+    
+
+    
 
     private void resetStates() {
         try (Transaction tx = graph.beginTx()) {

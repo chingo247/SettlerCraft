@@ -47,8 +47,6 @@ public class ConstructionWorld implements IWorld {
 
     private IWorld world;
     private World worldEditWorld;
-    private PlotRepository plotRepository;
-    private IStructureWorldRepository worldRepository;
     private Monitor monitor;
     private IStructureManager structureHandler;
     private IConstructionZoneManager constructionZoneHandler;
@@ -58,8 +56,6 @@ public class ConstructionWorld implements IWorld {
         GraphDatabaseService graph = SettlerCraft.getInstance().getNeo4j();
         this.worldEditWorld = SettlerCraft.getInstance().getWorld(w.getUUID());
         this.world = w;
-        this.plotRepository = new PlotRepository(graph);
-        this.worldRepository = new StructureWorldRepository(graph);
 
         File configFile = new File(structureAPI.getWorldDirectory(w.getName()), "config.yml");
         try {
@@ -87,7 +83,7 @@ public class ConstructionWorld implements IWorld {
         return config;
     }
 
-    World getWorldEditWorld() {
+    public World asWorldEditWorld() {
         return worldEditWorld;
     }
     

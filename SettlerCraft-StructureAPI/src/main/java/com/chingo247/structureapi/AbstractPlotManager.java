@@ -26,12 +26,18 @@ import com.sk89q.worldedit.regions.CuboidRegion;
  */
 public abstract class AbstractPlotManager {
     
+    protected final ConstructionWorld world;
+
+    public AbstractPlotManager(ConstructionWorld world) {
+        this.world = world;
+    }
+    
     /**
      * Checks world restrictions (e.g if the given region is between y=1 and the max build height of the world)
      * @param world The world
      * @param region The affected region
      */
-    public void checkWorldRestrictions(ConstructionWorld world, CuboidRegion region) throws RestrictionException {
+    public void checkWorldRestrictions(CuboidRegion region) throws RestrictionException {
 
         // Below the world?s
         if (region.getMinimumPoint().getBlockY() <= 1) {
