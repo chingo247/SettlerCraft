@@ -14,13 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction.asyncworldedit;
+package com.chingo247.structureapi.construction.awe;
 
-import com.chingo247.structureapi.construction.options.BuildOptions;
 import com.chingo247.structureapi.plan.placement.Placement;
+import com.chingo247.structureapi.construction.options.Options;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
+import java.util.UUID;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.utils.WaitFor;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
@@ -30,10 +31,10 @@ import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
  *
  * @author Chingo
  */
-public class AsyncPlacement extends AbstractAsyncPlacement<BuildOptions, Placement> {
+class AWEPlacement<T extends Options> extends AbstractAWEPlacement<T, Placement> {
 
-    private final AsyncPlacementCallback callback;
-    private final long structureId;
+    private final IAWECallback callback;
+    private UUID taskUUID;
     
     /**
      * Constructor.
@@ -41,45 +42,41 @@ public class AsyncPlacement extends AbstractAsyncPlacement<BuildOptions, Placeme
      * @param playerEntry The PlayerEntry
      * @param placement The placement
      * @param callback
-     * @param structureId
      */
-    public AsyncPlacement(PlayerEntry playerEntry, Placement placement, AsyncPlacementCallback callback, Long structureId) {
+    AWEPlacement(PlayerEntry playerEntry, Placement placement, UUID taskUUID, IAWECallback callback) {
         super(playerEntry, placement);
         this.callback = callback;
-        this.structureId = structureId == null ? -1 : structureId;
+        this.taskUUID = taskUUID;
     }
     
-    public AsyncPlacement(PlayerEntry playerEntry, Placement placement) {
-        this(playerEntry, placement, null, null);
-    }
-    
+  
     
 
     @Override
-    public void place(EditSession editSession, final Vector pos, final BuildOptions options) {
+    public void place(EditSession editSession, final Vector pos, final T options) {
 
         final int jobId = getJobId();
         final EditSession session;
-        final SCJobEntry job;
+        final AWEJobEntry job;
         final WaitFor wait;
 
         if (editSession instanceof AsyncEditSession) {
             AsyncEditSession aSession = (AsyncEditSession) editSession;
             wait = aSession.getWait();
             session = new CancelabeEditSession(aSession, aSession.getMask(), jobId);
-            job = new SCJobEntry(playerEntry, (CancelabeEditSession) session, jobId, "place", structureId);
+            job = new AWEJobEntry(playerEntry, (CancelabeEditSession) session, jobId, "place", taskUUID, callback);
         } else {
             session = editSession;
             wait = null;
-            job = new SCJobEntry(playerEntry, jobId, "place", structureId);
+            job = new AWEJobEntry(playerEntry, jobId, "place", taskUUID, callback);
         }
 
         if(callback != null) {
-            callback.onJobAdded(jobId);
+            callback.onJobAdded(job);
         }
         
-        scheduler.runAsync(new AsyncPlacementTask(placement, session, playerEntry, null, placer, job) {
-
+        scheduler.runAsync(new AWESilentAsyncTask(placement, editSession, playerEntry, null, placer, job, callback){
+            
             @Override
             public void task(Placement placement) throws MaxChangedBlocksException {
                 if (wait != null) {
@@ -88,6 +85,8 @@ public class AsyncPlacement extends AbstractAsyncPlacement<BuildOptions, Placeme
                 placement.place(session, pos, options);
             }
         });
+        
+       
 
     }
 

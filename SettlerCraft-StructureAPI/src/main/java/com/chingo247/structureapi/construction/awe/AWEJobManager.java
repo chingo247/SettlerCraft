@@ -14,18 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction.asyncworldedit;
+package com.chingo247.structureapi.construction.awe;
 
-import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
-import com.chingo247.structureapi.construction.event.StructureTaskCancelledEvent;
-import com.chingo247.structureapi.construction.event.StructureTaskCompleteEvent;
-import com.chingo247.structureapi.construction.ConstructionException;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerListener;
@@ -35,45 +30,44 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
  *
  * @author Chingo
  */
-class AWEJobManager {
+public class AWEJobManager {
 
+    private static final Logger LOG = Logger.getLogger(AWEJobManager.class.getSimpleName());
     private static AWEJobManager instance;
-
     private Map<UUID, AWEPlacementTask> tasks;
-    private Lock lock;
+    private Lock jobLock;
 
+    /**
+     * Private Constructor as this is a singleton
+     */
     private AWEJobManager() {
         this.tasks = Maps.newHashMap();
-        this.lock = new ReentrantLock();
+        this.jobLock = new ReentrantLock();
 
         AsyncWorldEditMain.getInstance().getBlockPlacer().addListener(new IBlockPlacerListener() {
 
             @Override
-            public void jobAdded(JobEntry je) {
-                // DO NOTHING
-            }
+            public void jobAdded(JobEntry je) { /* DO NOTHING HERE! */ }
 
             @Override
             public void jobRemoved(JobEntry je) {
+                
                 if (je instanceof AWEJobEntry) {
-
-                    lock.lock();
+                    AWEJobEntry jobEntry = (AWEJobEntry) je;
+                    jobLock.lock();
                     try {
-                        // I FIRED THIS JOB!
-                        AWEJobEntry jobEntry = (AWEJobEntry) je;
                         AWEPlacementTask task = tasks.get(jobEntry.getTaskUUID());
                         if (task != null) {
                             if (task.isChecked()) {
                                 return;
                             }
                             task.setChecked(true);
-                        }
-                        if (task != null) {
                             task.finish();
+                            // Remove this AWE Task
                             tasks.remove(task.getUUID());
                         }
                     } finally {
-                        lock.unlock();
+                        jobLock.unlock();
                     }
 
                 }
@@ -90,21 +84,29 @@ class AWEJobManager {
         return instance;
     }
 
+    /**
+     * Register a new AWE Placement task to track
+     * @param task The task
+     */
     void register(AWEPlacementTask task) {
-        lock.lock();
+        jobLock.lock();
         try {
             this.tasks.put(task.getUUID(), task);
         } finally {
-            lock.unlock();
+            jobLock.unlock();
         }
     }
 
-    void remove(AWEPlacementTask task) {
-        lock.lock();
+    /**
+     * Unregisters an AWE Placement task
+     * @param task 
+     */
+    void unregister(AWEPlacementTask task) {
+        jobLock.lock();
         try {
             tasks.remove(task.getUUID());
         } finally {
-            lock.unlock();
+            jobLock.unlock();
         }
 
     }

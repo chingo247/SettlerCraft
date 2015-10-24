@@ -16,8 +16,7 @@
  */
 package com.chingo247.structureapi.construction;
 
-import com.chingo247.structureapi.construction.ConstructionEntry;
-import com.chingo247.structureapi.construction.ITaskAssigner;
+import com.chingo247.structureapi.StructureException;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.construction.options.Options;
 import com.sk89q.worldedit.EditSession;
@@ -37,7 +36,7 @@ public class DefaultDemolitionTaskAssigner implements ITaskAssigner {
     }
 
     @Override
-    public void assignTasks(EditSession session, UUID player, ConstructionEntry entry, Options options) throws ConstructionException, IOException {
+    public void assignTasks(EditSession session, UUID player, ConstructionEntry entry, Options options) throws StructureException, IOException {
         Structure structure = entry.getStructure();
         if(taskfactory.hasBackup(structure, "restore.snapshot")) {
             System.out.println("[DemolitionTaskAssigner]: HAS BACKUP");

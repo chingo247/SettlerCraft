@@ -37,7 +37,7 @@ public class Settler extends BaseSettlerNode implements ISettler {
     public List<StructureNode> getStructures(int skip, int limit) {
         List<StructureNode> structures = Lists.newArrayList();
         Map<String, Object> params = Maps.newHashMap();
-        params.put("ownerId", getUniqueIndentifier().toString());
+        params.put("ownerId", getUniqueId().toString());
         if (skip > 0) {
             params.put("skip", skip);
         }

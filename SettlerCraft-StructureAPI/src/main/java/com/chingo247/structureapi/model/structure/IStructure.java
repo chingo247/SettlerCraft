@@ -17,22 +17,18 @@
 package com.chingo247.structureapi.model.structure;
 
 import com.chingo247.settlercraft.core.Direction;
-import com.chingo247.settlercraft.core.model.interfaces.IWorld;
-import com.chingo247.structureapi.model.structure.ConstructionStatus;
+import com.chingo247.structureapi.StructureException;
+import com.chingo247.structureapi.model.plot.IPlot;
 import com.chingo247.structureapi.plan.IStructurePlan;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.regions.CuboidRegion;
-import org.neo4j.graphdb.Node;
 
 /**
  *
  * @author Chingo
  */
-public interface IStructure {
+public interface IStructure extends IPlot {
     
     public Long getId();
-    
-    public Node getNode();
     
     public String getName();
     
@@ -40,14 +36,19 @@ public interface IStructure {
     
     public double getPrice();
     
-    public CuboidRegion getCuboidRegion();
-    
     public Direction getDirection();
     
+    /**
+     * The construction status
+     * @return 
+     */
     public ConstructionStatus getStatus();
     
-    public <T extends IWorld> T getWorld();
-    
-    public <T extends IStructurePlan> T getStructurePlan();
+    /**
+     * Gets the structure plan
+     * @return The structure plan
+     * @throws StructureException if structure doesnt have a plan 
+     */
+    public IStructurePlan getStructurePlan() throws StructureException;
     
 }

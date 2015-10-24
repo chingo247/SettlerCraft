@@ -14,16 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.world;
+package com.chingo247.structureapi.construction.awe;
+
+import org.primesoft.asyncworldedit.api.blockPlacer.IJobEntryListener;
+import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 
 /**
  *
  * @author Chingo
  */
-public class WorldConfigException extends Exception {
+public abstract class AWEJobListener implements IJobEntryListener {
 
-    public WorldConfigException(String message) {
-        super(message);
+    @Override
+    public void jobStateChanged(JobEntry je) {
+        if(je instanceof AWEJobEntry) {
+            jobStateChanged((AWEJobEntry) je);
+        }
     }
+    
+    public abstract void jobStateChanged(AWEJobEntry jobEntry);
+
+    
+    
     
 }

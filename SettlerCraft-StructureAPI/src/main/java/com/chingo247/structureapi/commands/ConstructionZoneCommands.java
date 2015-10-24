@@ -25,6 +25,7 @@ import com.chingo247.settlercraft.core.model.interfaces.IBaseSettler;
 import com.chingo247.structureapi.ConstructionWorld;
 import com.chingo247.structureapi.IConstructionZoneManager;
 import com.chingo247.structureapi.IStructureAPI;
+import com.chingo247.structureapi.PlotException;
 import com.chingo247.structureapi.RestrictionException;
 import com.chingo247.structureapi.event.zone.ConstructionZoneRemoveOwnerEvent;
 import com.chingo247.structureapi.event.zone.ConstructionZoneUpdateOwnerEvent;
@@ -35,7 +36,7 @@ import com.chingo247.structureapi.model.owner.OwnerType;
 import com.chingo247.structureapi.model.settler.ISettler;
 import com.chingo247.structureapi.model.settler.ISettlerRepository;
 import com.chingo247.structureapi.model.settler.SettlerRepositiory;
-import com.chingo247.structureapi.model.zone.ConstructionZone;
+import com.chingo247.structureapi.model.zone.ConstructionZoneNode;
 import com.chingo247.structureapi.model.zone.ConstructionZoneRepository;
 import com.chingo247.structureapi.model.zone.IConstructionZone;
 import com.chingo247.structureapi.model.zone.IConstructionZoneRepository;
@@ -62,6 +63,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang.math.NumberUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -127,15 +130,17 @@ public class ConstructionZoneCommands {
         }
         
         
-        IConstructionZoneManager zoneCreator = w.getConstructionZoneHandler();
+        IConstructionZoneManager zoneManager = w.getConstructionZoneManager();
         try {
-            IConstructionZone zone = zoneCreator.createZone(region, player);
+            IConstructionZone zone = zoneManager.create(region, player.getUniqueId());
             try(Transaction tx = SettlerCraft.getInstance().getNeo4j().beginTx()) {
                 sender.sendMessage("Succesfully created zone #" + zone.getId());
                 tx.success();
             }
         } catch (RestrictionException ex) {
             throw new CommandException(ex);
+        } catch (PlotException ex) {
+            Logger.getLogger(ConstructionZoneCommands.class.getName()).log(Level.SEVERE, null, ex);
         }
         
     }
@@ -281,7 +286,7 @@ public class ConstructionZoneCommands {
         ownerships(sender, args, structureAPI, OwnerType.MEMBER);
     }
     
-    private static ConstructionZone getConstructionZone(CommandContext args, Transaction activeTransaction) throws CommandException {
+    private static ConstructionZoneNode getConstructionZone(CommandContext args, Transaction activeTransaction) throws CommandException {
         final GraphDatabaseService graph = SettlerCraft.getInstance().getNeo4j();
         final IConstructionZoneRepository constructionRepository = new ConstructionZoneRepository(graph);
         Long zoneId = null;
@@ -291,7 +296,7 @@ public class ConstructionZoneCommands {
             throw new CommandException("Expected a number but got '" + zoneIdArg + "'");
         }
         zoneId = Long.parseLong(zoneIdArg);
-        ConstructionZone zone = constructionRepository.findById(zoneId);
+        ConstructionZoneNode zone = constructionRepository.findById(zoneId);
         if (zone == null) {
             activeTransaction.success();
             throw new CommandException("Couldn't find structure for id #" + zoneId);
@@ -306,7 +311,7 @@ public class ConstructionZoneCommands {
         TreeSet<String> ownerships = Sets.newTreeSet(ALPHABETICAL_ORDER);
         Long zoneId;
         try (Transaction tx = graph.beginTx()) {
-            ConstructionZone zone = getConstructionZone(args, tx);
+            ConstructionZoneNode zone = getConstructionZone(args, tx);
             zoneId = zone.getId();
             for (ISettler member : zone.getOwnerDomain().getOwners(type)) {
                 ownerships.add(member.getName());
@@ -373,7 +378,7 @@ public class ConstructionZoneCommands {
         }
 
         try (Transaction tx = graph.beginTx()) {
-            ConstructionZone zone = getConstructionZone(args, tx);
+            ConstructionZoneNode zone = getConstructionZone(args, tx);
             if (!isOP(sender)) {
                 IPlayer player = (IPlayer) sender;
                 IOwnership ownership = zone.getOwnerDomain().getOwnership(player.getUniqueId());
@@ -427,7 +432,7 @@ public class ConstructionZoneCommands {
                         tx.success();
                         throw new CommandException("Couldn't find a player for id'" + playerArg + "'");
                     }
-                    ply = structureAPI.getPlatform().getPlayer(sn.getUniqueIndentifier());
+                    ply = structureAPI.getPlatform().getPlayer(sn.getUniqueId());
 
                 } catch (NumberFormatException nfe) {
                     tx.success();
@@ -441,7 +446,7 @@ public class ConstructionZoneCommands {
             if (method.equalsIgnoreCase("add")) {
                 IBaseSettler settler = settlerRepository.findByUUID(ply.getUniqueId());
                 OwnerDomain ownerDomain = zone.getOwnerDomain();
-                IOwnership ownershipToAdd = ownerDomain.getOwnership(settler.getUniqueIndentifier());
+                IOwnership ownershipToAdd = ownerDomain.getOwnership(settler.getUniqueId());
 
                 if (ownershipToAdd == null) {
                     ownerDomain.setOwnership(settler, type);

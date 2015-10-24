@@ -14,18 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction.asyncworldedit;
+package com.chingo247.structureapi;
 
 /**
  *
  * @author Chingo
  */
-public interface IAWECallback {
+public class PlotException extends StructureAPIException {
+
+    public PlotException(String message) {
+        super(message);
+    }
     
-    void onJobAdded(AWEJobEntry task);
     
-    void onCancelled();
-    
-    void onStarted();
     
 }

@@ -6,9 +6,9 @@
 package com.chingo247.settlercraft.towny.plugin;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.structurecraft.structure.StructureAPI;
 import com.chingo247.settlercraft.towny.listener.TownListener;
 import com.chingo247.settlercraft.towny.restriction.TownyRestriction;
+import com.chingo247.structureapi.StructureAPI;
 import com.palmergames.bukkit.config.ConfigNodes;
 import com.palmergames.bukkit.towny.TownySettings;
 import com.palmergames.bukkit.towny.object.Coord;

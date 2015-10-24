@@ -17,7 +17,6 @@
 package com.chingo247.structureapi.model.owner;
 
 import com.chingo247.structureapi.model.settler.Settler;
-import com.chingo247.structureapi.model.structure.StructureNode;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
@@ -50,5 +49,11 @@ public interface IOwnership {
      * @return The other node
      */
     public Node getOtherNode();
+    
+    /**
+     * Sets the owner type
+     * @param type The type to set
+     */
+    public void setOwnerType(OwnerType type);
     
 }

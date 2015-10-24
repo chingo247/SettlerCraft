@@ -24,13 +24,14 @@ import com.chingo247.structureapi.model.settler.SettlerRepositiory;
 import com.chingo247.structureapi.model.owner.OwnerType;
 import com.chingo247.structureapi.model.owner.Ownership;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
+import com.chingo247.structureapi.model.structure.IStructure;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.structureapi.model.structure.StructureRepository;
 import com.chingo247.structureapi.model.world.StructureWorld;
 import com.chingo247.structureapi.model.world.StructureWorldRepository;
 import com.chingo247.structureapi.model.zone.AccessType;
-import com.chingo247.structureapi.model.zone.ConstructionZone;
+import com.chingo247.structureapi.model.zone.ConstructionZoneNode;
 import com.chingo247.structureapi.model.zone.ConstructionZoneRepository;
 import com.chingo247.structureapi.model.zone.IConstructionZone;
 import com.chingo247.structureapi.model.zone.IConstructionZoneRepository;
@@ -53,8 +54,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
@@ -73,7 +76,7 @@ import org.neo4j.graphdb.Transaction;
  *
  * @author Chingo
  */
-public class StructureManager extends AbstractPlotManager implements IStructureManager {
+public class StructureManager extends AbstractPlotManager<IStructure> implements IStructureManager {
 
     private final IStructureAPI structureAPI;
     private final APlatform platform;
@@ -91,7 +94,7 @@ public class StructureManager extends AbstractPlotManager implements IStructureM
      * @param world The world this StructureManager will 'Manage'
      */
     StructureManager(ConstructionWorld world, GraphDatabaseService graph) {
-        super(world);
+        super(world, graph);
         this.graph = graph;
         this.structureAPI = (StructureAPI) StructureAPI.getInstance();
         this.platform = structureAPI.getPlatform();
@@ -123,7 +126,7 @@ public class StructureManager extends AbstractPlotManager implements IStructureM
             for (StructureNode structureNode : structures) {
                 if (!RegionUtil.isDimensionWithin(structureNode.getCuboidRegion(), region)) { // overlaps but doesn't fit within
                     throw new StructureRestrictionException("Structure overlaps structure #" + structureNode.getId() + " " + structureNode.getName());
-                } else if (settler != null && structureNode.getOwnerDomain().isOwner(settler.getUniqueIndentifier())) { // fits within but doesnt own
+                } else if (settler != null && structureNode.getOwnerDomain().isOwner(settler.getUniqueId())) { // fits within but doesnt own
                     throw new StructureRestrictionException("Can't create substructure, structure will overlap a structure you don't own");
                 } else if(structureNode.getStatus() != ConstructionStatus.COMPLETED && structureNode.getStatus() != ConstructionStatus.STOPPED) { // fits within and owns, but structure is in progress
                     throw new StructureRestrictionException("Can't place within a structure that is in progress");
@@ -148,7 +151,7 @@ public class StructureManager extends AbstractPlotManager implements IStructureM
         boolean allowsSubstructures = structureAPI.getConfig().allowsSubstructures();
         ConfigProvider config = world.getConfig();
         
-        if(config.allowsStructures()) {
+        if(!config.allowsStructures()) {
             throw new WorldRestrictionException("This world does not allow any structures");
         }
         
@@ -194,7 +197,7 @@ public class StructureManager extends AbstractPlotManager implements IStructureM
     }
 
     private void checkStructureConstructionZoneRestrictions(ConstructionWorld world, CuboidRegion affectArea, Player player) throws RestrictionException {
-        Collection<ConstructionZone> zones = constructionZoneRepository.findWithin(world.getUUID(), affectArea, 2);
+        Collection<ConstructionZoneNode> zones = constructionZoneRepository.findWithin(world.getUUID(), affectArea, 2);
         
         // May not overlap multiple zones
         if(zones.size() == 2) {
@@ -231,46 +234,16 @@ public class StructureManager extends AbstractPlotManager implements IStructureM
     }
     
     @Override
-    public Structure createStructure(IStructurePlan plan, Vector position, Direction direction, Player owner) throws StructureException {
-        return createStructure(null, plan, position, direction, owner);
+    public IStructure create(CuboidRegion region) throws StructureException, RestrictionException {
+        return create(null, region, null);
     }
 
     @Override
-    public Structure createStructure(IStructurePlan plan,  Vector position, Direction direction) throws StructureException {
-        return createStructure(null, plan, position, direction, null);
-    }
-
-    @Override
-    public Structure createStructure(Placement placement, Vector position, Direction direction) throws StructureException {
-        return createStructure(null, placement, position, direction, null);
-    }
-
-    @Override
-    public Structure createStructure(Placement placement, Vector position, Direction direction, Player owner) throws StructureException {
-        return createStructure(null, placement, position, direction, owner);
-    }
-
-    @Override
-    public Structure createSubstructure(Structure parent, IStructurePlan plan, Vector position, Direction direction, Player owner) throws StructureException {
-        return createStructure(parent, plan, position, direction, owner);
-    }
-
-    @Override
-    public Structure createSubstructure(Structure parent, IStructurePlan plan, Vector position, Direction direction) throws StructureException {
-        return createStructure(parent, plan, position, direction, null);
-    }
-
-    @Override
-    public Structure createSubstructure(Structure parent, Placement placement, Vector position, Direction direction, Player owner) throws StructureException {
-        return createStructure(parent, placement, position, direction, owner);
-    }
-
-    @Override
-    public Structure createSubstructure(Structure parent, Placement placement, Vector position, Direction direction) throws StructureException {
-        return createStructure(parent, placement, position, direction, null);
+    public IStructure create(CuboidRegion region, UUID owner) throws StructureException, RestrictionException {
+        return create(null, region, owner);
     }
     
-    private Structure createStructure(Structure parentStructure, Placement placement, Vector position, Direction direction, Player owner) throws StructureException {
+    public IStructure create(Structure parent, CuboidRegion region, UUID owner) throws StructureException, RestrictionException {
         IWorld w = platform.getServer().getWorld(world.getName());
         Structure structure = null;
         Transaction tx = null;
@@ -280,22 +253,17 @@ public class StructureManager extends AbstractPlotManager implements IStructureM
             tx = graph.beginTx();
             
             StructureWorld worldNode = structureWorldRepository.addOrGet(w.getName(), w.getUUID());
-            structure = create(worldNode, parentStructure, placement, placement.getClass().getSimpleName(), position, direction, owner);
+            structure = create(worldNode, parent, region, "SELECTION-STRUCTURE", region.getMinimumPoint(), Direction.EAST, owner, 0.0);
 
             if (structure != null) {
-                
                 structureDirectory = structure.getDirectory();
                 if(structureDirectory.exists()) {
-                    structureDirectory.delete();
+                    FileUtils.deleteDirectory(structureDirectory);
                 }
                 structureDirectory.mkdirs();
-                
-                File structurePlanFile = new File(structureDirectory, "structureplan.xml");
-                PlacementExporter exporter = new PlacementExporter();
-                exporter.export(placement, structurePlanFile, "structureplan.xml", true);
             }
             tx.success();
-        } catch (StructureException ex) {
+        } catch (StructureException | RestrictionException ex) {
             if (tx != null) {
                 tx.failure();
             }
@@ -324,32 +292,146 @@ public class StructureManager extends AbstractPlotManager implements IStructureM
         return structure;
     }
     
-    private Structure createStructure(Structure parentStructure, IStructurePlan structurePlan, Vector position, Direction direction, Player owner) throws StructureException {
+    @Override
+    public Structure createStructure(IStructurePlan plan, Vector position, Direction direction, UUID owner) throws StructureException, RestrictionException {
+        return createStructure(null, plan, position, direction, owner);
+    }
+
+    @Override
+    public Structure createStructure(IStructurePlan plan,  Vector position, Direction direction) throws StructureException, RestrictionException {
+        return createStructure(null, plan, position, direction, null);
+    }
+
+    @Override
+    public Structure createStructure(Placement placement, Vector position, Direction direction) throws StructureException, RestrictionException {
+        return createStructure(null, placement, position, direction, null);
+    }
+
+    @Override
+    public Structure createStructure(Placement placement, Vector position, Direction direction, UUID owner) throws StructureException, RestrictionException {
+        return createStructure(null, placement, position, direction, owner);
+    }
+
+    @Override
+    public Structure createSubstructure(Structure parent, IStructurePlan plan, Vector position, Direction direction, UUID owner) throws StructureException, RestrictionException {
+        return createStructure(parent, plan, position, direction, owner);
+    }
+
+    @Override
+    public Structure createSubstructure(Structure parent, IStructurePlan plan, Vector position, Direction direction) throws StructureException, RestrictionException {
+        return createStructure(parent, plan, position, direction, null);
+    }
+
+    @Override
+    public Structure createSubstructure(Structure parent, Placement placement, Vector position, Direction direction, UUID owner) throws StructureException, RestrictionException {
+        return createStructure(parent, placement, position, direction, owner);
+    }
+
+    @Override
+    public Structure createSubstructure(Structure parent, Placement placement, Vector position, Direction direction) throws StructureException, RestrictionException {
+        return createStructure(parent, placement, position, direction, null);
+    }
+    
+    private Structure createStructure(Structure parentStructure, Placement placement, Vector position, Direction direction, UUID owner) throws StructureException, RestrictionException {
         IWorld w = platform.getServer().getWorld(world.getName());
         Structure structure = null;
         Transaction tx = null;
+        File structureDirectory = null;
+        try {
+            monitor.enter();
+            tx = graph.beginTx();
+            
+            StructureWorld worldNode = structureWorldRepository.addOrGet(w.getName(), w.getUUID());
+            Vector min = position;
+            Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getSize());
+            structure = create(worldNode, parentStructure, new CuboidRegion(min, max), placement.getClass().getSimpleName(), position, direction, owner, 0.0);
+
+            if (structure != null) {
+                
+                structureDirectory = structure.getDirectory();
+                if(structureDirectory.exists()) {
+                    FileUtils.deleteDirectory(structureDirectory);
+                }
+                structureDirectory.mkdirs();
+                
+                File structurePlanFile = new File(structureDirectory, "structureplan.xml");
+                PlacementExporter exporter = new PlacementExporter();
+                exporter.export(placement, structurePlanFile, "structureplan.xml", true);
+            }
+            tx.success();
+        } catch (StructureException | RestrictionException ex) {
+            if (tx != null) {
+                tx.failure();
+            }
+            if(structureDirectory != null) {
+                structureDirectory.delete();
+            }
+            throw ex;
+        } catch (Exception ex) {
+            if (tx != null) {
+                tx.failure();
+            }
+            if(structureDirectory != null) {
+                structureDirectory.delete();
+            }
+            throw new RuntimeException(ex);
+        } finally {
+            if(tx != null) {
+                tx.close();
+            }
+            monitor.leave();
+        }
+       
+        if(structure != null) {
+            EventManager.getInstance().getEventBus().post(new StructureCreateEvent(structure));
+        }
+        return structure;
+    }
+    
+    private Structure createStructure(Structure parentStructure, IStructurePlan structurePlan, Vector position, Direction direction, UUID owner) throws StructureException, RestrictionException {
+        IWorld w = platform.getServer().getWorld(world.getName());
+        Structure structure = null;
+        Transaction tx = null;
+        File structureDirectory = null;
         try {
             tx = graph.beginTx();
             monitor.enter();
             StructureWorld worldNode = structureWorldRepository.addOrGet(w.getName(), w.getUUID());
-            structure = create(worldNode, parentStructure, structurePlan.getPlacement(), structurePlan.getName(), position, direction, owner);
-             
-            File structureDirectory = structure.getDirectory();
-            if(structureDirectory.exists()) {
-                structureDirectory.delete();
-            }
-            structureDirectory.mkdirs();
-            try {
-                moveResources(structure, structurePlan);
-            } catch (IOException ex) {
-                structureDirectory.delete();
-                Logger.getLogger(StructureManager.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            Vector min = position;
+            Vector max = PlacementUtil.getPoint2Right(min, direction, structurePlan.getPlacement().getSize());
+            structure = create(worldNode, parentStructure, new CuboidRegion(min, max), structurePlan.getName(), position, direction, owner, structurePlan.getPrice());
             
-
-       
-        
+            if(structure != null) {
+                structureDirectory = structure.getDirectory();
+                if(structureDirectory.exists()) {
+                    FileUtils.deleteDirectory(structureDirectory);
+                }
+                structureDirectory.mkdirs();
+                try {
+                    moveResources(structure, structurePlan);
+                } catch (IOException ex) {
+                    structureDirectory.delete();
+                    Logger.getLogger(StructureManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         tx.success();
+        } catch (StructureException | RestrictionException ex) {
+            if (tx != null) {
+                tx.failure();
+            }
+            if(structureDirectory != null) {
+                structureDirectory.delete();
+            }
+            throw ex;
+        } catch (Exception ex) {
+            if (tx != null) {
+                tx.failure();
+            }
+            if(structureDirectory != null) {
+                structureDirectory.delete();
+            }
+            throw new RuntimeException(ex);
+        
         } finally {
            if(tx != null) {
                tx.close();
@@ -365,25 +447,20 @@ public class StructureManager extends AbstractPlotManager implements IStructureM
         return structure;
     }
     
-    private Structure create(StructureWorld structureWorld, Structure parent, Placement placement, String name, Vector position, Direction direction, Player owner) throws StructureException {
-        world.checkWorldRestrictions(placement, world.asWorldEditWorld(), position, direction);
-
-        Vector min = position;
-        Vector max = PlacementUtil.getPoint2Right(min, direction, placement.getCuboidRegion().getMaximumPoint());
-        CuboidRegion structureRegion = new CuboidRegion(min, max);
+    private Structure create(StructureWorld structureWorld, Structure parent, CuboidRegion structureRegion, String name, Vector position, Direction direction, UUID owner, double price) throws StructureException, RestrictionException {
+        world.checkWorldRestrictions(structureRegion, world.asWorldEditWorld());
         StructureNode structureNode = null;
-
         StructureNode parentNode = null;
         if (parent != null) {
             parentNode = new StructureNode(parent.getNode());
             CuboidRegion parentRegion = parent.getCuboidRegion();
-            if (!(parentRegion.contains(min) && parentRegion.contains(max))) {
+            if (!(parentRegion.contains(structureRegion.getMinimumPoint()) && parentRegion.contains(structureRegion.getMaximumPoint()))) {
                 throw new StructureException("Structure overlaps structure #" + parent.getId() + ", but does not fit within it's boundaries");
             }
         }
 
         // Create the StructureNode - Where it all starts...
-        structureNode = structureRepository.addStructure(name, position, structureRegion, direction, 0.0);
+        structureNode = structureRepository.addStructure(name, position, structureRegion, direction, price);
         structureWorld.addStructure(structureNode);
         
         if (parentNode != null && structureNode != null) {
@@ -396,7 +473,7 @@ public class StructureManager extends AbstractPlotManager implements IStructureM
 
         // Add owner!
         if (owner != null  && structureNode != null) {
-            Settler settler = settlerRepository.findByUUID(owner.getUniqueId());
+            Settler settler = settlerRepository.findByUUID(owner);
             if (settler == null) {
                 throw new RuntimeException("Settler was null!"); // SHOULD NEVER HAPPEN AS SETTLERS ARE ADDED AT MOMENT OF FIRST LOGIN
             }
@@ -437,6 +514,18 @@ public class StructureManager extends AbstractPlotManager implements IStructureM
             }
         }
     }
+
+    @Override
+    protected void onRemoveOwnership(IStructure plot, UUID player, OwnerType type) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    protected void onUpdateOwnership(IStructure plot, UUID player, OwnerType type) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    
 
     class PlacementPlan extends DefaultStructurePlan {
 

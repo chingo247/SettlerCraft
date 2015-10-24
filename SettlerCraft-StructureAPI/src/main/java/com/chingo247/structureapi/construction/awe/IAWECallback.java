@@ -14,27 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction.asyncworldedit;
-
-import org.primesoft.asyncworldedit.api.blockPlacer.IJobEntryListener;
-import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+package com.chingo247.structureapi.construction.awe;
 
 /**
  *
  * @author Chingo
  */
-public abstract class SCIJobListener implements IJobEntryListener {
-
-    @Override
-    public void jobStateChanged(JobEntry je) {
-        if(je instanceof SCJobEntry) {
-            jobStateChanged((SCJobEntry) je);
-        }
-    }
+public interface IAWECallback {
     
-    public abstract void jobStateChanged(SCJobEntry jobEntry);
-
+    void onJobAdded(AWEJobEntry task);
     
+    void onCancelled();
     
+    void onStarted();
     
 }

@@ -109,37 +109,39 @@ public class PlayerPlaceStructureHandler {
     }
 
     public void handle(final AItemStack planItem, final Player player, final ConstructionWorld world, final Vector pos, ISelectionManager selectionManager) {
+        // Check if this Itemstack is a StructurePlan
         if (!isStructurePlan(planItem)) {
             return;
         }
 
+        // Check if the player has permission to structures
         if (!PermissionManager.getInstance().isAllowed(player, PermissionManager.Perms.SETTLER_STRUCTURE_PLACE)) {
             player.printError("You have no permission to place structures");
             return;
         }
         
-
+        // Pick a selection type
         LocalSession session = WorldEdit.getInstance().getSession(player);
-
         final ISelectionManager slm;
         // Set the SelectionManager if null...
         if (selectionManager == null) {
             if (session.hasCUISupport()) {
                 slm = CUISelectionManager.getInstance();
-//            } else if (HologramSelectionManager.getInstance().hasHologramsProvider()) {
-//                slm = HologramSelectionManager.getInstance();
             } else {
                 slm = NoneSelectionManager.getInstance();
             }
         } else {
             slm = selectionManager;
         }
+        
+        // Dispatch a async task for structure creation at this players queue
         playerPool.execute(player.getUniqueId(), new Runnable() {
 
             @Override
             public void run() {
                 try {
 
+                    // Inventory check
                     IPlayer iPlayer = SettlerCraft.getInstance().getPlatform().getPlayer(player.getUniqueId());
                     AInventory inventory = iPlayer.getInventory();
                     if (!inventory.hasItem(planItem)) {
@@ -163,12 +165,10 @@ public class PlayerPlaceStructureHandler {
                         } else {
                             player.print(color.red() + "Removed invalid structure plans from your inventory");
                         }
-
                         iPlayer.getInventory().removeItem(planItem);
-
-                        return;
+                    } else {
+                        handlePlace(plan, planItem, player, world, pos, slm);
                     }
-                    handlePlace(plan, planItem, player, world, pos, slm);
                 } catch (Exception ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
                 }
@@ -179,10 +179,8 @@ public class PlayerPlaceStructureHandler {
 
     private void handlePlace(IStructurePlan plan, AItemStack item, Player player, ConstructionWorld world, Vector pos1, ISelectionManager selectionManager) {
         IPlayer iPlayer = SettlerCraft.getInstance().getPlatform().getPlayer(player.getUniqueId());
-
         Direction direction = WorldUtil.getDirection(iPlayer.getYaw());
         Vector pos2;
-
         boolean toLeft = iPlayer.isSneaking();
 
         if (toLeft) {
@@ -207,7 +205,7 @@ public class PlayerPlaceStructureHandler {
             if (placingResult.canPlace()) {
                 Structure structure;
                 try {
-                    IStructureManager sc = world.getStructureHandler();
+                    IStructureManager sc = world.getStructureManager();
 
                     if (placingResult.hasParentStructure()) {
                         Structure parentStructure = placingResult.getParentStructure();
@@ -215,9 +213,9 @@ public class PlayerPlaceStructureHandler {
                             player.printError("Status of #" + parentStructure.getId() + " must not be in progress before substructures can be placed inside");
                             return;
                         }
-                        structure = sc.createSubstructure(parentStructure, plan, pos1, direction, player);
+                        structure = sc.createSubstructure(parentStructure, plan, pos1, direction, player.getUniqueId());
                     } else {
-                        structure = sc.createStructure(plan, pos1, direction, player);
+                        structure = sc.createStructure(plan, pos1, direction, player.getUniqueId());
                     }
 
                     if (structure != null) {
@@ -334,8 +332,8 @@ public class PlayerPlaceStructureHandler {
         }
 
         try {
-            world.getStructureHandler().checkWorldRestrictions(affectedArea);
-            world.getStructureHandler().checkStructureRestrictions(player, affectedArea);
+            world.getStructureManager().checkWorldRestrictions(affectedArea);
+            world.getStructureManager().checkStructureRestrictions(player, affectedArea);
         } catch (RestrictionException ex) {
             player.printError(ex.getMessage());
             return new PlacingResult(false);
@@ -349,7 +347,7 @@ public class PlayerPlaceStructureHandler {
         try {
             tx = graph.beginTx();
 
-            world.getStructureHandler().checkStructurePlacingRestrictions(player, affectedArea, min);
+            world.getStructureManager().checkStructurePlacingRestrictions(player, affectedArea, min);
 
             StructureNode structureNode = structureRepository.findStructureOnPosition(iw.getUUID(), pos1);
             if (structureNode != null) {
@@ -364,7 +362,7 @@ public class PlayerPlaceStructureHandler {
                 tx.failure();
             }
             placingResult = new PlacingResult(false);
-            player.print(ex.getMessage());
+            player.printError(ex.getMessage());
         } finally {
             if (tx != null) {
                 tx.close();

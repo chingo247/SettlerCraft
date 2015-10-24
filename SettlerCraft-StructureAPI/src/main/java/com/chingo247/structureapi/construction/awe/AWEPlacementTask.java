@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction.asyncworldedit;
+package com.chingo247.structureapi.construction.awe;
 
 import com.chingo247.settlercraft.core.event.async.AsyncEventManager;
 import com.chingo247.structureapi.construction.ConstructionEntry;
@@ -39,12 +39,11 @@ import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
  */
 public class AWEPlacementTask<T extends Options> extends StructureTask {
 
-    private UUID uuid;
-    private Placement placement;
-    private PlayerEntry playerEntry;
-    private Vector position;
-    private EditSession editSession;
-    private T options;
+    private final Placement placement;
+    private final PlayerEntry playerEntry;
+    private final Vector position;
+    private final EditSession editSession;
+    private final T options;
     private int jobId;
 
     private boolean checked;
@@ -62,7 +61,6 @@ public class AWEPlacementTask<T extends Options> extends StructureTask {
      */
     public AWEPlacementTask(String action, ConstructionEntry connstructionEntry, Placement placement, PlayerEntry playerEntry, EditSession editSession, Vector position, T options) {
         super(action, connstructionEntry, playerEntry.getUUID());
-        this.uuid = UUID.randomUUID();
         this.playerEntry = playerEntry;
         this.position = position;
         this.placement = placement;
@@ -119,7 +117,9 @@ public class AWEPlacementTask<T extends Options> extends StructureTask {
     protected void onCancel() {
         IBlockPlacer bp = AsyncWorldEditMain.getInstance().getBlockPlacer();
         bp.cancelJob(playerEntry, jobId);
-        AWEJobManager.getInstance().remove(this);
+        AWEJobManager.getInstance().unregister(this);
     }
+    
+    
 
 }

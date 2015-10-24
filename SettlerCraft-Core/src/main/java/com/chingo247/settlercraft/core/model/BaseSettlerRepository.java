@@ -36,8 +36,6 @@ public class BaseSettlerRepository implements IBaseSettlerRepository {
     
     protected final GraphDatabaseService graph;
     private final Logger LOG = Logger.getLogger(getClass().getCanonicalName());
-    private boolean checked = false;
-   
 
     public BaseSettlerRepository(GraphDatabaseService graph) {
         this.graph = graph;
@@ -105,14 +103,14 @@ public class BaseSettlerRepository implements IBaseSettlerRepository {
     public BaseSettlerNode addSettler(IBaseSettler baseSettler) throws SettlerException {
         BaseSettlerNode settler = null;
         try(Transaction tx = graph.beginTx()) {
-            if(findByUUID(baseSettler.getUniqueIndentifier()) != null) {
+            if(findByUUID(baseSettler.getUniqueId()) != null) {
                 throw new SettlerException("Settler already exists!");
             }
             
             
             Long id = nextId();
             Node settlerNode = graph.createNode(BaseSettlerNode.label());
-            settlerNode.setProperty(BaseSettlerNode.UUID_PROPERTY, baseSettler.getUniqueIndentifier().toString());
+            settlerNode.setProperty(BaseSettlerNode.UUID_PROPERTY, baseSettler.getUniqueId().toString());
             settlerNode.setProperty(BaseSettlerNode.NAME_PROPERTY, baseSettler.getName());
             settlerNode.setProperty(BaseSettlerNode.ID_PROPERTY, id);
             
@@ -123,27 +121,13 @@ public class BaseSettlerRepository implements IBaseSettlerRepository {
     }
     
     private long nextId() {
-        if(!checked) {
-            Result r = graph.execute("MATCH (sid: ID_GENERATOR {name:'SETTLER_ID'}) "
-                        + "RETURN sid "
-                        + "LIMIT 1");
-            if(!r.hasNext()) {
-                graph.execute("CREATE (sid: ID_GENERATOR {name:'SETTLER_ID', nextId: 1 })");
-                checked = true;
-                return 1;
-            }
-            checked = true;
-        }
+        String idQuery = "MERGE (sid: ID_GENERATOR {name:'SETTLER_ID'}) "
+                       + "ON CREATE SET sid.nextId = 1 "
+                       + "ON MATCH SET sid.nextId = sid.nextId + 1 "
+                       + "RETURN sid.nextId as nextId";
         
-        // Work-around for getting the next Id
-        // Sets the lock at this node by removing a non-existent property
-        String idQuery = "MATCH (sid:ID_GENERATOR {name:'SETTLER_ID'}) "
-                        +"REMOVE sid.lock " // NON-EXISTENT PROPERTY
-                        +"SET sid.nextId = sid.nextId + 1 "
-                        +"RETURN sid.nextId as nextId";
         Result r = graph.execute(idQuery);
-        long id = (long) r.next().get("nextId");
-        
+        long id = (Long) r.next().get("nextId");
         return id;
     }
     

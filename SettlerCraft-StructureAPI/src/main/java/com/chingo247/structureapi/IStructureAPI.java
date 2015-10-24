@@ -19,18 +19,16 @@ package com.chingo247.structureapi;
 import com.chingo247.menuapi.menu.CategoryMenu;
 import com.chingo247.structureapi.construction.ITaskAssigner;
 import com.chingo247.structureapi.construction.IConstructionManager;
-import com.chingo247.structureapi.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.backupapi.core.IBackupAPI;
 import com.chingo247.backupapi.core.IChunkManager;
-import com.chingo247.settlercraft.core.concurrent.KeyPool;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.platform.IConfigProvider;
 import com.chingo247.structureapi.construction.ConstructionException;
 import com.chingo247.structureapi.plan.StructurePlanManager;
-import com.chingo247.structureapi.plan.placement.Placement;
 import com.chingo247.structureapi.plan.placement.SchematicPlacement;
 import com.chingo247.structureapi.construction.options.BuildOptions;
 import com.chingo247.structureapi.construction.options.DemolitionOptions;
+import com.chingo247.structureapi.platform.ConfigProvider;
 import com.chingo247.xplatform.core.APlatform;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -113,7 +111,7 @@ public interface IStructureAPI {
      *
      * @return The ConfigProvider
      */
-    IConfigProvider getConfig();
+    ConfigProvider getConfig();
 
     /**
      * Gets the platform
@@ -198,17 +196,6 @@ public interface IStructureAPI {
      */
     SchematicPlacement loadSchematic(File schematicFile) throws IOException;
 
-    /**
-     * Makes a placement Async
-     *
-     * @param player The player UUID or null, The UUID specifies the Queue for
-     * AsyncWorldEdit A null value means that the UUID was issued by
-     * PlayerEntry.CONSOLE. Note that the UUID does not have to be of a real
-     * player.
-     * @param placement The placement
-     * @return The AsyncPlacement
-     */
-    AsyncPlacement makeAsync(UUID player, Placement placement);
 
     /**
      * Gets the registered BackupAPI. May return null if none was registered

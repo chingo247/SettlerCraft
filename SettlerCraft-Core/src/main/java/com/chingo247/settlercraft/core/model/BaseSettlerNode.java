@@ -53,7 +53,7 @@ public class BaseSettlerNode implements IBaseSettler {
     }
     
     @Override
-    public UUID getUniqueIndentifier() {
+    public UUID getUniqueId() {
         if(uuid != null) {
             return uuid;
         }

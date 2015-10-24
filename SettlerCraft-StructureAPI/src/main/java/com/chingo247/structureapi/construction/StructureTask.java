@@ -120,7 +120,7 @@ public abstract class StructureTask {
             } else {
                 AsyncEventManager.getInstance().post(new StructureTaskCompleteEvent(this));
             }
-
+            
             if(!isCancelled() && !failed) {
                 constructionEntry.proceed();
             } else {

@@ -14,9 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction.asyncworldedit;
+package com.chingo247.structureapi.construction.awe;
 
-import com.chingo247.structureapi.construction.asyncworldedit.SCJobEntry;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;

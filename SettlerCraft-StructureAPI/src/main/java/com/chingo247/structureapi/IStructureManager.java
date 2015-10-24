@@ -23,6 +23,7 @@ import com.chingo247.structureapi.plan.placement.Placement;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
+import java.util.UUID;
 
 /**
  *
@@ -50,7 +51,7 @@ public interface IStructureManager {
      * @param owner The player that will be assigned as MASTER owner of this structure
      * @return The Structure that has been created
      */
-    public Structure createStructure(IStructurePlan plan, Vector position, Direction direction, Player owner) throws Exception;
+    public Structure createStructure(IStructurePlan plan, Vector position, Direction direction, UUID owner) throws Exception;
     
      /**
      * Creates a structure with the provided placement
@@ -71,7 +72,7 @@ public interface IStructureManager {
      * @param owner The player that will be assigned as MASTER owner of this structure
      * @return The Structure that has been created
      */
-    public Structure createStructure(Placement placement, Vector position, Direction direction, Player owner) throws Exception;
+    public Structure createStructure(Placement placement, Vector position, Direction direction, UUID owner) throws Exception;
     
      /**
      * Creates a substructure for given structure with the provided plan
@@ -83,7 +84,7 @@ public interface IStructureManager {
      * @param owner The player that will be assigned as MASTER owner of this structure
      * @return The Structure that has been created
      */
-    public Structure createSubstructure(Structure structure, IStructurePlan plan, Vector position, Direction direction, Player owner) throws Exception;
+    public Structure createSubstructure(Structure structure, IStructurePlan plan, Vector position, Direction direction, UUID owner) throws Exception;
     
      /**
      * Creates a substructure for given structure with the provided plan
@@ -106,7 +107,7 @@ public interface IStructureManager {
      * @param owner The player that will be assigned as MASTER owner of this structure
      * @return The Structure that has been created
      */
-    public Structure createSubstructure(Structure structure, Placement placement, Vector position, Direction direction, Player owner) throws Exception;
+    public Structure createSubstructure(Structure structure, Placement placement, Vector position, Direction direction, UUID owner) throws Exception;
     
      /**
      * Creates a substructure for given structure with the provided placement

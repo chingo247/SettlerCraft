@@ -29,20 +29,20 @@ import java.util.UUID;
 public interface IConstructionZoneRepository {
     
     
-    ConstructionZone findById(long id);
+    ConstructionZoneNode findById(long id);
     
-    ConstructionZone findOnPosition(UUID worldUUID, Vector position);
+    ConstructionZoneNode findOnPosition(UUID worldUUID, Vector position);
     
-    ConstructionZone findOnPosition(ILocation location);
+    ConstructionZoneNode findOnPosition(ILocation location);
     
-    Collection<ConstructionZone> findWithin(UUID worldUUID, CuboidRegion searchArea, int limit);
+    Collection<ConstructionZoneNode> findWithin(UUID worldUUID, CuboidRegion searchArea, int limit);
     
-    Iterable<? extends ConstructionZone> findAll();
+    Iterable<? extends ConstructionZoneNode> findAll();
     
-    ConstructionZone add(CuboidRegion region);
+    ConstructionZoneNode add(CuboidRegion region);
     
     void delete(long id);
     
-    void delete(ConstructionZone zone);
+    void delete(ConstructionZoneNode zone);
     
 }

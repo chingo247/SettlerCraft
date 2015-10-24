@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction.asyncworldedit;
+package com.chingo247.structureapi.construction.awe;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.structureapi.plan.placement.Placement;
@@ -32,7 +32,7 @@ import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
  * @param <T> Options
  * @param <P> The placement
  */
-public abstract class AbstractAsyncPlacement<T extends Options, P extends Placement> implements Placement<T> {
+public abstract class AbstractAWEPlacement<T extends Options, P extends Placement> implements Placement<T> {
     
     protected final AsyncWorldEditMain awe;
     protected final IBlockPlacer placer;
@@ -46,7 +46,7 @@ public abstract class AbstractAsyncPlacement<T extends Options, P extends Placem
      * @param playerEntry The PlayerEntry
      * @param placement The placement
      */
-    public AbstractAsyncPlacement(PlayerEntry playerEntry, P placement) {
+    public AbstractAWEPlacement(PlayerEntry playerEntry, P placement) {
         this.playerEntry = playerEntry;
         this.awe = AsyncWorldEditMain.getInstance();
         this.placer = awe.getBlockPlacer();

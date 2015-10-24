@@ -27,19 +27,19 @@ import java.util.UUID;
 public class ConstructionZoneRemoveOwnerEvent extends ConstructionZoneEvent {
     
     private UUID player;
-    private OwnerType ownerType;
+    private OwnerType type;
 
-    public ConstructionZoneRemoveOwnerEvent(IConstructionZone zone, UUID player, OwnerType ownerType) {
+    public ConstructionZoneRemoveOwnerEvent(IConstructionZone zone, UUID player, OwnerType type) {
         super(zone);
         
+        this.type = type;
         this.player = player;
-        this.ownerType = ownerType;
     }
 
-    public OwnerType getOwnerType() {
-        return ownerType;
+    public OwnerType getType() {
+        return type;
     }
-
+    
     public UUID getPlayer() {
         return player;
     }

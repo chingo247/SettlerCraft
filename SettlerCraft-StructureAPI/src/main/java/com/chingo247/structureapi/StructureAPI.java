@@ -35,7 +35,6 @@ import com.chingo247.structureapi.construction.ConstructionManager;
 import com.chingo247.structureapi.construction.DefaultDemolitionTaskAssigner;
 import com.chingo247.structureapi.construction.ITaskAssigner;
 import com.chingo247.structureapi.construction.IConstructionManager;
-import com.chingo247.structureapi.construction.asyncworldedit.AsyncPlacement;
 import com.chingo247.backupapi.core.IBackupAPI;
 import com.chingo247.backupapi.core.IChunkManager;
 import com.chingo247.structureapi.platform.IConfigProvider;
@@ -52,6 +51,7 @@ import com.chingo247.structureapi.construction.options.BuildOptions;
 import com.chingo247.structureapi.construction.options.DemolitionOptions;
 import com.chingo247.structureapi.plan.schematic.Schematic;
 import com.chingo247.structureapi.plan.schematic.SchematicManager;
+import com.chingo247.structureapi.platform.ConfigProvider;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IWorld;
 import com.google.common.base.Preconditions;
@@ -94,7 +94,7 @@ public class StructureAPI implements IStructureAPI {
     private final Set<StructureRestriction> restrictions;
     private final APlatform platform;
     private IPlugin plugin;
-    private IConfigProvider config;
+    private ConfigProvider config;
     private IConstructionManager constructionManager;
     private ITaskAssigner buildTaskAssigner;
     private ITaskAssigner demolitionTaskAssigner;
@@ -349,7 +349,7 @@ public class StructureAPI implements IStructureAPI {
         return plugin.getDataFolder();
     }
 
-    public void registerConfigProvider(IConfigProvider configProvider) {
+    public void registerConfigProvider(ConfigProvider configProvider) {
         this.config = configProvider;
     }
 
@@ -392,7 +392,7 @@ public class StructureAPI implements IStructureAPI {
     }
 
     @Override
-    public IConfigProvider getConfig() {
+    public ConfigProvider getConfig() {
         return config;
     }
 
@@ -531,12 +531,6 @@ public class StructureAPI implements IStructureAPI {
         return new SchematicPlacement(schematic);
     }
 
-    @Override
-    public AsyncPlacement makeAsync(UUID player, Placement placement) {
-        if (player == null) {
-            return new AsyncPlacement(PlayerEntry.CONSOLE, placement);
-        }
-        return new AsyncPlacement(AsyncWorldEditMain.getInstance().getPlayerManager().getPlayer(player), placement);
-    }
+  
 
 }

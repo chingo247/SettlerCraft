@@ -16,6 +16,7 @@
  */
 package com.chingo247.structureapi.platform;
 
+import com.chingo247.settlercraft.core.util.yaml.YAMLFormat;
 import com.chingo247.settlercraft.core.util.yaml.YAMLProcessor;
 import java.io.File;
 import java.io.IOException;
@@ -108,32 +109,35 @@ public class ConfigProvider {
         yamlp.save();
     }
     
+    
+    
     public static ConfigProvider loadOrCreateDefault(File f) throws IOException {
-        YAMLProcessor yamlp = new YAMLProcessor(f, true);
-        yamlp.load();
+        if(!f.exists()) {
+            f.createNewFile();
+        }
         
+        YAMLProcessor yamlp = new YAMLProcessor(f, true, YAMLFormat.EXTENDED);
+        
+     
         ConfigProvider config = new ConfigProvider(f);
-        
         config.setAllowsSubstructures(yamlp.getBoolean("structures.allow-substructures", true));
-        yamlp.setComment("structures.allow-substructures", "Determines if placing of substructures (placing structures within structures) is allowed");
-        
-        config.setAllowStructures(yamlp.getBoolean("structures.restricted-to-zones", false));
-        yamlp.setComment("structures.restricted-to-zones", "Determines if placing structures is only allowed within zones");
-        
+        config.setRestrictedToZones(yamlp.getBoolean("structures.restricted-to-zones", false));
         config.setAllowStructures(yamlp.getBoolean("structures.allow-structures", true));
-        yamlp.setComment("structures.allow-structures", "Determines if placing structures is allowed");
-        
         config.setUseHolograms(yamlp.getBoolean("structures.use-holograms", true));
-        yamlp.setComment("structures.use-holograms", "Determines whether structures should place holograms (Requires HolographicDisplays)");
-        
         config.setProtectStructures(yamlp.getBoolean("structures.protected", true));
-        yamlp.setComment("structures.protected", "Determines whether structures should be protected (Requires WorldGuard)");
-
         config.setMenuEnabled(yamlp.getBoolean("menus.planmenu-enabled", true));
-        yamlp.setComment("structures.planmenmu-enabled", "Determines whether the StructureAPI planmenu should be enabled", "Players can SELECT plans in this menu for FREE");
+        config.setShopEnabled(yamlp.getBoolean("menus.planshop-enabled", true));
+        config.save();
         
-        config.setMenuEnabled(yamlp.getBoolean("menus.planshop-enabled", true));
+        
+        yamlp.setComment("structures.allow-substructures", "Determines if placing of substructures (placing structures within structures) is allowed");
+        yamlp.setComment("structures.planmenmu-enabled", "Determines whether the StructureAPI planmenu should be enabled", "Players can SELECT plans in this menu for FREE");
+        yamlp.setComment("structures.protected", "Determines whether structures should be protected (Requires WorldGuard)");
+        yamlp.setComment("structures.use-holograms", "Determines whether structures should place holograms (Requires HolographicDisplays)");
+        yamlp.setComment("structures.allow-structures", "Determines if placing structures is allowed");
+        yamlp.setComment("structures.restricted-to-zones", "Determines if placing structures is only allowed within zones");
         yamlp.setComment("structures.planmenmu-enabled", "Determines whether the StructureAPI planshop should be enabled", "Players can BUY plans from the menu (Requires Vault + a Vault supported Economy plugin)");
+        yamlp.save();
         
         return config;
         

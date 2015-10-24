@@ -19,6 +19,7 @@ package com.chingo247.structureapi.commands;
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.chingo247.structureapi.IStructureAPI;
 import com.chingo247.settlercraft.core.commands.util.CommandExtras;
+import com.chingo247.structureapi.StructureException;
 import com.chingo247.structureapi.model.structure.IStructureRepository;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.model.structure.StructureNode;
@@ -95,7 +96,12 @@ public class SchematicCommands {
             tx.success();
         }
 
-        IStructurePlan plan = structure.getStructurePlan();
+        IStructurePlan plan = null;
+        try {
+            plan = structure.getStructurePlan();
+        } catch (StructureException ex) {
+            throw new CommandException(ex);
+        }
         Placement placement = plan.getPlacement();
 
         if(!(placement instanceof SchematicPlacement)) {

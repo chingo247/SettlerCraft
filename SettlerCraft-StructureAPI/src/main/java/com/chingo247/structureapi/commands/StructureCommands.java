@@ -564,7 +564,7 @@ public class StructureCommands {
                         tx.success();
                         throw new CommandException("Couldn't find a player for id'" + playerArg + "'");
                     }
-                    ply = structureAPI.getPlatform().getPlayer(sn.getUniqueIndentifier());
+                    ply = structureAPI.getPlatform().getPlayer(sn.getUniqueId());
 
                 } catch (NumberFormatException nfe) {
                     tx.success();
@@ -585,7 +585,7 @@ public class StructureCommands {
             if (method.equalsIgnoreCase("add")) {
                 IBaseSettler settler = settlerRepository.findByUUID(ply.getUniqueId());
                 OwnerDomain ownerDomain = structureNode.getOwnerDomain();
-                IOwnership ownershipToAdd = ownerDomain.getOwnership(settler.getUniqueIndentifier());
+                IOwnership ownershipToAdd = ownerDomain.getOwnership(settler.getUniqueId());
 
                 if (ownershipToAdd == null) {
                     ownerDomain.setOwnership(settler, type);

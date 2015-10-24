@@ -16,6 +16,7 @@
  */
 package com.chingo247.structureapi.construction;
 
+import com.chingo247.structureapi.StructureException;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.construction.options.DemolitionOptions;
 import com.chingo247.structureapi.construction.options.Options;
@@ -37,7 +38,7 @@ public interface IStructureTaskFactory {
      * @return The structure task
      * @throws Exception 
      */
-    public StructureTask build(EditSession session, UUID player, Structure structure) throws ConstructionException;
+    public StructureTask build(EditSession session, UUID player, Structure structure) throws StructureException;
     
     /**
      * Creates a task that will build the structure
@@ -48,7 +49,7 @@ public interface IStructureTaskFactory {
      * @return The structure task
      * @throws Exception 
      */
-    public StructureTask build(EditSession session, UUID player, Structure structure, Options options) throws ConstructionException;
+    public StructureTask build(EditSession session, UUID player, Structure structure, Options options) throws StructureException;
     
     /**
      * Creates a task that will demolish the structure. After the structure is demolished the structure will be removed
@@ -59,7 +60,7 @@ public interface IStructureTaskFactory {
      * @return The structure task
      * @throws Exception 
      */
-    public StructureTask demolish(EditSession session, UUID player, Structure structure) throws ConstructionException;
+    public StructureTask demolish(EditSession session, UUID player, Structure structure) throws StructureException;
     
     /**
      * Creates a task that will demolish the structure. After the structure is demolished the structure will be removed.
@@ -72,7 +73,7 @@ public interface IStructureTaskFactory {
      * @return The structure task
      * @throws Exception 
      */
-    public StructureTask demolish(EditSession session, UUID player, Structure structure, Options options) throws ConstructionException;
+    public StructureTask demolish(EditSession session, UUID player, Structure structure, Options options) throws StructureException;
     
     /**
      * Creates a backup of the area
@@ -81,7 +82,7 @@ public interface IStructureTaskFactory {
      * @return The structure task
      * @throws Exception 
      */
-    public StructureTask backup(UUID player, Structure structure, String backup) throws ConstructionException;
+    public StructureTask backup(UUID player, Structure structure, String backup) throws StructureException;
     
     /**
      * Restores the area to before the structure was placed, this will remove the structure
@@ -91,7 +92,7 @@ public interface IStructureTaskFactory {
      * @return The structure task
      * @throws Exception 
      */
-    public StructureTask restore(EditSession session, UUID player, Structure structure) throws ConstructionException, IOException;
+    public StructureTask restore(EditSession session, UUID player, Structure structure) throws StructureException, IOException;
     
     /**
      * Restores the area back to the backup that was made
@@ -101,7 +102,7 @@ public interface IStructureTaskFactory {
      * @param backup The number of the backup, where 0 indicates the backup that was made before the structure is placed
      * @return The StructureTask
      */
-    public StructureTask restoreTo(EditSession session, UUID player, Structure structure, String backup) throws ConstructionException;
+    public StructureTask restoreTo(EditSession session, UUID player, Structure structure, String backup) throws StructureException;
     
     
 }

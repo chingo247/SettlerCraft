@@ -18,9 +18,6 @@ package com.chingo247.structureapi;
 
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.SettlerCraft;
-import com.chingo247.structureapi.model.plot.PlotRepository;
-import com.chingo247.structureapi.model.world.IStructureWorldRepository;
-import com.chingo247.structureapi.model.world.StructureWorldRepository;
 import com.chingo247.structureapi.plan.placement.Placement;
 import com.chingo247.structureapi.platform.ConfigProvider;
 import com.chingo247.xplatform.core.ILocation;
@@ -48,8 +45,8 @@ public class ConstructionWorld implements IWorld {
     private IWorld world;
     private World worldEditWorld;
     private Monitor monitor;
-    private IStructureManager structureHandler;
-    private IConstructionZoneManager constructionZoneHandler;
+    private IStructureManager structureManager;
+    private IConstructionZoneManager constructionManager;
     private ConfigProvider config;
 
     ConstructionWorld(IWorld w, StructureAPI structureAPI) {
@@ -74,8 +71,10 @@ public class ConstructionWorld implements IWorld {
             }
         }
         
-        this.structureHandler = new StructureManager(this, graph);
-        this.constructionZoneHandler = new ConstructionZoneManager(this, graph);
+        this.monitor = new Monitor();
+       
+        this.constructionManager = new ConstructionZoneManager(this, graph);
+         this.structureManager = new StructureManager(this, graph);
 
     }
 
@@ -87,12 +86,12 @@ public class ConstructionWorld implements IWorld {
         return worldEditWorld;
     }
     
-    public IConstructionZoneManager getConstructionZoneHandler() {
-        return constructionZoneHandler;
+    public IConstructionZoneManager getConstructionZoneManager() {
+        return constructionManager;
     }
 
-    public IStructureManager getStructureHandler() {
-        return structureHandler;
+    public IStructureManager getStructureManager() {
+        return structureManager;
     }
 
     /**
@@ -105,27 +104,24 @@ public class ConstructionWorld implements IWorld {
      * @param position The position of the placement
      * @param direction The direction
      */
-    void checkWorldRestrictions(Placement p, World world, Vector position, Direction direction) throws StructureException {
-        Vector min = p.getCuboidRegion().getMinimumPoint().add(position);
-        Vector max = min.add(p.getCuboidRegion().getMaximumPoint());
-        CuboidRegion placementDimension = new CuboidRegion(min, max);
+    public void checkWorldRestrictions(CuboidRegion region, World world) throws RestrictionException {
 
         // Below the world?s
-        if (placementDimension.getMinimumPoint().getBlockY() <= 1) {
-            throw new StructureException("Structure must be placed at a minimum height of 1");
+        if (region.getMinimumPoint().getBlockY() <= 1) {
+            throw new RestrictionException("Minimum place height is 1");
         }
 
         // Exceeds world height limit?
-        if (placementDimension.getMaximumPoint().getBlockY() > world.getMaxY()) {
-            throw new StructureException("Structure will reach above the world's max height (" + world.getMaxY() + ")");
+        if (region.getMaximumPoint().getBlockY() > world.getMaxY()) {
+            throw new RestrictionException("Affected area exceeds the world max height (" + world.getMaxY() + ")");
         }
 
         // Check for overlap on the world's 'SPAWN'
         IWorld w = SettlerCraft.getInstance().getPlatform().getServer().getWorld(world.getName());
         ILocation l = w.getSpawn();
         Vector spawnPos = new Vector(l.getBlockX(), l.getBlockY(), l.getBlockZ());
-        if (placementDimension.contains(spawnPos)) {
-            throw new StructureException("Structure overlaps the world's spawn...");
+        if (region.contains(spawnPos)) {
+            throw new RestrictionException("Affected area overlaps the world's spawn...");
         }
     }
 
@@ -151,10 +147,6 @@ public class ConstructionWorld implements IWorld {
     @Override
     public ILocation getSpawn() {
         return world.getSpawn();
-    }
-
-    public void reloadConfig() {
-
     }
 
 }

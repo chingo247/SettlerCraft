@@ -16,12 +16,10 @@
  */
 package com.chingo247.structureapi.construction;
 
-import com.chingo247.structureapi.construction.ConstructionEntry;
-import com.chingo247.structureapi.construction.ITaskAssigner;
 import com.chingo247.backupapi.core.IBackupAPI;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.StructureAPI;
-import com.chingo247.structureapi.construction.options.BuildOptions;
+import com.chingo247.structureapi.StructureException;
 import com.chingo247.structureapi.construction.options.Options;
 import com.sk89q.worldedit.EditSession;
 import java.io.File;
@@ -43,13 +41,15 @@ public class DefaultBuildTaskAssigner implements ITaskAssigner {
     
     
     @Override
-    public void assignTasks(EditSession session, UUID player, ConstructionEntry entry, Options options) throws ConstructionException {
+    public void assignTasks(EditSession session, UUID player, ConstructionEntry entry, Options options) throws StructureException {
         Structure structure = entry.getStructure();
 
         // Only create backups when available
+        System.out.println("[DefaultBuildTaskAssigner]: checking BackupAPI");
         IBackupAPI backupAPI = StructureAPI.getInstance().getBackupAPI();
         if(backupAPI != null) {
             // 1. Create backup if none exists
+            System.out.println("[DefaultBuildTaskAssigner]: BackupAPI Available!");
             File structureDir = structure.getDirectory();
             File backupFile = new File(structureDir, "restore.snapshot");
             if(!backupFile.exists()) {

@@ -19,8 +19,15 @@ package com.chingo247.structureapi.model.structure;
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.model.World;
 import com.chingo247.settlercraft.core.model.interfaces.IWorld;
+import com.chingo247.structureapi.StructureAPI;
+import com.chingo247.structureapi.StructureException;
+import com.chingo247.structureapi.model.plot.Plot;
+import com.chingo247.structureapi.plan.IStructurePlan;
+import com.chingo247.structureapi.plan.StructurePlanReader;
+import com.chingo247.structureapi.util.WorldUtil;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
+import java.io.File;
 import java.util.Date;
 import org.neo4j.graphdb.Node;
 
@@ -29,7 +36,7 @@ import org.neo4j.graphdb.Node;
  * None of the opertions of this class have to be executed within a transaction
  * @author Chingo
  */
-public class Structure extends AStructure {
+public class Structure extends Plot implements IStructure {
     
     private Long id;
     private String name;
@@ -42,8 +49,6 @@ public class Structure extends AStructure {
     private Date completedAt;
     private Date createdAt;
     private Date deletedAt;
-    private IWorld world;
-    
 
     public Structure(Node structureNode) {
         this(new StructureNode(structureNode));
@@ -61,9 +66,9 @@ public class Structure extends AStructure {
         this.deletedAt = structure.getDeletedAt();
         this.createdAt = structure.getCreatedAt();
         this.completedAt = structure.getCompletedAt();
-        this.world = new World(structure.getWorld());
     }
-   
+
+  
     
     /**
      * Gets the id of the structure
@@ -163,11 +168,80 @@ public class Structure extends AStructure {
     public ConstructionStatus getStatus() {
         return status;
     }
+    
+    
+    
+    /**
+     * Will add the offset to the structure's origin, which is always the front
+     * left corner of a structure.
+     *
+     * @param offset The offset
+     * @return the location
+     */
+    public Vector translateRelativeLocation(Vector offset) {
+        Vector p = WorldUtil.translateLocation(getOrigin(), getDirection(), offset.getX(), offset.getY(), offset.getZ());
+        return new Vector(p.getBlockX(), p.getBlockY(), p.getBlockZ());
+    }
+
+    /**
+     * Gets the relative position
+     * @param worldPosition The worldposition
+     * @return The relative position
+     */
+    public Vector getRelativePosition(Vector worldPosition) {
+        switch (getDirection()) {
+            case NORTH:
+                return new Vector(
+                        worldPosition.getBlockX() - this.getOrigin().getX(),
+                        worldPosition.getBlockY() - this.getOrigin().getY(),
+                        this.getOrigin().getZ() - worldPosition.getBlockZ()
+                );
+            case SOUTH:
+                return new Vector(
+                        this.getOrigin().getX() - worldPosition.getBlockX(),
+                        worldPosition.getBlockY() - this.getOrigin().getY(),
+                        worldPosition.getBlockZ() - this.getOrigin().getZ()
+                );
+            case EAST:
+                return new Vector(
+                        worldPosition.getBlockZ() - this.getOrigin().getZ(),
+                        worldPosition.getBlockY() - this.getOrigin().getY(),
+                        worldPosition.getBlockX() - this.getOrigin().getX()
+                );
+            case WEST:
+                return new Vector(
+                        this.getOrigin().getZ() - worldPosition.getBlockZ(),
+                        worldPosition.getBlockY() - this.getOrigin().getY(),
+                        this.getOrigin().getX() - worldPosition.getBlockX()
+                );
+            default:
+                throw new AssertionError("Unreachable");
+        }
+    }
+
+    /**
+     * Returns the directory for this structure
+     *
+     * @return The directory
+     */
+    public final File getDirectory() {
+        File worldStructureFolder = StructureAPI.getInstance().getStructuresDirectory(getWorld().getName());
+        return new File(worldStructureFolder, String.valueOf(getId()));
+    }
 
     @Override
-    public IWorld getWorld() {
-        return world;
+    public IStructurePlan getStructurePlan() throws StructureException {
+        File planFile = new File(getDirectory(), "structureplan.xml");
+        if(planFile == null) {
+            throw new StructureException("Structure #" + getId() + " doesn't have a plan!");
+        }
+
+        StructurePlanReader reader = new StructurePlanReader();
+        IStructurePlan plan = reader.readFile(planFile);
+
+        return plan;
     }
-  
+
     
+
 }

@@ -18,7 +18,6 @@ package com.chingo247.structureapi.model.zone;
 
 import com.chingo247.structureapi.model.owner.OwnerDomain;
 import com.chingo247.structureapi.model.plot.IPlot;
-import com.chingo247.xplatform.core.IWorld;
 
 /**
  *
@@ -27,8 +26,6 @@ import com.chingo247.xplatform.core.IWorld;
 public interface IConstructionZone extends IPlot {
     
     Long getId();
-    
-    IWorld getWorld();
     
     OwnerDomain getOwnerDomain();
     

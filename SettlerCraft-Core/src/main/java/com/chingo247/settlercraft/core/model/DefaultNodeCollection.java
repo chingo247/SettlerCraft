@@ -56,7 +56,7 @@ public class DefaultNodeCollection<K,T extends IdentifiableNode<K>> implements N
 
     @Override
     public boolean has(T t) {
-        return get(t.getUniqueIndentifier()) != null;
+        return get(t.getUniqueId()) != null;
     }
 
     @Override
@@ -70,7 +70,7 @@ public class DefaultNodeCollection<K,T extends IdentifiableNode<K>> implements N
         if(k != null) {
             for(Iterator<T> it = iterate().iterator(); it.hasNext();) {
                 T next = it.next();
-                if(k.equals(next.getUniqueIndentifier())) {
+                if(k.equals(next.getUniqueId())) {
                     result = next;
                     break;
                 }
@@ -91,14 +91,14 @@ public class DefaultNodeCollection<K,T extends IdentifiableNode<K>> implements N
 
     @Override
     public boolean remove(final T t) {
-        if(t == null || t.getUniqueIndentifier()== null) {
+        if(t == null || t.getUniqueId()== null) {
             return false;
         }
         return NodeHelper.remove(underlyingNode, underlyingNode.getRelationships(relationshipType, direction), type, new IPredicate<T>() {
 
             @Override
             public boolean evaluate(T other) {
-                return Objects.equal(other.getUniqueIndentifier(), t.getUniqueIndentifier());
+                return Objects.equal(other.getUniqueId(), t.getUniqueId());
             }
         });
         

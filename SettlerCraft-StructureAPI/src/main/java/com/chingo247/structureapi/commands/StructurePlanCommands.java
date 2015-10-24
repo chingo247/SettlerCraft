@@ -61,7 +61,7 @@ public class StructurePlanCommands {
     @CommandPermissions({Permissions.SETTLER_OPEN_PLANMENU})
     @Command(aliases = {"plans:menu"}, usage = "/plans:menu", desc = "Opens the plan menu", max = 0)
     public static void openMenu(final CommandContext args, ICommandSender sender, IStructureAPI structureAPI) throws CommandException {
-        if (!structureAPI.getConfig().isPlanMenuEnabled()) {
+        if (!structureAPI.getConfig().isMenuEnabled()) {
             throw new CommandException("Plan menu is not enabled");
         }
         openMenu(structureAPI, (IPlayer) sender, true);
@@ -71,7 +71,7 @@ public class StructurePlanCommands {
     @CommandPermissions({Permissions.SETTLER_OPEN_PLANSHOP})
     @Command(aliases = {"plans:shop"}, usage = "/plans:shop", desc = "Opens the plan shop", max = 0)
     public static void openShop(final CommandContext args, ICommandSender sender, IStructureAPI structureAPI) throws CommandException {
-        if (!structureAPI.getConfig().isPlanShopEnabled()) {
+        if (!structureAPI.getConfig().isShopEnabled()) {
             throw new CommandException("Plan shop is not enabled");
         }
         openMenu(structureAPI, (IPlayer) sender, false);

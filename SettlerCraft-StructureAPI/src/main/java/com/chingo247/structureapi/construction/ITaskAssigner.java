@@ -16,6 +16,7 @@
  */
 package com.chingo247.structureapi.construction;
 
+import com.chingo247.structureapi.StructureException;
 import com.chingo247.structureapi.construction.options.Options;
 import com.sk89q.worldedit.EditSession;
 import java.io.IOException;
@@ -27,6 +28,6 @@ import java.util.UUID;
  */
 public interface ITaskAssigner {
     
-    public void assignTasks(EditSession session, UUID player, ConstructionEntry entry, Options buildOptions) throws ConstructionException, IOException;
+    public void assignTasks(EditSession session, UUID player, ConstructionEntry entry, Options buildOptions) throws StructureException, IOException;
     
 }

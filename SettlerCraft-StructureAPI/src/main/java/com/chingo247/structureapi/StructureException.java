@@ -20,7 +20,7 @@ package com.chingo247.structureapi;
  *
  * @author Chingo
  */
-public class StructureException extends Exception {
+public class StructureException extends PlotException {
 
     public StructureException(String message) {
         super(message);

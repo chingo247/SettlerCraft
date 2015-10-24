@@ -16,6 +16,7 @@
  */
 package com.chingo247.structureapi.model.plot;
 
+import com.chingo247.settlercraft.core.model.interfaces.IWorld;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import org.neo4j.graphdb.Node;
@@ -32,6 +33,10 @@ public interface IPlot {
     
     Vector getMax();
     
+    String getPlotType();
+    
     CuboidRegion getCuboidRegion();
+    
+    <T extends IWorld> T getWorld();
     
 }

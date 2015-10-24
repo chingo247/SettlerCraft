@@ -38,6 +38,7 @@ import com.chingo247.structureapi.model.owner.Ownership;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IColors;
 import com.chingo247.xplatform.core.IPlayer;
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import com.sk89q.worldedit.entity.Player;
@@ -143,14 +144,14 @@ public class ConstructionManager implements IConstructionManager {
         ConstructionEntry entry = getEntry(structure);
         stop(entry);
     }
-    
+
     @Override
     public void stop(ConstructionEntry entry) throws ConstructionException {
         Structure structure = entry.getStructure();
         if (structure.getConstructionStatus() == ConstructionStatus.REMOVED) {
             throw new ConstructionException("Can't stop a removed structure...");
         }
-        if(entry == null) {
+        if (entry == null) {
             throw new ConstructionException("Unable to stop structure #" + structure.getId() + ": No active tasks,,,");
         }
         entry.purge();
@@ -162,17 +163,13 @@ public class ConstructionManager implements IConstructionManager {
         ConstructionEntry entry = getEntry(structure);
         perform(session, player, entry, assigner, options);
     }
-    
-    
-    
 
     @Override
     public void perform(final AsyncEditSession session, final UUID player, final ConstructionEntry entry, final ITaskAssigner assigner, final Options options) throws ConstructionException {
-        if(entry.getStructure().getConstructionStatus() == ConstructionStatus.REMOVED) {
+        if (entry.getStructure().getConstructionStatus() == ConstructionStatus.REMOVED) {
             throw new ConstructionException("Can't perform tasks on a removed structure");
         }
-        
-        
+
         // Perform async
         executor.execute(new Runnable() {
 
@@ -197,71 +194,91 @@ public class ConstructionManager implements IConstructionManager {
 
                         @Override
                         public void run() {
-                            try {
+                            Transaction tx = null;
+                            try  {
+                                tx = graph.beginTx();
                                 System.out.println("[ConstructionManager]: run build async 2");
-                                Iterable<Structure> structures = null;
 
                                 // Traverse the structures from the database/graph
-                                try (Transaction tx = graph.beginTx()) {
-                                    
-                                    TraversalDescription traversal = graph.traversalDescription()
-                                            .relationships(RelTypes.SUBSTRUCTURE_OF, Direction.INCOMING);
-                                    
-                                            if(options.isTraversingReversed()) {
-                                                traversal = traversal.reverse();
-                                            }
-                                            if(options.getTraveral() == StructureTraversal.BREADTH_FIRST) {
-                                                traversal = traversal.breadthFirst();
-                                            } else {
-                                                traversal = traversal.depthFirst();
-                                            }
-                                            
-                                            Iterable<Node> nodeIt = traversal
-                                                    .traverse(entry.getStructure().getNode())
-                                                    .nodes();
-                                                    
-                                            structures = NodeHelper.makeIterable(nodeIt, Structure.class);
-                                    
-                                    tx.success();
+                                TraversalDescription traversal = graph.traversalDescription()
+                                        .relationships(RelTypes.SUBSTRUCTURE_OF, Direction.INCOMING);
+
+                                if (options.isTraversingReversed()) {
+                                    traversal = traversal.reverse();
+                                }
+                                if (options.getTraveral() == StructureTraversal.BREADTH_FIRST) {
+                                    traversal = traversal.breadthFirst();
+                                } else {
+                                    traversal = traversal.depthFirst();
+                                }
+
+                                Iterable<Node> nodes = traversal
+                                        .traverse(entry.getStructure().getNode())
+                                        .nodes();
+                                
+                                List<Structure> structures = Lists.newArrayList();
+                                for(Node structureNode : nodes) {
+                                    structures.add(new Structure(structureNode));
                                 }
                                 
-                                if(structures != null) {
+                                if (structures != null) {
 
                                     System.out.println("[ConstructionManager]: Purging existing tasks");
                                     // Purge existing tasks from entries
                                     for (Structure s : structures) {
+                                        System.out.println("[ConstructionManager]: Stopping " + s.getId());
                                         stop(s);
                                     }
 
+                                    System.out.println("[ConstructionManager]: Has nodes ? " + nodes.iterator().hasNext());
                                     System.out.println("[ConstructionManager]: Asigning new tasks");
-                                    
+
                                     // Build the links between the entries, similar to the linkedlist
                                     // Where each entry knows it's next and previous entry
                                     ConstructionEntry prevEntry = null;
-                                    try (Transaction tx = graph.beginTx()) {
-                                        for (Structure s : structures) {
-                                            ConstructionEntry e = getEntry(s);
-                                            assigner.assignTasks(session, player, e, options);
-
-                                            if (prevEntry != null) {
-                                                prevEntry.setNextEntry(e);
-                                            }
+                                    
+                                    ConstructionEntry firstEntry = null;
+                                    for (Structure s : structures) {
+                                        System.out.println("[ConstructionManager]: Asigning to " + s.getId() + " with " + assigner.getClass().getSimpleName());
+                                        ConstructionEntry currentEntry = getEntry(s);
+                                        if(firstEntry == null) {
+                                            firstEntry = currentEntry;
                                         }
-                                        tx.success();
+                                        assigner.assignTasks(session, player, currentEntry, options);
+
+                                        if (prevEntry != null) {
+                                            prevEntry.setNextEntry(currentEntry);
+                                        }
                                     }
 
                                     // Fire first structure entry
                                     System.out.println("[ConstructionManager]: Starting tasks!");
-                                    entry.proceed();
+                                    if(firstEntry != null) {
+                                        firstEntry.proceed();
+                                    }
+                                    
+                                    
+
                                 }
+                                tx.success();
                             } catch (ConstructionException ex) {
+                                if(tx != null) {
+                                    tx.failure();
+                                }
                                 Player ply = SettlerCraft.getInstance().getPlayer(player);
                                 if (ply != null) {
                                     ply.printError(ex.getMessage());
                                 }
                             } catch (Exception ex) {
+                                if(tx != null) {
+                                    tx.failure();
+                                }
                                 // Catch everything else or it will disappear in the abyss
                                 Logger.getLogger(StructureAPI.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                            } finally {
+                                if(tx != null) {
+                                    tx.close();
+                                }
                             }
                         }
                     });
@@ -273,8 +290,7 @@ public class ConstructionManager implements IConstructionManager {
             }
         });
     }
-    
-    
+
     @Subscribe
     @AllowConcurrentEvents
     public void onJobAdded(StructureJobAddedEvent addedEvent) {
@@ -290,19 +306,19 @@ public class ConstructionManager implements IConstructionManager {
                         Structure structure = null;
                         try (Transaction tx = graph.beginTx()) {
                             StructureNode sn = structureRepository.findById(structureId);
-                            if(sn != null) {
+                            if (sn != null) {
                                 sn.setStatus(ConstructionStatus.QUEUED);
                                 structure = new Structure(sn);
                             }
                             tx.success();
                         }
-                        
-                        if(structure != null) {
+
+                        if (structure != null) {
                             EventManager.getInstance().getEventBus().post(new StructureStateChangeEvent(structure));
                             if (uuid != null) {
                                 IPlayer player = platform.getServer().getPlayer(uuid);
                                 if (player != null) {
-                                    String status = getStatusString(ConstructionStatus.QUEUED, ConstructionStatus.QUEUED.name(), new Structure(structure.getNode()));
+                                    String status = getStatusString(ConstructionStatus.QUEUED, ConstructionStatus.QUEUED.name(), structure);
                                     player.sendMessage(status);
                                 }
                             }
@@ -424,7 +440,7 @@ public class ConstructionManager implements IConstructionManager {
 
             List<Ownership> ownerships = sn.getOwnerDomain().getOwnerships();
             for (Ownership ownership : ownerships) {
-                IPlayer ply = platform.getPlayer(ownership.getOwner().getUniqueIndentifier());
+                IPlayer ply = platform.getPlayer(ownership.getOwner().getUniqueId());
                 if (ply != null) {
                     owners.add(ply);
                 }

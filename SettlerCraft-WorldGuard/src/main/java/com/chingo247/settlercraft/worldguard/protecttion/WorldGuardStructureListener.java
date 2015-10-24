@@ -20,7 +20,7 @@ import com.chingo247.structureapi.event.StructureAddOwnerEvent;
 import com.chingo247.structureapi.event.StructureCreateEvent;
 import com.chingo247.structureapi.event.StructureRemoveEvent;
 import com.chingo247.structureapi.event.StructureRemoveOwnerEvent;
-import com.chingo247.structureapi.model.owner.StructureOwnerType;
+import com.chingo247.structureapi.model.owner.OwnerType;
 import com.chingo247.structureapi.model.structure.IStructureRepository;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.model.structure.StructureRepository;
@@ -59,9 +59,9 @@ public class WorldGuardStructureListener {
     @Subscribe
     public void onStructureAddOwner(StructureAddOwnerEvent addOwnerEvent) {
         final UUID player = addOwnerEvent.getAddedOwner();
-        final StructureOwnerType type = addOwnerEvent.getOwnerType();
+        final OwnerType type = addOwnerEvent.getOwnerType();
         final Structure structure = addOwnerEvent.getStructure();
-        if(type == StructureOwnerType.MEMBER) {
+        if(type == OwnerType.MEMBER) {
             worldGuardHelper.addMember(player, structure);
         } else {
             worldGuardHelper.removeMember(player, structure);
@@ -72,9 +72,9 @@ public class WorldGuardStructureListener {
     @Subscribe
     public void onStructureRemoveOwner(StructureRemoveOwnerEvent removeOwnerEvent) {
         final UUID player = removeOwnerEvent.getRemovedOwner();
-        final StructureOwnerType type = removeOwnerEvent.getOwnerType();
+        final OwnerType type = removeOwnerEvent.getOwnerType();
         final Structure structure = removeOwnerEvent.getStructure();
-        if(type == StructureOwnerType.MEMBER)  {
+        if(type == OwnerType.MEMBER)  {
             worldGuardHelper.removeMember(player, structure);
         } else {
             worldGuardHelper.removeOwner(player, structure);

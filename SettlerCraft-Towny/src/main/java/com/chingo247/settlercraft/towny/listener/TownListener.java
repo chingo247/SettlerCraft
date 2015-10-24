@@ -5,9 +5,11 @@
  */
 package com.chingo247.settlercraft.towny.listener;
 
-import com.chingo247.structurecraft.model.world.StructureWorldNode;
-import com.chingo247.structurecraft.model.world.StructureWorldRepository;
 import com.chingo247.settlercraft.towny.plugin.SettlerCraftTowny;
+import com.chingo247.structureapi.model.structure.IStructureRepository;
+import com.chingo247.structureapi.model.structure.StructureRepository;
+import com.chingo247.structureapi.model.world.StructureWorld;
+import com.chingo247.structureapi.model.world.StructureWorldRepository;
 import com.palmergames.bukkit.towny.TownySettings;
 import com.palmergames.bukkit.towny.event.NewTownEvent;
 import com.palmergames.bukkit.towny.event.TownClaimEvent;
@@ -43,10 +45,12 @@ public class TownListener implements Listener {
     private final GraphDatabaseService graph;
     private final ExecutorService executor;
     private final StructureWorldRepository worldRepository;
+    private final IStructureRepository structureRepository;
 
     public TownListener(GraphDatabaseService graph, ExecutorService executor) {
         this.graph = graph;
         this.executor = executor;
+        this.structureRepository = new StructureRepository(graph);
         this.worldRepository = new StructureWorldRepository(graph);
     }
 
@@ -117,24 +121,19 @@ public class TownListener implements Listener {
             World w = Bukkit.getWorld(t.getWorld().getName());
             
             try (Transaction tx = graph.beginTx()){
-            StructureWorldNode sw = worldRepository.findByUUID(w.getUID());
-            WorldCoord coord = tb.getWorldCoord();
-            
-            Vector2D pos = SettlerCraftTowny.translate(coord);
-            
-            Vector min = new BlockVector(pos.getX(), 0, pos.getZ());
-            Vector max = new BlockVector(pos.getX() + blockSize, 128, pos.getZ() + blockSize);
-            
-            hasStructures = sw.hasStructuresWithin(new CuboidRegion(min, max));
-            tx.success();
+                WorldCoord coord = tb.getWorldCoord();
+
+                Vector2D pos = SettlerCraftTowny.translate(coord);
+
+                Vector min = new BlockVector(pos.getX(), 0, pos.getZ());
+                Vector max = new BlockVector(pos.getX() + blockSize, 128, pos.getZ() + blockSize);
+
+                hasStructures = structureRepository.hasStructuresWithin(w.getUID(), new CuboidRegion(min, max));
+                tx.success();
             }
             
             if(hasStructures) {
-                    
-//                    t.getWorld().removeTownBlock(tb);
-//                    t.getWorld().removeTown(t);
                     TownyUniverse.getDataSource().removeTown(t);
-                
                 if(player != null) {
                     player.sendMessage(ChatColor.RED + "Removed town '" + t.getName() + "' because it was placed inside a structure");
                 }
@@ -162,17 +161,16 @@ public class TownListener implements Listener {
             World w = Bukkit.getWorld(t.getWorld().getName());
             
             try (Transaction tx = graph.beginTx()){
-            StructureWorldNode sw = worldRepository.findByUUID(w.getUID());
-            TownBlock tb = claimEvent.getTownBlock();
-            WorldCoord coord = tb.getWorldCoord();
+                TownBlock tb = claimEvent.getTownBlock();
+                WorldCoord coord = tb.getWorldCoord();
+
+                Vector2D pos = SettlerCraftTowny.translate(coord);
+
+                Vector min = new BlockVector(pos.getX(), 0, pos.getZ());
+                Vector max = new BlockVector(pos.getX() + blockSize, 128, pos.getZ() + blockSize);
             
-            Vector2D pos = SettlerCraftTowny.translate(coord);
-            
-            Vector min = new BlockVector(pos.getX(), 0, pos.getZ());
-            Vector max = new BlockVector(pos.getX() + blockSize, 128, pos.getZ() + blockSize);
-            
-            hasStructures = sw.hasStructuresWithin(new CuboidRegion(min, max));
-            tx.success();
+                hasStructures = structureRepository.hasStructuresWithin(w.getUID(), new CuboidRegion(min, max));
+                tx.success();
             }
             
             if(hasStructures) {

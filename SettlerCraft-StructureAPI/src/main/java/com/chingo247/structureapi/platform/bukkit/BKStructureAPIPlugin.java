@@ -34,6 +34,7 @@ import com.chingo247.structureapi.commands.StructureCommands;
 import com.chingo247.structureapi.commands.StructurePlanCommands;
 import com.chingo247.settlercraft.core.commands.util.PluginCommandManager;
 import com.chingo247.structureapi.plan.util.PlanGenerator;
+import com.chingo247.structureapi.platform.ConfigProvider;
 import com.chingo247.xplatform.platforms.bukkit.BukkitConsoleSender;
 import com.chingo247.xplatform.platforms.bukkit.BukkitPlayer;
 import com.chingo247.xplatform.platforms.bukkit.BukkitPlugin;
@@ -44,6 +45,7 @@ import com.sk89q.minecraft.util.commands.CommandUsageException;
 import com.sk89q.minecraft.util.commands.MissingNestedCommandException;
 import com.sk89q.minecraft.util.commands.WrappedCommandException;
 import java.io.File;
+import java.io.IOException;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,7 +70,7 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
     private static final Logger LOGGER = Logger.getLogger(BKStructureAPIPlugin.class.getName());
     
     private IEconomyProvider economyProvider;
-    private BKConfigProvider configProvider;
+    private ConfigProvider configProvider;
     private static BKStructureAPIPlugin instance;
     private GraphDatabaseService graph;
     private PluginCommandManager commands;
@@ -124,15 +126,13 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         // Get GraphDatabase
         graph = SettlerCraft.getInstance().getNeo4j();
         
-        // Initialize Config
-        configProvider = new BKConfigProvider();
         try {
-            configProvider.load();
-        } catch (SettlerCraftException ex) {
-            java.util.logging.Logger.getLogger(BKStructureAPIPlugin.class.getName()).log(Level.SEVERE, null, ex);
-            setEnabled(false);
-            return;
+            // Initialize Config
+            configProvider = ConfigProvider.loadOrCreateDefault(new File(getDataFolder(), "config.yml"));
+        } catch (IOException ex) {
+            Logger.getLogger(BKStructureAPIPlugin.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
 
         // Register plugin & ConfigProvider
         StructureAPI structureAPI = (StructureAPI) StructureAPI.getInstance();
@@ -175,7 +175,7 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         
 //        // Setup HolographicDisplays (if available)
         
-        if(configProvider.useHolograms()) {
+        if(configProvider.isUseHolograms()) {
             StructureHologramManager.getInstance().inititialize(new BukkitPlugin(this));
         }
         
@@ -238,7 +238,7 @@ public class BKStructureAPIPlugin extends JavaPlugin implements IPlugin {
         return instance;
     }
 
-    public BKConfigProvider getConfigProvider() {
+    public ConfigProvider getConfigProvider() {
         return configProvider;
     }
 

@@ -28,7 +28,9 @@ public enum RelTypes implements RelationshipType {
     
     SUBSTRUCTURE_OF,
     
-    OWNED_BY
+    OWNED_BY,
+    
+    PROTECTED_BY
    
     
 }

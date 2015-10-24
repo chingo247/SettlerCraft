@@ -14,14 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction.asyncworldedit;
+package com.chingo247.structureapi;
 
 /**
  *
  * @author Chingo
  */
-public interface AsyncPlacementCallback {
-    
-    public void onJobAdded(int jobId);
+public class ConstructionZoneException extends StructureAPIException {
+
+    public ConstructionZoneException(String message) {
+        super(message);
+    }
     
 }

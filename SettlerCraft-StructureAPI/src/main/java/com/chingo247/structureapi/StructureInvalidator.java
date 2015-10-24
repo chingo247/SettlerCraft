@@ -153,7 +153,7 @@ public class StructureInvalidator {
             }
 
             if (!structureNodes.isEmpty()) {
-                System.out.println("[SettlerCraft]: Restoring " + structureNodes.size() + " from '" + world.getName() + "' which have been deleted after the last world save ");
+                System.out.println("[SettlerCraft]: Restoring " + structureNodes.size() + " structures from '" + world.getName() + "' which have been deleted after the last world save ");
             } else {
                 System.out.println("[SettlerCraft]: Nothing to restore");
                 tx.success();
@@ -226,7 +226,7 @@ public class StructureInvalidator {
                         List<Settler> masters = ownerDomain.getOwners(OwnerType.MASTER);
                         double pricePerOwner = sn.getPrice() / masters.size();
                         for (BaseSettlerNode settler : masters) {
-                            economy.give(settler.getUniqueIndentifier(), pricePerOwner);
+                            economy.give(settler.getUniqueId(), pricePerOwner);
                             System.out.println("[SettlerCraft]: Refunded " + ShopUtil.valueString(pricePerOwner) + " to " + settler.getName()
                                     + " for structure #" + sn.getId() + " (" + ShopUtil.valueString(sn.getPrice()) + ")");
                         }

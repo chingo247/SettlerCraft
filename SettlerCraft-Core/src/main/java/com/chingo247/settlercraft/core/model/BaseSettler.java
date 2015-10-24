@@ -29,7 +29,7 @@ public class BaseSettler implements IBaseSettler {
     public BaseSettler(BaseSettlerNode settlerNode) {
         this.underlyingNode = settlerNode.getNode();
         this.id = settlerNode.getId();
-        this.uuid = settlerNode.getUniqueIndentifier();
+        this.uuid = settlerNode.getUniqueId();
         this.name = settlerNode.getName();
     }
 
@@ -39,7 +39,7 @@ public class BaseSettler implements IBaseSettler {
     }
 
     @Override
-    public UUID getUniqueIndentifier() {
+    public UUID getUniqueId() {
         return uuid;
     }
 

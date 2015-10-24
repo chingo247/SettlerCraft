@@ -35,10 +35,15 @@ public class Ownership implements IOwnership {
         this.rel = relation;
     }
     
+    @Override
     public Node getOtherNode() {
         return rel.getOtherNode(owner.getNode());
     }
 
+    @Override
+    public void setOwnerType(OwnerType ownerType) {
+        rel.setProperty("Type", ownerType.getTypeId()); 
+    }
 
     @Override
     public Settler getOwner() {

@@ -17,19 +17,17 @@
 package com.chingo247.structureapi;
 
 import com.chingo247.structureapi.model.zone.IConstructionZone;
-import com.chingo247.xplatform.core.IPlayer;
 import com.sk89q.worldedit.regions.CuboidRegion;
 
 /**
  *
  * @author ching
  */
-public interface IConstructionZoneManager {
-    
-    void checkWorldRestrictions(CuboidRegion region) throws RestrictionException;
+public interface IConstructionZoneManager extends IPlotManager<IConstructionZone> {
     
     void checkConstructionZonePlacingRestrictions(CuboidRegion region) throws RestrictionException;
     
-    IConstructionZone createZone(CuboidRegion region, IPlayer player) throws RestrictionException ;
+    void remove(IConstructionZone zone);
     
+    void remove(long id);
 }

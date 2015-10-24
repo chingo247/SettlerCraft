@@ -19,7 +19,7 @@ package com.chingo247.structureapi.model.zone;
 import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.settlercraft.core.persistence.neo4j.NodeHelper;
 import com.chingo247.structureapi.model.RelTypes;
-import com.chingo247.structureapi.model.plot.Plot;
+import com.chingo247.structureapi.model.plot.PlotNode;
 import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.xplatform.core.ILocation;
@@ -43,42 +43,26 @@ import org.neo4j.graphdb.Result;
  */
 public class ConstructionZoneRepository implements IConstructionZoneRepository {
 
-    private boolean checked;
     private final GraphDatabaseService graph;
 
     public ConstructionZoneRepository(GraphDatabaseService graph) {
-        this.checked = false;
         this.graph = graph;
     }
 
     private long nextId() {
-        if (!checked) {
-            Result r = graph.execute("MATCH (sid: ID_GENERATOR {name:'CONSTRUCTION_ZONE_ID'}) "
-                    + "RETURN sid "
-                    + "LIMIT 1");
-            if (!r.hasNext()) {
-                graph.execute("CREATE (sid: ID_GENERATOR {name:'CONSTRUCTION_ZONE_ID', nextId: 1})");
-                checked = true;
-                return 1;
-            }
-            checked = true;
-        }
-
-        // Work-around for getting the next Id
-        // Sets the lock at this node by removing a non-existent property
-        String idQuery = "MATCH (sid:ID_GENERATOR {name:'CONSTRUCTION_ZONE_ID'}) "
-                + "REMOVE sid.lock " // NON-EXISTENT PROPERTY
-                + "SET sid.nextId = sid.nextId + 1 "
-                + "RETURN sid.nextId as nextId";
+        String idQuery = "MERGE (sid: ID_GENERATOR {name:'CONSTRUCTION_ZONE_ID'}) "
+                       + "ON CREATE SET sid.nextId = 1 "
+                       + "ON MATCH SET sid.nextId = sid.nextId + 1 "
+                       + "RETURN sid.nextId as nextId";
+        
         Result r = graph.execute(idQuery);
-        long id = (long) r.next().get("nextId");
-
+        long id = (Long) r.next().get("nextId");
         return id;
     }
 
     @Override
-    public ConstructionZone findById(long id) {
-        ConstructionZone zone = null;
+    public ConstructionZoneNode findById(long id) {
+        ConstructionZoneNode zone = null;
         Map<String, Object> params = Maps.newHashMap();
         params.put("id", id);
 
@@ -90,14 +74,14 @@ public class ConstructionZoneRepository implements IConstructionZoneRepository {
 
         while (result.hasNext()) {
             Node n = (Node) result.next().get("zone");
-            zone = new ConstructionZone(n);
+            zone = new ConstructionZoneNode(n);
             break;
         }
         return zone;
     }
 
     @Override
-    public ConstructionZone findOnPosition(ILocation location) {
+    public ConstructionZoneNode findOnPosition(ILocation location) {
         return findOnPosition(
                 location.getWorld().getUUID(),
                 new BlockVector(location.getBlockX(), location.getBlockY(), location.getBlockZ())
@@ -105,18 +89,18 @@ public class ConstructionZoneRepository implements IConstructionZoneRepository {
     }
 
     @Override
-    public ConstructionZone findOnPosition(UUID worldUUID, Vector position) {
-        ConstructionZone constructionZone = null;
+    public ConstructionZoneNode findOnPosition(UUID worldUUID, Vector position) {
+        ConstructionZoneNode constructionZone = null;
         Map<String, Object> params = Maps.newHashMap();
         params.put("worldId", worldUUID.toString());
         String query
                 = "MATCH ( world: " + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
                 + " WITH world "
-                + " MATCH (world)<-[:" + RelTypes.WITHIN + "]-(s:" + ConstructionZone.LABEL + ")"
+                + " MATCH (world)<-[:" + RelTypes.WITHIN + "]-(s:" + ConstructionZoneNode.LABEL + ")"
                 + " WHERE "
-                + " AND s." + ConstructionZone.MAX_X_PROPERTY + " >= " + position.getBlockX() + " AND s." + ConstructionZone.MIN_X_PROPERTY + " <= " + position.getBlockX()
-                + " AND s." + ConstructionZone.MAX_Y_PROPERTY + " >= " + position.getBlockY() + " AND s." + ConstructionZone.MIN_Y_PROPERTY + " <= " + position.getBlockY()
-                + " AND s." + ConstructionZone.MAX_Z_PROPERTY + " >= " + position.getBlockZ() + " AND s." + ConstructionZone.MIN_Z_PROPERTY + " <= " + position.getBlockZ()
+                + " AND s." + ConstructionZoneNode.MAX_X_PROPERTY + " >= " + position.getBlockX() + " AND s." + ConstructionZoneNode.MIN_X_PROPERTY + " <= " + position.getBlockX()
+                + " AND s." + ConstructionZoneNode.MAX_Y_PROPERTY + " >= " + position.getBlockY() + " AND s." + ConstructionZoneNode.MIN_Y_PROPERTY + " <= " + position.getBlockY()
+                + " AND s." + ConstructionZoneNode.MAX_Z_PROPERTY + " >= " + position.getBlockZ() + " AND s." + ConstructionZoneNode.MIN_Z_PROPERTY + " <= " + position.getBlockZ()
                 + " RETURN s as zone"
                 + " LIMIT 1";
 
@@ -124,14 +108,14 @@ public class ConstructionZoneRepository implements IConstructionZoneRepository {
         while (result.hasNext()) {
             Map<String, Object> map = result.next();
             Node n = (Node) map.get("zone");
-            constructionZone = new ConstructionZone(n);
+            constructionZone = new ConstructionZoneNode(n);
         }
         return constructionZone;
     }
 
     @Override
-    public Collection<ConstructionZone> findWithin(UUID worldUUID, CuboidRegion searchArea, int limit) {
-        List<ConstructionZone> zones = new ArrayList<>();
+    public Collection<ConstructionZoneNode> findWithin(UUID worldUUID, CuboidRegion searchArea, int limit) {
+        List<ConstructionZoneNode> zones = new ArrayList<>();
 
         Map<String, Object> params = Maps.newHashMap();
         params.put("worldId", worldUUID.toString());
@@ -145,11 +129,11 @@ public class ConstructionZoneRepository implements IConstructionZoneRepository {
         String query
                 = "MATCH (world:" + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": {worldId} })"
                 + " WITH world "
-                + " MATCH (world)<-[:" + RelTypes.WITHIN.name() + "]-(s:" + ConstructionZone.LABEL + ")"
+                + " MATCH (world)<-[:" + RelTypes.WITHIN.name() + "]-(s:" + ConstructionZoneNode.LABEL + ")"
                 + " WHERE "
-                + " s." + ConstructionZone.MAX_X_PROPERTY + " >= " + min.getBlockX() + " AND s." + ConstructionZone.MIN_X_PROPERTY + " <= " + max.getBlockX()
-                + " AND s." + ConstructionZone.MAX_Y_PROPERTY + " >= " + min.getBlockY() + " AND s." + ConstructionZone.MIN_Y_PROPERTY + " <= " + max.getBlockY()
-                + " AND s." + ConstructionZone.MAX_Z_PROPERTY + " >= " + min.getBlockZ() + " AND s." + ConstructionZone.MIN_Z_PROPERTY + " <= " + max.getBlockZ()
+                + " s." + ConstructionZoneNode.MAX_X_PROPERTY + " >= " + min.getBlockX() + " AND s." + ConstructionZoneNode.MIN_X_PROPERTY + " <= " + max.getBlockX()
+                + " AND s." + ConstructionZoneNode.MAX_Y_PROPERTY + " >= " + min.getBlockY() + " AND s." + ConstructionZoneNode.MIN_Y_PROPERTY + " <= " + max.getBlockY()
+                + " AND s." + ConstructionZoneNode.MAX_Z_PROPERTY + " >= " + min.getBlockZ() + " AND s." + ConstructionZoneNode.MIN_Z_PROPERTY + " <= " + max.getBlockZ()
                 + " RETURN s";
 
         if (limit > 0) {
@@ -160,7 +144,7 @@ public class ConstructionZoneRepository implements IConstructionZoneRepository {
         while (result.hasNext()) {
             Map<String, Object> map = result.next();
             for (Object o : map.values()) {
-                zones.add(new ConstructionZone((Node) o));
+                zones.add(new ConstructionZoneNode((Node) o));
             }
         }
 
@@ -168,17 +152,17 @@ public class ConstructionZoneRepository implements IConstructionZoneRepository {
     }
 
     @Override
-    public Iterable<ConstructionZone> findAll() {
-        return NodeHelper.makeIterable(graph.findNodes(ConstructionZone.label()), ConstructionZone.class);
+    public Iterable<ConstructionZoneNode> findAll() {
+        return NodeHelper.makeIterable(graph.findNodes(ConstructionZoneNode.label()), ConstructionZoneNode.class);
     }
 
     @Override
-    public ConstructionZone add(CuboidRegion region) {
+    public ConstructionZoneNode add(CuboidRegion region) {
         Vector min = region.getMinimumPoint();
         Vector max = region.getMaximumPoint();
-        Node n = graph.createNode(Plot.plotLabel(), ConstructionZone.label());
-        n.setProperty(ConstructionZone.ID_PROPERTY, nextId());
-        ConstructionZone zone = new ConstructionZone(n);
+        Node n = graph.createNode(PlotNode.plotLabel(), ConstructionZoneNode.label());
+        n.setProperty(ConstructionZoneNode.ID_PROPERTY, nextId());
+        ConstructionZoneNode zone = new ConstructionZoneNode(n);
         zone.setAccessType(AccessType.PRIVATE);
         zone.setMinX(min.getBlockX());
         zone.setMinY(min.getBlockY());
@@ -191,14 +175,14 @@ public class ConstructionZoneRepository implements IConstructionZoneRepository {
 
     @Override
     public void delete(long id) {
-        ConstructionZone zone = findById(id);
+        ConstructionZoneNode zone = findById(id);
         if (zone != null) {
             delete(zone);
         }
     }
 
     @Override
-    public void delete(ConstructionZone zone) {
+    public void delete(ConstructionZoneNode zone) {
         Node n = zone.getNode();
         for(Relationship rel : n.getRelationships()) {
             rel.delete();

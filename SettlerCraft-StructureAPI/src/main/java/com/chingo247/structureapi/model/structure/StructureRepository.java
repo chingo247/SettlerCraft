@@ -8,14 +8,12 @@ package com.chingo247.structureapi.model.structure;
 import com.chingo247.settlercraft.core.Direction;
 import com.chingo247.settlercraft.core.model.WorldNode;
 import com.chingo247.structureapi.model.RelTypes;
-import com.chingo247.structureapi.model.plot.Plot;
+import com.chingo247.structureapi.model.plot.PlotNode;
 import com.chingo247.structureapi.model.settler.Settler;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldedit.world.World;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -35,7 +33,6 @@ public class StructureRepository implements IStructureRepository {
 
     private static final Logger LOG = Logger.getLogger(IStructureRepository.class.getSimpleName());
     private final GraphDatabaseService graph;
-    private boolean checked = false;
 
     public StructureRepository(GraphDatabaseService graph) {
         this.graph = graph;
@@ -63,34 +60,20 @@ public class StructureRepository implements IStructureRepository {
     }
 
     private long nextId() {
-        if (!checked) {
-            Result r = graph.execute("MATCH (sid: ID_GENERATOR {name:'STRUCTURE_ID'}) "
-                    + "RETURN sid "
-                    + "LIMIT 1");
-            if (!r.hasNext()) {
-                graph.execute("CREATE (sid: ID_GENERATOR {name:'STRUCTURE_ID', nextId: 1})");
-                checked = true;
-                return 1;
-            }
-            checked = true;
-        }
-
-        // Work-around for getting the next Id
-        // Sets the lock at this node by removing a non-existent property
-        String idQuery = "MATCH (sid:ID_GENERATOR {name:'STRUCTURE_ID'}) "
-                + "REMOVE sid.lock " // NON-EXISTENT PROPERTY
-                + "SET sid.nextId = sid.nextId + 1 "
-                + "RETURN sid.nextId as nextId";
+        String idQuery = "MERGE (sid: ID_GENERATOR {name:'STRUCTURE_ID'}) "
+                       + "ON CREATE SET sid.nextId = 1 "
+                       + "ON MATCH SET sid.nextId = sid.nextId + 1 "
+                       + "RETURN sid.nextId as nextId";
+        
         Result r = graph.execute(idQuery);
-        long id = (long) r.next().get("nextId");
-
+        long id = (Long) r.next().get("nextId");
         return id;
     }
 
     @Override
     public StructureNode addStructure(String name, Vector position, CuboidRegion region, Direction direction, double price) {
         long id = nextId();
-        Node stNode = graph.createNode(StructureNode.label(), DynamicLabel.label(Plot.LABEL_PLOT));
+        Node stNode = graph.createNode(StructureNode.label(), DynamicLabel.label(PlotNode.LABEL_PLOT));
         stNode.setProperty(StructureNode.ID_PROPERTY, id);
         stNode.setProperty(StructureNode.NAME_PROPERTY, name);
         stNode.setProperty(StructureNode.CONSTRUCTION_STATUS_PROPERTY, ConstructionStatus.ON_HOLD.getStatusId());
@@ -315,7 +298,6 @@ public class StructureRepository implements IStructureRepository {
                 + " RETURN s as structure"
                 + " ORDER BY s." + StructureNode.SIZE_PROPERTY + " ASC " // Smallest structure is anchor point for new structure, the new structure must fit within this structure to qualify as substructure
                 + " LIMIT 1";
-        System.out.println("QUERY: " + query);
 
         Result result = graph.execute(query, params);
         while (result.hasNext()) {

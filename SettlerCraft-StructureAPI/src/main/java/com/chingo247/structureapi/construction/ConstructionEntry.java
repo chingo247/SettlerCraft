@@ -43,7 +43,10 @@ public class ConstructionEntry {
         this.executorService = SettlerCraft.getInstance().getExecutor();
     }
 
+  
+    
     public void addTask(StructureTask task) {
+        System.out.println("[ConstructionEntry]: adding " + task.getClass().getSimpleName() + " to structure #" + structure.getId());
         this.tasks.add(task);
     }
 

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.structureapi.construction.asyncworldedit;
+package com.chingo247.structureapi.construction.awe;
 
 import com.chingo247.structureapi.plan.placement.Placement;
 import com.sk89q.worldedit.EditSession;
@@ -26,12 +26,12 @@ import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
  *
  * @author Chingo
  */
-public abstract class AsyncPlacementTask extends SCBaseTask {
+public abstract class AWESilentAsyncTask extends AWESilentBaseTask {
     
     private Placement placement;
 
-    public AsyncPlacementTask(Placement placement, EditSession editSession, PlayerEntry player, String commandName, IBlockPlacer blocksPlacer, SCJobEntry job) {
-        super(editSession, player, commandName, blocksPlacer, job);
+    public AWESilentAsyncTask(Placement placement, EditSession editSession, PlayerEntry player, String commandName, IBlockPlacer blocksPlacer, AWEJobEntry job, IAWECallback callback) {
+        super(editSession, player, commandName, blocksPlacer, job, callback);
         this.placement = placement;
     }
 

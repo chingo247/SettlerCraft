@@ -16,20 +16,36 @@
  */
 package com.chingo247.structureapi;
 
+import com.chingo247.structureapi.model.owner.OwnerDomain;
+import com.chingo247.structureapi.model.owner.OwnerType;
+import com.chingo247.structureapi.model.owner.Ownership;
+import com.chingo247.structureapi.model.plot.IPlot;
+import com.chingo247.structureapi.model.plot.Plot;
+import com.chingo247.structureapi.model.settler.ISettlerRepository;
+import com.chingo247.structureapi.model.settler.Settler;
+import com.chingo247.structureapi.model.settler.SettlerRepositiory;
 import com.chingo247.xplatform.core.ILocation;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
+import java.util.Iterator;
+import java.util.UUID;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
 
 /**
  *
  * @author ching
  */
-public abstract class AbstractPlotManager {
+public abstract class AbstractPlotManager<T extends IPlot> implements IPlotManager<T>{
     
     protected final ConstructionWorld world;
+    protected final ISettlerRepository settlerRepository;
+    protected final GraphDatabaseService graph;
 
-    public AbstractPlotManager(ConstructionWorld world) {
+    public AbstractPlotManager(ConstructionWorld world, GraphDatabaseService graph) {
+        this.graph = graph;
         this.world = world;
+        this.settlerRepository = new SettlerRepositiory(graph);
     }
     
     /**
@@ -37,6 +53,7 @@ public abstract class AbstractPlotManager {
      * @param world The world
      * @param region The affected region
      */
+    @Override
     public void checkWorldRestrictions(CuboidRegion region) throws RestrictionException {
 
         // Below the world?s
@@ -48,6 +65,7 @@ public abstract class AbstractPlotManager {
         if (region.getMaximumPoint().getBlockY() > world.getMaxHeight()) {
             throw new WorldRestrictionException("Will reach above the world's max height (" + world.getMaxHeight()+ ")");
         }
+        
 
         // Check for overlap on the world's 'SPAWN'
         ILocation l = world.getSpawn();
@@ -56,7 +74,50 @@ public abstract class AbstractPlotManager {
             throw new WorldRestrictionException("Area overlaps the world's spawn...");
         }
     } 
+
+    @Override
+    public void removeOwnership(T plot, Iterable<UUID> players) {
+        for(Iterator<UUID> it = players.iterator(); it.hasNext();) {
+            UUID next = it.next();
+            removeOwnership(plot, next);
+        }
+    }
     
+    @Override
+    public void removeOwnership(T plot, UUID player) {
+        updateOwnership(plot, player, null);
+    }
+
+    @Override
+    public void updateOwnership(T plot, UUID player, OwnerType type) {
+        Node node = plot.getNode();
+        OwnerDomain ownerDomain = new OwnerDomain(node);
+        if(type == null) {
+            Ownership ownership = ownerDomain.getOwnership(player);
+            if(ownership != null) {
+                OwnerType ownerType = ownership.getOwnerType();
+                ownership.getRelation().delete();
+                onRemoveOwnership(plot, player, ownerType);
+            }
+        } else {
+            Settler settler = settlerRepository.findByUUID(player);
+            boolean update = ownerDomain.setOwnership(settler, type);
+            if(update) {
+                onUpdateOwnership(plot, player, type);
+            }
+        }
+    }
+
+    @Override
+    public void updateOwnership(T plot, Iterable<UUID> players, OwnerType type) {
+        for(Iterator<UUID> it = players.iterator(); it.hasNext();) {
+             UUID next = it.next();
+             updateOwnership(plot, next, type);
+        }
+    }
+
+    protected abstract void onRemoveOwnership(T plot, UUID player, OwnerType type);
     
+    protected abstract void onUpdateOwnership(T plot, UUID player, OwnerType type);
     
 }

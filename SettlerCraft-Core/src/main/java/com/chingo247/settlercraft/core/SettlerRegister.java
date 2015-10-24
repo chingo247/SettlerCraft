@@ -90,7 +90,7 @@ public class SettlerRegister {
         }
 
         @Override
-        public UUID getUniqueIndentifier() {
+        public UUID getUniqueId() {
             return player.getUniqueId();
         }
 

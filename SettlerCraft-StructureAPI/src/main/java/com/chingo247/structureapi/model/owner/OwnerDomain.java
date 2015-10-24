@@ -52,7 +52,7 @@ public class OwnerDomain {
         Ownership ownership = null;
         for (Relationship rel : underlyingNode.getRelationships(DynamicRelationshipType.withName(Relations.RELATION_OWNED_BY), org.neo4j.graphdb.Direction.OUTGOING)) {
             Settler ownerNode = new Settler(rel.getOtherNode(underlyingNode));
-            if (ownerNode.getUniqueIndentifier().equals(settler)) {
+            if (ownerNode.getUniqueId().equals(settler)) {
                 ownership = new Ownership(ownerNode, rel);
                 break;
             }
@@ -60,26 +60,41 @@ public class OwnerDomain {
         return ownership;
     }
     
-    public void setOwnership(IBaseSettler settler, OwnerType ownerType) {
+    /**
+     * Sets the ownership, if none exists a new one is created, if it does exist the current one is updated
+     * @param settler The Settler of the ownership
+     * @param ownerType The owner type to set, may not be null
+     * @return True if there was an update
+     */
+    public boolean setOwnership(IBaseSettler settler, OwnerType ownerType) {
+        Preconditions.checkNotNull(ownerType, "Ownertype may not be null...");
         // if exists... update it
         for(Ownership o : getOwnerships()) {
-            if(o.getOwner().getUniqueIndentifier().equals(settler.getUniqueIndentifier())) {
-                o.getRelation().setProperty("Type", ownerType.getTypeId());
-                return;
+            if(o.getOwner().getUniqueId().equals(settler.getUniqueId())) {
+                OwnerType type = o.getOwnerType();
+                if(type != ownerType) {
+                    o.getRelation().setProperty("Type", ownerType.getTypeId()); 
+                    return true;
+                } else {
+                    return false;
+                }
             }
         }
         // otherwise create a new one
         Relationship r = underlyingNode.createRelationshipTo(settler.getNode(), DynamicRelationshipType.withName(Relations.RELATION_OWNED_BY));
         r.setProperty("Type", ownerType.getTypeId());
+        return true;
     }
     
+    
+    
     public boolean removeOwnership(IBaseSettler settler) {
-        return removeOwnership(settler.getUniqueIndentifier());
+        return removeOwnership(settler.getUniqueId());
     }
     
     public boolean removeOwnership(UUID settler) {
         for(Ownership o : getOwnerships()) {
-            if(o.getOwner().getUniqueIndentifier().equals(settler)) {
+            if(o.getOwner().getUniqueId().equals(settler)) {
                 o.getRelation().delete();
                 return true;
             }
@@ -90,7 +105,7 @@ public class OwnerDomain {
     public List<Ownership> getOwnerships() {
         List<Ownership> owners = Lists.newArrayList();
         for (Relationship rel : underlyingNode.getRelationships(DynamicRelationshipType.withName(Relations.RELATION_OWNED_BY), org.neo4j.graphdb.Direction.OUTGOING)) {
-            if (rel.hasProperty("Type")) {
+            if (rel.hasProperty("Type") && rel.getOtherNode(underlyingNode).hasLabel(Settler.label())) {
                 Settler ownerNode = new Settler(rel.getOtherNode(underlyingNode));
                 owners.add(new Ownership(ownerNode, rel));
             }

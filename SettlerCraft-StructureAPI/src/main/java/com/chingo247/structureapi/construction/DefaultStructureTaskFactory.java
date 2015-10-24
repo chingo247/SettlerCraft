@@ -19,7 +19,7 @@ package com.chingo247.structureapi.construction;
 import com.chingo247.structureapi.construction.ConstructionManager;
 import com.chingo247.structureapi.construction.ConstructionEntry;
 import com.chingo247.structureapi.construction.IStructureTaskFactory;
-import com.chingo247.structureapi.construction.asyncworldedit.AWEPlacementTask;
+import com.chingo247.structureapi.construction.awe.AWEPlacementTask;
 import com.chingo247.structureapi.construction.backup.BackupTask;
 import com.chingo247.backupapi.core.IBackupAPI;
 import com.chingo247.backupapi.core.io.IWorldPartSnapshot;
@@ -27,6 +27,7 @@ import com.chingo247.structureapi.model.structure.ConstructionStatus;
 import com.chingo247.structureapi.model.structure.Structure;
 import com.chingo247.structureapi.model.structure.StructureNode;
 import com.chingo247.structureapi.StructureAPI;
+import com.chingo247.structureapi.StructureException;
 import com.chingo247.structureapi.plan.placement.BlockPlacement;
 import com.chingo247.structureapi.plan.placement.DemolishingPlacement;
 import com.chingo247.structureapi.plan.placement.Placement;
@@ -37,6 +38,7 @@ import com.chingo247.structureapi.construction.options.BlockPredicate;
 import com.chingo247.structureapi.construction.options.BuildOptions;
 import com.chingo247.structureapi.construction.options.DemolitionOptions;
 import com.chingo247.structureapi.construction.options.Options;
+import com.chingo247.structureapi.plan.IStructurePlan;
 import com.chingo247.structureapi.plan.schematic.FastClipboard;
 import com.chingo247.structureapi.plan.schematic.DefaultSchematic;
 import com.sk89q.jnbt.NBTInputStream;
@@ -49,6 +51,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import org.neo4j.graphdb.Transaction;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
@@ -63,16 +67,18 @@ public class DefaultStructureTaskFactory implements IStructureTaskFactory {
     private static final String FIRST_BACKUP = "restore.snapshot";
     
     @Override
-    public StructureTask build(EditSession session, UUID player, Structure structure) throws ConstructionException {
+    public StructureTask build(EditSession session, UUID player, Structure structure) throws StructureException {
         return build(session, player, structure, new BuildOptions());
     }
 
     @Override
-    public StructureTask build(EditSession session, UUID player, Structure structure, Options options) throws ConstructionException {
+    public StructureTask build(EditSession session, UUID player, Structure structure, Options options) throws StructureException {
         StructureNode sn = new StructureNode(structure.getNode());
 
         // Get the placement and rotate
-        Placement p = structure.getStructurePlan().getPlacement();
+        IStructurePlan plan = structure.getStructurePlan();
+        Placement p = plan.getPlacement();
+        
         if (p instanceof RotationalPlacement) {
             RotationalPlacement rt = (RotationalPlacement) p;
             rt.rotate(structure.getDirection().getRotation());
@@ -106,7 +112,7 @@ public class DefaultStructureTaskFactory implements IStructureTaskFactory {
     }
 
     @Override
-    public StructureTask demolish(EditSession session, UUID player, Structure structure) throws ConstructionException {
+    public StructureTask demolish(EditSession session, UUID player, Structure structure) throws StructureException {
         return demolish(session, player, structure, new DemolitionOptions());
     }
 
@@ -119,7 +125,7 @@ public class DefaultStructureTaskFactory implements IStructureTaskFactory {
      * @return The StructureTask
      */
     @Override
-    public StructureTask demolish(EditSession session, UUID player, Structure structure, Options options) throws ConstructionException {
+    public StructureTask demolish(EditSession session, UUID player, Structure structure, Options options) throws StructureException {
         StructureNode sn = new StructureNode(structure.getNode());
         StructureNode parent = sn.getParent();
         DemolishingPlacement dp;
@@ -127,7 +133,7 @@ public class DefaultStructureTaskFactory implements IStructureTaskFactory {
         
         // If there is no parent or the structure doesn't have a placement inheriting from BlockPlacement
         // Then use the default removal method, which will clear the whole area
-        if(parent == null || (!(parent.getStructurePlan().getPlacement() instanceof BlockPlacement))) {
+        if(parent == null || (!(parent.getStructurePlan() != null && parent.getStructurePlan().getPlacement() instanceof BlockPlacement))) {
             Vector size = region.getMaximumPoint().subtract(region.getMinimumPoint()).add(Vector.ONE);
             dp = new DemolishingPlacement(size);
         } else {

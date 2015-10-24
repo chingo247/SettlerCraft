@@ -18,9 +18,9 @@ package com.chingo247.settlercraft.worldguard.plugin;
 
 import com.chingo247.settlercraft.core.exception.SettlerCraftException;
 import com.chingo247.structureapi.platform.bukkit.BKConfigProvider;
-import com.sk89q.worldedit.util.Direction.Flag;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
+import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
 import java.io.File;
 import java.util.HashMap;
@@ -59,7 +59,7 @@ public class ConfigProvider {
         if (config.getConfigurationSection("structure.default-flags") != null) {
             Map<String, Object> flags = config.getConfigurationSection("structure.default-flags").getValues(false);
             for (Map.Entry<String, Object> entry : flags.entrySet()) {
-                Flag foundFlag = DefaultFlag.fuzzyMatchFlag(entry.getKey());
+                Flag<?> foundFlag = DefaultFlag.fuzzyMatchFlag(entry.getKey());
                 if (foundFlag == null) {
                     throw new SettlerCraftException("Error in SettlerCraft config.yml: Flag '" + entry.getKey() + "' doesn't exist!");
                 } else {

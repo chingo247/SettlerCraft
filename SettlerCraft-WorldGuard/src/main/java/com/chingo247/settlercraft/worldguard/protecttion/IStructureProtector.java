@@ -38,7 +38,7 @@ public interface IStructureProtector extends Service {
     public void protect(Structure structure);
     
     /**
-     * Removes protection from a structure
+     * Removes protection from a structure, requires an active NEO4J transaction
      * @param structure 
      */
     public void removeProtection(Structure structure);

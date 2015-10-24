@@ -109,7 +109,7 @@ public class StructureHologramManager {
 
     public void setHologramProvider(HologramsProvider hologramsProvider) {
         Preconditions.checkNotNull(hologramsProvider);
-        if (this.hologramsProvider == null && StructureAPI.getInstance().getConfig().useHolograms()) {
+        if (this.hologramsProvider == null && StructureAPI.getInstance().getConfig().isUseHolograms()) {
             this.hologramsProvider = hologramsProvider;
             initHolos();
         }
@@ -132,7 +132,7 @@ public class StructureHologramManager {
     @AllowConcurrentEvents
     public void onStructureCreate(StructureCreateEvent structureCreateEvent) {
         try {
-            if (hologramsProvider == null || !StructureAPI.getInstance().getConfig().useHolograms()) {
+            if (hologramsProvider == null || !StructureAPI.getInstance().getConfig().isUseHolograms()) {
                 return;
             }
             final Structure structure = structureCreateEvent.getStructure();
@@ -161,7 +161,7 @@ public class StructureHologramManager {
     @AllowConcurrentEvents
     public void onStructureStateChange(StructureStateChangeEvent changeEvent) {
         try {
-            if (hologramsProvider == null || !StructureAPI.getInstance().getConfig().useHolograms()) {
+            if (hologramsProvider == null || !StructureAPI.getInstance().getConfig().isUseHolograms()) {
                 return;
             }
             final Structure structure = changeEvent.getStructure();

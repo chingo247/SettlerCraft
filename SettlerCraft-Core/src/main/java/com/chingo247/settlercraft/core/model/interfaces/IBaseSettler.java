@@ -37,7 +37,7 @@ public interface IBaseSettler extends IdentifiableNode<UUID>{
      * @return The UUID
      */
     @Override
-    public UUID getUniqueIndentifier();
+    public UUID getUniqueId();
     
     /**
      * The name of this Settler
