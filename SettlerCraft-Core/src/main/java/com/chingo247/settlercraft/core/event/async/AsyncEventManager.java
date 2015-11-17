@@ -18,6 +18,7 @@ package com.chingo247.settlercraft.core.event.async;
 
 import com.chingo247.settlercraft.core.SettlerCraft;
 import com.google.common.eventbus.AsyncEventBus;
+import com.google.common.eventbus.EventBus;
 
 /**
  *
@@ -50,6 +51,10 @@ public class AsyncEventManager {
     
     public void unregister(Object subscriber) {
         asyncEventBus.unregister(subscriber);
+    }
+
+    public EventBus getEventBus() {
+        return asyncEventBus;
     }
      
 }

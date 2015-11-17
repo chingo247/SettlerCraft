@@ -23,14 +23,14 @@
  */
 package com.chingo247.xplatform.platforms.bukkit;
 
-import com.chingo247.xplatform.core.IConsole;
+import com.chingo247.xplatform.core.ICommandSender;
 import com.google.common.base.Preconditions;
 import org.bukkit.command.ConsoleCommandSender;
 
 /**
  * @author Chingo
  */
-public class BukkitConsole implements IConsole {
+public class BukkitConsole implements ICommandSender {
     
     private final ConsoleCommandSender console;
 
@@ -40,8 +40,13 @@ public class BukkitConsole implements IConsole {
     }
 
     @Override
-    public void printMessage(String... message) {
+    public void sendMessage(String... message) {
         console.sendMessage(message);
+    }
+
+    @Override
+    public boolean hasPermission(String permission) {
+        return true; // Console...
     }
     
     

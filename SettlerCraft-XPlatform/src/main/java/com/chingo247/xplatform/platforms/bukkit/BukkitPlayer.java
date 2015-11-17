@@ -45,11 +45,6 @@ public class BukkitPlayer implements IPlayer {
     }
 
     @Override
-    public void sendMessage(String message) {
-        player.sendMessage(message);
-    }
-
-    @Override
     public void sendMessage(String... message) {
         player.sendMessage(message);
     }

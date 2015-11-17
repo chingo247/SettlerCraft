@@ -49,19 +49,9 @@ public interface IPlayer extends ICommandSender {
      */
     public IWorld getWorld();
     
-    /**
-     * Sends a message to the player
-     * @param message The message to send
-     */
-    @Override
-    public void sendMessage(String message);
+   
     
-    /**
-     * Sends a message to the player
-     * @param message The message to send
-     */
-    @Override
-    public void sendMessage(String... message);
+    
     
     /**
      * Gets the yaw of the player

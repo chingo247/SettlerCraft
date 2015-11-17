@@ -28,13 +28,10 @@ package com.chingo247.backupapi.core;
  * @author Chingo
  */
 public interface IChunkManager {
+
+    void save(String world);
     
-    /**
-     * Gets the chunkloader
-     * @param world The name of the world
-     * @return The loader
-     */
-    IChunkSaver getHandler(String world);
+    void save(String world, int x, int z);
     
     /**
      * Writes the changes to the disk

@@ -30,7 +30,7 @@ import org.bukkit.command.CommandSender;
 /**
  * @author Chingo
  */
-public class BukkitConsoleSender implements ICommandSender{
+public class BukkitConsoleSender implements ICommandSender {
     
     private final CommandSender commandSender;
 
@@ -44,11 +44,6 @@ public class BukkitConsoleSender implements ICommandSender{
         commandSender.sendMessage(message);
     }
 
-    @Override
-    public void sendMessage(String message) {
-        commandSender.sendMessage(message);
-    }
-    
     public boolean hasPermission(String permission) {
         return commandSender.hasPermission(permission);
     }

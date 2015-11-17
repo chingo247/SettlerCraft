@@ -21,18 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.chingo247.backupapi.core;
+package com.chingo247.xplatform.core;
 
 /**
  *
  * @author Chingo
  */
-public interface IChunkSaver {
-    
-    void save(int x, int z);
-    
-    void unload(int x, int z);
-    
-    boolean isLoaded(int x, int z);
+public interface ISender {
+ 
+    /**
+     * Sends a message
+     * @param message The message to send
+     */
+    void sendMessage(String... message);
     
 }

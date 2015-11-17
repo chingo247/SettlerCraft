@@ -29,7 +29,9 @@ import com.chingo247.backupapi.core.io.nbt.NBTSection;
 import com.chingo247.backupapi.core.io.nbt.TagNotFoundException;
 import com.chingo247.backupapi.core.util.PositionUtils;
 import com.chingo247.xplatform.core.APlatform;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.jnbt.IntTag;
 import com.sk89q.jnbt.ListTag;
@@ -73,17 +75,38 @@ public class RegionManager {
     }
 
     public void copy(String world, CuboidRegion region, File copyTo) throws IOException, Exception {
-//        File regionsDirectory = platform.getServer().getWorldRegionFolder(world);
-        File regionsDirectory = new File("F:\\GAMES\\MineCraftServers\\bukkit\\1.8\\Bukkit 1.8-SettlerCraft-2.1.0\\world\\region");
-
-        Set<RegionFileFormat> rffs = getRegionFiles(regionsDirectory, region);
+        File regionsDirectory = platform.getServer().getWorldRegionFolder(world);
         HashMap<String, Tag> chunkTagMap = Maps.newHashMap();
-
-        Set<Vector2D> chunks = region.getChunks();
-        for (RegionFileFormat rff : rffs) {
-            setTags(rff, region, chunks, chunkTagMap);
+        
+        Map<String, Set<Vector2D>> regionMap = Maps.newHashMap();
+        Set<Vector2D> chunkPos = region.getChunks();
+        for(Vector2D v : chunkPos) {
+            Vector2D regionCoordinate = PositionUtils.getRegionCoordinate(v.getBlockX(), v.getBlockZ());
+            String regionFile = "r." + regionCoordinate.getBlockX() + "." + regionCoordinate.getBlockZ() + ".mca";
+            Set<Vector2D> chunkList = regionMap.get(regionFile);
+            if(chunkList == null) {
+                chunkList = Sets.newHashSet();
+                regionMap.put(regionFile, chunkList);
+            }
+            chunkList.add(v);
         }
-
+        System.out.println("REGIONMAP: regions" + regionMap.size());
+        for(String s : regionMap.keySet()) {
+            String regionLine = "REGION-" + s + " - ";
+            for(Vector2D v : regionMap.get(s)) {
+                regionLine += "(" + v.getBlockX() + "," + v.getBlockZ() + ")";
+            }
+            System.out.println(regionLine);
+        }
+        
+        
+        for(String regionFileName : regionMap.keySet()) {
+            File regionFile = new File(regionsDirectory, regionFileName);
+            RegionFileFormat rff = new RegionFileFormat(regionFile);
+            System.out.println("Setting tag map");
+            setTags(rff, region, regionMap.get(regionFileName), chunkTagMap);
+        }
+        
         Vector min = region.getMinimumPoint();
         Vector max = region.getMaximumPoint();
 
@@ -111,18 +134,12 @@ public class RegionManager {
                 int zPos = v.getBlockZ() * RegionFileFormat.CHUNK_SIZE;
                 Vector2D regionPos = PositionUtils.getRegionPosition(xPos, zPos);
                 
-                if(!(regionPos.getBlockX() == rff.getX() && regionPos.getBlockZ() == rff.getZ())) {
-                    continue;
-                }
- 
                 xPos = (xPos - regionPos.getBlockX()) >> 4;
                 zPos = (zPos - regionPos.getBlockZ()) >> 4;
                 
+                System.out.println("HAS CHUNK CHECK: " + xPos + ", " + zPos);
                 
                 if (rf.hasChunk(xPos, zPos)) {
-                    // It's in here
-                    chunkIt.remove();
-
                 // Chunk
                     //  - Level
                     //      - Sections
@@ -164,10 +181,7 @@ public class RegionManager {
 
                     }
                 } else {
-//                System.out.println(" ");
-//                System.out.println("[RegionManager]: Doesn't have chunk " + xPos + ", " + zPos);
-//                System.out.println("[RegionManager]: Chunk at " + (rff.getX() + (xPos * RegionFileFormat.CHUNK_SIZE)) + ", " + (rff.getZ() + (zPos * RegionFileFormat.CHUNK_SIZE)));
-//                System.out.println(" ");
+                    System.out.println("[RegionManager]: Doesn't have chunk " + xPos + ", " + zPos + " (should have it!)");
                 }
             }
         }

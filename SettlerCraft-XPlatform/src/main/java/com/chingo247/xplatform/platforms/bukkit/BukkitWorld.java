@@ -53,7 +53,7 @@ public class BukkitWorld implements IWorld {
     }
 
     @Override
-    public int getMaxHeight() {
+    public int getMaxY() {
         return world.getMaxHeight();
     }
     

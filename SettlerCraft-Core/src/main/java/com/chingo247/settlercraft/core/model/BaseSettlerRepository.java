@@ -121,13 +121,14 @@ public class BaseSettlerRepository implements IBaseSettlerRepository {
     }
     
     private long nextId() {
-        String idQuery = "MERGE (sid: ID_GENERATOR {name:'SETTLER_ID'}) "
-                       + "ON CREATE SET sid.nextId = 1 "
-                       + "ON MATCH SET sid.nextId = sid.nextId + 1 "
-                       + "RETURN sid.nextId as nextId";
-        
+        // Work-around for getting the next Id
+        // Sets the lock at this node by removing a non-existent property
+        String idQuery = "MATCH (sid:ID_GENERATOR {name:'SETTLER_ID'}) "
+                + "REMOVE sid.lock " // NON-EXISTENT PROPERTY
+                + "SET sid.nextId = sid.nextId + 1 "
+                + "RETURN sid.nextId as nextId";
         Result r = graph.execute(idQuery);
-        long id = (Long) r.next().get("nextId");
+        long id = (long) r.next().get("nextId");
         return id;
     }
     

@@ -21,7 +21,7 @@ import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.core.model.BaseSettlerNode;
 import com.chingo247.settlercraft.core.persistence.neo4j.Neo4jHelper;
 import com.chingo247.settlercraft.worldguard.restriction.WorldGuardRestriction;
-import com.chingo247.structureapi.ConstructionWorld;
+import com.chingo247.structureapi.ICreator;
 import com.chingo247.structureapi.IStructureAPI;
 import com.chingo247.structureapi.StructureAPI;
 import com.chingo247.structureapi.model.RelTypes;
@@ -105,7 +105,7 @@ public class SettlerCraftWGService implements IPlotProtector<IPlot>, Service {
      */
     @Override
     public synchronized void protect(IPlot plot) {
-        ConstructionWorld cw = structureAPI.getConstructionWorld(plot.getWorld().getName());
+        ICreator cw = structureAPI.getConstructionWorld(plot.getWorld().getName());
 
         if (!cw.getConfig().isProtectStructures()) {
             return;

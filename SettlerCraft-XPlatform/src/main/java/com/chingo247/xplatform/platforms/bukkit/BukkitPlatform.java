@@ -27,7 +27,7 @@ import com.chingo247.xplatform.core.AInventory;
 import com.chingo247.xplatform.core.AItemStack;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IColors;
-import com.chingo247.xplatform.core.IConsole;
+import com.chingo247.xplatform.core.ICommandSender;
 import com.chingo247.xplatform.core.IServer;
 import com.google.common.base.Preconditions;
 import java.io.File;
@@ -58,7 +58,7 @@ public class BukkitPlatform extends APlatform {
     }
 
     @Override
-    public IConsole getConsole() {
+    public ICommandSender getConsole() {
         return bukkitServer.getConsole();
     }
 

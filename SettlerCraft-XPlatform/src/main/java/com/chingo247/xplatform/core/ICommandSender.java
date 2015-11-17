@@ -27,12 +27,8 @@ package com.chingo247.xplatform.core;
  *
  * @author Chingo
  */
-public interface ICommandSender {
+public interface ICommandSender extends ISender {
     
-    public void sendMessage(String... message);
-    
-    public void sendMessage(String message);
-    
-    public boolean hasPermission(String permission);
+    boolean hasPermission(String permission);
     
 }

@@ -35,8 +35,10 @@ public class Neo4jDatabase {
         Preconditions.checkArgument(pageCacheMemory >= 512, "Min pageCache is 512");
         Preconditions.checkNotNull(directory);
         Preconditions.checkNotNull(databaseName);
-        this.graph = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File(directory, databaseName).getAbsolutePath())
+        this.graph = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File(directory, databaseName))
+                .setConfig(GraphDatabaseSettings.keep_logical_logs, "300M size")
                 .setConfig(GraphDatabaseSettings.execution_guard_enabled, "true")
+                .setConfig(GraphDatabaseSettings.allow_store_upgrade, "false")
                 .setConfig(GraphDatabaseSettings.pagecache_memory, pageCacheMemory +"m")
                 .setConfig(GraphDatabaseSettings.log_queries, "true")
                 .newGraphDatabase();

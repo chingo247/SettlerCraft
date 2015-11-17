@@ -65,9 +65,16 @@
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                 </configuration>
-            </plugin>            
+            </plugin> 
         </plugins>
     </build>
+    <!-- One-Jar is in the googlecode repository -->
+    <pluginRepositories>
+        <pluginRepository>
+            <id>onejar-maven-plugin.googlecode.com</id>
+            <url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
+        </pluginRepository>
+    </pluginRepositories>
     <profiles>
         <!--Maven profile for Bukkit-->
         <profile>
@@ -205,7 +212,7 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j</artifactId>
-            <version>2.2.5</version>
+            <version>2.3.0</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

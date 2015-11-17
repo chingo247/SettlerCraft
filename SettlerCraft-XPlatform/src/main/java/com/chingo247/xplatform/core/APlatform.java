@@ -27,7 +27,7 @@ public abstract class APlatform {
     
     public abstract IServer getServer();
     
-    public abstract IConsole getConsole();
+    public abstract ICommandSender getConsole();
     
     public abstract File getPluginsFolder();
     

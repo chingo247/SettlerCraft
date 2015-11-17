@@ -41,6 +41,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
 /**
@@ -72,7 +73,7 @@ public class SettlerCraft {
         }
         
         databaseDir.mkdirs();
-        this.graph = new Neo4jDatabase(databaseDir, "SettlerCraft", 512).getGraph();
+        this.graph = new Neo4jDatabase(databaseDir, "SettlerCraft", 1024).getGraph();
         this.settlerDAO = new BaseSettlerRepository(graph);
         
         try (Transaction tx = graph.beginTx()) {
@@ -95,10 +96,22 @@ public class SettlerCraft {
             Neo4jHelper.createUniqueIndexIfNotExist(graph, DynamicLabel.label("ID_GENERATOR"), "name");
             tx.success();
         }
-        
+        setupIdGenerator("SETTLER_ID");
         
         SettlerRegister structureOwnerRegister = new SettlerRegister(settlerDAO, executor, graph);
         EventManager.getInstance().getEventBus().register(structureOwnerRegister);
+    }
+    
+    private void setupIdGenerator(String generatorName) {
+        try(Transaction tx = graph.beginTx()) {
+            Result r = graph.execute("MATCH (sid: ID_GENERATOR {name:'"+generatorName+"'}) "
+                        + "RETURN sid "
+                        + "LIMIT 1");
+            if(!r.hasNext()) {
+                graph.execute("CREATE (sid: ID_GENERATOR {name:'"+generatorName+"', nextId: 0})");
+            }
+            tx.success();
+        }
     }
     
     public static SettlerCraft getInstance() {

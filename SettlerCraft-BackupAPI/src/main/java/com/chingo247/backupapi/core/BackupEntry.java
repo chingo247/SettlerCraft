@@ -47,7 +47,6 @@ public class BackupEntry implements IBackupEntry {
     private final World world;
     private final UUID uuid;
     private final CuboidRegion region;
-    private final IChunkSaver loader;
     private final IChunkManager manager;
 
     private boolean isDone;
@@ -64,7 +63,7 @@ public class BackupEntry implements IBackupEntry {
     private boolean failedProcess = false;
     private boolean isWriting = false;
     private Vector2D currentChunk;
-    private long totalTime = 0, loadTime = 0, unloadTime = 0;
+    private long totalTime = 0;
 
     BackupEntry(IChunkManager chunkManager, World world, CuboidRegion region, File destinationFile, UUID uuid) {
         this.world = world;
@@ -81,7 +80,6 @@ public class BackupEntry implements IBackupEntry {
         System.out.println("[BackupEntry]: Total number of chunks " + total);
         this.chunkIt = chunks.iterator();
         this.manager = chunkManager;
-        this.loader = chunkManager.getHandler(world.getName());
     }
 
     @Override
@@ -114,30 +112,24 @@ public class BackupEntry implements IBackupEntry {
             setState(BackupState.SAVING_CHUNKS);
             AsyncEventManager.getInstance().post(new BackupEntryStateChangeEvent(this));
         }
+        manager.save(world.getName());
 
-        if (chunkIt.hasNext()) {
-            if (!failedProcess) {
-                currentChunk = chunkIt.next();
-            }
-            long time = System.currentTimeMillis();
-            int x = currentChunk.getBlockX();
-            int z = currentChunk.getBlockZ();
-            
-            long ldTime = System.currentTimeMillis();
-            loader.save(x, z);
-            loadTime += System.currentTimeMillis() - ldTime;
-            
-            long nldTime = System.currentTimeMillis();
-            loader.unload(x, z);
-            unloadTime += System.currentTimeMillis() - nldTime;
-            
-            totalTime += System.currentTimeMillis() - time;
-            
-            count++;
-            if(count % 10 == 0) {
-                System.out.println("avg save time: " + (totalTime / count) + "ms, avg loadTime: " + (loadTime/count) + "ms, avg unloadTime: " + (unloadTime/count) + "ms");
-            }
-        } else {
+//        if (chunkIt.hasNext()) {
+//            if (!failedProcess) {
+//                currentChunk = chunkIt.next();
+//            }
+//            long time = System.currentTimeMillis();
+//            int x = currentChunk.getBlockX();
+//            int z = currentChunk.getBlockZ();
+//            
+//            manager.save(world.getName(), x, z);
+//            totalTime += System.currentTimeMillis() - time;
+//            
+//            count++;
+//            if(count % 10 == 0) {
+//                System.out.println("avg save time: " + (totalTime / count));
+//            }
+//        } else {
             synchronized (this) {
                 if (isWriting) {
                     return;
@@ -160,7 +152,7 @@ public class BackupEntry implements IBackupEntry {
                 }
             });
 
-        }
+//        }
     }
 
     private void finish() {

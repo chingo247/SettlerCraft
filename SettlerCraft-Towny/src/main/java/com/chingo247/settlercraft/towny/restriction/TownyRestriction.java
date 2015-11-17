@@ -6,7 +6,7 @@
 package com.chingo247.settlercraft.towny.restriction;
 
 import com.chingo247.settlercraft.towny.plugin.SettlerCraftTowny;
-import com.chingo247.structureapi.StructureRestriction;
+import com.chingo247.structureapi.structure.StructureRestriction;
 import com.palmergames.bukkit.towny.TownySettings;
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.Resident;
