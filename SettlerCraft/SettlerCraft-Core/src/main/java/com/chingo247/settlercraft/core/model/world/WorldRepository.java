@@ -27,7 +27,7 @@ import org.neo4j.graphdb.Result;
  *
  * @author Chingo
  */
-public class WorldRepository implements IWorldRepository {
+public class WorldRepository implements IWorldRepository<WorldNode> {
     
     private GraphDatabaseService graph;
 

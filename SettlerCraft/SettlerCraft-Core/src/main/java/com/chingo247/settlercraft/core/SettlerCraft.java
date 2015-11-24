@@ -16,6 +16,7 @@
  */
 package com.chingo247.settlercraft.core;
 
+import com.chingo247.settlercraft.core.concurrent.ThreadPoolFactory;
 import com.chingo247.settlercraft.core.event.EventManager;
 import com.chingo247.settlercraft.core.exception.SettlerCraftException;
 import com.chingo247.settlercraft.core.persistence.neo4j.Neo4jDatabase;
@@ -63,7 +64,7 @@ public class SettlerCraft {
     private IEconomyProvider economyProvider;
 
     private SettlerCraft() {
-        this.executor = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 30L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+        this.executor = new ThreadPoolFactory().newCachedThreadPool(Runtime.getRuntime().availableProcessors(), Runtime.getRuntime().availableProcessors());
     }
 
     private void setupNeo4j() {

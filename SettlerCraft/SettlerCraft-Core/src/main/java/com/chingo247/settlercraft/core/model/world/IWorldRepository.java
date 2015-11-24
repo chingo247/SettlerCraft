@@ -22,14 +22,14 @@ import java.util.UUID;
  *
  * @author Chingo
  */
-public interface IWorldRepository {
+public interface IWorldRepository<T extends WorldNode> {
     
     /**
      * Finds a BaseWorld by UUID
      * @param worldUUID The worlds UUID
      * @return The BaseWorld
      */
-    public <T extends WorldNode> T findByUUID(UUID worldUUID);
+    public T findByUUID(UUID worldUUID);
 
     /**
      * Adds a world if not already added
@@ -37,6 +37,6 @@ public interface IWorldRepository {
      * @param worldUUID The worldUUID
      * @return The world that has been created or the world that already existed with the same UUID
      */
-    public <T extends WorldNode> T addOrGet(String worldName, UUID worldUUID);
+    public  T addOrGet(String worldName, UUID worldUUID);
     
 }
