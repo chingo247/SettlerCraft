@@ -16,11 +16,11 @@
  */
 package com.chingo247.settlercraft.core.platforms.bukkit;
 
-import com.chingo247.settlercraft.core.event.EventManager;
+import com.chingo247.settlercraft.core.SettlerCraft;
+import com.chingo247.settlercraft.core.event.IEventDispatcher;
 import com.chingo247.settlercraft.core.event.PlayerLoginEvent;
 import com.chingo247.settlercraft.core.event.PlayerLogoutEvent;
 import com.chingo247.xplatform.platforms.bukkit.BukkitPlayer;
-import com.google.common.eventbus.EventBus;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -30,16 +30,16 @@ import org.bukkit.event.Listener;
  */
 public class BKEventListener implements Listener {
     
-    private final EventBus eventBus = EventManager.getInstance().getEventBus();
-    
     @EventHandler
     public void onPlayerLogout(org.bukkit.event.player.PlayerQuitEvent pqe) {
-        eventBus.post(new PlayerLogoutEvent(new BukkitPlayer(pqe.getPlayer())));
+        IEventDispatcher dispatcher = SettlerCraft.getInstance().getEventDispatcher();
+        dispatcher.dispatchEvent(new PlayerLogoutEvent(new BukkitPlayer(pqe.getPlayer())));
     }
     
     @EventHandler
     public void onPlayerLogin(org.bukkit.event.player.PlayerLoginEvent pqe) {
-        eventBus.post(new PlayerLoginEvent(new BukkitPlayer(pqe.getPlayer())));
+        IEventDispatcher dispatcher = SettlerCraft.getInstance().getEventDispatcher();
+        dispatcher.dispatchEvent(new PlayerLoginEvent(new BukkitPlayer(pqe.getPlayer())));
     }
     
 }

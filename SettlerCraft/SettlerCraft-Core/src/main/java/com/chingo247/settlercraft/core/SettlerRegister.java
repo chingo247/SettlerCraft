@@ -22,6 +22,7 @@ import com.chingo247.settlercraft.core.model.settler.BaseSettlerRepository;
 import com.chingo247.settlercraft.core.model.settler.IBaseSettler;
 import com.chingo247.xplatform.core.IPlayer;
 import com.google.common.base.Preconditions;
+import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import java.util.Collections;
 import java.util.HashSet;
@@ -36,10 +37,12 @@ import org.neo4j.graphdb.Transaction;
 
 /**
  * Meant to register players as Settler for the very first time
+ *
  * @author Chingo
  */
 public class SettlerRegister {
 
+    private static final Logger LOG = Logger.getLogger(SettlerRegister.class.getName());
     private final BaseSettlerRepository settlerRepository;
     private final ExecutorService service;
     private final Set<UUID> cachedPlayers;
@@ -57,33 +60,37 @@ public class SettlerRegister {
 
     @Subscribe
     public void onPlayerLogin(PlayerLoginEvent ple) {
-        final IPlayer player = ple.getPlayer();
-        if (!cachedPlayers.contains(player.getUniqueId())) { // Only check if not in cache
-            service.submit(new Runnable() {
-                @Override
-                public void run() {
-                    try(Transaction tx = graph.beginTx()) {
-                        if (settlerRepository.findByUUID(player.getUniqueId()) == null) {
-                            settlerRepository.addSettler(new PlayerSettler(player));
+        try {
+            final IPlayer player = ple.getPlayer();
+            if (!cachedPlayers.contains(player.getUniqueId())) { // Only check if not in cache
+                service.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try (Transaction tx = graph.beginTx()) {
+                            if (settlerRepository.findByUUID(player.getUniqueId()) == null) {
+                                settlerRepository.addSettler(new PlayerSettler(player));
+                            }
+                            cachedPlayers.add(player.getUniqueId());
+                            tx.success();
+                        } catch (SettlerException ex) {
+                            LOG.log(Level.SEVERE, ex.getMessage(), ex);
                         }
-                        cachedPlayers.add(player.getUniqueId());
-                        tx.success();
-                    } catch (SettlerException ex) {
-                        Logger.getLogger(SettlerRegister.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                }
-            });
+                });
+            }
+        } catch (Exception ex) { // Catch all... EventBus doesn't catch it... and will not throw error
+            LOG.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
-    
+
     private class PlayerSettler implements IBaseSettler {
 
         private final IPlayer player;
-        
+
         public PlayerSettler(IPlayer player) {
             this.player = player;
         }
-        
+
         @Override
         public Long getId() {
             return null;
@@ -103,9 +110,7 @@ public class SettlerRegister {
         public Node getNode() {
             return null;
         }
-        
+
     }
-    
-    
 
 }

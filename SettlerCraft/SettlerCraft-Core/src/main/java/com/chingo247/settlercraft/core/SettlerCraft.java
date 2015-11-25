@@ -17,7 +17,9 @@
 package com.chingo247.settlercraft.core;
 
 import com.chingo247.settlercraft.core.concurrent.ThreadPoolFactory;
-import com.chingo247.settlercraft.core.event.EventManager;
+import com.chingo247.settlercraft.core.event.DefaultSubscriberExceptionHandler;
+import com.chingo247.settlercraft.core.event.EventDispatcher;
+import com.chingo247.settlercraft.core.event.IEventDispatcher;
 import com.chingo247.settlercraft.core.exception.SettlerCraftException;
 import com.chingo247.settlercraft.core.persistence.neo4j.Neo4jDatabase;
 import com.chingo247.settlercraft.core.persistence.neo4j.Neo4jHelper;
@@ -30,6 +32,8 @@ import com.chingo247.settlercraft.core.model.world.WorldNode;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.settlercraft.core.platforms.services.IPlayerProvider;
 import com.google.common.base.Preconditions;
+import com.google.common.eventbus.AsyncEventBus;
+import com.google.common.eventbus.EventBus;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.world.World;
@@ -37,9 +41,6 @@ import java.io.File;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
@@ -62,10 +63,31 @@ public class SettlerCraft {
     private GraphDatabaseService graph;
     private BaseSettlerRepository settlerDAO;
     private IEconomyProvider economyProvider;
+    private EventBus eventBus, asyncEventBus;
+    private IEventDispatcher eventDispatcher;
 
     private SettlerCraft() {
         this.executor = new ThreadPoolFactory().newCachedThreadPool(Runtime.getRuntime().availableProcessors(), Runtime.getRuntime().availableProcessors());
+        this.eventBus = new EventBus(new DefaultSubscriberExceptionHandler());
+        this.asyncEventBus = new AsyncEventBus(executor, new DefaultSubscriberExceptionHandler());
+        this.eventDispatcher = new EventDispatcher();
+        this.eventDispatcher.register(eventBus);
+        this.eventDispatcher.register(asyncEventBus);
     }
+
+    public IEventDispatcher getEventDispatcher() {
+        return eventDispatcher;
+    }
+
+    public EventBus getAsyncEventBus() {
+        return asyncEventBus;
+    }
+
+    public EventBus getEventBus() {
+        return eventBus;
+    }
+    
+    
 
     private void setupNeo4j() {
         File databaseDir = new File(plugin.getDataFolder().getAbsolutePath() + "//databases//Neo4J");
@@ -99,8 +121,8 @@ public class SettlerCraft {
         }
         setupIdGenerator("SETTLER_ID");
         
-        SettlerRegister structureOwnerRegister = new SettlerRegister(settlerDAO, executor, graph);
-        EventManager.getInstance().getEventBus().register(structureOwnerRegister);
+        SettlerRegister settlerRegister = new SettlerRegister(settlerDAO, executor, graph);
+        eventBus.register(settlerRegister);
     }
     
     private void setupIdGenerator(String generatorName) {
