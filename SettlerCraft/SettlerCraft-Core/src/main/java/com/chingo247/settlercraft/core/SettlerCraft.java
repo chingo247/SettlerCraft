@@ -100,9 +100,9 @@ public class SettlerCraft {
         this.settlerDAO = new BaseSettlerRepository(graph);
         
         try (Transaction tx = graph.beginTx()) {
-            if (!Neo4jHelper.hasUniqueConstraint(graph, WorldNode.label(), WorldNode.ID_PROPERTY)) {
+            if (!Neo4jHelper.hasUniqueConstraint(graph, WorldNode.label(), WorldNode.UUID_PROPERTY)) {
                 this.graph.schema().constraintFor(WorldNode.label())
-                        .assertPropertyIsUnique(WorldNode.ID_PROPERTY)
+                        .assertPropertyIsUnique(WorldNode.UUID_PROPERTY)
                         .create();
                 tx.success();
             }

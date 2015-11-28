@@ -30,7 +30,7 @@ public class WorldNode {
     
     public static final String LABEL = "WORLD";
     public static final String NAME_PROPERTY = "name";
-    public static final String ID_PROPERTY = "uuid";
+    public static final String UUID_PROPERTY = "uuid";
     
     public static Label label() {
         return DynamicLabel.label(LABEL);
@@ -51,7 +51,7 @@ public class WorldNode {
     }
     
     public UUID getUUID() {
-        return UUID.fromString((String) underlyingNode.getProperty(ID_PROPERTY));
+        return UUID.fromString((String) underlyingNode.getProperty(UUID_PROPERTY));
     }
     
     

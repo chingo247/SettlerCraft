@@ -39,7 +39,7 @@ public class WorldRepository implements IWorldRepository<WorldNode> {
     public WorldNode findByUUID(UUID worldUUID) {
         WorldNode world = null;
 
-        String query = "MATCH (world: " + WorldNode.LABEL + " { " + WorldNode.ID_PROPERTY + ": '" + worldUUID.toString() + "' }) RETURN world";
+        String query = "MATCH (world: " + WorldNode.LABEL + " { " + WorldNode.UUID_PROPERTY + ": '" + worldUUID.toString() + "' }) RETURN world";
 
         Result r = graph.execute(query);
         if (r.hasNext()) {
@@ -57,7 +57,7 @@ public class WorldRepository implements IWorldRepository<WorldNode> {
         if(world == null) { 
             Node worldNode = graph.createNode(WorldNode.label());
             worldNode.setProperty(WorldNode.NAME_PROPERTY, worldName);
-            worldNode.setProperty(WorldNode.ID_PROPERTY, worldUUID.toString());
+            worldNode.setProperty(WorldNode.UUID_PROPERTY, worldUUID.toString());
             world = new WorldNode(worldNode);
         }
         return world;
