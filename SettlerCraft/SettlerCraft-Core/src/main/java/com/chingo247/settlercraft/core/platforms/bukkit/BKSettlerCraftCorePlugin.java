@@ -37,6 +37,8 @@ public class BKSettlerCraftCorePlugin extends JavaPlugin {
     private final String MAIN_DATABASE = "SettlerCraft";
     private final String PATH = "plugins//SettlerCraft//database//";
     private final String MAIN_PATH = PATH + MAIN_DATABASE;
+    
+    
 
     @Override
     public void onEnable() {
@@ -46,26 +48,12 @@ public class BKSettlerCraftCorePlugin extends JavaPlugin {
             return;
         }
         
+        
+        
         SettlerCraft.getInstance().registerPlatform(new BukkitPlatform(Bukkit.getServer()));
         SettlerCraft.getInstance().registerPlugin(new BukkitPlugin(this));
+        SettlerCraft.getInstance().setupNeo4j(new BukkitPlugin(this));
         SettlerCraft.getInstance().registerPlayerProvider(new BKPlayerProvider());
-        
-         // Init HSQL Server
-//        
-//        if (!HSQLServer.isRunning(HOST, PORT)) { 
-//            Bukkit.getConsoleSender().sendMessage("SettlerCraft: Starting HSQL Server...");
-//            HSQLServer hSQLServer = new HSQLServer(PORT, HOST, new File(getDataFolder(), "databases//HSQL//SettlerCraft"), HOST);
-//            hSQLServer.start();
-//        }
-        
-//        SettlerCraft.getInstance().getExecutor().submit(new Runnable() {
-//
-//            @Override
-//            public void run() {
-//                 HibernateUtil.getSession().close();
-//            }
-//        });
-        
         
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 

@@ -31,6 +31,8 @@ import com.chingo247.settlercraft.core.model.settler.BaseSettlerNode;
 import com.chingo247.settlercraft.core.model.world.WorldNode;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.settlercraft.core.platforms.services.IPlayerProvider;
+import com.chingo247.settlercraft.core.util.yaml.YAMLFormat;
+import com.chingo247.settlercraft.core.util.yaml.YAMLProcessor;
 import com.google.common.base.Preconditions;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
@@ -38,9 +40,12 @@ import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.world.World;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
@@ -53,6 +58,7 @@ import org.neo4j.graphdb.Transaction;
 public class SettlerCraft {
 
     public static final String MSG_PREFIX = "[SettlerCraft]: ";
+    public static final String LAST_NEO4J_VERSION = "2.3.2";
 
     private static SettlerCraft instance;
     private final ExecutorService executor;
@@ -60,8 +66,8 @@ public class SettlerCraft {
     private APlatform platform;
     private IPlugin plugin;
     private IPlayerProvider playerProvider;
-    private GraphDatabaseService graph;
-    private BaseSettlerRepository settlerDAO;
+    private Neo4jDatabase database;
+    private BaseSettlerRepository settlerRepo;
     private IEconomyProvider economyProvider;
     private EventBus eventBus, asyncEventBus;
     private IEventDispatcher eventDispatcher;
@@ -86,57 +92,91 @@ public class SettlerCraft {
     public EventBus getEventBus() {
         return eventBus;
     }
-    
-    
 
-    private void setupNeo4j() {
+    public void setupNeo4j(IPlugin plugin) {
         File databaseDir = new File(plugin.getDataFolder().getAbsolutePath() + "//databases//Neo4J");
-        if(!databaseDir.exists()) {
+
+        boolean freshDatabase = !databaseDir.exists();
+
+        if (freshDatabase) {
             System.out.println(MSG_PREFIX + "Setting up Neo4j Database for the first time, this might take a while");
         }
-        
+
         databaseDir.mkdirs();
-        this.graph = new Neo4jDatabase(databaseDir, "SettlerCraft", 1024).getGraph();
-        this.settlerDAO = new BaseSettlerRepository(graph);
+
+        File updateFile = new File(databaseDir, "updated.yml");
+        if (!updateFile.exists()) {
+            try {
+                updateFile.createNewFile();
+            } catch (IOException ex) {
+                throw new RuntimeException("Error occured during creation of a file: " + updateFile.getName(), ex);
+            }
+        }
+
+        YAMLProcessor processor = new YAMLProcessor(updateFile, true, YAMLFormat.EXTENDED);
+        try {
+            processor.load();
+        } catch (IOException ex) {
+            throw new RuntimeException("Error occured while loading file: " + updateFile.getName(), ex);
+        }
         
-        try (Transaction tx = graph.beginTx()) {
-            if (!Neo4jHelper.hasUniqueConstraint(graph, WorldNode.label(), WorldNode.UUID_PROPERTY)) {
-                this.graph.schema().constraintFor(WorldNode.label())
-                        .assertPropertyIsUnique(WorldNode.UUID_PROPERTY)
-                        .create();
+        boolean updated = processor.getBoolean("neo4j.updated", false);
+
+        boolean shouldUpdate = !freshDatabase && !updated;
+
+        this.database = new Neo4jDatabase(databaseDir, "SettlerCraft", 1024, shouldUpdate);
+
+        processor.setProperty("neo4j.updated", true);
+        processor.setProperty("neo4j.version", LAST_NEO4J_VERSION);
+        processor.save();
+
+        boolean setup = processor.getBoolean("settler.repository.setup", false);
+
+        GraphDatabaseService graph = database.getGraph();
+        this.settlerRepo = new BaseSettlerRepository(graph);
+
+        if (!setup) {
+            try (Transaction tx = graph.beginTx()) {
+                if (!Neo4jHelper.hasUniqueConstraint(graph, WorldNode.label(), WorldNode.UUID_PROPERTY)) {
+                    graph.schema().constraintFor(WorldNode.label())
+                            .assertPropertyIsUnique(WorldNode.UUID_PROPERTY)
+                            .create();
+                    tx.success();
+                }
+            }
+            try (Transaction tx = graph.beginTx()) {
+                Neo4jHelper.createUniqueIndexIfNotExist(graph, BaseSettlerNode.label(), BaseSettlerNode.UUID_PROPERTY);
                 tx.success();
             }
+            try (Transaction tx = graph.beginTx()) {
+                Neo4jHelper.createUniqueIndexIfNotExist(graph, BaseSettlerNode.label(), BaseSettlerNode.ID_PROPERTY);
+                tx.success();
+            }
+            try (Transaction tx = graph.beginTx()) {
+                Neo4jHelper.createUniqueIndexIfNotExist(graph, DynamicLabel.label("ID_GENERATOR"), "name");
+                tx.success();
+            }
+            setupIdGenerator("SETTLER_ID");
+            processor.setProperty("settler.repository.setup", true);
+            processor.save();
         }
-        try (Transaction tx = graph.beginTx()) {
-            Neo4jHelper.createUniqueIndexIfNotExist(graph, BaseSettlerNode.label(), BaseSettlerNode.UUID_PROPERTY);
-            tx.success();
-        }
-        try (Transaction tx = graph.beginTx()) {
-            Neo4jHelper.createUniqueIndexIfNotExist(graph, BaseSettlerNode.label(), BaseSettlerNode.ID_PROPERTY);
-            tx.success();
-        }
-        try (Transaction tx = graph.beginTx()) {
-            Neo4jHelper.createUniqueIndexIfNotExist(graph, DynamicLabel.label("ID_GENERATOR"), "name");
-            tx.success();
-        }
-        setupIdGenerator("SETTLER_ID");
-        
-        SettlerRegister settlerRegister = new SettlerRegister(settlerDAO, executor, graph);
+
+        SettlerRegister settlerRegister = new SettlerRegister(settlerRepo, executor, graph);
         eventBus.register(settlerRegister);
     }
-    
+
     private void setupIdGenerator(String generatorName) {
-        try(Transaction tx = graph.beginTx()) {
-            Result r = graph.execute("MATCH (sid: ID_GENERATOR {name:'"+generatorName+"'}) "
-                        + "RETURN sid "
-                        + "LIMIT 1");
-            if(!r.hasNext()) {
-                graph.execute("CREATE (sid: ID_GENERATOR {name:'"+generatorName+"', nextId: 0})");
+        try (Transaction tx = database.getGraph().beginTx()) {
+            Result r = database.getGraph().execute("MATCH (sid: ID_GENERATOR {name:'" + generatorName + "'}) "
+                    + "RETURN sid "
+                    + "LIMIT 1");
+            if (!r.hasNext()) {
+                database.getGraph().execute("CREATE (sid: ID_GENERATOR {name:'" + generatorName + "', nextId: 0})");
             }
             tx.success();
         }
     }
-    
+
     public static SettlerCraft getInstance() {
         if (instance == null) {
             instance = new SettlerCraft();
@@ -147,9 +187,9 @@ public class SettlerCraft {
     public IEconomyProvider getEconomyProvider() {
         return economyProvider;
     }
-    
+
     public void registerEconomyService(IEconomyProvider iEconomyProvider) throws SettlerCraftException {
-        if(economyProvider != null) {
+        if (economyProvider != null) {
             throw new SettlerCraftException("Already registered an Economy Provider!");
         }
         this.economyProvider = iEconomyProvider;
@@ -161,7 +201,7 @@ public class SettlerCraft {
             throw new RuntimeException("Can't register '" + plugin.getName() + "' already registered a plugin!");
         }
         this.plugin = plugin;
-        setupNeo4j();
+
     }
 
     public void registerPlatform(APlatform platform) throws RuntimeException {
@@ -183,7 +223,7 @@ public class SettlerCraft {
     public APlatform getPlatform() {
         return platform;
     }
-    
+
     public IPlugin getPlugin() {
         return plugin;
     }
@@ -202,11 +242,11 @@ public class SettlerCraft {
 
     public World getWorld(UUID world) {
         IWorld w = platform.getServer().getWorld(world);
-        
-        if(w != null) {
+
+        if (w != null) {
             return getWorld(w.getName());
         }
-        
+
         return null;
     }
 
@@ -223,7 +263,7 @@ public class SettlerCraft {
     public synchronized final GraphDatabaseService getNeo4j() {
         Preconditions.checkNotNull(plugin);
 
-        return graph;
+        return database.getGraph();
     }
 
 }

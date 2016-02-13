@@ -45,8 +45,8 @@ public enum Direction {
     
     
     
-    public static Direction match(int direction) {
-        switch(direction) {
+    public static Direction match(int directionID) {
+        switch(directionID) {
             case 0: return NORTH;
             case 1: return EAST;
             case 2: return SOUTH;

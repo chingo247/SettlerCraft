@@ -31,19 +31,26 @@ public class Neo4jDatabase {
     private GraphDatabaseService graph;
     
 
-    public Neo4jDatabase(File directory, String databaseName, int pageCacheMemory) {
+    public Neo4jDatabase(File directory, String databaseName, int pageCacheMemory, boolean update) {
         Preconditions.checkArgument(pageCacheMemory >= 512, "Min pageCache is 512");
         Preconditions.checkNotNull(directory);
         Preconditions.checkNotNull(databaseName);
+        
+        if(update) {
+            System.out.println("[SettlerCraft-Core]: Upgrading Neo4j database...");
+        }
+        
         this.graph = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File(directory, databaseName))
                 .setConfig(GraphDatabaseSettings.keep_logical_logs, "300M size")
                 .setConfig(GraphDatabaseSettings.execution_guard_enabled, "true")
-                .setConfig(GraphDatabaseSettings.allow_store_upgrade, "false")
+                .setConfig(GraphDatabaseSettings.allow_store_upgrade, String.valueOf(update))
                 .setConfig(GraphDatabaseSettings.pagecache_memory, pageCacheMemory +"m")
-                .setConfig(GraphDatabaseSettings.log_queries, "true")
+                .setConfig(GraphDatabaseSettings.log_queries, "false")
                 .newGraphDatabase();
         
-        
+        if(update) {
+            System.out.println("[SettlerCraft-Core]: Neo4j upgrade finished and setup!");
+        }
        
         
         

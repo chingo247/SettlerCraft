@@ -9,6 +9,7 @@
         <module>SettlerCraft-Core</module>
         <module>SettlerCraft-MenuAPI</module>
         <module>SettlerCraft-XPlatform</module>
+        <module>SettlerCraft-Towns</module>
     </modules>
     <repositories>
         <!--Vault Repo-->

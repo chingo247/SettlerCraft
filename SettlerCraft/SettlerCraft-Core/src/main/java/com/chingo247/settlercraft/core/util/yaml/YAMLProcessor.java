@@ -183,8 +183,11 @@ public class YAMLProcessor extends YAMLNode {
                 writer.append(header);
                 writer.append(LINE_BREAK);
             }
+            
+            
             if (comments.isEmpty() || format != YAMLFormat.EXTENDED) {
                 yaml.dump(root, writer);
+                
             } else {
                 // Iterate over each root-level property and dump
                 for (Entry<String, Object> entry : root.entrySet()) {
