@@ -27,7 +27,7 @@ import org.neo4j.graphdb.Result;
  *
  * @author Chingo
  */
-public class WorldRepository implements IWorldRepository<WorldNode> {
+public class WorldRepository implements IWorldRepository<SCWorldNode> {
     
     private GraphDatabaseService graph;
 
@@ -36,29 +36,29 @@ public class WorldRepository implements IWorldRepository<WorldNode> {
     }
     
     @Override
-    public WorldNode findByUUID(UUID worldUUID) {
-        WorldNode world = null;
+    public SCWorldNode findByUUID(UUID worldUUID) {
+        SCWorldNode world = null;
 
-        String query = "MATCH (world: " + WorldNode.LABEL + " { " + WorldNode.UUID_PROPERTY + ": '" + worldUUID.toString() + "' }) RETURN world";
+        String query = "MATCH (world: " + SCWorldNode.LABEL + " { " + SCWorldNode.UUID_PROPERTY + ": '" + worldUUID.toString() + "' }) RETURN world";
 
         Result r = graph.execute(query);
         if (r.hasNext()) {
             Map<String, Object> map = r.next();
             for (Object o : map.values()) {
-                world = new WorldNode((Node) o);
+                world = new SCWorldNode((Node) o);
             }
         }
         return world;
     }
    
     @Override
-    public WorldNode addOrGet(String worldName, UUID worldUUID) {
-        WorldNode world = findByUUID(worldUUID);
+    public SCWorldNode addOrGet(String worldName, UUID worldUUID) {
+        SCWorldNode world = findByUUID(worldUUID);
         if(world == null) { 
-            Node worldNode = graph.createNode(WorldNode.label());
-            worldNode.setProperty(WorldNode.NAME_PROPERTY, worldName);
-            worldNode.setProperty(WorldNode.UUID_PROPERTY, worldUUID.toString());
-            world = new WorldNode(worldNode);
+            Node worldNode = graph.createNode(SCWorldNode.label());
+            worldNode.setProperty(SCWorldNode.NAME_PROPERTY, worldName);
+            worldNode.setProperty(SCWorldNode.UUID_PROPERTY, worldUUID.toString());
+            world = new SCWorldNode(worldNode);
         }
         return world;
     }

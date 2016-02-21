@@ -22,7 +22,7 @@ import java.util.UUID;
  *
  * @author Chingo
  */
-public interface IWorldRepository<T extends WorldNode> {
+public interface IWorldRepository<T extends SCWorldNode> {
     
     /**
      * Finds a BaseWorld by UUID

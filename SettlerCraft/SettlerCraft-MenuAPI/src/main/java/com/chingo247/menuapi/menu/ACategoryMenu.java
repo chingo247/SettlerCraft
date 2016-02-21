@@ -344,7 +344,7 @@ public abstract class ACategoryMenu {
         menuAPI.registerMenu(this);
         // Notify player's balance
         player.sendMessage(color.yellow() + "[" + title + "]: " + color.reset() + "Hello " + color.green() + player.getName() + color.reset() + "!");
-        if (economyProvider != null) {
+        if (economyProvider != null && economyProvider.isEnabled()) {
             double balance = economyProvider.getBalance(player.getUniqueId());
             if (balance > 0) {
                 player.sendMessage(color.yellow() + "[" + title + "]: " + color.reset() + "Your balance is " + color.gold() + ShopUtil.valueString(balance));
@@ -352,6 +352,9 @@ public abstract class ACategoryMenu {
                 player.sendMessage(color.yellow() + "[" + title + "]: " + color.reset() + "Your balance is " + color.red() + balance);
             }
 
+        } else {
+            player.sendMessage(color.red() + "No active economy plugin or economy plugin failed to register");
+            return;
         }
         updateMenu(currentCategory, currentPage, false);
         player.openInventory(inventory);

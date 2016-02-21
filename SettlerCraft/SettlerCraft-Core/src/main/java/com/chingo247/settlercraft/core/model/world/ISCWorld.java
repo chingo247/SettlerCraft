@@ -17,44 +17,18 @@
 package com.chingo247.settlercraft.core.model.world;
 
 import java.util.UUID;
-import org.neo4j.graphdb.DynamicLabel;
-import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 
 /**
  *
  * @author Chingo
  */
-public class WorldNode {
+public interface ISCWorld {
     
+    public Node getNode();
     
-    public static final String LABEL = "WORLD";
-    public static final String NAME_PROPERTY = "name";
-    public static final String UUID_PROPERTY = "uuid";
+    public UUID getUUID();
     
-    public static Label label() {
-        return DynamicLabel.label(LABEL);
-    }
-    
-    protected final Node underlyingNode;
-    
-    public WorldNode(Node underlyingNode) {
-        this.underlyingNode = underlyingNode;
-    }
-
-    public Node getNode() {
-        return underlyingNode;
-    }
-    
-    public String getName() {
-        return (String) underlyingNode.getProperty(NAME_PROPERTY);
-    }
-    
-    public UUID getUUID() {
-        return UUID.fromString((String) underlyingNode.getProperty(UUID_PROPERTY));
-    }
-    
-    
-    
+    public String getName();
     
 }

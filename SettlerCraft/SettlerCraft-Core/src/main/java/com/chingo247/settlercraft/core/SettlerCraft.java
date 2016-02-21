@@ -28,7 +28,7 @@ import com.chingo247.xplatform.core.IPlugin;
 import com.chingo247.xplatform.core.IWorld;
 import com.chingo247.settlercraft.core.model.settler.BaseSettlerRepository;
 import com.chingo247.settlercraft.core.model.settler.BaseSettlerNode;
-import com.chingo247.settlercraft.core.model.world.WorldNode;
+import com.chingo247.settlercraft.core.model.world.SCWorldNode;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.settlercraft.core.platforms.services.IPlayerProvider;
 import com.chingo247.settlercraft.core.util.yaml.YAMLFormat;
@@ -137,9 +137,9 @@ public class SettlerCraft {
 
         if (!setup) {
             try (Transaction tx = graph.beginTx()) {
-                if (!Neo4jHelper.hasUniqueConstraint(graph, WorldNode.label(), WorldNode.UUID_PROPERTY)) {
-                    graph.schema().constraintFor(WorldNode.label())
-                            .assertPropertyIsUnique(WorldNode.UUID_PROPERTY)
+                if (!Neo4jHelper.hasUniqueConstraint(graph, SCWorldNode.label(), SCWorldNode.UUID_PROPERTY)) {
+                    graph.schema().constraintFor(SCWorldNode.label())
+                            .assertPropertyIsUnique(SCWorldNode.UUID_PROPERTY)
                             .create();
                     tx.success();
                 }

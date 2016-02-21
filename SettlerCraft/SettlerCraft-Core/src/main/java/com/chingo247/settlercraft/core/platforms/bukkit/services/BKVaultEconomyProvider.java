@@ -20,6 +20,7 @@ import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import java.util.UUID;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 /**
@@ -49,17 +50,27 @@ public class BKVaultEconomyProvider implements IEconomyProvider{
 
     @Override
     public void give(UUID player, double amount) {
+        setupAccount(player);
         economy.depositPlayer(Bukkit.getOfflinePlayer(player), amount);
     }
 
     @Override
     public void withdraw(UUID player, double amount) {
+        setupAccount(player);
         economy.withdrawPlayer(Bukkit.getOfflinePlayer(player), amount);
     }
 
     @Override
     public double getBalance(UUID player) {
+        setupAccount(player);
         return economy.getBalance(Bukkit.getPlayer(player));
+    }
+    
+    private void setupAccount(UUID player) {
+        Player ply = Bukkit.getPlayer(player);
+        if(!economy.hasAccount(ply)) {
+            economy.createPlayerAccount(ply);
+        }
     }
 
     @Override

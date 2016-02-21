@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.chingo247.settlercraft.core.util.yaml;
 
+import com.google.common.collect.Sets;
 import com.sk89q.util.StringUtil;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -33,12 +33,14 @@ import org.yaml.snakeyaml.representer.Representer;
 import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * YAML configuration loader. To use this class, construct it with path to
- * a file and call its load() method. For specifying node paths in the
- * various get*() methods, they support SK's path notation, allowing you to
- * select child nodes by delimiting node names with periods.
+ * YAML configuration loader. To use this class, construct it with path to a
+ * file and call its load() method. For specifying node paths in the various
+ * get*() methods, they support SK's path notation, allowing you to select child
+ * nodes by delimiting node names with periods.
  *
  * <p>
  * For example, given the following configuration file:</p>
@@ -58,7 +60,8 @@ import java.util.Map.Entry;
  *     eats:
  *         babies: true</pre>
  *
- * <p>Calling code could access sturmeh's baby eating state by using
+ * <p>
+ * Calling code could access sturmeh's baby eating state by using
  * {@code getBoolean("sturmeh.eats.babies", false)}. For lists, there are
  * methods such as {@code getStringList} that will return a type safe list.
  */
@@ -76,7 +79,7 @@ public class YAMLProcessor extends YAMLNode {
      * Comments support based on ZerothAngel's AnnotatedYAMLConfiguration
      * Comments are only supported with YAMLFormat.EXTENDED
      */
-    private final Map<String, String> comments = new HashMap<String, String>();
+    private final Map<String, String> comments = new HashMap<>();
 
     public YAMLProcessor(File file, boolean writeDefaults, YAMLFormat format) {
         super(new LinkedHashMap<String, Object>(), writeDefaults);
@@ -107,7 +110,9 @@ public class YAMLProcessor extends YAMLNode {
 
         try {
             stream = getInputStream();
-            if (stream == null) throw new IOException("Stream is null!");
+            if (stream == null) {
+                throw new IOException("Stream is null!");
+            }
             read(yaml.load(new UnicodeReader(stream)));
         } catch (YAMLProcessorException e) {
             root = new LinkedHashMap<String, Object>();
@@ -122,8 +127,8 @@ public class YAMLProcessor extends YAMLNode {
     }
 
     /**
-     * Set the header for the file as a series of lines that are terminated
-     * by a new line sequence.
+     * Set the header for the file as a series of lines that are terminated by a
+     * new line sequence.
      *
      * @param headerLines header lines to prepend
      */
@@ -141,10 +146,10 @@ public class YAMLProcessor extends YAMLNode {
     }
 
     /**
-     * Set the header for the file. A header can be provided to prepend the
-     * YAML data output on configuration save. The header is
-     * printed raw and so must be manually commented if used. A new line will
-     * be appended after the header, however, if a header is provided.
+     * Set the header for the file. A header can be provided to prepend the YAML
+     * data output on configuration save. The header is printed raw and so must
+     * be manually commented if used. A new line will be appended after the
+     * header, however, if a header is provided.
      *
      * @param header header to prepend
      */
@@ -159,6 +164,28 @@ public class YAMLProcessor extends YAMLNode {
      */
     public String getHeader() {
         return header;
+    }
+    
+    public Iterator<String> keyIterator() {
+        Map<String, Object> map = getMap();
+        Set<String> keys = Sets.newHashSet();
+        recursiveAddKey("", keys, map);
+        return keys.iterator();
+    }
+    
+    private void recursiveAddKey(String key, Set<String> holder, Map<String,Object> map) {
+        for(Iterator<String> it = map.keySet().iterator(); it.hasNext();) {
+            String nextkey = it.next();
+            
+            
+            holder.add(key + nextkey);
+            
+            Object o = map.get(nextkey);
+            if(o instanceof Map) {
+                recursiveAddKey(key + nextkey + ".", holder, (Map) o );
+            }
+            
+        }
     }
 
     /**
@@ -177,28 +204,32 @@ public class YAMLProcessor extends YAMLNode {
 
         try {
             stream = getOutputStream();
-            if (stream == null) return false;
+            if (stream == null) {
+                return false;
+            }
             OutputStreamWriter writer = new OutputStreamWriter(stream, "UTF-8");
             if (header != null) {
                 writer.append(header);
                 writer.append(LINE_BREAK);
             }
-            
-            
+
             if (comments.isEmpty() || format != YAMLFormat.EXTENDED) {
                 yaml.dump(root, writer);
-                
+
             } else {
+                
                 // Iterate over each root-level property and dump
                 for (Entry<String, Object> entry : root.entrySet()) {
                     // Output comment, if present
                     String comment = comments.get(entry.getKey());
+
                     if (comment != null) {
                         writer.append(LINE_BREAK);
                         writer.append(comment);
                         writer.append(LINE_BREAK);
                     }
-
+                    
+                    
                     // Dump property
                     yaml.dump(Collections.singletonMap(entry.getKey(), entry.getValue()), writer);
                 }
@@ -210,8 +241,13 @@ public class YAMLProcessor extends YAMLNode {
                 if (stream != null) {
                     stream.close();
                 }
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
         }
+        
+        
+        
+        
 
         return false;
     }
@@ -259,8 +295,8 @@ public class YAMLProcessor extends YAMLNode {
      * Set a root-level comment.
      *
      * @param key the property key
-     * @param comment the comment. May be {@code null}, in which case the comment
-     *   is removed.
+     * @param comment the comment. May be {@code null}, in which case the
+     * comment is removed.
      */
     public void setComment(String key, String... comment) {
         if (comment != null && comment.length > 0) {
@@ -298,10 +334,11 @@ public class YAMLProcessor extends YAMLNode {
     }
 
     /**
-     * This method returns an empty ConfigurationNode for using as a
-     * default in methods that select a node from a node list.
+     * This method returns an empty ConfigurationNode for using as a default in
+     * methods that select a node from a node list.
      *
-     * @param writeDefaults true to write default values when a property is requested that doesn't exist
+     * @param writeDefaults true to write default values when a property is
+     * requested that doesn't exist
      * @return a node
      */
     public static YAMLNode getEmptyNode(boolean writeDefaults) {
@@ -310,10 +347,9 @@ public class YAMLProcessor extends YAMLNode {
 
     // This will be included in snakeyaml 1.10, but until then we have to do it manually.
     private class FancyDumperOptions extends DumperOptions {
-        
-        
+
         public DumperOptions.ScalarStyle calculateScalarStyle(ScalarAnalysis analysis,
-                                                              DumperOptions.ScalarStyle style) {
+                DumperOptions.ScalarStyle style) {
             if (format == YAMLFormat.EXTENDED
                     && (analysis.scalar.contains("\n") || analysis.scalar.contains("\r"))) {
                 return ScalarStyle.LITERAL;
@@ -324,6 +360,7 @@ public class YAMLProcessor extends YAMLNode {
     }
 
     private static class FancyRepresenter extends Representer {
+
         private FancyRepresenter() {
             this.nullRepresenter = new Represent() {
                 @Override
@@ -331,6 +368,26 @@ public class YAMLProcessor extends YAMLNode {
                     return representScalar(Tag.NULL, "");
                 }
             };
+        }
+    }
+
+    public static void main(String[] args) {
+        File testFile = new File("test.yml");
+        try {
+            if (!testFile.exists()) {
+                testFile.createNewFile();
+            }
+            YAMLProcessor yaml = new YAMLProcessor(testFile, true, YAMLFormat.EXTENDED);
+            yaml.load();
+            yaml.setProperty("test.test1", 1);
+            yaml.setComment("test.test1", "Some test comment");
+            
+            yaml.keyIterator();
+            
+            yaml.save();
+
+        } catch (IOException ex) {
+            Logger.getLogger(YAMLProcessor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

@@ -31,8 +31,9 @@ import java.io.File;
  */
 public interface IPlugin {
     
-    public String getName();
+    String getName();
     
-    public File getDataFolder();
+    File getDataFolder();
+    
     
 }

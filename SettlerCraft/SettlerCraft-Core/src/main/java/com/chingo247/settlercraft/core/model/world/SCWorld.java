@@ -5,28 +5,25 @@
  */
 package com.chingo247.settlercraft.core.model.world;
 
-import com.chingo247.settlercraft.core.model.world.IWorld;
 import java.util.UUID;
 import org.neo4j.graphdb.Node;
 
 /**
- * Has all of the attributes of {@link WorldNode}, but none of the operations in this class require
+ * Has all of the attributes of {@link SCWorldNode}, but none of the operations in this class require
  * transactions (except for the constructor...)
  * @author Chingo
  */
-public class World implements IWorld {
+public class SCWorld implements ISCWorld {
     
     private String worldName;
     private UUID worldUUID;
     private Node worldNode;
     
-    
-    
-    public World(Node worldNode) {
-        this(new WorldNode(worldNode));
+    public SCWorld(Node worldNode) {
+        this(new SCWorldNode(worldNode));
     }
     
-    public World(WorldNode worldNode) {
+    public SCWorld(SCWorldNode worldNode) {
         this.worldName = worldNode.getName();
         this.worldUUID = worldNode.getUUID();
         this.worldNode = worldNode.getNode();
