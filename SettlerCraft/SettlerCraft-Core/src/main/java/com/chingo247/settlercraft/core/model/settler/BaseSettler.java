@@ -5,7 +5,6 @@
  */
 package com.chingo247.settlercraft.core.model.settler;
 
-import com.chingo247.settlercraft.core.model.IdentifiableNode;
 import java.util.UUID;
 import org.neo4j.graphdb.Node;
 
@@ -13,7 +12,7 @@ import org.neo4j.graphdb.Node;
  *
  * @author Chingo
  */
-public class BaseSettler implements IBaseSettler {
+public class BaseSettler  {
     
     private Long id;
     private UUID uuid;
@@ -32,22 +31,18 @@ public class BaseSettler implements IBaseSettler {
         this.name = settlerNode.getName();
     }
 
-    @Override
     public Long getId() {
         return id;
     }
 
-    @Override
     public UUID getUniqueId() {
         return uuid;
     }
 
-    @Override
     public String getName() {
         return name;
     }
 
-    @Override
     public Node getNode() {
         return underlyingNode;
     }

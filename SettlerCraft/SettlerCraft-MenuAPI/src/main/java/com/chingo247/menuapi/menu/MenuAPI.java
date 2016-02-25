@@ -91,11 +91,11 @@ public class MenuAPI {
         }
     }
     
-    public void closeMenusWithTag(String tag) {
+    public void closeMenusWithTag(String tag, String reason) {
         for(Iterator<ACategoryMenu> it = openMenus.values().iterator(); it.hasNext();) {
             ACategoryMenu menu = it.next();
             if(menu != null && menu.getTag() != null && tag.equals(menu.getTag())) {
-                menu.close(COLORS.yellow() + "[SettlerCraft]: "+COLORS.reset()+" Closing menu, server is reloading...");
+                menu.close(COLORS.yellow() + "[SettlerCraft]: "+COLORS.reset()+"Closing menus, reason: " + reason);
                 it.remove();
             }
         }

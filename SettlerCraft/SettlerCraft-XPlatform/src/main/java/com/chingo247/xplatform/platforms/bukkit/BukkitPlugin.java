@@ -23,9 +23,12 @@
  */
 package com.chingo247.xplatform.platforms.bukkit;
 
+import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IPlugin;
+import com.chingo247.xplatform.core.IScheduler;
 import com.google.common.base.Preconditions;
 import java.io.File;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
 /**
@@ -53,6 +56,16 @@ public class BukkitPlugin implements IPlugin {
     @Override
     public String getName() {
         return plugin.getName();
+    }
+
+    @Override
+    public IScheduler getScheduler() {
+        return new BukkitScheduler(Bukkit.getServer(), plugin);
+    }
+
+    @Override
+    public APlatform getPlatform() {
+        return new BukkitPlatform(Bukkit.getServer());
     }
     
     

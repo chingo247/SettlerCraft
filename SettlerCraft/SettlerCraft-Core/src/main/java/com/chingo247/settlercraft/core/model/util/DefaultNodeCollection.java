@@ -16,7 +16,7 @@
  */
 package com.chingo247.settlercraft.core.model.util;
 
-import com.chingo247.settlercraft.core.model.IPredicate;
+import com.chingo247.settlercraft.core.util.Predicate;
 import com.chingo247.settlercraft.core.model.IdentifiableNode;
 import com.chingo247.settlercraft.core.persistence.neo4j.NodeHelper;
 import com.google.common.base.Objects;
@@ -94,7 +94,7 @@ public class DefaultNodeCollection<K,T extends IdentifiableNode<K>> implements N
         if(t == null || t.getUniqueId()== null) {
             return false;
         }
-        return NodeHelper.remove(underlyingNode, underlyingNode.getRelationships(relationshipType, direction), type, new IPredicate<T>() {
+        return NodeHelper.remove(underlyingNode, underlyingNode.getRelationships(relationshipType, direction), type, new Predicate<T>() {
 
             @Override
             public boolean evaluate(T other) {

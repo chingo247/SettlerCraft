@@ -14,24 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.chingo247.settlercraft.core.model.settler;
+package com.chingo247.settlercraft.core.model.world;
 
-import com.chingo247.settlercraft.core.exception.SettlerException;
-import com.chingo247.settlercraft.core.model.settler.BaseSettlerNode;
 import java.util.UUID;
+import org.neo4j.graphdb.Node;
 
 /**
  *
  * @author Chingo
  */
-public interface IBaseSettlerRepository {
+public interface World {
     
-    public BaseSettlerNode findByUUID(UUID uuid);
+    public Node getNode();
     
-    public BaseSettlerNode findById(Long id);
+    public UUID getUUID();
     
-    public BaseSettlerNode addSettler(IBaseSettler settler) throws SettlerException;
-    
-    public BaseSettlerNode addSettler(UUID uuid, String name) throws SettlerException;
+    public String getName();
     
 }

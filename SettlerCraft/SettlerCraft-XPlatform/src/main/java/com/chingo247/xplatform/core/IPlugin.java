@@ -35,5 +35,8 @@ public interface IPlugin {
     
     File getDataFolder();
     
+    IScheduler getScheduler();
+    
+    APlatform getPlatform();
     
 }

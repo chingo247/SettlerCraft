@@ -95,6 +95,10 @@ public abstract class ACategoryMenu {
         this.tag = tag;
     }
 
+    /**
+     * Gets the tag of this menu
+     * @return The tag
+     */
     public String getTag() {
         return tag;
     }

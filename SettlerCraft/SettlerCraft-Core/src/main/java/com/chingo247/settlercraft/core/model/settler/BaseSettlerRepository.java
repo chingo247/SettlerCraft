@@ -30,44 +30,42 @@ import org.neo4j.graphdb.Transaction;
  *
  * @author Chingo
  */
-public class BaseSettlerRepository implements IBaseSettlerRepository {
-    
+public class BaseSettlerRepository {
+
     protected final GraphDatabaseService graph;
     private final Logger LOG = Logger.getLogger(getClass().getCanonicalName());
 
     public BaseSettlerRepository(GraphDatabaseService graph) {
         this.graph = graph;
     }
-    
-    @Override
+
     public BaseSettlerNode findByUUID(UUID settlerId) {
         BaseSettlerNode settlerNode = null;
         try (Transaction tx = graph.beginTx()) {
-            String query = "MATCH(settler:"+BaseSettlerNode.LABEL+" { "+BaseSettlerNode.UUID_PROPERTY+": '" + settlerId.toString()+ "'}) RETURN settler";
+            String query = "MATCH(settler:" + BaseSettlerNode.LABEL + " { " + BaseSettlerNode.UUID_PROPERTY + ": '" + settlerId.toString() + "'}) RETURN settler";
             Result r = graph.execute(query);
-            if(r.hasNext()) {
-                Map<String,Object> map = r.next();
-                for(Object o : map.values()) {
+            if (r.hasNext()) {
+                Map<String, Object> map = r.next();
+                for (Object o : map.values()) {
                     settlerNode = new BaseSettlerNode((Node) o);
                 }
             }
-            
+
             tx.success();
         }
         return settlerNode;
     }
-    
-    @Override
+
     public BaseSettlerNode findById(Long settlerId) {
         BaseSettlerNode settlerNode = null;
         try (Transaction tx = graph.beginTx()) {
-            Map<String,Object> params = Maps.newHashMap();
+            Map<String, Object> params = Maps.newHashMap();
             params.put("settlerId", settlerId);
-            String query = "MATCH(settler:"+BaseSettlerNode.LABEL+" { "+BaseSettlerNode.ID_PROPERTY+": {settlerId} }) RETURN settler";
+            String query = "MATCH(settler:" + BaseSettlerNode.LABEL + " { " + BaseSettlerNode.ID_PROPERTY + ": {settlerId} }) RETURN settler";
             Result r = graph.execute(query, params);
-            if(r.hasNext()) {
-                Map<String,Object> map = r.next();
-                for(Object o : map.values()) {
+            if (r.hasNext()) {
+                Map<String, Object> map = r.next();
+                for (Object o : map.values()) {
                     settlerNode = new BaseSettlerNode((Node) o);
                 }
             }
@@ -75,12 +73,11 @@ public class BaseSettlerRepository implements IBaseSettlerRepository {
         }
         return settlerNode;
     }
-    
-    @Override
+
     public BaseSettlerNode addSettler(UUID uuid, String name) throws SettlerException {
         BaseSettlerNode settler = null;
-        try(Transaction tx = graph.beginTx()) {
-            if(findByUUID(uuid) != null) {
+        try (Transaction tx = graph.beginTx()) {
+            if (findByUUID(uuid) != null) {
                 throw new SettlerException("Settler already exists!");
             }
             Long id = nextId();
@@ -88,36 +85,34 @@ public class BaseSettlerRepository implements IBaseSettlerRepository {
             settlerNode.setProperty(BaseSettlerNode.UUID_PROPERTY, uuid.toString());
             settlerNode.setProperty(BaseSettlerNode.NAME_PROPERTY, name);
             settlerNode.setProperty(BaseSettlerNode.ID_PROPERTY, id);
-            
+
             settler = new BaseSettlerNode(settlerNode);
             tx.success();
-        } 
+        }
         return settler;
     }
-    
-    
-    
-    @Override
-    public BaseSettlerNode addSettler(IBaseSettler baseSettler) throws SettlerException {
+
+    public BaseSettlerNode addSettler(String name, UUID player) throws SettlerException {
         BaseSettlerNode settler = null;
-        try(Transaction tx = graph.beginTx()) {
-            if(findByUUID(baseSettler.getUniqueId()) != null) {
-                throw new SettlerException("Settler already exists!");
+        try (Transaction tx = graph.beginTx()) {
+            settler = findByUUID(player);
+
+            if (settler == null) {
+                Long id = nextId();
+                Node settlerNode = graph.createNode(BaseSettlerNode.label());
+                settlerNode.setProperty(BaseSettlerNode.UUID_PROPERTY, player.toString());
+                settlerNode.setProperty(BaseSettlerNode.NAME_PROPERTY, name);
+                settlerNode.setProperty(BaseSettlerNode.ID_PROPERTY, id);
+                settler = new BaseSettlerNode(settlerNode);
+            } else {
+                settler.getNode().setProperty(BaseSettlerNode.NAME_PROPERTY, name);
             }
-            
-            
-            Long id = nextId();
-            Node settlerNode = graph.createNode(BaseSettlerNode.label());
-            settlerNode.setProperty(BaseSettlerNode.UUID_PROPERTY, baseSettler.getUniqueId().toString());
-            settlerNode.setProperty(BaseSettlerNode.NAME_PROPERTY, baseSettler.getName());
-            settlerNode.setProperty(BaseSettlerNode.ID_PROPERTY, id);
-            
-            settler = new BaseSettlerNode(settlerNode);
+
             tx.success();
-        } 
+        }
         return settler;
     }
-    
+
     private long nextId() {
         // Work-around for getting the next Id
         // Sets the lock at this node by removing a non-existent property
@@ -129,5 +124,5 @@ public class BaseSettlerRepository implements IBaseSettlerRepository {
         long id = (long) r.next().get("nextId");
         return id;
     }
-    
+
 }

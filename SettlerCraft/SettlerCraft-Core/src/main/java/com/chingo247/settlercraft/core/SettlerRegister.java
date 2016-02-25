@@ -19,10 +19,9 @@ package com.chingo247.settlercraft.core;
 import com.chingo247.settlercraft.core.event.PlayerLoginEvent;
 import com.chingo247.settlercraft.core.exception.SettlerException;
 import com.chingo247.settlercraft.core.model.settler.BaseSettlerRepository;
-import com.chingo247.settlercraft.core.model.settler.IBaseSettler;
+import com.chingo247.settlercraft.core.model.settler.BaseSettler;
 import com.chingo247.xplatform.core.IPlayer;
 import com.google.common.base.Preconditions;
-import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import java.util.Collections;
 import java.util.HashSet;
@@ -68,7 +67,7 @@ public class SettlerRegister {
                     public void run() {
                         try (Transaction tx = graph.beginTx()) {
                             if (settlerRepository.findByUUID(player.getUniqueId()) == null) {
-                                settlerRepository.addSettler(new PlayerSettler(player));
+                                settlerRepository.addSettler(player.getUniqueId(), player.getName());
                             }
                             cachedPlayers.add(player.getUniqueId());
                             tx.success();
@@ -83,34 +82,6 @@ public class SettlerRegister {
         }
     }
 
-    private class PlayerSettler implements IBaseSettler {
-
-        private final IPlayer player;
-
-        public PlayerSettler(IPlayer player) {
-            this.player = player;
-        }
-
-        @Override
-        public Long getId() {
-            return null;
-        }
-
-        @Override
-        public UUID getUniqueId() {
-            return player.getUniqueId();
-        }
-
-        @Override
-        public String getName() {
-            return player.getName();
-        }
-
-        @Override
-        public Node getNode() {
-            return null;
-        }
-
-    }
+    
 
 }

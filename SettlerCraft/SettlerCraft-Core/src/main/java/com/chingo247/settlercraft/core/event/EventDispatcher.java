@@ -13,7 +13,7 @@ import java.util.List;
  * Implementation of {@link IEventDispatcher}
  * @author Chingo
  */
-public class EventDispatcher implements IEventDispatcher {
+public class EventDispatcher {
     
     private List<EventBus> eventBusses;
 
@@ -22,14 +22,12 @@ public class EventDispatcher implements IEventDispatcher {
     }
     
 
-    @Override
     public void dispatchEvent(Object event) {
         for(EventBus e : eventBusses) {
             e.post(event);
         }
     }
 
-    @Override
     public void register(EventBus eventBus) {
         this.eventBusses.add(eventBus);
     }

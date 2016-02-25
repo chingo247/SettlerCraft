@@ -16,7 +16,7 @@
  */
 package com.chingo247.settlercraft.core.persistence.neo4j;
 
-import com.chingo247.settlercraft.core.model.IPredicate;
+import com.chingo247.settlercraft.core.util.Predicate;
 import com.google.common.base.Preconditions;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -124,7 +124,7 @@ public class NodeHelper {
         return makeIterable(nodeIt, clazz);
     }
 
-    public static <T> Iterable<T> makeIterable(final Node node, final Iterable<Relationship> nodes, final Class<T> clazz, IPredicate<T> predicate) {
+    public static <T> Iterable<T> makeIterable(final Node node, final Iterable<Relationship> nodes, final Class<T> clazz, Predicate<T> predicate) {
         final Iterator<Relationship> nodeIt = nodes.iterator();
         try {
             final Constructor c = clazz.getConstructor(Node.class);
@@ -173,7 +173,7 @@ public class NodeHelper {
         return makeIterable(thisNode, nodes, clazz, null);
     }
 
-    public static <T> boolean remove(final Node node, final Iterable<Relationship> nodes, final Class<T> clazz, IPredicate<T> predicate) {
+    public static <T> boolean remove(final Node node, final Iterable<Relationship> nodes, final Class<T> clazz, Predicate<T> predicate) {
         Preconditions.checkNotNull(predicate, "Predicate may not be null");
         try {
             Constructor<T> c = clazz.getConstructor(Node.class);
