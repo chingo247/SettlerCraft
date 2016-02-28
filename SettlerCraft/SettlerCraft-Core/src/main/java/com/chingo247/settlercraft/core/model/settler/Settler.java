@@ -12,7 +12,7 @@ import org.neo4j.graphdb.Node;
  *
  * @author Chingo
  */
-public class BaseSettler  {
+public class Settler  {
     
     private Long id;
     private UUID uuid;
@@ -20,11 +20,11 @@ public class BaseSettler  {
     private Node underlyingNode;
     
     
-    public BaseSettler(Node node) {
-        this(new BaseSettlerNode(node));
+    public Settler(Node node) {
+        this(new SettlerNode(node));
     }
     
-    public BaseSettler(BaseSettlerNode settlerNode) {
+    public Settler(SettlerNode settlerNode) {
         this.underlyingNode = settlerNode.getNode();
         this.id = settlerNode.getId();
         this.uuid = settlerNode.getUniqueId();

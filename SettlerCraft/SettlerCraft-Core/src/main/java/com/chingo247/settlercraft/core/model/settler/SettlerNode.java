@@ -25,7 +25,7 @@ import org.neo4j.graphdb.Node;
  * Represents a Node containing data for a Settler. All operations within this class require to be executed within a Transaction
  * @author Chingo
  */
-public class BaseSettlerNode  {
+public class SettlerNode  {
     
     public static final String LABEL = "Settler";
     public static final String UUID_PROPERTY = "uuid";
@@ -42,12 +42,16 @@ public class BaseSettlerNode  {
     private UUID uuid;
     private Long id;
     
-    public BaseSettlerNode(Node underlyingNode) {
+    public SettlerNode(Node underlyingNode) {
         this.underlyingNode = underlyingNode;
     }
 
     public Node getNode() {
         return underlyingNode;
+    }
+    
+    public void setName(String name) {
+        underlyingNode.setProperty(NAME_PROPERTY, name);
     }
     
     public UUID getUniqueId() {

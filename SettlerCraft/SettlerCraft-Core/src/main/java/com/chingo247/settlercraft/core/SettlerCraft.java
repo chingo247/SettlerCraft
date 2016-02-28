@@ -26,8 +26,8 @@ import com.chingo247.settlercraft.core.persistence.neo4j.Neo4jHelper;
 import com.chingo247.xplatform.core.APlatform;
 import com.chingo247.xplatform.core.IPlugin;
 import com.chingo247.xplatform.core.IWorld;
-import com.chingo247.settlercraft.core.model.settler.BaseSettlerRepository;
-import com.chingo247.settlercraft.core.model.settler.BaseSettlerNode;
+import com.chingo247.settlercraft.core.model.settler.SettlerRepository;
+import com.chingo247.settlercraft.core.model.settler.SettlerNode;
 import com.chingo247.settlercraft.core.model.world.WorldNode;
 import com.chingo247.settlercraft.core.platforms.services.IEconomyProvider;
 import com.chingo247.settlercraft.core.platforms.services.IPlayerProvider;
@@ -67,7 +67,7 @@ public class SettlerCraft {
     private IPlugin plugin;
     private IPlayerProvider playerProvider;
     private Neo4jDatabase database;
-    private BaseSettlerRepository settlerRepo;
+    private SettlerRepository settlerRepo;
     private IEconomyProvider economyProvider;
     private EventBus eventBus, asyncEventBus;
     private EventDispatcher eventDispatcher;
@@ -133,7 +133,7 @@ public class SettlerCraft {
         boolean setup = processor.getBoolean("settler.repository.setup", false);
 
         GraphDatabaseService graph = database.getGraph();
-        this.settlerRepo = new BaseSettlerRepository(graph);
+        this.settlerRepo = new SettlerRepository(graph);
 
         if (!setup) {
             try (Transaction tx = graph.beginTx()) {
@@ -145,11 +145,11 @@ public class SettlerCraft {
                 }
             }
             try (Transaction tx = graph.beginTx()) {
-                Neo4jHelper.createUniqueIndexIfNotExist(graph, BaseSettlerNode.label(), BaseSettlerNode.UUID_PROPERTY);
+                Neo4jHelper.createUniqueIndexIfNotExist(graph, SettlerNode.label(), SettlerNode.UUID_PROPERTY);
                 tx.success();
             }
             try (Transaction tx = graph.beginTx()) {
-                Neo4jHelper.createUniqueIndexIfNotExist(graph, BaseSettlerNode.label(), BaseSettlerNode.ID_PROPERTY);
+                Neo4jHelper.createUniqueIndexIfNotExist(graph, SettlerNode.label(), SettlerNode.ID_PROPERTY);
                 tx.success();
             }
             try (Transaction tx = graph.beginTx()) {

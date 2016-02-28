@@ -18,8 +18,9 @@ package com.chingo247.settlercraft.core;
 
 import com.chingo247.settlercraft.core.event.PlayerLoginEvent;
 import com.chingo247.settlercraft.core.exception.SettlerException;
-import com.chingo247.settlercraft.core.model.settler.BaseSettlerRepository;
-import com.chingo247.settlercraft.core.model.settler.BaseSettler;
+import com.chingo247.settlercraft.core.model.settler.SettlerRepository;
+import com.chingo247.settlercraft.core.model.settler.Settler;
+import com.chingo247.settlercraft.core.model.settler.SettlerNode;
 import com.chingo247.xplatform.core.IPlayer;
 import com.google.common.base.Preconditions;
 import com.google.common.eventbus.Subscribe;
@@ -42,13 +43,13 @@ import org.neo4j.graphdb.Transaction;
 public class SettlerRegister {
 
     private static final Logger LOG = Logger.getLogger(SettlerRegister.class.getName());
-    private final BaseSettlerRepository settlerRepository;
+    private final SettlerRepository settlerRepository;
     private final ExecutorService service;
     private final Set<UUID> cachedPlayers;
     private final GraphDatabaseService graph;
     private boolean checked = false;
 
-    SettlerRegister(BaseSettlerRepository settlerDAO, ExecutorService service, GraphDatabaseService graph) {
+    SettlerRegister(SettlerRepository settlerDAO, ExecutorService service, GraphDatabaseService graph) {
         Preconditions.checkNotNull(settlerDAO, "settlerDAO was null!");
         Preconditions.checkNotNull(service, "Executor was null!");
         this.settlerRepository = settlerDAO;
@@ -66,14 +67,15 @@ public class SettlerRegister {
                     @Override
                     public void run() {
                         try (Transaction tx = graph.beginTx()) {
-                            if (settlerRepository.findByUUID(player.getUniqueId()) == null) {
+                            SettlerNode settlerNode = settlerRepository.findByUUID(player.getUniqueId());
+                            if (settlerNode == null) {
                                 settlerRepository.addSettler(player.getUniqueId(), player.getName());
+                            } else {
+                                settlerNode.setName(player.getName()); // update name..
                             }
                             cachedPlayers.add(player.getUniqueId());
                             tx.success();
-                        } catch (SettlerException ex) {
-                            LOG.log(Level.SEVERE, ex.getMessage(), ex);
-                        }
+                        } 
                     }
                 });
             }
