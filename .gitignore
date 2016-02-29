@@ -6,3 +6,8 @@ SettlerCraft-Core/target
 /SettlerCraft-HolographicDisplays/target/
 SettlerCraft-Towny/target/
 SettlerCraft-Towny/nbactions.xml
+/SettlerCraft-BackupAPI/target/
+/SettlerCraft/SettlerCraft-XPlatform/target/
+/SettlerCraft/SettlerCraft-Core/target/
+/SettlerCraft/SettlerCraft-MenuAPI/target/
+.idea/
