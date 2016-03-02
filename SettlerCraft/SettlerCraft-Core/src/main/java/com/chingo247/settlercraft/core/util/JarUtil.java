@@ -41,6 +41,7 @@ public class JarUtil {
                 FileOutputStream output = null;
 
                 try {
+                    new File(actualFile.getParent()).mkdirs();
                     output = new FileOutputStream(actualFile);
                     byte[] buf = new byte[8192];
                     int length;
