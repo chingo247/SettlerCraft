@@ -3,10 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.chingo247</groupId>
-        <artifactId>SettlerCraft</artifactId>
-        <version>2.2.0</version>
+        <artifactId>settlercraft</artifactId>
+        <version>2.2.1</version>
     </parent>
-    <artifactId>SettlerCraft-XPlatform</artifactId>
+    <artifactId>settlercraft-xplatform</artifactId>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -49,5 +49,5 @@
         </dependency>
         
     </dependencies>
-    <name>SettlerCraft-XPlatform</name>
+    <name>settlercraft-xplatform</name>
 </project>
