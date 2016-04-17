@@ -2,23 +2,25 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
-    <parent>
-        <groupId>com.chingo247</groupId>
-        <artifactId>settlercraft</artifactId>
-        <version>2.2.1</version>
-    </parent>
+    <groupId>com.chingo247</groupId>
     <artifactId>settlercraft-core</artifactId>
+    <version>2.3.0</version>
     <repositories>
-        <!--Private ThirdParty Repo-->
         <repository>
             <id>Nexus</id>
             <url>http://chingo247.com:8081/nexus/content/repositories/thirdparty/</url>
+        </repository>
+        <!--Vault Repo-->
+        <repository>
+            <id>vault-repo</id>
+            <url>http://nexus.theyeticave.net/content/repositories/pub_releases</url>
         </repository>
         <!--WorldEdit Repo-->
         <repository>
             <id>WorldEdit</id>
             <url>http://maven.sk89q.com/repo</url>
         </repository>
+        <!--Neo4j Repo-->
         <repository>
             <id>neo4j-contrib-releases</id>
             <url>https://raw.github.com/neo4j-contrib/m2/master/releases</url>
@@ -41,8 +43,8 @@
         </repository>
     </repositories>
     <build>
+        
         <plugins>
-            
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
@@ -54,6 +56,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <finalName>${project.artifactId}-${project.version}</finalName>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
@@ -61,69 +64,6 @@
             </plugin> 
         </plugins>
     </build>
-    <!-- One-Jar is in the googlecode repository -->
-    <pluginRepositories>
-        <pluginRepository>
-            <id>onejar-maven-plugin.googlecode.com</id>
-            <url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
-        </pluginRepository>
-    </pluginRepositories>
-    <profiles>
-        <!--Maven profile for Bukkit-->
-        <profile>
-            <id>bukkit</id>
-            <properties>
-                <platform>bukkit</platform>
-            </properties>
-            <build>
-                
-                <finalName>SettlerCraft-Core-Bukkit-${project.version}</finalName>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-resources-plugin</artifactId>
-                        <version>2.7</version>
-                        <executions>
-                            <execution>
-                                <id>copy-resources-plugin-yml</id>
-                                <!-- here the phase you need -->
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>copy-resources</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${basedir}/src/main/resources</outputDirectory>
-                                    <resources>          
-                                        <resource>
-                                            <directory>${basedir}/src/main/resources/com/chingo247/settlercraft/resources/bukkit</directory>
-                                            <!--<filtering>true</filtering>-->
-                                        </resource>
-                                    </resources>              
-                                </configuration>            
-                            </execution>
-                            <execution>
-                                <id>copy-resources-platforms-util</id>
-                                <!-- here the phase you need -->
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>copy-resources</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${basedir}/src/main/resources/com/chingo247/settlercraft/core/util/generated</outputDirectory>
-                                    
-                                    <resources>          
-                                        <resource>
-                                            <directory>${basedir}/src/main/resources/com/chingo247/settlercraft/resources/util/platforms</directory>
-                                            <filtering>true</filtering>
-                                        </resource>
-                                    </resources>              
-                                </configuration>            
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
     <dependencies>
         <dependency>
             <groupId>com.chingo247</groupId>
@@ -138,11 +78,14 @@
             <version>1.8</version>
             <scope>provided</scope>
         </dependency>
+        <!--Vault-->
         <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>1.9</version>
+            <groupId>net.milkbowl</groupId>
+            <artifactId>vault</artifactId>
+            <version>1.5.6</version>
+            <scope>provided</scope>
         </dependency>
+       
         <!--WorldEdit-->
         <dependency>
             <groupId>com.sk89</groupId>
@@ -155,6 +98,12 @@
             <groupId>org.fiber</groupId>
             <artifactId>fiber-core</artifactId>
             <version>1.0</version>
+        </dependency>
+        <!--YAML-->
+         <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.9</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>

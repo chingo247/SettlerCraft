@@ -1,6 +1,6 @@
 name: SettlerCraft-MenuAPI
 main: com.chingo247.menuapi.platforms.bukkit.BukkitMenuAPIPlugin
-version: 2.1.0
+version: 2.3.0
 author: Chingo247
 description: Library for creating menus
 depend: [SettlerCraft-Core]

@@ -355,11 +355,7 @@ public abstract class ACategoryMenu {
             } else {
                 player.sendMessage(color.yellow() + "[" + title + "]: " + color.reset() + "Your balance is " + color.red() + balance);
             }
-
-        } else {
-            player.sendMessage(color.red() + "No active economy plugin or economy plugin failed to register");
-            return;
-        }
+        } 
         updateMenu(currentCategory, currentPage, false);
         player.openInventory(inventory);
     }

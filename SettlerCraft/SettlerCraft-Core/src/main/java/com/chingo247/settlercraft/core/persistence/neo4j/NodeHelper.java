@@ -111,6 +111,11 @@ public class NodeHelper {
                             }
                         }
 
+                        @Override
+                        public void remove() {
+                            // Ignore...
+                        }
+
                     };
                 }
             };
@@ -147,6 +152,11 @@ public class NodeHelper {
                                 Logger.getLogger(NodeHelper.class.getName()).log(Level.SEVERE, null, ex);
                             }
                             return null;
+                        }
+
+                        @Override
+                        public void remove() {
+                            // Ignore
                         }
 
                     };
