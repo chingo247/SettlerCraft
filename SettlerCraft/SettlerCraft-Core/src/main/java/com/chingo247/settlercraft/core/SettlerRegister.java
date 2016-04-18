@@ -17,9 +17,7 @@
 package com.chingo247.settlercraft.core;
 
 import com.chingo247.settlercraft.core.event.PlayerLoginEvent;
-import com.chingo247.settlercraft.core.exception.SettlerException;
 import com.chingo247.settlercraft.core.model.settler.SettlerRepository;
-import com.chingo247.settlercraft.core.model.settler.Settler;
 import com.chingo247.settlercraft.core.model.settler.SettlerNode;
 import com.chingo247.xplatform.core.IPlayer;
 import com.google.common.base.Preconditions;
@@ -32,7 +30,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 
 /**
@@ -66,7 +63,9 @@ public class SettlerRegister {
                 service.submit(new Runnable() {
                     @Override
                     public void run() {
-                        try (Transaction tx = graph.beginTx()) {
+                        Transaction tx = null;
+                        try {
+                            tx = graph.beginTx();
                             SettlerNode settlerNode = settlerRepository.findByUUID(player.getUniqueId());
                             if (settlerNode == null) {
                                 settlerRepository.addSettler(player.getUniqueId(), player.getName());
@@ -75,7 +74,13 @@ public class SettlerRegister {
                             }
                             cachedPlayers.add(player.getUniqueId());
                             tx.success();
-                        } 
+                        } catch (Exception ex) {
+                            Logger.getLogger(SettlerRegister.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                        } finally {
+                            if (tx != null) {
+                                tx.close();
+                            }
+                        }
                     }
                 });
             }

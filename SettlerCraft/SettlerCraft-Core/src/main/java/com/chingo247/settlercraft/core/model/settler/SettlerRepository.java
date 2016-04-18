@@ -74,7 +74,6 @@ public class SettlerRepository {
         settlerNode.setProperty(SettlerNode.UUID_PROPERTY, uuid.toString());
         settlerNode.setProperty(SettlerNode.NAME_PROPERTY, name);
         settlerNode.setProperty(SettlerNode.ID_PROPERTY, id);
-
         settler = new SettlerNode(settlerNode);
         return settler;
     }
